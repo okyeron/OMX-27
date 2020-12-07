@@ -102,7 +102,7 @@ void playNote() {
       // Turn off the previous note
       usbMIDI.sendNoteOff(lastNote, 0, midiChannel);
       analogWrite(A14, 0);
-      //digitalWrite(13, LOW);
+      digitalWrite(13, LOW);
       break;
     case 1:
       // Turn off the previous note and play a new note.
@@ -112,7 +112,7 @@ void playNote() {
       usbMIDI.sendNoteOn(stepNote[playingPattern][seqPos], seq_velocity, midiChannel);
       lastNote = stepNote[playingPattern][seqPos];
 		stepCV = map (lastNote, 35, 90, 0, 4096);
-		//digitalWrite(13, HIGH);
+		digitalWrite(13, HIGH);
 		analogWrite(A14, stepCV);
       break;
     case 2:
@@ -123,15 +123,15 @@ void playNote() {
       usbMIDI.sendNoteOn(stepNote[playingPattern][seqPos], seq_acc_velocity, midiChannel);
       lastNote = stepNote[playingPattern][seqPos];
       	stepCV = map (lastNote, 35, 90, 0, 4096);
-      	//digitalWrite(13, HIGH);
+      	digitalWrite(13, HIGH);
       	analogWrite(A14, stepCV);
       break;
   }
 }
 void allNotesOff() {
+	analogWrite(A14, 0);
+	digitalWrite(13, LOW);
 	for (int j=0; j<128; j++){
 		usbMIDI.sendNoteOff(j, 0, midiChannel);
-		analogWrite(A14, 0);
-		//digitalWrite(13, LOW);
 	}
 }

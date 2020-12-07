@@ -15,6 +15,9 @@ elapsedMillis msec = 0;
 
 bool blinkState = false;
 bool noteSelect = false;
+bool noteSelection = false;
+int selectedNote = 0;
+int selectedStep = 0;
 
 int mode = 0;
 int newmode = 0;
@@ -53,7 +56,12 @@ int notes[] = {0,
      61,63,   66,68,70,   73,75,   78,80,82,
 59,60,62,64,65,67,69,71,72,74,76,77,79,81,83,84};
 
+int steps[] = {0,
+     1,2,   3,4,5,   6,7,   8,9,10,
+11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26};
+
 // NOTES
+
 
 // ENCODER
 Encoder myEncoder(12, 11); 	// encoder pins
@@ -92,7 +100,7 @@ const auto HALFWHITE = 0x808080;
 const auto LOWWHITE = 0x202020;
 const auto LEDOFF = 0x000000;
 
-const uint32_t seqColors[] = {ORANGE,YELLOW,HALFGREEN,MAGENTA,PURPLE,DKCYAN,DKBLUE,VIOLET};
+const uint32_t seqColors[] = {ORANGE,YELLOW,HALFGREEN,MAGENTA,VIOLET,DKCYAN,DKBLUE,PURPLE};
 
 //initialize an instance of class NewKeypad
 Adafruit_Keypad customKeypad = Adafruit_Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS); 
@@ -211,44 +219,57 @@ void show_current_step() {
 	} else {
 		strip.setPixelColor(0, LEDOFF);
 	}
-	
-	for(int j = 1; j < NUM_STEPS+11; j++){
-		if (j == 1) {
-			if (noteSelect){
-				if (noteSelect && blinkState){
-					strip.setPixelColor(j, DKCYAN);
-				} else {
-					strip.setPixelColor(j, LEDOFF);
-				}
-			} else {
-				strip.setPixelColor(j, DKCYAN);
+
+	if (noteSelect && noteSelection) {
+		for(int j = 1; j < NUM_STEPS+11; j++){
+			if (j == selectedNote){
+				strip.setPixelColor(j, HALFWHITE);
+			} else if (j == selectedStep+11){
+				strip.setPixelColor(j, ORANGE);
+			} else{
+				strip.setPixelColor(j, LEDOFF);
 			}
-		} else if (j == 2) {
-			strip.setPixelColor(j, DKBLUE);
-		} else if (j == playingPattern+3){  	// pattern select
-			strip.setPixelColor(playingPattern+3, seqColors[playingPattern]);
-		} else {
-			strip.setPixelColor(j, LEDOFF);
 		}
-	}
-	
-	for(int i = 0; i < NUM_STEPS; i++){
-		// 
-		//stepNote[playingPattern][seqPos] = notes[thisKey]
-		if(i % 4 == 0){ // mark groups of 4
-			if(i == seqPos){
+		
+	} else {
+		for(int j = 1; j < NUM_STEPS+11; j++){		
+			if (j == 1) {
+				if (noteSelect){
+					if (noteSelect && blinkState){
+						strip.setPixelColor(j, DKCYAN);
+					} else {
+						strip.setPixelColor(j, LEDOFF);
+					}
+				} else {
+					strip.setPixelColor(j, DKCYAN);
+				}
+			} else if (j == 2) {
+				strip.setPixelColor(j, DKBLUE);
+			} else if (j == playingPattern+3){  	// pattern select
+				strip.setPixelColor(playingPattern+3, seqColors[playingPattern]);
+			} else {
+				strip.setPixelColor(j, LEDOFF);
+			}
+		}
+
+		for(int i = 0; i < NUM_STEPS; i++){
+			// 
+			//stepNote[playingPattern][seqPos] = notes[thisKey]
+			if(i % 4 == 0){ // mark groups of 4
+				if(i == seqPos){
+					strip.setPixelColor(i+11, HALFRED); // step chase
+				} else if (stepPlay[playingPattern][i] == 1){
+					strip.setPixelColor(i+11, seqColors[playingPattern]); // step on
+				} else {
+					strip.setPixelColor(i+11, LOWWHITE); 
+				}
+			} else if (i == seqPos){
 				strip.setPixelColor(i+11, HALFRED); // step chase
 			} else if (stepPlay[playingPattern][i] == 1){
 				strip.setPixelColor(i+11, seqColors[playingPattern]); // step on
 			} else {
-				strip.setPixelColor(i+11, LOWWHITE); 
+				strip.setPixelColor(i+11, LEDOFF);
 			}
-		} else if (i == seqPos){
-			strip.setPixelColor(i+11, HALFRED); // step chase
-		} else if (stepPlay[playingPattern][i] == 1){
-			strip.setPixelColor(i+11, seqColors[playingPattern]); // step on
-		} else {
-			strip.setPixelColor(i+11, LEDOFF);
 		}
 	}
 	strip.show();
@@ -309,9 +330,10 @@ void loop() {
 			break;
 	}
 		
-	// POTS
+	
 	switch(mode) {
 		case 0:
+			// ############### POTS ###############
 			// --- READ POTS to MIDI ---
 			if (msec >= 20) {
 				msec = 0;
@@ -363,11 +385,13 @@ void loop() {
 			break;
 	} // END POTS SWITCH
 
-	// KEYS
+	// ############### KEYS ###############
+	
 	while(customKeypad.available()){
 		keypadEvent e = customKeypad.read();
-		display.clearDisplay();
 		int thisKey = e.bit.KEY;
+
+		display.clearDisplay();
 		display.setTextSize(1);
 		display.setCursor(96, 0);
 //		display.print("MODE: ");
@@ -398,20 +422,54 @@ void loop() {
 				}
 				strip.show();						
 				break;
+				
 			case 1: // sequencer
 				// Sequencer row keys
-				if (e.bit.EVENT == KEY_JUST_PRESSED && thisKey != 0 && thisKey > 10) {
+
+				// PRESSES
+				if (e.bit.EVENT == KEY_JUST_PRESSED && thisKey != 0) {
 					int keyPos = thisKey - 11;
-					if (stepPlay[playingPattern][keyPos] == 1){
-						stepPlay[playingPattern][keyPos] = 0;
-						//stepNote[playingPattern][keyPos] = 0;
-						strip.setPixelColor(thisKey, LEDOFF); 
-					} else if (stepPlay[playingPattern][keyPos] == 0){
-						stepPlay[playingPattern][keyPos] = 1;
-						stepNote[playingPattern][keyPos] = notes[thisKey];
-						strip.setPixelColor(thisKey, ORANGE); 
+					
+					// are we noteSelect ?
+					if (noteSelect){
+						if (noteSelection) {
+							// blink ??
+							stepNote[playingPattern][keyPos] = notes[thisKey];
+							selectedStep = keyPos;
+							selectedNote = thisKey;
+							
+						} else {
+							selectedStep = keyPos; //set playhead to this step
+							noteSelection = true;
+						}
+					} else {					
+						// Black Keys
+						if (thisKey > 2 && thisKey < 11) {
+							playingPattern = thisKey-3;
+						} else if (thisKey == 1) {
+							noteSelect = !noteSelect;
+						} else if (thisKey > 10) {
+							if (stepPlay[playingPattern][keyPos] == 1){
+								stepPlay[playingPattern][keyPos] = 0;
+								//strip.setPixelColor(thisKey, LEDOFF); 
+							} else if (stepPlay[playingPattern][keyPos] == 0){
+								stepPlay[playingPattern][keyPos] = 1;
+								stepNote[playingPattern][keyPos] = notes[thisKey];
+								//strip.setPixelColor(thisKey, ORANGE); 
+							}
+						}
 					}
 				}
+				
+
+				// RELEASES
+				if (e.bit.EVENT == KEY_JUST_RELEASED && thisKey != 0 && noteSelection && selectedNote > 0) {
+					noteSelection = false;
+					noteSelect = false;
+					selectedStep = 0;
+					selectedNote = 0;
+				}
+
 				// AUX key
 				if (e.bit.EVENT == KEY_JUST_PRESSED && thisKey == 0) {
 					strip.setPixelColor(0, HALFWHITE);
@@ -423,13 +481,7 @@ void loop() {
 						playing = 1;
 					}
 				} else if (e.bit.EVENT == KEY_JUST_RELEASED && thisKey == 0) {
-				}
-				// Black Keys
-				if (e.bit.EVENT == KEY_JUST_PRESSED && thisKey > 2 && thisKey < 11) {
-					playingPattern = thisKey-3;
-				}
-				if (e.bit.EVENT == KEY_JUST_PRESSED && thisKey == 1) {
-					noteSelect = !noteSelect;
+				
 				}
 				// 
 				strip.show();
@@ -454,14 +506,14 @@ void noteOn(int notenum, int velocity){
 	strip.setPixelColor(notenum, HALFWHITE);         //  Set pixel's color (in RAM)
 
 	pitchCV = map (notes[notenum], 35, 90, 0, 4096);
-	//digitalWrite(13, HIGH);
+	digitalWrite(13, HIGH);
 	analogWrite(A14, pitchCV);
 }
 void noteOff(int notenum){
 	usbMIDI.sendNoteOff(notes[notenum], 0, midiChannel);
 	MIDI.sendNoteOff(notes[notenum], 0, midiChannel);
 	strip.setPixelColor(notenum, LEDOFF); 
-	//digitalWrite(13, LOW);
+	digitalWrite(13, LOW);
 	analogWrite(A14, 0);
 }
 

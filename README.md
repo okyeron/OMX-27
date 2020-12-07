@@ -1,2 +1,3 @@
-# omx-27
- mechanical keyswitch midi keyboard
+# OMX-27
+
+Mechanical keyswitch midi keyboard and sequencer
