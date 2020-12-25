@@ -14,7 +14,7 @@
 |[540-MX3A-L1NA](http://www.mouser.com/Search/ProductDetail.aspx?R=540-MX3A-L1NA)|27|K1-K27|CHERRY-MX|CHERRY-MX Silent Red|
 |[595-TLV9062IDR](http://www.mouser.com/Search/ProductDetail.aspx?R=595-TLV9062IDR)|1|U1|SOIC127P600X175-8N|TLV9062IDR|
 |[AYZ0202AGRLC](http://www.mouser.com/Search/ProductDetail.aspx?R=AYZ0202AGRLC)|1|S1|DPDT Switch|SWITCH-DPDT-SMD-AYZ0202|
-|[688-RK09K1130A5R](http://www.mouser.com/Search/ProductDetail.aspx?R=688-RK09K1130A5R)|1|VR1-VR4,VR6|10K|9MM_SNAP-IN_POT*|
+|[688-RK09K1130A5R](http://www.mouser.com/Search/ProductDetail.aspx?R=688-RK09K1130A5R)|5|VR1-VR4,VR6|10K|9MM_SNAP-IN_POT*|
 |[652-PEC11R-4015F-S24](http://www.mouser.com/Search/ProductDetail.aspx?R=652-PEC11R-4015F-S24)|1|VR5|PEC11+SWITCH|Encoder with Switch|
 | [aliexpress](https://www.aliexpress.com/item/4000475685852.html?spm=a2g0s.9042311.0.0.601b4c4dcyhOZn) / [ebay](https://www.ebay.com/itm/100-2000pcs-SK6812-MINI-E-LED-CHIP-SK6812-3228-4pin-dream-color-LEDS-DC5V/224140435419?hash=item342fcf9fdb:g:XbAAAOSwzkRd8g96)|27|LED1-LED27|SK6812MINIE|SK6812-MINI-E|
 | [PJRC Store](https://www.pjrc.com/store/teensy32.html) |1| |TEENSY 3.2||
@@ -38,3 +38,6 @@ https://www.ebay.com/itm/293660021494
 1x01 (teensy dac pin) 
 
 TIP: Get 1x40 breakaway headers and cut what you need.
+
+[Mouser Cart (work in progress)](https://www.mouser.com/ProjectManager/ProjectDetail.aspx?AccessID=13c0107d30)
+
