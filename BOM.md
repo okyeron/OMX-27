@@ -48,8 +48,8 @@ Knobs are up to you.
 Any MX-compatible keycaps will work.  I like the DSA profile caps for this application.
 
 [DSA "Dolch" Keyset (Two Shot) "Windowed" Keys](https://pimpmykeyboard.com/dsa-dolch-keyset-two-shot/) (choose the __LED Kit__ option).  
-These come in a packet of 4 keycaps. You will need 7 packets.  
+These come in a pack of 4 keycaps. You will need 7 packs (@ ~$42 total).  
 
-[Flashquark Translucent DSA Keycaps](https://flashquark.com/product/translucent-dsa-keycaps/) (in Black, White, Clear, Blue, Red) - __50 per pack__.  
+[Flashquark Translucent DSA Keycaps](https://flashquark.com/product/translucent-dsa-keycaps/) (in Black, White, Clear, Blue, Red) - __50 per pack__. ($12.99-$15.99 per pack)
 
-[Maxkeyboard Black Translucent MX Blank](https://www.maxkeyboard.com/black-translucent-cherry-mx-blank-keycap-set-for-esc-w-a-s-d-or-e-s-d-f-and-arrow-keys.html) (set of 9)
+[Maxkeyboard Black Translucent MX Blank](https://www.maxkeyboard.com/black-translucent-cherry-mx-blank-keycap-set-for-esc-w-a-s-d-or-e-s-d-f-and-arrow-keys.html) (pack of 9). ($21 for 3 packs)
