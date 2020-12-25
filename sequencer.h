@@ -14,25 +14,29 @@ byte seqPos = 0;          // What position in the sequence are we in?
 bool seqLedRefresh = 1;   // Should we refresh the LED array?
 int playingPattern = 0;  // The currently playing pattern, 0-7
 byte patternAmount = 1;   // How many patterns will play
+
 word stepCV;
 int seq_velocity = 100;
 int seq_acc_velocity = 127;
 
+int patternLength[8] = {16, 16, 16, 16, 16, 16, 16, 16};
+int pattLen = patternLength[1];
 
 // Determine how to play a step
 // -1: restart
 // 0: mute
 // 1: play
 // 2: accent
+
 int stepPlay[8][16] = {
-  {1, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0},
-  {0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0},
-  {0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1},
-  {1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0},
+  {1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0},
+  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
   {0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1},
-  {1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0}
+  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 };
 
 // Slide note: 1
@@ -59,6 +63,17 @@ int stepNote[8][16] = {
   {60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60},
   {60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60},
   {60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60, 60}
+};
+
+int stepLength[8][16] = {
+  {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+  {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+  {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+  {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+  {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+  {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+  {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+  {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 };
 
 void seqStart() {
@@ -89,10 +104,10 @@ void seqStop() {
 }
 
 // Play a note
-void playNote() {
-  //Serial.println(stepNote[playingPattern][seqPos]); // Debug
+void playNote(int patternNum) {
+  //Serial.println(stepNote[patternNum][seqPos]); // Debug
 
-  switch (stepPlay[playingPattern][seqPos]) {
+  switch (stepPlay[patternNum][seqPos]) {
     case -1:
       // Skip the remaining notes
       seqPos = 16;
@@ -101,16 +116,20 @@ void playNote() {
       // Don't play a note
       // Turn off the previous note
       usbMIDI.sendNoteOff(lastNote, 0, midiChannel);
+      MIDI.sendNoteOff(lastNote, 0, midiChannel);
       analogWrite(A14, 0);
       digitalWrite(13, LOW);
       break;
     case 1:
       // Turn off the previous note and play a new note.
       usbMIDI.sendNoteOff(lastNote, 0, midiChannel);
+      MIDI.sendNoteOff(lastNote, 0, midiChannel);
       analogWrite(A14, 0);
       
-      usbMIDI.sendNoteOn(stepNote[playingPattern][seqPos], seq_velocity, midiChannel);
-      lastNote = stepNote[playingPattern][seqPos];
+      usbMIDI.sendNoteOn(stepNote[patternNum][seqPos], seq_velocity, midiChannel);
+      MIDI.sendNoteOn(stepNote[patternNum][seqPos], seq_velocity, midiChannel);
+      //Serial.println(stepNote[patternNum][seqPos]);
+      lastNote = stepNote[patternNum][seqPos];
 		stepCV = map (lastNote, 35, 90, 0, 4096);
 		digitalWrite(13, HIGH);
 		analogWrite(A14, stepCV);
@@ -118,10 +137,12 @@ void playNote() {
     case 2:
       // Turn off the previous note, and play a new accented note
       usbMIDI.sendNoteOff(lastNote, 0, midiChannel);
+      MIDI.sendNoteOff(lastNote, 0, midiChannel);
       analogWrite(A14, 0);
       
-      usbMIDI.sendNoteOn(stepNote[playingPattern][seqPos], seq_acc_velocity, midiChannel);
-      lastNote = stepNote[playingPattern][seqPos];
+      usbMIDI.sendNoteOn(stepNote[patternNum][seqPos], seq_acc_velocity, midiChannel);
+      MIDI.sendNoteOn(stepNote[patternNum][seqPos], seq_acc_velocity, midiChannel);
+      lastNote = stepNote[patternNum][seqPos];
       	stepCV = map (lastNote, 35, 90, 0, 4096);
       	digitalWrite(13, HIGH);
       	analogWrite(A14, stepCV);
@@ -133,5 +154,6 @@ void allNotesOff() {
 	digitalWrite(13, LOW);
 	for (int j=0; j<128; j++){
 		usbMIDI.sendNoteOff(j, 0, midiChannel);
+		MIDI.sendNoteOff(j, 0, midiChannel);
 	}
 }

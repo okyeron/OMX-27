@@ -23,6 +23,9 @@
 
 #define DISPLAY_WIDTH 128
 #define DISPLAY_HEIGHT 32
+#define OLED_RST -1
+#define CLKDURING 100000
+#define CLKAFTER 100000
 
 Adafruit_SSD1306 display =
   Adafruit_SSD1306(DISPLAY_WIDTH, DISPLAY_HEIGHT, &Wire);
