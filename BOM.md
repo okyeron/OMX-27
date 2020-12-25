@@ -21,16 +21,12 @@
 |  |1| |OLED - 128x32 I2C display| \**See below|
 |  | | |header pins| \***See below|
 
-
-
 \* POTS - I used trimmer type pots because they're a little more low profile. But you can use alpha pots or whatever you have around.
-
 
 \** OLED - 128x32 I2C display (SSD1306) with pin order ( GND, VCC, SCL, SDA )  
 example from eBay:  
 "0.91" 128x32 IIC I2C White OLED LCD Display DIY Module For Arduino"  
 https://www.ebay.com/itm/293660021494  
-
 
 \*** Headers:
 1X04 (oled) 
@@ -39,6 +35,21 @@ https://www.ebay.com/itm/293660021494
 
 TIP: Get 1x40 breakaway headers and cut what you need.  
 
-[Mouser Cart (work in progress)](https://www.mouser.com/ProjectManager/ProjectDetail.aspx?AccessID=13c0107d30)  
-__DOES NOT include Teensy, OLED, LEDs or headers__
+[Mouser Cart (work in progress)](https://www.mouser.com/ProjectManager/ProjectDetail.aspx?AccessID=13c0107d30) - __DOES NOT include Teensy, OLED, LEDs or headers__
 
+Mounting Hardware is NOT LISTED
+
+Knobs are up to you.
+
+---
+
+### Keycaps: 
+
+Any MX-compatible keycaps will work.  I like the DSA profile caps for this application.
+
+[DSA "Dolch" Keyset (Two Shot) "Windowed" Keys](https://pimpmykeyboard.com/dsa-dolch-keyset-two-shot/) (choose the __LED Kit__ option).  
+These come in a packet of 4 keycaps. You will need 7 packets.  
+
+[Flashquark Translucent DSA Keycaps](https://flashquark.com/product/translucent-dsa-keycaps/) (in Black, White, Clear, Blue, Red) - __50 per pack__.  
+
+[Maxkeyboard Black Translucent MX Blank](https://www.maxkeyboard.com/black-translucent-cherry-mx-blank-keycap-set-for-esc-w-a-s-d-or-e-s-d-f-and-arrow-keys.html) (set of 9)
