@@ -15,11 +15,11 @@
 |595-TLV9062IDR|1|U1|SOIC127P600X175-8N|TLV9062IDR|
 |AYZ0202AGRLC|1|S1|DPDT|SWITCH-DPDT-SMD-AYZ0202|
 ||1|VR1-VR4,VR6||9MM_SNAP-IN_POT*|
-|652-PEC11R-4015F-S24|1|VR5|PEC11+SWITCH|Encoder with Switch|
+|[652-PEC11R-4015F-S24](http://www.mouser.com/Search/ProductDetail.aspx?R=652-PEC11R-4015F-S24)|1|VR5|PEC11+SWITCH|Encoder with Switch|
 | aliexpress |27|LED1-LED27|SK6812MINIE|SK6812-MINI-E|
 
 
-* POTS - I used trimmer type 688-RK09K1130A5R because they're a little more low profile. But you can use alpha pots or whatever you have around.
+\* POTS - I used trimmer type 688-RK09K1130A5R because they're a little more low profile. But you can use alpha pots or whatever you have around.
 
 TEENSY_3.1-3.2
 
@@ -33,3 +33,5 @@ Headers:
 1X04 (oled)
 1x20 x 2 (teensy)
 1x01 (teensy dac pin)
+
+
