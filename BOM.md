@@ -37,8 +37,8 @@ https://www.ebay.com/itm/293660021494
 1x14 x 2 (teensy) 
 1x01 (teensy dac pin) 
 
-TIP: Get 1x40 breakaway headers and cut what you need.
+TIP: Get 1x40 breakaway headers and cut what you need.  
 
-[Mouser Cart (work in progress)](https://www.mouser.com/ProjectManager/ProjectDetail.aspx?AccessID=13c0107d30)
+[Mouser Cart (work in progress)](https://www.mouser.com/ProjectManager/ProjectDetail.aspx?AccessID=13c0107d30)  
 __DOES NOT include Teensy, OLED, LEDs or headers__
 
