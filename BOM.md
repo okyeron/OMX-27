@@ -40,4 +40,5 @@ https://www.ebay.com/itm/293660021494
 TIP: Get 1x40 breakaway headers and cut what you need.
 
 [Mouser Cart (work in progress)](https://www.mouser.com/ProjectManager/ProjectDetail.aspx?AccessID=13c0107d30)
+__DOES NOT include Teensy, OLED, LEDs or headers__
 
