@@ -33,8 +33,8 @@ https://www.ebay.com/itm/293660021494
 
 
 \*** Headers:
-1X04 (oled)
-1x20 x 2 (teensy)
-1x01 (teensy dac pin)
+1X04 (oled) 
+1x14 x 2 (teensy) 
+1x01 (teensy dac pin) 
 
-
+TIP: Get 1x40 breakaway headers and cut what you need.
