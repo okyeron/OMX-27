@@ -17,19 +17,22 @@
 |[688-RK09K1130A5R](http://www.mouser.com/Search/ProductDetail.aspx?R=688-RK09K1130A5R)|1|VR1-VR4,VR6|10K|9MM_SNAP-IN_POT*|
 |[652-PEC11R-4015F-S24](http://www.mouser.com/Search/ProductDetail.aspx?R=652-PEC11R-4015F-S24)|1|VR5|PEC11+SWITCH|Encoder with Switch|
 | [aliexpress](https://www.aliexpress.com/item/4000475685852.html?spm=a2g0s.9042311.0.0.601b4c4dcyhOZn) / [ebay](https://www.ebay.com/itm/100-2000pcs-SK6812-MINI-E-LED-CHIP-SK6812-3228-4pin-dream-color-LEDS-DC5V/224140435419?hash=item342fcf9fdb:g:XbAAAOSwzkRd8g96)|27|LED1-LED27|SK6812MINIE|SK6812-MINI-E|
+| [PJRC Store](https://www.pjrc.com/store/teensy32.html) |1| |TEENSY 3.2||
+|  |1| |OLED - 128x32 I2C display| \**See below|
+|  | | |header pins| \***See below|
 
 
-\* POTS - I used trimmer type because they're a little more low profile. But you can use alpha pots or whatever you have around.
 
-TEENSY_3.1-3.2
+\* POTS - I used trimmer type pots because they're a little more low profile. But you can use alpha pots or whatever you have around.
 
-OLED - 128x32 I2C display (SSD1306) with pin order ( GND, VCC, SCL, SDA )  
+
+\** OLED - 128x32 I2C display (SSD1306) with pin order ( GND, VCC, SCL, SDA )  
 example from eBay:  
 "0.91" 128x32 IIC I2C White OLED LCD Display DIY Module For Arduino"  
 https://www.ebay.com/itm/293660021494  
 
 
-Headers:
+\*** Headers:
 1X04 (oled)
 1x20 x 2 (teensy)
 1x01 (teensy dac pin)
