@@ -1,5 +1,10 @@
 # OMX-27
 
+<img src="buildpix/OMX-27-top.png" alt="Top" width="1080" height="244" />  
+<img src="buildpix/OMX-27-bottom.png" alt="Bottom" width="1080" height="244" />  
+
+
+
 ### 100n and 10u capacitors  
 <img src="buildpix/OMX-27-build-caps.png" alt="Capacitors" width="1080" height="237" />
 
