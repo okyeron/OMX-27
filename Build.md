@@ -35,3 +35,22 @@ U1 - the TLV9062 op-amp here is oriented with pin 1 at the bottom right side. Ex
 The LEDs are __Reverse Mount__ and are soldered to the back-side of the PCB with the LED facing towards the top of the PCB. When looking at the back of the PCB as in the picture, the GND leg is the top right pad for each one (marked with a red triangle in the picture below). The LED itself has a "notched" leg for GND.
 
 <img src="buildpix/OMX-27-build-leds.png" alt="LEDs" width="1080" height="237" />
+
+
+### TEENSY
+
+For the keyplate to fit properly, the Teensy MUST be flush-mounted to the top of the main PCB.
+
+Before soldering - Use a piece of insulating tape (Electrical, Kapton if you have it) to cover all the contacts on the bottom-middle of the Teensy (to prevent accidental shorts). (PIC NEEDED) 
+
+(NEED PICS OF ATTCHMENT/SOLDERING TECHNIQUE HERE)
+
+
+### JACKS, OLED, POTS, ENCODER, ETC.
+
+Figure it out. :)
+
+
+### KEY SWITCHES
+
+Snap all the key-switches into the keyplate (from the top). Then solder.
