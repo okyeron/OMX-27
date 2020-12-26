@@ -3,7 +3,13 @@
 <img src="buildpix/OMX-27-top.png" alt="Top" width="1080" height="244" />  
 <img src="buildpix/OMX-27-bottom.png" alt="Bottom" width="1080" height="244" />  
 
+### Before your start
 
+The key-switches are going to be the VERY LAST thing you solder. After you solder the switches in, everything on the inside is going to be inaccessible.
+
+Ideally you want to be able to test all the LEDs and OLED before putting the switches on.
+
+I'd also suggest testing each switch connection with a piece of wire so you can confirm the diodes are soldered correctly.
 
 ### 100n and 10u capacitors  
 
@@ -12,6 +18,8 @@ Everything is 100n caps except for the two next to the encoder which are 10u
 <img src="buildpix/OMX-27-build-caps.png" alt="Capacitors" width="1080" height="237" />
 
 ### Diodes
+
+The stripes (cathode pin) on each diode are all facing towards the top of the PCB. The one oddball (top left key) has its stripe facing to the outside of the board.
 <img src="buildpix/OMX-27-build-diodes.png" alt="Diodes" width="1080" height="237" />
 
 ### Resistors
