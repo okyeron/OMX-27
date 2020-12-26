@@ -13,8 +13,11 @@ I'd also suggest testing each switch connection with a piece of wire so you can 
 
 Order of operations here does not matter for anything aside from the keyswitches being absolutely last.
 
+
 ---
 # Build
+
+Everything should be wel marked on the PCB itself, but here's a visual guide and some tips just in case.
 
 
 ### 100n and 10u capacitors  
