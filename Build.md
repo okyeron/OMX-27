@@ -6,6 +6,9 @@
 
 
 ### 100n and 10u capacitors  
+
+Everything is 100n caps except for the two next to the encoder which are 10u
+
 <img src="buildpix/OMX-27-build-caps.png" alt="Capacitors" width="1080" height="237" />
 
 ### Diodes
