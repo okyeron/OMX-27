@@ -3,7 +3,7 @@
 <img src="buildpix/OMX-27-top.png" alt="Top" width="1080" height="244" />  
 <img src="buildpix/OMX-27-bottom.png" alt="Bottom" width="1080" height="244" />  
 
-### Before your start
+# Before your start
 
 The key-switches are going to be the VERY LAST thing you solder. __After you solder the switches in, everything on the inside is going to be inaccessible.__
 
@@ -14,6 +14,7 @@ I'd also suggest testing each switch connection with a piece of wire so you can 
 Order of operations here does not matter for anything aside from the keyswitches being absolutely last.
 
 ---
+# Build
 
 
 ### 100n and 10u capacitors  
