@@ -5,11 +5,16 @@
 
 ### Before your start
 
-The key-switches are going to be the VERY LAST thing you solder. After you solder the switches in, everything on the inside is going to be inaccessible.
+The key-switches are going to be the VERY LAST thing you solder. __After you solder the switches in, everything on the inside is going to be inaccessible.__
 
 Ideally you want to be able to test all the LEDs and OLED before putting the switches on.
 
 I'd also suggest testing each switch connection with a piece of wire so you can confirm the diodes are soldered correctly.
+
+Order of operations here does not matter for anything aside from the keyswitches being absolutely last.
+
+---
+
 
 ### 100n and 10u capacitors  
 
