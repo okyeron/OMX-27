@@ -1,0 +1,140 @@
+.cell { border: 0px solid black; border-radius: 5px;
+    width: 40px; height: 40px;
+    display: inline-block;
+    position: relative;
+    margin: 0px 6px 2px 0px;
+    background: #444;
+    font: 10px "Chango", 'Lucida Grande', sans-serif;
+    line-height: 40px;
+    text-align: center;
+    }
+
+.cell.on { background: white; }
+.cell.off { background: grey;}
+
+
+
+.blankcell { 
+	border: 0px solid black; border-radius: 5px;
+    width: 40px; height: 40px;
+    display: inline-block;
+    position: relative;
+    margin: 0px 6px 2px 0px;
+    background: none;
+    text-align: center;
+    }
+
+
+body { background: grey; color: white; font: 15px sans-serif;}
+	
+    #nomidi {
+      display: none;
+    }
+    #midi {
+      margin-bottom: 20px;
+    }
+
+    #grid {
+      background: #aaa;
+      position: relative;
+      margin-top: 20px;
+    }
+    #feedback {
+      position: relative;
+      margin-top: 20px;
+    }
+    #sliderblock {
+      position: relative;
+      height: 160px;
+    }
+
+    #backdrop {
+      background: #aaa;
+      position: relative;
+      margin-top: 20px;
+    }
+
+    #labels {
+      position: absolute;
+      width: 20px;
+      text-align: center;
+    }
+
+    #labels > div {
+      position: absolute;
+      width: 20px;
+      color: #444;
+    }
+
+    .clear {
+      clear: both;
+      display: block;
+    }
+
+    .slider {
+      position: absolute;
+      width: 20px;
+      margin-left: 5px;
+      display: block;
+      background: #444;
+    }
+	.row0 {
+		margin: 0px 0px 0px 24px;
+	}
+
+.loading { border-color: red;}
+.slider { height: 20px; width: 300px;}
+.xfade { margin-left: 110px; height:20px; width: 600px;}
+.droptarget { background: gray;}
+.deck { display: block; width: 300px; margin: 0px auto;}
+.disc { position: absolute; width: 300px; height: 300px; border:1px solid black; border-radius: 150px;}
+.platter { width:300px; height: 300px; 
+	a-webkit-transform: rotate(45deg); 
+	display: table-cell; vertical-align: middle;
+	font: 22px 'Chango', sans-serif; text-align: middle }
+.cueButton {
+	-webkit-box-shadow: white 0px 1px 1px 0px inset, rgba(0, 0, 0, 0.597656) 0px 3px 3px 0px;
+	background-color: #B6D3F4;
+	background-image: -webkit-linear-gradient(top, #B6D3F4, #5483B8);
+	border: 1px solid #9AC9FF;
+	border-radius: 18px;
+	box-shadow: white 0px 1px 1px 0px inset, rgba(0, 0, 0, 0.597656) 0px 3px 3px 0px;
+	color: #555;
+	display: block;
+	font: 15px "Chango", 'Lucida Grande', sans-serif;
+	padding: 1px 7px 0px 7px;
+	position: absolute;
+	text-shadow: rgba(0, 0, 0, 0.296875) 0px -1px 0px;
+	bottom: 5px;
+	left: 5px;
+}
+.cueButton.active {
+	background-color: red;
+	background-image: -webkit-linear-gradient(top, red, pink);
+	border: 1px solid #FFC99A;
+}
+.cueButton:hover {
+	-webkit-box-shadow:inset 0 2px 6px #fff,0 3px 3px rgba(0,0,0,0.6);
+	-moz-box-shadow:inset 0 2px 6px #fff,0 3px 3px rgba(0,0,0,0.6);
+	box-shadow:inset 0 2px 6px #fff,0 3px 3px rgba(0,0,0,0.6)
+}
+
+input[type="range"] {
+    -webkit-appearance: none;
+    background-color: gray;
+    height: 12px;
+}
+ 
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    position: relative;
+    z-index: 1;
+    width: 10px;
+    height: 20px;
+ 
+    -webkit-border-radius: 40px;
+    -moz-border-radius: 40px;
+    border-radius: 40px;
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ebf1f6), color-stop(50%,#abd3ee), color-stop(51%,#89c3eb), color-stop(100%,#d5ebfb));
+}
+
