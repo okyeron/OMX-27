@@ -16,10 +16,13 @@ unsigned long blinkInterval = 500;
 
 elapsedMillis msec = 0;
 elapsedMillis pots_msec = 0;
-elapsedMillis step_interval = 0;
 elapsedMillis checktime1 = 0;
 elapsedMicros clksTimer = 0;
 long clksDelay;
+
+elapsedMillis step_interval[8] = {0,0,0,0,0,0,0,0};
+unsigned long lastStepTime[8] = {0,0,0,0,0,0,0,0};
+uint16_t step_delay;
 
 bool dirtyPixels = false;
 bool dirtyDisplay = false;
@@ -35,12 +38,12 @@ bool enc_edit = false;
 float clockbpm = 120;
 float newtempo = clockbpm;
 int noteon_velocity = 100;
-uint16_t step_delay;
-unsigned long tempoStartTime, tempoEndTime, lastStepTime;
+unsigned long tempoStartTime, tempoEndTime;
+
 
 int mode = 0;
 int newmode = 0;
-const char* modes[] = {"MIDI","SEQ"};
+const char* modes[] = {"MIDI","SEQ-1","SEQ-2"};
 
 
 // POTS/ANALOG INPUTS				// CCS mapped to Organelle Defaults
@@ -308,16 +311,16 @@ void show_current_step(int patternNum) {
 			if (i < patternLength[patternNum]){
 
 				// 
-				//stepNote[patternNum][seqPos] = notes[thisKey]
+				//stepNote[patternNum][seqPos[patternNum]] = notes[thisKey]
 				if(i % 4 == 0){ // mark groups of 4
-					if(i == seqPos){
+					if(i == seqPos[patternNum]){
 						strip.setPixelColor(i+11, HALFRED); // step chase
 					} else if (stepPlay[patternNum][i] == 1){
 						strip.setPixelColor(i+11, seqColors[patternNum]); // step on
 					} else {
 						strip.setPixelColor(i+11, LOWWHITE); 
 					}
-				} else if (i == seqPos){
+				} else if (i == seqPos[patternNum]){
 					strip.setPixelColor(i+11, HALFRED); // step chase
 				} else if (stepPlay[patternNum][i] == 1){
 					strip.setPixelColor(i+11, seqColors[patternNum]); // step on
@@ -333,13 +336,13 @@ void show_current_step(int patternNum) {
 
 void step_ahead(int patternNum) {
   // step ahead one place
-    seqPos++;
-    if (seqPos >= patternLength[patternNum])
-      seqPos = 0;
+    seqPos[patternNum]++;
+    if (seqPos[patternNum] >= patternLength[patternNum])
+      seqPos[patternNum] = 0;
 }
 
 void step_on(int patternNum){
-	//	Serial.print(seqPos);
+	//	Serial.print(g);
 	//	Serial.println(" step on");
 	//  usbMIDI.sendNoteOn(sequencer[current_step].note, VELOCITY, CHANNEL);
 }
@@ -360,7 +363,7 @@ void dispPattLen(){
 	display.setCursor(0, 12);
 	display.print("LEN: ");
 	display.setCursor(32, 12);
-	display.print(pattLen);
+	display.print(pattLen[playingPattern]);
 
 }
 void dispPots(){
@@ -385,7 +388,7 @@ void dispNotes(){
 	display.setTextSize(1);
 	display.setCursor(0, 16);
 	display.print("Note:");
-	display.print(lastNote);
+	display.print(lastNote[playingPattern]);
 
 }
 
@@ -400,7 +403,7 @@ void readPots(){
 		for(int i=0; i<5; i++) {
 			if (EMA_S[i] != previous[i]){
 				usbMIDI.sendControlChange(pots[i], analogValues[i], midiChannel);
-//				MIDI.sendControlChange(pots[i], analogValues[i], midiChannel);
+				MIDI.sendControlChange(pots[i], analogValues[i], midiChannel);
 				previous[i] = EMA_S[i]; //analogValues[i];
 				potCC = pots[i];
 				potVal = analogValues[i];
@@ -432,31 +435,43 @@ void loop() {
 //    	Serial.println(u.dir() < 0 ? "ccw " : "cw ");
 //    	Serial.println(amt);
     	
-		newtempo = constrain(clockbpm + amt, 40, 300);
-		if (newtempo != clockbpm){
-			
-			// SET TEMPO HERE
-			
-			clockbpm = newtempo;
-			dirtyDisplay = true;
-		}
-		switch(mode) { // process encoder input depending on mode
-			case 0: // MIDI
-				break;
-			case 1: // SEQ
-				if (noteSelect && !enc_edit){ // sequence edit more
-					// 
-					pattLen = constrain(patternLength[playingPattern] + amt, 1, 16);
-					patternLength[playingPattern] = pattLen;
-					dirtyDisplay = true;
-				}		
-				break;
-		}		
 
 		// Change Mode
     	if (enc_edit) {
-	    	newmode = constrain(mode + amt, 0, 1);
+	    	newmode = constrain(newmode + amt, 0, 2);
+	    	
+		} else {
+			newtempo = constrain(clockbpm + amt, 40, 300);
+			if (newtempo != clockbpm){
+			
+				// SET TEMPO HERE
+				clockbpm = newtempo;
+				dirtyDisplay = true;
+			}
+			switch(mode) { // process encoder input depending on mode
+				case 0: // MIDI
+					break;
+				case 1: // SEQ
+					if (noteSelect && !enc_edit){ // sequence edit more
+						// 
+						pattLen[playingPattern] = constrain(patternLength[playingPattern] + amt, 1, 16);
+						patternLength[playingPattern] = pattLen[playingPattern];
+						dirtyDisplay = true;
+					}		
+					break;
+				case 2: // SEQ
+					if (noteSelect && !enc_edit){ // sequence edit more
+						// 
+						pattLen[playingPattern] = constrain(patternLength[playingPattern] + amt, 1, 16);
+						patternLength[playingPattern] = pattLen[playingPattern];
+						dirtyDisplay = true;
+					}		
+					break;
+			}		
+
 		}
+
+
 
 	}
 	auto s = encButton.update();
@@ -497,6 +512,8 @@ void loop() {
 			break;
 		case 1:
 			break;
+		case 2:
+			break;
 	} // END POTS SWITCH
 
 
@@ -511,7 +528,7 @@ void loop() {
 			case 0: // MIDI CONTROLLER
 				if (e.bit.EVENT == KEY_JUST_PRESSED && thisKey != 0) {
 					//Serial.println(" pressed");
-					noteOn(thisKey, noteon_velocity);
+					noteOn(thisKey, noteon_velocity, playingPattern);
 					
 				} else if(e.bit.EVENT == KEY_JUST_RELEASED && thisKey != 0) {
 					//Serial.println(" released");
@@ -537,8 +554,10 @@ void loop() {
 //					midiAUX = false;
 				}					
 				break;
-				
-			case 1: // SEQUENCER
+
+			case 1: // SEQUENCER 1
+				// fall through
+			case 2: // SEQUENCER 2
 				// Sequencer row keys
 
 				// PRESS EVENTS
@@ -564,6 +583,9 @@ void loop() {
 							
 						} else if (thisKey == 1) { 
 							noteSelect = !noteSelect; // toggle noteSelect 
+
+						} else if (thisKey == 2) { 
+							seqReset(); // reset all sequences to step 1
 							
 						} else if (thisKey > 10) { // SEQUENCE 1-16 KEYS
 							if (stepPlay[playingPattern][keyPos] == 1){ // toggle note on
@@ -574,6 +596,8 @@ void loop() {
 							}
 						}
 					}
+//					Serial.print("playingPattern: ");
+//					Serial.println(playingPattern);
 				}
 				
 
@@ -625,20 +649,20 @@ void loop() {
 				dispNotes();
 			}
 			break;
-		case 1: 		// SEQUENCER
+		case 1: 		// SEQUENCER 1
 			readPots();
 			if (dirtyDisplay){
 				dispPattLen();
 				dispTempo();		
 			}
 			if(playing == true) {
-				if(step_interval > step_delay){
-					lastStepTime = step_interval;
+				if(step_interval[playingPattern] > step_delay){
+					lastStepTime[playingPattern] = step_interval[playingPattern];
 					step_ahead(playingPattern);
 					step_on(playingPattern);
 					playNote(playingPattern);
-					step_interval =0;
-				} else if(step_interval > step_delay / 2){
+					step_interval[playingPattern] =0;
+				} else if(step_interval[playingPattern] > step_delay / 2){
 					step_off(playingPattern);
 				}
 				show_current_step(playingPattern);
@@ -649,6 +673,33 @@ void loop() {
 				for (int z=0; z<16; z++){
 				}
 			}
+			break;
+		case 2: 		// SEQUENCER 2
+			readPots();
+			if (dirtyDisplay){
+				dispPattLen();
+				dispTempo();		
+			}
+			if(playing == true) {
+				for (int j=0; j<8; j++){
+//					Serial.print("pattern:");
+//					Serial.println(j);
+
+					if(step_interval[j] > step_delay){
+						lastStepTime[j] = step_interval[j];
+						step_on(j);
+						playNote(j);
+						step_ahead(j);
+						step_interval[j] = 0;
+					} else if(step_interval[playingPattern] > step_delay / 2){
+						step_off(j);
+					}
+				}				
+				show_current_step(playingPattern);
+			} else {
+				show_current_step(playingPattern);
+			}
+		break;
 	}
 
 //	Serial.print("one:");
@@ -679,9 +730,14 @@ void loop() {
 	
 } // END MAIN LOOP
 
-void noteOn(int notenum, int velocity){
+void seqReset(){
+	for (int k=0; k<8; k++){
+		seqPos[k] = 0;
+	}
+}
+void noteOn(int notenum, int velocity, int patternNum){
 	usbMIDI.sendNoteOn(notes[notenum], velocity, midiChannel);
-	lastNote = notes[notenum];
+	lastNote[patternNum] = notes[notenum];
 //	MIDI.sendNoteOn(notes[notenum], velocity, midiChannel);
 	pitchCV = map (notes[notenum], 35, 90, 0, 4096);
 	digitalWrite(13, HIGH);
