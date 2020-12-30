@@ -774,9 +774,12 @@ void noteOn(int notenum, int velocity, int patternNum){
 	usbMIDI.sendNoteOn(notes[notenum], velocity, midiChannel);
 	lastNote[patternNum] = notes[notenum];
 //	MIDI.sendNoteOn(notes[notenum], velocity, midiChannel);
+
+	// CV
 	pitchCV = map (notes[notenum], 35, 90, 0, 4096);
 	digitalWrite(13, HIGH);
 	analogWrite(A14, pitchCV);
+
 	strip.setPixelColor(notenum, HALFWHITE);         //  Set pixel's color (in RAM)
 	dirtyPixels = true;	
 	dirtyDisplay = true;
@@ -784,8 +787,10 @@ void noteOn(int notenum, int velocity, int patternNum){
 void noteOff(int notenum){
 	usbMIDI.sendNoteOff(notes[notenum], 0, midiChannel);
 //	MIDI.sendNoteOff(notes[notenum], 0, midiChannel);
+	// CV
 	digitalWrite(13, LOW);
 	analogWrite(A14, 0);
+
 	strip.setPixelColor(notenum, LEDOFF); 
 	dirtyPixels = true;
 	dirtyDisplay = true;
