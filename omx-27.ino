@@ -2,6 +2,7 @@
 
 #include "Adafruit_Keypad.h"
 #include <Adafruit_NeoPixel.h>
+#include <ResponsiveAnalogRead.h>
 #include <MIDI.h>
 MIDI_CREATE_DEFAULT_INSTANCE();
 //MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, MIDI);
@@ -12,21 +13,31 @@ MIDI_CREATE_DEFAULT_INSTANCE();
 #define LED_PIN    14
 #define LED_COUNT 27
 
+const int potCount = 5;
+ResponsiveAnalogRead *analog[potCount];
+
+// storage of pot values; current is in the main loop; last value is for midi output
+int volatile currentValue[potCount];
+int lastMidiValue[potCount];
+int potMin = 0;
+int potMax = 8190;
+int temp;
+
 unsigned long blinkInterval = 500;
 
 elapsedMillis msec = 0;
 elapsedMillis pots_msec = 0;
 elapsedMillis checktime1 = 0;
 elapsedMicros clksTimer = 0;
-long clksDelay;
+unsigned long clksDelay;
 
 elapsedMillis step_interval[8] = {0,0,0,0,0,0,0,0};
 unsigned long lastStepTime[8] = {0,0,0,0,0,0,0,0};
 uint16_t step_delay;
 
+
 bool dirtyPixels = false;
 bool dirtyDisplay = false;
-
 bool blinkState = false;
 bool noteSelect = false;
 bool noteSelection = false;
@@ -51,10 +62,11 @@ int pots[] = {21,22,23,24,7};		// the MIDI CC (continuous controller) for each a
 int analogPins[] = {23,22,21,20,16};	// teensy pins for analog inputs
 int previous[] = {-1,-1,-1,-1,-1};	// store previously sent values, to detect changes
 int analogValues[] = {0,0,0,0,0};		// default values
+int potCC = pots[0];
+int potVal = analogValues[0];
+
 float EMA_a[] = {0.6,0.6,0.6,0.6,0.6};
 int EMA_S[] = {0,0,0,0,0};
-int potCC = pots[1];
-int potVal = analogValues[1];
 
 
 // KEYSWITCH ROWS/COLS
@@ -143,12 +155,51 @@ void stopClock(){
 //	MIDI.sendStop();
 }
 
+void readPotentimeters(){
+	for(int k=0; k<potCount; k++) {
+		temp = analogRead(analogPins[k]);
+		analog[k]->update(temp);
+		
+	    // read from the smoother, constrain (to account for tolerances), and map it
+    	temp = analog[k]->getValue();
+    	temp = constrain(temp, potMin, potMax);
+		temp = map(temp, potMin, potMax, 0, 16383);
+		// map and update the value
+    	analogValues[k] = temp >> 7;
+   	
+    	if(analog[k]->hasChanged()) {
+      		// do stuff		
+			usbMIDI.sendControlChange(pots[k], analogValues[k], midiChannel);
+			MIDI.sendControlChange(pots[k], analogValues[k], midiChannel);
+			potCC = pots[k];
+			potVal = analogValues[k];
+			dirtyDisplay = true;
+    	}
+	}
+}
 // ####### SETUP #######
 
 void setup() {
 	Serial.begin(115200);
 	checktime1 = 0;
 	clksTimer = 0;
+
+	// set analog read resolution to teensy's 13 usable bits
+	analogReadResolution(13);
+	
+	// initialize ResponsiveAnalogRead
+	for (int i = 0; i < potCount; i++){
+		analog[i] = new ResponsiveAnalogRead(0, true, .001);
+		analog[i]->setAnalogResolution(1 << 13);
+
+		// ResponsiveAnalogRead is designed for 10-bit ADCs
+		// meanining its threshold defaults to 4. Let's bump that for 
+		// our 13-bit adc by setting it to 4 << (13-10)
+		analog[i]->setActivityThreshold(32);
+
+		currentValue[i] = 0;
+		lastMidiValue[i] = 0;
+	}
 
 	// hardware midi
 	MIDI.begin();
@@ -194,12 +245,8 @@ void setup() {
 	//usbMIDI.setHandleNoteOff(HandleNoteOff);
 
 	// READ POTS
-	for(int k=0; k<5; k++) {
-		analogValues[k] = analogRead(analogPins[k]) / 8;
-		previous[k] = analogValues[k];
-		EMA_S[k] = previous[k];
-	}
-
+//	readPotentimeters();
+	
 	//LEDs
 	strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
 	strip.show();            // Turn OFF all pixels ASAP
@@ -223,6 +270,7 @@ void setup() {
 	display.setTextSize(1);
 	display.setCursor(96, 0);
 	display.print(modes[newmode]);
+	dispTempo();
 	display.display();			
 
 	//Serial.println(" loading... ");
@@ -284,7 +332,6 @@ void show_current_step(int patternNum) {
 	} else {
 		for(int j = 1; j < NUM_STEPS+11; j++){		
 			if (j < patternLength[patternNum]+11){
-
 				if (j == 1) {
 					if (noteSelect){
 						if (noteSelect && blinkState){
@@ -309,21 +356,34 @@ void show_current_step(int patternNum) {
 
 		for(int i = 0; i < NUM_STEPS; i++){
 			if (i < patternLength[patternNum]){
-
-				// 
-				//stepNote[patternNum][seqPos[patternNum]] = notes[thisKey]
 				if(i % 4 == 0){ // mark groups of 4
 					if(i == seqPos[patternNum]){
-						strip.setPixelColor(i+11, HALFRED); // step chase
+						if (playing){
+							strip.setPixelColor(i+11, HALFRED); // step chase
+						} else if (stepPlay[patternNum][i] == 1){
+							strip.setPixelColor(i+11, seqColors[patternNum]); // step on color
+						} else {
+							strip.setPixelColor(i+11, LOWWHITE); 
+						}
+//						strip.setPixelColor(i+11, HALFRED); // step chase
 					} else if (stepPlay[patternNum][i] == 1){
-						strip.setPixelColor(i+11, seqColors[patternNum]); // step on
+						strip.setPixelColor(i+11, seqColors[patternNum]); // step on color
 					} else {
 						strip.setPixelColor(i+11, LOWWHITE); 
 					}
 				} else if (i == seqPos[patternNum]){
-					strip.setPixelColor(i+11, HALFRED); // step chase
+					if (playing){
+						strip.setPixelColor(i+11, HALFRED); // step chase
+					} else if (stepPlay[patternNum][i] == 1){
+						strip.setPixelColor(i+11, seqColors[patternNum]); // step on color
+					} else {
+						strip.setPixelColor(i+11, LEDOFF); 
+					}
+//					strip.setPixelColor(i+11, HALFRED); // step chase
+
 				} else if (stepPlay[patternNum][i] == 1){
-					strip.setPixelColor(i+11, seqColors[patternNum]); // step on
+					strip.setPixelColor(i+11, seqColors[patternNum]); // step on color
+
 				} else {
 					strip.setPixelColor(i+11, LEDOFF);
 				}
@@ -392,62 +452,61 @@ void dispNotes(){
 
 }
 
-void readPots(){
-	// --- READ POTS to MIDI ---
-	if (pots_msec >= 30) {
-		pots_msec = 0;
-		for(int i=0; i<5; i++) {
-			analogValues[i] = analogRead(analogPins[i]) / 8;
-			EMA_S[i] = (EMA_a[i]*analogValues[i]) + ((1-EMA_a[i])*EMA_S[i]); // Filtered result
-		}
-		for(int i=0; i<5; i++) {
-			if (EMA_S[i] != previous[i]){
-				usbMIDI.sendControlChange(pots[i], analogValues[i], midiChannel);
-				MIDI.sendControlChange(pots[i], analogValues[i], midiChannel);
-				previous[i] = EMA_S[i]; //analogValues[i];
-				potCC = pots[i];
-				potVal = analogValues[i];
-			}
-		}
-		dirtyDisplay = true;
-//		Serial.print("one:");
-//		Serial.println(sinceTest1);
 
-	}
-}
 // ####### MAIN LOOP #######
 
 void loop() {
 	customKeypad.tick();
 	checktime1 = 0;
 
+	// ############### CLOCK/TIMING ###############
+	// BPM tempo to step-delay calculation
+	step_delay = 60000 / clockbpm / 4; // 16th notes
+	// BPM to clock pulses
+	clksDelay = (60000000 / clockbpm) / 24;
+	if (clksTimer > clksDelay ) {
+		// SEND CLOCK
+	  clksTimer = 0;
+	}
+
+
 	// DISPLAY SETUP
 	display.clearDisplay();
 	display.setTextSize(1);
 	display.setCursor(96, 0);
-	display.print(modes[newmode]);				
+	if (newmode != mode && enc_edit) {
+		display.print(modes[newmode]);
+		dirtyDisplay = true;
+	} else {
+		display.print(modes[mode]);
+	}
+		
 				
+	// ############### POTS ###############
+	//
+	readPotentimeters();
 	
-	// ENCODER
+
+	// ############### ENCODER ###############
+	// 
 	auto u = myEncoder.update();
 	if (u.active()) {
     	auto amt = u.accel(5); // where 5 is the acceleration factor if you want it, 0 if you don't)
 //    	Serial.println(u.dir() < 0 ? "ccw " : "cw ");
 //    	Serial.println(amt);
     	
-
 		// Change Mode
     	if (enc_edit) {
 	    	newmode = constrain(newmode + amt, 0, 2);
-	    	
-		} else {
+	    	dirtyDisplay = true;
+		} else if (!noteSelect){
 			newtempo = constrain(clockbpm + amt, 40, 300);
 			if (newtempo != clockbpm){
-			
 				// SET TEMPO HERE
 				clockbpm = newtempo;
 				dirtyDisplay = true;
 			}
+		} else {
 			switch(mode) { // process encoder input depending on mode
 				case 0: // MIDI
 					break;
@@ -470,10 +529,8 @@ void loop() {
 			}		
 
 		}
-
-
-
 	}
+	
 	auto s = encButton.update();
 	switch (s) {
 		case Button::Down: //Serial.println("Button down"); 
@@ -483,8 +540,7 @@ void loop() {
 				setAllLEDS(0,0,0);
 				dirtyDisplay = true;
 			}
-			enc_edit = !enc_edit;
-
+			enc_edit = !enc_edit;			
 			break;
 		case Button::DownLong: //Serial.println("Button downlong"); 
 			break;
@@ -494,28 +550,6 @@ void loop() {
 			break;
 	}
 				
-
-	// BPM tempo to step-delay calculation
-	step_delay = 60000 / clockbpm / 4; // 16th notes
-	// BPM to clock pulses
-	clksDelay = (60000000 / clockbpm) / 24;
-	if (clksTimer > clksDelay ) {
-		// SEND CLOCK
-	  clksTimer = 0;
-	}
-
-
-	
-	// ############### POTS ###############
-	switch(mode) {
-		case 0:
-			break;
-		case 1:
-			break;
-		case 2:
-			break;
-	} // END POTS SWITCH
-
 
 	// ############### KEY HANDLING ###############
 	
@@ -580,6 +614,7 @@ void loop() {
 						// Black Keys
 						if (thisKey > 2 && thisKey < 11) { // pattern select
 							playingPattern = thisKey-3;
+							dirtyDisplay = true;
 							
 						} else if (thisKey == 1) { 
 							noteSelect = !noteSelect; // toggle noteSelect 
@@ -642,7 +677,7 @@ void loop() {
 	switch(mode){
 		case 0:			// MIDI KEYBOARD
 			midi_leds();
-			readPots();
+
 			if (dirtyDisplay){
 				dispPots();
 				dispTempo();
@@ -650,7 +685,7 @@ void loop() {
 			}
 			break;
 		case 1: 		// SEQUENCER 1
-			readPots();
+
 			if (dirtyDisplay){
 				dispPattLen();
 				dispTempo();		
@@ -675,7 +710,7 @@ void loop() {
 			}
 			break;
 		case 2: 		// SEQUENCER 2
-			readPots();
+//			readPotentimeters();
 			if (dirtyDisplay){
 				dispPattLen();
 				dispTempo();		
