@@ -20,9 +20,9 @@ Order of operations here does not matter for anything aside from the keyswitches
 Everything should be wel marked on the PCB itself, but here's a visual guide and some tips just in case.
 
 
-### 100n and 10u capacitors  
+### 100n and 10n capacitors  
 
-Everything is 100n caps except for the two next to the encoder which are 10u
+Everything is 100n caps except for the two next to the encoder which are 10n
 
 <img src="buildpix/OMX-27-build-caps.png" alt="Capacitors" width="1080" height="237" />
 

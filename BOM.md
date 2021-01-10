@@ -8,7 +8,7 @@
 |[652-CR0805-FX2202ELF](http://www.mouser.com/Search/ProductDetail.aspx?R=652-CR0805-FX2202ELF)|2|R4 R6|22K|0805|
 |[RC0805FR-1056KL](http://www.mouser.com/Search/ProductDetail.aspx?R=RC0805FR-1056KL)|2|R3 R5|56K|0805|
 |[80-C0805C104J5RACLR](http://www.mouser.com/Search/ProductDetail.aspx?R=80-C0805C104J5RACLR)|28|C1-C29|100nF|0805|
-|[963-EMK212ABJ106MG-T](http://www.mouser.com/Search/ProductDetail.aspx?R=963-EMK212ABJ106MG-T)|2|C30, C31|10uF|0805|
+|[710-885382207006](http://www.mouser.com/Search/ProductDetail.aspx?R=710-885382207006)|2|C30, C31|10nF|0805|
 |[621-1N4148W-F](http://www.mouser.com/Search/ProductDetail.aspx?R=621-1N4148W-F)|27|D1-D27|1N4148 Diode|SOD-123|
 |[SJ-3523-SMT-TR](http://www.mouser.com/Search/ProductDetail.aspx?R=SJ-3523-SMT-TR)|1|J1|SJ-3523-SMT-TR|3.5 mm jack stereo|
 |[490-MJ-3523-SMT-TR](http://www.mouser.com/Search/ProductDetail.aspx?R=490-MJ-3523-SMT-TR)|2|J2,J3|MJ-3523-SMT|3.5 mm jack mono|
