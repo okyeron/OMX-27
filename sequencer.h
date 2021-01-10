@@ -18,7 +18,7 @@ word stepCV;
 int seq_velocity = 100;
 int seq_acc_velocity = 127;
 
-int lastNote[8] = {0, 0, 0, 0, 0, 0, 0, 0};            // A place to remember the last MIDI note we played
+// int lastNote[8] = {0, 0, 0, 0, 0, 0, 0, 0};            // A place to remember the last MIDI note we played
 int seqPos[8] = {0, 0, 0, 0, 0, 0, 0, 0};          // What position in the sequence are we in?
 int patternLength[8] = {16, 16, 16, 16, 16, 16, 16, 16};
 int pattLen[8] = {patternLength[0],patternLength[1],patternLength[2],patternLength[3],patternLength[4],patternLength[5],patternLength[6],patternLength[7]};
@@ -30,7 +30,7 @@ int pattLen[8] = {patternLength[0],patternLength[1],patternLength[2],patternLeng
 // 2: accent
 
 int stepPlay[8][16] = {
-  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+  {1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0},
   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -66,8 +66,19 @@ int stepNote[8][16] = {
   {39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39}
 };
 
+int lastNote[8][16] = {
+  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+};
+
 int stepLength[8][16] = {
-  {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+  {2, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1},
   {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
   {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
   {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
@@ -111,40 +122,40 @@ void playNote(int patternNum) {
   switch (stepPlay[patternNum][seqPos[patternNum]]) {
     case -1:
       // Skip the remaining notes
-      seqPos[patternNum] = 16;
+      seqPos[patternNum] = 15;
       break;
     case 0:
       // Don't play a note
       // Turn off the previous note
-      usbMIDI.sendNoteOff(lastNote[patternNum], 0, midiChannel);
-      MIDI.sendNoteOff(lastNote[patternNum], 0, midiChannel);
-      analogWrite(A14, 0);
-      digitalWrite(13, LOW);
+//       usbMIDI.sendNoteOff(lastNote[patternNum], 0, midiChannel);
+//       MIDI.sendNoteOff(lastNote[patternNum], 0, midiChannel);
+//       analogWrite(A14, 0);
+//       digitalWrite(13, LOW);
       break;
     case 1:
       // Turn off the previous note and play a new note.
-      usbMIDI.sendNoteOff(lastNote[patternNum], 0, midiChannel);
-      MIDI.sendNoteOff(lastNote[patternNum], 0, midiChannel);
-      analogWrite(A14, 0);
+//       usbMIDI.sendNoteOff(lastNote[patternNum], 0, midiChannel);
+//       MIDI.sendNoteOff(lastNote[patternNum], 0, midiChannel);
+//       analogWrite(A14, 0);
       
       usbMIDI.sendNoteOn(stepNote[patternNum][seqPos[patternNum]], seq_velocity, midiChannel);
       MIDI.sendNoteOn(stepNote[patternNum][seqPos[patternNum]], seq_velocity, midiChannel);
       //Serial.println(stepNote[patternNum][seqPos[patternNum]]);
-      lastNote[patternNum] = stepNote[patternNum][seqPos[patternNum]];
-		stepCV = map (lastNote[patternNum], 35, 90, 0, 4096);
+      lastNote[patternNum][seqPos[patternNum]] = stepNote[patternNum][seqPos[patternNum]];
+		stepCV = map (lastNote[patternNum][seqPos[patternNum]], 35, 90, 0, 4096);
 		digitalWrite(13, HIGH);
 		analogWrite(A14, stepCV);
       break;
     case 2:
       // Turn off the previous note, and play a new accented note
-      usbMIDI.sendNoteOff(lastNote[patternNum], 0, midiChannel);
-      MIDI.sendNoteOff(lastNote[patternNum], 0, midiChannel);
-      analogWrite(A14, 0);
+//       usbMIDI.sendNoteOff(lastNote[patternNum], 0, midiChannel);
+//       MIDI.sendNoteOff(lastNote[patternNum], 0, midiChannel);
+//       analogWrite(A14, 0);
       
       usbMIDI.sendNoteOn(stepNote[patternNum][seqPos[patternNum]], seq_acc_velocity, midiChannel);
       MIDI.sendNoteOn(stepNote[patternNum][seqPos[patternNum]], seq_acc_velocity, midiChannel);
-      lastNote[patternNum] = stepNote[patternNum][seqPos[patternNum]];
-      	stepCV = map (lastNote[patternNum], 35, 90, 0, 4096);
+      lastNote[patternNum][seqPos[patternNum]] = stepNote[patternNum][seqPos[patternNum]];
+      	stepCV = map (lastNote[patternNum][seqPos[patternNum]], 35, 90, 0, 4096);
       	digitalWrite(13, HIGH);
       	analogWrite(A14, stepCV);
       break;

@@ -23,8 +23,6 @@ int potMin = 0;
 int potMax = 8190;
 int temp;
 
-unsigned long blinkInterval = 500;
-
 elapsedMillis msec = 0;
 elapsedMillis pots_msec = 0;
 elapsedMillis checktime1 = 0;
@@ -33,7 +31,7 @@ unsigned long clksDelay;
 
 elapsedMillis step_interval[8] = {0,0,0,0,0,0,0,0};
 unsigned long lastStepTime[8] = {0,0,0,0,0,0,0,0};
-uint16_t step_delay;
+float step_delay;
 
 
 bool dirtyPixels = false;
@@ -41,6 +39,7 @@ bool dirtyDisplay = false;
 bool blinkState = false;
 bool noteSelect = false;
 bool noteSelection = false;
+bool funcTwoSelect = false;
 int selectedNote = 0;
 int selectedStep = 0;
 bool midiAUX = false;
@@ -50,6 +49,8 @@ float clockbpm = 120;
 float newtempo = clockbpm;
 int noteon_velocity = 100;
 unsigned long tempoStartTime, tempoEndTime;
+
+unsigned long blinkInterval = clockbpm * 2;
 
 
 int mode = 0;
@@ -183,7 +184,8 @@ void setup() {
 	Serial.begin(115200);
 	checktime1 = 0;
 	clksTimer = 0;
-
+	resetClocks();
+	
 	// set analog read resolution to teensy's 13 usable bits
 	analogReadResolution(13);
 	
@@ -275,19 +277,12 @@ void setup() {
 
 	//Serial.println(" loading... ");
 }
-
-//void enc_selector(uint16_t z, uint16_t pos) {
-//	if (z == 1){
-//		display.clearDisplay();
-//		display.setCursor(16, 2);
-//		display.print("ENC: ");
-//		display.print(pos);
-//		display.display();
-//	}
-//}
+// ####### END SETUP #######
 
 
-// MIDI LEDS
+
+
+// ####### MIDI LEDS
 
 void midi_leds() {
 	if (midiAUX){
@@ -298,18 +293,22 @@ void midi_leds() {
 	dirtyPixels = true;
 }
 
-// SEQUENCER LEDS
+// ####### SEQUENCER LEDS
+
 void show_current_step(int patternNum) {
+	blinkInterval = step_delay*2;
 	
 	if (msec >= blinkInterval){
 		blinkState = !blinkState;
 		msec = 0;
 	}
-
+															// AUX KEY
 	if (playing && blinkState){
 		strip.setPixelColor(0, HALFWHITE);
 	} else if (noteSelect){
 		strip.setPixelColor(0, CYAN);
+	} else if (funcTwoSelect){
+		strip.setPixelColor(0, DKBLUE);
 	} else {
 		strip.setPixelColor(0, LEDOFF);
 	}
@@ -332,7 +331,7 @@ void show_current_step(int patternNum) {
 	} else {
 		for(int j = 1; j < NUM_STEPS+11; j++){		
 			if (j < patternLength[patternNum]+11){
-				if (j == 1) {
+				if (j == 1) {								// NOTE SELECT
 					if (noteSelect){
 						if (noteSelect && blinkState){
 							strip.setPixelColor(j, DKCYAN);
@@ -342,10 +341,22 @@ void show_current_step(int patternNum) {
 					} else {
 						strip.setPixelColor(j, DKCYAN);
 					}
-				} else if (j == 2) {
-					strip.setPixelColor(j, DKBLUE);
-				} else if (j == patternNum+3){  	// pattern select
+					
+				} else if (j == 2) {						// FUNC TWO
+					if (funcTwoSelect){
+						if (funcTwoSelect && blinkState){
+							strip.setPixelColor(j, DKBLUE);
+						} else {
+							strip.setPixelColor(j, LEDOFF);
+						}
+					} else {
+						strip.setPixelColor(j, DKBLUE);
+					}
+
+					
+				} else if (j == patternNum+3){  			// PATTERN SELECT
 					strip.setPixelColor(patternNum+3, seqColors[patternNum]);
+
 				} else {
 					strip.setPixelColor(j, LEDOFF);
 				}
@@ -404,13 +415,17 @@ void step_ahead(int patternNum) {
 void step_on(int patternNum){
 	//	Serial.print(g);
 	//	Serial.println(" step on");
-	//  usbMIDI.sendNoteOn(sequencer[current_step].note, VELOCITY, CHANNEL);
+
 }
 
-void step_off(int patternNum){
-	//	Serial.print(seqPos);
+void step_off(int patternNum, int position){
+	//	Serial.print(seqPos[patternNum]);
 	//	Serial.println(" step off");
-	//  usbMIDI.sendNoteOff(sequencer[current_step].note, VELOCITY, CHANNEL);
+      usbMIDI.sendNoteOff(lastNote[patternNum][position], 0, midiChannel);
+      MIDI.sendNoteOff(lastNote[patternNum][position], 0, midiChannel);
+      lastNote[patternNum][position] = 0;
+      analogWrite(A14, 0);
+      digitalWrite(13, LOW);
 }
 
 void dispPattLen(){
@@ -448,27 +463,31 @@ void dispNotes(){
 	display.setTextSize(1);
 	display.setCursor(0, 16);
 	display.print("Note:");
-	display.print(lastNote[playingPattern]);
+	display.print(lastNote[playingPattern][seqPos[playingPattern]]);
 
 }
 
+void resetClocks(){
+	// ############### CLOCK/TIMING ###############
+
+	// BPM tempo to step-delay calculation
+	step_delay = 60000 / clockbpm / 4; // 16th notes
+	// BPM to clock pulses
+	clksDelay = (60000000 / clockbpm) / 24;
+}
 
 // ####### MAIN LOOP #######
 
 void loop() {
 	customKeypad.tick();
 	checktime1 = 0;
-
-	// ############### CLOCK/TIMING ###############
-	// BPM tempo to step-delay calculation
-	step_delay = 60000 / clockbpm / 4; // 16th notes
-	// BPM to clock pulses
-	clksDelay = (60000000 / clockbpm) / 24;
+	
+//	resetClocks();
 	if (clksTimer > clksDelay ) {
 		// SEND CLOCK
 	  clksTimer = 0;
 	}
-
+//Serial.println(step_delay);
 
 	// DISPLAY SETUP
 	display.clearDisplay();
@@ -504,6 +523,7 @@ void loop() {
 			if (newtempo != clockbpm){
 				// SET TEMPO HERE
 				clockbpm = newtempo;
+				resetClocks();
 				dirtyDisplay = true;
 			}
 		} else {
@@ -602,7 +622,6 @@ void loop() {
 					// are we noteSelect ?
 					if (noteSelect && thisKey > 10){
 						if (noteSelection) {
-							// blink ??
 							selectedNote = thisKey;
 							stepNote[playingPattern][selectedStep] = notes[thisKey];
 								
@@ -610,16 +629,23 @@ void loop() {
 							selectedStep = keyPos; //set selection to this step
 							noteSelection = true;
 						}
+						
+					// are we funcTwoSelect ?
+					}else if (funcTwoSelect && thisKey > 10){
+					
+
 					} else {					
 						// Black Keys
-						if (thisKey > 2 && thisKey < 11) { // pattern select
+						if (thisKey > 2 && thisKey < 11) { // Pattern select keys
 							playingPattern = thisKey-3;
 							dirtyDisplay = true;
 							
 						} else if (thisKey == 1) { 
-							noteSelect = !noteSelect; // toggle noteSelect 
+							noteSelect = !noteSelect; // toggle noteSelect on/off
 
 						} else if (thisKey == 2) { 
+							funcTwoSelect = !funcTwoSelect; // toggle funcTwoSelect on/off
+
 							seqReset(); // reset all sequences to step 1
 							
 						} else if (thisKey > 10) { // SEQUENCE 1-16 KEYS
@@ -652,6 +678,9 @@ void loop() {
 						if (noteSelection){
 							noteSelection = false;
 						}
+					} else if (funcTwoSelect){
+						funcTwoSelect = !funcTwoSelect;
+					
 					} else {
 //						strip.setPixelColor(0, HALFWHITE);
 						if (playing){
@@ -691,16 +720,26 @@ void loop() {
 				dispTempo();		
 			}
 			if(playing == true) {
-				if(step_interval[playingPattern] > step_delay){
+				// step timing
+				if(step_interval[playingPattern] >= step_delay){
+					
+					// Do stuff
+					
+					// turn previous note off
+					int lastPos = (seqPos[playingPattern]+15) % 16;
+//					Serial.println(lastPos);
+					if (lastNote[playingPattern][lastPos] > 0){
+						step_off(playingPattern, lastPos);
+					}
+					
 					lastStepTime[playingPattern] = step_interval[playingPattern];
-					step_ahead(playingPattern);
+					
 					step_on(playingPattern);
 					playNote(playingPattern);
-					step_interval[playingPattern] =0;
-				} else if(step_interval[playingPattern] > step_delay / 2){
-					step_off(playingPattern);
+					show_current_step(playingPattern);
+					step_ahead(playingPattern);
+					step_interval[playingPattern] = 0;
 				}
-				show_current_step(playingPattern);
 			} else {
 				show_current_step(playingPattern);
 			}
@@ -719,18 +758,23 @@ void loop() {
 				for (int j=0; j<8; j++){
 //					Serial.print("pattern:");
 //					Serial.println(j);
-
-					if(step_interval[j] > step_delay){
+					
+					if(step_interval[j] >= step_delay){
+						int lastPos = (seqPos[j]+15) % 16;
+						if (lastNote[j][lastPos] > 0){
+							step_off(j, lastPos);
+						}
 						lastStepTime[j] = step_interval[j];
 						step_on(j);
 						playNote(j);
+						show_current_step(playingPattern);
 						step_ahead(j);
 						step_interval[j] = 0;
-					} else if(step_interval[playingPattern] > step_delay / 2){
-						step_off(j);
+//					} else if(step_interval[playingPattern] >= step_delay / 2){
+//						step_off(j, lastPos);
+//						show_current_step(playingPattern);
 					}
 				}				
-				show_current_step(playingPattern);
 			} else {
 				show_current_step(playingPattern);
 			}
@@ -763,17 +807,19 @@ void loop() {
 		// ignore incoming messages
 	}
 	
-} // END MAIN LOOP
+} // #### END MAIN LOOP
 
 void seqReset(){
 	for (int k=0; k<8; k++){
 		seqPos[k] = 0;
 	}
 }
+
+// #### MIDI Mode note on/off
 void noteOn(int notenum, int velocity, int patternNum){
 	usbMIDI.sendNoteOn(notes[notenum], velocity, midiChannel);
-	lastNote[patternNum] = notes[notenum];
-//	MIDI.sendNoteOn(notes[notenum], velocity, midiChannel);
+	lastNote[patternNum][seqPos[patternNum]] = notes[notenum];
+	MIDI.sendNoteOn(notes[notenum], velocity, midiChannel);
 
 	// CV
 	pitchCV = map (notes[notenum], 35, 90, 0, 4096);
@@ -786,7 +832,7 @@ void noteOn(int notenum, int velocity, int patternNum){
 }
 void noteOff(int notenum){
 	usbMIDI.sendNoteOff(notes[notenum], 0, midiChannel);
-//	MIDI.sendNoteOff(notes[notenum], 0, midiChannel);
+	MIDI.sendNoteOff(notes[notenum], 0, midiChannel);
 	// CV
 	digitalWrite(13, LOW);
 	analogWrite(A14, 0);
@@ -796,6 +842,7 @@ void noteOff(int notenum){
 	dirtyDisplay = true;
 }
 
+// #### LED STUFF
 // Rainbow cycle along whole strip. Pass delay time (in ms) between frames.
 void rainbow(int wait) {
   // Hue of first pixel runs 5 complete loops through the color wheel.
@@ -819,7 +866,14 @@ void rainbow(int wait) {
     delay(wait);  // Pause for a moment
   }
 }
+void setAllLEDS(int R, int G, int B) {
+	for(int i=0; i<LED_COUNT; i++) { // For each pixel...
+		strip.setPixelColor(i, strip.Color(R, G, B));
+	}
+	dirtyPixels = true;
+}
 
+// #### OLED STUFF
 void testdrawrect(void) {
   display.clearDisplay();
 
@@ -830,11 +884,4 @@ void testdrawrect(void) {
   }
 
   delay(500);
-}
-
-void setAllLEDS(int R, int G, int B) {
-	for(int i=0; i<LED_COUNT; i++) { // For each pixel...
-		strip.setPixelColor(i, strip.Color(R, G, B));
-	}
-	dirtyPixels = true;
 }
