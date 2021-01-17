@@ -1,6 +1,6 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
 
-#include "Adafruit_Keypad.h"
+#include <Adafruit_Keypad.h>
 #include <Adafruit_NeoPixel.h>
 #include <ResponsiveAnalogRead.h>
 #include <MIDI.h>
@@ -272,7 +272,7 @@ void setup() {
 	display.setTextSize(1);
 	display.setCursor(96, 0);
 	display.print(modes[newmode]);
-	dispTempo();
+	//dispTempo();
 	display.display();			
 
 	//Serial.println(" loading... ");
@@ -428,6 +428,8 @@ void step_off(int patternNum, int position){
       digitalWrite(13, LOW);
 }
 
+// #### DISPLAY ###
+
 void dispPattLen(){
 	display.setTextSize(1);
 	display.setCursor(0, 0);
@@ -441,6 +443,19 @@ void dispPattLen(){
 	display.print(pattLen[playingPattern]);
 
 }
+
+void dispPatt(){
+	display.setTextSize(1);
+	display.setCursor(96, 0);
+	display.print("P:");
+	display.print(playingPattern+1);
+
+	display.setCursor(96, 12);
+	display.print("L:");
+	display.print(pattLen[playingPattern]);
+}
+
+
 void dispPots(){
 	display.setTextSize(1);
 	display.setCursor(0, 0);
@@ -453,20 +468,44 @@ void dispPots(){
 }
 void dispTempo(){
 	display.setTextSize(1);
-	display.setCursor(74, 16);
+	display.setCursor(74, 12);
 	display.print("BPM:");
-	display.setCursor(100, 16);
+	display.setCursor(100, 12);
 	display.print((int)clockbpm);
 
 }
 void dispNotes(){
 	display.setTextSize(1);
-	display.setCursor(0, 16);
-	display.print("Note:");
+	display.setCursor(0, 12);
+	display.print("NOTE:");
 	display.print(lastNote[playingPattern][seqPos[playingPattern]]);
+	display.setCursor(0, 24);
+	display.print("BPM:");
+	display.print((int)clockbpm);
 
 }
 
+void dispNoteSelect(){
+	display.setTextSize(1);
+	display.setCursor(0, 0);
+	display.print("NOTE-SELECT ");
+
+	display.setCursor(0, 12);
+	display.print("STEP: ");
+	display.print(selectedStep+1);
+	display.setCursor(0, 24);
+	display.print("NOTE:");
+	display.print(stepNote[playingPattern][selectedStep]);
+}
+void dispMode(){
+	display.setTextSize(1);
+	display.setCursor(96, 0);
+	if (newmode != mode && enc_edit) {
+		display.print(modes[newmode]);
+	} else if (enc_edit) {
+		display.print(modes[mode]);
+	}
+}
 void resetClocks(){
 	// ############### CLOCK/TIMING ###############
 
@@ -491,15 +530,7 @@ void loop() {
 
 	// DISPLAY SETUP
 	display.clearDisplay();
-	display.setTextSize(1);
-	display.setCursor(96, 0);
-	if (newmode != mode && enc_edit) {
-		display.print(modes[newmode]);
-		dirtyDisplay = true;
-	} else {
-		display.print(modes[mode]);
-	}
-		
+			
 				
 	// ############### POTS ###############
 	//
@@ -517,6 +548,7 @@ void loop() {
 		// Change Mode
     	if (enc_edit) {
 	    	newmode = constrain(newmode + amt, 0, 2);
+	    	dispMode();
 	    	dirtyDisplay = true;
 		} else if (!noteSelect){
 			newtempo = constrain(clockbpm + amt, 40, 300);
@@ -558,9 +590,10 @@ void loop() {
 				mode = newmode;
 				playing = 0;
 				setAllLEDS(0,0,0);
-				dirtyDisplay = true;
 			}
 			enc_edit = !enc_edit;			
+			dispMode();
+			dirtyDisplay = true;
 			break;
 		case Button::DownLong: //Serial.println("Button downlong"); 
 			break;
@@ -620,14 +653,24 @@ void loop() {
 					int keyPos = thisKey - 11;
 					
 					// are we noteSelect ?
-					if (noteSelect && thisKey > 10){
+					if (noteSelect){
 						if (noteSelection) {
 							selectedNote = thisKey;
 							stepNote[playingPattern][selectedStep] = notes[thisKey];
-								
-						} else {
+							dirtyDisplay = true;
+							
+						} else if ( thisKey > 10 ) {
 							selectedStep = keyPos; //set selection to this step
 							noteSelection = true;
+							dirtyDisplay = true;
+							
+						} else if (thisKey > 2 && thisKey < 11) { // Pattern select keys
+							playingPattern = thisKey-3;
+							dirtyDisplay = true;
+							
+						} else if (thisKey == 1) { 
+							noteSelect = !noteSelect; // toggle noteSelect on/off
+							dirtyDisplay = true;
 						}
 						
 					// are we funcTwoSelect ?
@@ -642,11 +685,13 @@ void loop() {
 							
 						} else if (thisKey == 1) { 
 							noteSelect = !noteSelect; // toggle noteSelect on/off
+							dirtyDisplay = true;
 
 						} else if (thisKey == 2) { 
 							funcTwoSelect = !funcTwoSelect; // toggle funcTwoSelect on/off
 
 							seqReset(); // reset all sequences to step 1
+							dirtyDisplay = true;
 							
 						} else if (thisKey > 10) { // SEQUENCE 1-16 KEYS
 							if (stepPlay[playingPattern][keyPos] == 1){ // toggle note on
@@ -678,9 +723,10 @@ void loop() {
 						if (noteSelection){
 							noteSelection = false;
 						}
+						dirtyDisplay = true;
 					} else if (funcTwoSelect){
 						funcTwoSelect = !funcTwoSelect;
-					
+						dirtyDisplay = true;
 					} else {
 //						strip.setPixelColor(0, HALFWHITE);
 						if (playing){
@@ -709,15 +755,24 @@ void loop() {
 
 			if (dirtyDisplay){
 				dispPots();
-				dispTempo();
+				//dispTempo();
 				dispNotes();
 			}
 			break;
 		case 1: 		// SEQUENCER 1
 
 			if (dirtyDisplay){
-				dispPattLen();
-				dispTempo();		
+				if (!enc_edit){
+					dispPatt();
+				}
+				
+				if (noteSelect) {
+					dispNoteSelect();
+					
+				} else {
+					//dispPattLen();
+					//dispTempo();		
+				}
 			}
 			if(playing == true) {
 				// step timing
@@ -751,8 +806,12 @@ void loop() {
 		case 2: 		// SEQUENCER 2
 //			readPotentimeters();
 			if (dirtyDisplay){
-				dispPattLen();
-				dispTempo();		
+				if (noteSelect) {
+					dispNoteSelect();
+				} else {
+					dispPattLen();
+					//dispTempo();		
+				}
 			}
 			if(playing == true) {
 				for (int j=0; j<8; j++){
