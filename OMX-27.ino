@@ -1,4 +1,6 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
+// 
+// Steven Noreyko, January 2021
 
 #include <Adafruit_Keypad.h>
 #include <Adafruit_NeoPixel.h>
