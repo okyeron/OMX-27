@@ -52,12 +52,36 @@ For the keyplate to fit properly, the Teensy MUST be flush-mounted to the top of
 
 Before soldering - Use a piece of insulating tape (Electrical, Kapton if you have it) to cover all the contacts on the bottom-middle of the Teensy (to prevent accidental shorts). (PIC NEEDED) 
 
-(NEED PICS OF ATTCHMENT/SOLDERING TECHNIQUE HERE)
+Use the included acrylic jig to set up your teensy like this for soldering:
+
+<img src="buildpix/teensy_jig_1.jpg" alt="LEDs" width="720" height="416" />
+<img src="buildpix/teensy_jig_2.jpg" alt="LEDs" width="720" height="416" />
+<img src="buildpix/teensy_jig_3.jpg" alt="LEDs" width="720" height="416" />
+<img src="buildpix/teensy_jig_4.jpg" alt="LEDs" width="720" height="416" />
+<img src="buildpix/teensy_jig_5.jpg" alt="LEDs" width="720" height="416" />
+
+Solder the pins to the Teensy first.
+
+Then remove the jig and carefully remove the black plastic from the headers.
+
+After you've removed the plastic, drop the Teensy onto the main board so it sits nice and flat. Put a piece of tape over the whole teensy to keep it in place and to keep the pins from getting pushed out while soldering from the bottom.
+
+Flip the board over and solder the pins to the bottom. Be careful not to push the pins down while soldering.
+
+Using flush cutters, trim the pins away.
 
 
-### JACKS, OLED, POTS, ENCODER, ETC.
+### OLED
+
+The OLED display sits on a regular header (not flush like the Teensy)> the display should be close to level with the keyplate (the OLED glass will be about 0.5-1mm higher than the keyplate).
+
+Trim the headers on the top side of the OLED if you're worried about something shorting there.
+
+
+### JACKS, POTS, ENCODER, ETC.
 
 Figure it out. :)
+
 
 
 ### KEY SWITCHES
