@@ -52,12 +52,23 @@ For the keyplate to fit properly, the Teensy MUST be flush-mounted to the top of
 
 Before soldering - Use a piece of insulating tape (Electrical, Kapton if you have it) to cover all the contacts on the bottom-middle of the Teensy (to prevent accidental shorts). (PIC NEEDED) 
 
-Use the included acrylic jig to set up your teensy like this for soldering:
+Use the included acrylic jig to set up your teensy like the following for soldering.  
+
+Short side of the headers goes down to the jig and the long side up.  
 
 <img src="buildpix/teensy_jig_1.jpg" alt="LEDs" width="720" height="416" />
+
+Add a 1x3 and 1x1 in the appropriate places. The 1x1 directly next to the 1x3 is not connected to anything so you can solder that or not (your choice).  
+
 <img src="buildpix/teensy_jig_2.jpg" alt="LEDs" width="720" height="416" />
 <img src="buildpix/teensy_jig_3.jpg" alt="LEDs" width="720" height="416" />
+
+Add the two spacers  
+
 <img src="buildpix/teensy_jig_4.jpg" alt="LEDs" width="720" height="416" />
+
+Drop the Teensy into place. There should just be a small amount of header sticking up from the Teensy at this point.  
+
 <img src="buildpix/teensy_jig_5.jpg" alt="LEDs" width="720" height="416" />
 
 Solder the pins to the Teensy first.
