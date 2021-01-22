@@ -45,19 +45,20 @@ Knobs are up to you.
 ---
 ### \* Key switches: 
 
-Any of the Cherry MX RGB switches will work. Red/SilentRed/Blue/Brown/Black/SpeedSilver. Red is linear (45g). Blue is clicky & tactile (50g). Brown is tactile (45g). Black is similar to Red but 60 g actuation force. SpeedSilver (shorter key travel for gamers) are linear and __Expensive__( 45g)
+Any of the Cherry MX RGB switches will work. Red/SilentRed/Blue/Brown/Black/SpeedSilver.  
+Red is linear (45g). Blue is clicky & tactile (50g). Brown is tactile (45g). Black is similar to Red but 60g actuation force. SpeedSilver (shorter key travel for gamers) are linear and __Expensive__( 45g)
 
 Cherry MX RGB part numbers:  
 
-| name  | part num |
-|-----|:--:|
-|SilentRed |[MX3A-L1NA](https://www.mouser.com/ProductDetail/CHERRY/MX3A-L1NA/?qs=F5EMLAvA7IA6PAS7ry3I9w%3D%3D)|
-|Red	|MX1A-L1NA|
-|SilentBlack |[MX3A-11NA](https://www.mouser.com/ProductDetail/CHERRY/MX3A-11NA/?qs=F5EMLAvA7ICizK1XKjfN9w%3D%3D)|
-|Black	|MX1A-11NA|
-|Brown	|MX1A-G1NA|
-|Blue	|MX1A-E1NA|
-|Silver	|MX1A-51NA|
+| name  | part num | type | actuation |
+|-----|----|-----|----|
+|SilentRed |[MX3A-L1NA](https://www.mouser.com/ProductDetail/CHERRY/MX3A-L1NA/?qs=F5EMLAvA7IA6PAS7ry3I9w%3D%3D)| linear | (45g) |
+|Red	|MX1A-L1NA| linear | (45g) |
+|SilentBlack |[MX3A-11NA](https://www.mouser.com/ProductDetail/CHERRY/MX3A-11NA/?qs=F5EMLAvA7ICizK1XKjfN9w%3D%3D)| linear | (60g) |
+|Black	|MX1A-11NA| linear | (60g) |
+|Brown	|MX1A-G1NA| tactile | (45g) |
+|Blue	|MX1A-E1NA| clicky & tactile | (50g) |
+|Silver	|MX1A-51NA| linear | (45g) |
 
 Reference: https://www.mouser.com/pdfDocs/cherrykeyswitches.pdf
 
