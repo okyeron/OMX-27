@@ -95,7 +95,8 @@ int steps[] = {0,
      1,2,   3,4,5,   6,7,   8,9,10,
 11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26};
 
-// NOTES
+int octave = 0; // default C4 is 0 - range is -4 to +5
+int newoctave = octave;
 
 
 // ENCODER
@@ -157,6 +158,14 @@ void stopClock(){
 	usbMIDI.sendRealTime(usbMIDI.Stop);
 //	MIDI.sendStop();
 }
+void resetClocks(){
+	// ############### CLOCK/TIMING ###############
+
+	// BPM tempo to step-delay calculation
+	step_delay = 60000 / clockbpm / 4; // 16th notes
+	// BPM to clock pulses
+	clksDelay = (60000000 / clockbpm) / 24;
+}
 
 void readPotentimeters(){
 	for(int k=0; k<potCount; k++) {
@@ -180,6 +189,7 @@ void readPotentimeters(){
     	}
 	}
 }
+
 // ####### SETUP #######
 
 void setup() {
@@ -457,7 +467,6 @@ void dispPatt(){
 	display.print(pattLen[playingPattern]);
 }
 
-
 void dispPots(){
 	display.setTextSize(1);
 	display.setCursor(0, 0);
@@ -466,25 +475,31 @@ void dispPots(){
 	display.print(": ");
 	display.setCursor(30, 0);
 	display.print(potVal);
-
 }
+
 void dispTempo(){
 	display.setTextSize(1);
 	display.setCursor(74, 12);
 	display.print("BPM:");
 	display.setCursor(100, 12);
 	display.print((int)clockbpm);
-
 }
+
+void dispOctave(){
+	display.setTextSize(1);
+	display.setCursor(0, 24);
+	display.print("Octave:");
+	display.print((int)octave+4);
+}
+
 void dispNotes(){
 	display.setTextSize(1);
 	display.setCursor(0, 12);
 	display.print("NOTE:");
 	display.print(lastNote[playingPattern][seqPos[playingPattern]]);
-	display.setCursor(0, 24);
-	display.print("BPM:");
-	display.print((int)clockbpm);
-
+//	display.setCursor(0, 24);
+//	display.print("BPM:");
+//	display.print((int)clockbpm);
 }
 
 void dispNoteSelect(){
@@ -507,14 +522,6 @@ void dispMode(){
 	} else if (enc_edit) {
 		display.print(modes[mode]);
 	}
-}
-void resetClocks(){
-	// ############### CLOCK/TIMING ###############
-
-	// BPM tempo to step-delay calculation
-	step_delay = 60000 / clockbpm / 4; // 16th notes
-	// BPM to clock pulses
-	clksDelay = (60000000 / clockbpm) / 24;
 }
 
 // ####### MAIN LOOP #######
@@ -549,17 +556,26 @@ void loop() {
     	
 		// Change Mode
     	if (enc_edit) {
+			// set mode
 	    	newmode = constrain(newmode + amt, 0, 2);
 	    	dispMode();
 	    	dirtyDisplay = true;
+
 		} else if (!noteSelect){
-			newtempo = constrain(clockbpm + amt, 40, 300);
-			if (newtempo != clockbpm){
-				// SET TEMPO HERE
-				clockbpm = newtempo;
-				resetClocks();
+		
+			// set octave 
+			newoctave = constrain(octave + amt, -5, 4);
+			if (newoctave != octave){
+				octave = newoctave;
 				dirtyDisplay = true;
 			}
+//			newtempo = constrain(clockbpm + amt, 40, 300);
+//			if (newtempo != clockbpm){
+//				// SET TEMPO HERE
+//				clockbpm = newtempo;
+				resetClocks();
+//				dirtyDisplay = true;
+//			}
 		} else {
 			switch(mode) { // process encoder input depending on mode
 				case 0: // MIDI
@@ -628,7 +644,7 @@ void loop() {
 				if (e.bit.EVENT == KEY_JUST_PRESSED && thisKey == 0) {
 					// Hard coded Organelle stuff
 					usbMIDI.sendControlChange(25, 100, midiChannel);
-//					MIDI.sendControlChange(25, 100, midiChannel);
+					MIDI.sendControlChange(25, 100, midiChannel);
 					if (midiAUX) {
 						// STOP CLOCK
 					} else {
@@ -639,7 +655,7 @@ void loop() {
 				} else if (e.bit.EVENT == KEY_JUST_RELEASED && thisKey == 0) { 
 					// Hard coded Organelle stuff
 					usbMIDI.sendControlChange(25, 0, midiChannel);
-//					MIDI.sendControlChange(25, 0, midiChannel);
+					MIDI.sendControlChange(25, 0, midiChannel);
 //					midiAUX = false;
 				}					
 				break;
@@ -759,6 +775,7 @@ void loop() {
 				dispPots();
 				//dispTempo();
 				dispNotes();
+				dispOctave();
 			}
 			break;
 		case 1: 		// SEQUENCER 1
@@ -878,26 +895,31 @@ void seqReset(){
 
 // #### MIDI Mode note on/off
 void noteOn(int notenum, int velocity, int patternNum){
-	usbMIDI.sendNoteOn(notes[notenum], velocity, midiChannel);
-	lastNote[patternNum][seqPos[patternNum]] = notes[notenum];
-	MIDI.sendNoteOn(notes[notenum], velocity, midiChannel);
-
-	// CV
-	pitchCV = map (notes[notenum], 35, 90, 0, 4096);
-	digitalWrite(13, HIGH);
-	analogWrite(A14, pitchCV);
+	int adjnote = notes[notenum] + (octave * 12); // adjust key for octave range
+	if (adjnote>=0 && adjnote <128){
+		usbMIDI.sendNoteOn(adjnote, velocity, midiChannel);
+		lastNote[patternNum][seqPos[patternNum]] = adjnote;
+		MIDI.sendNoteOn(adjnote, velocity, midiChannel);	
+		// CV
+		pitchCV = map (adjnote, 35, 90, 0, 4096);
+		digitalWrite(13, HIGH);
+		analogWrite(A14, pitchCV);
+	}
 
 	strip.setPixelColor(notenum, HALFWHITE);         //  Set pixel's color (in RAM)
 	dirtyPixels = true;	
 	dirtyDisplay = true;
 }
 void noteOff(int notenum){
-	usbMIDI.sendNoteOff(notes[notenum], 0, midiChannel);
-	MIDI.sendNoteOff(notes[notenum], 0, midiChannel);
-	// CV
-	digitalWrite(13, LOW);
-	analogWrite(A14, 0);
-
+	int adjnote = notes[notenum] + (octave * 12); // adjust key for octave range
+	if (adjnote>=0 && adjnote <128){
+		usbMIDI.sendNoteOff(adjnote, 0, midiChannel);
+		MIDI.sendNoteOff(adjnote, 0, midiChannel);
+		// CV
+		digitalWrite(13, LOW);
+		analogWrite(A14, 0);
+	}
+	
 	strip.setPixelColor(notenum, LEDOFF); 
 	dirtyPixels = true;
 	dirtyDisplay = true;
