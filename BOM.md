@@ -12,7 +12,7 @@
 |[621-1N4148W-F](http://www.mouser.com/Search/ProductDetail.aspx?R=621-1N4148W-F)|27|D1-D27|1N4148 Diode|SOD-123|
 |[SJ-3523-SMT-TR](http://www.mouser.com/Search/ProductDetail.aspx?R=SJ-3523-SMT-TR)|1|J1|SJ-3523-SMT-TR|3.5 mm jack stereo|
 |[490-MJ-3523-SMT-TR](http://www.mouser.com/Search/ProductDetail.aspx?R=490-MJ-3523-SMT-TR)|2|J2,J3|MJ-3523-SMT|3.5 mm jack mono|
-|[540-MX3A-L1NA](http://www.mouser.com/Search/ProductDetail.aspx?R=540-MX3A-L1NA)|27|K1-K27|CHERRY-MX|CHERRY-MX Silent Red|
+|[540-MX3A-L1NA](http://www.mouser.com/Search/ProductDetail.aspx?R=540-MX3A-L1NA)|27|K1-K27|CHERRY-MX|CHERRY-MX RGB Silent Red \*|
 |[595-TLV9062IDR](http://www.mouser.com/Search/ProductDetail.aspx?R=595-TLV9062IDR)|1|U1|SOIC127P600X175-8N|TLV9062IDR|
 |[AYZ0202AGRLC](http://www.mouser.com/Search/ProductDetail.aspx?R=AYZ0202AGRLC)|1|S1|DPDT Switch|SWITCH-DPDT-SMD-AYZ0202|
 |[688-RK09K1130A5R](http://www.mouser.com/Search/ProductDetail.aspx?R=688-RK09K1130A5R)|5|VR1-VR4,VR6|10K|9MM_SNAP-IN_POT*|
@@ -43,6 +43,22 @@ Mounting Hardware is NOT LISTED
 Knobs are up to you.
 
 ---
+### \* Key switches: 
+
+Any of the Cherry MX RGB switches will work. Red/SilentRed/Blue/Brown/Black/SpeedSilver. Red is linear (45g). Blue is clicky & tactile (50g). Brown is tactile (45g). Black is similar to Red but 60 g actuation force. SpeedSilver (shorter key travel for gamers) are linear and __Expensive__( 45g)
+
+Cherry MX RGB part numbers:  
+
+| name  | part num |
+|-----|:--:|
+|SilentRed |MX3A-L1NA|
+|Red	|MX1A-L1NA|
+|SilentBlack |MX3A-11NA|
+|Black	|MX1A-11NA|
+|Brown	|MX1A-G1NA|
+|Blue	|MX1A-E1NA|
+|Silver	|MX1A-51NA|
+
 
 ### Keycaps: 
 
