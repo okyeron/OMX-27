@@ -39,7 +39,7 @@ Q: What's with these LEDs?
 A: This project uses SK6812-MINI-E reverse mount LEDs. They are somewhat hard to find, so I'll try to offer them included with kits. They are easy to solder, even if you've not done much SMD.  
 
 Q: Can I get the Gerbers or order the pcbs myself?  
-A: Not sure about open sourcing yet.  
+A: No. Not sure about open sourcing yet.  
 
 Q: Can I get some of those windowed keycaps you're using?
 A: Yes. 

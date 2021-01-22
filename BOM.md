@@ -51,13 +51,15 @@ Cherry MX RGB part numbers:
 
 | name  | part num |
 |-----|:--:|
-|SilentRed |MX3A-L1NA|
+|SilentRed |[MX3A-L1NA](https://www.mouser.com/ProductDetail/CHERRY/MX3A-L1NA/?qs=F5EMLAvA7IA6PAS7ry3I9w%3D%3D)|
 |Red	|MX1A-L1NA|
-|SilentBlack |MX3A-11NA|
+|SilentBlack |[MX3A-11NA](https://www.mouser.com/ProductDetail/CHERRY/MX3A-11NA/?qs=F5EMLAvA7ICizK1XKjfN9w%3D%3D)|
 |Black	|MX1A-11NA|
 |Brown	|MX1A-G1NA|
 |Blue	|MX1A-E1NA|
 |Silver	|MX1A-51NA|
+
+Reference: https://www.mouser.com/pdfDocs/cherrykeyswitches.pdf
 
 
 ### Keycaps: 
