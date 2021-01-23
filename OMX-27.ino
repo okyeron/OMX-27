@@ -479,9 +479,8 @@ void dispPots(){
 
 void dispTempo(){
 	display.setTextSize(1);
-	display.setCursor(74, 12);
+	display.setCursor(74, 24);
 	display.print("BPM:");
-	display.setCursor(100, 12);
 	display.print((int)clockbpm);
 }
 
@@ -562,20 +561,34 @@ void loop() {
 	    	dirtyDisplay = true;
 
 		} else if (!noteSelect){
-		
-			// set octave 
-			newoctave = constrain(octave + amt, -5, 4);
-			if (newoctave != octave){
-				octave = newoctave;
-				dirtyDisplay = true;
+			switch(mode) { // process encoder input depending on mode
+				case 0: // MIDI
+					// set octave 
+					newoctave = constrain(octave + amt, -5, 4);
+					if (newoctave != octave){
+						octave = newoctave;
+						dirtyDisplay = true;
+					}
+				case 1: // SEQ
+					newtempo = constrain(clockbpm + amt, 40, 300);
+					if (newtempo != clockbpm){
+						// SET TEMPO HERE
+						clockbpm = newtempo;
+						resetClocks();
+						dirtyDisplay = true;
+					}
+					break;
+				case 2: // SEQ
+					newtempo = constrain(clockbpm + amt, 40, 300);
+					if (newtempo != clockbpm){
+						// SET TEMPO HERE
+						clockbpm = newtempo;
+						resetClocks();
+						dirtyDisplay = true;
+					}
+					break;
 			}
-//			newtempo = constrain(clockbpm + amt, 40, 300);
-//			if (newtempo != clockbpm){
-//				// SET TEMPO HERE
-//				clockbpm = newtempo;
-				resetClocks();
-//				dirtyDisplay = true;
-//			}
+
 		} else {
 			switch(mode) { // process encoder input depending on mode
 				case 0: // MIDI
@@ -586,7 +599,15 @@ void loop() {
 						pattLen[playingPattern] = constrain(patternLength[playingPattern] + amt, 1, 16);
 						patternLength[playingPattern] = pattLen[playingPattern];
 						dirtyDisplay = true;
-					}		
+					} else {
+						newtempo = constrain(clockbpm + amt, 40, 300);
+						if (newtempo != clockbpm){
+							// SET TEMPO HERE
+							clockbpm = newtempo;
+							resetClocks();
+							dirtyDisplay = true;
+						}
+					}
 					break;
 				case 2: // SEQ
 					if (noteSelect && !enc_edit){ // sequence edit more
@@ -594,6 +615,14 @@ void loop() {
 						pattLen[playingPattern] = constrain(patternLength[playingPattern] + amt, 1, 16);
 						patternLength[playingPattern] = pattLen[playingPattern];
 						dirtyDisplay = true;
+					} else {
+						newtempo = constrain(clockbpm + amt, 40, 300);
+						if (newtempo != clockbpm){
+							// SET TEMPO HERE
+							clockbpm = newtempo;
+							resetClocks();
+							dirtyDisplay = true;
+						}
 					}		
 					break;
 			}		
