@@ -783,6 +783,7 @@ void loop() {
 			if (dirtyDisplay){
 				if (!enc_edit){
 					dispPatt();
+					dispTempo();
 				}
 				
 				if (noteSelect) {
@@ -829,7 +830,7 @@ void loop() {
 					dispNoteSelect();
 				} else {
 					dispPattLen();
-					//dispTempo();		
+					dispTempo();		
 				}
 			}
 			if(playing == true) {
