@@ -351,6 +351,8 @@ void resetClocks(){
 	clksDelay = (60000000 / clockbpm) / 24;
 }
 
+
+
 // ####### DISPLAY FUNCTIONS #######
 
 void dispPattLen(){
@@ -403,6 +405,13 @@ void dispNotes(){
 
 void dispNoteSelect(){
 	if (!noteSelection){
+		display.setCursor(0, 0);
+		display.setTextSize(1);
+		display.print("PTN");		
+		display.setCursor(30, 0);
+		display.setTextSize(2);
+		display.print(playingPattern+1);
+
 		display.setTextSize(4);
 		display.setCursor(74, 0);
 		display.print("NS");
@@ -410,14 +419,14 @@ void dispNoteSelect(){
 			display.setCursor(0, 0);
 			display.setTextSize(1);
 			display.print("PTN");		
-			display.setCursor(36, 18);
+			display.setCursor(30, 0);
 			display.setTextSize(2);
 			display.print(playingPattern+1);
 
 			display.setCursor(0, 18);
 			display.setTextSize(1);
 			display.print("STEP");		
-			display.setCursor(36, 18);
+			display.setCursor(30, 18);
 			display.setTextSize(2);
 			display.print(selectedStep+1);
 
@@ -439,6 +448,13 @@ void dispNoteSelect(){
 
 void dispPatternParams(){
 	if (patternParams){
+		display.setCursor(0, 0);
+		display.setTextSize(1);
+		display.print("PTN");		
+		display.setCursor(30, 0);
+		display.setTextSize(2);
+		display.print(playingPattern+1);
+
 		display.setTextSize(4);
 		display.setCursor(74, 0);
 		display.print("PT");
@@ -581,6 +597,7 @@ void loop() {
 				dirtyDisplay = true;
 			} else if (enc_edit){
 				enc_edit = false;
+				dirtyDisplay = true;
 			}
 						
 			
