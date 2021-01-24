@@ -409,7 +409,7 @@ void dispNotes(){
 
 void dispNoteSelect(){
 	if (!noteSelection){
-		display.setTextSize(3);
+		display.setTextSize(4);
 		display.setCursor(74, 0);
 		display.print("NS");
 	}else{
@@ -421,7 +421,7 @@ void dispNoteSelect(){
 			display.setTextSize(1);
 			display.print("STEP");		
 
-			display.setCursor(100, 16);
+			display.setCursor(100, 18);
 			display.setTextSize(2);
 			display.print(stepNote[playingPattern][selectedStep]);
 			display.setCursor(68, 20);
