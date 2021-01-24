@@ -10,10 +10,8 @@ MIDI_CREATE_DEFAULT_INSTANCE();
 //MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, MIDI);
 
 #include "sequencer.h"
+#include "OMX-27.h"
 #include "ClearUI.h"
-
-#define LED_PIN    14
-#define LED_COUNT 27
 
 const int potCount = 5;
 ResponsiveAnalogRead *analog[potCount];
@@ -25,78 +23,14 @@ int potMin = 0;
 int potMax = 8190;
 int temp;
 
+// Timers and such
 elapsedMillis msec = 0;
 elapsedMillis pots_msec = 0;
 elapsedMillis checktime1 = 0;
 elapsedMicros clksTimer = 0;
 unsigned long clksDelay;
-
 elapsedMillis step_interval[8] = {0,0,0,0,0,0,0,0};
 unsigned long lastStepTime[8] = {0,0,0,0,0,0,0,0};
-float step_delay;
-
-
-bool dirtyPixels = false;
-bool dirtyDisplay = false;
-bool blinkState = false;
-bool noteSelect = false;
-bool noteSelection = false;
-bool funcTwoSelect = false;
-int selectedNote = 0;
-int selectedStep = 0;
-bool midiAUX = false;
-bool enc_edit = false;
-
-float clockbpm = 120;
-float newtempo = clockbpm;
-int noteon_velocity = 100;
-unsigned long tempoStartTime, tempoEndTime;
-
-unsigned long blinkInterval = clockbpm * 2;
-
-
-int mode = 0;
-int newmode = 0;
-const char* modes[] = {"MIDI","SEQ-1","SEQ-2"};
-
-
-// POTS/ANALOG INPUTS				// CCS mapped to Organelle Defaults
-int pots[] = {21,22,23,24,7};		// the MIDI CC (continuous controller) for each analog input
-int analogPins[] = {23,22,21,20,16};	// teensy pins for analog inputs
-int previous[] = {-1,-1,-1,-1,-1};	// store previously sent values, to detect changes
-int analogValues[] = {0,0,0,0,0};		// default values
-int potCC = pots[0];
-int potVal = analogValues[0];
-
-float EMA_a[] = {0.6,0.6,0.6,0.6,0.6};
-int EMA_S[] = {0,0,0,0,0};
-
-
-// KEYSWITCH ROWS/COLS
-const byte ROWS = 5; //five rows
-const byte COLS = 6; //six columns
-// Map the keys
-char keys[ROWS][COLS] = {
-  {0, 1, 2, 3, 4, 5},
-  {6, 7, 8, 9, 10,26},
-  {11,12,13,14,15,24},
-  {16,17,18,19,20,25},
-  {22,23,21}
-  };
-byte rowPins[ROWS] = {6, 4, 3, 5, 2}; //connect to the row pinouts of the keypad
-byte colPins[COLS] = {7, 8, 10, 9, 15, 17}; //connect to the column pinouts of the keypad
-
-// KEYBOARD NOTE LAYOUT
-int notes[] = {0,
-     61,63,   66,68,70,   73,75,   78,80,82,
-59,60,62,64,65,67,69,71,72,74,76,77,79,81,83,84};
-
-int steps[] = {0,
-     1,2,   3,4,5,   6,7,   8,9,10,
-11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26};
-
-int octave = 0; // default C4 is 0 - range is -4 to +5
-int newoctave = octave;
 
 
 // ENCODER
@@ -105,67 +39,16 @@ Button encButton(0);		// encoder button pin
 long newPosition = 0;
 long oldPosition = -999;
 
-// CV 
-word pitchCV;
-uint8_t RES;
-uint16_t AMAX;
-word V_scale;
 
-// COLOR PRESETS
-const auto RED = 0xFF0000;
-const auto ORANGE = 0xFF8C00;
-const auto YELLOW = 0xFFFF00;
-const auto GREEN = 0x00FF00;
-const auto BLUE = 0x0000FF;
-const auto INDIGO = 0x4B0082;
-const auto VIOLET = 0xEE82EE;
-const auto HALFGREEN = 0x008000;
-const auto HALFRED = 0x800000;
-const auto DKORANGE = 0x663300;
-const auto LBLUE = 0xADD8E6;
-const auto DKBLUE = 0x000080;
-const auto CYAN = 0x00FFFF;
-const auto LTCYAN = 0xE0FFFF;
-const auto DKCYAN = 0x008080;
-const auto MAGENTA = 0xFF00FF;
-const auto DKMAGENTA = 0x330033;
-const auto PURPLE = 0x3B0F85;
-const auto AMBER = 0x999900;
-const auto BEIGE = 0xFFCC33;
-const auto HALFWHITE = 0x808080;
-const auto LOWWHITE = 0x202020;
-const auto LEDOFF = 0x000000;
-
-const uint32_t seqColors[] = {ORANGE,YELLOW,HALFGREEN,MAGENTA,VIOLET,DKCYAN,DKBLUE,PURPLE};
-
-//initialize an instance of class NewKeypad
+//initialize an instance of class Keypad
 Adafruit_Keypad customKeypad = Adafruit_Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS); 
 
-// Declare NeoPixel strip object:
+// Declare NeoPixel strip object
 Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 
 
-// FIGURE OUT WHAT TO DO WITH CLOCK FOR NOW
-void sendClock(){
-	usbMIDI.sendRealTime(usbMIDI.Clock);
-//	MIDI.sendClock();
-}
-void startClock(){
-	usbMIDI.sendRealTime(usbMIDI.Start);
-//	MIDI.sendStart();
-}
-void stopClock(){
-	usbMIDI.sendRealTime(usbMIDI.Stop);
-//	MIDI.sendStop();
-}
-void resetClocks(){
-	// ############### CLOCK/TIMING ###############
 
-	// BPM tempo to step-delay calculation
-	step_delay = 60000 / clockbpm / 4; // 16th notes
-	// BPM to clock pulses
-	clksDelay = (60000000 / clockbpm) / 24;
-}
+// ####### POTENTIMETERS #######
 
 void readPotentimeters(){
 	for(int k=0; k<potCount; k++) {
@@ -228,7 +111,7 @@ void setup() {
     V_scale = 64; // pow(2,(RES-7)); 4095 max
     analogWrite(A14, 0);
 
-  	// Display
+  	// Init Display
 	initializeDisplay();
 	
 	// Startup screen		
@@ -242,24 +125,24 @@ void setup() {
 	display.println("OMX-27");
 	display.display();
 
-	// keypad
+	// Keypad
 	customKeypad.begin();
 
-  
-	// Handle incoming MIDI events
-	//MIDI.setHandleClock(handleExtClock);
-	//MIDI.setHandleStart(handleExtStart);
-	//MIDI.setHandleContinue(handleExtContinue);
-	//MIDI.setHandleStop(handleExtStop);
-	//MIDI.setHandleNoteOn(HandleNoteOn);  // Put only the name of the function
-	//usbMIDI.setHandleNoteOn(HandleNoteOn); 
-	//MIDI.setHandleControlChange(HandleControlChange);
-	//usbMIDI.setHandleControlChange(HandleControlChange);
-	//MIDI.setHandleNoteOff(HandleNoteOff);
-	//usbMIDI.setHandleNoteOff(HandleNoteOff);
 
-	// READ POTS
-//	readPotentimeters();
+		// Handle incoming MIDI events
+		//MIDI.setHandleClock(handleExtClock);
+		//MIDI.setHandleStart(handleExtStart);
+		//MIDI.setHandleContinue(handleExtContinue);
+		//MIDI.setHandleStop(handleExtStop);
+		//MIDI.setHandleNoteOn(HandleNoteOn);  // Put only the name of the function
+		//usbMIDI.setHandleNoteOn(HandleNoteOn); 
+		//MIDI.setHandleControlChange(HandleControlChange);
+		//usbMIDI.setHandleControlChange(HandleControlChange);
+		//MIDI.setHandleNoteOff(HandleNoteOff);
+		//usbMIDI.setHandleNoteOff(HandleNoteOff);
+
+		// READ POTS
+//		readPotentimeters();
 	
 	//LEDs
 	strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
@@ -279,6 +162,7 @@ void setup() {
 
 	delay(100);
 
+
 	// Clear display and show default mode
 	display.clearDisplay();
 	display.setTextSize(1);
@@ -289,12 +173,12 @@ void setup() {
 
 	//Serial.println(" loading... ");
 }
+
 // ####### END SETUP #######
 
 
 
-
-// ####### MIDI LEDS
+// ####### MIDI LEDS #######
 
 void midi_leds() {
 	if (midiAUX){
@@ -305,7 +189,7 @@ void midi_leds() {
 	dirtyPixels = true;
 }
 
-// ####### SEQUENCER LEDS
+// ####### SEQUENCER LEDS #######
 
 void show_current_step(int patternNum) {
 	blinkInterval = step_delay*2;
@@ -416,6 +300,8 @@ void show_current_step(int patternNum) {
 	dirtyPixels = true;
 //	strip.show();
 }
+// ####### END LEDS
+
 
 void step_ahead(int patternNum) {
   // step ahead one place
@@ -440,12 +326,35 @@ void step_off(int patternNum, int position){
       digitalWrite(13, LOW);
 }
 
-// #### DISPLAY ###
+// FIGURE OUT WHAT TO DO WITH CLOCK FOR NOW ???
+
+// ####### CLOCK/TIMING #######
+
+void sendClock(){
+	usbMIDI.sendRealTime(usbMIDI.Clock);
+//	MIDI.sendClock();
+}
+void startClock(){
+	usbMIDI.sendRealTime(usbMIDI.Start);
+//	MIDI.sendStart();
+}
+void stopClock(){
+	usbMIDI.sendRealTime(usbMIDI.Stop);
+//	MIDI.sendStop();
+}
+void resetClocks(){
+	// BPM tempo to step-delay calculation
+	step_delay = 60000 / clockbpm / 4; // 16th notes
+	// BPM to clock pulses
+	clksDelay = (60000000 / clockbpm) / 24;
+}
+
+// ####### DISPLAY FUNCTIONS #######
 
 void dispPattLen(){
 	display.setTextSize(1);
 	display.setCursor(0, 0);
-	display.print("SEQ: ");
+	display.print("PTN: ");
 	display.setCursor(32, 0);
 	display.print(playingPattern+1);
 
@@ -453,7 +362,6 @@ void dispPattLen(){
 	display.print("LEN: ");
 	display.setCursor(32, 12);
 	display.print(pattLen[playingPattern]);
-
 }
 
 void dispPatt(){
@@ -467,6 +375,14 @@ void dispPatt(){
 	display.print(pattLen[playingPattern]);
 }
 
+void dispTempo(){
+	display.setTextSize(1);
+	display.setCursor(0, 24);
+	display.print("BPM:");
+	display.setCursor(32, 24);
+	display.print((int)clockbpm);
+}
+
 void dispPots(){
 	display.setTextSize(1);
 	display.setCursor(0, 0);
@@ -475,13 +391,6 @@ void dispPots(){
 	display.print(": ");
 	display.setCursor(30, 0);
 	display.print(potVal);
-}
-
-void dispTempo(){
-	display.setTextSize(1);
-	display.setCursor(74, 24);
-	display.print("BPM:");
-	display.print((int)clockbpm);
 }
 
 void dispOctave(){
@@ -496,22 +405,27 @@ void dispNotes(){
 	display.setCursor(0, 12);
 	display.print("NOTE:");
 	display.print(lastNote[playingPattern][seqPos[playingPattern]]);
-//	display.setCursor(0, 24);
-//	display.print("BPM:");
-//	display.print((int)clockbpm);
 }
 
 void dispNoteSelect(){
-	display.setTextSize(1);
-	display.setCursor(0, 0);
-	display.print("NOTE-SELECT ");
+	display.setTextSize(4);
+	display.setCursor(74, 0);
+	if (!noteSelection){
+		display.print("NS");
+	}else{
+		if (stepSelect){
+			display.print(selectedStep+1);
+		}else{
+			display.print(stepNote[playingPattern][selectedStep]);
+		}
+	}
 
-	display.setCursor(0, 12);
-	display.print("STEP: ");
-	display.print(selectedStep+1);
-	display.setCursor(0, 24);
-	display.print("NOTE:");
-	display.print(stepNote[playingPattern][selectedStep]);
+//	display.setCursor(0, 12);
+//	display.print("STEP: ");
+//	display.print(selectedStep+1);
+//	display.setCursor(0, 24);
+//	display.print("NOTE:");
+//	display.print(stepNote[playingPattern][selectedStep]);
 }
 void dispMode(){
 	display.setTextSize(1);
@@ -522,6 +436,7 @@ void dispMode(){
 		display.print(modes[mode]);
 	}
 }
+
 
 // ####### MAIN LOOP #######
 
@@ -534,7 +449,7 @@ void loop() {
 		// SEND CLOCK
 	  clksTimer = 0;
 	}
-//Serial.println(step_delay);
+
 
 	// DISPLAY SETUP
 	display.clearDisplay();
@@ -560,8 +475,8 @@ void loop() {
 	    	dispMode();
 	    	dirtyDisplay = true;
 
-		} else if (!noteSelect){
-			switch(mode) { // process encoder input depending on mode
+		} else if (!noteSelect){  
+			switch(mode) { 
 				case 0: // MIDI
 					// set octave 
 					newoctave = constrain(octave + amt, -5, 4);
@@ -569,7 +484,7 @@ void loop() {
 						octave = newoctave;
 						dirtyDisplay = true;
 					}
-				case 1: // SEQ
+				case 1: // SEQ 1
 					newtempo = constrain(clockbpm + amt, 40, 300);
 					if (newtempo != clockbpm){
 						// SET TEMPO HERE
@@ -578,7 +493,7 @@ void loop() {
 						dirtyDisplay = true;
 					}
 					break;
-				case 2: // SEQ
+				case 2: // SEQ 2
 					newtempo = constrain(clockbpm + amt, 40, 300);
 					if (newtempo != clockbpm){
 						// SET TEMPO HERE
@@ -589,11 +504,11 @@ void loop() {
 					break;
 			}
 
-		} else {
+		} else if (noteSelect){  
 			switch(mode) { // process encoder input depending on mode
 				case 0: // MIDI
 					break;
-				case 1: // SEQ
+				case 1: // SEQ 1
 					if (noteSelect && !enc_edit){ // sequence edit more
 						// 
 						pattLen[playingPattern] = constrain(patternLength[playingPattern] + amt, 1, 16);
@@ -609,7 +524,7 @@ void loop() {
 						}
 					}
 					break;
-				case 2: // SEQ
+				case 2: // SEQ 2
 					if (noteSelect && !enc_edit){ // sequence edit more
 						// 
 						pattLen[playingPattern] = constrain(patternLength[playingPattern] + amt, 1, 16);
@@ -630,6 +545,8 @@ void loop() {
 		}
 	}
 	
+	// ############### ENCODER BUTTON ###############
+	//
 	auto s = encButton.update();
 	switch (s) {
 		case Button::Down: //Serial.println("Button down"); 
@@ -648,6 +565,8 @@ void loop() {
 			break;
 		case Button::UpLong: //Serial.println("Button uplong"); 
 			break;
+		default:
+			break;		
 	}
 				
 
@@ -671,6 +590,7 @@ void loop() {
 				
 				// AUX KEY
 				if (e.bit.EVENT == KEY_JUST_PRESSED && thisKey == 0) {
+
 					// Hard coded Organelle stuff
 					usbMIDI.sendControlChange(25, 100, midiChannel);
 					MIDI.sendControlChange(25, 100, midiChannel);
@@ -694,20 +614,23 @@ void loop() {
 			case 2: // SEQUENCER 2
 				// Sequencer row keys
 
-				// PRESS EVENTS
+				// ### KEY PRESS EVENTS
 				if (e.bit.EVENT == KEY_JUST_PRESSED && thisKey != 0) {
 					
 					int keyPos = thisKey - 11;
 					
 					// are we noteSelect ?
 					if (noteSelect){
-						if (noteSelection) {
+						if (noteSelection) {		// set note
+							stepSelect = false;
 							selectedNote = thisKey;
 							stepNote[playingPattern][selectedStep] = notes[thisKey];
+							noteOn(thisKey, noteon_velocity, playingPattern);
 							dirtyDisplay = true;
 							
 						} else if ( thisKey > 10 ) {
-							selectedStep = keyPos; //set selection to this step
+							selectedStep = keyPos; // set noteSelection to this step
+							stepSelect = true;
 							noteSelection = true;
 							dirtyDisplay = true;
 							
@@ -731,7 +654,11 @@ void loop() {
 							dirtyDisplay = true;
 							
 						} else if (thisKey == 1) { 
-							noteSelect = !noteSelect; // toggle noteSelect on/off
+							if (noteSelection){
+								noteSelection = !noteSelection; // toggle noteSelect on/off
+							}else{
+								noteSelect = !noteSelect; // toggle noteSelect on/off
+							}
 							dirtyDisplay = true;
 
 						} else if (thisKey == 2) { 
@@ -754,9 +681,11 @@ void loop() {
 				}
 				
 
-				// RELEASE EVENTS
+				// ### KEY RELEASE EVENTS
 				if (e.bit.EVENT == KEY_JUST_RELEASED && thisKey != 0 && noteSelection && selectedNote > 0) {
 					noteSelection = false;
+					noteOff(thisKey);
+
 //					noteSelect = false;
 					selectedStep = 0;
 					selectedNote = 0;
@@ -794,33 +723,28 @@ void loop() {
 
 	} // END KEYS WHILE
 
-	// ############### MODES ###############
+	// ############### MODES LOGIC ##############
 
 	switch(mode){
 		case 0:			// MIDI KEYBOARD
-			midi_leds();
+			midi_leds();				// SHOW LEDS
 
-			if (dirtyDisplay){
+			if (dirtyDisplay){			// DISPLAY
 				dispPots();
 				//dispTempo();
 				dispNotes();
 				dispOctave();
 			}
 			break;
-		case 1: 		// SEQUENCER 1
+		case 1: 						// SEQUENCER 1
 
-			if (dirtyDisplay){
+			if (dirtyDisplay){			// DISPLAY
 				if (!enc_edit){
-					dispPatt();
+					dispPattLen();
 					dispTempo();
-				}
-				
+				}				
 				if (noteSelect) {
 					dispNoteSelect();
-					
-				} else {
-					//dispPattLen();
-					//dispTempo();		
 				}
 			}
 			if(playing == true) {
@@ -835,7 +759,6 @@ void loop() {
 					if (lastNote[playingPattern][lastPos] > 0){
 						step_off(playingPattern, lastPos);
 					}
-					
 					lastStepTime[playingPattern] = step_interval[playingPattern];
 					
 					step_on(playingPattern);
@@ -852,9 +775,9 @@ void loop() {
 				}
 			}
 			break;
-		case 2: 		// SEQUENCER 2
-//			readPotentimeters();
-			if (dirtyDisplay){
+		case 2: 						// SEQUENCER 2
+
+			if (dirtyDisplay){			// DISPLAY
 				if (noteSelect) {
 					dispNoteSelect();
 				} else {

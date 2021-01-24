@@ -56,16 +56,18 @@ Cherry MX RGB part numbers:
 |Red	|MX1A-L1NA| linear | (45g) |
 |SilentBlack |[MX3A-11NA](https://www.mouser.com/ProductDetail/CHERRY/MX3A-11NA/?qs=F5EMLAvA7ICizK1XKjfN9w%3D%3D)| linear | (60g) |
 |Black	|MX1A-11NA| linear | (60g) |
-|Brown	|MX1A-G1NA| tactile | (45g) |
+|Brown	|[MX1A-G1NA](https://www.mouser.com/ProductDetail/540-MX1A-G1NA/)| tactile | (45g) |
 |Blue	|MX1A-E1NA| clicky & tactile | (50g) |
-|Silver	|MX1A-51NA| linear | (45g) |
+|Silver	|[MX1A-51NA](https://www.mouser.com/ProductDetail/CHERRY/MX1A-51NA/?qs=F5EMLAvA7IB4ByA0zXdBkg%3D%3D)| linear | (45g) |
 
 Reference: https://www.mouser.com/pdfDocs/cherrykeyswitches.pdf
 
 
 ### Keycaps: 
 
-Any MX-compatible keycaps will work.  I like the DSA profile caps for this application.
+Any MX-compatible keycaps will work, but you'll want one designed for backlighting, such as a "backlit two-shot", "translucent", "shine-through", or "windowed".  
+
+I like the DSA profile caps for this application.
 
 [DSA "Dolch" Keyset (Two Shot) "Windowed" Keys](https://pimpmykeyboard.com/dsa-dolch-keyset-two-shot/) (choose the __LED Kit__ option).  
 These come in a pack of 4 keycaps. You will need 7 packs (@ ~$42 total).  
