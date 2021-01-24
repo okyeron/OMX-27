@@ -408,16 +408,26 @@ void dispNotes(){
 }
 
 void dispNoteSelect(){
-	display.setTextSize(4);
-	display.setCursor(74, 0);
 	if (!noteSelection){
+		display.setTextSize(3);
+		display.setCursor(74, 0);
 		display.print("NS");
 	}else{
-		if (stepSelect){
+
+			display.setCursor(100, 0);
+			display.setTextSize(2);
 			display.print(selectedStep+1);
-		}else{
+			display.setCursor(68, 4);
+			display.setTextSize(1);
+			display.print("STEP");		
+
+			display.setCursor(100, 16);
+			display.setTextSize(2);
 			display.print(stepNote[playingPattern][selectedStep]);
-		}
+			display.setCursor(68, 20);
+			display.setTextSize(1);
+			display.print("NOTE");		
+
 	}
 
 //	display.setCursor(0, 12);
