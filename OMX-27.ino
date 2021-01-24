@@ -412,7 +412,7 @@ void dispNoteSelect(){
 			display.print("PTN");		
 			display.setCursor(36, 18);
 			display.setTextSize(2);
-			display.print(pattLen[playingPattern]);
+			display.print(playingPattern+1);
 
 			display.setCursor(0, 18);
 			display.setTextSize(1);
@@ -579,6 +579,8 @@ void loop() {
 				enc_edit = false;
 				dispMode();
 				dirtyDisplay = true;
+			} else if (enc_edit){
+				enc_edit = false;
 			}
 						
 			
@@ -783,8 +785,8 @@ void loop() {
 
 			if (dirtyDisplay){			// DISPLAY
 				if (!enc_edit){
-					dispPatt();
 					if (!noteSelect and !patternParams){
+						dispPatt();
 						dispPattLen();
 						dispTempo();
 					}				
