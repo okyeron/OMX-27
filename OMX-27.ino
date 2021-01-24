@@ -165,11 +165,13 @@ void setup() {
 
 	// Clear display and show default mode
 	display.clearDisplay();
-	display.setTextSize(1);
-	display.setCursor(96, 0);
-	display.print(modes[newmode]);
-	//dispTempo();
+//	display.setTextSize(1);
+//	display.setCursor(96, 0);
+//	display.print(modes[newmode]);
+//	//dispTempo();
 	display.display();			
+
+	dirtyDisplay = true;
 
 	//Serial.println(" loading... ");
 }
@@ -203,7 +205,7 @@ void show_current_step(int patternNum) {
 		strip.setPixelColor(0, HALFWHITE);
 	} else if (noteSelect){
 		strip.setPixelColor(0, CYAN);
-	} else if (funcTwoSelect){
+	} else if (patternParams){
 		strip.setPixelColor(0, DKBLUE);
 	} else {
 		strip.setPixelColor(0, LEDOFF);
@@ -239,8 +241,8 @@ void show_current_step(int patternNum) {
 					}
 					
 				} else if (j == 2) {						// FUNC TWO
-					if (funcTwoSelect){
-						if (funcTwoSelect && blinkState){
+					if (patternParams){
+						if (patternParams && blinkState){
 							strip.setPixelColor(j, DKBLUE);
 						} else {
 							strip.setPixelColor(j, LEDOFF);
@@ -353,11 +355,6 @@ void resetClocks(){
 
 void dispPattLen(){
 	display.setTextSize(1);
-	display.setCursor(0, 0);
-	display.print("PTN: ");
-	display.setCursor(32, 0);
-	display.print(playingPattern+1);
-
 	display.setCursor(0, 12);
 	display.print("LEN: ");
 	display.setCursor(32, 12);
@@ -366,13 +363,10 @@ void dispPattLen(){
 
 void dispPatt(){
 	display.setTextSize(1);
-	display.setCursor(96, 0);
-	display.print("P:");
+	display.setCursor(0, 0);
+	display.print("PTN: ");
+	display.setCursor(32, 0);
 	display.print(playingPattern+1);
-
-	display.setCursor(96, 12);
-	display.print("L:");
-	display.print(pattLen[playingPattern]);
 }
 
 void dispTempo(){
@@ -413,33 +407,50 @@ void dispNoteSelect(){
 		display.setCursor(74, 0);
 		display.print("NS");
 	}else{
-
-			display.setCursor(100, 0);
+			display.setCursor(0, 0);
+			display.setTextSize(1);
+			display.print("PTN");		
+			display.setCursor(36, 18);
 			display.setTextSize(2);
-			display.print(selectedStep+1);
-			display.setCursor(68, 4);
+			display.print(pattLen[playingPattern]);
+
+			display.setCursor(0, 18);
 			display.setTextSize(1);
 			display.print("STEP");		
-
-			display.setCursor(100, 18);
+			display.setCursor(36, 18);
 			display.setTextSize(2);
-			display.print(stepNote[playingPattern][selectedStep]);
-			display.setCursor(68, 20);
+			display.print(selectedStep+1);
+
+			display.setCursor(64, 0);
 			display.setTextSize(1);
 			display.print("NOTE");		
+			display.setCursor(90, 0);
+			display.setTextSize(2);
+			display.print(stepNote[playingPattern][selectedStep]);
+
+			display.setCursor(64, 18);
+			display.setTextSize(1);
+			display.print("VEL");		
+			display.setCursor(90, 18);
+			display.setTextSize(2);
+			display.print(stepVelocity[playingPattern][selectedStep]);
+	}
+}
+
+void dispPatternParams(){
+	if (patternParams){
+		display.setTextSize(4);
+		display.setCursor(74, 0);
+		display.print("PT");
+	}else{
 
 	}
-
-//	display.setCursor(0, 12);
-//	display.print("STEP: ");
-//	display.print(selectedStep+1);
-//	display.setCursor(0, 24);
-//	display.print("NOTE:");
-//	display.print(stepNote[playingPattern][selectedStep]);
 }
+
 void dispMode(){
-	display.setTextSize(1);
-	display.setCursor(96, 0);
+	display.setTextSize(4);
+	display.setCursor(74, 0);
+
 	if (newmode != mode && enc_edit) {
 		display.print(modes[newmode]);
 	} else if (enc_edit) {
@@ -519,7 +530,7 @@ void loop() {
 				case 0: // MIDI
 					break;
 				case 1: // SEQ 1
-					if (noteSelect && !enc_edit){ // sequence edit more
+					if (patternParams && !enc_edit){ // sequence edit more
 						// 
 						pattLen[playingPattern] = constrain(patternLength[playingPattern] + amt, 1, 16);
 						patternLength[playingPattern] = pattLen[playingPattern];
@@ -560,16 +571,22 @@ void loop() {
 	auto s = encButton.update();
 	switch (s) {
 		case Button::Down: //Serial.println("Button down"); 
+			// what page are we on?
 			if (newmode != mode && enc_edit) {
 				mode = newmode;
 				playing = 0;
 				setAllLEDS(0,0,0);
+				enc_edit = false;
+				dispMode();
+				dirtyDisplay = true;
 			}
-			enc_edit = !enc_edit;			
-			dispMode();
-			dirtyDisplay = true;
+						
+			
 			break;
 		case Button::DownLong: //Serial.println("Button downlong"); 
+			enc_edit = true;			
+			dispMode();
+			dirtyDisplay = true;
 			break;
 		case Button::Up: //Serial.println("Button up"); 
 			break;
@@ -635,7 +652,9 @@ void loop() {
 							stepSelect = false;
 							selectedNote = thisKey;
 							stepNote[playingPattern][selectedStep] = notes[thisKey];
-							noteOn(thisKey, noteon_velocity, playingPattern);
+							if (!playing){
+								noteOn(thisKey, noteon_velocity, playingPattern);
+							}
 							dirtyDisplay = true;
 							
 						} else if ( thisKey > 10 ) {
@@ -650,11 +669,24 @@ void loop() {
 							
 						} else if (thisKey == 1) { 
 							noteSelect = !noteSelect; // toggle noteSelect on/off
+							patternParams = false;
 							dirtyDisplay = true;
 						}
 						
-					// are we funcTwoSelect ?
-					}else if (funcTwoSelect && thisKey > 10){
+					// are we patternParams ?
+					} else if (patternParams){
+
+						if (thisKey == 1) { 
+
+
+						} else if (thisKey == 2) { 
+							patternParams = !patternParams; // toggle patternParams on/off
+							noteSelect = false;
+							dirtyDisplay = true;
+						} else if (thisKey > 2 && thisKey < 11) { // Pattern select keys
+							playingPattern = thisKey-3;
+							dirtyDisplay = true;
+						}
 					
 
 					} else {					
@@ -663,7 +695,7 @@ void loop() {
 							playingPattern = thisKey-3;
 							dirtyDisplay = true;
 							
-						} else if (thisKey == 1) { 
+						} else if (thisKey == 1) { 			// Note Select
 							if (noteSelection){
 								noteSelection = !noteSelection; // toggle noteSelect on/off
 							}else{
@@ -671,9 +703,9 @@ void loop() {
 							}
 							dirtyDisplay = true;
 
-						} else if (thisKey == 2) { 
-							funcTwoSelect = !funcTwoSelect; // toggle funcTwoSelect on/off
-
+						} else if (thisKey == 2) { 			// patternParams
+							patternParams = !patternParams; // toggle patternParams on/off
+							
 							seqReset(); // reset all sequences to step 1
 							dirtyDisplay = true;
 							
@@ -694,8 +726,9 @@ void loop() {
 				// ### KEY RELEASE EVENTS
 				if (e.bit.EVENT == KEY_JUST_RELEASED && thisKey != 0 && noteSelection && selectedNote > 0) {
 					noteSelection = false;
-					noteOff(thisKey);
-
+					if (!playing){
+						noteOff(thisKey);
+					}
 //					noteSelect = false;
 					selectedStep = 0;
 					selectedNote = 0;
@@ -710,8 +743,8 @@ void loop() {
 							noteSelection = false;
 						}
 						dirtyDisplay = true;
-					} else if (funcTwoSelect){
-						funcTwoSelect = !funcTwoSelect;
+					} else if (patternParams){
+						patternParams = !patternParams;
 						dirtyDisplay = true;
 					} else {
 //						strip.setPixelColor(0, HALFWHITE);
@@ -750,11 +783,17 @@ void loop() {
 
 			if (dirtyDisplay){			// DISPLAY
 				if (!enc_edit){
-					dispPattLen();
-					dispTempo();
-				}				
-				if (noteSelect) {
-					dispNoteSelect();
+					dispPatt();
+					if (!noteSelect and !patternParams){
+						dispPattLen();
+						dispTempo();
+					}				
+					if (noteSelect) {
+						dispNoteSelect();
+					}
+					if (patternParams) {
+						dispPatternParams();
+					}
 				}
 			}
 			if(playing == true) {
@@ -822,8 +861,8 @@ void loop() {
 		break;
 	}
 
-//	Serial.print("one:");
-//	Serial.println(checktime1);
+	//	Serial.print("one:");
+	//	Serial.println(checktime1);
 
 	// DISPLAY at end of loop
 

@@ -10,7 +10,7 @@ bool dirtyDisplay = false;
 bool blinkState = false;
 bool noteSelect = false;
 bool noteSelection = false;
-bool funcTwoSelect = false;
+bool patternParams = false;
 int selectedNote = 0;
 int selectedStep = 0;
 bool stepSelect = false;
@@ -30,7 +30,7 @@ unsigned long blinkInterval = clockbpm * 2;
 // MODES
 int mode = 0;
 int newmode = 0;
-const char* modes[] = {"MIDI","SEQ-1","SEQ-2"};
+const char* modes[] = {"M","S1","S2"};
 
 
 // POTS/ANALOG INPUTS					// CCS mapped to Organelle Defaults
