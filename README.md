@@ -1,6 +1,6 @@
 # OMX-27
 
-Mechanical keyswitch midi keyboard and sequencer. Based on Teensy 3.2 and Cherry MX RGB key switches.
+Mechanical key switch midi keyboard and sequencer. Based on Teensy 3.2 and Cherry MX RGB key switches.
 
 ### Arduino Requirements
 
@@ -41,5 +41,5 @@ A: This project uses SK6812-MINI-E reverse mount LEDs. They are somewhat hard to
 Q: Can I get the Gerbers or order the pcbs myself?  
 A: No. Not sure about open sourcing yet.  
 
-Q: Can I get some of those windowed keycaps you're using?
+Q: Can I get some of those windowed keycaps you're using?  
 A: Yes. 
