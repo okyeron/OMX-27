@@ -74,4 +74,9 @@ These come in a pack of 4 keycaps. You will need 7 packs (@ ~$42 total).
 
 [Flashquark Translucent DSA Keycaps](https://flashquark.com/product/translucent-dsa-keycaps/) (in Black, White, Clear, Blue, Red) - __50 per pack__. ($12.99-$15.99 per pack)
 
+[Blue Hat 1U DSA Blank Printed Keycaps PBT Keycaps](https://www.amazon.com/gp/product/B07SJKMNWC) (Gray Translucent) - __37 per pack__. ($15.55 per pack and prime shipping)  
+(about the same as the black ones from Flashquark above)
+
 [Maxkeyboard Black Translucent MX Blank](https://www.maxkeyboard.com/black-translucent-cherry-mx-blank-keycap-set-for-esc-w-a-s-d-or-e-s-d-f-and-arrow-keys.html) (pack of 9). ($21 for 3 packs)
+
+
