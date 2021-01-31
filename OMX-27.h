@@ -1,7 +1,34 @@
+// OMX-27 config
 
+#define CVGATE_PIN	13		// 13 on beta boards, A10 on v1
+#define CVPITCH_PIN	A14
 #define LED_PIN    14
 #define LED_COUNT 27
 
+#define DEFAULT_MODE 1
+
+// DEFINE CCS FOR POTS
+int CC1 = 21;
+int CC2 = 22;
+int CC3 = 23;
+int CC4 = 24;
+int CC5 = 7;
+
+
+// POTS/ANALOG INPUTS					// CCS mapped to Organelle Defaults
+int pots[] = {CC1,CC2,CC3,CC4,CC5};			// the MIDI CC (continuous controller) for each analog input
+int analogPins[] = {23,22,21,20,16};	// teensy pins for analog inputs
+int analogValues[] = {0,0,0,0,0};		// default values
+int potCC = pots[0];
+int potVal = analogValues[0];
+int potNum = 0;
+//int previous[] = {-1,-1,-1,-1,-1};	// ???
+
+// MODES
+const char* modes[] = {"M","S1","S2","O"};
+int mode = DEFAULT_MODE;
+int newmode = DEFAULT_MODE;
+#define numModes (sizeof(modes)/sizeof(char *)) //array size  
 
 // VARIABLES
 float step_delay;
@@ -25,21 +52,6 @@ float newtempo = clockbpm;
 unsigned long tempoStartTime, tempoEndTime;
 
 unsigned long blinkInterval = clockbpm * 2;
-
-
-// MODES
-int mode = 0;
-int newmode = 0;
-const char* modes[] = {"M","S1","S2"};
-
-
-// POTS/ANALOG INPUTS					// CCS mapped to Organelle Defaults
-int pots[] = {21,22,23,24,7};			// the MIDI CC (continuous controller) for each analog input
-int analogPins[] = {23,22,21,20,16};	// teensy pins for analog inputs
-int analogValues[] = {0,0,0,0,0};		// default values
-int potCC = pots[0];
-int potVal = analogValues[0];
-//int previous[] = {-1,-1,-1,-1,-1};	// ???
 
 
 // KEY SWITCH ROWS/COLS
@@ -97,5 +109,15 @@ const auto BEIGE = 0xFFCC33;
 const auto HALFWHITE = 0x808080;
 const auto LOWWHITE = 0x202020;
 const auto LEDOFF = 0x000000;
+
+// sequence pattern colors
 const uint32_t seqColors[] = {ORANGE,YELLOW,HALFGREEN,MAGENTA,VIOLET,DKCYAN,DKBLUE,PURPLE};
 
+
+#define MIDINOTEON HALFWHITE
+#define SEQCHASE HALFRED 
+#define SEQMARKER LOWWHITE 
+#define SEQSTEP ORANGE 
+
+#define NOTESEL DKCYAN 
+#define PATTSEL DKBLUE 
