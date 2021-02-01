@@ -65,8 +65,7 @@ int stepNote[8][16] = {
   {46, 46, 46, 46, 46, 46, 46, 46, 46, 46, 46, 46, 46, 46, 46, 46},
   {39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39}
 };
-int stepNoteP[8][16][8] = { 
-							// {notenum,vel,len,p1,p2,p3,p4,p5}
+int stepNoteP[8][16][8] = { 		// {notenum,vel,len,p1,p2,p3,p4,p5}
 	{ {60, 100, 1, 0, 0, 0, 0, 0}, {62, 100, 1, 0, 0, 0, 0, 0},{60, 100, 1, 0, 0, 0, 0, 0},{64, 100, 1, 0, 0, 0, 0, 0},{63, 100, 1, 0, 0, 0, 0, 0},{63, 100, 1, 0, 0, 0, 0, 0},{60, 100, 1, 0, 0, 0, 0, 0},{60, 100, 1, 0, 0, 0, 0, 0},{60, 100, 1, 0, 0, 0, 0, 0},{62, 100, 1, 0, 0, 0, 0, 0},{72, 100, 1, 0, 0, 0, 0, 0},{65, 100, 1, 0, 0, 0, 0, 0},{65, 100, 1, 0, 0, 0, 0, 0},{72, 100, 1, 0, 0, 0, 0, 0},{60, 100, 1, 0, 0, 0, 0, 0},{72, 100, 1, 0, 0, 0, 0, 0} },
 	{ {48, 100, 1, 0, 0, 0, 0, 0}, {48, 100, 1, 0, 0, 0, 0, 0},{48, 100, 1, 0, 0, 0, 0, 0},{48, 100, 1, 0, 0, 0, 0, 0},{63, 100, 1, 0, 0, 0, 0, 0},{63, 100, 1, 0, 0, 0, 0, 0},{48, 100, 1, 0, 0, 0, 0, 0},{48, 100, 1, 0, 0, 0, 0, 0},{48, 100, 1, 0, 0, 0, 0, 0},{48, 100, 1, 0, 0, 0, 0, 0},{48, 100, 1, 0, 0, 0, 0, 0},{65, 100, 1, 0, 0, 0, 0, 0},{65, 100, 1, 0, 0, 0, 0, 0},{48, 100, 1, 0, 0, 0, 0, 0},{48, 100, 1, 0, 0, 0, 0, 0},{48, 100, 1, 0, 0, 0, 0, 0} },
 	{ {48, 100, 1, 0, 0, 0, 0, 0}, {48, 100, 1, 0, 0, 0, 0, 0},{48, 100, 1, 0, 0, 0, 0, 0},{48, 100, 1, 0, 0, 0, 0, 0},{63, 100, 1, 0, 0, 0, 0, 0},{63, 100, 1, 0, 0, 0, 0, 0},{48, 100, 1, 0, 0, 0, 0, 0},{48, 100, 1, 0, 0, 0, 0, 0},{48, 100, 1, 0, 0, 0, 0, 0},{48, 100, 1, 0, 0, 0, 0, 0},{48, 100, 1, 0, 0, 0, 0, 0},{65, 100, 1, 0, 0, 0, 0, 0},{65, 100, 1, 0, 0, 0, 0, 0},{48, 100, 1, 0, 0, 0, 0, 0},{48, 100, 1, 0, 0, 0, 0, 0},{48, 100, 1, 0, 0, 0, 0, 0} },
@@ -139,7 +138,7 @@ void seqStop() {
 
 // Play a note
 void playNote(int patternNum) {
-  //Serial.println(stepNote[patternNum][seqPos]); // Debug
+  //Serial.println(stepNoteP[patternNum][seqPos][0]); // Debug
 
   switch (stepPlay[patternNum][seqPos[patternNum]]) {
     case -1:
@@ -151,41 +150,54 @@ void playNote(int patternNum) {
       // Turn off the previous note
 //       usbMIDI.sendNoteOff(lastNote[patternNum], 0, midiChannel);
 //       MIDI.sendNoteOff(lastNote[patternNum], 0, midiChannel);
-//       analogWrite(A14, 0);
-//       digitalWrite(13, LOW);
+//       analogWrite(CVPITCH_PIN, 0);
+//       digitalWrite(CVGATE_PIN, LOW);
       break;
-    case 1:
+
+    case 1:	// regular note on
       // Turn off the previous note and play a new note.
 //       usbMIDI.sendNoteOff(lastNote[patternNum], 0, midiChannel);
 //       MIDI.sendNoteOff(lastNote[patternNum], 0, midiChannel);
-//       analogWrite(A14, 0);
-      
-      usbMIDI.sendNoteOn(stepNote[patternNum][seqPos[patternNum]], seq_velocity, midiChannel);
-      MIDI.sendNoteOn(stepNote[patternNum][seqPos[patternNum]], seq_velocity, midiChannel);
-      //Serial.println(stepNote[patternNum][seqPos[patternNum]]);
-      lastNote[patternNum][seqPos[patternNum]] = stepNote[patternNum][seqPos[patternNum]];
+//       analogWrite(CVPITCH_PIN, 0);
+
+// stepNoteP[playingPattern][selectedStep][1]
+		seq_velocity = stepNoteP[playingPattern][seqPos[patternNum]][1];
+		usbMIDI.sendNoteOn(stepNoteP[patternNum][seqPos[patternNum]][0], seq_velocity, midiChannel);
+		MIDI.sendNoteOn(stepNoteP[patternNum][seqPos[patternNum]][0], seq_velocity, midiChannel);
+		//Serial.println(stepNoteP[patternNum][seqPos[patternNum]]);
+
+		// send param locks // {notenum,vel,len,p1,p2,p3,p4,p5}
+		for (int q=0; q<5; q++){	
+			int tempCC = stepNoteP[patternNum][seqPos[patternNum]][q+3];
+			if (tempCC > 0){ // && tempCC != prevPlock[q]
+				usbMIDI.sendControlChange(pots[q],tempCC,midiChannel);
+				prevPlock[q] = tempCC;
+			}
+		}
+		lastNote[patternNum][seqPos[patternNum]] = stepNoteP[patternNum][seqPos[patternNum]][0];
 		stepCV = map (lastNote[patternNum][seqPos[patternNum]], 35, 90, 0, 4096);
-		digitalWrite(13, HIGH);
-		analogWrite(A14, stepCV);
+		digitalWrite(CVGATE_PIN, HIGH);
+		analogWrite(CVPITCH_PIN, stepCV);
       break;
-    case 2:
+
+    case 2:		 // accented note on - NOT USED?
       // Turn off the previous note, and play a new accented note
 //       usbMIDI.sendNoteOff(lastNote[patternNum], 0, midiChannel);
 //       MIDI.sendNoteOff(lastNote[patternNum], 0, midiChannel);
-//       analogWrite(A14, 0);
+//       analogWrite(CVPITCH_PIN, 0);
       
-      usbMIDI.sendNoteOn(stepNote[patternNum][seqPos[patternNum]], seq_acc_velocity, midiChannel);
-      MIDI.sendNoteOn(stepNote[patternNum][seqPos[patternNum]], seq_acc_velocity, midiChannel);
-      lastNote[patternNum][seqPos[patternNum]] = stepNote[patternNum][seqPos[patternNum]];
+		usbMIDI.sendNoteOn(stepNoteP[patternNum][seqPos[patternNum]][0], seq_acc_velocity, midiChannel);
+		MIDI.sendNoteOn(stepNoteP[patternNum][seqPos[patternNum]][0], seq_acc_velocity, midiChannel);
+		lastNote[patternNum][seqPos[patternNum]] = stepNoteP[patternNum][seqPos[patternNum]][0];
       	stepCV = map (lastNote[patternNum][seqPos[patternNum]], 35, 90, 0, 4096);
-      	digitalWrite(13, HIGH);
-      	analogWrite(A14, stepCV);
+      	digitalWrite(CVGATE_PIN, HIGH);
+      	analogWrite(CVPITCH_PIN, stepCV);
       break;
   }
 }
 void allNotesOff() {
-	analogWrite(A14, 0);
-	digitalWrite(13, LOW);
+	analogWrite(CVPITCH_PIN, 0);
+	digitalWrite(CVGATE_PIN, LOW);
 	for (int j=0; j<128; j++){
 		usbMIDI.sendNoteOff(j, 0, midiChannel);
 		MIDI.sendNoteOff(j, 0, midiChannel);

@@ -10,8 +10,8 @@ MIDI_CREATE_DEFAULT_INSTANCE();
 //MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, MIDI);
 
 #include "ClearUI.h"
-#include "sequencer.h"
 #include "OMX-27.h"
+#include "sequencer.h"
 
 const int potCount = 5;
 ResponsiveAnalogRead *analog[potCount];
@@ -89,6 +89,7 @@ void readPotentimeters(){
 						potVal = analogValues[k];
 								// stepNoteP[8] {notenum,vel,len,p1,p2,p3,p4,p5}
 						stepNoteP[playingPattern][selectedStep][k+3] = analogValues[k];
+						sendPots(k);
 						dirtyDisplay = true;
 						
 					} else if (!noteSelect){
@@ -448,34 +449,51 @@ void dispNoteSelect(){
 		display.setCursor(74, 0);
 		display.print("NS");
 	}else{
-		display.setCursor(0, 0);
+		display.setCursor(1, 1);
 		display.setTextSize(1);
 		display.print("STEP");		
-		display.setCursor(30, 0);
+		display.setCursor(29, 0);
 		display.setTextSize(2);
 		display.print(selectedStep+1);
 
-		display.setCursor(0, 18);
+		display.setCursor(1, 18);
 		display.setTextSize(1);
 		display.print("CC");
 		display.print(potCC);
-		display.setCursor(30, 18);
+		display.setCursor(29, 18);
 		display.setTextSize(2);
 		display.print(stepNoteP[playingPattern][selectedStep][potNum+3]);
 
-		display.setCursor(64, 0);
+		display.setCursor(65, 1);
 		display.setTextSize(1);
 		display.print("NOTE");		
-		display.setCursor(90, 0);
+		display.setCursor(92, 0);
 		display.setTextSize(2);
-		display.print(stepNote[playingPattern][selectedStep]);
+		display.print(stepNoteP[playingPattern][selectedStep][0]);
 
-		display.setCursor(64, 18);
+		display.setCursor(65, 19);
 		display.setTextSize(1);
 		display.print("VEL");		
-		display.setCursor(90, 18);
+		display.setCursor(92, 18);
 		display.setTextSize(2);
-		display.print(stepVelocity[playingPattern][selectedStep]);
+		display.print(stepNoteP[playingPattern][selectedStep][1]);
+//		display.print(stepVelocity[playingPattern][selectedStep]);
+
+		switch(nsmode){
+			case 0:
+				//display.fillRect(40, 4, 4, 4, WHITE);
+				display.drawRect(26, 0, 38, 16, WHITE);
+				break;
+			case 1: 
+				display.drawRect(26, 16, 38, 16, WHITE);
+				break;
+			case 2: 
+				display.drawRect(90, 0, 38, 16, WHITE);
+				break;
+			case 3: 
+				display.drawRect(90, 16, 38, 16, WHITE);
+				break;
+		}
 	}
 }
 
@@ -549,18 +567,18 @@ void loop() {
     	if (enc_edit) {
 			// set mode
 			int modesize = numModes-1;
-			Serial.println(modesize);
+//			Serial.println(modesize);
 	    	newmode = constrain(newmode + amt, 0, modesize);
 	    	dispMode();
 	    	dirtyDisplay = true;
 
 		} else if (!noteSelect && !patternParams){  
 			switch(mode) { 
-				case 3: // Organelle
+				case 3: // Organelle Mother
 					if(u.dir() < 0){
-						usbMIDI.sendControlChange(28,125,midiChannel);
+						usbMIDI.sendControlChange(CC_OM2,0,midiChannel);
 					} else if (u.dir() > 0){
-						usbMIDI.sendControlChange(28,126,midiChannel);
+						usbMIDI.sendControlChange(CC_OM2,127,midiChannel);
 					}      
 					break;
 				case 0: // MIDI
@@ -600,8 +618,13 @@ void loop() {
 						pattLen[playingPattern] = constrain(patternLength[playingPattern] + amt, 1, 16);
 						patternLength[playingPattern] = pattLen[playingPattern];
 						dirtyDisplay = true;
-					} else if (noteSelect && !enc_edit){
+					} else if (noteSelect && noteSelection && !enc_edit){
 
+						if (nsmode == 3) { // set velocity
+							int tempVel = stepNoteP[playingPattern][selectedStep][1];
+							stepNoteP[playingPattern][selectedStep][1] = constrain(tempVel + amt, 0, 127);
+							dirtyDisplay = true;
+						}	
 //						Serial.println("NS");
 
 					} else {
@@ -630,7 +653,7 @@ void loop() {
 						}
 					}		
 					break;
-				case 3: // Organelle
+				case 3: // Organelle Mother
 					break;
 			}		
 
@@ -656,7 +679,15 @@ void loop() {
 			}
 
 			if(mode == 3) {
-				usbMIDI.sendControlChange(26,100,midiChannel);					
+				usbMIDI.sendControlChange(CC_OM1,100,midiChannel);					
+			}
+			if(mode == 1) {
+				if (noteSelect && noteSelection) {
+					// increment nsmode
+					nsmode = (nsmode + 1) % 4;
+					//Serial.println(nsmode);
+					dirtyDisplay = true;
+				}
 			}
 			break;
 		case Button::DownLong: //Serial.println("Button downlong"); 
@@ -666,7 +697,7 @@ void loop() {
 			break;
 		case Button::Up: //Serial.println("Button up"); 
 			if(mode == 3) {
-				usbMIDI.sendControlChange(26,0,midiChannel);						
+				usbMIDI.sendControlChange(CC_OM1,0,midiChannel);						
 			}
 			break;
 		case Button::UpLong: //Serial.println("Button uplong"); 
@@ -699,8 +730,8 @@ void loop() {
 				if (e.bit.EVENT == KEY_JUST_PRESSED && thisKey == 0) {
 
 					// Hard coded Organelle stuff
-					usbMIDI.sendControlChange(25, 100, midiChannel);
-					MIDI.sendControlChange(25, 100, midiChannel);
+					usbMIDI.sendControlChange(CC_AUX, 100, midiChannel);
+					MIDI.sendControlChange(CC_AUX, 100, midiChannel);
 					if (midiAUX) {
 						// STOP CLOCK
 					} else {
@@ -710,8 +741,8 @@ void loop() {
 					
 				} else if (e.bit.EVENT == KEY_JUST_RELEASED && thisKey == 0) { 
 					// Hard coded Organelle stuff
-					usbMIDI.sendControlChange(25, 0, midiChannel);
-					MIDI.sendControlChange(25, 0, midiChannel);
+					usbMIDI.sendControlChange(CC_AUX, 0, midiChannel);
+					MIDI.sendControlChange(CC_AUX, 0, midiChannel);
 //					midiAUX = false;
 				}					
 				break;
@@ -731,7 +762,8 @@ void loop() {
 						if (noteSelection) {		// set note
 							stepSelect = false;
 							selectedNote = thisKey;
-							stepNote[playingPattern][selectedStep] = notes[thisKey];
+							stepNoteP[playingPattern][selectedStep][0] = notes[thisKey];
+//							stepNote[playingPattern][selectedStep] = notes[thisKey];
 							if (!playing){
 								noteOn(thisKey, noteon_velocity, playingPattern);
 							}
@@ -1022,6 +1054,7 @@ void rainbow(int wait) {
       // color wheel (range of 65536) along the length of the strip
       // (strip.numPixels() steps):
       int pixelHue = firstPixelHue + (i * 65536L / strip.numPixels());
+
       // strip.ColorHSV() can take 1 or 3 arguments: a hue (0 to 65535) or
       // optionally add saturation and value (brightness) (each 0 to 255).
       // Here we're using just the single-argument hue variant. The result

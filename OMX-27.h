@@ -8,11 +8,15 @@
 #define DEFAULT_MODE 1
 
 // DEFINE CCS FOR POTS
-int CC1 = 21;
-int CC2 = 22;
-int CC3 = 23;
-int CC4 = 24;
-int CC5 = 7;
+const int CC1 = 21;
+const int CC2 = 22;
+const int CC3 = 23;
+const int CC4 = 24;
+const int CC5 = 7;
+
+const int CC_AUX = 25; // Mother mode - AUX key
+const int CC_OM1 = 26; // Mother mode - enc switch 
+const int CC_OM2 = 28; // Mother mode - enc turn
 
 
 // POTS/ANALOG INPUTS					// CCS mapped to Organelle Defaults
@@ -22,13 +26,15 @@ int analogValues[] = {0,0,0,0,0};		// default values
 int potCC = pots[0];
 int potVal = analogValues[0];
 int potNum = 0;
-//int previous[] = {-1,-1,-1,-1,-1};	// ???
+bool plockDirty[] = {false,false,false,false,false};
+int prevPlock[] = {0,0,0,0,0};
 
 // MODES
-const char* modes[] = {"M","S1","S2","O"};
+const char* modes[] = {"MI","S1","S2","OM"};
 int mode = DEFAULT_MODE;
 int newmode = DEFAULT_MODE;
 #define numModes (sizeof(modes)/sizeof(char *)) //array size  
+int nsmode = 0;
 
 // VARIABLES
 float step_delay;
