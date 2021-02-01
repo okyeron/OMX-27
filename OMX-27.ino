@@ -55,6 +55,7 @@ void sendPots(int val){
 	MIDI.sendControlChange(pots[val], analogValues[val], midiChannel);
 	potCC = pots[val];
 	potVal = analogValues[val];
+	potValues[val] = potVal;
 }
 
 void readPotentimeters(){
@@ -88,7 +89,9 @@ void readPotentimeters(){
 						potCC = pots[k];
 						potVal = analogValues[k];
 								// stepNoteP[8] {notenum,vel,len,p1,p2,p3,p4,p5}
-						stepNoteP[playingPattern][selectedStep][k+3] = analogValues[k];
+						if (k < 4){ // only store p-lock value for first 4 knobs
+							stepNoteP[playingPattern][selectedStep][k+3] = analogValues[k];
+						}
 						sendPots(k);
 						dirtyDisplay = true;
 						
@@ -449,25 +452,39 @@ void dispNoteSelect(){
 		display.setCursor(74, 0);
 		display.print("NS");
 	}else{
-		display.setCursor(1, 1);
-		display.setTextSize(1);
-		display.print("STEP");		
-		display.setCursor(29, 0);
-		display.setTextSize(2);
-		display.print(selectedStep+1);
+//		display.setCursor(1, 1);
+//		display.setTextSize(1);
+//		display.print("STEP");		
+//		display.setCursor(29, 0);
+//		display.setTextSize(2);
+//		display.print(selectedStep+1);
 
-		display.setCursor(1, 18);
-		display.setTextSize(1);
-		display.print("CC");
-		display.print(potCC);
-		display.setCursor(29, 18);
-		display.setTextSize(2);
-		display.print(stepNoteP[playingPattern][selectedStep][potNum+3]);
+//		display.setCursor(1, 18);
+//		display.setTextSize(1);
+//		display.print("CC");
+//		display.print(potCC);
+		display.setCursor(2, 2);
+		int tempOffset = 32;
+		for (int j=0; j<4; j++){
+			display.setTextSize(1);
+			display.setCursor(j*tempOffset, 2);
+			if (stepNoteP[playingPattern][selectedStep][j+3] > 0){
+				display.print(stepNoteP[playingPattern][selectedStep][j+3]);
+			} else {
+				display.print("---");
+			}
+			if (j != 3){
+				display.setCursor(j*tempOffset+16, 2);
+				display.print(" /");
+			}
+		}
+		
 
-		display.setCursor(65, 1);
+
+		display.setCursor(1, 19);
 		display.setTextSize(1);
 		display.print("NOTE");		
-		display.setCursor(92, 0);
+		display.setCursor(29, 18);
 		display.setTextSize(2);
 		display.print(stepNoteP[playingPattern][selectedStep][0]);
 
@@ -482,15 +499,21 @@ void dispNoteSelect(){
 		switch(nsmode){
 			case 0:
 				//display.fillRect(40, 4, 4, 4, WHITE);
-				display.drawRect(26, 0, 38, 16, WHITE);
+				display.drawRect(0, 0, 24, 12, WHITE);
 				break;
 			case 1: 
-				display.drawRect(26, 16, 38, 16, WHITE);
+				display.drawRect(32, 0, 24, 12, WHITE);
 				break;
 			case 2: 
-				display.drawRect(90, 0, 38, 16, WHITE);
+				display.drawRect(64, 0, 24, 12, WHITE);
 				break;
 			case 3: 
+				display.drawRect(96, 0, 24, 12, WHITE);
+				break;
+			case 4: 
+				display.drawRect(27, 16, 38, 16, WHITE);
+				break;
+			case 5: 
 				display.drawRect(90, 16, 38, 16, WHITE);
 				break;
 		}
@@ -619,8 +642,14 @@ void loop() {
 						patternLength[playingPattern] = pattLen[playingPattern];
 						dirtyDisplay = true;
 					} else if (noteSelect && noteSelection && !enc_edit){
-
-						if (nsmode == 3) { // set velocity
+						if (nsmode >= 0 && nsmode < 4){
+							if(u.dir() < 0){
+								//{notenum,vel,len,p1,p2,p3,p4,p5}
+								stepNoteP[playingPattern][selectedStep][nsmode+3] = -1;
+								dirtyDisplay = true;
+							}
+						}
+						if (nsmode == 5) { // set velocity
 							int tempVel = stepNoteP[playingPattern][selectedStep][1];
 							stepNoteP[playingPattern][selectedStep][1] = constrain(tempVel + amt, 0, 127);
 							dirtyDisplay = true;
@@ -684,7 +713,7 @@ void loop() {
 			if(mode == 1) {
 				if (noteSelect && noteSelection) {
 					// increment nsmode
-					nsmode = (nsmode + 1) % 4;
+					nsmode = (nsmode + 1) % 6;
 					//Serial.println(nsmode);
 					dirtyDisplay = true;
 				}

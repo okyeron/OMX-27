@@ -21,6 +21,7 @@ const int CC_OM2 = 28; // Mother mode - enc turn
 
 // POTS/ANALOG INPUTS					// CCS mapped to Organelle Defaults
 int pots[] = {CC1,CC2,CC3,CC4,CC5};			// the MIDI CC (continuous controller) for each analog input
+int potValues[] = {0,0,0,0,0};			
 int analogPins[] = {23,22,21,20,16};	// teensy pins for analog inputs
 int analogValues[] = {0,0,0,0,0};		// default values
 int potCC = pots[0];
@@ -34,7 +35,7 @@ const char* modes[] = {"MI","S1","S2","OM"};
 int mode = DEFAULT_MODE;
 int newmode = DEFAULT_MODE;
 #define numModes (sizeof(modes)/sizeof(char *)) //array size  
-int nsmode = 0;
+int nsmode = 5;
 
 // VARIABLES
 float step_delay;
