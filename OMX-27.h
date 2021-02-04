@@ -93,36 +93,60 @@ word V_scale;
 
 
 // COLOR PRESETS
+// https://www.rapidtables.com/web/color/color-wheel.html
+// hsl(xxx, 100%, 50%)
 const auto RED = 0xFF0000;
-const auto ORANGE = 0xFF8C00;
+const auto ORANGE = 0xFF8000;
 const auto YELLOW = 0xFFFF00;
+const auto LIME = 0x80FF00;
 const auto GREEN = 0x00FF00;
-const auto BLUE = 0x0000FF;
-const auto INDIGO = 0x4B0082;
-const auto VIOLET = 0xEE82EE;
-const auto HALFGREEN = 0x008000;
-const auto HALFRED = 0x800000;
-const auto DKORANGE = 0x663300;
-const auto LBLUE = 0xADD8E6;
-const auto DKBLUE = 0x000080;
+const auto MINT = 0x00FF80;
 const auto CYAN = 0x00FFFF;
-const auto LTCYAN = 0xE0FFFF;
-const auto DKCYAN = 0x008080;
+const auto RBLUE = 0x007FFF;
+const auto BLUE = 0x0000FF;
+const auto PURPLE = 0x7F00FF;
 const auto MAGENTA = 0xFF00FF;
-const auto DKMAGENTA = 0x330033;
-const auto PURPLE = 0x3B0F85;
+const auto ROSE = 0xFF0080;
+
+// hsl(xxx, 50%, 50%)
+const auto MEDRED = 0xBF4040;
+const auto MEDBLUE = 0x4040BF;
+const auto MEDYELLOW = 0xBFBF40;
+
+// hsl(xxx, 100%, 90%)
+const auto LTCYAN = 0xE0FFFF;
+const auto LTRED = 0xFFCCCC;
+
+// hsl(xxx, 100%, 75%)
+const auto LTPURPLE = 0xBF80FF;
+
+// hsl(xxx, 100%, 25%)
+const auto DKCYAN = 0x008080;
+const auto DKBLUE = 0x000080;
+const auto DKMAGENTA = 0x80007F;
+const auto DKGREEN = 0x008000;
+const auto DKORANGE = 0x804000;
+const auto DKRED = 0x800000;
+const auto INDIGO = 0x4B0082;
+
+// hsl(xxx, 50%, 75%)
+const auto LBLUE = 0x9FCFDF;
+const auto VIOLET = 0xDF9FDF;
+
+// other
 const auto AMBER = 0x999900;
 const auto BEIGE = 0xFFCC33;
+
+// no color
 const auto HALFWHITE = 0x808080;
 const auto LOWWHITE = 0x202020;
 const auto LEDOFF = 0x000000;
 
 // sequence pattern colors
-const uint32_t seqColors[] = {ORANGE,YELLOW,HALFGREEN,MAGENTA,VIOLET,DKCYAN,DKBLUE,PURPLE};
-
+const uint32_t seqColors[] = {ORANGE,YELLOW,DKGREEN,MAGENTA,CYAN,BLUE,PURPLE,LTPURPLE};
 
 #define MIDINOTEON HALFWHITE
-#define SEQCHASE HALFRED 
+#define SEQCHASE DKRED 
 #define SEQMARKER LOWWHITE 
 #define SEQSTEP ORANGE 
 

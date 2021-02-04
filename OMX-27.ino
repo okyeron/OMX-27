@@ -218,7 +218,7 @@ void setup() {
 
 void midi_leds() {
 	if (midiAUX){
-		strip.setPixelColor(0, HALFRED);
+		strip.setPixelColor(0, MEDRED);
 	} else {
 		strip.setPixelColor(0, LEDOFF);
 	}
@@ -391,27 +391,45 @@ void resetClocks(){
 // ####### DISPLAY FUNCTIONS #######
 
 void dispPattLen(){
-	display.setTextSize(1);
-	display.setCursor(0, 12);
-	display.print("LEN: ");
-	display.setCursor(32, 12);
-	display.print(pattLen[playingPattern]);
+//	display.setTextSize(1);
+//	display.setCursor(0, 12);
+//	display.print("LEN: ");
+//	display.setCursor(32, 12);
+//	display.print(pattLen[playingPattern]);
+		display.setCursor(1, 19);
+		display.setTextSize(1);
+		display.print("LEN");		
+		display.setCursor(29, 18);
+		display.setTextSize(2);
+		display.print(pattLen[playingPattern]);
 }
 
 void dispPatt(){
-	display.setTextSize(1);
-	display.setCursor(0, 0);
-	display.print("PTN: ");
-	display.setCursor(32, 0);
-	display.print(playingPattern+1);
+//	display.setTextSize(1);
+//	display.setCursor(0, 0);
+//	display.print("PTN: ");
+//	display.setCursor(32, 0);
+//	display.print(playingPattern+1);
+		display.setCursor(0, 0);
+		display.setTextSize(1);
+		display.print("PTN");		
+		display.setCursor(30, 0);
+		display.setTextSize(2);
+		display.print(playingPattern+1);
 }
 
 void dispTempo(){
-	display.setTextSize(1);
-	display.setCursor(0, 24);
-	display.print("BPM:");
-	display.setCursor(32, 24);
-	display.print((int)clockbpm);
+//	display.setTextSize(1);
+//	display.setCursor(0, 24);
+//	display.print("BPM:");
+//	display.setCursor(32, 24);
+//	display.print((int)clockbpm);
+		display.setCursor(65, 19);
+		display.setTextSize(1);
+		display.print("BPM");		
+		display.setCursor(92, 18);
+		display.setTextSize(2);
+		display.print((int)clockbpm);
 }
 
 void dispPots(){
@@ -440,6 +458,7 @@ void dispNotes(){
 
 void dispNoteSelect(){
 	if (!noteSelection){
+
 		display.setCursor(0, 0);
 		display.setTextSize(1);
 		display.print("PTN");		
@@ -447,11 +466,42 @@ void dispNoteSelect(){
 		display.setTextSize(2);
 		display.print(playingPattern+1);
 
-
+		display.fillRect(66, 0, 58, 32, WHITE);
+		display.setTextColor(INVERSE);
 		display.setTextSize(4);
-		display.setCursor(74, 0);
+		display.setCursor(74, 1);
 		display.print("NS");
 	}else{
+
+		switch(nsmode){
+			case 0:
+				display.fillRect(-2, 0, 22, 12, WHITE);
+				display.setTextColor(INVERSE);
+				//display.drawRect(0, 0, 24, 12, WHITE);
+				break;
+			case 1: 
+				display.fillRect(30, 0, 22, 12, WHITE);
+				display.setTextColor(INVERSE);
+				break;
+			case 2: 
+				display.fillRect(62, 0, 22, 12, WHITE);
+				display.setTextColor(INVERSE);
+				break;
+			case 3: 
+				display.fillRect(94, 0, 22, 12, WHITE);
+				display.setTextColor(INVERSE);
+				//display.drawRect(96, 0, 22, 12, WHITE);
+				break;
+			case 4: 
+				display.fillRect(27, 16, 38, 16, WHITE);
+				display.setTextColor(INVERSE);
+				break;
+			case 5: 
+				display.fillRect(90, 16, 38, 16, WHITE);
+				display.setTextColor(INVERSE);
+				break;
+		}
+
 //		display.setCursor(1, 1);
 //		display.setTextSize(1);
 //		display.print("STEP");		
@@ -496,33 +546,13 @@ void dispNoteSelect(){
 		display.print(stepNoteP[playingPattern][selectedStep][1]);
 //		display.print(stepVelocity[playingPattern][selectedStep]);
 
-		switch(nsmode){
-			case 0:
-				//display.fillRect(40, 4, 4, 4, WHITE);
-				display.drawRect(0, 0, 24, 12, WHITE);
-				break;
-			case 1: 
-				display.drawRect(32, 0, 24, 12, WHITE);
-				break;
-			case 2: 
-				display.drawRect(64, 0, 24, 12, WHITE);
-				break;
-			case 3: 
-				display.drawRect(96, 0, 24, 12, WHITE);
-				break;
-			case 4: 
-				display.drawRect(27, 16, 38, 16, WHITE);
-				break;
-			case 5: 
-				display.drawRect(90, 16, 38, 16, WHITE);
-				break;
-		}
 	}
 }
 
 void dispPatternParams(){
 	if (patternParams){
-		display.setCursor(0, 8);
+
+		display.setCursor(0, 0);
 		display.setTextSize(1);
 		display.print("PTN");		
 		display.setCursor(30, 0);
@@ -536,8 +566,10 @@ void dispPatternParams(){
 		display.setTextSize(2);
 		display.print(pattLen[playingPattern]);
 
+		display.fillRect(66, 0, 58, 32, WHITE);
+		display.setTextColor(INVERSE);
 		display.setTextSize(4);
-		display.setCursor(74, 0);
+		display.setCursor(74, 1);
 		display.print("PT");
 	}else{
 
@@ -878,10 +910,11 @@ void loop() {
 				// AUX key
 				if (e.bit.EVENT == KEY_JUST_PRESSED && thisKey == 0) {
 					if (noteSelect){
-						// toggle out of note select
-						noteSelect = !noteSelect;
 						if (noteSelection){
 							noteSelection = false;
+						} else {
+							// toggle out of note select
+							noteSelect = !noteSelect;
 						}
 						dirtyDisplay = true;
 					} else if (patternParams){
