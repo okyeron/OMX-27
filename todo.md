@@ -8,6 +8,8 @@
 
 * pattern rotate?
 
+* clock divide/mulitply?
+
 * what happens on CV when you have multiple keys pressed?
 
 * note offs not reliable

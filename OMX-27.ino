@@ -502,17 +502,6 @@ void dispNoteSelect(){
 				break;
 		}
 
-//		display.setCursor(1, 1);
-//		display.setTextSize(1);
-//		display.print("STEP");		
-//		display.setCursor(29, 0);
-//		display.setTextSize(2);
-//		display.print(selectedStep+1);
-
-//		display.setCursor(1, 18);
-//		display.setTextSize(1);
-//		display.print("CC");
-//		display.print(potCC);
 		display.setCursor(2, 2);
 		int tempOffset = 32;
 		for (int j=0; j<4; j++){
@@ -529,8 +518,6 @@ void dispNoteSelect(){
 			}
 		}
 		
-
-
 		display.setCursor(1, 19);
 		display.setTextSize(1);
 		display.print("NOTE");		
@@ -544,8 +531,6 @@ void dispNoteSelect(){
 		display.setCursor(92, 18);
 		display.setTextSize(2);
 		display.print(stepNoteP[playingPattern][selectedStep][1]);
-//		display.print(stepVelocity[playingPattern][selectedStep]);
-
 	}
 }
 

@@ -113,20 +113,23 @@ const auto MEDRED = 0xBF4040;
 const auto MEDBLUE = 0x4040BF;
 const auto MEDYELLOW = 0xBFBF40;
 
-// hsl(xxx, 100%, 90%)
-const auto LTCYAN = 0xE0FFFF;
+// hsl(xxx, 100%, 90%) // these are kinda hard to tell
+const auto LTCYAN = 0xCCFFFF;
 const auto LTRED = 0xFFCCCC;
 
 // hsl(xxx, 100%, 75%)
 const auto LTPURPLE = 0xBF80FF;
+const auto SALMON = 0xFF8080;
+const auto PINK = 0xFF80D4;
 
 // hsl(xxx, 100%, 25%)
 const auto DKCYAN = 0x008080;
-const auto DKBLUE = 0x000080;
 const auto DKMAGENTA = 0x80007F;
-const auto DKGREEN = 0x008000;
-const auto DKORANGE = 0x804000;
 const auto DKRED = 0x800000;
+const auto DKORANGE = 0x804000;
+const auto DKYELLOW = 0x7F8000;
+const auto DKGREEN = 0x008000;
+const auto DKBLUE = 0x000080;
 const auto INDIGO = 0x4B0082;
 
 // hsl(xxx, 50%, 75%)
@@ -142,8 +145,9 @@ const auto HALFWHITE = 0x808080;
 const auto LOWWHITE = 0x202020;
 const auto LEDOFF = 0x000000;
 
-// sequence pattern colors
-const uint32_t seqColors[] = {ORANGE,YELLOW,DKGREEN,MAGENTA,CYAN,BLUE,PURPLE,LTPURPLE};
+
+// sequencer pattern colors
+const uint32_t seqColors[] = {ORANGE,YELLOW,DKGREEN,MAGENTA,CYAN,BLUE,MEDYELLOW,LTPURPLE};
 
 #define MIDINOTEON HALFWHITE
 #define SEQCHASE DKRED 
