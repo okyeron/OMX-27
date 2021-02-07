@@ -2,6 +2,10 @@
 
 * add octave to note select
 
+* Track mute (S2)
+
+* Conditional triggers (see grid step on norns )
+
 * note length?
 
 * Additional mode for MIDI settings (channel, etc)?

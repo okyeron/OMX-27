@@ -79,4 +79,8 @@ These come in a pack of 4 keycaps. You will need 7 packs (@ ~$42 total).
 
 [Maxkeyboard Black Translucent MX Blank](https://www.maxkeyboard.com/black-translucent-cherry-mx-blank-keycap-set-for-esc-w-a-s-d-or-e-s-d-f-and-arrow-keys.html) (pack of 9). ($21 for 3 packs)
 
+### USB Cable: 
 
+I recommend using a right angle extension cable [like this one from Amazon](https://www.amazon.com/gp/product/B015PSU5F6/)  
+
+Be sure you have a good, known working, USB DATA CABLE and not just a charging cable.

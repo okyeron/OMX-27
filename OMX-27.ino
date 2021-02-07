@@ -31,6 +31,7 @@ elapsedMicros clksTimer = 0;
 unsigned long clksDelay;
 elapsedMillis step_interval[8] = {0,0,0,0,0,0,0,0};
 unsigned long lastStepTime[8] = {0,0,0,0,0,0,0,0};
+elapsedMillis keyPressTime[27] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
 
 // ENCODER
@@ -151,7 +152,7 @@ void setup() {
 	// Startup screen		
 	display.clearDisplay();
 	testdrawrect();
-	delay(300);
+	delay(200);
 	display.clearDisplay();
 	display.setCursor(16,4);
 	defaultText(2);
@@ -175,9 +176,6 @@ void setup() {
 		//MIDI.setHandleNoteOff(HandleNoteOff);
 		//usbMIDI.setHandleNoteOff(HandleNoteOff);
 
-		// READ POTS
-//		readPotentimeters();
-	
 	//LEDs
 	strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
 	strip.show();            // Turn OFF all pixels ASAP
@@ -186,9 +184,9 @@ void setup() {
 	for(int i=0; i<LED_COUNT; i++) { // For each pixel...
 		strip.setPixelColor(i, HALFWHITE);
 		strip.show();   // Send the updated pixel colors to the hardware.
-		delay(20); // Pause before next pass through loop
+		delay(5); // Pause before next pass through loop
 	}
-	rainbow(10); // rainbow startup pattern
+	rainbow(5); // rainbow startup pattern
   
 	delay(100);
 	strip.fill(0, 0, LED_COUNT);
@@ -237,9 +235,9 @@ void show_current_step(int patternNum) {
 															// AUX KEY
 	if (playing && blinkState){
 		strip.setPixelColor(0, HALFWHITE);
-	} else if (noteSelect){
+	} else if (noteSelect && blinkState){
 		strip.setPixelColor(0, NOTESEL);
-	} else if (patternParams){
+	} else if (patternParams && blinkState){
 		strip.setPixelColor(0, PATTSEL);
 	} else {
 		strip.setPixelColor(0, LEDOFF);
@@ -264,26 +262,26 @@ void show_current_step(int patternNum) {
 		for(int j = 1; j < NUM_STEPS+11; j++){		
 			if (j < patternLength[patternNum]+11){
 				if (j == 1) {								// NOTE SELECT
-					if (noteSelect){
-						if (noteSelect && blinkState){
-							strip.setPixelColor(j, NOTESEL);
-						} else {
-							strip.setPixelColor(j, LEDOFF);
-						}
-					} else {
-						strip.setPixelColor(j, NOTESEL);
-					}
+//					if (noteSelect){
+//						if (noteSelect && blinkState){
+//							strip.setPixelColor(j, NOTESEL);
+//						} else {
+//							strip.setPixelColor(j, LEDOFF);
+//						}
+//					} else {
+//						strip.setPixelColor(j, NOTESEL);
+//					}
 					
-				} else if (j == 2) {						// FUNC TWO
-					if (patternParams){
-						if (patternParams && blinkState){
-							strip.setPixelColor(j, PATTSEL);
-						} else {
-							strip.setPixelColor(j, LEDOFF);
-						}
-					} else {
-						strip.setPixelColor(j, PATTSEL);
-					}
+				} else if (j == 2) {						// PATTERN PARAMS
+//					if (patternParams){
+//						if (patternParams && blinkState){
+//							strip.setPixelColor(j, PATTSEL);
+//						} else {
+//							strip.setPixelColor(j, LEDOFF);
+//						}
+//					} else {
+//						strip.setPixelColor(j, PATTSEL);
+//					}
 
 					
 				} else if (j == patternNum+3){  			// PATTERN SELECT
@@ -339,6 +337,8 @@ void show_current_step(int patternNum) {
 // ####### END LEDS
 
 
+// ####### SEQENCER FUNCTIONS
+
 void step_ahead(int patternNum) {
   // step ahead one place
     seqPos[patternNum]++;
@@ -361,6 +361,7 @@ void step_off(int patternNum, int position){
       analogWrite(CVPITCH_PIN, 0);
       digitalWrite(CVGATE_PIN, LOW);
 }
+
 
 
 // FIGURE OUT WHAT TO DO WITH CLOCK FOR NOW ???
@@ -546,7 +547,7 @@ void dispPatternParams(){
 
 		display.setCursor(0, 18);
 		display.setTextSize(1);
-		display.print("LEN: ");		
+		display.print("LEN");		
 		display.setCursor(30, 18);
 		display.setTextSize(2);
 		display.print(pattLen[playingPattern]);
@@ -615,9 +616,9 @@ void loop() {
 		} else if (!noteSelect && !patternParams){  
 			switch(mode) { 
 				case 3: // Organelle Mother
-					if(u.dir() < 0){
+					if(u.dir() < 0){									// if turn ccw
 						usbMIDI.sendControlChange(CC_OM2,0,midiChannel);
-					} else if (u.dir() > 0){
+					} else if (u.dir() > 0){							// if turn cw
 						usbMIDI.sendControlChange(CC_OM2,127,midiChannel);
 					}      
 					break;
@@ -653,19 +654,24 @@ void loop() {
 				case 0: // MIDI
 					break;
 				case 1: // SEQ 1
-					if (patternParams && !enc_edit){ // sequence edit more
+					if (patternParams && !enc_edit){ // sequence edit mode
 						//
 						pattLen[playingPattern] = constrain(patternLength[playingPattern] + amt, 1, 16);
 						patternLength[playingPattern] = pattLen[playingPattern];
 						dirtyDisplay = true;
 					} else if (noteSelect && noteSelection && !enc_edit){
+						// {notenum,vel,len,p1,p2,p3,p4,p5}
 						if (nsmode >= 0 && nsmode < 4){
-							if(u.dir() < 0){
-								//{notenum,vel,len,p1,p2,p3,p4,p5}
+							if(u.dir() < 0){			// reset plock if turn ccw
 								stepNoteP[playingPattern][selectedStep][nsmode+3] = -1;
 								dirtyDisplay = true;
 							}
 						}
+						if (nsmode == 4) { // set note
+							int tempNote = stepNoteP[playingPattern][selectedStep][0];
+							stepNoteP[playingPattern][selectedStep][0] = constrain(tempNote + amt, 0, 127);
+							dirtyDisplay = true;
+						}	
 						if (nsmode == 5) { // set velocity
 							int tempVel = stepNoteP[playingPattern][selectedStep][1];
 							stepNoteP[playingPattern][selectedStep][1] = constrain(tempVel + amt, 0, 127);
@@ -684,7 +690,7 @@ void loop() {
 					}
 					break;
 				case 2: // SEQ 2
-					if (noteSelect && !enc_edit){ // sequence edit more
+					if (noteSelect && !enc_edit){ // sequence edit mode
 						// 
 						pattLen[playingPattern] = constrain(patternLength[playingPattern] + amt, 1, 16);
 						patternLength[playingPattern] = pattLen[playingPattern];
@@ -758,11 +764,18 @@ void loop() {
 	while(customKeypad.available()){
 		keypadEvent e = customKeypad.read();
 		int thisKey = e.bit.KEY;
+		int keyPos = thisKey - 11;
 
+		if (e.bit.EVENT == KEY_JUST_PRESSED){
+			keyState[thisKey] = true;
+		}
+		
 		switch(mode) {
 			case 3: // Organelle
 				// Fall Through		
 			case 0: // MIDI CONTROLLER
+		
+				// ### KEY PRESS EVENTS
 				if (e.bit.EVENT == KEY_JUST_PRESSED && thisKey != 0) {
 					//Serial.println(" pressed");
 					noteOn(thisKey, noteon_velocity, playingPattern);
@@ -797,11 +810,12 @@ void loop() {
 				// fall through
 			case 2: // SEQUENCER 2
 				// Sequencer row keys
-
-				// ### KEY PRESS EVENTS
-				if (e.bit.EVENT == KEY_JUST_PRESSED && thisKey != 0) {
 					
-					int keyPos = thisKey - 11;
+				// ### KEY PRESS EVENTS
+				
+				if (e.bit.EVENT == KEY_JUST_PRESSED && thisKey != 0) {
+					// set key timer to zero
+					keyPressTime[thisKey] = 0;
 					
 					// are we noteSelect ?
 					if (noteSelect){
@@ -809,26 +823,28 @@ void loop() {
 							stepSelect = false;
 							selectedNote = thisKey;
 							stepNoteP[playingPattern][selectedStep][0] = notes[thisKey];
-//							stepNote[playingPattern][selectedStep] = notes[thisKey];
 							if (!playing){
 								noteOn(thisKey, noteon_velocity, playingPattern);
 							}
+							// see RELEASE events for more
 							dirtyDisplay = true;
-							
+														
+						} else if (thisKey == 1) { 
+//							noteSelect = !noteSelect; // toggle noteSelect on/off
+//							patternParams = false;
+//							dirtyDisplay = true;
+
+						} else if (thisKey == 2) { 
+
+						} else if (thisKey > 2 && thisKey < 11) { // Pattern select keys
+							playingPattern = thisKey-3;
+							dirtyDisplay = true;
+
 						} else if ( thisKey > 10 ) {
 							selectedStep = keyPos; // set noteSelection to this step
 							stepSelect = true;
 							noteSelection = true;
-							dirtyDisplay = true;
-							
-						} else if (thisKey > 2 && thisKey < 11) { // Pattern select keys
-							playingPattern = thisKey-3;
-							dirtyDisplay = true;
-							
-						} else if (thisKey == 1) { 
-							noteSelect = !noteSelect; // toggle noteSelect on/off
-							patternParams = false;
-							dirtyDisplay = true;
+							dirtyDisplay = true;							
 						}
 						
 					// are we patternParams ?
@@ -836,35 +852,36 @@ void loop() {
 
 						if (thisKey == 1) { 
 
-
 						} else if (thisKey == 2) { 
-							patternParams = !patternParams; // toggle patternParams on/off
-							noteSelect = false;
-							dirtyDisplay = true;
+//							patternParams = !patternParams; // toggle patternParams on/off
+//							noteSelect = false;
+//							dirtyDisplay = true;
 						} else if (thisKey > 2 && thisKey < 11) { // Pattern select keys
 							playingPattern = thisKey-3;
 							dirtyDisplay = true;
+						} else if ( thisKey > 10 ) {
+
 						}
 					
 
 					} else {					
-						// Black Keys
-						if (thisKey > 2 && thisKey < 11) { // Pattern select keys
-							playingPattern = thisKey-3;
-							dirtyDisplay = true;
-							
-						} else if (thisKey == 1) { 			// Note Select
-							if (noteSelection){
-								noteSelection = !noteSelection; // toggle noteSelect on/off
-							}else{
-								noteSelect = !noteSelect; // toggle noteSelect on/off
-							}
-							dirtyDisplay = true;
+						if (thisKey == 1) {		
+//							if (noteSelection){					// Note Select
+//								noteSelection = !noteSelection; // toggle noteSelection on/off
+//							}else{
+//								noteSelect = !noteSelect; 		// toggle noteSelect on/off
+//							}
+//							dirtyDisplay = true;
+						
+						} else if (thisKey == 2) { 			
+							seqReset(); 					// reset all sequences to step 1
+															// patternParams
+//							patternParams = !patternParams; // toggle patternParams on/off
+//							dirtyDisplay = true;
 
-						} else if (thisKey == 2) { 			// patternParams
-							patternParams = !patternParams; // toggle patternParams on/off
-							
-							seqReset(); // reset all sequences to step 1
+						// BLACK KEYS
+						} else if (thisKey > 2 && thisKey < 11) { // Pattern select
+							playingPattern = thisKey-3;
 							dirtyDisplay = true;
 							
 						} else if (thisKey > 10) { // SEQUENCE 1-16 KEYS
@@ -876,45 +893,59 @@ void loop() {
 							}
 						}
 					}
-//					Serial.print("playingPattern: ");
-//					Serial.println(playingPattern);
 				}
 				
-
 				// ### KEY RELEASE EVENTS
+				
+				if (e.bit.EVENT == KEY_JUST_RELEASED && thisKey != 0) {
+					
+				}
+				
 				if (e.bit.EVENT == KEY_JUST_RELEASED && thisKey != 0 && noteSelection && selectedNote > 0) {
-					noteSelection = false;
 					if (!playing){
 						noteOff(thisKey);
 					}
+//					noteSelection = false;
 //					noteSelect = false;
-					selectedStep = 0;
-					selectedNote = 0;
+//					selectedStep = 0;
+//					selectedNote = 0;
 				}
 
-				// AUX key
+				// AUX KEY PRESS EVENTS
+				
 				if (e.bit.EVENT == KEY_JUST_PRESSED && thisKey == 0) {
+//				Serial.print("noteSelect:");
+//				Serial.println(noteSelect);
+//				Serial.print("noteSelection:");
+//				Serial.println(noteSelection);
+					
 					if (noteSelect){
 						if (noteSelection){
-							noteSelection = false;
+							selectedStep = 0;
+							selectedNote = 0;
+							
 						} else {
-							// toggle out of note select
-							noteSelect = !noteSelect;
+							
 						}
+						noteSelection = false;
+						noteSelect = !noteSelect;
 						dirtyDisplay = true;
+
 					} else if (patternParams){
 						patternParams = !patternParams;
 						dirtyDisplay = true;
+
 					} else {
-//						strip.setPixelColor(0, HALFWHITE);
 						if (playing){
 							playing = 0;
 							allNotesOff();
-//							strip.setPixelColor(0, LEDOFF);
 						} else {
 							playing = 1;
 						}
 					}
+
+				// AUX KEY RELEASE EVENTS
+
 				} else if (e.bit.EVENT == KEY_JUST_RELEASED && thisKey == 0) {
 				
 				}
@@ -923,14 +954,57 @@ void loop() {
 				break;
 		} // END MODE SWITCH
 
+		if (e.bit.EVENT == KEY_JUST_RELEASED){
+			keyState[thisKey] = false;
+			keyPressTime[thisKey] = 0;
+		}
+
 	} // END KEYS WHILE
+	
+	
+	// ### LONG KEY PRESS
+	for (int j=0; j<LED_COUNT; j++){
+		if (keyState[j]){
+			if (keyPressTime[j] >= longPressInterval && keyPressTime[j] < 9999){
+
+				// DO LONG PRESS THINGS
+				switch (mode){
+					case 0:
+						break;
+					case 1:
+						// fall through
+					case 2:
+						if (j > 0 && j < 11){ // skip AUX key, get pattern keys
+							patternParams = true;
+							dirtyDisplay = true;
+						
+						} else if (j > 10){
+							selectedStep = j - 11; // set noteSelection to this step
+							noteSelect = true;
+							stepSelect = true;
+							noteSelection = true;
+							dirtyDisplay = true;
+						}
+						break;
+						
+				}
+//				Serial.print("long press:");
+//				Serial.println(j);
+
+				keyPressTime[j] = 9999;	
+			}
+		}
+	}
+	
+
 
 	// ############### MODES LOGIC ##############
 
 	switch(mode){
-		case 3: 						// ORGANELLE MODE
+		case 3: 						// ############## ORGANELLE MODE
 			// Fall through
-		case 0:			// MIDI KEYBOARD
+
+		case 0:							// ############## MIDI KEYBOARD
 			midi_leds();				// SHOW LEDS
 
 			if (dirtyDisplay){			// DISPLAY
@@ -940,8 +1014,8 @@ void loop() {
 				dispOctave();
 			}
 			break;
-		case 1: 						// SEQUENCER 1
 
+		case 1: 						// ############## SEQUENCER 1
 			if (dirtyDisplay){			// DISPLAY
 				if (!enc_edit){
 					if (!noteSelect and !patternParams){
@@ -985,8 +1059,8 @@ void loop() {
 				}
 			}
 			break;
-		case 2: 						// SEQUENCER 2
 
+		case 2: 						// ############## SEQUENCER 2
 			if (dirtyDisplay){			// DISPLAY
 				if (noteSelect) {
 					dispNoteSelect();
@@ -1048,7 +1122,8 @@ void loop() {
 		// ignore incoming messages
 	}
 	
-} // #### END MAIN LOOP
+} // ######## END MAIN LOOP ########
+
 
 void seqReset(){
 	for (int k=0; k<8; k++){

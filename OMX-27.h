@@ -59,7 +59,8 @@ float newtempo = clockbpm;
 unsigned long tempoStartTime, tempoEndTime;
 
 unsigned long blinkInterval = clockbpm * 2;
-
+unsigned long longPressInterval = 1500;
+bool keyState[27] = {false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false};
 
 // KEY SWITCH ROWS/COLS
 const byte ROWS = 5; //five rows
@@ -121,6 +122,7 @@ const auto LTRED = 0xFFCCCC;
 const auto LTPURPLE = 0xBF80FF;
 const auto SALMON = 0xFF8080;
 const auto PINK = 0xFF80D4;
+const auto LTYELLOW = 0xFFFF80;
 
 // hsl(xxx, 100%, 25%)
 const auto DKCYAN = 0x008080;
@@ -155,4 +157,4 @@ const uint32_t seqColors[] = {ORANGE,YELLOW,DKGREEN,MAGENTA,CYAN,BLUE,MEDYELLOW,
 #define SEQSTEP ORANGE 
 
 #define NOTESEL DKCYAN 
-#define PATTSEL DKBLUE 
+#define PATTSEL LIME 
