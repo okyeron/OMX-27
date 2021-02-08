@@ -35,7 +35,8 @@ const char* modes[] = {"MI","S1","S2","OM"};
 int mode = DEFAULT_MODE;
 int newmode = DEFAULT_MODE;
 #define numModes (sizeof(modes)/sizeof(char *)) //array size  
-int nsmode = 5;
+int nsmode = 6;
+int ptmode = 2;
 
 // VARIABLES
 float step_delay;
@@ -45,6 +46,7 @@ bool blinkState = false;
 bool noteSelect = false;
 bool noteSelection = false;
 bool patternParams = false;
+int noteSelectPage = 0;
 int selectedNote = 0;
 int selectedStep = 0;
 bool stepSelect = false;
@@ -114,29 +116,39 @@ const auto MEDRED = 0xBF4040;
 const auto MEDBLUE = 0x4040BF;
 const auto MEDYELLOW = 0xBFBF40;
 
-// hsl(xxx, 100%, 90%) // these are kinda hard to tell
-const auto LTCYAN = 0xCCFFFF;
-const auto LTRED = 0xFFCCCC;
-
 // hsl(xxx, 100%, 75%)
+const auto LTCYAN = 0x80FFFF;
 const auto LTPURPLE = 0xBF80FF;
 const auto SALMON = 0xFF8080;
 const auto PINK = 0xFF80D4;
 const auto LTYELLOW = 0xFFFF80;
 
-// hsl(xxx, 100%, 25%)
-const auto DKCYAN = 0x008080;
-const auto DKMAGENTA = 0x80007F;
+// hsl(xxx, 100%, 15%)
 const auto DKRED = 0x800000;
-const auto DKORANGE = 0x804000;
-const auto DKYELLOW = 0x7F8000;
-const auto DKGREEN = 0x008000;
-const auto DKBLUE = 0x000080;
+const auto DKORANGE = 0x4D2600;
+const auto DKYELLOW = 0x4C4D00;
+const auto DKLIME = 0x408000;
+const auto DKGREEN = 0x264D00;
+const auto DKCYAN = 0x004C4D;
+const auto DKBLUE = 0x00004D;
+const auto DKPURPLE = 0x26004D;
+const auto DKMAGENTA = 0x4D004C;
 const auto INDIGO = 0x4B0082;
 
 // hsl(xxx, 50%, 75%)
 const auto LBLUE = 0x9FCFDF;
 const auto VIOLET = 0xDF9FDF;
+
+// hsl(xxx, 25%, 50%)
+const auto DIMORANGE = 0x9F8060;
+const auto DIMYELLOW = 0x9F9F60;
+const auto DIMLIME = 0x809F60;
+const auto DIMGREEN = 0x609F60;
+const auto DIMMAGENTA = 0x9F609F;
+const auto DIMCYAN = 0x609F9F;
+const auto DIMBLUE = 0x60609F;
+const auto DIMPURPLE = 0x7F609F;
+
 
 // other
 const auto AMBER = 0x999900;
@@ -147,9 +159,12 @@ const auto HALFWHITE = 0x808080;
 const auto LOWWHITE = 0x202020;
 const auto LEDOFF = 0x000000;
 
+uint32_t stepColor = 0x000000;
 
 // sequencer pattern colors
-const uint32_t seqColors[] = {ORANGE,YELLOW,DKGREEN,MAGENTA,CYAN,BLUE,MEDYELLOW,LTPURPLE};
+const uint32_t seqColors[] = {ORANGE,YELLOW,GREEN,MAGENTA,CYAN,BLUE,LIME,LTPURPLE};
+const uint32_t muteColors[] = {DKORANGE,DKYELLOW,DKGREEN,DKMAGENTA,DKCYAN,DKBLUE,DKLIME,DKPURPLE};
+
 
 #define MIDINOTEON HALFWHITE
 #define SEQCHASE DKRED 
@@ -158,3 +173,6 @@ const uint32_t seqColors[] = {ORANGE,YELLOW,DKGREEN,MAGENTA,CYAN,BLUE,MEDYELLOW,
 
 #define NOTESEL DKCYAN 
 #define PATTSEL LIME 
+
+#define FUNKONE LTCYAN 
+#define FUNKTWO MINT 

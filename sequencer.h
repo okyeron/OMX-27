@@ -19,8 +19,10 @@ int seq_velocity = 100;
 int seq_acc_velocity = 127;
 
 // int lastNote[8] = {0, 0, 0, 0, 0, 0, 0, 0};            // A place to remember the last MIDI note we played
-int seqPos[8] = {0, 0, 0, 0, 0, 0, 0, 0};          // What position in the sequence are we in?
+int seqPos[8] = {0, 0, 0, 0, 0, 0, 0, 0};				// What position in the sequence are we in?
+bool patternMute[8] = {false, false, false, false, false, false, false, false};     
 int patternLength[8] = {16, 16, 16, 16, 16, 16, 16, 16};
+int patternStart[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 int pattLen[8] = {patternLength[0],patternLength[1],patternLength[2],patternLength[3],patternLength[4],patternLength[5],patternLength[6],patternLength[7]};
 
 // bool plocks[16];

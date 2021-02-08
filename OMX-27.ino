@@ -242,6 +242,12 @@ void show_current_step(int patternNum) {
 	} else {
 		strip.setPixelColor(0, LEDOFF);
 	}
+	
+	if (patternMute[patternNum]){
+		stepColor = muteColors[patternNum];
+	} else {
+		stepColor = seqColors[patternNum];
+	}
 
 	if (noteSelect && noteSelection) {
 		for(int j = 1; j < NUM_STEPS+11; j++){
@@ -261,7 +267,9 @@ void show_current_step(int patternNum) {
 	} else {
 		for(int j = 1; j < NUM_STEPS+11; j++){		
 			if (j < patternLength[patternNum]+11){
-				if (j == 1) {								// NOTE SELECT
+				if (j == 1) {								
+					strip.setPixelColor(j, FUNKONE);
+// NOTE SELECT
 //					if (noteSelect){
 //						if (noteSelect && blinkState){
 //							strip.setPixelColor(j, NOTESEL);
@@ -272,7 +280,9 @@ void show_current_step(int patternNum) {
 //						strip.setPixelColor(j, NOTESEL);
 //					}
 					
-				} else if (j == 2) {						// PATTERN PARAMS
+				} else if (j == 2) {
+					strip.setPixelColor(j, FUNKTWO);
+// PATTERN PARAMS
 //					if (patternParams){
 //						if (patternParams && blinkState){
 //							strip.setPixelColor(j, PATTSEL);
@@ -285,7 +295,7 @@ void show_current_step(int patternNum) {
 
 					
 				} else if (j == patternNum+3){  			// PATTERN SELECT
-					strip.setPixelColor(patternNum+3, seqColors[patternNum]);
+					strip.setPixelColor(patternNum+3, stepColor);
 
 				} else {
 					strip.setPixelColor(j, LEDOFF);
@@ -302,13 +312,13 @@ void show_current_step(int patternNum) {
 						if (playing){
 							strip.setPixelColor(i+11, SEQCHASE); // step chase
 						} else if (stepPlay[patternNum][i] == 1){
-							strip.setPixelColor(i+11, seqColors[patternNum]); // step on color
+							strip.setPixelColor(i+11, stepColor); // step on color
 						} else {
 							strip.setPixelColor(i+11, SEQMARKER); 
 						}
 //						strip.setPixelColor(i+11, SEQCHASE); // step chase
 					} else if (stepPlay[patternNum][i] == 1){
-						strip.setPixelColor(i+11, seqColors[patternNum]); // step on color
+						strip.setPixelColor(i+11, stepColor); // step on color
 					} else {
 						strip.setPixelColor(i+11, SEQMARKER); 
 					}
@@ -316,14 +326,14 @@ void show_current_step(int patternNum) {
 					if (playing){
 						strip.setPixelColor(i+11, SEQCHASE); // step chase
 					} else if (stepPlay[patternNum][i] == 1){
-						strip.setPixelColor(i+11, seqColors[patternNum]); // step on color
+						strip.setPixelColor(i+11, stepColor); // step on color
 					} else {
 						strip.setPixelColor(i+11, LEDOFF); 
 					}
 //					strip.setPixelColor(i+11, SEQCHASE); // step chase
 
 				} else if (stepPlay[patternNum][i] == 1){
-					strip.setPixelColor(i+11, seqColors[patternNum]); // step on color
+					strip.setPixelColor(i+11, stepColor); // step on color
 
 				} else {
 					strip.setPixelColor(i+11, LEDOFF);
@@ -391,19 +401,6 @@ void resetClocks(){
 
 // ####### DISPLAY FUNCTIONS #######
 
-void dispPattLen(){
-//	display.setTextSize(1);
-//	display.setCursor(0, 12);
-//	display.print("LEN: ");
-//	display.setCursor(32, 12);
-//	display.print(pattLen[playingPattern]);
-		display.setCursor(1, 19);
-		display.setTextSize(1);
-		display.print("LEN");		
-		display.setCursor(29, 18);
-		display.setTextSize(2);
-		display.print(pattLen[playingPattern]);
-}
 
 void dispPatt(){
 //	display.setTextSize(1);
@@ -473,7 +470,7 @@ void dispNoteSelect(){
 		display.setCursor(74, 1);
 		display.print("NS");
 	}else{
-
+		int tempOffset = 27;
 		switch(nsmode){
 			case 0:
 				display.fillRect(-2, 0, 22, 12, WHITE);
@@ -481,30 +478,33 @@ void dispNoteSelect(){
 				//display.drawRect(0, 0, 24, 12, WHITE);
 				break;
 			case 1: 
-				display.fillRect(30, 0, 22, 12, WHITE);
+				display.fillRect(tempOffset, 0, 22, 12, WHITE);
 				display.setTextColor(INVERSE);
 				break;
 			case 2: 
-				display.fillRect(62, 0, 22, 12, WHITE);
+				display.fillRect(tempOffset*2, 0, 22, 12, WHITE);
 				display.setTextColor(INVERSE);
 				break;
 			case 3: 
-				display.fillRect(94, 0, 22, 12, WHITE);
+				display.fillRect(tempOffset*3, 0, 22, 12, WHITE);
 				display.setTextColor(INVERSE);
 				//display.drawRect(96, 0, 22, 12, WHITE);
 				break;
 			case 4: 
-				display.fillRect(27, 16, 38, 16, WHITE);
+				display.fillRect(tempOffset, 16, 38, 16, WHITE);
 				display.setTextColor(INVERSE);
 				break;
 			case 5: 
 				display.fillRect(90, 16, 38, 16, WHITE);
 				display.setTextColor(INVERSE);
 				break;
+			case 6: 
+				display.fillRect(tempOffset*4, 0, 20, 12, WHITE);
+				display.setTextColor(INVERSE);
+				break;
 		}
 
 		display.setCursor(2, 2);
-		int tempOffset = 32;
 		for (int j=0; j<4; j++){
 			display.setTextSize(1);
 			display.setCursor(j*tempOffset, 2);
@@ -514,10 +514,16 @@ void dispNoteSelect(){
 				display.print("---");
 			}
 			if (j != 3){
-				display.setCursor(j*tempOffset+16, 2);
-				display.print(" /");
+				display.setCursor(j*tempOffset+19, 2);
+				display.print("/");
 			}
 		}
+
+		display.setTextSize(1);
+		display.setCursor(tempOffset*4+2, 1);
+		display.print("NS");
+		display.print(noteSelectPage+1);
+		
 		
 		display.setCursor(1, 19);
 		display.setTextSize(1);
@@ -535,8 +541,41 @@ void dispNoteSelect(){
 	}
 }
 
+void dispPattLen(){
+		display.setCursor(1, 19);
+		display.setTextSize(1);
+		display.print("LEN");	
+		display.setCursor(29, 18);
+		display.setTextSize(2);
+		display.print(pattLen[playingPattern]);
+}
+void dispPattStrt(){
+		display.setCursor(1, 19);
+		display.setTextSize(1);
+		display.print("SRT");	
+		display.setCursor(29, 18);
+		display.setTextSize(2);
+		display.print(pattLen[playingPattern]);
+}
+
 void dispPatternParams(){
 	if (patternParams){
+
+		int tempOffset = 27;
+		switch(ptmode){
+			case 0:  // LEN
+				display.fillRect(tempOffset, 16, 38, 16, WHITE);
+				display.setTextColor(INVERSE);
+				break;
+			case 1: 	// ROTATE
+				display.fillRect(63, 16, 28, 16, WHITE);
+				display.setTextColor(INVERSE);
+				break;
+			case 2: 
+				display.fillRect(100, 0, 28, 16, WHITE);
+				display.setTextColor(INVERSE);
+				break;
+		}
 
 		display.setCursor(0, 0);
 		display.setTextSize(1);
@@ -545,17 +584,23 @@ void dispPatternParams(){
 		display.setTextSize(2);
 		display.print(playingPattern+1);
 
-		display.setCursor(0, 18);
+		display.setCursor(1, 19);
 		display.setTextSize(1);
 		display.print("LEN");		
-		display.setCursor(30, 18);
+		display.setCursor(29, 18);
 		display.setTextSize(2);
 		display.print(pattLen[playingPattern]);
 
-		display.fillRect(66, 0, 58, 32, WHITE);
-		display.setTextColor(INVERSE);
-		display.setTextSize(4);
-		display.setCursor(74, 1);
+		display.setCursor(65, 19);
+		display.setTextSize(1);
+		display.print("ROT");		
+		display.setCursor(65, 18);
+		display.setTextSize(2);
+
+//		display.fillRect(100, 0, 20, 16, WHITE);
+//		display.setTextColor(INVERSE);
+		display.setTextSize(2);
+		display.setCursor(102, 1);
 		display.print("PT");
 	}else{
 
@@ -656,8 +701,15 @@ void loop() {
 				case 1: // SEQ 1
 					if (patternParams && !enc_edit){ // sequence edit mode
 						//
-						pattLen[playingPattern] = constrain(patternLength[playingPattern] + amt, 1, 16);
-						patternLength[playingPattern] = pattLen[playingPattern];
+						if (ptmode == 0) { // set length
+							pattLen[playingPattern] = constrain(patternLength[playingPattern] + amt, 1, 16);
+							patternLength[playingPattern] = pattLen[playingPattern];
+						}	
+						if (ptmode == 1) { // set rotation						
+							//int N = sizeof(stepNoteP[playingPattern]) / sizeof(int);
+							rotatePattern(stepPlay[playingPattern], patternLength[playingPattern], constrain(amt, -patternLength[playingPattern]-1, patternLength[playingPattern]-1));
+						}	
+						
 						dirtyDisplay = true;
 					} else if (noteSelect && noteSelection && !enc_edit){
 						// {notenum,vel,len,p1,p2,p3,p4,p5}
@@ -676,6 +728,9 @@ void loop() {
 							int tempVel = stepNoteP[playingPattern][selectedStep][1];
 							stepNoteP[playingPattern][selectedStep][1] = constrain(tempVel + amt, 0, 127);
 							dirtyDisplay = true;
+						}	
+						if (nsmode == 6) { // change page
+
 						}	
 //						Serial.println("NS");
 
@@ -736,8 +791,14 @@ void loop() {
 			if(mode == 1) {
 				if (noteSelect && noteSelection) {
 					// increment nsmode
-					nsmode = (nsmode + 1) % 6;
-					//Serial.println(nsmode);
+					nsmode = (nsmode + 1 ) % 7;
+					Serial.println(nsmode);
+					dirtyDisplay = true;
+				}
+				if (patternParams) {
+					// increment ptmode
+					ptmode = (ptmode + 1 ) % 3;
+					Serial.println(ptmode);
 					dirtyDisplay = true;
 				}
 			}
@@ -881,8 +942,16 @@ void loop() {
 
 						// BLACK KEYS
 						} else if (thisKey > 2 && thisKey < 11) { // Pattern select
-							playingPattern = thisKey-3;
-							dirtyDisplay = true;
+						
+							if (keyState[2]){ 		// If KEY 2 is down + pattern = mute
+//								Serial.print("mute ");
+//								Serial.println(thisKey);
+//								Serial.println(patternMute[thisKey]);
+								patternMute[thisKey-3] = !patternMute[thisKey-3];
+							} else {
+								playingPattern = thisKey-3;
+								dirtyDisplay = true;
+							}
 							
 						} else if (thisKey > 10) { // SEQUENCE 1-16 KEYS
 							if (stepPlay[playingPattern][keyPos] == 1){ // toggle note on
@@ -974,7 +1043,7 @@ void loop() {
 					case 1:
 						// fall through
 					case 2:
-						if (j > 0 && j < 11){ // skip AUX key, get pattern keys
+						if (j > 2 && j < 11){ // skip AUX key, get pattern keys
 							patternParams = true;
 							dirtyDisplay = true;
 						
@@ -1074,20 +1143,23 @@ void loop() {
 //					Serial.print("pattern:");
 //					Serial.println(j);
 					
-					if(step_interval[j] >= step_delay){
-						int lastPos = (seqPos[j]+15) % 16;
-						if (lastNote[j][lastPos] > 0){
-							step_off(j, lastPos);
+					if (!patternMute[j]) {
+					
+						if(step_interval[j] >= step_delay){
+							int lastPos = (seqPos[j]+15) % 16;
+							if (lastNote[j][lastPos] > 0){
+								step_off(j, lastPos);
+							}
+							lastStepTime[j] = step_interval[j];
+							step_on(j);
+							playNote(j);
+							show_current_step(playingPattern);
+							step_ahead(j);
+							step_interval[j] = 0;
+	//					} else if(step_interval[playingPattern] >= step_delay / 2){
+	//						step_off(j, lastPos);
+	//						show_current_step(playingPattern);
 						}
-						lastStepTime[j] = step_interval[j];
-						step_on(j);
-						playNote(j);
-						show_current_step(playingPattern);
-						step_ahead(j);
-						step_interval[j] = 0;
-//					} else if(step_interval[playingPattern] >= step_delay / 2){
-//						step_off(j, lastPos);
-//						show_current_step(playingPattern);
 					}
 				}				
 			} else {
@@ -1161,6 +1233,30 @@ void noteOff(int notenum){
 	strip.setPixelColor(notenum, LEDOFF); 
 	dirtyPixels = true;
 	dirtyDisplay = true;
+}
+
+void rotatePattern(int a[], int size, int rot ){
+	int arr[size];	
+	//rot = rot % size;
+	rot = (rot + size) % size;
+	
+	for (int d = rot, s = 0; s < size; d = (d+1) % size, ++s)
+		arr[d] = a[s];
+	for (int i = 0; i < size; ++i)
+		a[i] = arr[i];
+    
+//  	
+//	// add last rot elements
+//	for (int i = 0; i < rot; i++){
+//		arr[i] = a[size - rot + i];
+//	}
+//	// add remaining elements
+//	for (int i = rot; i < size; i++){
+//		arr[i] = a[i - rot];
+//	}
+//	for (int i = 0; i < size; i++){
+//        a[i] = arr[i];
+//   }
 }
 
 // #### LED STUFF
