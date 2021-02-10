@@ -490,6 +490,7 @@ void dispNoteSelect(){
 	if (!noteSelection){
 
 	}else{
+			// labels formatting
 			u8g2_display.setFontMode(1);  
 			u8g2_display.setFont(FONT_LABELS);
 			u8g2_display.setCursor(0, 0);	
@@ -504,44 +505,40 @@ void dispNoteSelect(){
 			u8g2centerText("NOTE", 65, hline-2, 32, 10);
 			u8g2centerText("VEL", 97, hline-2, 32, 10);
 
-/*
+		// value text formatting
+		u8g2_display.setFontMode(1); 
+
+		bool ccFlip[] = {false,false,false,false}, noteFlip = false, velFlip = false;		
 		switch(nsmode){
-			case 0:
-				display.fillRect(-2, 0, 22, 12, WHITE);
-				display.setTextColor(INVERSE);
-				//display.drawRect(0, 0, 24, 12, WHITE);
+			case 0: 	//
+				display.fillRect(2*32, 10, 33, 22, WHITE);
+				noteFlip = true;
 				break;
-			case 1: 
-				display.fillRect(tempOffset, 0, 22, 12, WHITE);
-				display.setTextColor(INVERSE);
+			case 1: 	//
+				display.fillRect(3*32, 10, 33, 22, WHITE);
+				velFlip = true;
 				break;
-			case 2: 
-				display.fillRect(tempOffset*2, 0, 22, 12, WHITE);
-				display.setTextColor(INVERSE);
+			case 2:  	// CC1
+				display.fillRect(0*32, 11, 33, 11, WHITE);
+				ccFlip[0] = true;
 				break;
-			case 3: 
-				display.fillRect(tempOffset*3, 0, 22, 12, WHITE);
-				display.setTextColor(INVERSE);
-				//display.drawRect(96, 0, 22, 12, WHITE);
+			case 3: 	// CC2
+				display.fillRect(0*32, 11*2-1, 33, 11, WHITE);
+				ccFlip[1] = true;
 				break;
-			case 4: 
-				display.fillRect(tempOffset, 16, 38, 16, WHITE);
-				display.setTextColor(INVERSE);
+			case 4: 	// CC3
+				display.fillRect(1*32, 10, 33, 11, WHITE);
+				ccFlip[2] = true;
 				break;
-			case 5: 
-				display.fillRect(90, 16, 38, 16, WHITE);
-				display.setTextColor(INVERSE);
+			case 5: 	// CC4
+				display.fillRect(1*32, 11*2-1, 33, 11, WHITE);
+				ccFlip[3] = true;
 				break;
-			case 6: 
-				display.fillRect(tempOffset*4, 0, 20, 12, WHITE);
-				display.setTextColor(INVERSE);
+			default:
 				break;
 		}
-*/
 
-			u8g2_display.setForegroundColor(WHITE);
-			u8g2_display.setBackgroundColor(BLACK);
-
+		u8g2_display.setFont(FONT_LABELS);		
 		for (int j=0; j<4; j++){
 			char tempText[4];
 			if (stepNoteP[playingPattern][selectedStep][j+3] > 0){
@@ -558,18 +555,14 @@ void dispNoteSelect(){
 			if (j==2 || j==3){
 				xoffset = 32; 
 			}
-			u8g2centerText(tempText, xoffset, hline*2+yoffset, 32, 11);
+			invertColor(ccFlip[j]);
+			u8g2centerText(tempText, xoffset, hline*2+yoffset, 32, 11); 	// CC VALUES
 		}
 
-	// value text formatting
-	u8g2_display.setFontMode(1); 
-	u8g2_display.setFont(FONT_VALUES);
-	u8g2_display.setForegroundColor(WHITE);
-	u8g2_display.setBackgroundColor(BLACK);
-	
-	// ValueBoxes
-	dispValBox(stepNoteP[playingPattern][selectedStep][0], 2, false);
-	dispValBox(stepNoteP[playingPattern][selectedStep][1], 3, false);
+		u8g2_display.setFont(FONT_VALUES);
+		// ValueBoxes
+		dispValBox(stepNoteP[playingPattern][selectedStep][0], 2, noteFlip); 		// NOTE NUM
+		dispValBox(stepNoteP[playingPattern][selectedStep][1], 3, velFlip); 	// VELOCITY
 
 	}
 }
@@ -579,34 +572,21 @@ void dispPatternParams(){
 		// values formatting
 		u8g2_display.setFontMode(1); 
 		u8g2_display.setFont(FONT_VALUES);
-//		u8g2_display.setForegroundColor(WHITE);
-//		u8g2_display.setBackgroundColor(BLACK);
 		
-		bool pattFlip, lenFlip, rotFlip;
-		
+		bool pattFlip = false, lenFlip = false, rotFlip = false;		
 		switch(ptmode){
 			case 0:  // LEN
 				display.fillRect(1*32, 11, 33, 22, WHITE);
-				pattFlip = false;
 				lenFlip = true;
-				rotFlip = false;
 				break;
 			case 1: 	// ROTATE
 				display.fillRect(2*32, 11, 33, 22, WHITE);
-				pattFlip = false;
-				lenFlip = false;
 				rotFlip = true;
 				break;
-			case 2: 
+			case 2: 	// ???
 				display.fillRect(3*32, 11, 33, 22, WHITE);
-				pattFlip = false;
-				lenFlip = false;
-				rotFlip = false;
 				break;
 			default:
-				pattFlip = false;
-				lenFlip = false;
-				rotFlip = false;
 				break;
 		}
 
@@ -952,18 +932,18 @@ void loop() {
 						dirtyDisplay = true;
 					} else if (noteSelect && noteSelection && !enc_edit){
 						// {notenum,vel,len,p1,p2,p3,p4,p5}
-						if (nsmode >= 0 && nsmode < 4){
+						if (nsmode >= 2 && nsmode < 6){
 							if(u.dir() < 0){			// reset plock if turn ccw
-								stepNoteP[playingPattern][selectedStep][nsmode+3] = -1;
+								stepNoteP[playingPattern][selectedStep][nsmode+1] = -1;
 								dirtyDisplay = true;
 							}
 						}
-						if (nsmode == 4) { // set note
+						if (nsmode == 0) { // set note
 							int tempNote = stepNoteP[playingPattern][selectedStep][0];
 							stepNoteP[playingPattern][selectedStep][0] = constrain(tempNote + amt, 0, 127);
 							dirtyDisplay = true;
 						}	
-						if (nsmode == 5) { // set velocity
+						if (nsmode == 1) { // set velocity
 							int tempVel = stepNoteP[playingPattern][selectedStep][1];
 							stepNoteP[playingPattern][selectedStep][1] = constrain(tempVel + amt, 0, 127);
 							dirtyDisplay = true;
