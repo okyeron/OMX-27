@@ -7,6 +7,13 @@
 
 #define DEFAULT_MODE 1
 
+#define gridh 32
+#define gridw 128
+
+#define FONT_LABELS u8g2_font_5x8_tf
+#define FONT_VALUES u8g2_font_7x14B_tf
+#define FONT_SYMB u8g2_font_9x15_m_symbols
+
 // DEFINE CCS FOR POTS
 const int CC1 = 21;
 const int CC2 = 22;
@@ -36,7 +43,7 @@ int mode = DEFAULT_MODE;
 int newmode = DEFAULT_MODE;
 #define numModes (sizeof(modes)/sizeof(char *)) //array size  
 int nsmode = 6;
-int ptmode = 2;
+int ptmode = 3;
 
 // VARIABLES
 float step_delay;
@@ -55,6 +62,8 @@ bool enc_edit = false;
 int noteon_velocity = 100;
 int octave = 0; // default C4 is 0 - range is -4 to +5
 int newoctave = octave;
+int rotationAmt = 0;
+int hline = 8;
 
 float clockbpm = 120;
 float newtempo = clockbpm;

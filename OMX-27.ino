@@ -5,6 +5,8 @@
 #include <Adafruit_Keypad.h>
 #include <Adafruit_NeoPixel.h>
 #include <ResponsiveAnalogRead.h>
+#include <U8g2_for_Adafruit_GFX.h>
+
 #include <MIDI.h>
 MIDI_CREATE_DEFAULT_INSTANCE();
 //MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, MIDI);
@@ -12,6 +14,8 @@ MIDI_CREATE_DEFAULT_INSTANCE();
 #include "ClearUI.h"
 #include "OMX-27.h"
 #include "sequencer.h"
+
+U8G2_FOR_ADAFRUIT_GFX u8g2_display;
 
 const int potCount = 5;
 ResponsiveAnalogRead *analog[potCount];
@@ -148,6 +152,7 @@ void setup() {
 
   	// Init Display
 	initializeDisplay();
+	u8g2_display.begin(display);
 	
 	// Startup screen		
 	display.clearDisplay();
@@ -155,9 +160,11 @@ void setup() {
 	delay(200);
 	display.clearDisplay();
 	display.setCursor(16,4);
-	defaultText(2);
+
+	defaultText(2); // set font
 	display.setTextColor(SSD1306_WHITE);
 	display.println("OMX-27");
+	display.setTextSize(1);
 	display.display();
 
 	// Keypad
@@ -401,59 +408,235 @@ void resetClocks(){
 
 // ####### DISPLAY FUNCTIONS #######
 
-
-void dispPatt(){
-//	display.setTextSize(1);
-//	display.setCursor(0, 0);
-//	display.print("PTN: ");
-//	display.setCursor(32, 0);
-//	display.print(playingPattern+1);
-		display.setCursor(0, 0);
-		display.setTextSize(1);
-		display.print("PTN");		
-		display.setCursor(30, 0);
-		display.setTextSize(2);
-		display.print(playingPattern+1);
+void dispGridBoxes(){
+	display.fillRect(0, 0, gridw, 10, WHITE);
+	display.drawFastVLine(gridw/4, 0, gridh, INVERSE);
+	display.drawFastVLine(gridw/2, 0, gridh, INVERSE);
+	display.drawFastVLine(gridw*0.75, 0, gridh, INVERSE);
+}
+void invertColor(bool flip){
+	if (flip) {
+		u8g2_display.setForegroundColor(BLACK);
+		u8g2_display.setBackgroundColor(WHITE);
+	} else {
+		u8g2_display.setForegroundColor(WHITE);
+		u8g2_display.setBackgroundColor(BLACK);
+	}
+}
+void dispValBox(int v, int16_t n, bool inv){			// n is box 0-3
+	invertColor(inv);
+	u8g2centerNumber(v, n*32, hline*2+6, 32, 22);
 }
 
-void dispTempo(){
-//	display.setTextSize(1);
-//	display.setCursor(0, 24);
-//	display.print("BPM:");
-//	display.setCursor(32, 24);
-//	display.print((int)clockbpm);
-		display.setCursor(65, 19);
-		display.setTextSize(1);
-		display.print("BPM");		
-		display.setCursor(92, 18);
-		display.setTextSize(2);
-		display.print((int)clockbpm);
+void dispMidiMode(){
+	u8g2_display.setFontMode(1);  
+	u8g2_display.setFont(FONT_LABELS);
+	u8g2_display.setCursor(0, 0);
+	
+	dispGridBoxes();
+
+	// labels
+	u8g2_display.setForegroundColor(BLACK);
+	u8g2_display.setBackgroundColor(WHITE);
+
+	u8g2_display.setCursor(7, hline);
+	u8g2_display.print("CC");
+	u8g2_display.print(potCC);
+
+	u8g2centerText("NOTE", 33, hline-2, 32, 10);
+	u8g2centerText("OCT", 65, hline-2, 32, 10);
+	u8g2centerText("CH", 97, hline-2, 32, 10);
+	
+	// value text formatting
+	u8g2_display.setFontMode(1); 
+	u8g2_display.setFont(FONT_VALUES);
+	u8g2_display.setForegroundColor(WHITE);
+	u8g2_display.setBackgroundColor(BLACK);
+	
+	// ValueBoxes
+	dispValBox(potVal, 0, false);
+	dispValBox(lastNote[playingPattern][seqPos[playingPattern]], 1, false);
+	dispValBox((int)octave+4, 2, false);
+	dispValBox(midiChannel, 3, false);
 }
 
-void dispPots(){
-	display.setTextSize(1);
-	display.setCursor(0, 0);
-	display.print("CC");
-	display.print(potCC);
-	display.print(": ");
-	display.setCursor(30, 0);
-	display.print(potVal);
+void dispSeqMode1(){
+	u8g2_display.setFontMode(1);  
+	u8g2_display.setFont(FONT_LABELS);
+	u8g2_display.setCursor(0, 0);	
+	dispGridBoxes();
+	// labels
+	u8g2_display.setForegroundColor(BLACK);
+	u8g2_display.setBackgroundColor(WHITE);
+
+	u8g2centerText("PTN", 1, hline-2, 32, 10);
+	u8g2centerText("LEN", 33, hline-2, 32, 10);
+	u8g2centerText("BPM", 65, hline-2, 32, 10);
+
+	// value text formatting
+	u8g2_display.setFontMode(1); 
+	u8g2_display.setFont(FONT_VALUES);
+	u8g2_display.setForegroundColor(WHITE);
+	u8g2_display.setBackgroundColor(BLACK);
+	
+	// ValueBoxes
+	dispValBox(playingPattern+1, 0, false);
+	dispValBox(pattLen[playingPattern], 1, false);
+	dispValBox((int)clockbpm, 2, false);
+//	dispValBox(midiChannel, 3, false);
+
+}
+void dispNoteSelect(){
+	if (!noteSelection){
+
+	}else{
+			u8g2_display.setFontMode(1);  
+			u8g2_display.setFont(FONT_LABELS);
+			u8g2_display.setCursor(0, 0);	
+			dispGridBoxes();
+			display.drawFastHLine(0, 20, 64, WHITE);
+			// labels
+			u8g2_display.setForegroundColor(BLACK);
+			u8g2_display.setBackgroundColor(WHITE);
+
+			u8g2centerText("L-1/2", 0, hline-2, 32, 10);
+			u8g2centerText("L-3/4", 32, hline-2, 32, 10);
+			u8g2centerText("NOTE", 65, hline-2, 32, 10);
+			u8g2centerText("VEL", 97, hline-2, 32, 10);
+
+/*
+		switch(nsmode){
+			case 0:
+				display.fillRect(-2, 0, 22, 12, WHITE);
+				display.setTextColor(INVERSE);
+				//display.drawRect(0, 0, 24, 12, WHITE);
+				break;
+			case 1: 
+				display.fillRect(tempOffset, 0, 22, 12, WHITE);
+				display.setTextColor(INVERSE);
+				break;
+			case 2: 
+				display.fillRect(tempOffset*2, 0, 22, 12, WHITE);
+				display.setTextColor(INVERSE);
+				break;
+			case 3: 
+				display.fillRect(tempOffset*3, 0, 22, 12, WHITE);
+				display.setTextColor(INVERSE);
+				//display.drawRect(96, 0, 22, 12, WHITE);
+				break;
+			case 4: 
+				display.fillRect(tempOffset, 16, 38, 16, WHITE);
+				display.setTextColor(INVERSE);
+				break;
+			case 5: 
+				display.fillRect(90, 16, 38, 16, WHITE);
+				display.setTextColor(INVERSE);
+				break;
+			case 6: 
+				display.fillRect(tempOffset*4, 0, 20, 12, WHITE);
+				display.setTextColor(INVERSE);
+				break;
+		}
+*/
+
+			u8g2_display.setForegroundColor(WHITE);
+			u8g2_display.setBackgroundColor(BLACK);
+
+		for (int j=0; j<4; j++){
+			char tempText[4];
+			if (stepNoteP[playingPattern][selectedStep][j+3] > 0){
+				itoa (stepNoteP[playingPattern][selectedStep][j+3],tempText,10);
+			} else {
+				snprintf( tempText, sizeof(tempText), "---");
+			}
+			// this is ugly
+			int xoffset = 0;
+			int yoffset = 0;
+			if (j==1 || j==3){
+				yoffset = 11;
+			}
+			if (j==2 || j==3){
+				xoffset = 32; 
+			}
+			u8g2centerText(tempText, xoffset, hline*2+yoffset, 32, 11);
+		}
+
+	// value text formatting
+	u8g2_display.setFontMode(1); 
+	u8g2_display.setFont(FONT_VALUES);
+	u8g2_display.setForegroundColor(WHITE);
+	u8g2_display.setBackgroundColor(BLACK);
+	
+	// ValueBoxes
+	dispValBox(stepNoteP[playingPattern][selectedStep][0], 2, false);
+	dispValBox(stepNoteP[playingPattern][selectedStep][1], 3, false);
+
+	}
+}
+void dispPatternParams(){
+	if (patternParams){
+
+		// values formatting
+		u8g2_display.setFontMode(1); 
+		u8g2_display.setFont(FONT_VALUES);
+//		u8g2_display.setForegroundColor(WHITE);
+//		u8g2_display.setBackgroundColor(BLACK);
+		
+		bool pattFlip, lenFlip, rotFlip;
+		
+		switch(ptmode){
+			case 0:  // LEN
+				display.fillRect(1*32, 11, 33, 22, WHITE);
+				pattFlip = false;
+				lenFlip = true;
+				rotFlip = false;
+				break;
+			case 1: 	// ROTATE
+				display.fillRect(2*32, 11, 33, 22, WHITE);
+				pattFlip = false;
+				lenFlip = false;
+				rotFlip = true;
+				break;
+			case 2: 
+				display.fillRect(3*32, 11, 33, 22, WHITE);
+				pattFlip = false;
+				lenFlip = false;
+				rotFlip = false;
+				break;
+			default:
+				pattFlip = false;
+				lenFlip = false;
+				rotFlip = false;
+				break;
+		}
+
+		// ValueBoxes
+		dispValBox(playingPattern+1, 0, pattFlip); // PAT
+		dispValBox(pattLen[playingPattern], 1, lenFlip); // LEN
+		dispValBox(rotationAmt, 2, rotFlip); // LEN
+	
+//		u8g2_display.setFont(FONT_SYMB);
+//		invertColor(rotFlip);
+//		u8g2centerText("\u25C1\u25B7", 2*32, hline*2+6, 32, 22); // "\u00BB\u00AB" // // dice: "\u2685"
+
+		// labels formatting
+		u8g2_display.setFontMode(1);  
+		u8g2_display.setFont(FONT_LABELS);
+		u8g2_display.setCursor(0, 0);	
+		dispGridBoxes();
+		// labels
+		u8g2_display.setForegroundColor(BLACK);
+		u8g2_display.setBackgroundColor(WHITE);
+
+		u8g2centerText("PTN", 0, hline-2, 32, 10);
+		u8g2centerText("LEN", 32, hline-2, 32, 10);
+		u8g2centerText("ROT", 65, hline-2, 32, 10);
+		u8g2centerText("STAR", 97, hline-2, 32, 10);
+	}
 }
 
-void dispOctave(){
-	display.setTextSize(1);
-	display.setCursor(0, 24);
-	display.print("Octave:");
-	display.print((int)octave+4);
-}
 
-void dispNotes(){
-	display.setTextSize(1);
-	display.setCursor(0, 12);
-	display.print("NOTE:");
-	display.print(lastNote[playingPattern][seqPos[playingPattern]]);
-}
-
+/*
 void dispNoteSelect(){
 	if (!noteSelection){
 
@@ -540,24 +723,6 @@ void dispNoteSelect(){
 		display.print(stepNoteP[playingPattern][selectedStep][1]);
 	}
 }
-
-void dispPattLen(){
-		display.setCursor(1, 19);
-		display.setTextSize(1);
-		display.print("LEN");	
-		display.setCursor(29, 18);
-		display.setTextSize(2);
-		display.print(pattLen[playingPattern]);
-}
-void dispPattStrt(){
-		display.setCursor(1, 19);
-		display.setTextSize(1);
-		display.print("SRT");	
-		display.setCursor(29, 18);
-		display.setTextSize(2);
-		display.print(pattLen[playingPattern]);
-}
-
 void dispPatternParams(){
 	if (patternParams){
 
@@ -606,7 +771,7 @@ void dispPatternParams(){
 
 	}
 }
-
+*/
 void dispMode(){
 	display.setTextSize(4);
 	display.setCursor(74, 0);
@@ -616,6 +781,75 @@ void dispMode(){
 	} else if (enc_edit) {
 		display.print(modes[mode]);
 	}
+}
+
+void dispPattLen(){
+		display.setCursor(1, 19);
+		display.setTextSize(1);
+		display.print("LEN");	
+		display.setCursor(29, 18);
+		display.setTextSize(2);
+		display.print(pattLen[playingPattern]);
+}
+void dispPattStrt(){
+		display.setCursor(1, 19);
+		display.setTextSize(1);
+		display.print("SRT");	
+		display.setCursor(29, 18);
+		display.setTextSize(2);
+		display.print(pattLen[playingPattern]);
+}
+
+void dispPatt(){
+//	display.setTextSize(1);
+//	display.setCursor(0, 0);
+//	display.print("PTN: ");
+//	display.setCursor(32, 0);
+//	display.print(playingPattern+1);
+		display.setCursor(0, 0);
+		display.setTextSize(1);
+		display.print("PTN");		
+		display.setCursor(30, 0);
+		display.setTextSize(2);
+		display.print(playingPattern+1);
+}
+
+void dispTempo(){
+//	display.setTextSize(1);
+//	display.setCursor(0, 24);
+//	display.print("BPM:");
+//	display.setCursor(32, 24);
+//	display.print((int)clockbpm);
+		display.setCursor(65, 19);
+		display.setTextSize(1);
+		display.print("BPM");		
+		display.setCursor(92, 18);
+		display.setTextSize(2);
+		display.print((int)clockbpm);
+}
+
+void dispPots(){
+	display.setTextSize(1);
+	display.setCursor(0, 0);
+	display.print("CC");
+	display.print(potCC);
+	display.print(": ");
+	display.setCursor(30, 0);
+	display.print(potVal);
+}
+
+void dispOctave(){
+	display.setTextSize(1);
+	display.setCursor(0, 24);
+	display.print("Octave:");
+	display.print((int)octave+4);
+}
+
+void dispNotes(){
+	display.setTextSize(1);
+	display.setCursor(0, 12);
+	display.print("NOTE:");
+	display.print(lastNote[playingPattern][seqPos[playingPattern]]);
 }
 
 
@@ -634,7 +868,6 @@ void loop() {
 
 	// DISPLAY SETUP
 	display.clearDisplay();
-			
 				
 	// ############### POTS ###############
 	//
@@ -705,9 +938,15 @@ void loop() {
 							pattLen[playingPattern] = constrain(patternLength[playingPattern] + amt, 1, 16);
 							patternLength[playingPattern] = pattLen[playingPattern];
 						}	
-						if (ptmode == 1) { // set rotation						
-							//int N = sizeof(stepNoteP[playingPattern]) / sizeof(int);
-							rotatePattern(stepPlay[playingPattern], patternLength[playingPattern], constrain(amt, -patternLength[playingPattern]-1, patternLength[playingPattern]-1));
+						if (ptmode == 1) { // set rotation	
+							int rotator;
+							(u.dir() < 0 ? rotator = -1 : rotator = 1);					
+//							int rotator = constrain(rotcc, (patternLength[playingPattern])*-1, patternLength[playingPattern]);
+							rotationAmt = rotationAmt + rotator;
+							if (rotationAmt < 16 && rotationAmt > -16 ){
+								rotatePattern(stepPlay[playingPattern], patternLength[playingPattern], rotator);
+							}
+							rotationAmt = constrain(rotationAmt, (patternLength[playingPattern]-1)*-1, patternLength[playingPattern]-1);
 						}	
 						
 						dirtyDisplay = true;
@@ -792,19 +1031,19 @@ void loop() {
 				if (noteSelect && noteSelection) {
 					// increment nsmode
 					nsmode = (nsmode + 1 ) % 7;
-					Serial.println(nsmode);
+//					Serial.println(nsmode);
 					dirtyDisplay = true;
 				}
 				if (patternParams) {
 					// increment ptmode
-					ptmode = (ptmode + 1 ) % 3;
-					Serial.println(ptmode);
+					ptmode = (ptmode + 1 ) % 4;
+//					Serial.println(ptmode);
 					dirtyDisplay = true;
 				}
 			}
 			break;
 		case Button::DownLong: //Serial.println("Button downlong"); 
-			enc_edit = true;			
+			enc_edit = true;		
 			dispMode();
 			dirtyDisplay = true;
 			break;
@@ -1077,10 +1316,12 @@ void loop() {
 			midi_leds();				// SHOW LEDS
 
 			if (dirtyDisplay){			// DISPLAY
-				dispPots();
-				//dispTempo();
-				dispNotes();
-				dispOctave();
+				if (!enc_edit){
+					dispMidiMode();
+//					dispPots();
+//					dispNotes();
+//					dispOctave();
+				}
 			}
 			break;
 
@@ -1088,9 +1329,10 @@ void loop() {
 			if (dirtyDisplay){			// DISPLAY
 				if (!enc_edit){
 					if (!noteSelect and !patternParams){
-						dispPatt();
-						dispPattLen();
-						dispTempo();
+						dispSeqMode1();
+//						dispPatt();
+//						dispPattLen();
+//						dispTempo();
 					}				
 					if (noteSelect) {
 						dispNoteSelect();
@@ -1239,25 +1481,32 @@ void rotatePattern(int a[], int size, int rot ){
 	int arr[size];	
 	//rot = rot % size;
 	rot = (rot + size) % size;
-	
+//	Serial.println(rot);
 	for (int d = rot, s = 0; s < size; d = (d+1) % size, ++s)
 		arr[d] = a[s];
 	for (int i = 0; i < size; ++i)
 		a[i] = arr[i];
-    
-//  	
-//	// add last rot elements
-//	for (int i = 0; i < rot; i++){
-//		arr[i] = a[size - rot + i];
-//	}
-//	// add remaining elements
-//	for (int i = rot; i < size; i++){
-//		arr[i] = a[i - rot];
-//	}
-//	for (int i = 0; i < size; i++){
-//        a[i] = arr[i];
-//   }
 }
+
+void u8g2centerText(const char* s, int16_t x, int16_t y, uint16_t w, uint16_t h) {
+//  int16_t bx, by;
+  uint16_t bw, bh;
+  bw = u8g2_display.getUTF8Width(s);
+  bh = u8g2_display.getFontAscent();
+  u8g2_display.setCursor(
+    x + (w - bw) / 2,
+    y + (h - bh) / 2
+  );
+  u8g2_display.print(s);
+}
+
+void u8g2centerNumber(int n, uint16_t x, uint16_t y, uint16_t w, uint16_t h)
+{
+  char buf[8];
+  itoa(n, buf, 10);
+  u8g2centerText(buf, x, y, w, h);
+}
+
 
 // #### LED STUFF
 // Rainbow cycle along whole strip. Pass delay time (in ms) between frames.

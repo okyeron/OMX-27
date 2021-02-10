@@ -4,19 +4,29 @@
 #include <Adafruit_GFX.h>
 #include <Wire.h>
 
+#include <Fonts/FreeMono9pt7b.h>
 #include <Fonts/FreeSansBold9pt7b.h>
 #include <Fonts/FreeSerifBold9pt7b.h>
 #include <Fonts/TomThumb.h>
 #include <Fonts/Picopixel.h>
 #include <Fonts/Tiny3x3a2pt7b.h>
 #include <Fonts/Org_01.h>
+// #include "fonts/slkscr7pt7b.h"
+// #include "fonts/liquid_7pt7b.h"
+
 
 #define FONTSANS FreeSansBold9pt7b
+#define FONTMONO9 FreeMono9pt7b
+#define FONTSANS12 FreeSans12pt7b
+#define FONTSANS9BOLD FreeSansBold9pt7b
+#define FONTSANS12BOLD FreeSansBold12pt7b
 #define FONT FreeSerifBold9pt7b
 #define FONT_TT TomThumb
 #define FONT_PICO Picopixel
 #define FONT_TINY Tiny3x3a2pt7b
 #define FONT5 Org_01
+#define FONTSILK slkscr7pt7b
+#define FONTLIQUID liquid_7pt7b
 
 #define DIGIT_WIDTH 9
 #define DIGIT_HEIGHT 12
@@ -27,8 +37,15 @@
 #define CLKDURING 100000
 #define CLKAFTER 100000
 
-Adafruit_SSD1306 display =
-  Adafruit_SSD1306(DISPLAY_WIDTH, DISPLAY_HEIGHT, &Wire);
+Adafruit_SSD1306 display = Adafruit_SSD1306(DISPLAY_WIDTH, DISPLAY_HEIGHT, &Wire);
+
+void initializeDisplay() {
+  // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C); // Address 0x3C for 128x32
+  
+  display.cp437();
+  setRotationNormal();
+}
 
 // Display is mounted upside down on PCB
 void setRotationNormal() {
@@ -40,11 +57,10 @@ void setRotationSideways() {
 }
 
 
-void initializeDisplay() {
-  // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
-  display.begin(SSD1306_SWITCHCAPVCC, 0x3C); // Address 0x3C for 128x32
-  display.cp437();
-  setRotationNormal();
+
+void defaultText(int size) {
+  display.setTextSize(size);
+  display.setFont();
 }
 
 void serifText(int size) {
@@ -53,17 +69,36 @@ void serifText(int size) {
   display.setTextColor(WHITE);
   display.setTextWrap(false);
 }
-void sansText(int size) {
+void mono9Text(int size) {
   display.setTextSize(size);
-  display.setFont(&FONTSANS);
+  display.setFont(&FONTMONO9);
   display.setTextColor(WHITE);
   display.setTextWrap(false);
 }
-
-void defaultText(int size) {
+// void silkText(int size) {
+//   display.setTextSize(size);
+//   display.setFont(&FONTSILK);
+//   display.setTextColor(WHITE);
+//   display.setTextWrap(false);
+// }
+// void liquidText(int size) {
+//   display.setTextSize(size);
+//   display.setFont(&FONTSILK);
+//   display.setTextColor(WHITE);
+//   display.setTextWrap(false);
+// }
+void sans9bText(int size) {
   display.setTextSize(size);
-  display.setFont();
+  display.setFont(&FONTSANS9BOLD);
+  display.setTextColor(WHITE);
+  display.setTextWrap(false);
 }
+// void sans12bText(int size) {
+//   display.setTextSize(size);
+//   display.setFont(&FONTSANS12BOLD);
+//   display.setTextColor(WHITE);
+//   display.setTextWrap(false);
+// }
 
 void tinyText(int size) {
   display.setTextSize(size);
@@ -71,14 +106,12 @@ void tinyText(int size) {
   display.setTextColor(WHITE);
   display.setTextWrap(false);
 }
-
 void tomText(int size) {
   display.setTextSize(size);
   display.setFont(&FONT_TT);
   display.setTextColor(WHITE);
   display.setTextWrap(false);
 }
-
 void picoText(int size) {
   display.setTextSize(size);
   display.setFont(&FONT_PICO);
@@ -104,6 +137,7 @@ void centerText(const char* s, int16_t x, int16_t y, uint16_t w, uint16_t h) {
   );
   display.print(s);
 }
+
 void centerNumber(unsigned int n,
   uint16_t x, uint16_t y, uint16_t w, uint16_t h)
 {

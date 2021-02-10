@@ -6,7 +6,6 @@
 #define WHITE SSD1306_WHITE
 #define BLACK SSD1306_BLACK
 
-
 extern Adafruit_SSD1306 display;
 
 void initializeDisplay();
@@ -14,9 +13,13 @@ void initializeDisplay();
 void setRotationSideways();
 void setRotationNormal();
 
-void serifText(int size);
-void sansText(int size);
 void defaultText(int size);
+void serifText(int size);
+void mono9Text(int size);
+void silkText(int size);
+void liquidText(int size);
+void sans9bText(int size);
+
 void tomText(int size);
 void picoText(int size);
 void tinyText(int size);
