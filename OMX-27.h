@@ -13,6 +13,8 @@
 #define FONT_LABELS u8g2_font_5x8_tf
 #define FONT_VALUES u8g2_font_7x14B_tf
 #define FONT_SYMB u8g2_font_9x15_m_symbols
+#define FONT_SYMB_BIG u8g2_font_cu12_h_symbols
+#define FONT_TENFAT u8g2_font_tenfatguys_tf
 
 // DEFINE CCS FOR POTS
 const int CC1 = 21;

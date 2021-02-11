@@ -159,19 +159,23 @@ void setup() {
 	testdrawrect();
 	delay(200);
 	display.clearDisplay();
-	display.setCursor(16,4);
 
-	defaultText(2); // set font
-	display.setTextColor(SSD1306_WHITE);
-	display.println("OMX-27");
-	display.setTextSize(1);
-	display.display();
+//	display.setCursor(16,4);
+//	defaultText(2); // set font
+//	display.setTextColor(SSD1306_WHITE);
+//	display.println("OMX-27");
+
+
+	u8g2_display.setForegroundColor(WHITE);
+	u8g2_display.setBackgroundColor(BLACK);
+	drawLoading();
+
 
 	// Keypad
 	customKeypad.begin();
 
 
-		// Handle incoming MIDI events
+	// Handle incoming MIDI events
 		//MIDI.setHandleClock(handleExtClock);
 		//MIDI.setHandleStart(handleExtStart);
 		//MIDI.setHandleContinue(handleExtContinue);
@@ -203,7 +207,7 @@ void setup() {
 
 
 	// Clear display and show default mode
-	display.clearDisplay();
+//	display.clearDisplay();
 //	display.setTextSize(1);
 //	display.setCursor(96, 0);
 //	display.print(modes[newmode]);
@@ -845,9 +849,9 @@ void loop() {
 	  clksTimer = 0;
 	}
 
-
 	// DISPLAY SETUP
 	display.clearDisplay();
+
 				
 	// ############### POTS ###############
 	//
@@ -1390,8 +1394,8 @@ void loop() {
 			break;
 	}
 
-	//	Serial.print("one:");
-	//	Serial.println(checktime1);
+//	Serial.print("one:");
+//	Serial.println(checktime1);
 
 	// DISPLAY at end of loop
 
@@ -1400,9 +1404,11 @@ void loop() {
 		dirtyDisplay = false;
 	}
 	
-//	Serial.print("two:");
-//	Serial.println(checktime1);
-
+//	if (checktime1 >3){
+//		Serial.print("two:");
+//		Serial.println(checktime1);
+//	}
+	
 	// are pixels dirty
 	if (dirtyPixels){
 		strip.show();	
@@ -1531,4 +1537,22 @@ void testdrawrect(void) {
   }
 
   delay(500);
+}
+
+void drawLoading(void) {
+	const char* loader[] = {"\u25f0", "\u25f1", "\u25f2", "\u25f3"};
+	display.clearDisplay();
+	u8g2_display.setFontMode(0);  
+	for(int16_t i=0; i<16; i+=1) {
+		display.clearDisplay();
+		u8g2_display.setCursor(12,18);
+		u8g2_display.setFont(FONT_TENFAT);
+		u8g2_display.print("OMX-27");
+		u8g2_display.setFont(FONT_SYMB_BIG);
+		u8g2centerText(loader[i%4], 74, 10, 32, 32); // "\u00BB\u00AB" // // dice: "\u2685"
+		display.display();
+		delay(100);
+	}
+
+  delay(100);
 }

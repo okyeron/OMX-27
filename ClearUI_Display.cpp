@@ -34,10 +34,10 @@
 #define DISPLAY_WIDTH 128
 #define DISPLAY_HEIGHT 32
 #define OLED_RST -1
-#define CLKDURING 100000
-#define CLKAFTER 100000
+#define CLKDURING 1000000
+#define CLKAFTER 400000
 
-Adafruit_SSD1306 display = Adafruit_SSD1306(DISPLAY_WIDTH, DISPLAY_HEIGHT, &Wire);
+Adafruit_SSD1306 display = Adafruit_SSD1306(DISPLAY_WIDTH, DISPLAY_HEIGHT, &Wire, OLED_RST, CLKDURING, CLKAFTER);
 
 void initializeDisplay() {
   // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
