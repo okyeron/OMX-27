@@ -1,11 +1,12 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
 // 
-// Steven Noreyko, January 2021
+// Steven Noreyko, February 2021
 
 #include <Adafruit_Keypad.h>
 #include <Adafruit_NeoPixel.h>
 #include <ResponsiveAnalogRead.h>
 #include <U8g2_for_Adafruit_GFX.h>
+#include <FrequencyTimer2.h>
 
 #include <MIDI.h>
 MIDI_CREATE_DEFAULT_INSTANCE();
@@ -37,6 +38,7 @@ elapsedMillis step_interval[8] = {0,0,0,0,0,0,0,0};
 unsigned long lastStepTime[8] = {0,0,0,0,0,0,0,0};
 elapsedMillis keyPressTime[27] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
+volatile unsigned long clockInterval; 
 
 // ENCODER
 Encoder myEncoder(12, 11); 	// encoder pins
@@ -112,6 +114,54 @@ void readPotentimeters(){
 	}
 }
 
+// FIGURE OUT WHAT TO DO WITH CLOCK FOR NOW ???
+
+// ####### CLOCK/TIMING #######
+
+//void clockTick() {
+//  if (started) {
+//	usbMIDI.sendRealTime(usbMIDI.Clock);
+//    //MIDI.sendRealTime(midi::Clock);
+//  }
+//  currentTick++;
+//  if (currentTick == 24) {
+//    currentTick = 0;
+//  }
+//}
+void sendClock(void){
+	if (playing){
+		usbMIDI.sendRealTime(usbMIDI.Clock);
+	//	MIDI.sendClock();
+	}
+}
+void startClock(){
+	usbMIDI.sendRealTime(usbMIDI.Start);
+//	MIDI.sendStart();
+}
+void stopClock(){
+	usbMIDI.sendRealTime(usbMIDI.Stop);
+//	MIDI.sendStop();
+}
+void resetClocks(){
+	// BPM tempo to step_delay calculation
+	clockInterval = 60000000/(PPQ * clockbpm); // interval is in microseconds
+	FrequencyTimer2::setPeriod(clockInterval);
+
+	// 16th notes
+	step_delay = clockInterval * 0.006; // 60000 / clockbpm / 4; 
+
+	// BPM to clock pulses
+	//clksDelay = FrequencyTimer2::getPeriod(); // (60000000 / clockbpm) / 24;
+
+}
+
+//long calcTempoMicros() {
+//  long tempoMicros = (60 * 1000000) / (tempo * PPQ);
+//  return tempoMicros;
+//}
+
+
+
 // ####### SETUP #######
 
 void setup() {
@@ -120,6 +170,13 @@ void setup() {
 	clksTimer = 0;
 	resetClocks();
 	
+	// set the FrequencyTimer2 for clock
+//	FrequencyTimer2::setPeriod(clockInterval);
+	FrequencyTimer2::setOnOverflow(sendClock); 
+	FrequencyTimer2::enable();
+  
+  	// (long)FrequencyTimer2::getPeriod();
+
 	// set analog read resolution to teensy's 13 usable bits
 	analogReadResolution(13);
 	
@@ -370,6 +427,7 @@ void step_ahead(int patternNum) {
 void step_on(int patternNum){
 	//	Serial.print(g);
 	//	Serial.println(" step on");
+	playNote(playingPattern);
 
 }
 
@@ -382,32 +440,6 @@ void step_off(int patternNum, int position){
       analogWrite(CVPITCH_PIN, 0);
       digitalWrite(CVGATE_PIN, LOW);
 }
-
-
-
-// FIGURE OUT WHAT TO DO WITH CLOCK FOR NOW ???
-
-// ####### CLOCK/TIMING #######
-
-void sendClock(){
-	usbMIDI.sendRealTime(usbMIDI.Clock);
-//	MIDI.sendClock();
-}
-void startClock(){
-	usbMIDI.sendRealTime(usbMIDI.Start);
-//	MIDI.sendStart();
-}
-void stopClock(){
-	usbMIDI.sendRealTime(usbMIDI.Stop);
-//	MIDI.sendStop();
-}
-void resetClocks(){
-	// BPM tempo to step-delay calculation
-	step_delay = 60000 / clockbpm / 4; // 16th notes
-	// BPM to clock pulses
-	clksDelay = (60000000 / clockbpm) / 24;
-}
-
 
 
 // ####### DISPLAY FUNCTIONS #######
@@ -619,197 +651,60 @@ void dispPatternParams(){
 	}
 }
 
-
-/*
-void dispNoteSelect(){
-	if (!noteSelection){
-
-		display.setCursor(0, 0);
-		display.setTextSize(1);
-		display.print("PTN");		
-		display.setCursor(30, 0);
-		display.setTextSize(2);
-		display.print(playingPattern+1);
-
-		display.fillRect(66, 0, 58, 32, WHITE);
-		display.setTextColor(INVERSE);
-		display.setTextSize(4);
-		display.setCursor(74, 1);
-		display.print("NS");
-	}else{
-		int tempOffset = 27;
-		switch(nsmode){
-			case 0:
-				display.fillRect(-2, 0, 22, 12, WHITE);
-				display.setTextColor(INVERSE);
-				//display.drawRect(0, 0, 24, 12, WHITE);
-				break;
-			case 1: 
-				display.fillRect(tempOffset, 0, 22, 12, WHITE);
-				display.setTextColor(INVERSE);
-				break;
-			case 2: 
-				display.fillRect(tempOffset*2, 0, 22, 12, WHITE);
-				display.setTextColor(INVERSE);
-				break;
-			case 3: 
-				display.fillRect(tempOffset*3, 0, 22, 12, WHITE);
-				display.setTextColor(INVERSE);
-				//display.drawRect(96, 0, 22, 12, WHITE);
-				break;
-			case 4: 
-				display.fillRect(tempOffset, 16, 38, 16, WHITE);
-				display.setTextColor(INVERSE);
-				break;
-			case 5: 
-				display.fillRect(90, 16, 38, 16, WHITE);
-				display.setTextColor(INVERSE);
-				break;
-			case 6: 
-				display.fillRect(tempOffset*4, 0, 20, 12, WHITE);
-				display.setTextColor(INVERSE);
-				break;
-		}
-
-		display.setCursor(2, 2);
-		for (int j=0; j<4; j++){
-			display.setTextSize(1);
-			display.setCursor(j*tempOffset, 2);
-			if (stepNoteP[playingPattern][selectedStep][j+3] > 0){
-				display.print(stepNoteP[playingPattern][selectedStep][j+3]);
-			} else {
-				display.print("---");
-			}
-			if (j != 3){
-				display.setCursor(j*tempOffset+19, 2);
-				display.print("/");
-			}
-		}
-
-		display.setTextSize(1);
-		display.setCursor(tempOffset*4+2, 1);
-		display.print("NS");
-		display.print(noteSelectPage+1);
-		
-		
-		display.setCursor(1, 19);
-		display.setTextSize(1);
-		display.print("NOTE");		
-		display.setCursor(29, 18);
-		display.setTextSize(2);
-		display.print(stepNoteP[playingPattern][selectedStep][0]);
-
-		display.setCursor(65, 19);
-		display.setTextSize(1);
-		display.print("VEL");		
-		display.setCursor(92, 18);
-		display.setTextSize(2);
-		display.print(stepNoteP[playingPattern][selectedStep][1]);
-	}
-}
-void dispPatternParams(){
-	if (patternParams){
-
-		int tempOffset = 27;
-		switch(ptmode){
-			case 0:  // LEN
-				display.fillRect(tempOffset, 16, 38, 16, WHITE);
-				display.setTextColor(INVERSE);
-				break;
-			case 1: 	// ROTATE
-				display.fillRect(63, 16, 28, 16, WHITE);
-				display.setTextColor(INVERSE);
-				break;
-			case 2: 
-				display.fillRect(100, 0, 28, 16, WHITE);
-				display.setTextColor(INVERSE);
-				break;
-		}
-
-		display.setCursor(0, 0);
-		display.setTextSize(1);
-		display.print("PTN");		
-		display.setCursor(30, 0);
-		display.setTextSize(2);
-		display.print(playingPattern+1);
-
-		display.setCursor(1, 19);
-		display.setTextSize(1);
-		display.print("LEN");		
-		display.setCursor(29, 18);
-		display.setTextSize(2);
-		display.print(pattLen[playingPattern]);
-
-		display.setCursor(65, 19);
-		display.setTextSize(1);
-		display.print("ROT");		
-		display.setCursor(65, 18);
-		display.setTextSize(2);
-
-//		display.fillRect(100, 0, 20, 16, WHITE);
-//		display.setTextColor(INVERSE);
-		display.setTextSize(2);
-		display.setCursor(102, 1);
-		display.print("PT");
-	}else{
-
-	}
-}
-*/
 void dispMode(){
-	display.setTextSize(4);
-	display.setCursor(74, 0);
 
+	// labels formatting
+	u8g2_display.setFontMode(1);  
+	u8g2_display.setFont(FONT_BIG);
+	u8g2_display.setCursor(0, 0);	
+
+	u8g2_display.setForegroundColor(WHITE);
+	u8g2_display.setBackgroundColor(BLACK);
+	
+	const char* displaymode = "";
 	if (newmode != mode && enc_edit) {
-		display.print(modes[newmode]);
+		displaymode = modes[newmode]; // display.print(modes[newmode]);
 	} else if (enc_edit) {
-		display.print(modes[mode]);
+		displaymode = modes[mode]; // display.print(modes[mode]);
 	}
+	u8g2centerText(displaymode, 86, 20, 44, 32);
+
+
 }
 
 void dispPattLen(){
-		display.setCursor(1, 19);
-		display.setTextSize(1);
-		display.print("LEN");	
-		display.setCursor(29, 18);
-		display.setTextSize(2);
-		display.print(pattLen[playingPattern]);
+	display.setCursor(1, 19);
+	display.setTextSize(1);
+	display.print("LEN");	
+	display.setCursor(29, 18);
+	display.setTextSize(2);
+	display.print(pattLen[playingPattern]);
 }
 void dispPattStrt(){
-		display.setCursor(1, 19);
-		display.setTextSize(1);
-		display.print("SRT");	
-		display.setCursor(29, 18);
-		display.setTextSize(2);
-		display.print(pattLen[playingPattern]);
+	display.setCursor(1, 19);
+	display.setTextSize(1);
+	display.print("SRT");	
+	display.setCursor(29, 18);
+	display.setTextSize(2);
+	display.print(pattLen[playingPattern]);
 }
 
 void dispPatt(){
-//	display.setTextSize(1);
-//	display.setCursor(0, 0);
-//	display.print("PTN: ");
-//	display.setCursor(32, 0);
-//	display.print(playingPattern+1);
-		display.setCursor(0, 0);
-		display.setTextSize(1);
-		display.print("PTN");		
-		display.setCursor(30, 0);
-		display.setTextSize(2);
-		display.print(playingPattern+1);
+	display.setCursor(0, 0);
+	display.setTextSize(1);
+	display.print("PTN");		
+	display.setCursor(30, 0);
+	display.setTextSize(2);
+	display.print(playingPattern+1);
 }
 
 void dispTempo(){
-//	display.setTextSize(1);
-//	display.setCursor(0, 24);
-//	display.print("BPM:");
-//	display.setCursor(32, 24);
-//	display.print((int)clockbpm);
-		display.setCursor(65, 19);
-		display.setTextSize(1);
-		display.print("BPM");		
-		display.setCursor(92, 18);
-		display.setTextSize(2);
-		display.print((int)clockbpm);
+	display.setCursor(65, 19);
+	display.setTextSize(1);
+	display.print("BPM");		
+	display.setCursor(92, 18);
+	display.setTextSize(2);
+	display.print((int)clockbpm);
 }
 
 void dispPots(){
@@ -843,12 +738,6 @@ void loop() {
 	customKeypad.tick();
 	checktime1 = 0;
 	
-//	resetClocks();
-	if (clksTimer > clksDelay ) {
-		// SEND CLOCK
-	  clksTimer = 0;
-	}
-
 	// DISPLAY SETUP
 	display.clearDisplay();
 
@@ -1077,8 +966,12 @@ void loop() {
 					MIDI.sendControlChange(CC_AUX, 100, midiChannel);
 					if (midiAUX) {
 						// STOP CLOCK
+//						Serial.println("stop clock");
+//						stopClock();
 					} else {
 						// START CLOCK
+//						Serial.println("start clock");
+//						startClock();
 					}
 					midiAUX = !midiAUX;
 					
@@ -1229,9 +1122,15 @@ void loop() {
 
 					} else {
 						if (playing){
+							// stop transport
 							playing = 0;
 							allNotesOff();
+//							Serial.println("stop transport");
+							stopClock();
 						} else {
+							// start transport
+//							Serial.println("start transport");
+							startClock();
 							playing = 1;
 						}
 					}
@@ -1341,7 +1240,6 @@ void loop() {
 					lastStepTime[playingPattern] = step_interval[playingPattern];
 					
 					step_on(playingPattern);
-					playNote(playingPattern);
 					show_current_step(playingPattern);
 					step_ahead(playingPattern);
 					step_interval[playingPattern] = 0;
@@ -1378,7 +1276,6 @@ void loop() {
 							}
 							lastStepTime[j] = step_interval[j];
 							step_on(j);
-							playNote(j);
 							show_current_step(playingPattern);
 							step_ahead(j);
 							step_interval[j] = 0;
@@ -1545,11 +1442,11 @@ void drawLoading(void) {
 	u8g2_display.setFontMode(0);  
 	for(int16_t i=0; i<16; i+=1) {
 		display.clearDisplay();
-		u8g2_display.setCursor(12,18);
+		u8g2_display.setCursor(18,18);
 		u8g2_display.setFont(FONT_TENFAT);
 		u8g2_display.print("OMX-27");
 		u8g2_display.setFont(FONT_SYMB_BIG);
-		u8g2centerText(loader[i%4], 74, 10, 32, 32); // "\u00BB\u00AB" // // dice: "\u2685"
+		u8g2centerText(loader[i%4], 80, 10, 32, 32); // "\u00BB\u00AB" // // dice: "\u2685"
 		display.display();
 		delay(100);
 	}

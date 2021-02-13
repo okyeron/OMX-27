@@ -10,11 +10,14 @@
 #define gridh 32
 #define gridw 128
 
+#define PPQ 24
+
 #define FONT_LABELS u8g2_font_5x8_tf
 #define FONT_VALUES u8g2_font_7x14B_tf
 #define FONT_SYMB u8g2_font_9x15_m_symbols
 #define FONT_SYMB_BIG u8g2_font_cu12_h_symbols
 #define FONT_TENFAT u8g2_font_tenfatguys_tf
+#define FONT_BIG u8g2_font_helvB18_tr
 
 // DEFINE CCS FOR POTS
 const int CC1 = 21;
@@ -73,6 +76,7 @@ unsigned long tempoStartTime, tempoEndTime;
 
 unsigned long blinkInterval = clockbpm * 2;
 unsigned long longPressInterval = 1500;
+
 bool keyState[27] = {false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false};
 
 // KEY SWITCH ROWS/COLS
