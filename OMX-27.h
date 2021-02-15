@@ -1,23 +1,15 @@
 // OMX-27 config
 
-#define CVGATE_PIN	13		// 13 on beta boards, A10 on v1
-#define CVPITCH_PIN	A14
-#define LED_PIN    14
-#define LED_COUNT 27
+const int CVGATE_PIN = 13;	// 13 on beta boards, A10 on v1
+const int CVPITCH_PIN = A14;
+const int LED_PIN  = 14;
+const int LED_COUNT = 27;
 
-#define DEFAULT_MODE 1
+const int DEFAULT_MODE = 1;
 
-#define gridh 32
-#define gridw 128
-
-#define PPQ 24
-
-#define FONT_LABELS u8g2_font_5x8_tf
-#define FONT_VALUES u8g2_font_7x14B_tf
-#define FONT_SYMB u8g2_font_9x15_m_symbols
-#define FONT_SYMB_BIG u8g2_font_cu12_h_symbols
-#define FONT_TENFAT u8g2_font_tenfatguys_tf
-#define FONT_BIG u8g2_font_helvB18_tr
+const int gridh = 32;
+const int gridw = 128;
+const int PPQ = 24;
 
 // DEFINE CCS FOR POTS
 const int CC1 = 21;
@@ -109,6 +101,14 @@ uint8_t RES;
 uint16_t AMAX;
 word V_scale;
 
+// FONTS
+#define FONT_LABELS u8g2_font_5x8_tf
+#define FONT_VALUES u8g2_font_7x14B_tf
+#define FONT_SYMB u8g2_font_9x15_m_symbols
+#define FONT_SYMB_BIG u8g2_font_cu12_h_symbols
+#define FONT_TENFAT u8g2_font_tenfatguys_tf
+#define FONT_BIG u8g2_font_helvB18_tr
+
 
 // COLOR PRESETS
 // https://www.rapidtables.com/web/color/color-wheel.html
@@ -181,13 +181,13 @@ const uint32_t seqColors[] = {ORANGE,YELLOW,GREEN,MAGENTA,CYAN,BLUE,LIME,LTPURPL
 const uint32_t muteColors[] = {DKORANGE,DKYELLOW,DKGREEN,DKMAGENTA,DKCYAN,DKBLUE,DKLIME,DKPURPLE};
 
 
-#define MIDINOTEON HALFWHITE
-#define SEQCHASE DKRED 
-#define SEQMARKER LOWWHITE 
-#define SEQSTEP ORANGE 
+const auto MIDINOTEON = HALFWHITE;
+const auto SEQCHASE = DKRED;
+const auto SEQMARKER = LOWWHITE;
+const auto SEQSTEP = ORANGE;
 
-#define NOTESEL DKCYAN 
-#define PATTSEL LIME 
+const auto NOTESEL = DKCYAN;
+const auto PATTSEL = LIME; 
 
-#define FUNKONE LTCYAN 
-#define FUNKTWO MINT 
+const auto FUNKONE = LTCYAN; 
+const auto FUNKTWO = MINT; 

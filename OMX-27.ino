@@ -1,20 +1,29 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
 // 
 // Steven Noreyko, February 2021
+//
+//
+//	Big thanks to: 
+//	John Park and Gerald Stevens for testing and feature ideas
+//	mzero, drjohn for code coaching/assistance
+//
+
 
 #include <Adafruit_Keypad.h>
 #include <Adafruit_NeoPixel.h>
+#include <FrequencyTimer2.h>
+#include <MIDI.h>
 #include <ResponsiveAnalogRead.h>
 #include <U8g2_for_Adafruit_GFX.h>
-#include <FrequencyTimer2.h>
 
-#include <MIDI.h>
 MIDI_CREATE_DEFAULT_INSTANCE();
-//MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, MIDI);
+	//MIDI_CREATE_INSTANCE(HardwareSerial, Serial1, MIDI); // ALT
 
 #include "ClearUI.h"
 #include "OMX-27.h"
 #include "sequencer.h"
+#include "noteoffs.h"
+
 
 U8G2_FOR_ADAFRUIT_GFX u8g2_display;
 
@@ -54,6 +63,53 @@ Adafruit_Keypad customKeypad = Adafruit_Keypad( makeKeymap(keys), rowPins, colPi
 Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 
 
+// ####### CLOCK/TIMING #######
+
+//void clockTick() {
+//  if (started) {
+//	usbMIDI.sendRealTime(usbMIDI.Clock);
+//    //MIDI.sendRealTime(midi::Clock);
+//  }
+//  currentTick++;
+//  if (currentTick == 24) {
+//    currentTick = 0;
+//  }
+//}
+void sendClock(void){
+	if (playing){
+		usbMIDI.sendRealTime(usbMIDI.Clock);
+	//	MIDI.sendClock();
+	
+	// turn off any expiring notes
+	pendingNoteOffs.play(micros());
+	Serial.println(micros());
+	
+	// turn on any pending notes
+	
+	}
+}
+void startClock(){
+	usbMIDI.sendRealTime(usbMIDI.Start);
+//	MIDI.sendStart();
+}
+void stopClock(){
+	usbMIDI.sendRealTime(usbMIDI.Stop);
+//	MIDI.sendStop();
+}
+void resetClocks(){
+	// BPM tempo to step_delay calculation
+	clockInterval = 60000000/(PPQ * clockbpm); // interval is in microseconds
+	step_micros = 60000000/clockbpm/4; 			// 16th note step in microseconds
+	FrequencyTimer2::setPeriod(clockInterval);
+
+	// 16th notes
+	step_delay = clockInterval * 0.006; // 60000 / clockbpm / 4; 
+
+	// BPM to clock pulses
+	//clksDelay = FrequencyTimer2::getPeriod(); // (60000000 / clockbpm) / 24;
+}
+
+
 
 // ####### POTENTIMETERS #######
 
@@ -81,15 +137,15 @@ void readPotentimeters(){
        		// do stuff		   	
 			switch(mode) { 
 				case 3:
-					// fall through
+						// fall through - same as MIDI
 				case 0: // MIDI
-//					usbMIDI.sendControlChange(pots[k], analogValues[k], midiChannel);
-//					MIDI.sendControlChange(pots[k], analogValues[k], midiChannel);
-//					potCC = pots[k];
-//					potVal = analogValues[k];
 					sendPots(k);
 					dirtyDisplay = true;
 					break;    	
+
+				case 2: // SEQ2
+						// fall through - same as SEQ1
+
 				case 1: // SEQ1
 					if (noteSelect && noteSelection){ // note selection - do P-Locks
 						potNum = k;
@@ -105,60 +161,11 @@ void readPotentimeters(){
 					} else if (!noteSelect){
 						sendPots(k);
 					}
-					
-					break;    	
-				case 2: // SEQ2
 					break;    	
     		}
     	}
 	}
 }
-
-// FIGURE OUT WHAT TO DO WITH CLOCK FOR NOW ???
-
-// ####### CLOCK/TIMING #######
-
-//void clockTick() {
-//  if (started) {
-//	usbMIDI.sendRealTime(usbMIDI.Clock);
-//    //MIDI.sendRealTime(midi::Clock);
-//  }
-//  currentTick++;
-//  if (currentTick == 24) {
-//    currentTick = 0;
-//  }
-//}
-void sendClock(void){
-	if (playing){
-		usbMIDI.sendRealTime(usbMIDI.Clock);
-	//	MIDI.sendClock();
-	}
-}
-void startClock(){
-	usbMIDI.sendRealTime(usbMIDI.Start);
-//	MIDI.sendStart();
-}
-void stopClock(){
-	usbMIDI.sendRealTime(usbMIDI.Stop);
-//	MIDI.sendStop();
-}
-void resetClocks(){
-	// BPM tempo to step_delay calculation
-	clockInterval = 60000000/(PPQ * clockbpm); // interval is in microseconds
-	FrequencyTimer2::setPeriod(clockInterval);
-
-	// 16th notes
-	step_delay = clockInterval * 0.006; // 60000 / clockbpm / 4; 
-
-	// BPM to clock pulses
-	//clksDelay = FrequencyTimer2::getPeriod(); // (60000000 / clockbpm) / 24;
-
-}
-
-//long calcTempoMicros() {
-//  long tempoMicros = (60 * 1000000) / (tempo * PPQ);
-//  return tempoMicros;
-//}
 
 
 
@@ -168,16 +175,16 @@ void setup() {
 	Serial.begin(115200);
 	checktime1 = 0;
 	clksTimer = 0;
+	
+//	FrequencyTimer2::setPeriod(clockInterval); // interval set in resetClocks()	
 	resetClocks();
 	
 	// set the FrequencyTimer2 for clock
-//	FrequencyTimer2::setPeriod(clockInterval);
 	FrequencyTimer2::setOnOverflow(sendClock); 
 	FrequencyTimer2::enable();
-  
-  	// (long)FrequencyTimer2::getPeriod();
 
-	// set analog read resolution to teensy's 13 usable bits
+
+	// SET ANALOG READ resolution to teensy's 13 usable bits
 	analogReadResolution(13);
 	
 	// initialize ResponsiveAnalogRead
@@ -217,12 +224,6 @@ void setup() {
 	delay(200);
 	display.clearDisplay();
 
-//	display.setCursor(16,4);
-//	defaultText(2); // set font
-//	display.setTextColor(SSD1306_WHITE);
-//	display.println("OMX-27");
-
-
 	u8g2_display.setForegroundColor(WHITE);
 	u8g2_display.setBackgroundColor(BLACK);
 	drawLoading();
@@ -230,7 +231,6 @@ void setup() {
 
 	// Keypad
 	customKeypad.begin();
-
 
 	// Handle incoming MIDI events
 		//MIDI.setHandleClock(handleExtClock);
@@ -428,17 +428,17 @@ void step_on(int patternNum){
 	//	Serial.print(g);
 	//	Serial.println(" step on");
 	playNote(playingPattern);
-
+	
 }
 
 void step_off(int patternNum, int position){
 	//	Serial.print(seqPos[patternNum]);
 	//	Serial.println(" step off");
-      usbMIDI.sendNoteOff(lastNote[patternNum][position], 0, midiChannel);
-      MIDI.sendNoteOff(lastNote[patternNum][position], 0, midiChannel);
+//      usbMIDI.sendNoteOff(lastNote[patternNum][position], 0, midiChannel);
+//      MIDI.sendNoteOff(lastNote[patternNum][position], 0, midiChannel);
       lastNote[patternNum][position] = 0;
-      analogWrite(CVPITCH_PIN, 0);
-      digitalWrite(CVGATE_PIN, LOW);
+//      analogWrite(CVPITCH_PIN, 0);
+//      digitalWrite(CVGATE_PIN, LOW);
 }
 
 
@@ -1358,6 +1358,99 @@ void noteOff(int notenum){
 	strip.setPixelColor(notenum, LEDOFF); 
 	dirtyPixels = true;
 	dirtyDisplay = true;
+}
+
+
+// Play a note
+void playNote(int patternNum) {
+  //Serial.println(stepNoteP[patternNum][seqPos][0]); // Debug
+  switch (stepPlay[patternNum][seqPos[patternNum]]) {
+    case -1:
+      // Skip the remaining notes
+      seqPos[patternNum] = 15;
+      break;
+      
+    case 0:
+      // Don't play a note
+
+      break;
+
+    case 1:	// regular note on
+		seq_velocity = stepNoteP[playingPattern][seqPos[patternNum]][1];
+		usbMIDI.sendNoteOn(stepNoteP[patternNum][seqPos[patternNum]][0], seq_velocity, midiChannel);
+		MIDI.sendNoteOn(stepNoteP[patternNum][seqPos[patternNum]][0], seq_velocity, midiChannel);
+
+		// send param locks // {notenum,vel,len,p1,p2,p3,p4,p5}
+		for (int q=0; q<4; q++){	
+			int tempCC = stepNoteP[patternNum][seqPos[patternNum]][q+3];
+			if (tempCC > -1) {
+				usbMIDI.sendControlChange(pots[q],tempCC,midiChannel);
+				prevPlock[q] = tempCC;
+			} else if (prevPlock[q] != potValues[q]) {
+				//if (tempCC != prevPlock[q]) {
+				usbMIDI.sendControlChange(pots[q],potValues[q],midiChannel);
+				prevPlock[q] = potValues[q];
+			}
+		}
+		lastNote[patternNum][seqPos[patternNum]] = stepNoteP[patternNum][seqPos[patternNum]][0];
+		
+		// set notes in note-off queue
+		pendingNoteOffs.insert(stepNoteP[patternNum][seqPos[patternNum]][0], midiChannel, micros()+stepNoteP[patternNum][seqPos[patternNum]][2]*step_micros);
+		
+		stepCV = map (lastNote[patternNum][seqPos[patternNum]], 35, 90, 0, 4096);
+		digitalWrite(CVGATE_PIN, HIGH);
+		analogWrite(CVPITCH_PIN, stepCV);
+      break;
+
+    case 2:		 // NOT USED?      
+		usbMIDI.sendNoteOn(stepNoteP[patternNum][seqPos[patternNum]][0], seq_acc_velocity, midiChannel);
+		MIDI.sendNoteOn(stepNoteP[patternNum][seqPos[patternNum]][0], seq_acc_velocity, midiChannel);
+		lastNote[patternNum][seqPos[patternNum]] = stepNoteP[patternNum][seqPos[patternNum]][0];
+      	stepCV = map (lastNote[patternNum][seqPos[patternNum]], 35, 90, 0, 4096);
+      	digitalWrite(CVGATE_PIN, HIGH);
+      	analogWrite(CVPITCH_PIN, stepCV);
+      break;
+  }
+}
+
+void allNotesOff() {
+	pendingNoteOffs.allOff();
+}
+
+void allNotesOffPanic() {
+	analogWrite(CVPITCH_PIN, 0);
+	digitalWrite(CVGATE_PIN, LOW);
+	for (int j=0; j<128; j++){
+		usbMIDI.sendNoteOff(j, 0, midiChannel);
+		MIDI.sendNoteOff(j, 0, midiChannel);
+	}
+}
+
+void seqStart() {
+  playing = 1;
+  paused = 0;
+  stopped = 0;
+}
+
+void seqContinue() {
+  playing = 1;
+  paused = 0;
+  stopped = 0;
+}
+
+void seqPause() {
+  playing = 0;
+  paused = 1;
+  stopped = 0;
+}
+
+void seqStop() {
+  ticks = 0;
+  // seqPos = 0;
+  playing = 0;
+  paused = 0;
+  stopped = 1;
+  seqLedRefresh = 1;
 }
 
 void rotatePattern(int a[], int size, int rot ){

@@ -25,7 +25,8 @@ int patternLength[8] = {16, 16, 16, 16, 16, 16, 16, 16};
 int patternStart[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 int pattLen[8] = {patternLength[0],patternLength[1],patternLength[2],patternLength[3],patternLength[4],patternLength[5],patternLength[6],patternLength[7]};
 
-// bool plocks[16];
+volatile unsigned long step_micros; 
+
 
 // Determine how to play a step
 // -1: restart
@@ -40,6 +41,17 @@ int stepPlay[8][16] = {
   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
   {1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0},
+  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+};
+
+int stepQueue[8][16] = {
+  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+  {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 };
@@ -70,7 +82,7 @@ int stepNote[8][16] = {
   {39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39, 39}
 };
 int stepNoteP[8][16][8] = { 		// {notenum,vel,len,p1,p2,p3,p4,p5}
-	{ {60, 100, 1, -1, -1, -1, -1, -1}, {62, 100, 1, -1, -1, -1, -1, -1},{60, 100, 1, -1, -1, -1, -1, -1},{64, 100, 1, -1, -1, -1, -1, -1},{63, 100, 1, -1, -1, -1, -1, -1},{63, 100, 1, -1, -1, -1, -1, -1},{60, 100, 1, -1, -1, -1, -1, -1},{60, 100, 1, -1, -1, -1, -1, -1},{60, 100, 1, -1, -1, -1, -1, -1},{62, 100, 1, -1, -1, -1, -1, -1},{72, 100, 1, -1, -1, -1, -1, -1},{65, 100, 1, -1, -1, -1, -1, -1},{65, 100, 1, -1, -1, -1, -1, -1},{72, 100, 1, -1, -1, -1, -1, -1},{60, 100, 1, -1, -1, -1, -1, -1},{72, 100, 1, -1, -1, -1, -1, -1} },
+	{ {60, 100, 8, -1, -1, -1, -1, -1}, {62, 100, 1, -1, -1, -1, -1, -1},{60, 100, 1, -1, -1, -1, -1, -1},{64, 100, 1, -1, -1, -1, -1, -1},{63, 100, 1, -1, -1, -1, -1, -1},{63, 100, 1, -1, -1, -1, -1, -1},{60, 100, 1, -1, -1, -1, -1, -1},{60, 100, 1, -1, -1, -1, -1, -1},{60, 100, 1, -1, -1, -1, -1, -1},{62, 100, 1, -1, -1, -1, -1, -1},{72, 100, 1, -1, -1, -1, -1, -1},{65, 100, 1, -1, -1, -1, -1, -1},{65, 100, 1, -1, -1, -1, -1, -1},{72, 100, 1, -1, -1, -1, -1, -1},{60, 100, 1, -1, -1, -1, -1, -1},{72, 100, 1, -1, -1, -1, -1, -1} },
 	{ {48, 100, 1, -1, -1, -1, -1, -1}, {48, 100, 1, -1, -1, -1, -1, -1},{48, 100, 1, -1, -1, -1, -1, -1},{48, 100, 1, -1, -1, -1, -1, -1},{63, 100, 1, -1, -1, -1, -1, -1},{63, 100, 1, -1, -1, -1, -1, -1},{48, 100, 1, -1, -1, -1, -1, -1},{48, 100, 1, -1, -1, -1, -1, -1},{48, 100, 1, -1, -1, -1, -1, -1},{48, 100, 1, -1, -1, -1, -1, -1},{48, 100, 1, -1, -1, -1, -1, -1},{65, 100, 1, -1, -1, -1, -1, -1},{65, 100, 1, -1, -1, -1, -1, -1},{48, 100, 1, -1, -1, -1, -1, -1},{48, 100, 1, -1, -1, -1, -1, -1},{48, 100, 1, -1, -1, -1, -1, -1} },
 	{ {48, 100, 1, -1, -1, -1, -1, -1}, {48, 100, 1, -1, -1, -1, -1, -1},{48, 100, 1, -1, -1, -1, -1, -1},{48, 100, 1, -1, -1, -1, -1, -1},{63, 100, 1, -1, -1, -1, -1, -1},{63, 100, 1, -1, -1, -1, -1, -1},{48, 100, 1, -1, -1, -1, -1, -1},{48, 100, 1, -1, -1, -1, -1, -1},{48, 100, 1, -1, -1, -1, -1, -1},{48, 100, 1, -1, -1, -1, -1, -1},{48, 100, 1, -1, -1, -1, -1, -1},{65, 100, 1, -1, -1, -1, -1, -1},{65, 100, 1, -1, -1, -1, -1, -1},{48, 100, 1, -1, -1, -1, -1, -1},{48, 100, 1, -1, -1, -1, -1, -1},{48, 100, 1, -1, -1, -1, -1, -1} },
 	{ {48, 100, 1, -1, -1, -1, -1, -1}, {48, 100, 1, -1, -1, -1, -1, -1},{48, 100, 1, -1, -1, -1, -1, -1},{48, 100, 1, -1, -1, -1, -1, -1},{63, 100, 1, -1, -1, -1, -1, -1},{63, 100, 1, -1, -1, -1, -1, -1},{48, 100, 1, -1, -1, -1, -1, -1},{48, 100, 1, -1, -1, -1, -1, -1},{48, 100, 1, -1, -1, -1, -1, -1},{48, 100, 1, -1, -1, -1, -1, -1},{48, 100, 1, -1, -1, -1, -1, -1},{65, 100, 1, -1, -1, -1, -1, -1},{65, 100, 1, -1, -1, -1, -1, -1},{48, 100, 1, -1, -1, -1, -1, -1},{48, 100, 1, -1, -1, -1, -1, -1},{48, 100, 1, -1, -1, -1, -1, -1} },
@@ -113,101 +125,4 @@ int stepLength[8][16] = {
   {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 };
 
-void seqStart() {
-  playing = 1;
-  paused = 0;
-  stopped = 0;
-}
 
-void seqContinue() {
-  playing = 1;
-  paused = 0;
-  stopped = 0;
-}
-
-void seqPause() {
-  playing = 0;
-  paused = 1;
-  stopped = 0;
-}
-
-void seqStop() {
-  ticks = 0;
-  // seqPos = 0;
-  playing = 0;
-  paused = 0;
-  stopped = 1;
-  seqLedRefresh = 1;
-}
-
-// Play a note
-void playNote(int patternNum) {
-  //Serial.println(stepNoteP[patternNum][seqPos][0]); // Debug
-
-  switch (stepPlay[patternNum][seqPos[patternNum]]) {
-    case -1:
-      // Skip the remaining notes
-      seqPos[patternNum] = 15;
-      break;
-    case 0:
-      // Don't play a note
-      // Turn off the previous note
-//       usbMIDI.sendNoteOff(lastNote[patternNum], 0, midiChannel);
-//       MIDI.sendNoteOff(lastNote[patternNum], 0, midiChannel);
-//       analogWrite(CVPITCH_PIN, 0);
-//       digitalWrite(CVGATE_PIN, LOW);
-      break;
-
-    case 1:	// regular note on
-      // Turn off the previous note and play a new note.
-//       usbMIDI.sendNoteOff(lastNote[patternNum], 0, midiChannel);
-//       MIDI.sendNoteOff(lastNote[patternNum], 0, midiChannel);
-//       analogWrite(CVPITCH_PIN, 0);
-
-// stepNoteP[playingPattern][selectedStep][1]
-		seq_velocity = stepNoteP[playingPattern][seqPos[patternNum]][1];
-		usbMIDI.sendNoteOn(stepNoteP[patternNum][seqPos[patternNum]][0], seq_velocity, midiChannel);
-		MIDI.sendNoteOn(stepNoteP[patternNum][seqPos[patternNum]][0], seq_velocity, midiChannel);
-		//Serial.println(stepNoteP[patternNum][seqPos[patternNum]]);
-
-		// send param locks // {notenum,vel,len,p1,p2,p3,p4,p5}
-		for (int q=0; q<4; q++){	
-			int tempCC = stepNoteP[patternNum][seqPos[patternNum]][q+3];
-			if (tempCC > -1) {
-				usbMIDI.sendControlChange(pots[q],tempCC,midiChannel);
-				prevPlock[q] = tempCC;
-			} else if (prevPlock[q] != potValues[q]) {
-				//if (tempCC != prevPlock[q]) {
-				usbMIDI.sendControlChange(pots[q],potValues[q],midiChannel);
-				prevPlock[q] = potValues[q];
-			}
-		}
-		lastNote[patternNum][seqPos[patternNum]] = stepNoteP[patternNum][seqPos[patternNum]][0];
-		stepCV = map (lastNote[patternNum][seqPos[patternNum]], 35, 90, 0, 4096);
-		digitalWrite(CVGATE_PIN, HIGH);
-		analogWrite(CVPITCH_PIN, stepCV);
-      break;
-
-    case 2:		 // accented note on - NOT USED?
-      // Turn off the previous note, and play a new accented note
-//       usbMIDI.sendNoteOff(lastNote[patternNum], 0, midiChannel);
-//       MIDI.sendNoteOff(lastNote[patternNum], 0, midiChannel);
-//       analogWrite(CVPITCH_PIN, 0);
-      
-		usbMIDI.sendNoteOn(stepNoteP[patternNum][seqPos[patternNum]][0], seq_acc_velocity, midiChannel);
-		MIDI.sendNoteOn(stepNoteP[patternNum][seqPos[patternNum]][0], seq_acc_velocity, midiChannel);
-		lastNote[patternNum][seqPos[patternNum]] = stepNoteP[patternNum][seqPos[patternNum]][0];
-      	stepCV = map (lastNote[patternNum][seqPos[patternNum]], 35, 90, 0, 4096);
-      	digitalWrite(CVGATE_PIN, HIGH);
-      	analogWrite(CVPITCH_PIN, stepCV);
-      break;
-  }
-}
-void allNotesOff() {
-	analogWrite(CVPITCH_PIN, 0);
-	digitalWrite(CVGATE_PIN, LOW);
-	for (int j=0; j<128; j++){
-		usbMIDI.sendNoteOff(j, 0, midiChannel);
-		MIDI.sendNoteOff(j, 0, midiChannel);
-	}
-}
