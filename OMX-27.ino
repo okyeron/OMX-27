@@ -11,7 +11,6 @@
 
 #include <Adafruit_Keypad.h>
 #include <Adafruit_NeoPixel.h>
-#include <FrequencyTimer2.h>
 #include <MIDI.h>
 #include <ResponsiveAnalogRead.h>
 #include <U8g2_for_Adafruit_GFX.h>
@@ -49,6 +48,10 @@ elapsedMillis keyPressTime[27] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 
 volatile unsigned long clockInterval; 
 
+using Micros = unsigned long;
+Micros lastProcessTime;
+
+
 // ENCODER
 Encoder myEncoder(12, 11); 	// encoder pins
 Button encButton(0);		// encoder button pin
@@ -75,19 +78,31 @@ Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 //    currentTick = 0;
 //  }
 //}
+
 void sendClock(void){
 	if (playing){
-		usbMIDI.sendRealTime(usbMIDI.Clock);
-	//	MIDI.sendClock();
-	
-	// turn off any expiring notes
-	pendingNoteOffs.play(micros());
-	Serial.println(micros());
-	
-	// turn on any pending notes
-	
+		// usbMIDI.sendRealTime(usbMIDI.Clock);
+		//	MIDI.sendClock();
 	}
 }
+
+void advanceClock(Micros advance) {
+	static Micros timeToNextClock = 0;
+	while (advance >= timeToNextClock) {
+		advance -= timeToNextClock;		
+		usbMIDI.sendRealTime(usbMIDI.Clock);
+		// MIDI.sendClock();
+		timeToNextClock = clockInterval;
+		
+		// turn off any expiring notes
+		pendingNoteOffs.play(micros());
+	
+		// turn on any pending notes
+
+	}
+	timeToNextClock -= advance;
+}
+
 void startClock(){
 	usbMIDI.sendRealTime(usbMIDI.Start);
 //	MIDI.sendStart();
@@ -100,13 +115,9 @@ void resetClocks(){
 	// BPM tempo to step_delay calculation
 	clockInterval = 60000000/(PPQ * clockbpm); // interval is in microseconds
 	step_micros = 60000000/clockbpm/4; 			// 16th note step in microseconds
-	FrequencyTimer2::setPeriod(clockInterval);
 
 	// 16th notes
 	step_delay = clockInterval * 0.006; // 60000 / clockbpm / 4; 
-
-	// BPM to clock pulses
-	//clksDelay = FrequencyTimer2::getPeriod(); // (60000000 / clockbpm) / 24;
 }
 
 
@@ -173,17 +184,13 @@ void readPotentimeters(){
 
 void setup() {
 	Serial.begin(115200);
+
 	checktime1 = 0;
 	clksTimer = 0;
-	
-//	FrequencyTimer2::setPeriod(clockInterval); // interval set in resetClocks()	
+		
+	lastProcessTime = micros();
 	resetClocks();
 	
-	// set the FrequencyTimer2 for clock
-	FrequencyTimer2::setOnOverflow(sendClock); 
-	FrequencyTimer2::enable();
-
-
 	// SET ANALOG READ resolution to teensy's 13 usable bits
 	analogReadResolution(13);
 	
@@ -520,26 +527,26 @@ void dispSeqMode1(){
 	dispValBox(pattLen[playingPattern], 1, false);
 	dispValBox((int)clockbpm, 2, false);
 //	dispValBox(midiChannel, 3, false);
-
 }
+
 void dispNoteSelect(){
 	if (!noteSelection){
 
 	}else{
-			// labels formatting
-			u8g2_display.setFontMode(1);  
-			u8g2_display.setFont(FONT_LABELS);
-			u8g2_display.setCursor(0, 0);	
-			dispGridBoxes();
-			display.drawFastHLine(0, 20, 64, WHITE);
-			// labels
-			u8g2_display.setForegroundColor(BLACK);
-			u8g2_display.setBackgroundColor(WHITE);
+		// labels formatting
+		u8g2_display.setFontMode(1);  
+		u8g2_display.setFont(FONT_LABELS);
+		u8g2_display.setCursor(0, 0);	
+		dispGridBoxes();
+		display.drawFastHLine(0, 20, 64, WHITE);
+		// labels
+		u8g2_display.setForegroundColor(BLACK);
+		u8g2_display.setBackgroundColor(WHITE);
 
-			u8g2centerText("L-1/2", 0, hline-2, 32, 10);
-			u8g2centerText("L-3/4", 32, hline-2, 32, 10);
-			u8g2centerText("NOTE", 65, hline-2, 32, 10);
-			u8g2centerText("VEL", 97, hline-2, 32, 10);
+		u8g2centerText("L-1/2", 0, hline-2, 32, 10);
+		u8g2centerText("L-3/4", 32, hline-2, 32, 10);
+		u8g2centerText("NOTE", 65, hline-2, 32, 10);
+		u8g2centerText("VEL", 97, hline-2, 32, 10);
 
 		// value text formatting
 		u8g2_display.setFontMode(1); 
@@ -602,6 +609,40 @@ void dispNoteSelect(){
 
 	}
 }
+
+void dispNoteSelect2(){
+	// labels formatting
+	u8g2_display.setFontMode(1);  
+	u8g2_display.setFont(FONT_LABELS);
+	u8g2_display.setCursor(0, 0);	
+	dispGridBoxes();
+	// labels
+	u8g2_display.setForegroundColor(BLACK);
+	u8g2_display.setBackgroundColor(WHITE);
+
+	u8g2centerText("", 0, hline-2, 32, 10);
+	u8g2centerText("", 32, hline-2, 32, 10);
+	u8g2centerText("", 65, hline-2, 32, 10);
+	u8g2centerText("LEN", 97, hline-2, 32, 10);
+
+	// value text formatting
+	u8g2_display.setFontMode(1); 
+
+	bool lenFlip = false;		
+	switch(nsmode2){
+		case 1: 	//
+			display.fillRect(3*32, 10, 33, 22, WHITE);
+			lenFlip = true;
+			break;
+		default:
+			break;
+	}
+
+	u8g2_display.setFont(FONT_VALUES);
+	// ValueBoxes
+	dispValBox(stepNoteP[playingPattern][selectedStep][2], 3, lenFlip); 	// NOTE LENGTH
+}
+
 void dispPatternParams(){
 	if (patternParams){
 
@@ -652,7 +693,6 @@ void dispPatternParams(){
 }
 
 void dispMode(){
-
 	// labels formatting
 	u8g2_display.setFontMode(1);  
 	u8g2_display.setFont(FONT_BIG);
@@ -668,8 +708,6 @@ void dispMode(){
 		displaymode = modes[mode]; // display.print(modes[mode]);
 	}
 	u8g2centerText(displaymode, 86, 20, 44, 32);
-
-
 }
 
 void dispPattLen(){
@@ -737,6 +775,19 @@ void dispNotes(){
 void loop() {
 	customKeypad.tick();
 	checktime1 = 0;
+	
+	Micros now = micros();
+	Micros passed = now - lastProcessTime;
+	lastProcessTime = now;
+
+//	Serial.print("clockInterval:");
+//	Serial.println(clockInterval);
+	
+	if (passed > 0) {
+		if (playing){
+			advanceClock(passed);
+		}
+	}
 	
 	// DISPLAY SETUP
 	display.clearDisplay();
@@ -841,10 +892,20 @@ void loop() {
 							stepNoteP[playingPattern][selectedStep][1] = constrain(tempVel + amt, 0, 127);
 							dirtyDisplay = true;
 						}	
-						if (nsmode == 6) { // change page
-
+						if (nsmode == 6 && nsmode2 == 0) { // change page
+							nspage = constrain(nspage + amt, 0, 1);
+							Serial.print("nspage ");
+							Serial.println(nspage);
+							dirtyDisplay = true;
 						}	
 //						Serial.println("NS");
+
+						if (nsmode2 == 1) { // set note length
+							int tempLen = stepNoteP[playingPattern][selectedStep][2];
+							stepNoteP[playingPattern][selectedStep][2] = constrain(tempLen + amt, 1, 16); // Note Len between 1-16
+							dirtyDisplay = true;
+						}	
+
 
 					} else {
 						newtempo = constrain(clockbpm + amt, 40, 300);
@@ -902,9 +963,14 @@ void loop() {
 			}
 			if(mode == 1) {
 				if (noteSelect && noteSelection) {
-					// increment nsmode
-					nsmode = (nsmode + 1 ) % 7;
-//					Serial.println(nsmode);
+					if (nspage == 0){
+						// increment nsmode
+						nsmode = (nsmode + 1 ) % 7;
+					}else if (nspage == 1){
+						nsmode2 = (nsmode2 + 1 ) % 2;
+					}
+					Serial.print("nsmode2 ");
+					Serial.println(nsmode2);
 					dirtyDisplay = true;
 				}
 				if (patternParams) {
@@ -1070,12 +1136,13 @@ void loop() {
 							}
 							
 						} else if (thisKey > 10) { // SEQUENCE 1-16 KEYS
-							if (stepPlay[playingPattern][keyPos] == 1){ // toggle note on
-								stepPlay[playingPattern][keyPos] = 0;
-							} else if (stepPlay[playingPattern][keyPos] == 0){ // toggle note off
-								stepPlay[playingPattern][keyPos] = 1;
-								//stepNote[playingPattern][keyPos] = notes[thisKey];
-							}
+							// toggle step on/off
+							stepPlay[playingPattern][keyPos] = !stepPlay[playingPattern][keyPos];
+//							if (stepPlay[playingPattern][keyPos] == 1){ 
+//								stepPlay[playingPattern][keyPos] = 0;
+//							} else if (stepPlay[playingPattern][keyPos] == 0){ // toggle note on
+//								stepPlay[playingPattern][keyPos] = 1;
+//							}
 						}
 					}
 				}
@@ -1171,10 +1238,13 @@ void loop() {
 						
 						} else if (j > 10){
 							selectedStep = j - 11; // set noteSelection to this step
+							Serial.println(selectedStep);
 							noteSelect = true;
 							stepSelect = true;
 							noteSelection = true;
 							dirtyDisplay = true;
+
+							stepPlay[playingPattern][selectedStep] = !stepPlay[playingPattern][selectedStep];
 						}
 						break;
 						
@@ -1218,7 +1288,11 @@ void loop() {
 //						dispTempo();
 					}				
 					if (noteSelect) {
-						dispNoteSelect();
+						if (nspage == 0){
+							dispNoteSelect();
+						} else if (nspage == 1){
+							dispNoteSelect2();
+						}
 					}
 					if (patternParams) {
 						dispPatternParams();
@@ -1226,7 +1300,8 @@ void loop() {
 				}
 			}
 			if(playing == true) {
-				// step timing
+				// ############## STEP TIMING ##############
+
 				if(step_interval[playingPattern] >= step_delay){
 					
 					// Do stuff
@@ -1240,6 +1315,7 @@ void loop() {
 					lastStepTime[playingPattern] = step_interval[playingPattern];
 					
 					step_on(playingPattern);
+					
 					show_current_step(playingPattern);
 					step_ahead(playingPattern);
 					step_interval[playingPattern] = 0;
@@ -1256,7 +1332,12 @@ void loop() {
 		case 2: 						// ############## SEQUENCER 2
 			if (dirtyDisplay){			// DISPLAY
 				if (noteSelect) {
-					dispNoteSelect();
+					if (nspage == 0){
+						dispNoteSelect();
+					} else if (nspage == 1){
+						dispNoteSelect2();
+					}
+
 				} else {
 					dispPattLen();
 					dispTempo();		
@@ -1398,8 +1479,8 @@ void playNote(int patternNum) {
 		pendingNoteOffs.insert(stepNoteP[patternNum][seqPos[patternNum]][0], midiChannel, micros()+stepNoteP[patternNum][seqPos[patternNum]][2]*step_micros);
 		
 		stepCV = map (lastNote[patternNum][seqPos[patternNum]], 35, 90, 0, 4096);
-		digitalWrite(CVGATE_PIN, HIGH);
-		analogWrite(CVPITCH_PIN, stepCV);
+//		digitalWrite(CVGATE_PIN, HIGH);
+//		analogWrite(CVPITCH_PIN, stepCV);
       break;
 
     case 2:		 // NOT USED?      

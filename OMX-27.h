@@ -40,6 +40,8 @@ int mode = DEFAULT_MODE;
 int newmode = DEFAULT_MODE;
 #define numModes (sizeof(modes)/sizeof(char *)) //array size  
 int nsmode = 6;
+int nsmode2 = 0;
+int nspage = 0;
 int ptmode = 3;
 
 // VARIABLES
