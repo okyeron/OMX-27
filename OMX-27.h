@@ -1,19 +1,19 @@
 // OMX-27 config
 
-const int CVGATE_PIN = 13;	// 13 on beta boards, A10 on v1
+const int CVGATE_PIN = 22; // ;	// 13 on beta1 boards, 22 on test, 23 on 1.0
 const int CVPITCH_PIN = A14;
 const int LED_PIN  = 14;
 const int LED_COUNT = 27;
 
-const int DEFAULT_MODE = 1;
+const int DEFAULT_MODE = 0;
 
 const int gridh = 32;
 const int gridw = 128;
 const int PPQ = 24;
 
-// DEFINE CCS FOR POTS
+// DEFINE CCS FOR POTS // CCS mapped to Organelle Defaults
 const int CC1 = 21;
-const int CC2 = 22;
+const int CC2 = 22; 
 const int CC3 = 23;
 const int CC4 = 24;
 const int CC5 = 7;
@@ -23,11 +23,11 @@ const int CC_OM1 = 26; // Mother mode - enc switch
 const int CC_OM2 = 28; // Mother mode - enc turn
 
 
-// POTS/ANALOG INPUTS					// CCS mapped to Organelle Defaults
+// POTS/ANALOG INPUTS					
+int analogPins[] = {23,A10,21,20,16};	// teensy pins for analog inputs // {23,22,21,20,16} on beta, {23,A10,21,20,16} on test, {A10,22,21,20,16} on 1.0
+int analogValues[] = {0,0,0,0,0};		// default values
 int pots[] = {CC1,CC2,CC3,CC4,CC5};			// the MIDI CC (continuous controller) for each analog input
 int potValues[] = {0,0,0,0,0};			
-int analogPins[] = {23,22,21,20,16};	// teensy pins for analog inputs
-int analogValues[] = {0,0,0,0,0};		// default values
 int potCC = pots[0];
 int potVal = analogValues[0];
 int potNum = 0;
@@ -102,6 +102,21 @@ word pitchCV;
 uint8_t RES;
 uint16_t AMAX;
 word V_scale;
+
+const int loSkip = 0;
+const int hiSkip = 0;
+constexpr int range = 4096 - loSkip - hiSkip;
+
+const float fullRangeV = 4.66;
+const float fullRangeDAC = 4095.0;
+const float stepsPerVolt = fullRangeDAC / fullRangeV;
+const float stepsPerOctave = stepsPerVolt;
+const float stepsPerSemitone = stepsPerOctave / 12;
+
+const int midiMiddleC = 60;
+const int midiLowestNote = midiMiddleC - 3 * 12; // 3 is how many octaves under middle c
+const int midiHightestNote = midiLowestNote + int(fullRangeV * 12) - 1;
+
 
 // FONTS
 #define FONT_LABELS u8g2_font_5x8_tf

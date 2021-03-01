@@ -141,6 +141,7 @@ void readPotentimeters(){
     	temp = analog[k]->getValue();
     	temp = constrain(temp, potMin, potMax);
 		temp = map(temp, potMin, potMax, 0, 16383);
+
 		// map and update the value
     	analogValues[k] = temp >> 7;
    	
@@ -263,7 +264,7 @@ void setup() {
 	}
 	rainbow(5); // rainbow startup pattern
   
-	delay(100);
+	delay(1000);
 	strip.fill(0, 0, LED_COUNT);
 	strip.show();            // Turn OFF all pixels ASAP
 
@@ -444,8 +445,8 @@ void step_off(int patternNum, int position){
 //      usbMIDI.sendNoteOff(lastNote[patternNum][position], 0, midiChannel);
 //      MIDI.sendNoteOff(lastNote[patternNum][position], 0, midiChannel);
       lastNote[patternNum][position] = 0;
-//      analogWrite(CVPITCH_PIN, 0);
-//      digitalWrite(CVGATE_PIN, LOW);
+      analogWrite(CVPITCH_PIN, 0);
+      digitalWrite(CVGATE_PIN, LOW);
 }
 
 
@@ -969,8 +970,8 @@ void loop() {
 					}else if (nspage == 1){
 						nsmode2 = (nsmode2 + 1 ) % 2;
 					}
-					Serial.print("nsmode2 ");
-					Serial.println(nsmode2);
+//					Serial.print("nsmode2 ");
+//					Serial.println(nsmode2);
 					dirtyDisplay = true;
 				}
 				if (patternParams) {
@@ -1238,12 +1239,11 @@ void loop() {
 						
 						} else if (j > 10){
 							selectedStep = j - 11; // set noteSelection to this step
-							Serial.println(selectedStep);
 							noteSelect = true;
 							stepSelect = true;
 							noteSelection = true;
 							dirtyDisplay = true;
-
+							// re-toggle the key you just held
 							stepPlay[playingPattern][selectedStep] = !stepPlay[playingPattern][selectedStep];
 						}
 						break;
@@ -1409,6 +1409,18 @@ void seqReset(){
 	}
 }
 
+void cvNoteOn(int notenum){
+	if (notenum>=midiLowestNote && notenum <midiHightestNote){
+		pitchCV = static_cast<int>(roundf( (notenum - midiLowestNote) * stepsPerSemitone)); // map (adjnote, 36, 91, 0, 4080);
+		digitalWrite(CVGATE_PIN, HIGH);
+		analogWrite(CVPITCH_PIN, pitchCV);
+	}
+}
+void cvNoteOff(){
+	digitalWrite(CVGATE_PIN, LOW);
+	analogWrite(CVPITCH_PIN, 0);
+}
+
 // #### MIDI Mode note on/off
 void noteOn(int notenum, int velocity, int patternNum){
 	int adjnote = notes[notenum] + (octave * 12); // adjust key for octave range
@@ -1417,9 +1429,7 @@ void noteOn(int notenum, int velocity, int patternNum){
 		lastNote[patternNum][seqPos[patternNum]] = adjnote;
 		MIDI.sendNoteOn(adjnote, velocity, midiChannel);	
 		// CV
-		pitchCV = map (adjnote, 35, 90, 0, 4096);
-		digitalWrite(CVGATE_PIN, HIGH);
-		analogWrite(CVPITCH_PIN, pitchCV);
+		cvNoteOn(adjnote);
 	}
 
 	strip.setPixelColor(notenum, MIDINOTEON);         //  Set pixel's color (in RAM)
@@ -1431,9 +1441,8 @@ void noteOff(int notenum){
 	if (adjnote>=0 && adjnote <128){
 		usbMIDI.sendNoteOff(adjnote, 0, midiChannel);
 		MIDI.sendNoteOff(adjnote, 0, midiChannel);
-		// CV
-		digitalWrite(CVGATE_PIN, LOW);
-		analogWrite(CVPITCH_PIN, 0);
+		// CV off
+		cvNoteOff();
 	}
 	
 	strip.setPixelColor(notenum, LEDOFF); 
@@ -1477,8 +1486,10 @@ void playNote(int patternNum) {
 		
 		// set notes in note-off queue
 		pendingNoteOffs.insert(stepNoteP[patternNum][seqPos[patternNum]][0], midiChannel, micros()+stepNoteP[patternNum][seqPos[patternNum]][2]*step_micros);
+		// CV
+		cvNoteOn(stepNoteP[patternNum][seqPos[patternNum]][0]);
 		
-		stepCV = map (lastNote[patternNum][seqPos[patternNum]], 35, 90, 0, 4096);
+//		stepCV = map (lastNote[patternNum][seqPos[patternNum]], 35, 90, 0, 4096);
 //		digitalWrite(CVGATE_PIN, HIGH);
 //		analogWrite(CVPITCH_PIN, stepCV);
       break;
@@ -1488,8 +1499,8 @@ void playNote(int patternNum) {
 		MIDI.sendNoteOn(stepNoteP[patternNum][seqPos[patternNum]][0], seq_acc_velocity, midiChannel);
 		lastNote[patternNum][seqPos[patternNum]] = stepNoteP[patternNum][seqPos[patternNum]][0];
       	stepCV = map (lastNote[patternNum][seqPos[patternNum]], 35, 90, 0, 4096);
-      	digitalWrite(CVGATE_PIN, HIGH);
-      	analogWrite(CVPITCH_PIN, stepCV);
+//      	digitalWrite(CVGATE_PIN, HIGH);
+//      	analogWrite(CVPITCH_PIN, stepCV);
       break;
   }
 }
@@ -1499,8 +1510,8 @@ void allNotesOff() {
 }
 
 void allNotesOffPanic() {
-	analogWrite(CVPITCH_PIN, 0);
-	digitalWrite(CVGATE_PIN, LOW);
+//	analogWrite(CVPITCH_PIN, 0);
+//	digitalWrite(CVGATE_PIN, LOW);
 	for (int j=0; j<128; j++){
 		usbMIDI.sendNoteOff(j, 0, midiChannel);
 		MIDI.sendNoteOff(j, 0, midiChannel);

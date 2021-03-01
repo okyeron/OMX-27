@@ -25,6 +25,9 @@ void PendingNoteOffs::play(uint32_t now) {
 		if (queue[i].inUse && queue[i].time <= now) {
 		usbMIDI.sendNoteOff(queue[i].note, 0, queue[i].channel);
 // 		MIDI.sendNoteOff(queue[i].note, 0, queue[i].channel);
+
+// 		const int CVGATE_PIN = 13; // ;	// 13 on beta1 boards, 22 on test, 23 on 1.0
+// 		const int CVPITCH_PIN = A14;
 // 		analogWrite(CVPITCH_PIN, 0);
 // 		digitalWrite(CVGATE_PIN, LOW);
 
