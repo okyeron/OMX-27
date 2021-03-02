@@ -1,15 +1,11 @@
-// OMX-27 config
-
-const int CVGATE_PIN = 22; // ;	// 13 on beta1 boards, 22 on test, 23 on 1.0
-const int CVPITCH_PIN = A14;
-const int LED_PIN  = 14;
-const int LED_COUNT = 27;
+// OMX-27 definitions
 
 const int DEFAULT_MODE = 0;
 
-const int gridh = 32;
-const int gridw = 128;
-const int PPQ = 24;
+const int CVGATE_PIN = 13;  // 13 on beta1 boards, 22 on test, 23 on 1.0
+const int CVPITCH_PIN = A14;
+const int LED_PIN  = 14;
+const int LED_COUNT = 27;
 
 // DEFINE CCS FOR POTS // CCS mapped to Organelle Defaults
 const int CC1 = 21;
@@ -22,9 +18,8 @@ const int CC_AUX = 25; // Mother mode - AUX key
 const int CC_OM1 = 26; // Mother mode - enc switch 
 const int CC_OM2 = 28; // Mother mode - enc turn
 
-
 // POTS/ANALOG INPUTS					
-int analogPins[] = {23,A10,21,20,16};	// teensy pins for analog inputs // {23,22,21,20,16} on beta, {23,A10,21,20,16} on test, {A10,22,21,20,16} on 1.0
+int analogPins[] = {23,22,21,20,16};	// teensy pins for analog inputs // {23,22,21,20,16} on beta, {23,A10,21,20,16} on test, {A10,22,21,20,16} on 1.0
 int analogValues[] = {0,0,0,0,0};		// default values
 int pots[] = {CC1,CC2,CC3,CC4,CC5};			// the MIDI CC (continuous controller) for each analog input
 int potValues[] = {0,0,0,0,0};			
@@ -33,6 +28,10 @@ int potVal = analogValues[0];
 int potNum = 0;
 bool plockDirty[] = {false,false,false,false,false};
 int prevPlock[] = {0,0,0,0,0};
+
+const int gridh = 32;
+const int gridw = 128;
+const int PPQ = 24;
 
 // MODES
 const char* modes[] = {"MI","S1","S2","OM"};
@@ -63,7 +62,12 @@ int octave = 0; // default C4 is 0 - range is -4 to +5
 int newoctave = octave;
 int rotationAmt = 0;
 int hline = 8;
-
+// CV 
+int pitchCV;
+uint8_t RES;
+uint16_t AMAX;
+int V_scale;
+// clock
 float clockbpm = 120;
 float newtempo = clockbpm;
 unsigned long tempoStartTime, tempoEndTime;
@@ -96,12 +100,6 @@ int steps[] = {0,
      1,2,   3,4,5,   6,7,   8,9,10,
 11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26};
 
-
-// CV 
-word pitchCV;
-uint8_t RES;
-uint16_t AMAX;
-word V_scale;
 
 const int loSkip = 0;
 const int hiSkip = 0;
