@@ -1,6 +1,9 @@
 #include "noteoffs.h"
 
+#include <Arduino.h>
+#include "consts.h"
 #include "MM.h"
+
 
 PendingNoteOffs::PendingNoteOffs() {
 	for (int i = 0; i < queueSize; ++i)
@@ -25,8 +28,8 @@ void PendingNoteOffs::play(uint32_t now) {
 		if (queue[i].inUse && queue[i].time <= now) {
 		MM::sendNoteOff(queue[i].note, 0, queue[i].channel);
 
-// 		analogWrite(CVPITCH_PIN, 0);
-// 		digitalWrite(CVGATE_PIN, LOW);
+		analogWrite(CVPITCH_PIN, 0);
+		digitalWrite(CVGATE_PIN, LOW);
 
 		queue[i].inUse = false;
 		}

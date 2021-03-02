@@ -1,6 +1,6 @@
 #include "MM.h"
-#include <MIDI.h>
 
+#include <MIDI.h>
 
 namespace {
   using SerialMIDI = midi::SerialMIDI<HardwareSerial>;

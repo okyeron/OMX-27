@@ -14,7 +14,9 @@
 #include <ResponsiveAnalogRead.h>
 #include <U8g2_for_Adafruit_GFX.h>
 
-#include "definitions.h"
+#include "consts.h"
+#include "config.h"
+#include "colors.h"
 #include "MM.h"
 #include "ClearUI.h"
 #include "sequencer.h"
@@ -47,6 +49,59 @@ volatile unsigned long clockInterval;
 
 using Micros = unsigned long;
 Micros lastProcessTime;
+
+// ANALOGS
+int analogValues[] = {0,0,0,0,0};		// default values
+int potValues[] = {0,0,0,0,0};			
+int potCC = pots[0];
+int potVal = analogValues[0];
+int potNum = 0;
+bool plockDirty[] = {false,false,false,false,false};
+int prevPlock[] = {0,0,0,0,0};
+
+// MODES
+int mode = DEFAULT_MODE;
+int newmode = DEFAULT_MODE;
+#define numModes (sizeof(modes)/sizeof(char *)) //array size  
+int nsmode = 6;
+int nsmode2 = 0;
+int nspage = 0;
+int ptmode = 3;
+
+// VARIABLES
+float step_delay;
+bool dirtyPixels = false;
+bool dirtyDisplay = false;
+bool blinkState = false;
+bool noteSelect = false;
+bool noteSelection = false;
+bool patternParams = false;
+int noteSelectPage = 0;
+int selectedNote = 0;
+int selectedStep = 0;
+bool stepSelect = false;
+bool midiAUX = false;
+bool enc_edit = false;
+int noteon_velocity = 100;
+int octave = 0; // default C4 is 0 - range is -4 to +5
+int newoctave = octave;
+int rotationAmt = 0;
+int hline = 8;
+// CV 
+int pitchCV;
+uint8_t RES;
+uint16_t AMAX;
+int V_scale;
+
+// clock
+float clockbpm = 120;
+float newtempo = clockbpm;
+unsigned long tempoStartTime, tempoEndTime;
+
+unsigned long blinkInterval = clockbpm * 2;
+unsigned long longPressInterval = 1500;
+
+bool keyState[27] = {false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false};
 
 
 // ENCODER
