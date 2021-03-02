@@ -67,6 +67,8 @@ int nsmode = 6;
 int nsmode2 = 0;
 int nspage = 0;
 int ptmode = 3;
+int mimode = 0;
+
 
 // VARIABLES
 float step_delay;
@@ -105,10 +107,10 @@ bool keyState[27] = {false,false,false,false,false,false,false,false,false,false
 
 
 // ENCODER
-Encoder myEncoder(12, 11); 	// encoder pins
-Button encButton(0);		// encoder button pin
-long newPosition = 0;
-long oldPosition = -999;
+Encoder myEncoder(12, 11); 	// encoder pins on hardware
+Button encButton(0);		// encoder button pin on hardware
+//long newPosition = 0;
+//long oldPosition = -999;
 
 
 //initialize an instance of class Keypad
@@ -290,14 +292,13 @@ void setup() {
 	u8g2_display.setBackgroundColor(BLACK);
 	drawLoading();
 
-
 	// Keypad
 	customKeypad.begin();
 
 	//LEDs
 	strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
 	strip.show();            // Turn OFF all pixels ASAP
-	strip.setBrightness(50); // Set BRIGHTNESS to about 1/5 (max = 255)
+	strip.setBrightness(LED_BRIGHTNESS); // Set BRIGHTNESS to about 1/5 (max = 255)
 
 	for(int i=0; i<LED_COUNT; i++) { // For each pixel...
 		strip.setPixelColor(i, HALFWHITE);
@@ -305,20 +306,15 @@ void setup() {
 		delay(5); // Pause before next pass through loop
 	}
 	rainbow(5); // rainbow startup pattern
-  
-	delay(1000);
+	delay(500);
+	
+	// clear LEDs
 	strip.fill(0, 0, LED_COUNT);
-	strip.show();            // Turn OFF all pixels ASAP
+	strip.show();
 
 	delay(100);
 
-
-	// Clear display and show default mode
-//	display.clearDisplay();
-//	display.setTextSize(1);
-//	display.setCursor(96, 0);
-//	display.print(modes[newmode]);
-//	//dispTempo();
+	// Clear display
 	display.display();			
 
 	dirtyDisplay = true;
@@ -542,8 +538,24 @@ void dispMidiMode(){
 	// ValueBoxes
 	dispValBox(potVal, 0, false);
 	dispValBox(lastNote[playingPattern][seqPos[playingPattern]], 1, false);
-	dispValBox((int)octave+4, 2, false);
-	dispValBox(midiChannel, 3, false);
+
+	bool octFlip = false;		
+	bool chFlip = false;		
+	switch(mimode){
+		case 0: 	//
+//			display.fillRect(2*32, 10, 33, 22, WHITE);
+//			octFlip = true;
+			break;
+		case 1: 	//
+			display.fillRect(3*32, 10, 33, 22, WHITE);
+			chFlip = true;
+			break;
+		default:
+			break;
+	}
+
+	dispValBox((int)octave+4, 2, octFlip);
+	dispValBox(midiChannel, 3, chFlip);
 }
 
 void dispSeqMode1(){
@@ -869,12 +881,22 @@ void loop() {
 //						usbMIDI.sendControlChange(CC_OM2,127,midiChannel);
 					}      
 					break;
-				case 0: // MIDI
-					// set octave 
-					newoctave = constrain(octave + amt, -5, 4);
-					if (newoctave != octave){
-						octave = newoctave;
-						dirtyDisplay = true;
+				case 0: // MIDI			
+					if (mimode == 1) { // set length
+						int newchan = constrain(midiChannel + amt, 1, 16);
+						if (newchan != midiChannel){
+							midiChannel = newchan;
+							dirtyDisplay = true;
+						}
+						
+						
+					}else {
+						// set octave 
+						newoctave = constrain(octave + amt, -5, 4);
+						if (newoctave != octave){
+							octave = newoctave;
+							dirtyDisplay = true;
+						}
 					}
 				case 1: // SEQ 1
 					newtempo = constrain(clockbpm + amt, 40, 300);
@@ -1003,9 +1025,13 @@ void loop() {
 				dirtyDisplay = true;
 			}
 
+			if(mode == 0) {
+				// switch midi oct/chan selection
+				mimode = !mimode;
+				dirtyDisplay = true;
+			}
 			if(mode == 3) {
-				MM::sendControlChange(CC_OM1,100,midiChannel);					
-//				usbMIDI.sendControlChange(CC_OM1,100,midiChannel);					
+				MM::sendControlChange(CC_OM1,100,midiChannel);									
 			}
 			if(mode == 1) {
 				if (noteSelect && noteSelection) {

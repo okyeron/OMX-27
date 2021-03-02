@@ -1,7 +1,7 @@
 #define NUM_STEPS 16
 
 // the MIDI channel number to send messages
-const int midiChannel = 1;
+int midiChannel = 1;
 
 int ticks = 0;            // A tick of the clock
 bool clockSource = 0;     // Internal clock (0), external clock (1)

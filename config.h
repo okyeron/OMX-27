@@ -6,11 +6,13 @@ const int CC1 = 21;
 const int CC2 = 22; 
 const int CC3 = 23;
 const int CC4 = 24;
-const int CC5 = 7;
+const int CC5 = 7;		// change to 25 for EYESY Knob 5
 
 const int CC_AUX = 25; // Mother mode - AUX key
 const int CC_OM1 = 26; // Mother mode - enc switch 
 const int CC_OM2 = 28; // Mother mode - enc turn
+
+const int LED_BRIGHTNESS = 50;
 
 // DONT CHANGE ANYTHING BELOW HERE
 
