@@ -58,6 +58,8 @@ const auto AMBER = 0x999900;
 const auto BEIGE = 0xFFCC33;
 
 // no color
+
+const auto WHITE = 0xFFFFFF;
 const auto HALFWHITE = 0x808080;
 const auto LOWWHITE = 0x202020;
 const auto LEDOFF = 0x000000;
@@ -78,3 +80,6 @@ const auto PATTSEL = LIME;
 
 const auto FUNKONE = LTCYAN; 
 const auto FUNKTWO = MINT; 
+
+const auto SEQ1C = HALFWHITE; 
+const auto SEQ2C = DKBLUE; 

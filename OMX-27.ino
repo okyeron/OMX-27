@@ -321,16 +321,28 @@ void show_current_step(int patternNum) {
 		blinkState = !blinkState;
 		msec = 0;
 	}
-															// AUX KEY
+
+									// AUX KEY
 	if (playing && blinkState){
-		strip.setPixelColor(0, HALFWHITE);
+		strip.setPixelColor(0, WHITE);
 	} else if (noteSelect && blinkState){
 		strip.setPixelColor(0, NOTESEL);
 	} else if (patternParams && blinkState){
 		strip.setPixelColor(0, PATTSEL);
 	} else {
-		strip.setPixelColor(0, LEDOFF);
+		switch(mode){
+			case 1:
+				strip.setPixelColor(0, SEQ1C);
+				break;
+			case 2:
+				strip.setPixelColor(0, SEQ2C);
+				break;
+			default:
+				strip.setPixelColor(0, LEDOFF);
+				break;
+		}
 	}
+
 	
 	if (patternMute[patternNum]){
 		stepColor = muteColors[patternNum];
@@ -358,12 +370,18 @@ void show_current_step(int patternNum) {
 			if (j < patternLength[patternNum]+11){
 				if (j == 1) {								
 					// NOTE SELECT
-					strip.setPixelColor(j, FUNKONE);
-
-
+					if (keyState[j] && blinkState){
+						strip.setPixelColor(j, LEDOFF);
+					} else {
+						strip.setPixelColor(j, FUNKONE);
+					}
 				} else if (j == 2) {
 					// PATTERN PARAMS
-					strip.setPixelColor(j, FUNKTWO);
+					if (keyState[j] && blinkState){
+						strip.setPixelColor(j, LEDOFF);
+					} else {
+						strip.setPixelColor(j, FUNKTWO);
+					}
 					
 				} else if (j == patternNum+3){  			// PATTERN SELECT
 					strip.setPixelColor(patternNum+3, stepColor);
@@ -387,7 +405,7 @@ void show_current_step(int patternNum) {
 						} else {
 							strip.setPixelColor(i+11, SEQMARKER); 
 						}
-//						strip.setPixelColor(i+11, SEQCHASE); // step chase
+
 					} else if (stepPlay[patternNum][i] == 1){
 						strip.setPixelColor(i+11, stepColor); // step on color
 					} else {
@@ -399,15 +417,14 @@ void show_current_step(int patternNum) {
 					} else if (stepPlay[patternNum][i] == 1){
 						strip.setPixelColor(i+11, stepColor); // step on color
 					} else {
-						strip.setPixelColor(i+11, LEDOFF); 
+						strip.setPixelColor(i+11, LEDOFF);  // DO WE NEED TO MARK PLAYHEAD WHEN STOPPED?
 					}
-//					strip.setPixelColor(i+11, SEQCHASE); // step chase
 
 				} else if (stepPlay[patternNum][i] == 1){
 					strip.setPixelColor(i+11, stepColor); // step on color
 
 				} else {
-					strip.setPixelColor(i+11, LEDOFF);
+					strip.setPixelColor(i+11, LEDOFF); 
 				}
 			}
 		}
@@ -512,7 +529,7 @@ void dispSeqMode1(){
 	
 	// ValueBoxes
 	dispValBox(playingPattern+1, 0, false);
-	dispValBox(pattLen[playingPattern], 1, false);
+	dispValBox(patternLength[playingPattern], 1, false);
 	dispValBox((int)clockbpm, 2, false);
 //	dispValBox(midiChannel, 3, false);
 }
@@ -657,7 +674,7 @@ void dispPatternParams(){
 
 		// ValueBoxes
 		dispValBox(playingPattern+1, 0, pattFlip); // PAT
-		dispValBox(pattLen[playingPattern], 1, lenFlip); // LEN
+		dispValBox(patternLength[playingPattern], 1, lenFlip); // LEN
 		dispValBox(rotationAmt, 2, rotFlip); // LEN
 	
 //		u8g2_display.setFont(FONT_SYMB);
@@ -704,7 +721,7 @@ void dispPattLen(){
 	display.print("LEN");	
 	display.setCursor(29, 18);
 	display.setTextSize(2);
-	display.print(pattLen[playingPattern]);
+	display.print(patternLength[playingPattern]);
 }
 void dispPattStrt(){
 	display.setCursor(1, 19);
@@ -712,7 +729,7 @@ void dispPattStrt(){
 	display.print("SRT");	
 	display.setCursor(29, 18);
 	display.setTextSize(2);
-	display.print(pattLen[playingPattern]);
+	display.print(patternLength[playingPattern]);
 }
 
 void dispPatt(){
@@ -1081,15 +1098,17 @@ void loop() {
 							playingPattern = thisKey-3;
 							dirtyDisplay = true;
 						} else if ( thisKey > 10 ) {
-
+							// set pattern length with key
+							patternLength[playingPattern] = thisKey - 10;
+							dirtyDisplay = true;
 						}
 					
 					// regular SEQ mode
 					} else {					
-						if (thisKey == 1) {		
-						
+						if (thisKey == 1) {	
+							seqResetFlag = true;					// reset all sequences to step 1
+
 						} else if (thisKey == 2) { 			
-							seqReset(); 					// reset all sequences to step 1
 
 						// BLACK KEYS
 						} else if (thisKey > 2 && thisKey < 11) { // Pattern select
@@ -1330,6 +1349,11 @@ void step_off(int patternNum, int position){
 }
 
 void doStep() {
+	if (seqResetFlag){
+		seqReset();	 
+		seqResetFlag = false;
+	}
+	
 	switch(mode){
 		case 1:
 			if(playing) {
@@ -1371,8 +1395,8 @@ void doStep() {
 							playNote(j);
 						}
 					}
-					step_ahead(playingPattern);
 					show_current_step(playingPattern);
+					step_ahead(playingPattern);
 
 				}			
 			} else {
@@ -1462,9 +1486,8 @@ void playNote(int patternNum) {
 		}
 		lastNote[patternNum][seqPos[patternNum]] = stepNoteP[patternNum][seqPos[patternNum]][0];
 		
-		// set notes in note-off queue
 		// CV
-//		cvNoteOn(stepNoteP[patternNum][seqPos[patternNum]][0]);
+		cvNoteOn(stepNoteP[patternNum][seqPos[patternNum]][0]);
 		
       break;
 
@@ -1486,7 +1509,6 @@ void allNotesOffPanic() {
 	analogWrite(CVPITCH_PIN, 0);
 	digitalWrite(CVGATE_PIN, LOW);
 	for (int j=0; j<128; j++){
-		MM::sendNoteOff(j, 0, midiChannel);
 		MM::sendNoteOff(j, 0, midiChannel);
 	}
 }
