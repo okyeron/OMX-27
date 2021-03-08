@@ -45,4 +45,11 @@ namespace MM {
 	}
 
 	// NEED SOMETHING FOR usbMIDI.read() / MIDI.read()
+	
+	bool usbMidiRead(){
+		return usbMIDI.read();
+	}
+	bool midiRead(){
+		return HWMIDI.read();
+	}
 }

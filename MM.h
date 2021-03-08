@@ -10,4 +10,7 @@ namespace MM {
 	void sendClock();
 	void startClock();
 	void stopClock();
+
+	bool usbMidiRead();
+	bool midiRead();
 }

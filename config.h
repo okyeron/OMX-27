@@ -1,5 +1,5 @@
 
-const int DEFAULT_MODE = 0;
+const int DEFAULT_MODE = 2;
 
 // DEFINE CC NUMBERS FOR POTS // CCS mapped to Organelle Defaults
 const int CC1 = 21;
@@ -36,6 +36,7 @@ const char* modes[] = {"MI","S1","S2","OM"};
 // KEY SWITCH ROWS/COLS
 const byte ROWS = 5; //five rows
 const byte COLS = 6; //six columns
+
 // Map the keys
 char keys[ROWS][COLS] = {
   {0, 1, 2, 3, 4, 5},
@@ -44,10 +45,10 @@ char keys[ROWS][COLS] = {
   {16,17,18,19,20,25},
   {22,23,21}
   };
-byte rowPins[ROWS] = {6, 4, 3, 5, 2}; //connect to the row pinouts of the keypad
-byte colPins[COLS] = {7, 8, 10, 9, 15, 17}; //connect to the column pinouts of the keypad
+byte rowPins[ROWS] = {6, 4, 3, 5, 2}; // row pins for key switches
+byte colPins[COLS] = {7, 8, 10, 9, 15, 17}; // column pins for key switches
 
-// KEYBOARD NOTE LAYOUT
+// KEYBOARD MIDI NOTE LAYOUT
 const int notes[] = {0,
      61,63,   66,68,70,   73,75,   78,80,82,
 59,60,62,64,65,67,69,71,72,74,76,77,79,81,83,84};
