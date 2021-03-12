@@ -42,10 +42,12 @@ body { background: grey; color: white; font: 15px sans-serif;}
     #feedback {
       position: relative;
       margin-top: 20px;
+      width: 180px;
     }
     #sliderblock {
       position: relative;
-      height: 160px;
+      height: 127px;
+      width: 180px;
     }
 
     #backdrop {
@@ -64,6 +66,10 @@ body { background: grey; color: white; font: 15px sans-serif;}
       position: absolute;
       width: 20px;
       color: #444;
+    }
+
+    #pots {
+      width: 400px;
     }
 
     .clear {

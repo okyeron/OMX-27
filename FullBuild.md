@@ -3,7 +3,7 @@
 <img src="buildpix/OMX-27-top.png" alt="Top" width="1080" height="244" />  
 <img src="buildpix/OMX-27-bottom.png" alt="Bottom" width="1080" height="244" />  
 
-# Before you start
+# Before your start
 
 The key-switches are going to be the VERY LAST thing you solder. __After you solder the switches in, everything on the inside is going to be inaccessible.__
 
@@ -11,13 +11,33 @@ Ideally you want to be able to test all the LEDs and OLED before putting the swi
 
 I'd also suggest testing each switch connection with a piece of wire so you can confirm the diodes are soldered correctly.
 
-Follow the order of operations here to make your life easier. NOTE - the keyswitches are  absolutely the last thing you solder. Make sure everything looks good
-
-### Soldering Tips
+Order of operations here does not matter for anything aside from the keyswitches being absolutely last.
 
 
 ---
-# Build from Kit
+# Build
+
+Everything should be wel marked on the PCB itself, but here's a visual guide and some tips just in case.
+
+
+### 100n and 10n capacitors  
+
+Everything is 100n caps except for the two next to the encoder which are 10n
+
+<img src="buildpix/OMX-27-build-caps.png" alt="Capacitors" width="1080" height="237" />
+
+### Diodes
+
+The stripes (cathode pin) on each diode are all facing towards the top of the PCB. The one oddball (top left key) has its stripe facing to the outside of the board.
+<img src="buildpix/OMX-27-build-diodes.png" alt="Diodes" width="1080" height="237" />
+
+### Resistors
+<img src="buildpix/OMX-27-build-resistors.png" alt="Resistors" width="1080" height="237" />
+
+### IC
+
+U1 - the TLV9062 op-amp here is oriented with pin 1 at the bottom right side. Extra large white dot added here in picture for emphasis.  
+<img src="buildpix/OMX-27-ic.png" alt="IC" width="1080" height="237" />
 
 ### LEDs
 
@@ -30,9 +50,7 @@ The LEDs are __Reverse Mount__ and are soldered to the back-side of the PCB with
 
 For the keyplate to fit properly, the Teensy MUST be flush-mounted to the top of the main PCB.
 
-An insulating kapton spacer is included with your kit. Use this between the bottom of the teensy and the main PCB to reduce the chances of unintended shorts.
-
-__Teensy jig__
+Before soldering - Use a piece of insulating tape (Electrical, Kapton if you have it) to cover all the contacts on the bottom-middle of the Teensy (to prevent accidental shorts). (PIC NEEDED) 
 
 Use the included acrylic jig to set up your teensy like the following for soldering.  
 
@@ -68,51 +86,15 @@ Using flush cutters, trim the pins away.
 
 The OLED display sits on a regular header (not flush like the Teensy)> the display should be close to level with the keyplate (the OLED glass will be about 0.5-1mm higher than the keyplate).
 
-I suggest using a section of the header plastic you removed from the Teensy headers as a spacer. Glue or tape a 1x4 chunk of the header plastic to the back of the OLED pcb and this will keep it level and support it.
-
 Trim the headers on the top side of the OLED if you're worried about something shorting there.
 
 
 ### JACKS, POTS, ENCODER, ETC.
 
-Snap pots and encoders into place and solder.
+Figure it out. :)
 
-You may need to gently squeeze the snap-in mounting pins together a tiny bit to get the pots to snap into place.
-
-
-### STOP HERE AND TEST
-
-At this point you can flash the firmware and do some testing. The OLED should display and the LEDs will show a rainbow pattern on startup.
-
-You will want to test each keyswitch on the PCB using tweezers or a piece of wire. This is a second check that the LED for that switch is working correctly.
-
-Use the [browser_test](browser_test/index.html) script to show USB-MIDI input to your computer. Then you can check to be sure the pots are sending CCs and that you get MIDI note-ons/note-offs when you test each keyswitch's pads. Be sure you have the `oct` (octave) set to 4 on the display (change with encoder knob).
-
-
-
-### Acrylic Case Parts
-
-Carefully remove the paper backing from the acrylic parts - the spacer and the back plate. Then set these aside for the next step.
 
 
 ### KEY SWITCHES
 
-Snap all the key-switches into the keyplate (from the top). 
-
-(PIC)  
-
-The switches may be a tight fit. Be sure they are snapped all the way into place.
-
-(PIC)  
-
-Drop the black acrylic spacer on to the main PCB and align it around the various components. Then set the keyplate with switches into place to be sure all the pins line up and everything is nice and flat. You may need to gently bend key-switch pins into place if they got slightly bent in transport.
-
-Use the included case screws/nuts - using the holes down the middle of the case - to fix everything together for soldering. This will ensure the key switches are held in place for soldering and that everything will remain flat.
-
-Solder all the switches.
-
-### Bottom Plate
-
-Then remove the screws/nuts and then reassemble with the back plate.
-
-The nuts fit into the captive cutouts on the bottom plate.
+Snap all the key-switches into the keyplate (from the top). Then solder.

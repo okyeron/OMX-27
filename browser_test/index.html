@@ -6,13 +6,14 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
-  <h1>MIDI test</h1>
+  <h1>OMX-27 MIDI test</h1>
   <div id="nomidi">This test page requires a WebMIDI compatible browser. We recommend Google Chrome.</div>
 
 	<script src="js/cells.js"></script>
 
 	<div id="universe">
 	</div>
+	
 	<div style="margin-top: 25px;margin-bottom: 25px;">
 	Connect your device via USB _or_ hardware MIDI, not both
 	</div>
@@ -29,30 +30,40 @@
 
 	  <div id="midi">
 	
-		<div id="sliderblock">
-		<div id="backdrop">
-		  <div class='slider'></div>
-		  <div class='slider'></div>
-		  <div class='slider'></div>
-		  <div class='slider'></div>
-		  <div class='slider'></div>
+		<div id="pots">
+			<div id="sliderblock" style="float:right">
+				<div id="backdrop">
+				  <div class='slider'></div>
+				  <div class='slider'></div>
+				  <div class='slider'></div>
+				  <div class='slider'></div>
+				  <div class='slider'></div>
+				</div>
+				<div id="labels">
+				  <div>1</div>
+				  <div>1</div>
+				  <div>1</div>
+				  <div>1</div>
+				  <div>1</div>
+				</div> 
+			</div>
+			<div id="feedback" style="float:left">
+				<div><br /><br /><br /><p>potentiometers</p></div>
+				cc: <div id="ccnum" class="cell">0</div>
+				val: <div id="ccval" class="cell">0</div>
+			</div>
+			<div style="clear:both"><br /></div>
+			
+			
 		</div>
-		<div id="labels">
-		  <div>1</div>
-		  <div>1</div>
-		  <div>1</div>
-		  <div>1</div>
-		  <div>1</div>
-		</div>
-		</div>
+		
+		<div style="clear:both"><br /><br /><p>notes</p></div>
 		
 		<div id="feedback">
 			note: <div id="notenum" class="cell">0</div> 
 			vel: <div id="noteval" class="cell">0</div>
-			cc: <div id="ccnum" class="cell">0</div>
-			val: <div id="ccval" class="cell">0</div>
 		</div>
-
+		<div style="clear:both"></div>
 
 	  </div>
 	
