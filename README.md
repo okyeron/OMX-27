@@ -4,7 +4,7 @@ Mechanical key switch midi keyboard and sequencer. Based on Teensy 3.2 and Cherr
 
 ### Arduino Requirements
 
-__Libraries: __  
+__Libraries:__  
 Adafruit_Keypad  
 Adafruit_NeoPixel  
 Adafruit_SSD1306  
