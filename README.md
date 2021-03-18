@@ -9,8 +9,9 @@ Adafruit_Keypad
 Adafruit_NeoPixel  
 Adafruit_SSD1306  
 Adafruit_GFX_Library  
+U8g2_for_Adafruit_GFX
 
-Set USB-Type to Serial + MIDI
+__Set USB-Type to Serial + MIDI__
 
 
 ### BOM
