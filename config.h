@@ -1,5 +1,5 @@
 
-const int DEFAULT_MODE = 2;
+const int DEFAULT_MODE = 0;
 
 // DEFINE CC NUMBERS FOR POTS // CCS mapped to Organelle Defaults
 const int CC1 = 21;
@@ -20,7 +20,7 @@ const int LED_PIN  = 14;
 const int LED_COUNT = 27;
 
 // POTS/ANALOG INPUTS					
-const int analogPins[] = {23,22,21,20,16};	// teensy pins for analog inputs 
+const int analogPins[] = {A10,22,21,20,16};	// teensy pins for analog inputs 
 						// {23,22,21,20,16} on beta
 						// {23,A10,21,20,16} on test
 						// {A10,22,21,20,16} on 1.0

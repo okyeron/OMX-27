@@ -1,6 +1,6 @@
 // OMX-27 shared constants
 
-const int CVGATE_PIN = 13;  // 13 on beta1 boards, 22 on test, 23 on 1.0
+const int CVGATE_PIN = 23;  // 13 on beta1 boards, 22 on test, 23 on 1.0
 const int CVPITCH_PIN = A14;
 
 const int loSkip = 0;
