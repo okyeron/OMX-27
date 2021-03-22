@@ -945,6 +945,7 @@ void loop() {
 	auto s = encButton.update();
 	switch (s) {
 		case Button::Down: //Serial.println("Button down"); 
+
 			// what page are we on?
 			if (newmode != mode && enc_edit) {
 				mode = newmode;
@@ -983,6 +984,7 @@ void loop() {
 			enc_edit = true;		
 			dispMode();
 			dirtyDisplay = true;
+
 			break;
 		case Button::Up: //Serial.println("Button up"); 
 			if(mode == 3) {
