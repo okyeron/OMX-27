@@ -7,16 +7,25 @@
 
 The key-switches are going to be the VERY LAST thing you solder. __After you solder the switches in, everything on the inside is going to be inaccessible.__
 
-Ideally you want to be able to test all the LEDs and OLED before putting the switches on.
+Ideally you want to be able to test all the LEDs, the OLED, and the pots/encoder before putting the switches on.
 
-I'd also suggest testing each switch connection with a piece of wire so you can confirm the diodes are soldered correctly.
+I'd also suggest testing each switch connection with a piece of wire or tweezers so you can confirm the diodes/LEDs/caps are all soldered correctly.
 
-Follow the order of operations here to make your life easier. NOTE - the keyswitches are  absolutely the last thing you solder. Make sure everything looks good
+Follow the order of operations here to make your life easier. __NOTE - the keyswitches are  absolutely the last thing you solder.__ Make sure everything else looks good before you do the switches.
 
 ### Soldering Tips
 
+I work with a fine point tip on my iron at 400C. With this setup I typically hold the iron on a pad for about 2 seconds and then apply a bit of solder and then hold the iron there for anything 2-3 seconds. You want to watch for the solder to flow around the joint, but not to hold the iron there forever.
+
+See [Adafruit's guide to excellent soldering](https://learn.adafruit.com/adafruit-guide-excellent-soldering) for lots of good tips and tricks.
+
+Nice to have tools:
+ - flush diagonal cutters  
+ - tweezers  
+ 
 
 ---
+
 # Build from Kit
 
 ### LEDs
@@ -24,6 +33,15 @@ Follow the order of operations here to make your life easier. NOTE - the keyswit
 The LEDs are __Reverse Mount__ and are soldered to the back-side of the PCB with the LED facing towards the top of the PCB. When looking at the back of the PCB as in the picture, the GND leg is the top right pad for each one (marked with a red triangle in the picture below). The LED itself has a "notched" leg for GND.
 
 <img src="buildpix/OMX-27-build-leds.png" alt="LEDs" width="1080" height="237" />
+
+Set each LED into position (tweezers are handy for this) and then double check the ground pin is in the right position.  
+
+Solder/tack the bottom right corner pad of each LED to hold each one in place. Then check the orientation of each LED to be sure they're nice and square in the hole. If not, warm up the solder there and reposition as needed.
+
+After you're happy with the LEDs being in the proper positions - solder the rest of the pads.
+
+
+
 
 
 ### TEENSY
@@ -102,12 +120,14 @@ Also test the Hardware MIDI 1/8" jack with an appropriate adapter and synth. Che
 
 ### Acrylic Case Parts
 
-Carefully remove the paper backing from the acrylic parts - the spacer and the back plate. Then set these aside for the next step. 
+__Carefully__ remove the paper backing from the acrylic parts - the spacer and the back plate. Then set these aside for the next step. 
 
-The spacer layer is pretty fragile - try not to break it. However, even if it does break, it might be fine since this is in-between the other layers.
+The spacer layer is pretty fragile - try not to break it. However, even if it does break, it might be fine since this sits in-between the other layers.
 
 
 ### KEY SWITCHES
+
+Check the orientation of the switches. The pins go towards the bottom-half and the LED window at the top.  
 
 Snap all the key-switches into the keyplate (from the top). 
 
@@ -117,9 +137,9 @@ The switches may be a tight fit. Be sure they are snapped all the way into place
 
 (PIC NEEDED)  
 
-Drop the black acrylic spacer on to the main PCB and align it around the various components. Then set the keyplate with switches into place to be sure all the pins line up and everything is nice and flat. You may need to gently bend key-switch pins into place if they got slightly bent in transport.
+Set the black acrylic spacer layer on the main PCB and align it around the various components. Then set the keyplate with switches into place to be sure all the pins line up and everything is nice and flat. You may need to gently bend key-switch pins into place if they got slightly bent in transport.
 
-Use the included case screws/nuts - with the holes down the middle of the case - to fix everything together for soldering. This will ensure the key switches are held in place for soldering and that everything will remain flat.
+Use the included case screws/nuts to fix everything together for soldering. I suggest using the holes down the middle of the case. This will ensure the key switches are held in place for soldering and that everything will remain flat.
 
 Solder all the switches.
 
