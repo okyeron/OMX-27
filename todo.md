@@ -19,6 +19,7 @@
 
 * missing note off if octave is changed while holding note on
 
+* S2 - edit the rotation or length of a pattern with the encoder it freezes, and while the menu displays the settings, turning the encoder adjusts the tempo.
 
 
 # IDEAS / FEATURE REQUESTS / WISH LIST

@@ -73,6 +73,8 @@ Drop the Teensy into place. There should just be a small amount of header sticki
 
 <img src="buildpix/teensy_jig_5.jpg" alt="LEDs" width="720" height="416" />
 
+DON'T SOLDER A HEADER TO THE VUSB PIN - it's not used. This is the 1x1 pin/hole right next to the USB jack on the Teensy (on the inside row).
+
 Solder the pins to the Teensy first.
 
 Then remove the jig and carefully remove the black plastic from the headers. __Hold onto the black spacers for the next step.__  

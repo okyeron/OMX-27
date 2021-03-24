@@ -79,6 +79,16 @@ These come in a pack of 4 keycaps. You will need 7 packs (@ ~$42 total).
 
 [Maxkeyboard Black Translucent MX Blank](https://www.maxkeyboard.com/black-translucent-cherry-mx-blank-keycap-set-for-esc-w-a-s-d-or-e-s-d-f-and-arrow-keys.html) (pack of 9). ($21 for 3 packs)
 
+### Knobs
+
+So many opinions about knobs. 
+
+Micro knobs (Befaco Style) can be found at these places:  
+https://www.thonk.co.uk/shop/tall-trimmer-toppers/   
+https://www.thonk.co.uk/shop/micro-knobs/  
+https://www.thonk.co.uk/shop/tall-trimmer-toppers/
+
+
 ### USB Cable: 
 
 I recommend using a right angle extension cable [like this one from Amazon](https://www.amazon.com/gp/product/B015PSU5F6/)  
