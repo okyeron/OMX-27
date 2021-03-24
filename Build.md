@@ -94,7 +94,7 @@ Using flush cutters, trim the pins away. Be carefull not to nick/scratch the pcb
 
 The OLED display sits on a regular header (not flush like the Teensy)> the display should be close to level with the keyplate (the OLED glass will be about 0.5-1mm higher than the keyplate).
 
-I suggest using a section of the header plastic you removed from the Teensy headers as a spacer. Glue or tape a 1x4 chunk of the header plastic to the back of the OLED pcb and this will keep it level and support it.
+__TIP:__ I suggest using a section of the header plastic you removed from the Teensy headers as a spacer to hold up the other side of the OLED PCB. Glue or tape a 1x4 chunk of the header plastic to the back of the OLED pcb and this will keep it level and support it while you solder (and after).
 
 Trim the headers on the top side of the OLED if you're worried about something shorting there.
 
@@ -106,7 +106,7 @@ Snap pots and encoders into place and solder.
 You may need to gently squeeze the snap-in mounting pins together a tiny bit to get the pots to snap into place.
 
 
-### STOP HERE AND TEST THINGS
+# STOP HERE AND TEST THINGS
 
 At this point you can flash the firmware and do some testing. The OLED should display and the LEDs will show a rainbow pattern on startup.
 
