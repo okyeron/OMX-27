@@ -1,12 +1,8 @@
-# To-do 
+# To-Do 
 
 * pattern saving
 
-* add octave to note select
-
 * Conditional triggers (see grid step on norns )
-
-* note length?
 
 * Additional mode for MIDI settings (channel, etc)?
 
@@ -18,19 +14,27 @@
 
 * Step recording
 
+
 # BUGS
 
-* note offs not reliable
-
-* timing
+* missing note off if octave is changed while holding note on
 
 
-# IDEAS / FEATURE REQUESTS
 
-* Chain patterns?
+# IDEAS / FEATURE REQUESTS / WISH LIST
+
+* chain patterns?
+
+* extend pattern length - needs "pages" (1-8 bar drum patterns)
 
 * knob banks (pots)?
 
-* Step probability
+* step probability
 
 * while ??
+
+
+# already done?
+
+* add octave to note select
+* note length?

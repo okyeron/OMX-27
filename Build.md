@@ -34,14 +34,16 @@ The LEDs are __Reverse Mount__ and are soldered to the back-side of the PCB with
 
 <img src="buildpix/OMX-27-build-leds.png" alt="LEDs" width="1080" height="237" />
 
-Set each LED into position (tweezers are handy for this) and then double check the ground pin is in the right position.  
+Set each LED into position (tweezers are handy for this) and __then double check the ground pin is in the right position__.  
+
+<img src="buildpix/leds3.png" alt="LEDs" width="360" height="275" />
+<img src="buildpix/leds1.png" alt="LEDs" width="360" height="275" />
+<img src="buildpix/leds2.png" alt="LEDs" width="360" height="275" />
+
 
 Solder/tack the bottom right corner pad of each LED to hold each one in place. Then check the orientation of each LED to be sure they're nice and square in the hole. If not, warm up the solder there and reposition as needed.
 
 After you're happy with the LEDs being in the proper positions - solder the rest of the pads.
-
-
-
 
 
 ### TEENSY
