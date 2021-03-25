@@ -1423,7 +1423,7 @@ void cvNoteOn(int notenum){
 }
 void cvNoteOff(){
 	digitalWrite(CVGATE_PIN, LOW);
-	analogWrite(CVPITCH_PIN, 0);
+//	analogWrite(CVPITCH_PIN, 0);
 }
 
 // #### MIDI Mode note on/off
