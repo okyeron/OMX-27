@@ -14,6 +14,8 @@
 
 * Step recording
 
+* copy note to other steps - or assign same note to all steps?
+
 
 # BUGS
 
