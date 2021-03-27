@@ -907,7 +907,7 @@ void loop() {
 						}	
 					} else if (noteSelect && noteSelection && !enc_edit){
 						// {notenum,vel,len,p1,p2,p3,p4,p5}
-						if (nsmode >= 2 && nsmode < 6){
+						if ((nsmode != 4) && (nsmode >= 2 && nsmode < 6)){
 							if(u.dir() < 0){			// reset plock if turn ccw
 								stepNoteP[playingPattern][selectedStep][nsmode+1] = -1;
 							}
@@ -916,8 +916,7 @@ void loop() {
 							nspage = constrain(nspage + amt, 0, 1);
 							Serial.print("nspage ");
 							Serial.println(nspage);
-						}	
-
+						}
 						if (nsmode2 == 0) { // set note num
 							int tempNote = stepNoteP[playingPattern][selectedStep][0];
 							stepNoteP[playingPattern][selectedStep][0] = constrain(tempNote + amt, 0, 127);
