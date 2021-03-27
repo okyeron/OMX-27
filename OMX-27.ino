@@ -907,9 +907,9 @@ void loop() {
 						}	
 					} else if (noteSelect && noteSelection && !enc_edit){
 						// {notenum,vel,len,p1,p2,p3,p4,p5}
-						if ((nsmode != 4) && (nsmode >= 2 && nsmode < 6)){
+						if (nsmode < 4){
 							if(u.dir() < 0){			// reset plock if turn ccw
-								stepNoteP[playingPattern][selectedStep][nsmode+1] = -1;
+								stepNoteP[playingPattern][selectedStep][nsmode+3] = -1;
 							}
 						}
 						if (nsmode == 4 && nsmode2 == 4) { // change page
