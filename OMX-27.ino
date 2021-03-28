@@ -1,5 +1,5 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
-// v 1.02
+// v 1.03
 // 
 // Steven Noreyko, March 2021
 //
