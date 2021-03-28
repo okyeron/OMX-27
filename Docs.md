@@ -4,7 +4,6 @@
 
 Sequencer has 8 patterns (tracks).
 
-
 Pots are mapped by default to CCs 21, 22, 23, 24 and 7 (volume). These can be changed in the firmware. Hopefully this will be configurable from a web-MIDI interface in future.
 
 
@@ -24,13 +23,21 @@ The first 2 black keys are "Function Keys" (FUNC)
 
 The next 8 are Pattern Keys and they select the active sequence pattern.
 
-Hold a key (long press) to access parameters for that pattern.
+Hold a key (long press) to access parameters for that pattern. This is "Pattern-params".
 
 __"White keys" (bottom row)__
 
-Step Keys - These are your sequencer step on/off keys. Hold a key (long press) to access parameters for that step.
+Step Keys - These are your sequencer step on/off keys. 
 
+Hold a key (long press) to access parameters for that step. This is "Note-select".
 
+__Encoder__
+
+Long press encoder to enable mode change. Turn to switch modes, short-press to enter mode.
+
+Within the modes a short press on the encoder will select a parameter to edit.
+
+In some modes, turning the encoder is set to a default param (like BPM)
 
 
 ## Modes
