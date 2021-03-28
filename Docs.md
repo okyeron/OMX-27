@@ -4,7 +4,6 @@
 
 Sequencer has 8 patterns (tracks).
 
-
 Pots are mapped by default to CCs 21, 22, 23, 24 and 7 (volume). These can be changed in the firmware. Hopefully this will be configurable from a web-MIDI interface in future.
 
 
@@ -12,27 +11,33 @@ Pots are mapped by default to CCs 21, 22, 23, 24 and 7 (volume). These can be ch
 
 Top left key = AUX  
 
-In sequencer modes:
+### In sequencer modes:
 
 AUX key is transport start/stop.
 
-"Black keys" (sharp/flat keyboard keys)  
+__"Black keys" (sharp/flat keyboard keys) __ 
 
-The first 2 black keys are "Function Keys" 
-- Function One will reset all sequences to step one. 
-- Function Two: Press and hold and then press any pattern key to Mute that pattern
+The first 2 black keys are "Function Keys" (FUNC)
+- Function One (F1): Reset all sequences to step one. 
+- Function Two (F2): Press and hold and then press any pattern key to Mute that pattern
 
-The next 8 select the active sequence pattern.
+The next 8 are Pattern Keys and they select the active sequence pattern.
 
-Hold a key (long press) to access parameters for that pattern.
+Hold a key (long press) to access parameters for that pattern. This is "Pattern-params".
 
-"White keys" (bottom row)
+__"White keys" (bottom row)__
 
-These are your sequencer step on/off keys. Hold a key (long press) to access parameters for that step.
+Step Keys - These are your sequencer step on/off keys. 
 
+Hold a key (long press) to access parameters for that step. This is "Note-select".
 
+__Encoder__
 
+Long press encoder to enable mode change. Turn to switch modes, short-press to enter mode.
 
+Within the modes a short press on the encoder will select a parameter to edit.
+
+In some modes, turning the encoder is set to a default param (like BPM)
 
 
 ## Modes
@@ -41,16 +46,28 @@ These are your sequencer step on/off keys. Hold a key (long press) to access par
 
 MIDI Keyboard. Encoder selects octave or channel.
 
+AUX does nothing here (yet)
+
 ### S1 - Sequencer 1
 
 Step sequencer - One pattern active at a time.
+
+ - AUX is Start/Stop 
 
 ### S2 - Sequencer 2
 
 Step sequencer - All patterns active.
 
+- AUX is Start/Stop 
+- F2 + pattern key will mute that pattern  
 
 ### OM - Organelle Mother
+
+Pretty much the same as MI, but with the following tweaks for Organelle Mother on norns/fates.
+
+- AUX key sends CC 25 (127 on press, 0 on release)  
+- Encoder button sends CC 26 (100 on press, 0 on release)  
+- Encoder turn sends CC 28 (127 on CW, 0 on CCW)  
 
 
 

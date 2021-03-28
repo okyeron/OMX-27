@@ -5,6 +5,8 @@
 
 # Before you start
 
+## READ THIS ENTIRE GUIDE FIRST
+
 The key-switches are going to be the VERY LAST thing you solder. __After you solder the switches in, everything on the inside is going to be inaccessible.__
 
 Ideally you want to be able to test all the LEDs, the OLED, and the pots/encoder before putting the switches on.
@@ -12,6 +14,11 @@ Ideally you want to be able to test all the LEDs, the OLED, and the pots/encoder
 I'd also suggest testing each switch connection with a piece of wire or tweezers so you can confirm the diodes/LEDs/caps are all soldered correctly.
 
 Follow the order of operations here to make your life easier. __NOTE - the keyswitches are  absolutely the last thing you solder.__ Make sure everything else looks good before you do the switches.
+
+Also important - Keyswitches are snapped into the keyplate first (before soldering them). 
+
+Don't forget to put the spacer layer in-between the main PCB and the keyplate before you solder all the switches.
+
 
 ### Soldering Tips
 
@@ -112,15 +119,37 @@ You may need to gently squeeze the snap-in mounting pins together a tiny bit to 
 
 # STOP HERE AND TEST THINGS
 
-At this point you can flash the firmware and do some testing. The OLED should display and the LEDs will show a rainbow pattern on startup.
+At this point you can flash the firmware and do some testing. The OLED should display something as soon as you plug into USB power.
 
-You will want to test each keyswitch on the PCB using tweezers or a piece of wire. This is a second check that the LED for that switch is working correctly.
+### LED test
+
+On startup all the LEDs should show a rainbow pattern.
+
+If your LEDs work up to a certain point (e.g. LEDs 1-7 work, LED 8-27 don't):
+
+- The problem is most likely a bad soldering joint on the erroneous LED itself, or on the LED that is RIGHT BEFORE this LED in the chain (in the above example, check LED 7 and 8). Carefully re-solder all connections again to fix the problem (melt the existing solder again, maybe apply some more, make sure it flows nicely between LED and PCB pad)
+
+- Check that the orientation of the LED is correct (see pictures above)
+
+
+### Switch contact test
+
+You will want to test the pads for each keyswitch on the PCB using tweezers or a piece of wire. This is also a second check that the LED for that switch is working correctly.
+
+If not working here, check the LEDs again first. If all the LEDs are working OK look to be sure the diode adjacent to that switch position is OK.
 
 (PIC NEEDED) 
+
+
+### MIDI test
 
 Use the [browser_test](browser_test/index.html) script to show USB-MIDI input to your computer. Then you can check to be sure the pots are sending CCs and that you get MIDI note-ons/note-offs when you test each keyswitch's pads. Be sure you have the `oct` (octave) set to 4 on the display (change with encoder knob).
 
 Also test the Hardware MIDI 1/8" jack with an appropriate adapter and synth. Check the A/B switch position for your particular setup (try both to be sure you have the right one).
+
+---
+
+# Continue building
 
 ### Acrylic Case Parts
 
