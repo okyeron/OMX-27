@@ -11,6 +11,8 @@ Adafruit_SSD1306
 Adafruit_GFX_Library  
 U8g2_for_Adafruit_GFX
 
+In Teensyduino Library Manager - Check to be sure MIDI Library (by Francois Best / fortyseveneffects) is updated to 5.02
+
 __Set USB-Type to Serial + MIDI__
 
 

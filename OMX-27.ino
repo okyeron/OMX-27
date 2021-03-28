@@ -888,14 +888,15 @@ void loop() {
 					break;
 				case 1: // SEQ 1
 						// FALL THROUGH
+						
 				case 2: // SEQ 2						
-					if (patternParams && !enc_edit){ // sequence edit mode
+					if (patternParams && !enc_edit){ 		// SEQUENCE EDIT MODE
 						//
-						if (ppmode == 0) { // set length
+						if (ppmode == 0) { 					// SET LENGTH
 							pattLen[playingPattern] = constrain(patternLength[playingPattern] + amt, 1, 16);
 							patternLength[playingPattern] = pattLen[playingPattern];
 						}	
-						if (ppmode == 1) { // set rotation	
+						if (ppmode == 1) { 					// SET PATTERN ROTATION	
 							int rotator;
 							(u.dir() < 0 ? rotator = -1 : rotator = 1);					
 //							int rotator = constrain(rotcc, (patternLength[playingPattern])*-1, patternLength[playingPattern]);
@@ -907,18 +908,21 @@ void loop() {
 						}	
 					} else if (noteSelect && noteSelection && !enc_edit){
 						// {notenum,vel,len,p1,p2,p3,p4,p5}
-						if (nsmode >= 2 && nsmode < 6){
-							if(u.dir() < 0){			// reset plock if turn ccw
-								stepNoteP[playingPattern][selectedStep][nsmode+1] = -1;
+
+						if (nsmode >= 0 && nsmode < 4){
+//							Serial.print("nsmode ");
+//							Serial.println(nsmode);
+							if(u.dir() < 0){				// RESET PLOCK IF TURN CCW
+								stepNoteP[playingPattern][selectedStep][nsmode+3] = -1;
 							}
 						}
-						if (nsmode == 4 && nsmode2 == 4) { // change page
+						if (nsmode == 4 && nsmode2 == 4) { 	// CHANGE PAGE
 							nspage = constrain(nspage + amt, 0, 1);
-							Serial.print("nspage ");
-							Serial.println(nspage);
+//							Serial.print("nspage ");
+//							Serial.println(nspage);
 						}	
 
-						if (nsmode2 == 0) { // set note num
+						if (nsmode2 == 0) { 				// SET NOTE NUM
 							int tempNote = stepNoteP[playingPattern][selectedStep][0];
 							stepNoteP[playingPattern][selectedStep][0] = constrain(tempNote + amt, 0, 127);
 						}	
@@ -928,11 +932,11 @@ void loop() {
 								octave = newoctave;
 							}						
 						}	
-						if (nsmode2 == 3) { // set note length
+						if (nsmode2 == 3) { 				// SET NOTE LENGTH
 							int tempLen = stepNoteP[playingPattern][selectedStep][2];
 							stepNoteP[playingPattern][selectedStep][2] = constrain(tempLen + amt, 1, 16); // Note Len between 1-16
 						}	
-						if (nsmode2 == 2) { // set velocity
+						if (nsmode2 == 2) { 				// SET VELOCITY
 							int tempVel = stepNoteP[playingPattern][selectedStep][1];
 							stepNoteP[playingPattern][selectedStep][1] = constrain(tempVel + amt, 0, 127);
 						}	
@@ -1078,10 +1082,11 @@ void loop() {
 					
 					// are we noteSelect ?
 					if (noteSelect){
-						if (noteSelection) {		// set note
+						if (noteSelection) {		// SET NOTE
 							stepSelect = false;
 							selectedNote = thisKey;
-							stepNoteP[playingPattern][selectedStep][0] = notes[thisKey];
+							int adjnote = notes[thisKey] + (octave * 12);
+							stepNoteP[playingPattern][selectedStep][0] = adjnote;
 							if (!playing){
 								noteOn(thisKey, noteon_velocity, playingPattern);
 							}
