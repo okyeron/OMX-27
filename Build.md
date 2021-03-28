@@ -119,17 +119,27 @@ You may need to gently squeeze the snap-in mounting pins together a tiny bit to 
 
 # STOP HERE AND TEST THINGS
 
-At this point you can flash the firmware and do some testing. The OLED should display and the LEDs will show a rainbow pattern on startup.
+At this point you can flash the firmware and do some testing. The OLED should display something as soon as you plug into USB power.
 
-You will want to test each keyswitch on the PCB using tweezers or a piece of wire. This is a second check that the LED for that switch is working correctly.
+### LED test
 
-(PIC NEEDED) 
+On startup all the LEDs should show a rainbow pattern.
 
-If your LEDs work up to a certain point, e.g. LEDs 1-7 work, LED 8-27 don't
+If your LEDs work up to a certain point (e.g. LEDs 1-7 work, LED 8-27 don't):
 
 - The problem is most likely a bad soldering joint on the erroneous LED itself, or on the LED that is RIGHT BEFORE this LED in the chain (in the above example, check LED 7 and 8). Carefully re-solder all connections again to fix the problem (melt the existing solder again, maybe apply some more, make sure it flows nicely between LED and PCB pad)
 
 - Check that the orientation of the LED is correct (see pictures above)
+
+
+### Switch contact test
+
+You will want to test the pads for each keyswitch on the PCB using tweezers or a piece of wire. This is also a second check that the LED for that switch is working correctly.
+
+If not working here, check the LEDs again first. If all the LEDs are working OK look to be sure the diode adjacent to that switch position is OK.
+
+(PIC NEEDED) 
+
 
 ### MIDI test
 
