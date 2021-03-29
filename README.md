@@ -4,6 +4,8 @@ Mechanical key switch midi keyboard and sequencer. Based on Teensy 3.2 and Cherr
 
 ### Arduino Requirements
 
+In Teensyduino Library Manager - check to be sure these are installed and on the most recent versions.  
+
 __Libraries:__  
 Adafruit_Keypad  
 Adafruit_NeoPixel  
@@ -11,10 +13,15 @@ Adafruit_SSD1306
 Adafruit_GFX_Library  
 U8g2_for_Adafruit_GFX
 
-In Teensyduino Library Manager - Check to be sure MIDI Library (by Francois Best / fortyseveneffects) is updated to 5.02
+Also check to be sure MIDI Library (by Francois Best / fortyseveneffects) is updated to 5.02  
+I believe this is installed by default with Teensyduino 
 
-__Set USB-Type to Serial + MIDI__
+Set the following for the Teensy under the Tools menu:  
 
+__Board:  Teensy 3.2/3.1__  
+__USB Type: Serial + MIDI__  
+__CPU Speed: 120 MHz (overclock)__
+  
 
 ### BOM
 
@@ -27,9 +34,9 @@ __Set USB-Type to Serial + MIDI__
 # FAQ
 
 Q: What key switches are recommended?  
-A: Cherry MX RGB switches are recommended and are linked in the [BOM](<BOM.md>). Different varieties are available (Red, Brown, etc.)  
+A: Any RGB switches with a Cherry MX footprint can be used - I'm using Cherry MX RGB and these are linked in the [BOM](<BOM.md>). Different varieties are available (Red, Brown, etc.)  
 
-Q: Can I use other keyswitches?  
+Q: Can I use other key switches?  
 A: Yes - as long as they have the same footprint as Cherry MX switches and a window/opening for the LED to shine through. Low profile keys like the Cherry Low Profile or Kailh Choc switches have a different footprint and will not work.  
 
 Q: What about recommended Keycaps?  
