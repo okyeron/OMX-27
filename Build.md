@@ -82,6 +82,8 @@ Drop the Teensy into place. There should just be a small amount of header sticki
 
 DON'T SOLDER A HEADER TO THE VUSB PIN - it's not used. This is the 1x1 pin/hole right next to the USB jack on the Teensy (on the inside row).
 
+(PIC NEEDED) 
+
 Solder the pins to the Teensy first.
 
 Then remove the jig and carefully remove the black plastic from the headers. __Hold onto the black spacers for the next step.__  
@@ -92,11 +94,13 @@ To keep the pins from wiggling around while soldering the bottom, either
 
  * Put a big piece of tape over the whole teensy to keep it in place and to keep the pins from getting pushed out
  
- * Or push the black pastic bits from the headers onto the pins to hold them in place while soldering.
+ * Or push the black pastic bits from the headers onto the pins to hold them in place while soldering
+ 
+ * Or both
 
 Flip the board over and solder the pins to the bottom. Try to tack/solder one pin on either side in place while pushing your finger against the teensy to make sure it's absolutely flat against the main pcb.
 
-Once you're happy with the flatness - solder the rest of the pins. Be careful not to push the pins down while soldering.
+Once you're happy with the flatness - solder the rest of the pins. Be careful not to push down on the pins while soldering.
 
 Using flush cutters, trim the pins away. Be carefull not to nick/scratch the pcb.
 
