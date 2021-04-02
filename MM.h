@@ -9,6 +9,7 @@ namespace MM {
 	
 	void sendClock();
 	void startClock();
+	void continueClock();
 	void stopClock();
 
 	bool usbMidiRead();

@@ -39,6 +39,10 @@ namespace MM {
 		usbMIDI.sendRealTime(usbMIDI.Start);
 		HWMIDI.sendStart();
 	}
+	void continueClock(){
+		usbMIDI.sendRealTime(usbMIDI.Continue);
+		HWMIDI.sendContinue();
+	}
 	void stopClock(){
 		usbMIDI.sendRealTime(usbMIDI.Stop);
 		HWMIDI.sendStop();

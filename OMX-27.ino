@@ -967,7 +967,7 @@ void loop() {
 			// what page are we on?
 			if (newmode != mode && enc_edit) {
 				mode = newmode;
-				playing = 0;
+				seqStop();
 				setAllLEDS(0,0,0);
 				enc_edit = false;
 				dispMode();
@@ -1354,16 +1354,12 @@ void step_off(int patternNum, int position){
 }
 
 void doStep() {
-	if (seqResetFlag){
-		seqReset();	 
-		seqResetFlag = false;
-	}
-	
 	switch(mode){
 		case 1:
 			if(playing) {
 				// ############## STEP TIMING ##############
 				if(micros() >= nextStepTime){
+					seqReset();
 					// DO STUFF
 					int lastPos = (seqPos[playingPattern]+15) % 16;
 					if (lastNote[playingPattern][lastPos] > 0){
@@ -1384,8 +1380,8 @@ void doStep() {
 			break;
 		case 2:
 			if(playing) {
-
 				if(micros() >= nextStepTime){
+					seqReset();
 					lastStepTime = nextStepTime;
 					nextStepTime += step_micros;
 
@@ -1408,12 +1404,6 @@ void doStep() {
 				show_current_step(playingPattern);
 			}
 			break;		
-	}
-}
-
-void seqReset(){
-	for (int k=0; k<8; k++){
-		seqPos[k] = 0;
 	}
 }
 
@@ -1518,10 +1508,23 @@ void allNotesOffPanic() {
 	}
 }
 
+void seqReset(){
+	if (seqResetFlag) {
+		for (int k=0; k<8; k++){
+			seqPos[k] = 0;
+		}
+		MM::stopClock();
+		MM::startClock();
+		seqResetFlag = false;
+	}
+}
+
 void seqStart() {
 	playing = 1;
-	MM::startClock();
 	nextStepTime = micros();
+	if (!seqResetFlag) {
+		MM::continueClock();
+	}
 }
 
 void seqStop() {
@@ -1534,7 +1537,6 @@ void seqStop() {
 void seqContinue() {
 	playing = 1;
 }
-
 
 void rotatePattern(int a[], int size, int rot ){
 	int arr[size];	
