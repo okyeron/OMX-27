@@ -967,7 +967,7 @@ void loop() {
 			// what page are we on?
 			if (newmode != mode && enc_edit) {
 				mode = newmode;
-				playing = 0;
+        seqStop();
 				setAllLEDS(0,0,0);
 				enc_edit = false;
 				dispMode();
