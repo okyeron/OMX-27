@@ -162,8 +162,7 @@ void seqStop();
 
 		// ####### CLOCK/TIMING #######
 
-void advanceClock(Micros advance)
-{
+void advanceClock(Micros advance) {
 	static Micros timeToNextClock = 0;
 	while (advance >= timeToNextClock) {
 		advance -= timeToNextClock;
