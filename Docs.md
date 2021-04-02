@@ -71,3 +71,25 @@ Pretty much the same as MI, but with the following tweaks for Organelle Mother o
 
 
 
+# MIDI Switch for the mini TRS jack connection
+
+A hardware switch on the device will let you swap between Type-A and Type-B for the hardware MIDI TRS jack.  
+
+
+Products That Use Type-B mini TRS Jack Connections  
+- Arturia BeatStep Pro  
+- Novation products  
+- 1010music Original Series 1 modules, Series 2 modules, Blackbox, MX4 and Euroshield  
+
+Products That Use Type-A mini TRS Jack Connections   
+- ADDAC System products  
+- Arturia BeatStep (not to be confused with the BeatStep Pro)  
+- IK Multimedia products  
+- inMusic (Akai) products  
+- Korg products  
+- Line 6 products  
+- little Bits w5 MIDI module  
+- Make Noise 0-Coast  
+
+See https://1010music.com/stereo-minijacks-midi-connections-compatibility-guide for more information
+
