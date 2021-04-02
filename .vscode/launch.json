@@ -1,0 +1,36 @@
+// AUTOMATICALLY GENERATED FILE. PLEASE DO NOT MODIFY IT MANUALLY
+//
+// PIO Unified Debugger
+//
+// Documentation: https://docs.platformio.org/page/plus/debugging.html
+// Configuration: https://docs.platformio.org/page/projectconf/section_env_debug.html
+
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "platformio-debug",
+            "request": "launch",
+            "name": "PIO Debug",
+            "executable": "/Users/catkins/dev/eurorack/OMX-27/.pio/build/teensy31/firmware.elf",
+            "projectEnvName": "teensy31",
+            "toolchainBinDir": "/Users/catkins/.platformio/packages/toolchain-gccarmnoneeabi/bin",
+            "internalConsoleOptions": "openOnSessionStart",
+            "svdPath": "/Users/catkins/.platformio/platforms/teensy/misc/svd/MK20D5.svd",
+            "preLaunchTask": {
+                "type": "PlatformIO",
+                "task": "Pre-Debug"
+            }
+        },
+        {
+            "type": "platformio-debug",
+            "request": "launch",
+            "name": "PIO Debug (skip Pre-Debug)",
+            "executable": "/Users/catkins/dev/eurorack/OMX-27/.pio/build/teensy31/firmware.elf",
+            "projectEnvName": "teensy31",
+            "toolchainBinDir": "/Users/catkins/.platformio/packages/toolchain-gccarmnoneeabi/bin",
+            "internalConsoleOptions": "openOnSessionStart",
+            "svdPath": "/Users/catkins/.platformio/platforms/teensy/misc/svd/MK20D5.svd"
+        }
+    ]
+}
