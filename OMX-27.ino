@@ -531,7 +531,7 @@ void dispSeqMode1(){
 	u8g2_display.setBackgroundColor(BLACK);
 	
 	// ValueBoxes
-	bool octFlip = false;			
+//	bool octFlip = false;			
 	switch(mimode){
 		case 0: 	//
 //			display.fillRect(2*32, 10, 33, 22, WHITE);

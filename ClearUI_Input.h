@@ -82,8 +82,8 @@ public:
   bool update();      // returns true on start of idle
 
 private:
-  const unsigned long period;
   bool idle;
+  const unsigned long period;
   unsigned long idleAtTime;
 };
 

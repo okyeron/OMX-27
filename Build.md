@@ -7,6 +7,13 @@
 
 ## READ THIS ENTIRE GUIDE FIRST
 
+Also - see these __Build Videos:__
+
+[Part 1 - LEDs](https://youtu.be/UFm8Dfpjoz4)   
+[Part 2 - Teensy](https://youtu.be/W-rJqxFzsLw):   
+[Part 3- Pots and Testing](https://youtu.be/rtUBW4xm9us):   
+[Part 4 - Switches and Assembly](https://youtu.be/jUWWuaacoz4):   
+
 The key-switches are going to be the VERY LAST thing you solder. __After you solder the switches in, everything on the inside is going to be inaccessible.__
 
 Ideally you want to be able to test all the LEDs, the OLED, and the pots/encoder before putting the switches on.
