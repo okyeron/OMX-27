@@ -2,34 +2,16 @@
 
 ## Concepts
 
-Sequencer has 8 patterns (tracks).
+Sequencer modes have 8 patterns (tracks).
 
-Pots are mapped by default to CCs 21, 22, 23, 24 and 7 (volume). These can be changed in the firmware. Hopefully this will be configurable from a web-MIDI interface in future.
+Potentiometers are mapped by default to CCs 21, 22, 23, 24 and 7 (volume). These can be changed in the firmware. Hopefully this will be configurable from a web-MIDI interface in future.
 
 
 ## Layout
 
-Top left key = AUX  
+Top left key = AUX Key 
 
-### In sequencer modes:
-
-AUX key is transport start/stop.
-
-__"Black keys" (sharp/flat keyboard keys) __ 
-
-The first 2 black keys are "Function Keys" (FUNC)
-- Function One (F1)
-- Function Two (F2)
-
-The next 8 are Pattern Keys and they select the active sequence pattern.
-
-Hold a key (long press) to access parameters for that pattern. This is "Pattern-params".
-
-__"White keys" (bottom row)__
-
-Step Keys - These are your sequencer step on/off keys. 
-
-Hold a key (long press) to access parameters for that step. This is "Note-select".
+Potentiometers - 
 
 __Encoder__
 
@@ -39,6 +21,36 @@ Within the modes a short press on the encoder will select a parameter to edit.
 
 In some modes, turning the encoder is set to a default param (like BPM)
 
+
+### Key Switches
+
+In MIDI modes the key switches work as a normal MIDI keyboard.
+
+In sequencer modes the switches are broken into groups - Function Keys, Pattern Keys and Step Keys.
+
+
+<img src="omx27_layout.png" alt="layout" width="884" height="220" />
+
+
+__"Black keys" (sharp/flat keyboard keys)__ 
+
+The first 2 black keys are Function Keys (FUNC)  
+- F1  
+- F2
+
+The next 8 are Pattern Keys and they select the active sequence pattern (P1-P8).
+
+Hold a key (long press) to access parameters for that pattern. This is "Pattern Params".
+
+
+__"White keys" (bottom row)__
+
+Step Keys - These are your sequencer step on/off keys. 
+
+Hold a key (long press) to access parameters for that step. This is "Note Select".
+
+
+---
 
 ## Modes
 
