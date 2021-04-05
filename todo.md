@@ -2,21 +2,23 @@
 
 * pattern saving
 
-* Conditional triggers (see grid step on norns )
+* Step recording
+
+* transpose entire sequence
 
 * Additional mode for MIDI settings (channel, etc)?
 
 * clock divide/mulitply?
 
-* what happens on CV when you have multiple keys pressed?
-
 * UI
-
-* Step recording
 
 * copy note to other steps - or assign same note to all steps?
 
 * Panic/all-notes-off on AUX?
+
+* Conditional triggers (see grid step on norns )
+
+* what happens on CV when you have multiple keys pressed?
 
 
 # BUGS

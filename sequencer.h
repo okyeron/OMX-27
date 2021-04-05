@@ -22,6 +22,8 @@ int patternLength[8] = {16, 16, 16, 16, 16, 16, 16, 16};
 int patternStart[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 int pattLen[8] = {patternLength[0],patternLength[1],patternLength[2],patternLength[3],patternLength[4],patternLength[5],patternLength[6],patternLength[7]};
 
+int patternDefaultNoteMap[8] = {36, 38, 37, 39, 42, 46, 49, 51}; // default to GM Drum Map for now
+
 
 // Determine how to play a step
 // -1: restart
