@@ -93,6 +93,7 @@ bool enc_edit = false;
 int noteon_velocity = 100;
 int octave = 0; // default C4 is 0 - range is -4 to +5
 int newoctave = octave;
+int transpose = 0;
 int rotationAmt = 0;
 int hline = 8;
 // CV 
@@ -132,15 +133,15 @@ void advanceClock(Micros advance) {
 	static Micros timeToNextClock = 0;
 	while (advance >= timeToNextClock) {
 		advance -= timeToNextClock;		
+
 		MM::sendClock();
 		timeToNextClock = clockInterval;
-		
-		
+
 		// turn off any expiring notes
 		pendingNoteOffs.play(micros());
-	
+				
 		// turn on any pending notes ?
-		//pendingNoteOns.play(micros());
+		pendingNoteOns.play(micros());
 	}
 	timeToNextClock -= advance;
 }
@@ -541,7 +542,7 @@ void dispSeqMode1(){
 
 	u8g2centerText("PTN", 1, hline-2, 32, 10);
 	u8g2centerText("LEN", 33, hline-2, 32, 10);
-//	u8g2centerText("OCT", 65, hline-2, 32, 10);
+	u8g2centerText("TRSP", 65, hline-2, 32, 10);
 	u8g2centerText("BPM", 97, hline-2, 32, 10);
 
 	// value text formatting
@@ -563,7 +564,7 @@ void dispSeqMode1(){
 		
 	dispValBox(playingPattern+1, 0, false);
 	dispValBox(patternLength[playingPattern], 1, false);
-//	dispValBox((int)octave+4, 2, octFlip);
+	dispValBox((int)transpose, 2, false);
 	dispValBox((int)clockbpm, 3, false);
 }
 
@@ -920,13 +921,19 @@ void loop() {
 						if (newoctave != octave){
 							octave = newoctave;
 						}						
-					}else { // otherwise set tempo
-						newtempo = constrain(clockbpm + amt, 40, 300);
-						if (newtempo != clockbpm){
-							// SET TEMPO HERE
-							clockbpm = newtempo;
-							resetClocks();
-						}
+					}else { 
+						
+						transposeSeq(playingPattern, amt);
+						int newtransp = transpose + amt;
+						transpose = newtransp;
+						
+//						// otherwise set tempo
+//						newtempo = constrain(clockbpm + amt, 40, 300);
+//						if (newtempo != clockbpm){
+//							// SET TEMPO HERE
+//							clockbpm = newtempo;
+//							resetClocks();
+//						}
 					}
   					dirtyDisplay = true;
 					break;
@@ -1052,7 +1059,9 @@ void loop() {
 					// increment ppmode
 					ppmode = (ppmode + 1 ) % 4;
 				} else if (stepRecord) {
+					
 					step_ahead(playingPattern);
+					selectedStep = seqPos[playingPattern];
 					
 				} else {
 					//patmode = !patmode;					
@@ -1211,15 +1220,14 @@ void loop() {
 							noteOn(thisKey, noteon_velocity, playingPattern);
 						} // see RELEASE events for more
 
-						step_ahead(playingPattern);
 						dirtyDisplay = true;
 
 					// regular SEQ mode
 					} else {					
 						if (thisKey == 1) {	
 							seqResetFlag = true;					// reset all sequences to step 1
-								Serial.print("set seqResetFlag: ");
-								Serial.println(seqResetFlag);
+//								Serial.print("set seqResetFlag: ");
+//								Serial.println(seqResetFlag);
 
 						} else if (thisKey == 2) { 			
 
@@ -1266,6 +1274,9 @@ void loop() {
 				if (e.bit.EVENT == KEY_JUST_RELEASED && thisKey != 0 && (noteSelection || stepRecord) && selectedNote > 0) {
 					if (!playing){
 						noteOff(thisKey);
+					}
+					if (stepRecord) {
+						step_ahead(playingPattern);
 					}
 				}
 
@@ -1574,10 +1585,11 @@ void playNote(int patternNum) {
     case 1:	// regular note on
 		seq_velocity = stepNoteP[playingPattern][seqPos[patternNum]][1];
 		
-		MM::sendNoteOn(stepNoteP[patternNum][seqPos[patternNum]][0], seq_velocity, midiChannel);
-		//pendingNoteOns.insert(stepNoteP[patternNum][seqPos[patternNum]][0], seq_velocity, midiChannel, micros() );
-
 		pendingNoteOffs.insert(stepNoteP[patternNum][seqPos[patternNum]][0], midiChannel, micros()+stepNoteP[patternNum][seqPos[patternNum]][2]*step_micros);
+
+//		MM::sendNoteOn(stepNoteP[patternNum][seqPos[patternNum]][0], seq_velocity, midiChannel);
+		pendingNoteOns.insert(stepNoteP[patternNum][seqPos[patternNum]][0], seq_velocity, midiChannel, micros() );
+
 		
 		// send param locks // {notenum,vel,len,p1,p2,p3,p4,p5}
 		for (int q=0; q<4; q++){	
@@ -1622,7 +1634,16 @@ void allNotesOffPanic() {
 
 void resetPatternDefaults(int patternNum){
 	for (int i = 0; i < NUM_STEPS; i++){
+		// {notenum,vel,len,p1,p2,p3,p4,p5}
 		stepNoteP[patternNum][i][0] = patternDefaultNoteMap[patternNum];
+		stepNoteP[patternNum][i][2] = 1;
+	}
+}
+
+void transposeSeq(int patternNum, int amt) {
+	for (int k=0; k<NUM_STEPS; k++){
+		int newNote = stepNoteP[patternNum][k][0]+amt;
+		stepNoteP[patternNum][k][0] = newNote;
 	}
 }
 
