@@ -18,8 +18,8 @@ AUX key is transport start/stop.
 __"Black keys" (sharp/flat keyboard keys) __ 
 
 The first 2 black keys are "Function Keys" (FUNC)
-- Function One (F1): Reset all sequences to step one. 
-- Function Two (F2): Press and hold and then press any pattern key to Mute that pattern
+- Function One (F1)
+- Function Two (F2)
 
 The next 8 are Pattern Keys and they select the active sequence pattern.
 
@@ -53,13 +53,24 @@ AUX does nothing here (yet)
 Step sequencer - One pattern active at a time.
 
  - AUX is Start/Stop 
+ - Pattern Key: Selects playing pattern
+ - F1: Reset sequences to step one
+ - F1 + Pattern Key: Enter "Step Record Mode"
+ - Long press a Step Key: Enter "Note Select Mode"
+ - Long press a Pattern Key: Enter "Pattern Params Mode"
 
 ### S2 - Sequencer 2
 
 Step sequencer - All patterns active.
 
-- AUX is Start/Stop 
-- F2 + pattern key will mute that pattern  
+ - AUX is Start/Stop 
+ - Pattern Key: Selects active pattern
+ - F1: Reset all sequences to step one. 
+ - F1 + Pattern Key: Enter "Step Record Mode"
+ - F2 + Pattern Key: Mute that pattern  
+ - Long press a Step Key: Enter "Note Select Mode"
+ - Long press a Pattern Key: Enter "Pattern Params Mode"
+
 
 ### OM - Organelle Mother
 
@@ -69,6 +80,22 @@ Pretty much the same as MI, but with the following tweaks for Organelle Mother o
 - Encoder button sends CC 26 (100 on press, 0 on release)  
 - Encoder turn sends CC 28 (127 on CW, 0 on CCW)  
 
+
+## Sub-Modes
+
+### Note Select
+
+### Pattern Params
+
+### Step Record
+
+Holding F1 + a Pattern Key will enter Step Record Mode.
+
+Enter notes from the keyboard and the sequence step will automatically advance to the next step. 
+
+You can use the encoder button to skip a step (making no change)
+
+Turn the encoder to change octave for the note you enter.
 
 
 # MIDI Switch for the mini TRS jack connection
