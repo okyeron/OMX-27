@@ -73,6 +73,7 @@ int nspage = 0;
 int ppmode = 3;
 int patmode = 0;
 int mimode = 0;
+int sqmode = 0;
 
 
 // VARIABLES / FLAGS
@@ -552,11 +553,11 @@ void dispSeqMode1(){
 	u8g2_display.setBackgroundColor(BLACK);
 	
 	// ValueBoxes
-//	bool octFlip = false;			
-	switch(mimode){
-		case 0: 	//
-//			display.fillRect(2*32, 10, 33, 22, WHITE);
-//			octFlip = true;
+	bool trspFlip = false;			
+	switch(sqmode){
+		case 1: 	//
+			display.fillRect(2*32, 10, 33, 22, WHITE);
+			trspFlip = true;
 			break;
 		default:
 			break;
@@ -564,7 +565,7 @@ void dispSeqMode1(){
 		
 	dispValBox(playingPattern+1, 0, false);
 	dispValBox(patternLength[playingPattern], 1, false);
-	dispValBox((int)transpose, 2, false);
+	dispValBox((int)transpose, 2, trspFlip);
 	dispValBox((int)clockbpm, 3, false);
 }
 
@@ -921,19 +922,19 @@ void loop() {
 						if (newoctave != octave){
 							octave = newoctave;
 						}						
-					}else { 
-						
+					} else if (sqmode == 1){ 
 						transposeSeq(playingPattern, amt);
 						int newtransp = transpose + amt;
 						transpose = newtransp;
 						
-//						// otherwise set tempo
-//						newtempo = constrain(clockbpm + amt, 40, 300);
-//						if (newtempo != clockbpm){
-//							// SET TEMPO HERE
-//							clockbpm = newtempo;
-//							resetClocks();
-//						}
+					} else if (sqmode == 0){ 
+						// otherwise set tempo
+						newtempo = constrain(clockbpm + amt, 40, 300);
+						if (newtempo != clockbpm){
+							// SET TEMPO HERE
+							clockbpm = newtempo;
+							resetClocks();
+						}
 					}
   					dirtyDisplay = true;
 					break;
@@ -1059,11 +1060,11 @@ void loop() {
 					// increment ppmode
 					ppmode = (ppmode + 1 ) % 4;
 				} else if (stepRecord) {
-					
 					step_ahead(playingPattern);
 					selectedStep = seqPos[playingPattern];
 					
 				} else {
+					sqmode = !sqmode;
 					//patmode = !patmode;					
 				}
 			}
