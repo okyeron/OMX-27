@@ -89,6 +89,8 @@ int selectedNote = 0;
 int selectedStep = 0;
 bool stepSelect = false;
 bool stepRecord = false;
+bool stepDirty = false;
+
 bool midiAUX = false;
 bool enc_edit = false;
 int noteon_velocity = 100;
@@ -1220,7 +1222,7 @@ void loop() {
 						if (!playing){
 							noteOn(thisKey, noteon_velocity, playingPattern);
 						} // see RELEASE events for more
-
+						stepDirty = true;
 						dirtyDisplay = true;
 
 					// regular SEQ mode
@@ -1276,8 +1278,9 @@ void loop() {
 					if (!playing){
 						noteOff(thisKey);
 					}
-					if (stepRecord) {
+					if (stepRecord && stepDirty) {
 						step_ahead(playingPattern);
+						stepDirty = false;
 					}
 				}
 
