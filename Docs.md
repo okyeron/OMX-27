@@ -11,15 +11,13 @@ Potentiometers are mapped by default to CCs 21, 22, 23, 24 and 7 (volume). These
 
 Top left key = AUX Key 
 
-Potentiometers - 
-
 __Encoder__
 
 Long press encoder to enable mode change. Turn to switch modes, short-press to enter mode.
 
 Within the modes a short press on the encoder will select a parameter to edit.
 
-In some modes, turning the encoder is set to a default param (like BPM)
+In some modes, turning the encoder is set to a default param (like octave or BPM)
 
 
 ### Key Switches
