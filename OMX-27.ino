@@ -1,5 +1,5 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
-// v 1.03
+// v 1.05b
 // 
 // Steven Noreyko, March 2021
 //
@@ -111,7 +111,7 @@ float newtempo = clockbpm;
 unsigned long tempoStartTime, tempoEndTime;
 
 unsigned long blinkInterval = clockbpm * 2;
-unsigned long longPressInterval = 2000;
+unsigned long longPressInterval = 1500;
 
 bool keyState[27] = {false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false};
 
@@ -329,13 +329,14 @@ void show_current_step(int patternNum) {
 		msec = 0;
 	}
 
-									// AUX KEY
+	// AUX KEY
+
 	if (playing && blinkState){
 		strip.setPixelColor(0, WHITE);
 	} else if (noteSelect && blinkState){
 		strip.setPixelColor(0, NOTESEL);
 	} else if (patternParams && blinkState){
-		strip.setPixelColor(0, PATTSEL);
+		strip.setPixelColor(0, seqColors[patternNum]);
 	} else if (stepRecord && blinkState){
 		strip.setPixelColor(0, seqColors[patternNum]);
 	} else {
@@ -410,8 +411,10 @@ void show_current_step(int patternNum) {
 					}
 					
 				} else if (j == patternNum+3){  			// PATTERN SELECT
-					strip.setPixelColor(patternNum+3, stepColor);
-
+					strip.setPixelColor(j, stepColor); 
+					if (patternParams && blinkState){
+						strip.setPixelColor(j, LEDOFF);						
+					}
 				} else {
 					strip.setPixelColor(j, LEDOFF);
 				}
@@ -727,7 +730,7 @@ void dispPatternParams(){
 		u8g2_display.setFontMode(1); 
 		u8g2_display.setFont(FONT_VALUES);
 		
-		bool pattFlip = false, lenFlip = false, rotFlip = false;		
+		bool pattFlip = false, lenFlip = false, rotFlip = false, chFlip = false;		
 		switch(ppmode){
 			case 0:  // LEN
 				display.fillRect(1*32, 11, 33, 22, WHITE);
@@ -737,17 +740,19 @@ void dispPatternParams(){
 				display.fillRect(2*32, 11, 33, 22, WHITE);
 				rotFlip = true;
 				break;
-			case 2: 	// ???
+			case 2: 	// CHANNEL
 				display.fillRect(3*32, 11, 33, 22, WHITE);
+				chFlip = true;
 				break;
 			default:
 				break;
 		}
 
-		// ValueBoxes
+	// ValueBoxes
 		dispValBox(playingPattern+1, 0, pattFlip); // PAT
 		dispValBox(patternLength[playingPattern], 1, lenFlip); // LEN
 		dispValBox(rotationAmt, 2, rotFlip); // LEN
+		dispValBox(patternChannel[playingPattern], 3, chFlip); // CHANNEL
 	
 //		u8g2_display.setFont(FONT_SYMB);
 //		invertColor(rotFlip);
@@ -762,10 +767,11 @@ void dispPatternParams(){
 		u8g2_display.setForegroundColor(BLACK);
 		u8g2_display.setBackgroundColor(WHITE);
 
+	// ValueBoxLabels
 		u8g2centerText("PTN", 0, hline-2, 32, 10);
 		u8g2centerText("LEN", 32, hline-2, 32, 10);
 		u8g2centerText("ROT", 65, hline-2, 32, 10);
-		u8g2centerText("STAR", 97, hline-2, 32, 10);
+		u8g2centerText("CHAN", 97, hline-2, 32, 10);
 	}
 }
 
@@ -966,6 +972,10 @@ void loop() {
 							}
 							rotationAmt = constrain(rotationAmt, (patternLength[playingPattern]-1)*-1, patternLength[playingPattern]-1);
 						}	
+						if (ppmode == 2) { 					// SET PATTERN CHANNEL	
+							patternChannel[playingPattern] = constrain(patternChannel[playingPattern] + amt, 1, 16);
+						}
+						
 					} else if (stepRecord && !enc_edit){
 							// SET OCTAVE 
 							newoctave = constrain(octave + amt, -5, 4);
@@ -1575,7 +1585,7 @@ void noteOff(int notenum){
 }
 
 
-// Play a note
+// Play a note (SEQUENCERS)
 void playNote(int patternNum) {
   //Serial.println(stepNoteP[patternNum][seqPos][0]); // Debug
 
@@ -1589,21 +1599,21 @@ void playNote(int patternNum) {
     case 1:	// regular note on
 		seq_velocity = stepNoteP[playingPattern][seqPos[patternNum]][1];
 		
-		pendingNoteOffs.insert(stepNoteP[patternNum][seqPos[patternNum]][0], midiChannel, micros()+stepNoteP[patternNum][seqPos[patternNum]][2]*step_micros);
+		pendingNoteOffs.insert(stepNoteP[patternNum][seqPos[patternNum]][0], patternChannel[patternNum], micros()+stepNoteP[patternNum][seqPos[patternNum]][2]*step_micros);
 
-//		MM::sendNoteOn(stepNoteP[patternNum][seqPos[patternNum]][0], seq_velocity, midiChannel);
-		pendingNoteOns.insert(stepNoteP[patternNum][seqPos[patternNum]][0], seq_velocity, midiChannel, micros() );
+//		MM::sendNoteOn(stepNoteP[patternNum][seqPos[patternNum]][0], seq_velocity, patternChannel[patternNum]);
+		pendingNoteOns.insert(stepNoteP[patternNum][seqPos[patternNum]][0], seq_velocity, patternChannel[patternNum], micros() );
 
 		
 		// send param locks // {notenum,vel,len,p1,p2,p3,p4,p5}
 		for (int q=0; q<4; q++){	
 			int tempCC = stepNoteP[patternNum][seqPos[patternNum]][q+3];
 			if (tempCC > -1) {
-				MM::sendControlChange(pots[q],tempCC,midiChannel);
+				MM::sendControlChange(pots[q],tempCC,patternChannel[patternNum]);
 				prevPlock[q] = tempCC;
 			} else if (prevPlock[q] != potValues[q]) {
 				//if (tempCC != prevPlock[q]) {
-				MM::sendControlChange(pots[q],potValues[q],midiChannel);
+				MM::sendControlChange(pots[q],potValues[q],patternChannel[patternNum]);
 				prevPlock[q] = potValues[q];
 			}
 		}

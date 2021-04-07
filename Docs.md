@@ -116,6 +116,7 @@ A hardware switch on the device will let you swap between Type-A and Type-B for 
 Products That Use Type-B mini TRS Jack Connections  
 - Arturia BeatStep Pro  
 - Novation products  
+- Polyend products  
 - 1010music Original Series 1 modules, Series 2 modules, Blackbox, MX4 and Euroshield  
 
 Products That Use Type-A mini TRS Jack Connections   

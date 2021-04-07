@@ -1,18 +1,20 @@
 # To-Do 
 
-* pattern saving
+* Pattern saving
 
-* Step recording
-
-* transpose entire sequence
+* Step recording (needs testing)
+ 
+* transpose entire sequence (needs testing)
 
 * Additional mode for MIDI settings (channel, etc)?
 
-* clock divide/mulitply?
+* Change MIDI channel per pattern  
+
+* Clock divide/mulitply?
 
 * UI
 
-* copy note to other steps - or assign same note to all steps?
+* Copy note to other steps - or assign same note to all steps?
 
 * Panic/all-notes-off on AUX?
 
@@ -35,6 +37,10 @@
 * knob banks (pots)?
 
 * step probability
+
+* randomize function
+
+* quantization for the live playing.
 
 * while ??
 
