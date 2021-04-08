@@ -90,6 +90,8 @@ int selectedStep = 0;
 bool stepSelect = false;
 bool stepRecord = false;
 bool stepDirty = false;
+bool copiedFlag = false;
+bool pastedFlag = false;
 
 bool midiAUX = false;
 bool enc_edit = false;
@@ -163,7 +165,7 @@ void resetClocks(){
 // ####### POTENTIMETERS #######
 
 void sendPots(int val){
-	MM::sendControlChange(pots[val], analogValues[val], midiChannel);
+	MM::sendControlChange(pots[val], analogValues[val], patternChannel[playingPattern]);
 	potCC = pots[val];
 	potVal = analogValues[val];
 	potValues[val] = potVal;
@@ -772,6 +774,23 @@ void dispPatternParams(){
 		u8g2centerText("LEN", 32, hline-2, 32, 10);
 		u8g2centerText("ROT", 65, hline-2, 32, 10);
 		u8g2centerText("CHAN", 97, hline-2, 32, 10);
+		
+		if (copiedFlag || pastedFlag){
+			display.clearDisplay();
+			u8g2_display.setCursor(24,20);
+			u8g2_display.setFontMode(1);  
+			u8g2_display.setFont(FONT_TENFAT);
+			u8g2_display.setForegroundColor(WHITE);
+			u8g2_display.setBackgroundColor(BLACK);
+			if (copiedFlag){
+				u8g2_display.print("COPIED");
+				copiedFlag = false;
+			}
+			if (pastedFlag){
+				u8g2_display.print("PASTED");
+				pastedFlag = false;
+			}
+		}
 	}
 }
 
@@ -1201,12 +1220,26 @@ void loop() {
 					} else if (patternParams) {
 						if (thisKey == 1) { 
 
+
 						} else if (thisKey == 2) { 
-//							patternParams = !patternParams; // toggle patternParams on/off
-//							noteSelect = false;
-//							dirtyDisplay = true;
+
+
 						} else if (thisKey > 2 && thisKey < 11) { // Pattern select keys
+							// COPY
 							playingPattern = thisKey-3;
+
+							if (keyState[1]) { 	
+								copyPattern(playingPattern);
+								copiedFlag = true;
+//								Serial.print("copy: ");
+//								Serial.println(playingPattern);
+							} else if (keyState[2]) {
+								pastePattern(playingPattern);
+								pastedFlag = true;
+//								Serial.print("paste: ");
+//								Serial.println(playingPattern);							
+							}
+						
 							dirtyDisplay = true;
 						} else if ( thisKey > 10 ) {
 							// set pattern length with key
@@ -1700,6 +1733,28 @@ void rotatePattern(int a[], int size, int rot ){
 		arr[d] = a[s];
 	for (int i = 0; i < size; ++i)
 		a[i] = arr[i];
+}
+
+void copyPattern(int patternNum){
+	for( int i = 0 ; i < NUM_STEPS ; ++i ){
+		for( int j = 0 ; j < 8 ; ++j ){
+			copyPatternBuffer[i][j] = stepNoteP[patternNum][i][j];
+		}
+	}
+	for( int k = 0 ; k < NUM_STEPS ; ++k ){	
+		copyStepBuffer[k] = stepPlay[patternNum][k];
+	}
+}
+
+void pastePattern(int patternNum){
+	for( int i = 0 ; i < NUM_STEPS ; ++i ){
+		for( int j = 0 ; j < 8 ; ++j ){
+			stepNoteP[patternNum][i][j] = copyPatternBuffer[i][j] ;
+		}
+	}
+	for( int k = 0 ; k < NUM_STEPS ; ++k ){	
+		stepPlay[patternNum][k] = copyStepBuffer[k];
+	}
 }
 
 void u8g2centerText(const char* s, int16_t x, int16_t y, uint16_t w, uint16_t h) {
