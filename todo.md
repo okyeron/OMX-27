@@ -1,10 +1,8 @@
-# To-Do 
+# TO-DO 
 
 * Pattern saving
 
-* Step recording (needs testing)
- 
-* transpose entire sequence (needs testing)
+* Reset copiedFlag/clearedFlag/pastedFlag after some timeout
 
 * Additional mode for MIDI settings (channel, etc)?
 
@@ -21,6 +19,13 @@
 * Conditional triggers (see grid step on norns )
 
 * what happens on CV when you have multiple keys pressed?
+
+
+# NEEDS MORE TESTING
+
+* Step recording (needs testing)
+ 
+* transpose entire sequence (needs testing)
 
 
 # BUGS

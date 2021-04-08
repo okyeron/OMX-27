@@ -1,5 +1,5 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
-// v 1.05b
+// v 1.05b2
 // 
 // Steven Noreyko, March 2021
 //
@@ -92,6 +92,7 @@ bool stepRecord = false;
 bool stepDirty = false;
 bool copiedFlag = false;
 bool pastedFlag = false;
+bool clearedFlag = false;
 
 bool midiAUX = false;
 bool enc_edit = false;
@@ -604,6 +605,7 @@ void dispStepRec(){
 	dispValBox(stepNoteP[playingPattern][selectedStep][0], 2, false);
 	dispValBox((int)octave+4, 3, false);
 
+	dispCopyPaste();
 }
 
 void dispNoteSelect(){
@@ -775,21 +777,50 @@ void dispPatternParams(){
 		u8g2centerText("ROT", 65, hline-2, 32, 10);
 		u8g2centerText("CHAN", 97, hline-2, 32, 10);
 		
-		if (copiedFlag || pastedFlag){
-			display.clearDisplay();
-			u8g2_display.setCursor(24,20);
-			u8g2_display.setFontMode(1);  
-			u8g2_display.setFont(FONT_TENFAT);
-			u8g2_display.setForegroundColor(WHITE);
-			u8g2_display.setBackgroundColor(BLACK);
-			if (copiedFlag){
-				u8g2_display.print("COPIED");
-				copiedFlag = false;
-			}
-			if (pastedFlag){
-				u8g2_display.print("PASTED");
-				pastedFlag = false;
-			}
+		dispCopyPaste();
+//		if (copiedFlag || pastedFlag || pastedFlag){
+//			display.clearDisplay();
+//			u8g2_display.setCursor(24,20);
+//			u8g2_display.setFontMode(1);  
+//			u8g2_display.setFont(FONT_TENFAT);
+//			u8g2_display.setForegroundColor(WHITE);
+//			u8g2_display.setBackgroundColor(BLACK);
+//			if (clearedFlag){
+//				u8g2_display.print("CLEARED");
+//				clearedFlag = false;
+//			}
+//			if (copiedFlag){
+//				u8g2_display.print("COPIED");
+//				copiedFlag = false;
+//			}
+//			if (pastedFlag){
+//				u8g2_display.print("PASTED");
+//				pastedFlag = false;
+//			}
+//		}
+	}
+}
+
+void dispCopyPaste(){
+	if (copiedFlag || pastedFlag || clearedFlag){
+		display.clearDisplay();
+		u8g2_display.setCursor(24,20);
+		u8g2_display.setFontMode(1);  
+		u8g2_display.setFont(FONT_TENFAT);
+		u8g2_display.setForegroundColor(WHITE);
+		u8g2_display.setBackgroundColor(BLACK);
+
+		if (copiedFlag){
+			u8g2_display.print("COPIED");
+			copiedFlag = false;
+		}
+		if (pastedFlag){
+			u8g2_display.print("PASTED");
+			pastedFlag = false;
+		}
+		if (clearedFlag){
+			u8g2_display.print("CLEARED");
+			clearedFlag = false;
 		}
 	}
 }
@@ -1106,6 +1137,7 @@ void loop() {
 		case Button::DownLong: //Serial.println("Button downlong"); 
 			if (stepRecord) {
 				resetPatternDefaults(playingPattern);
+				clearedFlag = true;
 			} else {
 				enc_edit = true;		
 				dispMode();
@@ -1228,16 +1260,19 @@ void loop() {
 							// COPY
 							playingPattern = thisKey-3;
 
-							if (keyState[1]) { 	
+							if (keyState[1] && !keyState[2]) { 	
 								copyPattern(playingPattern);
 								copiedFlag = true;
 //								Serial.print("copy: ");
 //								Serial.println(playingPattern);
-							} else if (keyState[2]) {
+							} else if (!keyState[1] && keyState[2]) {
 								pastePattern(playingPattern);
 								pastedFlag = true;
 //								Serial.print("paste: ");
 //								Serial.println(playingPattern);							
+							} else if (keyState[1] && keyState[2]) {
+								clearPattern(playingPattern);
+								clearedFlag = true;
 							}
 						
 							dirtyDisplay = true;
@@ -1679,13 +1714,7 @@ void allNotesOffPanic() {
 	}
 }
 
-void resetPatternDefaults(int patternNum){
-	for (int i = 0; i < NUM_STEPS; i++){
-		// {notenum,vel,len,p1,p2,p3,p4,p5}
-		stepNoteP[patternNum][i][0] = patternDefaultNoteMap[patternNum];
-		stepNoteP[patternNum][i][2] = 1;
-	}
-}
+
 
 void transposeSeq(int patternNum, int amt) {
 	for (int k=0; k<NUM_STEPS; k++){
@@ -1733,6 +1762,28 @@ void rotatePattern(int a[], int size, int rot ){
 		arr[d] = a[s];
 	for (int i = 0; i < size; ++i)
 		a[i] = arr[i];
+}
+
+void resetPatternDefaults(int patternNum){
+	for (int i = 0; i < NUM_STEPS; i++){
+		// {notenum,vel,len,p1,p2,p3,p4,p5}
+		stepNoteP[patternNum][i][0] = patternDefaultNoteMap[patternNum];
+		stepNoteP[patternNum][i][2] = 1;
+	}
+}
+
+void clearPattern(int patternNum){
+	for (int i = 0; i < NUM_STEPS; i++){
+		// {notenum,vel,len,p1,p2,p3,p4,p5}
+		stepNoteP[patternNum][i][0] = patternDefaultNoteMap[patternNum];
+		stepNoteP[patternNum][i][1] = 100;
+		stepNoteP[patternNum][i][2] = 1;
+		stepNoteP[patternNum][i][3] = -1;
+		stepNoteP[patternNum][i][4] = -1;
+		stepNoteP[patternNum][i][5] = -1;
+		stepNoteP[patternNum][i][6] = -1;
+		stepNoteP[patternNum][i][7] = -1;
+	}
 }
 
 void copyPattern(int patternNum){

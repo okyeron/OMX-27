@@ -97,6 +97,18 @@ Pretty much the same as MI, but with the following tweaks for Organelle Mother o
 
 ### Pattern Params
 
+Long press Pattern Key to enter pattern params
+
+Encoder press to get parameters for length, rotation and MIDI channel for that pattern (blinking)
+
+Step Keys also set pattern length 
+F1 + pattern will copy pattern  
+F2 + pattern will paste pattern to other pattern slot  
+F1 + F2 + pattern will clear the pattern back to GM drum map default (and clear all plocks)  
+
+(you can paste multiple times - paste buffer should stay the same until you copy again)
+
+
 ### Step Record
 
 Holding F1 + a Pattern Key will enter Step Record Mode.
