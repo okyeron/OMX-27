@@ -64,7 +64,8 @@ Step sequencer - One pattern active at a time.
 
  - AUX is Start/Stop 
  - Pattern Key: Selects playing pattern
- - F1: Reset sequences to step one
+ - F1 + AUX: Reset sequences to first/last step 
+ - F2 + AUX: Reverse pattern direction 
  - F1 + Pattern Key: Enter "Step Record Mode" (transport must be stopped)
  - Long press a Step Key: Enter "Note Select Mode"
  - Long press a Pattern Key: Enter "Pattern Params Mode"
@@ -75,7 +76,8 @@ Step sequencer - All patterns active.
 
  - AUX is Start/Stop 
  - Pattern Key: Selects active pattern
- - F1: Reset all sequences to step one. 
+ - F1 + AUX: Reset sequences to first/last step 
+ - F2 + AUX: Reverse pattern direction 
  - F1 + Pattern Key: Enter "Step Record Mode"
  - F2 + Pattern Key: Mute that pattern  
  - Long press a Step Key: Enter "Note Select Mode"

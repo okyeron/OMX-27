@@ -1,5 +1,5 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
-// v 1.05b3
+// v 1.05b4
 // 
 // Steven Noreyko, March 2021
 //
@@ -1303,15 +1303,15 @@ void loop() {
 						stepDirty = true;
 						dirtyDisplay = true;
 
-					// regular SEQ mode
+					// REGULAR SEQ MODE
 					} else {					
 						if (thisKey == 1) {	
-							seqResetFlag = true;					// RESET ALL SEQUENCES TO FIRST/LAST STEP 
+//							seqResetFlag = true;					// RESET ALL SEQUENCES TO FIRST/LAST STEP 
 //								Serial.print("set seqResetFlag: ");
 //								Serial.println(seqResetFlag);
 
 						} else if (thisKey == 2) { 					// CHANGE PATTERN DIRECTION
-							patternDirection[playingPattern] = !patternDirection[playingPattern];
+//							patternDirection[playingPattern] = !patternDirection[playingPattern];
 
 						// BLACK KEYS
 						} else if (thisKey > 2 && thisKey < 11) { // Pattern select
@@ -1387,16 +1387,24 @@ void loop() {
 						dirtyDisplay = true;
 
 					} else {
-						if (playing){
-							// stop transport
-							playing = 0;
-							allNotesOff();
-//							Serial.println("stop transport");
-							seqStop();
+						if (keyState[1] || keyState[2]) { 				// CHECK keyState[] FOR LONG PRESS OF FUNC KEYS
+							if (keyState[1]) {	
+								seqResetFlag = true;					// RESET ALL SEQUENCES TO FIRST/LAST STEP 
+							} else if (keyState[2]) { 					// CHANGE PATTERN DIRECTION
+								patternDirection[playingPattern] = !patternDirection[playingPattern];
+							}
 						} else {
-							// start transport
-//							Serial.println("start transport");
-							seqStart();							
+							if (playing){
+								// stop transport
+								playing = 0;
+								allNotesOff();
+	//							Serial.println("stop transport");
+								seqStop();
+							} else {
+								// start transport
+	//							Serial.println("start transport");
+								seqStart();							
+							}
 						}
 					}
 
