@@ -1,5 +1,5 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
-// v 1.05b2
+// v 1.05b3
 // 
 // Steven Noreyko, March 2021
 //
@@ -1306,11 +1306,12 @@ void loop() {
 					// regular SEQ mode
 					} else {					
 						if (thisKey == 1) {	
-							seqResetFlag = true;					// reset all sequences to step 1
+							seqResetFlag = true;					// RESET ALL SEQUENCES TO FIRST/LAST STEP 
 //								Serial.print("set seqResetFlag: ");
 //								Serial.println(seqResetFlag);
 
-						} else if (thisKey == 2) { 			
+						} else if (thisKey == 2) { 					// CHANGE PATTERN DIRECTION
+							patternDirection[playingPattern] = !patternDirection[playingPattern];
 
 						// BLACK KEYS
 						} else if (thisKey > 2 && thisKey < 11) { // Pattern select
@@ -1536,9 +1537,19 @@ void loop() {
 void step_ahead(int patternNum) {
 	// step each pattern ahead one place
 	for (int j=0; j<8; j++){
-		seqPos[j]++;
-		if (seqPos[j] >= patternLength[j])
-			seqPos[j] = 0;
+
+		// what direction?
+		if (patternDirection[patternNum] == 1){ // REVERSE
+			seqPos[j]--;
+			if (seqPos[j] < 0)
+				seqPos[j] = patternLength[j]-1;
+	
+		} else {
+			seqPos[j]++;
+			if (seqPos[j] >= patternLength[j])
+				seqPos[j] = 0;
+
+		}
 	}
 }
 
@@ -1653,7 +1664,7 @@ void noteOff(int notenum){
 }
 
 
-// Play a note (SEQUENCERS)
+// Play a note / step (SEQUENCERS)
 void playNote(int patternNum) {
   //Serial.println(stepNoteP[patternNum][seqPos][0]); // Debug
 
@@ -1670,6 +1681,7 @@ void playNote(int patternNum) {
 		pendingNoteOffs.insert(stepNoteP[patternNum][seqPos[patternNum]][0], patternChannel[patternNum], micros()+stepNoteP[patternNum][seqPos[patternNum]][2]*step_micros);
 
 //		MM::sendNoteOn(stepNoteP[patternNum][seqPos[patternNum]][0], seq_velocity, patternChannel[patternNum]);
+
 		pendingNoteOns.insert(stepNoteP[patternNum][seqPos[patternNum]][0], seq_velocity, patternChannel[patternNum], micros() );
 
 		
@@ -1726,7 +1738,11 @@ void transposeSeq(int patternNum, int amt) {
 void seqReset(){
 	if (seqResetFlag) {
 		for (int k=0; k<8; k++){
-			seqPos[k] = 0;
+			if (patternDirection[k] == 1){ // REVERSE
+				seqPos[k] = patternLength[k]-1;
+			} else {
+				seqPos[k] = 0;
+			}
 		}
 		MM::stopClock();
 		MM::startClock();

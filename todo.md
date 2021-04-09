@@ -4,6 +4,8 @@
 
 * Reset copiedFlag/clearedFlag/pastedFlag after some timeout
 
+* Play direction
+
 * Additional mode for MIDI settings (channel, etc)?
 
 * Change MIDI channel per pattern  
@@ -43,14 +45,22 @@
 
 * step probability
 
-* randomize function
+* Record CC automation (playback on clock ticks)
+
+* supersteps ( lfo waveforms per step for CCs - with a bunch of preset waveforms?)
+
+* randomize function (Random Patterns?)
 
 * quantization for the live playing.
+
+* Arps
+
+* midi delay?
 
 * while ??
 
 
-# already done?
+# DONE?
 
 * add octave to note select
 * note length?
