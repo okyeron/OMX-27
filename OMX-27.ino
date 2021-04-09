@@ -1,5 +1,5 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
-// v 1.05b4
+// v 1.0.5b5
 // 
 // Steven Noreyko, March 2021
 //
@@ -1182,7 +1182,7 @@ void loop() {
 					
 				} else if(e.bit.EVENT == KEY_JUST_RELEASED && thisKey != 0) {
 					//Serial.println(" released");
-					noteOff(thisKey);
+					noteOff(thisKey, playingPattern);
 				}
 				
 				// AUX KEY
@@ -1355,7 +1355,7 @@ void loop() {
 				
 				if (e.bit.EVENT == KEY_JUST_RELEASED && thisKey != 0 && (noteSelection || stepRecord) && selectedNote > 0) {
 					if (!playing){
-						noteOff(thisKey);
+						noteOff(thisKey, playingPattern);
 					}
 					if (stepRecord && stepDirty) {
 						step_ahead(playingPattern);
@@ -1547,7 +1547,7 @@ void step_ahead(int patternNum) {
 	for (int j=0; j<8; j++){
 
 		// what direction?
-		if (patternDirection[patternNum] == 1){ // REVERSE
+		if (patternDirection[j] == 1){ // REVERSE
 			seqPos[j]--;
 			if (seqPos[j] < 0)
 				seqPos[j] = patternLength[j]-1;
@@ -1648,7 +1648,7 @@ void noteOn(int notenum, int velocity, int patternNum){
 	int adjnote = notes[notenum] + (octave * 12); // adjust key for octave range
 	if (adjnote>=0 && adjnote <128){
 		lastNote[patternNum][seqPos[patternNum]] = adjnote;
-		MM::sendNoteOn(adjnote, velocity, midiChannel);
+		MM::sendNoteOn(adjnote, velocity, patternChannel[playingPattern]);
 		// CV
 		cvNoteOn(adjnote);
 	}
@@ -1658,10 +1658,10 @@ void noteOn(int notenum, int velocity, int patternNum){
 	dirtyDisplay = true;
 }
 
-void noteOff(int notenum){
+void noteOff(int notenum, int patternNum){
 	int adjnote = notes[notenum] + (octave * 12); // adjust key for octave range
 	if (adjnote>=0 && adjnote <128){
-		MM::sendNoteOff(adjnote, 0, midiChannel);
+		MM::sendNoteOff(adjnote, 0, patternChannel[playingPattern]);
 		// CV off
 		cvNoteOff();
 	}
