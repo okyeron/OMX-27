@@ -20,7 +20,14 @@ int seqPos[8] = {0, 0, 0, 0, 0, 0, 0, 0};				// What position in the sequence ar
 bool patternMute[8] = {false, false, false, false, false, false, false, false};     
 int patternLength[8] = {16, 16, 16, 16, 16, 16, 16, 16};
 int patternStart[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+int patternDirection[8] = {0, 0, 0, 0, 0, 0, 0, 0}; // 0 = forward, 1 = reverse
+
 int pattLen[8] = {patternLength[0],patternLength[1],patternLength[2],patternLength[3],patternLength[4],patternLength[5],patternLength[6],patternLength[7]};
+int patternChannel[8] = {1, 2, 3, 4, 5, 6, 7, 8};
+int copyPatternBuffer[16][8] = 	{ {0, 0, 1, -1, -1, -1, -1, -1}, {0, 0, 1, -1, -1, -1, -1, -1},{0, 0, 1, -1, -1, -1, -1, -1},{0, 0, 1, -1, -1, -1, -1, -1},{0, 0, 1, -1, -1, -1, -1, -1},{0, 0, 1, -1, -1, -1, -1, -1},{0, 0, 1, -1, -1, -1, -1, -1},{0, 0, 1, -1, -1, -1, -1, -1},{0, 0, 1, -1, -1, -1, -1, -1},{0, 0, 1, -1, -1, -1, -1, -1},{0, 0, 1, -1, -1, -1, -1, -1},{0, 0, 1, -1, -1, -1, -1, -1},{0, 0, 1, -1, -1, -1, -1, -1},{0, 0, 1, -1, -1, -1, -1, -1},{0, 0, 1, -1, -1, -1, -1, -1},{0, 0, 1, -1, -1, -1, -1, -1} };
+int copyStepBuffer[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+int patternDefaultNoteMap[8] = {36, 38, 37, 39, 42, 46, 49, 51}; // default to GM Drum Map for now
 
 
 // Determine how to play a step
