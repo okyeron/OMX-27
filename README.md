@@ -35,7 +35,6 @@ __CPU Speed: 120 MHz (overclock)__
 
 [Documentation](<Docs.md>)
 
-
 # FAQ
 
 Q: What key switches are recommended?  

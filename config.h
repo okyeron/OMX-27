@@ -32,6 +32,7 @@ const int gridw = 128;
 const int PPQ = 24;
 
 const char* modes[] = {"MI","S1","S2","OM"};
+const char* infoDialogText[] = {"COPIED","PASTED","CLEARED","RESET","FWD >>","<< REV"};
 
 // KEY SWITCH ROWS/COLS
 const byte ROWS = 5; //five rows
