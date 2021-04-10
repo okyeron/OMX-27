@@ -75,6 +75,7 @@ Step sequencer - One pattern active at a time.
  - F1 + Pattern Key: Enter "Step Record Mode" (transport must be stopped)
  - Long press a Step Key: Enter "Note Select Mode"
  - Long press a Pattern Key: Enter "Pattern Params Mode"
+ - AUX-key exits sub-modes  
 
 ### S2 - Sequencer 2
 
@@ -88,6 +89,7 @@ Step sequencer - All patterns active.
  - F2 + Pattern Key: Mute that pattern  
  - Long press a Step Key: Enter "Note Select Mode"
  - Long press a Pattern Key: Enter "Pattern Params Mode"
+ - AUX-key exits sub-modes  
 
 
 ### OM - Organelle Mother
@@ -101,7 +103,11 @@ Pretty much the same as MI, but with the following tweaks for Organelle Mother o
 
 ## Sub-Modes
 
+AUX-key exits sub-modes  
+
 ### Note Select
+
+
 
 ### Pattern Params
 
@@ -118,6 +124,8 @@ F1 + F2 + pattern will clear the pattern back to GM drum map default (and clear 
 
 
 ### Step Record
+
+(SH-101-ish style note entry)
 
 Holding F1 + a Pattern Key will enter Step Record Mode.
 

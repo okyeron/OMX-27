@@ -1,5 +1,5 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
-// v 1.0.5b5
+// v 1.0.5
 // 
 // Steven Noreyko, March 2021
 //
@@ -40,7 +40,7 @@ int temp;
 // Timers and such
 elapsedMillis msec = 0;
 elapsedMillis pots_msec = 0;
-elapsedMillis checktime1 = 0;
+elapsedMillis dialogTimeout = 0;
 elapsedMicros clksTimer = 0;
 unsigned long clksDelay;
 elapsedMillis keyPressTime[27] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
@@ -90,6 +90,9 @@ int selectedStep = 0;
 bool stepSelect = false;
 bool stepRecord = false;
 bool stepDirty = false;
+bool dialogFlags[] = {false, false, false, false, false, false};
+unsigned dialogDuration = 1000;
+
 bool copiedFlag = false;
 bool pastedFlag = false;
 bool clearedFlag = false;
@@ -226,7 +229,7 @@ void readPotentimeters(){
 void setup() {
 	Serial.begin(115200);
 
-	checktime1 = 0;
+	dialogTimeout = 0;
 	clksTimer = 0;
 		
 	lastProcessTime = micros();
@@ -605,7 +608,6 @@ void dispStepRec(){
 	dispValBox(stepNoteP[playingPattern][selectedStep][0], 2, false);
 	dispValBox((int)octave+4, 3, false);
 
-	dispCopyPaste();
 }
 
 void dispNoteSelect(){
@@ -777,52 +779,24 @@ void dispPatternParams(){
 		u8g2centerText("ROT", 65, hline-2, 32, 10);
 		u8g2centerText("CHAN", 97, hline-2, 32, 10);
 		
-		dispCopyPaste();
-//		if (copiedFlag || pastedFlag || pastedFlag){
-//			display.clearDisplay();
-//			u8g2_display.setCursor(24,20);
-//			u8g2_display.setFontMode(1);  
-//			u8g2_display.setFont(FONT_TENFAT);
-//			u8g2_display.setForegroundColor(WHITE);
-//			u8g2_display.setBackgroundColor(BLACK);
-//			if (clearedFlag){
-//				u8g2_display.print("CLEARED");
-//				clearedFlag = false;
-//			}
-//			if (copiedFlag){
-//				u8g2_display.print("COPIED");
-//				copiedFlag = false;
-//			}
-//			if (pastedFlag){
-//				u8g2_display.print("PASTED");
-//				pastedFlag = false;
-//			}
-//		}
 	}
 }
 
-void dispCopyPaste(){
-	if (copiedFlag || pastedFlag || clearedFlag){
-		display.clearDisplay();
-		u8g2_display.setCursor(24,20);
-		u8g2_display.setFontMode(1);  
-		u8g2_display.setFont(FONT_TENFAT);
-		u8g2_display.setForegroundColor(WHITE);
-		u8g2_display.setBackgroundColor(BLACK);
-
-		if (copiedFlag){
-			u8g2_display.print("COPIED");
-			copiedFlag = false;
+void dispInfoDialog(){	
+	for (int q=0; q <6; q++){
+		if (dialogFlags[q]){ //  copied	
+			// reset timer
+			dialogTimeout = 0;
+			display.clearDisplay();
+			u8g2_display.setFontMode(1);  
+			u8g2_display.setFont(FONT_TENFAT);
+			u8g2_display.setForegroundColor(WHITE);
+			u8g2_display.setBackgroundColor(BLACK);
+			
+			u8g2centerText(infoDialogText[q], 0, 10, 128, 32);
+			dialogFlags[q] = false;
 		}
-		if (pastedFlag){
-			u8g2_display.print("PASTED");
-			pastedFlag = false;
-		}
-		if (clearedFlag){
-			u8g2_display.print("CLEARED");
-			clearedFlag = false;
-		}
-	}
+	}		
 }
 
 void dispMode(){
@@ -1257,22 +1231,23 @@ void loop() {
 
 
 						} else if (thisKey > 2 && thisKey < 11) { // Pattern select keys
-							// COPY
+							
 							playingPattern = thisKey-3;
 
+							// COPY / PASTE / CLEAR
 							if (keyState[1] && !keyState[2]) { 	
 								copyPattern(playingPattern);
-								copiedFlag = true;
+								dialogFlags[0] = true; // copied flag
 //								Serial.print("copy: ");
 //								Serial.println(playingPattern);
 							} else if (!keyState[1] && keyState[2]) {
 								pastePattern(playingPattern);
-								pastedFlag = true;
+								dialogFlags[1] = true; // pasted flag
 //								Serial.print("paste: ");
 //								Serial.println(playingPattern);							
 							} else if (keyState[1] && keyState[2]) {
 								clearPattern(playingPattern);
-								clearedFlag = true;
+								dialogFlags[2] = true; // cleared flag
 							}
 						
 							dirtyDisplay = true;
@@ -1307,6 +1282,7 @@ void loop() {
 					} else {					
 						if (thisKey == 1) {	
 //							seqResetFlag = true;					// RESET ALL SEQUENCES TO FIRST/LAST STEP 
+																	// MOVED DOWN TO AUX KEY
 //								Serial.print("set seqResetFlag: ");
 //								Serial.println(seqResetFlag);
 
@@ -1390,9 +1366,19 @@ void loop() {
 						if (keyState[1] || keyState[2]) { 				// CHECK keyState[] FOR LONG PRESS OF FUNC KEYS
 							if (keyState[1]) {	
 								seqResetFlag = true;					// RESET ALL SEQUENCES TO FIRST/LAST STEP 
+								dialogFlags[3] = true; // reset flag
+								
+
 							} else if (keyState[2]) { 					// CHANGE PATTERN DIRECTION
 								patternDirection[playingPattern] = !patternDirection[playingPattern];
+								if (patternDirection[playingPattern]) {
+									dialogFlags[4] = true; // fwd direction flag
+								} else{
+									dialogFlags[5] = true; // rev direction flag
+								}
+
 							}
+							dirtyDisplay = true;
 						} else {
 							if (playing){
 								// stop transport
@@ -1439,19 +1425,21 @@ void loop() {
 					case 1:
 						// fall through
 					case 2:
-						if (j > 2 && j < 11){ // skip AUX key, get pattern keys
-							patternParams = true;
-							dirtyDisplay = true;
-						
-						} else if (j > 10){
-							if (!stepRecord){ 		// IGNORING LONG PRESSES IN STEP RECORD?
-								selectedStep = j - 11; // set noteSelection to this step
-								noteSelect = true;
-								stepSelect = true;
-								noteSelection = true;
+						if (!keyState[1] && !keyState[2]) { // SKIP LONG PRESS IF FUNC KEYS ARE ALREDY HELD
+							if (j > 2 && j < 11){ // skip AUX key, get pattern keys
+								patternParams = true;
 								dirtyDisplay = true;
-								// re-toggle the key you just held
-								stepPlay[playingPattern][selectedStep] = !stepPlay[playingPattern][selectedStep];
+						
+							} else if (j > 10){
+								if (!stepRecord){ 		// IGNORING LONG PRESSES IN STEP RECORD?
+									selectedStep = j - 11; // set noteSelection to this step
+									noteSelect = true;
+									stepSelect = true;
+									noteSelection = true;
+									dirtyDisplay = true;
+									// re-toggle the key you just held
+									stepPlay[playingPattern][selectedStep] = !stepPlay[playingPattern][selectedStep];
+								}
 							}
 						}
 						break;
@@ -1483,10 +1471,18 @@ void loop() {
 		case 1: 						// ############## SEQUENCER 1
 			// FALL THROUGH
 		case 2: 						// ############## SEQUENCER 2
+			if (!enc_edit) {
+				if (dialogTimeout > dialogDuration && dialogTimeout < dialogDuration + 20) {
+					dirtyDisplay = true;
+//					Serial.println("dirty");
+				}
+			}
+	
 			if (dirtyDisplay){			// DISPLAY
 				if (!enc_edit){
 					if (!noteSelect and !patternParams and !stepRecord){
 						dispSeqMode1();
+						dispInfoDialog();
 					}				
 					if (noteSelect) {
 						if (nspage == 0){
@@ -1497,9 +1493,11 @@ void loop() {
 					}
 					if (patternParams) {
 						dispPatternParams();
+						dispInfoDialog();
 					}
 					if (stepRecord) {
 						dispStepRec();
+						dispInfoDialog();
 					}
 					
 				}

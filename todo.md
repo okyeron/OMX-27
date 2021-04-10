@@ -32,7 +32,11 @@
 
 # BUGS
 
+* step record skipping steps - sometimes led stays on
+
 * missing note off if octave is changed while holding note on
+
+* CV sequence running all day and twice, the sequencer just paused for awhile and then started up again
 
 
 # IDEAS / FEATURE REQUESTS / WISH LIST
@@ -56,6 +60,10 @@
 * Arps
 
 * midi delay?
+
+* controllable sequence drift?. P1: probability of step drift, P2: direction and distance, P3: velocity, P4: set of quantizations.
+
+* CV mode - like a single channel version of a 0-control? maybe presets on the "white" keys and LFO's on the "black" 
 
 * while ??
 
