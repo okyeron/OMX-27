@@ -143,11 +143,13 @@ If your LEDs work up to a certain point (e.g. LEDs 1-7 work, LED 8-27 don't):
 - Check that the orientation of the LED is correct (see pictures above)
 
 
-### Switch contact test
+### Switch contact test - AKA "the tweezer test"
 
 You will want to test the pads for each keyswitch on the PCB using tweezers or a piece of wire. This is also a second check that the LED for that switch is working correctly.
 
 If not working here, check the LEDs again first. If all the LEDs are working OK look to be sure the diode adjacent to that switch position is OK.
+
+There are groups of Rows and Columns for sets of switches. If you get a group lighting up, it may be a corresponding pin on the Teensy for that row or column. (Link to troubleshooting guide needed)
 
 (PIC NEEDED) 
 

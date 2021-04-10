@@ -1,11 +1,11 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
-// v 1.0.5
+// v 1.0.5.1
 // 
 // Steven Noreyko, March 2021
 //
 //
 //	Big thanks to: 
-//	John Park and Gerald Stevens for testing and feature ideas
+//	John Park and Gerald Stevens for initial testing and feature ideas
 //	mzero for immense amounts of code coaching/assistance
 //	drjohn for support
 
@@ -1372,9 +1372,9 @@ void loop() {
 							} else if (keyState[2]) { 					// CHANGE PATTERN DIRECTION
 								patternDirection[playingPattern] = !patternDirection[playingPattern];
 								if (patternDirection[playingPattern]) {
-									dialogFlags[4] = true; // fwd direction flag
-								} else{
 									dialogFlags[5] = true; // rev direction flag
+								} else{
+									dialogFlags[4] = true; // fwd direction flag
 								}
 
 							}
