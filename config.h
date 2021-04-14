@@ -1,5 +1,24 @@
+enum OMXMode
+{
+     MODE_MIDI = 0,
+     MODE_S1,
+     MODE_S2,
+     MODE_OM,
 
-const int DEFAULT_MODE = 0;
+     NUM_OMX_MODES
+};
+
+const OMXMode DEFAULT_MODE = MODE_MIDI;
+
+// Increment this when data layout in EEPROM changes. May need to write version upgrade readers when this changes.
+const uint8_t EEPROM_VERSION = 1;
+
+#define EEPROM_HEADER_ADDRESS	     0
+#define EEPROM_HEADER_SIZE		32
+#define EEPROM_PATTERN_ADDRESS 	32
+#define EEPROM_PATTERN_SIZE		1024
+#define EEPROM_PATTERN_LENGTH_ADDRESS 1056
+#define EEPROM_PATTERN_LENGTH_SIZE 64
 
 // DEFINE CC NUMBERS FOR POTS // CCS mapped to Organelle Defaults
 const int CC1 = 21;
