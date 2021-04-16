@@ -924,7 +924,7 @@ void loop() {
 			// set mode
 //			int modesize = NUM_OMX_MODES;
 //			Serial.println(modesize);
-	    	newmode = (OMXMode)constrain(newmode + amt, 0, NUM_OMX_MODES);
+	    	newmode = (OMXMode)constrain(newmode + amt, 0, NUM_OMX_MODES - 1);
 	    	dispMode();
 	    	dirtyDisplay = true;
 
