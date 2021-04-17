@@ -1,5 +1,5 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
-// v 1.0.5.1
+// v 1.0.5.2
 // 
 // Steven Noreyko, March 2021
 //
@@ -539,7 +539,7 @@ void dispMidiMode(){
 	}
 
 	dispValBox((int)octave+4, 2, octFlip);
-	dispValBox(midiChannel, 3, chFlip);
+	dispValBox(patternChannel[playingPattern], 3, chFlip);
 	
 }
 
@@ -929,11 +929,12 @@ void loop() {
 					}    
   					dirtyDisplay = true;
 					break;
-				case 0: // MIDI			
+				case 0: // MIDI		
 					if (mimode == 1) { // set length
-						int newchan = constrain(midiChannel + amt, 1, 16);
-						if (newchan != midiChannel){
-							midiChannel = newchan;
+						int miChan = patternChannel[playingPattern];
+						int newchan = constrain(miChan + amt, 1, 16);
+						if (newchan != miChan){
+							patternChannel[playingPattern] = newchan;
 						}
 						
 					}else {
@@ -1459,6 +1460,7 @@ void loop() {
 			// FALL THROUGH
 
 		case 0:							// ############## MIDI KEYBOARD
+			playingPattern = 0; 		// DEFAULT MIDI MODE TO THE FIRST PATTERN SLOT
 			midi_leds();				// SHOW LEDS
 
 			if (dirtyDisplay){			// DISPLAY
@@ -1728,7 +1730,7 @@ void allNotesOffPanic() {
 	analogWrite(CVPITCH_PIN, 0);
 	digitalWrite(CVGATE_PIN, LOW);
 	for (int j=0; j<128; j++){
-		MM::sendNoteOff(j, 0, midiChannel);
+		MM::sendNoteOff(j, 0, midiChannel);  // NEEDS FIXING
 	}
 }
 
