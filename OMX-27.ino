@@ -53,6 +53,7 @@ Micros lastProcessTime;
 Micros nextStepTime;
 Micros lastStepTime;
 volatile unsigned long step_micros; 
+volatile unsigned long noteon_micros; 
 
 // ANALOGS
 int analogValues[] = {0,0,0,0,0};		// default values
@@ -119,6 +120,8 @@ unsigned long tempoStartTime, tempoEndTime;
 unsigned long blinkInterval = clockbpm * 2;
 unsigned long longPressInterval = 1500;
 
+float swing = 0;
+
 bool keyState[27] = {false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false};
 
 
@@ -144,24 +147,34 @@ void advanceClock(Micros advance) {
 		advance -= timeToNextClock;		
 
 		MM::sendClock();
+		timeToNextClock = clockInterval * (PPQ / 24);
+	}
+	timeToNextClock -= advance;
+}
+void advanceSteps(Micros advance) {
+	static Micros timeToNextClock = 0;
+	static Micros stepnow = micros();	
+	while (advance >= timeToNextClock) {
+		advance -= timeToNextClock;		
 		timeToNextClock = clockInterval;
 
 		// turn off any expiring notes
-		pendingNoteOffs.play(micros());
+		pendingNoteOffs.play(stepnow);
 				
-		// turn on any pending notes ?
-		pendingNoteOns.play(micros());
+		// turn on any pending notes
+		pendingNoteOns.play(stepnow);
 	}
 	timeToNextClock -= advance;
 }
 
+
 void resetClocks(){
 	// BPM tempo to step_delay calculation
-	clockInterval = 60000000/(PPQ * clockbpm); // clock interval is in microseconds
-	step_micros = clockInterval * 6; 			// 16th note step in microseconds
+	clockInterval = 60000000/(PPQ * clockbpm); 		// clock interval is in microseconds
+	step_micros = clockInterval * (PPQ/4); 			// 16th note step in microseconds
 
-	// 16th notes
-	step_delay = clockInterval * 0.006; // 60000 / clockbpm / 4; 
+	// 16th note step in milliseconds
+	step_delay = step_micros * 0.001; 	// clockInterval * 0.006; // 60000 / clockbpm / 4; 
 }
 
 
@@ -890,6 +903,7 @@ void loop() {
 	if (passed > 0) {
 		if (playing){
 			advanceClock(passed);
+			advanceSteps(passed);
 		}
 	}
 	doStep();
@@ -956,9 +970,13 @@ void loop() {
 							octave = newoctave;
 						}						
 					} else if (sqmode == 1){ 
-						transposeSeq(playingPattern, amt);
-						int newtransp = transpose + amt;
-						transpose = newtransp;
+						int newswing = constrain(swing + amt, 0, 5);
+						swing = newswing;
+						Serial.println(newswing);
+						
+//						transposeSeq(playingPattern, amt);
+//						int newtransp = transpose + amt;
+//						transpose = newtransp;
 						
 					} else if (sqmode == 0){ 
 						// otherwise set tempo
@@ -1690,7 +1708,14 @@ void playNote(int patternNum) {
 
 //		MM::sendNoteOn(stepNoteP[patternNum][seqPos[patternNum]][0], seq_velocity, patternChannel[patternNum]);
 
-		pendingNoteOns.insert(stepNoteP[patternNum][seqPos[patternNum]][0], seq_velocity, patternChannel[patternNum], micros() );
+		// is there swing ? 
+		if ((swing != 0) && (seqPos[patternNum] % 2 == 0)) {
+			noteon_micros = micros() + (clockInterval * swing); // constrain(swing, 0, 5);
+		} else {
+			noteon_micros = micros();
+		}
+		
+		pendingNoteOns.insert(stepNoteP[patternNum][seqPos[patternNum]][0], seq_velocity, patternChannel[patternNum], noteon_micros );
 
 		
 		// send param locks // {notenum,vel,len,p1,p2,p3,p4,p5}

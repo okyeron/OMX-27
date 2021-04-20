@@ -19,7 +19,7 @@ I believe this is installed by default with Teensyduino
 Set the following for the Teensy under the Tools menu:  
 
 __Board:  Teensy 3.2/3.1__  
-__USB Type: Serial + MIDI__  
+__USB Type: MIDI or Serial + MIDI__  
 __CPU Speed: 120 MHz (overclock)__
   
 
@@ -31,9 +31,9 @@ __CPU Speed: 120 MHz (overclock)__
 
 [Build Guide](<Build.md>)
 
-### Docs
+### Docs / Manual 
 
-[Documentation](<Docs.md>)
+[Documentation](<Docs.md>) (work in progress)
 
 # FAQ
 
@@ -57,3 +57,7 @@ A: No. Not sure about open sourcing yet.
 
 Q: Can I get some of those windowed keycaps you're using?  
 A: Yes. 
+
+Q: Where can I get a kit?
+A: Full or partial kits are available [thru my online shop](<https://denki-oto.weebly.com/#/>)
+

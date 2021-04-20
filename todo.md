@@ -2,9 +2,7 @@
 
 * Pattern saving
 
-* Reset copiedFlag/clearedFlag/pastedFlag after some timeout
-
-* Play direction
+* chain patterns - hold two patten keys at once and do them in order?
 
 * Additional mode for MIDI settings (channel, etc)?
 
@@ -28,6 +26,8 @@
 * Step recording (needs testing)
  
 * transpose entire sequence (needs testing)
+
+* Play direction
 
 
 # BUGS
