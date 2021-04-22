@@ -18,13 +18,8 @@ int seq_velocity = 100;
 int seq_acc_velocity = 127;
 
 int seqPos[NUM_PATTERNS] = {0, 0, 0, 0, 0, 0, 0, 0};				// What position in the sequence are we in?
-bool patternMute[NUM_PATTERNS] = {false, false, false, false, false, false, false, false};     
-uint8_t patternLength[NUM_PATTERNS];    // loaded from EEPROM or manually initialized
 
-int patternStart[NUM_PATTERNS] = {0, 0, 0, 0, 0, 0, 0, 0};
-int patternDirection[NUM_PATTERNS] = {0, 0, 0, 0, 0, 0, 0, 0}; // 0 = forward, 1 = reverse
-
-int patternChannel[NUM_PATTERNS] = {1, 2, 3, 4, 5, 6, 7, 8};
+// int patternStart[NUM_PATTERNS] = {0, 0, 0, 0, 0, 0, 0, 0};
 
 int patternDefaultNoteMap[NUM_PATTERNS] = {36, 38, 37, 39, 42, 46, 49, 51}; // default to GM Drum Map for now
 
@@ -34,6 +29,37 @@ enum StepType {
   STEPTYPE_ACCENT,
   STEPTYPE_RESTART
 };
+
+struct PatternSettings {  // 2 bytes
+  uint8_t len : 4;    // 0 - 15, maps to 1 - 16
+  bool reverse : 1;
+  uint8_t channel : 4;    // 0 - 15 , maps to channels 1 - 16
+  bool mute : 1;
+};
+
+PatternSettings patternSettings[NUM_PATTERNS] = { 
+  { 15, false, 0, false },
+  { 15, false, 1, false },
+  { 15, false, 2, false },
+  { 15, false, 3, false },
+  { 15, false, 4, false },
+  { 15, false, 5, false },
+  { 15, false, 6, false },
+  { 15, false, 7, false }
+};
+
+// Helpers to deal with 1-16 values for pattern length and channel when they're stored as 0-15
+uint8_t PatternLength( int pattern ) {
+  return patternSettings[pattern].len + 1;
+}
+
+void SetPatternLength( int pattern, int len ) {
+  patternSettings[pattern].len = len - 1;
+}
+
+uint8_t PatternChannel( int pattern ) {
+  return patternSettings[pattern].channel + 1;
+}
 
 struct StepNote {           // 8 bytes
   uint8_t note : 7;        // 0 - 127
@@ -63,6 +89,8 @@ uint8_t lastNote[NUM_PATTERNS][NUM_STEPS] = {
   {0}
 };
 
+uint8_t midiLastNote = 0;
+
 StepNote copyPatternBuffer[NUM_STEPS] = { 
   {0, 0, 1, STEPTYPE_MUTE, { -1, -1, -1, -1, -1} },
   {0, 0, 1, STEPTYPE_MUTE, { -1, -1, -1, -1, -1} },
@@ -80,6 +108,3 @@ StepNote copyPatternBuffer[NUM_STEPS] = {
   {0, 0, 1, STEPTYPE_MUTE, { -1, -1, -1, -1, -1} },
   {0, 0, 1, STEPTYPE_MUTE, { -1, -1, -1, -1, -1} },
   {0, 0, 1, STEPTYPE_MUTE, { -1, -1, -1, -1, -1} } };
-
-
-
