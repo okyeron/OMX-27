@@ -2121,7 +2121,7 @@ void saveToEEPROM( void ) {
 // currently loads everything ( mode + patterns )
 bool loadFromEEPROM( void ) {
 	// This load can happen soon after Serial.begin - enable this 'wait for Serial' if you need to Serial.print during loading
-	while( !Serial );
+	//while( !Serial );
 
 	bool bContainedData = loadHeader();
 
