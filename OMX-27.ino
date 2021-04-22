@@ -529,7 +529,6 @@ void dispMidiMode(){
 	
 	// ValueBoxes
 	dispValBox(potVal, 0, false);
-	//dispValBox(lastNote[playingPattern][seqPos[playingPattern]], 1, false);
 	dispValBox(midiLastNote, 1, false);
 
 	bool octFlip = false;		
@@ -1740,8 +1739,7 @@ void playNote(int patternNum) {
 
 	switch (stepNoteP[patternNum][seqPos[patternNum]].stepType) {
 	case STEPTYPE_MUTE:
-		break;
-      
+		break;      
 
 	case STEPTYPE_PLAY:	// regular note on
 		seq_velocity = stepNoteP[playingPattern][seqPos[patternNum]].vel;
