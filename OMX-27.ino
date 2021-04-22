@@ -1,5 +1,5 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
-// v 1.0.5.1
+// v 1.0.5.2
 // 
 // Steven Noreyko, March 2021
 //
@@ -119,6 +119,7 @@ unsigned long blinkInterval = clockbpm * 2;
 unsigned long longPressInterval = 1500;
 
 bool keyState[27] = {false};
+int midiKeyState[27] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
 
 
 // ENCODER
@@ -1488,6 +1489,7 @@ void loop() {
 			// FALL THROUGH
 
 		case MODE_MIDI:							// ############## MIDI KEYBOARD
+			//playingPattern = 0; 		// DEFAULT MIDI MODE TO THE FIRST PATTERN SLOT
 			midi_leds();				// SHOW LEDS
 
 			if (dirtyDisplay){			// DISPLAY
@@ -1681,6 +1683,11 @@ void midiNoteOn(int notenum, int velocity) {
 	int adjnote = notes[notenum] + (octave * 12); // adjust key for octave range
 	if (adjnote>=0 && adjnote <128){
 		midiLastNote = adjnote;
+
+		// keep track of adjusted note when pressed so that when key is released we send
+		// the correct note off message
+		midiKeyState[notenum] = adjnote;
+
 		MM::sendNoteOn(adjnote, velocity, midiChannel);
 		// CV
 		cvNoteOn(adjnote);
@@ -1692,7 +1699,8 @@ void midiNoteOn(int notenum, int velocity) {
 }
 
 void midiNoteOff(int notenum) {
-	int adjnote = notes[notenum] + (octave * 12); // adjust key for octave range
+	// we use the key state captured at the time we pressed the key to send the correct note off message
+	int adjnote = midiKeyState[notenum];
 	if (adjnote>=0 && adjnote <128){
 		MM::sendNoteOff(adjnote, 0, midiChannel);
 		// CV off
@@ -1710,6 +1718,11 @@ void seqNoteOn(int notenum, int velocity, int patternNum){
 	if (adjnote>=0 && adjnote <128){
 		lastNote[patternNum][seqPos[patternNum]] = adjnote;
 		MM::sendNoteOn(adjnote, velocity, PatternChannel(playingPattern));
+
+		// keep track of adjusted note when pressed so that when key is released we send
+		// the correct note off message
+		midiKeyState[notenum] = adjnote;
+
 		// CV
 		cvNoteOn(adjnote);
 	}
@@ -1720,7 +1733,8 @@ void seqNoteOn(int notenum, int velocity, int patternNum){
 }
 
 void seqNoteOff(int notenum, int patternNum){
-	int adjnote = notes[notenum] + (octave * 12); // adjust key for octave range
+	// we use the key state captured at the time we pressed the key to send the correct note off message
+	int adjnote = midiKeyState[notenum];
 	if (adjnote>=0 && adjnote <128){
 		MM::sendNoteOff(adjnote, 0, PatternChannel(playingPattern));
 		// CV off
@@ -1793,7 +1807,7 @@ void allNotesOffPanic() {
 	analogWrite(CVPITCH_PIN, 0);
 	digitalWrite(CVGATE_PIN, LOW);
 	for (int j=0; j<128; j++){
-		MM::sendNoteOff(j, 0, midiChannel);
+		MM::sendNoteOff(j, 0, midiChannel);  // NEEDS FIXING
 	}
 }
 
