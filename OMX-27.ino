@@ -207,7 +207,7 @@ void readPotentimeters(){
 						potVal = analogValues[k];
 								// stepNoteP[8] {notenum,vel,len,p1,p2,p3,p4,p5}
 						if (k < 4){ // only store p-lock value for first 4 knobs
-							stepNoteP[playing][selectedStep].params[k] = analogValues[k];
+							stepNoteP[playingPattern][selectedStep].params[k] = analogValues[k];
 						}
 						sendPots(k, PatternChannel(playingPattern));
 						dirtyDisplay = true;
