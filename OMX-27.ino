@@ -157,10 +157,10 @@ void advanceClock(Micros advance) {
 void resetClocks(){
 	// BPM tempo to step_delay calculation
 	clockInterval = 60000000/(PPQ * clockbpm); // clock interval is in microseconds
-	step_micros = clockInterval * 6; 			// 16th note step in microseconds
+	step_micros = clockInterval * (PPQ/4);			// 16th note step in microseconds
 
-	// 16th notes
-	step_delay = clockInterval * 0.006; // 60000 / clockbpm / 4; 
+  // 16th note step in milliseconds
+  step_delay = step_micros * 0.001;   // clockInterval * 0.001; // 60000 / clockbpm / 4; 
 }
 
 
@@ -1717,7 +1717,7 @@ void playNote(int patternNum) {
 	case STEPTYPE_PLAY:	// regular note on
 		seq_velocity = stepNoteP[playingPattern][seqPos[patternNum]].vel;
 		
-		pendingNoteOffs.insert(stepNoteP[patternNum][seqPos[patternNum]].note, patternChannel[patternNum], micros()+ ( stepNoteP[patternNum][seqPos[patternNum]].len + 1 )*step_micros);
+		pendingNoteOffs.insert(stepNoteP[patternNum][seqPos[patternNum]].note, patternChannel[patternNum], micros()+ ( (stepNoteP[patternNum][seqPos[patternNum]].len + 1 )*step_micros)*.90); // 90% to account for jitter and avoid overlaps
 
 //		MM::sendNoteOn(stepNoteP[patternNum][seqPos[patternNum]].note, seq_velocity, patternChannel[patternNum]);
 
