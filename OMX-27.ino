@@ -104,6 +104,14 @@ int newoctave = octave;
 int transpose = 0;
 int rotationAmt = 0;
 int hline = 8;
+
+// added for step reset automation
+// TODO: these should be on a new page of patterm params
+int reset_step = 3; // which step to "soft reset" on - clock stays
+int reset_freq = 2; // which pattern run to reset on - ie every X reset
+int reset_chnc = 1; // 0 is 0% / 1 is 100% / 2 is 50% chance / 3 is 33% / 4 is 25%
+int reset_iter = 0; // a variable to track current pseudo-iteration
+
 // CV 
 int pitchCV;
 uint8_t RES;
@@ -1012,6 +1020,8 @@ void loop() {
 							patternSettings[playingPattern].channel = constrain(patternSettings[playingPattern].channel + amt, 0, 15);
 						}
 						
+						// Add additional pattern params here? stz
+						
 					} else if (stepRecord && !enc_edit){
 							// SET OCTAVE 
 							newoctave = constrain(octave + amt, -5, 4);
@@ -1585,8 +1595,10 @@ void step_ahead(int patternNum) {
 	
 		} else {
 			seqPos[j]++;
-			if (seqPos[j] >= PatternLength(j))
+			if (seqPos[j] >= PatternLength(j)){
 				seqPos[j] = 0;
+				reset_iter=reset_iter+1; // reset iteration stz may not work
+			}
 
 		}
 	}
@@ -1616,6 +1628,7 @@ void doStep() {
 				if(micros() >= nextStepTime){
 					seqReset();
 					// DO STUFF
+
 					int lastPos = (seqPos[playingPattern]+15) % 16;
 					if (lastNote[playingPattern][lastPos] > 0){
 						step_off(playingPattern, lastPos);
@@ -1638,6 +1651,25 @@ void doStep() {
 			if(playing) {
 				if(micros() >= nextStepTime){
 					seqReset();
+
+					// here's where we can dictate our next step - stz
+					if (reset_freq == reset_iter){
+						for (int k=0; k<8; k++){ // go through all steps for all patterns
+							if (seqPos[k] == reset_step){ // if on reset step
+								if ((rand() % reset_chnc) == 0){ // chance of a soft reset
+									seqPos[k] = 0; // reset pattern
+								}
+							}
+						}
+						reset_iter=0;
+					}
+					/*  This was just a test of the sequence reset routine
+					for (int k=0; k<8; k++){
+						if (seqPos[k] == 3) {
+							seqResetFlag = true;
+						}
+					} */
+
 					lastStepTime = nextStepTime;
 					nextStepTime += step_micros;
 
@@ -1758,7 +1790,7 @@ void playNote(int patternNum) {
 	case STEPTYPE_PLAY:	// regular note on
 		seq_velocity = stepNoteP[playingPattern][seqPos[patternNum]].vel;
 		
-		pendingNoteOffs.insert(stepNoteP[patternNum][seqPos[patternNum]].note, patternChannel[patternNum], micros()+ ( (stepNoteP[patternNum][seqPos[patternNum]].len + 1 )*step_micros)*.80); // 90% to account for jitter and avoid overlaps
+		pendingNoteOffs.insert(stepNoteP[patternNum][seqPos[patternNum]].note, PatternChannel(patternNum), micros()+ ( (stepNoteP[patternNum][seqPos[patternNum]].len + 1 )*step_micros)*.80); // 90% to account for jitter and avoid overlaps
 
 //		MM::sendNoteOn(stepNoteP[patternNum][seqPos[patternNum]].note, seq_velocity, PatternChannel(patternNum));
 
@@ -1818,6 +1850,7 @@ void transposeSeq(int patternNum, int amt) {
 }
 
 void seqReset(){
+
 	if (seqResetFlag) {
 		for (int k=0; k<8; k++){
 			if (patternSettings[k].reverse) { // REVERSE
@@ -2011,6 +2044,7 @@ void initPatterns( void ) {
 		patternSettings[i].channel = i;		// 0 - 15 becomes 1 - 16
 		patternSettings[i].mute = false;
 		patternSettings[i].reverse = false;
+		// TODO: the random step settings might go here
 	}
 }
 
