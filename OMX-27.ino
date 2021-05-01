@@ -106,12 +106,13 @@ int rotationAmt = 0;
 int hline = 8;
 
 // added for step reset automation
-// TODO: these should be on a new page of patterm params
+// TODO: these should be on a new page of adj patterm params
 int reset_step = 3; // which step to "soft reset" on - clock stays
 int reset_freq = 2; // which pattern run to reset on - ie every X reset
 int reset_chnc = 1; // 0 is 0% / 1 is 100% / 2 is 50% chance / 3 is 33% / 4 is 25%
 int reset_iter = 0; // a variable to track current pseudo-iteration
-
+bool reset_cycle = false; // should we auto reset step?
+bool new_cycle = false;
 // CV 
 int pitchCV;
 uint8_t RES;
@@ -1595,12 +1596,24 @@ void step_ahead(int patternNum) {
 	
 		} else {
 			seqPos[j]++;
-			if (seqPos[j] >= PatternLength(j)){
+			if ((seqPos[j] >= PatternLength(j)) || ((reset_cycle) && (seqPos[j] >= reset_step)) ){ // check for length or reset step
 				seqPos[j] = 0;
-				reset_iter=reset_iter+1; // reset iteration stz may not work
+				new_cycle = true; // we're in a new cycle for fwd
 			}
-
 		}
+	}
+
+    
+	// logic to dictate whether to auto reset -- todo: make per pattern rather than global - stz
+	if (new_cycle){ // Are we in a new cycle? check if we need to auto reset
+	  if (reset_iter == reset_freq){
+		reset_cycle = true;
+		reset_iter = 0; // reset iteration for next cycle
+	  } else {
+		reset_cycle = false;
+		reset_iter++; // advance to next reset iteration
+	  }
+	  new_cycle = false; // reset to check for new cycle
 	}
 }
 
@@ -1653,15 +1666,15 @@ void doStep() {
 					seqReset();
 
 					// here's where we can dictate our next step - stz
-					if (reset_freq == reset_iter){
+					// if (reset_freq == reset_iter){ // this logic belongs somewhere else
+					if (reset_cycle){ // if we're in a reset cycle, do step reset logic
 						for (int k=0; k<8; k++){ // go through all steps for all patterns
 							if (seqPos[k] == reset_step){ // if on reset step
 								if ((rand() % reset_chnc) == 0){ // chance of a soft reset
-									seqPos[k] = 0; // reset pattern
+									seqPos[k] = 0; // reset step
 								}
 							}
 						}
-						reset_iter=0;
 					}
 					/*  This was just a test of the sequence reset routine
 					for (int k=0; k<8; k++){
