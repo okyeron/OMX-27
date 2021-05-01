@@ -112,7 +112,7 @@ int reset_freq = 2; // which pattern run to reset on - ie every X reset
 int reset_chnc = 1; // 0 is 0% / 1 is 100% / 2 is 50% chance / 3 is 33% / 4 is 25%
 int reset_iter = 0; // a variable to track current pseudo-iteration
 bool reset_cycle = false; // should we auto reset step?
-bool new_cycle = false;
+bool new_cycle = false; // for determining whether to iterate overall pattern cycle // probably could be reworked
 // CV 
 int pitchCV;
 uint8_t RES;
