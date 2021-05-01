@@ -35,22 +35,29 @@ struct PatternSettings {  // 2 bytes
   bool reverse : 1;
   uint8_t channel : 4;    // 0 - 15 , maps to channels 1 - 16
   bool mute : 1;
+  bool autoreset : 1; // whether autoreset is enabled
+  bool new_cycle : 1; // for determining if cycle count should restart
+  uint8_t reset_iter : 4; // tracking reset iteration if enabled
 };
 
 PatternSettings patternSettings[NUM_PATTERNS] = { 
-  { 15, false, 0, false },
-  { 15, false, 1, false },
-  { 15, false, 2, false },
-  { 15, false, 3, false },
-  { 15, false, 4, false },
-  { 15, false, 5, false },
-  { 15, false, 6, false },
-  { 15, false, 7, false }
+  { 15, false, 0, false, false, false, 3 },
+  { 15, false, 1, false, false, false, 3 },
+  { 15, false, 2, false, false, false, 3 },
+  { 15, false, 3, false, false, false, 3 },
+  { 15, false, 4, false, false, false, 3 },
+  { 15, false, 5, false, false, false, 3 },
+  { 15, false, 6, false, false, false, 3 },
+  { 15, false, 7, false, false, false, 3 }
 };
 
 // Helpers to deal with 1-16 values for pattern length and channel when they're stored as 0-15
 uint8_t PatternLength( int pattern ) {
   return patternSettings[pattern].len + 1;
+}
+// Used for dictating what length to Auto-Reset on, if enabled
+uint8_t PatternAutoResetLength( int pattern ) {
+  return patternSettings[pattern].len - 1; // test using pattern-1 for now TODO: introduce new pattern parameter for this
 }
 
 void SetPatternLength( int pattern, int len ) {

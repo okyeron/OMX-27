@@ -107,8 +107,8 @@ int hline = 8;
 
 // added for step reset automation
 // TODO: these should be on a new page of adj patterm params
-int reset_step = 3; // which step to "soft reset" on - clock stays
-int reset_freq = 2; // which pattern run to reset on - ie every X reset
+int reset_step = 0; // which step to autoreset on - clock stays // was for testing.. now using pattern length -1 until new param
+int reset_freq = 2; // which pattern run to auto reset on - ie every X reset
 int reset_chnc = 1; // 0 is 0% / 1 is 100% / 2 is 50% chance / 3 is 33% / 4 is 25%
 int reset_iter = 0; // a variable to track current pseudo-iteration
 bool reset_cycle = false; // should we auto reset step?
@@ -1589,6 +1589,9 @@ void step_ahead(int patternNum) {
 	// step each pattern ahead one place
 	for (int j=0; j<8; j++){
 		// what direction?
+		reset_step = PatternAutoResetLength(j); // determine current auto reset step
+		// reset_cycle = patternSettings[j].autoreset;
+
 		if (patternSettings[j].reverse) {
 			seqPos[j]--;
 			if (seqPos[j] < 0)
@@ -1596,14 +1599,22 @@ void step_ahead(int patternNum) {
 	
 		} else {
 			seqPos[j]++;
-			if ((seqPos[j] >= PatternLength(j)) || ((reset_cycle) && (seqPos[j] >= reset_step)) ){ // check for length or reset step
+			if ((seqPos[j] >= PatternLength(j)) || ((patternSettings[j].autoreset) && (seqPos[j] >= reset_step)) ){ // check for length or reset step
 				seqPos[j] = 0;
-				new_cycle = true; // we're in a new cycle for fwd
+				if (patternSettings[j].reset_iter == reset_freq){
+					patternSettings[j].autoreset = true;
+					patternSettings[j].reset_iter = 0; // reset iteration for next cycle
+				} else {
+					patternSettings[j].autoreset = false;
+					patternSettings[j].reset_iter++; // advance to next reset iteration
+				}
+				patternSettings[j].new_cycle = false; // reset to check for new cycle
+	
 			}
 		}
 	}
 
-    
+    /*
 	// logic to dictate whether to auto reset -- todo: make per pattern rather than global - stz
 	if (new_cycle){ // Are we in a new cycle? check if we need to auto reset
 	  if (reset_iter == reset_freq){
@@ -1615,6 +1626,7 @@ void step_ahead(int patternNum) {
 	  }
 	  new_cycle = false; // reset to check for new cycle
 	}
+	*/
 }
 
 void step_on(int patternNum){
@@ -1667,11 +1679,12 @@ void doStep() {
 
 					// here's where we can dictate our next step - stz
 					// if (reset_freq == reset_iter){ // this logic belongs somewhere else
-					if (reset_cycle){ // if we're in a reset cycle, do step reset logic
-						for (int k=0; k<8; k++){ // go through all steps for all patterns
+		
+					for (int k=0; k<8; k++){ // go through all steps for all patterns
+						if (patternSettings[k].autoreset){ // if we're in a reset cycle, do step reset logic
 							if (seqPos[k] == reset_step){ // if on reset step
-								if ((rand() % reset_chnc) == 0){ // chance of a soft reset
-									seqPos[k] = 0; // reset step
+								if ((rand() % reset_chnc) == 0){ // chance of a autoreset
+								seqPos[k] = 0; // reset step
 								}
 							}
 						}
