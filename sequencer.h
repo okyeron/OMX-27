@@ -35,20 +35,23 @@ struct PatternSettings {  // 2 bytes
   bool reverse : 1;
   uint8_t channel : 4;    // 0 - 15 , maps to channels 1 - 16
   bool mute : 1;
+  uint8_t autoresetstep : 4;  // step to reset on / 0 = off
   bool autoreset : 1; // whether autoreset is enabled
   bool new_cycle : 1; // for determining if cycle count should restart
-  uint8_t reset_iter : 4; // tracking reset iteration if enabled
+  uint8_t reset_iter : 4; // tracking reset iteration if enabled / ie Freq of autoreset. should be renamed
+  uint8_t autoresetprob : 4; // probability of autoreset - 1 is always and totally random if autoreset is 0
+  uint8_t current_cycle : 4; // tracking current cycle of autoreset counter
 };
 
 PatternSettings patternSettings[NUM_PATTERNS] = { 
-  { 15, false, 0, false, false, false, 3 },
-  { 15, false, 1, false, false, false, 3 },
-  { 15, false, 2, false, false, false, 3 },
-  { 15, false, 3, false, false, false, 3 },
-  { 15, false, 4, false, false, false, 3 },
-  { 15, false, 5, false, false, false, 3 },
-  { 15, false, 6, false, false, false, 3 },
-  { 15, false, 7, false, false, false, 3 }
+  { 15, false, 0, false, 3, false, false, 3, 1, 0 },
+  { 15, false, 1, false, 3, false, false, 3, 1, 0 },
+  { 15, false, 2, false, 3, false, false, 3, 1, 0 },
+  { 15, false, 3, false, 3, false, false, 3, 1, 0 },
+  { 15, false, 4, false, 3, false, false, 3, 1, 0 },
+  { 15, false, 5, false, 3, false, false, 3, 1, 0 },
+  { 15, false, 6, false, 3, false, false, 3, 1, 0 },
+  { 15, false, 7, false, 3, false, false, 3, 1, 0 }
 };
 
 // Helpers to deal with 1-16 values for pattern length and channel when they're stored as 0-15

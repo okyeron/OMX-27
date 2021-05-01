@@ -70,6 +70,8 @@ int nsmode = 4;
 int nsmode2 = 4;
 int nspage = 0;
 int ppmode = 3;
+int ppmode2 = 3;
+int pppage = 1; // introduce multiple patterm parampages
 int patmode = 0;
 int mimode = 0;
 int sqmode = 0;
@@ -749,7 +751,7 @@ void dispNoteSelect2(){
 	dispValBox(stepNoteP[playingPattern][selectedStep].len + 1, 3, lenFlip); 	// NOTE LENGTH
 }
 
-void dispPatternParams(){
+void dispPatternParams(){ // pattern params - stz
 	if (patternParams){
 
 		// values formatting
@@ -798,6 +800,59 @@ void dispPatternParams(){
 		u8g2centerText("LEN", 32, hline-2, 32, 10);
 		u8g2centerText("ROT", 65, hline-2, 32, 10);
 		u8g2centerText("CHAN", 97, hline-2, 32, 10);
+		
+	}
+}
+
+void dispPatternParams2(){ // autoreset pattern params - added by stz
+	if (patternParams){
+
+		// values formatting
+		u8g2_display.setFontMode(1); 
+		u8g2_display.setFont(FONT_VALUES);
+		
+		bool pattFlip = false, stpFlip = false, frqFlip = false, proFlip = false;		
+		switch(ppmode2){
+			case 0:  // STP step to autoreset on - 0 = no auto reset
+				display.fillRect(1*32, 11, 33, 22, WHITE);
+				stpFlip = true;
+				break;
+			case 1: 	// FRQ to autoreset on -- every x cycles
+				display.fillRect(2*32, 11, 33, 22, WHITE);
+				frqFlip = true;
+				break;
+			case 2: 	// PRO probability of resetting 0=NEVER 1=Always 2=50%
+				display.fillRect(3*32, 11, 33, 22, WHITE);
+				proFlip = true;
+				break;
+			default:
+				break;
+		}
+
+	// ValueBoxes
+		dispValBox(playingPattern+1, 0, pattFlip); // PAT
+		dispValBox(patternSettings[playingPattern].autoresetstep, 1, stpFlip); // STEP
+		dispValBox(patternSettings[playingPattern].reset_iter, 2, frqFlip); // FREQUENCY
+		dispValBox(patternSettings[playingPattern].autoresetprob, 3, proFlip); // PROBABILITY
+	
+//		u8g2_display.setFont(FONT_SYMB);
+//		invertColor(rotFlip);
+//		u8g2centerText("\u25C1\u25B7", 2*32, hline*2+6, 32, 22); // "\u00BB\u00AB" // // dice: "\u2685"
+
+		// labels formatting
+		u8g2_display.setFontMode(1);  
+		u8g2_display.setFont(FONT_LABELS);
+		u8g2_display.setCursor(0, 0);	
+		dispGridBoxes();
+		// labels
+		u8g2_display.setForegroundColor(BLACK);
+		u8g2_display.setBackgroundColor(WHITE);
+
+	// ValueBoxLabels
+		u8g2centerText("PTN", 0, hline-2, 32, 10);
+		u8g2centerText("STEP", 32, hline-2, 32, 10);
+		u8g2centerText("FRQ", 65, hline-2, 32, 10);
+		u8g2centerText("PROB", 97, hline-2, 32, 10);
 		
 	}
 }
@@ -1004,21 +1059,33 @@ void loop() {
 				case MODE_S2: // SEQ 2						
 					if (patternParams && !enc_edit){ 		// SEQUENCE EDIT MODE
 						//
-						if (ppmode == 0) { 					// SET LENGTH
-							SetPatternLength( playingPattern, constrain(PatternLength(playingPattern) + amt, 1, 16) );
-						}	
-						if (ppmode == 1) { 					// SET PATTERN ROTATION	
-							int rotator;
-							(u.dir() < 0 ? rotator = -1 : rotator = 1);					
-//							int rotator = constrain(rotcc, (PatternLength(playingPattern))*-1, PatternLength(playingPattern));
-							rotationAmt = rotationAmt + rotator;
-							if (rotationAmt < 16 && rotationAmt > -16 ){
-								rotatePattern(playingPattern, rotator);
+						if (pppage == 0){ // page 1
+							if (ppmode == 0) { 					// SET LENGTH
+								SetPatternLength( playingPattern, constrain(PatternLength(playingPattern) + amt, 1, 16) );
+							}	
+							if (ppmode == 1) { 					// SET PATTERN ROTATION	
+								int rotator;
+								(u.dir() < 0 ? rotator = -1 : rotator = 1);					
+	//							int rotator = constrain(rotcc, (PatternLength(playingPattern))*-1, PatternLength(playingPattern));
+								rotationAmt = rotationAmt + rotator;
+								if (rotationAmt < 16 && rotationAmt > -16 ){
+									rotatePattern(playingPattern, rotator);
+								}
+								rotationAmt = constrain(rotationAmt, (PatternLength(playingPattern)-1)*-1, PatternLength(playingPattern)-1);
+							}	
+							if (ppmode == 2) { 					// SET PATTERN CHANNEL	
+								patternSettings[playingPattern].channel = constrain(patternSettings[playingPattern].channel + amt, 0, 15);
 							}
-							rotationAmt = constrain(rotationAmt, (PatternLength(playingPattern)-1)*-1, PatternLength(playingPattern)-1);
-						}	
-						if (ppmode == 2) { 					// SET PATTERN CHANNEL	
-							patternSettings[playingPattern].channel = constrain(patternSettings[playingPattern].channel + amt, 0, 15);
+						} else if (pppage == 1){
+							if (ppmode2 == 0) { 					// SET AUTO RESET STEP
+								patternSettings[playingPattern].autoresetstep = constrain(patternSettings[playingPattern].autoresetstep + amt, 0, 15);
+							}	
+							if (ppmode2 == 1) { 					// SET AUTO RESET FREQUENCY	
+								patternSettings[playingPattern].reset_iter = constrain(patternSettings[playingPattern].reset_iter + amt, 0, 15); // max every 15 times
+							}	
+							if (ppmode2 == 2) { 					// SET AUTO RESET PROB	
+								patternSettings[playingPattern].autoresetprob = constrain(patternSettings[playingPattern].autoresetprob + amt, 0, 4); // never, 100% - 25%
+							}
 						}
 						
 						// Add additional pattern params here? stz
@@ -1120,7 +1187,8 @@ void loop() {
 					}
 				} else if (patternParams) {
 					// increment ppmode
-					ppmode = (ppmode + 1 ) % 4;
+					// ppmode = (ppmode + 1 ) % 4;
+					ppmode2 = (ppmode2 + 1 ) % 4; // testing ppmode2 .. TODO - need to be able to select page 
 				} else if (stepRecord) {
 					step_ahead(playingPattern);
 					selectedStep = seqPos[playingPattern];
@@ -1534,8 +1602,13 @@ void loop() {
 						}
 					}
 					if (patternParams) {
+						if (pppage == 0){
 						dispPatternParams();
 						dispInfoDialog();
+						} else if (pppage == 1){
+						dispPatternParams2();
+						dispInfoDialog();
+						}
 					}
 					if (stepRecord) {
 						dispStepRec();
@@ -1589,7 +1662,8 @@ void step_ahead(int patternNum) {
 	// step each pattern ahead one place
 	for (int j=0; j<8; j++){
 		// what direction?
-		reset_step = PatternAutoResetLength(j); // determine current auto reset step
+		// reset_step = PatternAutoResetLength(j); // determine current auto reset step
+		// reset_step = patternSettings[j].autoresetstep;
 		// reset_cycle = patternSettings[j].autoreset;
 
 		if (patternSettings[j].reverse) {
@@ -1599,16 +1673,16 @@ void step_ahead(int patternNum) {
 	
 		} else {
 			seqPos[j]++;
-			if ((seqPos[j] >= PatternLength(j)) || ((patternSettings[j].autoreset) && (seqPos[j] >= reset_step)) ){ // check for length or reset step
+			if ((seqPos[j] >= PatternLength(j)) || ((patternSettings[j].autoreset) && (seqPos[j] >= patternSettings[j].autoresetstep)) ){ // check for length or reset step
 				seqPos[j] = 0;
-				if (patternSettings[j].reset_iter == reset_freq){
+				if (patternSettings[j].reset_iter == patternSettings[j].current_cycle){
 					patternSettings[j].autoreset = true;
-					patternSettings[j].reset_iter = 0; // reset iteration for next cycle
+					patternSettings[j].current_cycle = 0; // reset cycle to start new iteration
 				} else {
 					patternSettings[j].autoreset = false;
-					patternSettings[j].reset_iter++; // advance to next reset iteration
+					patternSettings[j].current_cycle++; // advance to next cycle
 				}
-				patternSettings[j].new_cycle = false; // reset to check for new cycle
+				patternSettings[j].new_cycle = false; // reset to check for new cycle // sort of needless now
 	
 			}
 		}
