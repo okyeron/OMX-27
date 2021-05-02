@@ -1661,11 +1661,6 @@ void loop() {
 void step_ahead(int patternNum) {
 	// step each pattern ahead one place
 	for (int j=0; j<8; j++){
-		// what direction?
-		// reset_step = PatternAutoResetLength(j); // determine current auto reset step
-		// reset_step = patternSettings[j].autoresetstep;
-		// reset_cycle = patternSettings[j].autoreset;
-
 		if (patternSettings[j].reverse) {
 			seqPos[j]--;
 			if (seqPos[j] < 0)
@@ -1677,7 +1672,7 @@ void step_ahead(int patternNum) {
 			if ((seqPos[j] >= PatternLength(j)) || ((patternSettings[j].autoreset) && (seqPos[j] >= patternSettings[j].autoresetstep)) ){ // check for length or reset step
 				seqPos[j] = 0;
 				if (patternSettings[j].autoresetfreq == patternSettings[j].current_cycle){ // +1 accounts for human display
-					if ((rand() % patternSettings[j].autoresetprob) == 0){ // chance of doing autoreset
+					if ((rand() % patternSettings[j].autoresetprob) == 0) // chance of doing autoreset
 						patternSettings[j].autoreset = true;
 					patternSettings[j].current_cycle = 1; // reset cycle to start new iteration
 				} else {
@@ -1690,19 +1685,6 @@ void step_ahead(int patternNum) {
 		}
 	}
 
-    /*
-	// logic to dictate whether to auto reset -- todo: make per pattern rather than global - stz
-	if (new_cycle){ // Are we in a new cycle? check if we need to auto reset
-	  if (reset_iter == reset_freq){
-		reset_cycle = true;
-		reset_iter = 0; // reset iteration for next cycle
-	  } else {
-		reset_cycle = false;
-		reset_iter++; // advance to next reset iteration
-	  }
-	  new_cycle = false; // reset to check for new cycle
-	}
-	*/
 }
 
 void step_on(int patternNum){
@@ -1752,26 +1734,6 @@ void doStep() {
 			if(playing) {
 				if(micros() >= nextStepTime){
 					seqReset();
-
-					// here's where we can dictate our next step - stz
-					// if (reset_freq == reset_iter){ // this logic belongs somewhere else
-		
-					/*for (int k=0; k<8; k++){ // go through all steps for all patterns
-						if (patternSettings[k].autoreset){ // if we're in a reset cycle, do step reset logic
-							if (seqPos[k] == patternSettings[k].autoresetstep){ // if on reset step
-								if ((rand() % patternSettings[k].autoresetprob) == 0){ // chance of doing autoreset this needs to be moved! TODO
-								seqPos[k] = 0; // reset step
-								}
-							}
-						}
-					}*/
-					/*  This was just a test of the sequence reset routine
-					for (int k=0; k<8; k++){
-						if (seqPos[k] == 3) {
-							seqResetFlag = true;
-						}
-					} */
-
 					lastStepTime = nextStepTime;
 					nextStepTime += step_micros;
 
