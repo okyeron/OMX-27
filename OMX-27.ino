@@ -109,12 +109,12 @@ int hline = 8;
 
 // added for step reset automation
 // TODO: these should be on a new page of adj patterm params
-int reset_step = 0; // which step to autoreset on - clock stays // was for testing.. now using pattern length -1 until new param
-int reset_freq = 2; // which pattern run to auto reset on - ie every X reset
-int reset_chnc = 1; // 0 is 0% / 1 is 100% / 2 is 50% chance / 3 is 33% / 4 is 25%
-int reset_iter = 0; // a variable to track current pseudo-iteration
-bool reset_cycle = false; // should we auto reset step?
-bool new_cycle = false; // for determining whether to iterate overall pattern cycle // probably could be reworked
+// int reset_step = 0; // which step to autoreset on - clock stays // was for testing.. now using pattern length -1 until new param
+// int reset_freq = 2; // which pattern run to auto reset on - ie every X reset
+// int reset_chnc = 1; // 0 is 0% / 1 is 100% / 2 is 50% chance / 3 is 33% / 4 is 25%
+// int reset_iter = 0; // a variable to track current pseudo-iteration
+// bool reset_cycle = false; // should we auto reset step?
+// bool new_cycle = false; // for determining whether to iterate overall pattern cycle // probably could be reworked
 // CV 
 int pitchCV;
 uint8_t RES;
@@ -832,7 +832,7 @@ void dispPatternParams2(){ // autoreset pattern params - added by stz
 	// ValueBoxes
 		dispValBox(playingPattern+1, 0, pattFlip); // PAT
 		dispValBox(patternSettings[playingPattern].autoresetstep, 1, stpFlip); // STEP
-		dispValBox(patternSettings[playingPattern].reset_iter, 2, frqFlip); // FREQUENCY
+		dispValBox(patternSettings[playingPattern].autoresetfreq, 2, frqFlip); // FREQUENCY
 		dispValBox(patternSettings[playingPattern].autoresetprob, 3, proFlip); // PROBABILITY
 	
 //		u8g2_display.setFont(FONT_SYMB);
@@ -1081,7 +1081,7 @@ void loop() {
 								patternSettings[playingPattern].autoresetstep = constrain(patternSettings[playingPattern].autoresetstep + amt, 0, 15);
 							}	
 							if (ppmode2 == 1) { 					// SET AUTO RESET FREQUENCY	
-								patternSettings[playingPattern].reset_iter = constrain(patternSettings[playingPattern].reset_iter + amt, 0, 15); // max every 15 times
+								patternSettings[playingPattern].autoresetfreq = constrain(patternSettings[playingPattern].autoresetfreq + amt, 0, 15); // max every 15 times
 							}	
 							if (ppmode2 == 2) { 					// SET AUTO RESET PROB	
 								patternSettings[playingPattern].autoresetprob = constrain(patternSettings[playingPattern].autoresetprob + amt, 0, 4); // never, 100% - 25%
@@ -1673,16 +1673,18 @@ void step_ahead(int patternNum) {
 	
 		} else {
 			seqPos[j]++;
+			// should be conditioned on whether we're in S2!!
 			if ((seqPos[j] >= PatternLength(j)) || ((patternSettings[j].autoreset) && (seqPos[j] >= patternSettings[j].autoresetstep)) ){ // check for length or reset step
 				seqPos[j] = 0;
-				if (patternSettings[j].reset_iter == patternSettings[j].current_cycle){
-					patternSettings[j].autoreset = true;
-					patternSettings[j].current_cycle = 0; // reset cycle to start new iteration
+				if (patternSettings[j].autoresetfreq == patternSettings[j].current_cycle){ // +1 accounts for human display
+					if ((rand() % patternSettings[j].autoresetprob) == 0){ // chance of doing autoreset
+						patternSettings[j].autoreset = true;
+					patternSettings[j].current_cycle = 1; // reset cycle to start new iteration
 				} else {
 					patternSettings[j].autoreset = false;
 					patternSettings[j].current_cycle++; // advance to next cycle
 				}
-				patternSettings[j].new_cycle = false; // reset to check for new cycle // sort of needless now
+				//patternSettings[j].new_cycle = false; // reset to check for new cycle // sort of needless now
 	
 			}
 		}
@@ -1754,15 +1756,15 @@ void doStep() {
 					// here's where we can dictate our next step - stz
 					// if (reset_freq == reset_iter){ // this logic belongs somewhere else
 		
-					for (int k=0; k<8; k++){ // go through all steps for all patterns
+					/*for (int k=0; k<8; k++){ // go through all steps for all patterns
 						if (patternSettings[k].autoreset){ // if we're in a reset cycle, do step reset logic
-							if (seqPos[k] == reset_step){ // if on reset step
-								if ((rand() % reset_chnc) == 0){ // chance of a autoreset
+							if (seqPos[k] == patternSettings[k].autoresetstep){ // if on reset step
+								if ((rand() % patternSettings[k].autoresetprob) == 0){ // chance of doing autoreset this needs to be moved! TODO
 								seqPos[k] = 0; // reset step
 								}
 							}
 						}
-					}
+					}*/
 					/*  This was just a test of the sequence reset routine
 					for (int k=0; k<8; k++){
 						if (seqPos[k] == 3) {
