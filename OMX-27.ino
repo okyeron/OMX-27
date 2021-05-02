@@ -71,7 +71,7 @@ int nsmode2 = 4;
 int nspage = 0;
 int ppmode = 3;
 int ppmode2 = 3;
-int pppage = 1; // introduce multiple patterm parampages
+int pppage = 0; // introduce multiple patterm parampages
 int patmode = 0;
 int mimode = 0;
 int sqmode = 0;
@@ -1058,6 +1058,19 @@ void loop() {
 						
 				case MODE_S2: // SEQ 2						
 					if (patternParams && !enc_edit){ 		// SEQUENCE EDIT MODE
+
+						if (ppmode >= 0 && ppmode < 3){ // this may not be necessary??
+//							Serial.print("nsmode ");
+//							Serial.println(nsmode);
+							if(u.dir() < 0){				// RESET PLOCK IF TURN CCW
+								stepNoteP[playingPattern][selectedStep].params[ppmode] = -1; 
+							}
+						}
+						if (ppmode == 3 && ppmode2 == 3) { 	// CHANGE PAGE
+							pppage = constrain(pppage + amt, 0, 1);
+//							Serial.print("pppage ");
+//							Serial.println(pppage);
+						}	
 						//
 						if (pppage == 0){ // page 1
 							if (ppmode == 0) { 					// SET LENGTH
@@ -1188,7 +1201,17 @@ void loop() {
 				} else if (patternParams) {
 					// increment ppmode
 					// ppmode = (ppmode + 1 ) % 4;
-					ppmode2 = (ppmode2 + 1 ) % 4; // testing ppmode2 .. TODO - need to be able to select page 
+
+					// used to work for 1 page:
+					//ppmode2 = (ppmode2 + 1 ) % 4; // testing ppmode2 .. TODO - need to be able to select page 
+
+					// this may not work.. comment and uncomment line above to get back to sort of working with 1 page:
+					if (pppage == 1){
+						// increment nsmode
+						ppmode = (ppmode + 1 ) % 4;
+					}else if (pppage == 0){
+						ppmode2 = (ppmode2 + 1 ) % 4;
+					}
 				} else if (stepRecord) {
 					step_ahead(playingPattern);
 					selectedStep = seqPos[playingPattern];
