@@ -1059,23 +1059,10 @@ void loop() {
 				case MODE_S2: // SEQ 2						
 					if (patternParams && !enc_edit){ 		// SEQUENCE EDIT MODE
 
-						//if (ppmode >= 0 && ppmode < 3){ // this may not be necessary??
-//							Serial.print("nsmode ");
-//							Serial.println(nsmode);
-							//if(u.dir() < 0){				// RESET PLOCK IF TURN CCW
-							//	stepNoteP[playingPattern][selectedStep].params[ppmode] = -1; 
-							//}
-						//}
-						//if (ppmode == 3 && ppmode2 == 3) { 	// CHANGE PAGE
-							//pppage = constrain(pppage + amt, 0, 1);
-//							Serial.print("pppage ");
-//							Serial.println(pppage);
-						//}	
-						//
-						if (pppage == 0){ // page 1
-              if ((ppmode < 0) || (ppmode >2)){   // change page
-                pppage = constrain(pppage + amt, 0, 1);
-              }
+							if (ppmode == 3 && ppmode2 == 3) {  // change page
+								pppage = constrain(pppage + amt, 0, 1);
+							}
+
 							if (ppmode == 0) { 					// SET LENGTH
 								SetPatternLength( playingPattern, constrain(PatternLength(playingPattern) + amt, 1, 16) );
 							}	
@@ -1092,10 +1079,7 @@ void loop() {
 							if (ppmode == 2) { 					// SET PATTERN CHANNEL	
 								patternSettings[playingPattern].channel = constrain(patternSettings[playingPattern].channel + amt, 0, 15);
 							}
-						} else if (pppage == 1){
-              if ((ppmode2 < 0) || (ppmode2 >2)){    // change page
-                pppage = constrain(pppage + amt, 0, 1);
-              }
+
 							if (ppmode2 == 0) { 					// SET AUTO RESET STEP
 								patternSettings[playingPattern].autoresetstep = constrain(patternSettings[playingPattern].autoresetstep + amt, 0, 15);
 							}	
@@ -1105,7 +1089,6 @@ void loop() {
 							if (ppmode2 == 2) { 					// SET AUTO RESET PROB	
 								patternSettings[playingPattern].autoresetprob = constrain(patternSettings[playingPattern].autoresetprob + amt, 0, 4); // never, 100% - 25%
 							}
-						}
 						
 						// Add additional pattern params here? stz
 						
@@ -1212,10 +1195,10 @@ void loop() {
 					//ppmode2 = (ppmode2 + 1 ) % 4; // testing ppmode2 .. TODO - need to be able to select page 
 
 					// this may not work.. comment and uncomment line above to get back to sort of working with 1 page:
-					if (pppage == 1){
+					if (pppage == 0){
 						// increment nsmode
 						ppmode = (ppmode + 1 ) % 4;
-					}else if (pppage == 0){
+					}else if (pppage == 1){
 						ppmode2 = (ppmode2 + 1 ) % 4;
 					}
 				} else if (stepRecord) {
