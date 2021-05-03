@@ -11,7 +11,7 @@ enum OMXMode
 const OMXMode DEFAULT_MODE = MODE_MIDI;
 
 // Increment this when data layout in EEPROM changes. May need to write version upgrade readers when this changes.
-const uint8_t EEPROM_VERSION = 3;
+const uint8_t EEPROM_VERSION = 4;
 
 #define EEPROM_HEADER_ADDRESS	          0
 #define EEPROM_HEADER_SIZE		     32
@@ -45,7 +45,8 @@ const int analogPins[] = {A10,22,21,20,16};	// teensy pins for analog inputs
 						// {23,A10,21,20,16} on test
 						// {A10,22,21,20,16} on 1.0
 
-const int pots[] = {CC1,CC2,CC3,CC4,CC5};			// the MIDI CC (continuous controller) for each analog input
+#define NUM_CC_POTS 5
+int pots[NUM_CC_POTS] = {CC1,CC2,CC3,CC4,CC5};			// the MIDI CC (continuous controller) for each analog input
 
 const int gridh = 32;
 const int gridw = 128;

@@ -270,6 +270,23 @@ void setup() {
     	V_scale = 64; // pow(2,(RES-7)); 4095 max
     analogWrite(CVPITCH_PIN, 0);
 
+	// Load from EEPROM
+	bool bLoaded = loadFromEEPROM();
+	if ( !bLoaded )
+	{
+		// Failed to load due to initialized EEPROM or version mismatch
+		// defaults
+		omxMode = DEFAULT_MODE;
+		playingPattern = 0;
+		midiChannel = 1;
+		pots[0] = CC1;
+		pots[1] = CC2;
+		pots[2] = CC3;
+		pots[3] = CC4;
+		pots[4] = CC5;
+		initPatterns();
+	}
+
   	// Init Display
 	initializeDisplay();
 	u8g2_display.begin(display);
@@ -308,15 +325,6 @@ void setup() {
 	display.display();			
 
 	dirtyDisplay = true;
-
-	bool bLoaded = loadFromEEPROM();
-	if ( !bLoaded )
-	{
-		omxMode = DEFAULT_MODE;
-		playingPattern = 0;
-		midiChannel = 1;
-		initPatterns();
-	}
 }
 
 // ####### END SETUP #######
@@ -2028,7 +2036,11 @@ void saveHeader( void ) {
 	uint8_t unMidiChannel = (uint8_t)( midiChannel - 1 );
 	EEPROM.update( EEPROM_HEADER_ADDRESS + 3, unMidiChannel );
 
-	// 28 bytes remain for header fields
+	for ( int i=0; i<NUM_CC_POTS; i++ ) {
+		EEPROM.update( EEPROM_HEADER_ADDRESS + 4 + i, pots[i] );
+	}
+
+	// 23 bytes remain for header fields
 }
 
 // returns true if the header contained initialized data
@@ -2059,6 +2071,10 @@ bool loadHeader( void ) {
 
 	uint8_t unMidiChannel = EEPROM.read( EEPROM_HEADER_ADDRESS + 3 );
 	midiChannel = unMidiChannel + 1;
+
+	for ( int i=0; i<NUM_CC_POTS; i++ ) {
+		pots[i] = EEPROM.read( EEPROM_HEADER_ADDRESS + 4 + i );
+	}
 
 	return true;
 }
