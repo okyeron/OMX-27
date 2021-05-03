@@ -106,16 +106,6 @@ int newoctave = octave;
 int transpose = 0;
 int rotationAmt = 0;
 int hline = 8;
-
-// added for step reset automation
-// TODO: these should be on a new page of adj patterm params
-// int reset_step = 0; // which step to autoreset on - clock stays // was for testing.. now using pattern length -1 until new param
-// int reset_freq = 2; // which pattern run to auto reset on - ie every X reset
-// int reset_chnc = 1; // 0 is 0% / 1 is 100% / 2 is 50% chance / 3 is 33% / 4 is 25%
-// int reset_iter = 0; // a variable to track current pseudo-iteration
-// bool reset_cycle = false; // should we auto reset step?
-// bool new_cycle = false; // for determining whether to iterate overall pattern cycle // probably could be reworked
-// CV 
 int pitchCV;
 uint8_t RES;
 uint16_t AMAX;
@@ -751,7 +741,7 @@ void dispNoteSelect2(){
 	dispValBox(stepNoteP[playingPattern][selectedStep].len + 1, 3, lenFlip); 	// NOTE LENGTH
 }
 
-void dispPatternParams(){ // pattern params - stz
+void dispPatternParams(){ // Parameter Params: Page 1 (general settings)
 	if (patternParams){
 
 		// values formatting
@@ -804,7 +794,7 @@ void dispPatternParams(){ // pattern params - stz
 	}
 }
 
-void dispPatternParams2(){ // autoreset pattern params - added by stz
+void dispPatternParams2(){ // Parameter Params: Page 2 (auto-step reset settings)
 	if (patternParams){
 
 		// values formatting
@@ -1089,8 +1079,6 @@ void loop() {
 							if (ppmode2 == 2) { 					// SET AUTO RESET PROB	
 								patternSettings[playingPattern].autoresetprob = constrain(patternSettings[playingPattern].autoresetprob + amt, 0, 4); // never, 100% - 25%
 							}
-						
-						// Add additional pattern params here? stz
 						
 					} else if (stepRecord && !enc_edit){
 							// SET OCTAVE 
