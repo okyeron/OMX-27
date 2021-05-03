@@ -1059,20 +1059,23 @@ void loop() {
 				case MODE_S2: // SEQ 2						
 					if (patternParams && !enc_edit){ 		// SEQUENCE EDIT MODE
 
-						if (ppmode >= 0 && ppmode < 3){ // this may not be necessary??
+						//if (ppmode >= 0 && ppmode < 3){ // this may not be necessary??
 //							Serial.print("nsmode ");
 //							Serial.println(nsmode);
-							if(u.dir() < 0){				// RESET PLOCK IF TURN CCW
-								stepNoteP[playingPattern][selectedStep].params[ppmode] = -1; 
-							}
-						}
-						if (ppmode == 3 && ppmode2 == 3) { 	// CHANGE PAGE
-							pppage = constrain(pppage + amt, 0, 1);
+							//if(u.dir() < 0){				// RESET PLOCK IF TURN CCW
+							//	stepNoteP[playingPattern][selectedStep].params[ppmode] = -1; 
+							//}
+						//}
+						//if (ppmode == 3 && ppmode2 == 3) { 	// CHANGE PAGE
+							//pppage = constrain(pppage + amt, 0, 1);
 //							Serial.print("pppage ");
 //							Serial.println(pppage);
-						}	
+						//}	
 						//
 						if (pppage == 0){ // page 1
+              if ((ppmode < 0) || (ppmode >2)){   // change page
+                pppage = constrain(pppage + amt, 0, 1);
+              }
 							if (ppmode == 0) { 					// SET LENGTH
 								SetPatternLength( playingPattern, constrain(PatternLength(playingPattern) + amt, 1, 16) );
 							}	
@@ -1090,6 +1093,9 @@ void loop() {
 								patternSettings[playingPattern].channel = constrain(patternSettings[playingPattern].channel + amt, 0, 15);
 							}
 						} else if (pppage == 1){
+              if ((ppmode2 < 0) || (ppmode2 >2)){    // change page
+                pppage = constrain(pppage + amt, 0, 1);
+              }
 							if (ppmode2 == 0) { 					// SET AUTO RESET STEP
 								patternSettings[playingPattern].autoresetstep = constrain(patternSettings[playingPattern].autoresetstep + amt, 0, 15);
 							}	
