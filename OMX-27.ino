@@ -1052,7 +1052,7 @@ void loop() {
 							if (ppmode == 3 && ppmode2 == 3) {  // change page
 								pppage = constrain(pppage + amt, 0, 1);
 							}
-
+							//TODO: convert to case statement
 							if (ppmode == 0) { 					// SET LENGTH
 								SetPatternLength( playingPattern, constrain(PatternLength(playingPattern) + amt, 1, 16) );
 							}	
@@ -1069,7 +1069,7 @@ void loop() {
 							if (ppmode == 2) { 					// SET PATTERN CHANNEL	
 								patternSettings[playingPattern].channel = constrain(patternSettings[playingPattern].channel + amt, 0, 15);
 							}
-
+							//TODO: convert to case statement
 							if (ppmode2 == 0) { 					// SET AUTO RESET STEP
 								patternSettings[playingPattern].autoresetstep = constrain(patternSettings[playingPattern].autoresetstep + amt, 0, 15);
 							}	
@@ -1663,29 +1663,48 @@ void step_ahead(int patternNum) {
 	for (int j=0; j<8; j++){
 		if (patternSettings[j].reverse) {
 			seqPos[j]--;
-			if (seqPos[j] < 0)
-				seqPos[j] = PatternLength(j)-1;
+			// if (seqPos[j] < 0)
+			auto_reset(j); // determine whether to reset or not based on param settings
+				// seqPos[j] = PatternLength(j)-1;
+
 	
 		} else {
 			seqPos[j]++;
-			// should be conditioned on whether we're in S2!!
-			if ((seqPos[j] >= PatternLength(j)) || ((patternSettings[j].autoreset) && (seqPos[j] >= patternSettings[j].autoresetstep)) ){ // check for length or reset step
-				seqPos[j] = 0;
-				if (patternSettings[j].autoresetfreq == patternSettings[j].current_cycle){ // +1 accounts for human display
-					if ((rand() % patternSettings[j].autoresetprob) == 0) // chance of doing autoreset
-						patternSettings[j].autoreset = true;
-					patternSettings[j].current_cycle = 1; // reset cycle to start new iteration
-				} else {
-					patternSettings[j].autoreset = false;
-					patternSettings[j].current_cycle++; // advance to next cycle
-				}
-				//patternSettings[j].new_cycle = false; // reset to check for new cycle // sort of needless now
-	
-			}
+			auto_reset(j); // determine whether to reset or not based on param settings
 		}
 	}
 
 }
+
+void auto_reset(int p){
+			// should be conditioned on whether we're in S2!!
+			if ( patternSettings[p].reverse || seqPos[p] >= PatternLength(p) || 
+			   (patternSettings[p].autoreset &&  (patternSettings[p].autoresetstep >=1) && (seqPos[p] >= patternSettings[p].autoresetstep)) ||
+			   (patternSettings[p].autoreset &&  (patternSettings[p].autoresetstep <1) && (seqPos[p] > patternSettings[p].rndstep))
+			   ) {
+
+				if (patternSettings[p].reverse) {
+					// TODO: This logic needs work..
+					// if ((seqPos[p] < 0) || ((patternSettings[p].autoreset) && (seqPos[p] <= ((PatternLength(p)-1)-patternSettings[p].autoresetstep)))) // auto reset in REV
+					if (seqPos[p] < 0) // original REV logic
+						seqPos[p] = PatternLength(p)-1; // resets pattern in REV
+				} else {
+					seqPos[p] = 0; // resets pattern in FWD
+				}
+				if (patternSettings[p].autoresetfreq == patternSettings[p].current_cycle){ // reset cycle logic
+					if ((rand() % patternSettings[p].autoresetprob) == 0) // chance of doing autoreset
+						patternSettings[p].autoreset = true;
+					patternSettings[p].current_cycle = 1; // reset cycle to start new iteration
+				} else {
+					patternSettings[p].autoreset = false;
+					patternSettings[p].current_cycle++; // advance to next cycle
+				}
+				patternSettings[p].rndstep = (rand() % PatternLength(p)) + 1; // randomly choose step for next cycle
+				//patternSettings[j].new_cycle = false; // reset to check for new cycle // sort of needless now
+			}
+	// return ()
+}
+
 
 void step_on(int patternNum){
 //		Serial.print(patternNum);
