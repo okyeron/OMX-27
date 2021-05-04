@@ -35,6 +35,7 @@ struct PatternSettings {  // 2 bytes
   bool reverse : 1;
   uint8_t channel : 4;    // 0 - 15 , maps to channels 1 - 16
   bool mute : 1;
+  uint8_t startstep : 4; // step to begin pattern. must be < patternlength-1
   uint8_t autoresetstep : 4;  // step to reset on / 0 = off
   bool autoreset : 1; // whether autoreset is enabled
   uint8_t autoresetfreq : 4; // tracking reset iteration if enabled / ie Freq of autoreset. should be renamed
@@ -44,14 +45,14 @@ struct PatternSettings {  // 2 bytes
 };
 
 PatternSettings patternSettings[NUM_PATTERNS] = { 
-  { 15, false, 0, false, 0, false, 0, 0, 1, 3 },
-  { 15, false, 1, false, 0, false, 0, 0, 1, 3 },
-  { 15, false, 2, false, 0, false, 0, 0, 1, 3 },
-  { 15, false, 3, false, 0, false, 0, 0, 1, 3 },
-  { 15, false, 4, false, 0, false, 0, 0, 1, 3 },
-  { 15, false, 5, false, 0, false, 0, 0, 1, 3 },
-  { 15, false, 6, false, 0, false, 0, 0, 1, 3 },
-  { 15, false, 7, false, 0, false, 0, 0, 1, 3 }
+  { 15, false, 0, false, 0, 0, false, 0, 0, 1, 3 },
+  { 15, false, 1, false, 0, 0, false, 0, 0, 1, 3 },
+  { 15, false, 2, false, 0, 0, false, 0, 0, 1, 3 },
+  { 15, false, 3, false, 0, 0, false, 0, 0, 1, 3 },
+  { 15, false, 4, false, 0, 0, false, 0, 0, 1, 3 },
+  { 15, false, 5, false, 0, 0, false, 0, 0, 1, 3 },
+  { 15, false, 6, false, 0, 0, false, 0, 0, 1, 3 },
+  { 15, false, 7, false, 0, 0, false, 0, 0, 1, 3 }
 };
 
 // Helpers to deal with 1-16 values for pattern length and channel when they're stored as 0-15
