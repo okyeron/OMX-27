@@ -1877,7 +1877,7 @@ void resetPatternDefaults(int patternNum){
 	for (int i = 0; i < NUM_STEPS; i++){
 		// {notenum,vel,len,stepType,{p1,p2,p3,p4,p5}}
 		stepNoteP[patternNum][i].note = patternDefaultNoteMap[patternNum];
-		stepNoteP[patternNum][i].len = 1;
+		stepNoteP[patternNum][i].len = 0;
 	}
 }
 
@@ -1886,7 +1886,7 @@ void clearPattern(int patternNum){
 		// {notenum,vel,len,stepType,{p1,p2,p3,p4,p5}}
 		stepNoteP[patternNum][i].note = patternDefaultNoteMap[patternNum];
 		stepNoteP[patternNum][i].vel = 100;
-		stepNoteP[patternNum][i].len = 1;
+		stepNoteP[patternNum][i].len = 0;
 		stepNoteP[patternNum][i].stepType = STEPTYPE_MUTE;
 		stepNoteP[patternNum][i].params[0] = -1;
 		stepNoteP[patternNum][i].params[1] = -1;
