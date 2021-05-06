@@ -30,7 +30,7 @@ enum StepType {
   STEPTYPE_RESTART
 };
 
-struct PatternSettings {  // 2 bytes
+struct PatternSettings {  // 5 bytes
   uint8_t len : 4;    // 0 - 15, maps to 1 - 16
   uint8_t channel : 4;    // 0 - 15 , maps to channels 1 - 16
   uint8_t startstep : 4; // step to begin pattern. must be < patternlength-1
