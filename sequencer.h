@@ -30,18 +30,18 @@ enum StepType {
   STEPTYPE_RESTART
 };
 
-struct PatternSettings {  // 2 bytes
+struct PatternSettings {  // 5 bytes
   uint8_t len : 4;    // 0 - 15, maps to 1 - 16
-  bool reverse : 1;
   uint8_t channel : 4;    // 0 - 15 , maps to channels 1 - 16
-  bool mute : 1;
   uint8_t startstep : 4; // step to begin pattern. must be < patternlength-1
   uint8_t autoresetstep : 4;  // step to reset on / 0 = off
-  bool autoreset : 1; // whether autoreset is enabled
   uint8_t autoresetfreq : 4; // tracking reset iteration if enabled / ie Freq of autoreset. should be renamed
   uint8_t autoresetprob : 4; // probability of autoreset - 1 is always and totally random if autoreset is 0
   uint8_t current_cycle : 4; // tracking current cycle of autoreset counter / start it at 1
   uint8_t rndstep : 4; // for random autostep functionality
+  bool reverse : 1;
+  bool mute : 1;
+  bool autoreset : 1; // whether autoreset is enabled
 };
 
 PatternSettings patternSettings[NUM_PATTERNS] = { 
@@ -119,3 +119,4 @@ StepNote copyPatternBuffer[NUM_STEPS] = {
   {0, 0, 1, STEPTYPE_MUTE, { -1, -1, -1, -1, -1} },
   {0, 0, 1, STEPTYPE_MUTE, { -1, -1, -1, -1, -1} },
   {0, 0, 1, STEPTYPE_MUTE, { -1, -1, -1, -1, -1} } };
+  
