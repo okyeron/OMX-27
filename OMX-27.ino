@@ -73,6 +73,7 @@ int ppmode = 3;
 int patmode = 0;
 int mimode = 0;
 int sqmode = 0;
+int settingsmode = 0;
 
 
 // VARIABLES / FLAGS
@@ -89,7 +90,7 @@ int selectedStep = 0;
 bool stepSelect = false;
 bool stepRecord = false;
 bool stepDirty = false;
-bool dialogFlags[] = {false, false, false, false, false, false};
+bool dialogFlags[] = {false, false, false, false, false, false, false, false};
 unsigned dialogDuration = 1000;
 
 bool copiedFlag = false;
@@ -162,6 +163,7 @@ void resetClocks(){
 
 	// 16th notes
 	step_delay = clockInterval * 0.006; // 60000 / clockbpm / 4; 
+	blinkInterval = step_delay*2;
 }
 
 
@@ -334,18 +336,34 @@ void setup() {
 // ####### MIDI LEDS #######
 
 void midi_leds() {
+
 	if (midiAUX){
-		strip.setPixelColor(0, MEDRED);
+		strip.setPixelColor(0, HALFWHITE);
 	} else {
 		strip.setPixelColor(0, LEDOFF);
 	}
 	dirtyPixels = true;
 }
 
+void save_leds() {
+	if (msec >= blinkInterval){
+		blinkState = !blinkState;
+		msec = 0;
+	}
+
+	if (blinkState){
+		strip.setPixelColor(0, HALFWHITE);
+	} else {
+		strip.setPixelColor(0, LEDOFF);
+	}
+	dirtyPixels = true;
+}
+
+
 // ####### SEQUENCER LEDS #######
 
 void show_current_step(int patternNum) {
-	blinkInterval = step_delay*2;
+//	blinkInterval = step_delay*2;
 	
 	if (msec >= blinkInterval){
 		blinkState = !blinkState;
@@ -355,7 +373,7 @@ void show_current_step(int patternNum) {
 	// AUX KEY
 
 	if (playing && blinkState){
-		strip.setPixelColor(0, WHITE);
+		strip.setPixelColor(0, LEDWHITE);
 	} else if (noteSelect && blinkState){
 		strip.setPixelColor(0, NOTESEL);
 	} else if (patternParams && blinkState){
@@ -511,6 +529,11 @@ void dispValBox(int v, int16_t n, bool inv){			// n is box 0-3
 	u8g2centerNumber(v, n*32, hline*2+6, 32, 22);
 }
 
+void dispSymbBox(const char* v, int16_t n, bool inv){			// n is box 0-3
+	invertColor(inv);
+	u8g2centerText(v, n*32, hline*2+6, 32, 22);
+}
+
 void dispMidiMode(){
 	u8g2_display.setFontMode(1);  
 	u8g2_display.setFont(FONT_LABELS);
@@ -557,6 +580,53 @@ void dispMidiMode(){
 
 	dispValBox((int)octave+4, 2, octFlip);
 	dispValBox(midiChannel, 3, chFlip);
+	
+}
+
+void dispSettings(){
+	u8g2_display.setFontMode(1);  
+	u8g2_display.setFont(FONT_LABELS);
+	u8g2_display.setCursor(0, 0);	
+	dispGridBoxes();
+	// labels
+	u8g2_display.setForegroundColor(BLACK);
+	u8g2_display.setBackgroundColor(WHITE);
+
+	u8g2centerText("SAVE", 1, hline-2, 32, 10);
+	u8g2centerText("---", 33, hline-2, 32, 10);
+	u8g2centerText("---", 65, hline-2, 32, 10);
+	u8g2centerText("---", 97, hline-2, 32, 10);
+	
+	// value text formatting
+	u8g2_display.setFontMode(1); 
+	u8g2_display.setFont(FONT_VALUES);
+	u8g2_display.setForegroundColor(WHITE);
+	u8g2_display.setBackgroundColor(BLACK);
+	
+
+	bool saveFlip = false;		
+	
+	switch(settingsmode){
+		case 0: 	//
+			break;
+		case 1: 	//
+			display.fillRect(0*32, 10, 33, 22, WHITE);
+			saveFlip = true;
+			break;
+		default:
+			break;
+	}
+
+		u8g2_display.setFont(FONT_SYMB);
+//		// "\u00BB\u00AB" // // dice: "\u2685"
+	const char* setting_glyphs[] = {"\u21e9","\u2611"};
+	
+	// ValueBoxes
+	dispSymbBox(setting_glyphs[0], 0, saveFlip);
+//	dispSymbBox(setting_glyphs[1], 1, false);
+//	dispValBox(midiLastNote, 1, false);
+//	dispValBox((int)octave+4, 2, octFlip);
+//	dispValBox(midiChannel, 3, chFlip);
 	
 }
 
@@ -801,8 +871,8 @@ void dispPatternParams(){
 	}
 }
 
-void dispInfoDialog(){	
-	for (int q=0; q <6; q++){
+void dispInfoDialog(){			// Change this to have dialog text as param?
+	for (int q=0; q <8; q++){ 	// Hard coded array length == bad.
 		if (dialogFlags[q]){ //  copied	
 			// reset timer
 			dialogTimeout = 0;
@@ -816,6 +886,16 @@ void dispInfoDialog(){
 			dialogFlags[q] = false;
 		}
 	}		
+}
+
+void dispSaveQ(){
+	display.clearDisplay();
+	u8g2_display.setFontMode(1);  
+	u8g2_display.setFont(FONT_TENFAT);
+	u8g2_display.setForegroundColor(WHITE);
+	u8g2_display.setBackgroundColor(BLACK);
+	
+	u8g2centerText(infoDialogText[7], 0, 10, 128, 32);
 }
 
 void dispMode(){
@@ -1100,6 +1180,12 @@ void loop() {
 				enc_edit = false;
 			}
 
+			if(omxMode == MODE_SETTINGS) {
+				// switch
+				settingsmode = !settingsmode;
+//				Serial.println(settingsmode);
+			}
+
 			if(omxMode == MODE_MIDI) {
 				// switch midi oct/chan selection
 				mimode = !mimode;
@@ -1169,10 +1255,34 @@ void loop() {
 
 		if (e.bit.EVENT == KEY_JUST_PRESSED && thisKey == 0) {
 			// temp - save whenever the 0 key is pressed
-			saveToEEPROM();
+//			saveToEEPROM();
 		}
 		
 		switch(omxMode) {
+			case MODE_QUICKSAVE:
+				if (e.bit.EVENT == KEY_JUST_PRESSED && thisKey == 0) {
+					dialogFlags[6] = true; // saved flag
+					dirtyDisplay = true;
+					Serial.println("Saving to EEprom");
+					omxMode = DEFAULT_MODE;	
+					saveToEEPROM();
+					omxMode = MODE_QUICKSAVE;	
+				}
+				break;
+				
+			case MODE_SETTINGS: // Global Settings
+				if (e.bit.EVENT == KEY_JUST_PRESSED && thisKey == 0 && settingsmode == 1) {
+					dialogFlags[6] = true; // saved flag
+					dirtyDisplay = true;
+					settingsmode = !settingsmode;
+
+					// temp - save whenever the 0 key is pressed
+					Serial.println("Saving to EEprom");
+					saveToEEPROM();
+				}
+
+				break;
+
 			case MODE_OM: // Organelle
 				// Fall Through		
 				
@@ -1373,7 +1483,6 @@ void loop() {
 				// AUX KEY PRESS EVENTS
 				
 				if (e.bit.EVENT == KEY_JUST_PRESSED && thisKey == 0) {
-					
 					if (noteSelect){
 						if (noteSelection){
 							selectedStep = 0;
@@ -1491,8 +1600,44 @@ void loop() {
 
 
 	// ############### MODES DISPLAY  ##############
-
+	
 	switch(omxMode){
+		case MODE_QUICKSAVE: 						// ############## QUICKSAVE
+			save_leds();				// SHOW LEDS
+			
+			if (!enc_edit) {
+				if (dialogTimeout > dialogDuration && dialogTimeout < dialogDuration + 20) {
+					dirtyDisplay = true;
+					enc_edit = true;
+					dispMode();
+				}
+			}
+			if (dirtyDisplay){			// DISPLAY
+				if (!enc_edit){
+					dispSaveQ();
+					dispInfoDialog();
+				}
+			}
+
+			break;
+			
+		case MODE_SETTINGS: 						// ############## SETTINGS
+			save_leds();				// SHOW LEDS
+			
+			if (!enc_edit) {
+				if (dialogTimeout > dialogDuration && dialogTimeout < dialogDuration + 20) {
+					dirtyDisplay = true;
+				}
+			}
+			if (dirtyDisplay){			// DISPLAY
+				if (!enc_edit){
+					dispSettings();
+					dispInfoDialog();
+				}
+			}
+
+			break;
+			
 		case MODE_OM: 						// ############## ORGANELLE MODE
 			// FALL THROUGH
 

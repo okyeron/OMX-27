@@ -1,6 +1,8 @@
 enum OMXMode
 {
-     MODE_MIDI = 0,
+     MODE_QUICKSAVE = 0,
+     MODE_SETTINGS,
+     MODE_MIDI,
      MODE_S1,
      MODE_S2,
      MODE_OM,
@@ -11,7 +13,7 @@ enum OMXMode
 const OMXMode DEFAULT_MODE = MODE_MIDI;
 
 // Increment this when data layout in EEPROM changes. May need to write version upgrade readers when this changes.
-const uint8_t EEPROM_VERSION = 4;
+const uint8_t EEPROM_VERSION = 6;
 
 #define EEPROM_HEADER_ADDRESS	          0
 #define EEPROM_HEADER_SIZE		     32
@@ -52,8 +54,8 @@ const int gridh = 32;
 const int gridw = 128;
 const int PPQ = 24;
 
-const char* modes[] = {"MI","S1","S2","OM"};
-const char* infoDialogText[] = {"COPIED","PASTED","CLEARED","RESET","FWD >>","<< REV"};
+const char* modes[] = {"SAVE","GS","MI","S1","S2","OM"};
+const char* infoDialogText[] = {"COPIED","PASTED","CLEARED","RESET","FWD >>","<< REV","SAVED","SAVE?"};
 
 // KEY SWITCH ROWS/COLS
 const byte ROWS = 5; //five rows
