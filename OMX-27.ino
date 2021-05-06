@@ -1677,9 +1677,7 @@ void step_ahead(int patternNum) {
 			seqPos[j]--;
 			// if (seqPos[j] < 0)
 			auto_reset(j); // determine whether to reset or not based on param settings
-				// seqPos[j] = PatternLength(j)-1;
-
-	
+				// seqPos[j] = PatternLength(j)-1;	
 		} else {
 			seqPos[j]++;
 			auto_reset(j); // determine whether to reset or not based on param settings
@@ -1693,7 +1691,7 @@ void auto_reset(int p){
 			if ( seqPos[p] >= PatternLength(p) || 
 			   (patternSettings[p].autoreset && (patternSettings[p].autoresetstep > (patternSettings[p].startstep-1) ) && (seqPos[p] >= patternSettings[p].autoresetstep)) ||
 			   (patternSettings[p].autoreset && (patternSettings[p].autoresetstep == 0 ) && (seqPos[p] >= patternSettings[p].rndstep)) ||
-			   (patternSettings[p].reverse && (seqPos[p] < 1)) || // normal reverse reset
+			   (patternSettings[p].reverse && (seqPos[p] < 0)) || // normal reverse reset
 			   (patternSettings[p].reverse && patternSettings[p].autoreset && (seqPos[p] < (patternSettings[p].startstep-1))) ||
 			   (patternSettings[p].reverse && patternSettings[p].autoreset && (patternSettings[p].autoresetstep == 0 ) && (seqPos[p] >= patternSettings[p].rndstep)) 
 			   ) {
