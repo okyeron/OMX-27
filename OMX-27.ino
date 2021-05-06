@@ -1690,16 +1690,22 @@ void step_ahead(int patternNum) {
 
 void auto_reset(int p){
 			// should be conditioned on whether we're in S2!!
-			if ( patternSettings[p].reverse || seqPos[p] >= PatternLength(p) || 
-			   (patternSettings[p].autoreset &&  (patternSettings[p].autoresetstep > (patternSettings[p].startstep-1) ) && (seqPos[p] >= patternSettings[p].autoresetstep)) ||
-			   (patternSettings[p].autoreset &&  (patternSettings[p].autoresetstep == 0 ) && (seqPos[p] >= patternSettings[p].rndstep))
+			if ( seqPos[p] >= PatternLength(p) || 
+			   (patternSettings[p].autoreset && (patternSettings[p].autoresetstep > (patternSettings[p].startstep-1) ) && (seqPos[p] >= patternSettings[p].autoresetstep)) ||
+			   (patternSettings[p].autoreset && (patternSettings[p].autoresetstep == 0 ) && (seqPos[p] >= patternSettings[p].rndstep)) ||
+			   (patternSettings[p].reverse && (seqPos[p] < 1)) || // normal reverse reset
+			   (patternSettings[p].reverse && patternSettings[p].autoreset && (seqPos[p] < (patternSettings[p].startstep-1))) ||
+			   (patternSettings[p].reverse && patternSettings[p].autoreset && (patternSettings[p].autoresetstep == 0 ) && (seqPos[p] >= patternSettings[p].rndstep)) 
 			   ) {
 
 				if (patternSettings[p].reverse) {
 					// TODO: This logic needs work..
-					// if ((seqPos[p] < 0) || ((patternSettings[p].autoreset) && (seqPos[p] <= ((PatternLength(p)-1)-patternSettings[p].autoresetstep)))) // auto reset in REV
-					if (seqPos[p] < (patternSettings[p].startstep-1) ) // original REV logic
-						seqPos[p] = PatternLength(p)-1; // resets pattern in REV
+					if (patternSettings[p].autoreset){
+						seqPos[p] = patternSettings[p].autoresetstep-1; // resets pattern in REV	
+					} else {
+					    seqPos[p] = PatternLength(p)-1;
+					}
+
 				} else {
 					seqPos[p] = (patternSettings[p].startstep-1); // resets pattern in FWD
 				}
