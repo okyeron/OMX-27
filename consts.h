@@ -1,7 +1,7 @@
 // OMX-27 shared constants
 
 // HARDWARE Pin for CVGATE_PIN = 13 on beta1 boards, 22 on test/midi, 23 on 1.0
-#ifdef DEV			
+#if DEV			
 	const int CVGATE_PIN = 13;  
 #elif MIDIONLY
 	const int CVGATE_PIN = 22;  // 13 on beta1 boards, 22 on test, 23 on 1.0

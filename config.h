@@ -43,12 +43,12 @@ const int LED_COUNT = 27;
 
 // POTS/ANALOG INPUTS
 // teensy pins for analog inputs 
-#ifdef DEV			
+#if DEV			
 	const int analogPins[] = {23,22,21,20,16};	// DEV/beta boards
 #elif MIDIONLY
 	const int analogPins[] = {23,A10,21,20,16}  // on MIDI only boards
 #else
-	const int analogPins[] = {A10,22,21,20,16} on 1.0
+	const int analogPins[] = {A10,22,21,20,16} // on 1.0
 #endif
 
 #define NUM_CC_POTS 5
