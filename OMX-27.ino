@@ -854,7 +854,7 @@ void dispPatternParams2(){ // Parameter Params: Page 2 (auto-step reset settings
 	// ValueBoxLabels
 		u8g2centerText("START", 0, hline-2, 32, 10);
 		u8g2centerText("END", 32, hline-2, 32, 10);
-		u8g2centerText("FRQ", 65, hline-2, 32, 10);
+		u8g2centerText("FREQ", 65, hline-2, 32, 10);
 		u8g2centerText("PROB", 97, hline-2, 32, 10);
 		
 	}

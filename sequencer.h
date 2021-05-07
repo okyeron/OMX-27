@@ -119,3 +119,4 @@ StepNote copyPatternBuffer[NUM_STEPS] = {
   {0, 0, 1, STEPTYPE_MUTE, { -1, -1, -1, -1, -1} },
   {0, 0, 1, STEPTYPE_MUTE, { -1, -1, -1, -1, -1} },
   {0, 0, 1, STEPTYPE_MUTE, { -1, -1, -1, -1, -1} } };
+  
