@@ -51,7 +51,7 @@ unsigned long clksDelay;
 elapsedMillis keyPressTime[27] = {0};
 //bool step_dirty[] = {false,false,false,false,false,false,false,false};
 
-volatile unsigned long clockInterval; 
+volatile unsigned long ppqInterval; 
 
 using Micros = unsigned long;
 Micros lastProcessTime;
@@ -153,7 +153,7 @@ void advanceClock(Micros advance) {
 		advance -= timeToNextClock;		
 
 		MM::sendClock();
-		timeToNextClock = clockInterval * (PPQ / 24);
+		timeToNextClock = ppqInterval * (PPQ / 24);
 	}
 	timeToNextClock -= advance;
 }
@@ -162,7 +162,7 @@ void advanceSteps(Micros advance) {
 //	static Micros stepnow = micros();	
 	while (advance >= timeToNextStep) {
 		advance -= timeToNextStep;		
-		timeToNextStep = clockInterval;
+		timeToNextStep = ppqInterval;
 
 		// turn off any expiring notes
 		pendingNoteOffs.play(micros());
@@ -176,11 +176,11 @@ void advanceSteps(Micros advance) {
 
 void resetClocks(){
 	// BPM tempo to step_delay calculation
-	clockInterval = 60000000/(PPQ * clockbpm); 		// clock interval is in microseconds
-	step_micros = clockInterval * (PPQ/4); 			// 16th note step in microseconds
-
-	// 16th note step in milliseconds
-	step_delay = step_micros * 0.001; 	// clockInterval * 0.006; // 60000 / clockbpm / 4; 
+	ppqInterval = 60000000/(PPQ * clockbpm); 		// ppq interval is in microseconds
+	step_micros = ppqInterval * (PPQ/4); 			// 16th note step in microseconds (quarter of quarter note)
+	
+	// 16th note step length in milliseconds
+	step_delay = step_micros * 0.001; 	// ppqInterval * 0.006; // 60000 / clockbpm / 4; 
 }
 
 
@@ -1876,7 +1876,7 @@ void playNote(int patternNum) {
 	case STEPTYPE_PLAY:	// regular note on
 		seq_velocity = stepNoteP[playingPattern][seqPos[patternNum]].vel;
 
-		noteoff_micros = micros() + ( stepNoteP[patternNum][seqPos[patternNum]].len + 1 )*step_micros/2		
+		noteoff_micros = micros() + ( stepNoteP[patternNum][seqPos[patternNum]].len + 1 )* step_micros ;
 		pendingNoteOffs.insert(stepNoteP[patternNum][seqPos[patternNum]].note, PatternChannel(patternNum), noteoff_micros);
 
 //		MM::sendNoteOn(stepNoteP[patternNum][seqPos[patternNum]].note, seq_velocity, PatternChannel(patternNum));
@@ -1884,7 +1884,7 @@ void playNote(int patternNum) {
 
 		// is there swing ? 
 		if ((swing != 0) && (seqPos[patternNum] % 2 == 0)) {
-			noteon_micros = micros() + (clockInterval * swing); // constrain(swing, 0, 5);
+			noteon_micros = micros() + (ppqInterval * swing); // constrain(swing, 0, 5);
 		} else {
 			noteon_micros = micros();
 		}
@@ -2126,7 +2126,7 @@ void initPatterns( void ) {
 		49,
 		51 };
 
-	StepNote stepNote = { 0, 100, 1, STEPTYPE_MUTE, { -1, -1, -1, -1, -1 }  };
+	StepNote stepNote = { 0, 100, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1 }  };
 
 	for ( int i=0; i<NUM_PATTERNS; i++ ) {
 		stepNote.note = initNotes[i];
