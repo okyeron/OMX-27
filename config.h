@@ -1,5 +1,27 @@
+//const int OMX_VERSION = 1.1.0;
 
-const int DEFAULT_MODE = 0;
+enum OMXMode
+{
+     MODE_MIDI = 0,
+     MODE_S1,
+     MODE_S2,
+     MODE_OM,
+
+     NUM_OMX_MODES
+};
+
+const OMXMode DEFAULT_MODE = MODE_MIDI;
+
+// Increment this when data layout in EEPROM changes. May need to write version upgrade readers when this changes.
+const uint8_t EEPROM_VERSION = 4;
+
+#define EEPROM_HEADER_ADDRESS	          0
+#define EEPROM_HEADER_SIZE		     32
+#define EEPROM_PATTERN_ADDRESS 	     32
+#define EEPROM_PATTERN_SIZE		     1024      // 8 * 16 * sizeof(StepNote))
+#define EEPROM_PATTERN_SETTINGS_ADDRESS 1056
+#define EEPROM_PATTERN_SETTINGS_SIZE      16      // 8 * sizeof(PatternSettings)
+// next address 1072
 
 // DEFINE CC NUMBERS FOR POTS // CCS mapped to Organelle Defaults
 const int CC1 = 21;
@@ -19,13 +41,18 @@ const int LED_BRIGHTNESS = 50;
 const int LED_PIN  = 14;
 const int LED_COUNT = 27;
 
-// POTS/ANALOG INPUTS					
-const int analogPins[] = {A10,22,21,20,16};	// teensy pins for analog inputs 
-						// {23,22,21,20,16} on beta
-						// {23,A10,21,20,16} on test
-						// {A10,22,21,20,16} on 1.0
+// POTS/ANALOG INPUTS
+// teensy pins for analog inputs 
+#if DEV			
+	const int analogPins[] = {23,22,21,20,16};	// DEV/beta boards
+#elif MIDIONLY
+	const int analogPins[] = {23,A10,21,20,16}  // on MIDI only boards
+#else
+	const int analogPins[] = {A10,22,21,20,16} // on 1.0
+#endif
 
-const int pots[] = {CC1,CC2,CC3,CC4,CC5};			// the MIDI CC (continuous controller) for each analog input
+#define NUM_CC_POTS 5
+int pots[NUM_CC_POTS] = {CC1,CC2,CC3,CC4,CC5};			// the MIDI CC (continuous controller) for each analog input
 
 const int gridh = 32;
 const int gridw = 128;
