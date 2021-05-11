@@ -11,7 +11,7 @@
 //  Additional code contributions: Matt Boone, wavefiler
 
 // HW_VERSIONS
-#define DEV			0
+#define DEV			1
 #define MIDIONLY	0
 
 
@@ -58,6 +58,8 @@ Micros lastProcessTime;
 Micros nextStepTime;
 Micros lastStepTime;
 volatile unsigned long step_micros; 
+volatile unsigned long noteon_micros;
+volatile unsigned long noteoff_micros;
 
 // ANALOGS
 int analogValues[] = {0,0,0,0,0};		// default values
@@ -123,6 +125,8 @@ unsigned long tempoStartTime, tempoEndTime;
 unsigned long blinkInterval = clockbpm * 2;
 unsigned long longPressInterval = 1500;
 
+float swing = 0;
+
 bool keyState[27] = {false};
 int midiKeyState[27] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
 
@@ -149,24 +153,34 @@ void advanceClock(Micros advance) {
 		advance -= timeToNextClock;		
 
 		MM::sendClock();
-		timeToNextClock = clockInterval;
+		timeToNextClock = clockInterval * (PPQ / 24);
+	}
+	timeToNextClock -= advance;
+}
+void advanceSteps(Micros advance) {
+	static Micros timeToNextStep = 0;
+//	static Micros stepnow = micros();	
+	while (advance >= timeToNextStep) {
+		advance -= timeToNextStep;		
+		timeToNextStep = clockInterval;
 
 		// turn off any expiring notes
 		pendingNoteOffs.play(micros());
 				
-		// turn on any pending notes ?
+		// turn on any pending notes
 		pendingNoteOns.play(micros());
 	}
-	timeToNextClock -= advance;
+	timeToNextStep -= advance;
 }
+
 
 void resetClocks(){
 	// BPM tempo to step_delay calculation
-	clockInterval = 60000000/(PPQ * clockbpm); // clock interval is in microseconds
-	step_micros = clockInterval * 6; 			// 16th note step in microseconds
+	clockInterval = 60000000/(PPQ * clockbpm); 		// clock interval is in microseconds
+	step_micros = clockInterval * (PPQ/4); 			// 16th note step in microseconds
 
-	// 16th notes
-	step_delay = clockInterval * 0.006; // 60000 / clockbpm / 4; 
+	// 16th note step in milliseconds
+	step_delay = step_micros * 0.001; 	// clockInterval * 0.006; // 60000 / clockbpm / 4; 
 }
 
 
@@ -513,28 +527,90 @@ void invertColor(bool flip){
 }
 void dispValBox(int v, int16_t n, bool inv){			// n is box 0-3
 	invertColor(inv);
-	u8g2centerNumber(v, n*32, hline*2+6, 32, 22);
+	u8g2centerNumber(v, n*32, hline*2+5, 32, 22);
 }
 
-void dispMidiMode(){
+void dispSymbBox(const char* v, int16_t n, bool inv){			// n is box 0-3
+	invertColor(inv);
+	u8g2centerText(v, n*32, hline*2+6, 32, 22);
+}
+
+void dispGenericMode(int submode, int selected){
+	const char* legends[4] = {"","","",""};
+	int legendVals[4] = {0,0,0,0};
+	switch(submode){
+		case SUBMODE_MIDI:
+			legends[0] = "OCT";
+			legends[1] = "CH";
+			legends[2] = "CC";
+			legends[3] = "NOTE";
+			legendVals[0] = (int)octave+4;
+			legendVals[1] = midiChannel;
+			legendVals[2] = potVal;
+			legendVals[3] = midiLastNote;
+			break;
+		case SUBMODE_SEQ:
+			legends[0] = "PTN";
+			legends[1] = "LEN";
+			legends[2] = "TRSP";
+			legends[3] = "BPM";
+			legendVals[0] = playingPattern+1;
+			legendVals[1] = PatternLength(playingPattern);
+			legendVals[2] = (int)transpose;
+			legendVals[3] = (int)clockbpm;
+			break;
+		default:
+			break;
+	}
+	
+	
 	u8g2_display.setFontMode(1);  
 	u8g2_display.setFont(FONT_LABELS);
-	u8g2_display.setCursor(0, 0);
-	
+	u8g2_display.setCursor(0, 0);	
 	dispGridBoxes();
 
 	// labels
 	u8g2_display.setForegroundColor(BLACK);
 	u8g2_display.setBackgroundColor(WHITE);
 
-	u8g2_display.setCursor(7, hline);
-	u8g2_display.print("CC");
-	u8g2_display.print(potCC);
+	for (int j= 0; j<4; j++){
+		u8g2centerText(legends[j], (j*32) + 1, hline-2, 32, 10);
+	}
 
-	u8g2centerText("NOTE", 33, hline-2, 32, 10);
-	u8g2centerText("OCT", 65, hline-2, 32, 10);
-	u8g2centerText("CH", 97, hline-2, 32, 10);
+	// value text formatting
+	u8g2_display.setFontMode(1); 
+	u8g2_display.setFont(FONT_VALUES);
+	u8g2_display.setForegroundColor(WHITE);
+	u8g2_display.setBackgroundColor(BLACK);
 	
+
+	switch(selected){
+		case 0: 	//
+			display.fillRect(0*32+2, 11, 29, 21, WHITE);
+			break;
+		case 1: 	//
+			display.fillRect(1*32+2, 11, 29, 21, WHITE);
+			break;
+		default:
+			break;
+	}
+	// ValueBoxes
+	int highlight = false;
+	for (int j = 0; j<4; j++){
+		
+		if (j == selected) {
+			highlight = true;
+		}else{
+			highlight = false;
+		}
+		dispValBox(legendVals[j], j, highlight);
+	}
+
+		
+}
+
+
+void dispMidiMode(){
 	// value text formatting
 	u8g2_display.setFontMode(1); 
 	u8g2_display.setFont(FONT_VALUES);
@@ -549,11 +625,11 @@ void dispMidiMode(){
 	bool chFlip = false;		
 	switch(mimode){
 		case 0: 	//
-//			display.fillRect(2*32, 10, 33, 22, WHITE);
-//			octFlip = true;
+			display.fillRect(2*32, 11, 33, 22, WHITE);
+			octFlip = true;
 			break;
 		case 1: 	//
-			display.fillRect(3*32, 10, 33, 22, WHITE);
+			display.fillRect(3*32, 11, 33, 22, WHITE);
 			chFlip = true;
 			break;
 		default:
@@ -562,6 +638,23 @@ void dispMidiMode(){
 
 	dispValBox((int)octave+4, 2, octFlip);
 	dispValBox(midiChannel, 3, chFlip);
+	dispGridBoxes();
+
+	u8g2_display.setFontMode(1);  
+	u8g2_display.setFont(FONT_LABELS);
+	u8g2_display.setCursor(0, 0);
+	
+	// labels
+	u8g2_display.setForegroundColor(BLACK);
+	u8g2_display.setBackgroundColor(WHITE);
+
+	u8g2_display.setCursor(7, hline);
+	u8g2_display.print("CC");
+	u8g2_display.print(potCC);
+
+	u8g2centerText("NOTE", 33, hline-2, 32, 10);
+	u8g2centerText("OCT", 65, hline-2, 32, 10);
+	u8g2centerText("CH", 97, hline-2, 32, 10);
 	
 }
 
@@ -806,9 +899,9 @@ void dispPatternParams(){
 	}
 }
 
-void dispInfoDialog(){	
-	for (int q=0; q <6; q++){
-		if (dialogFlags[q]){ //  copied	
+void dispInfoDialog(){			
+	for (int key=0; key < NUM_DIALOGS; key++){ 	
+		if (infoDialog[key].state){ 
 			// reset timer
 			dialogTimeout = 0;
 			display.clearDisplay();
@@ -817,8 +910,8 @@ void dispInfoDialog(){
 			u8g2_display.setForegroundColor(WHITE);
 			u8g2_display.setBackgroundColor(BLACK);
 			
-			u8g2centerText(infoDialogText[q], 0, 10, 128, 32);
-			dialogFlags[q] = false;
+			u8g2centerText(infoDialog[key].text, 0, 10, 128, 32);
+			infoDialog[key].state = false;
 		}
 	}		
 }
@@ -914,6 +1007,7 @@ void loop() {
 	if (passed > 0) {
 		if (playing){
 			advanceClock(passed);
+			advanceSteps(passed);
 		}
 	}
 	doStep();
@@ -979,9 +1073,12 @@ void loop() {
 							octave = newoctave;
 						}						
 					} else if (sqmode == 1){ 
-						transposeSeq(playingPattern, amt);
-						int newtransp = transpose + amt;
-						transpose = newtransp;
+						int newswing = constrain(swing + amt, 0, 5);
+						swing = newswing;
+						Serial.println(newswing);
+//						transposeSeq(playingPattern, amt);
+//						int newtransp = transpose + amt;
+//						transpose = newtransp;
 						
 					} else if (sqmode == 0){ 
 						// otherwise set tempo
@@ -1272,17 +1369,20 @@ void loop() {
 							// COPY / PASTE / CLEAR
 							if (keyState[1] && !keyState[2]) { 	
 								copyPattern(playingPattern);
-								dialogFlags[0] = true; // copied flag
+								infoDialog[COPY].state = true; // copied flag
+//								dialogFlags[0] = true; // copied flag
 								Serial.print("copy: ");
 								Serial.println(playingPattern);
 							} else if (!keyState[1] && keyState[2]) {
 								pastePattern(playingPattern);
-								dialogFlags[1] = true; // pasted flag
+								infoDialog[PASTE].state = true; // pasted flag
+//								dialogFlags[1] = true; // pasted flag
 								Serial.print("paste: ");
 								Serial.println(playingPattern);							
 							} else if (keyState[1] && keyState[2]) {
 								clearPattern(playingPattern);
-								dialogFlags[2] = true; // cleared flag
+								infoDialog[CLEAR].state = true; // cleared flag
+//								dialogFlags[2] = true; // cleared flag
 							}
 						
 							dirtyDisplay = true;
@@ -1403,15 +1503,18 @@ void loop() {
 						if (keyState[1] || keyState[2]) { 				// CHECK keyState[] FOR LONG PRESS OF FUNC KEYS
 							if (keyState[1]) {	
 								seqResetFlag = true;					// RESET ALL SEQUENCES TO FIRST/LAST STEP 
-								dialogFlags[3] = true; // reset flag
+								infoDialog[RESET].state = true; // reset flag
+//								dialogFlags[3] = true; // reset flag
 								
 
 							} else if (keyState[2]) { 					// CHANGE PATTERN DIRECTION
 								patternSettings[playingPattern].reverse = !patternSettings[playingPattern].reverse;
 								if (patternSettings[playingPattern].reverse) {
-									dialogFlags[5] = true; // rev direction flag
+									infoDialog[REV].state = true; // rev direction flag
+//									dialogFlags[5] = true; // rev direction flag
 								} else{
-									dialogFlags[4] = true; // fwd direction flag
+									infoDialog[FWD].state = true; // fwd direction flag
+//									dialogFlags[4] = true; // fwd direction flag
 								}
 
 							}
@@ -1508,7 +1611,8 @@ void loop() {
 
 			if (dirtyDisplay){			// DISPLAY
 				if (!enc_edit){
-					dispMidiMode();
+					dispGenericMode(SUBMODE_MIDI, mimode);
+//					dispMidiMode();
 				}
 			}
 			break;
@@ -1771,12 +1875,21 @@ void playNote(int patternNum) {
 
 	case STEPTYPE_PLAY:	// regular note on
 		seq_velocity = stepNoteP[playingPattern][seqPos[patternNum]].vel;
-		
-		pendingNoteOffs.insert(stepNoteP[patternNum][seqPos[patternNum]].note, PatternChannel(patternNum), micros()+ ( stepNoteP[patternNum][seqPos[patternNum]].len + 1 )*step_micros);
+
+		noteoff_micros = micros() + ( stepNoteP[patternNum][seqPos[patternNum]].len + 1 )*step_micros/2		
+		pendingNoteOffs.insert(stepNoteP[patternNum][seqPos[patternNum]].note, PatternChannel(patternNum), noteoff_micros);
 
 //		MM::sendNoteOn(stepNoteP[patternNum][seqPos[patternNum]].note, seq_velocity, PatternChannel(patternNum));
 
-		pendingNoteOns.insert(stepNoteP[patternNum][seqPos[patternNum]].note, seq_velocity, PatternChannel(patternNum), micros() );
+
+		// is there swing ? 
+		if ((swing != 0) && (seqPos[patternNum] % 2 == 0)) {
+			noteon_micros = micros() + (clockInterval * swing); // constrain(swing, 0, 5);
+		} else {
+			noteon_micros = micros();
+		}
+//		pendingNoteOns.insert(stepNoteP[patternNum][seqPos[patternNum]].note, seq_velocity, PatternChannel(patternNum), micros() 
+		pendingNoteOns.insert(stepNoteP[patternNum][seqPos[patternNum]].note, seq_velocity, PatternChannel(patternNum), noteon_micros );
 
 		
 		// send param locks // {notenum,vel,len,p1,p2,p3,p4,p5}

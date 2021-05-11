@@ -10,7 +10,7 @@ enum OMXMode
      NUM_OMX_MODES
 };
 
-const OMXMode DEFAULT_MODE = MODE_MIDI;
+const OMXMode DEFAULT_MODE = MODE_S1;
 
 // Increment this when data layout in EEPROM changes. May need to write version upgrade readers when this changes.
 const uint8_t EEPROM_VERSION = 4;
@@ -56,10 +56,48 @@ int pots[NUM_CC_POTS] = {CC1,CC2,CC3,CC4,CC5};			// the MIDI CC (continuous cont
 
 const int gridh = 32;
 const int gridw = 128;
-const int PPQ = 24;
+const int PPQ = 48;
 
 const char* modes[] = {"MI","S1","S2","OM"};
-const char* infoDialogText[] = {"COPIED","PASTED","CLEARED","RESET","FWD >>","<< REV"};
+const char* infoDialogText[] = {"COPIED","PASTED","CLEARED","RESET","FWD >>","<< REV","SAVED","SAVE?"};
+
+enum Dialogs{
+     COPY = 0,
+     PASTE,
+     CLEAR,
+     RESET,
+     FWD,
+     REV,
+     SAVED,
+     SAVE,
+
+     NUM_DIALOGS
+};
+struct InfoDialogs {
+  const char*  text;
+  bool state;
+};
+InfoDialogs infoDialog[NUM_DIALOGS] = {
+  {"COPIED", false},
+  {"PASTED", false},
+  {"CLEARED", false},
+  {"RESET", false},
+  {"FWD >>", false},
+  {"<< REV", false},
+  {"SAVED", false},
+  {"SAVE?", false}
+};
+
+enum SubModes
+{
+     SUBMODE_MIDI = 0,
+     SUBMODE_SEQ,
+     SUBMODE_NOTESEL,
+     SUBMODE_PATTPARAMS,
+     SUBMODE_STEPREC,
+
+     SUBMODES_COUNT
+};
 
 // KEY SWITCH ROWS/COLS
 const byte ROWS = 5; //five rows
