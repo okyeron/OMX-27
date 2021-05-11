@@ -1770,7 +1770,15 @@ void doStep() {
 				if(micros() >= nextStepTime){
 					seqReset();
 					lastStepTime = nextStepTime;
-					nextStepTime += step_micros;
+					// nextStepTime += step_micros; // original
+					// nextStepTime += ((step_micros-1)*1); // 16th notes - default
+				    // nextStepTime += ((step_micros-1)*16); // whole notes
+					// nextStepTime += ((step_micros-1)*8); // half notes
+					nextStepTime += ((step_micros-1)*4); // quarter notes	
+					// nextStepTime += ((step_micros-1)*2); // 8th notes					
+					// nextStepTime += ((step_micros-1)/2); // 32nd notes
+					//nextStepTime += ((step_micros-1)/4); // 64th notes
+
 
 					// check all patterns for notes to play
 					for (int j=0; j<8; j++){
