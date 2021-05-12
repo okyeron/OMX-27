@@ -1889,8 +1889,8 @@ void playNote(int patternNum) {
 	case STEPTYPE_PLAY:	// regular note on
 		seq_velocity = stepNoteP[playingPattern][seqPos[patternNum]].vel;
 		
-		pendingNoteOffs.insert(stepNoteP[patternNum][seqPos[patternNum]].note, PatternChannel(patternNum), micros()+ ( (stepNoteP[patternNum][seqPos[patternNum]].len + 1 )*step_micros)*.80); // 90% to account for jitter and avoid overlaps
-
+		pendingNoteOffs.insert(stepNoteP[patternNum][seqPos[patternNum]].note, PatternChannel(patternNum), micros()+ ( stepNoteP[patternNum][seqPos[patternNum]].len + 1 )*step_micros);
+		
 //		MM::sendNoteOn(stepNoteP[patternNum][seqPos[patternNum]].note, seq_velocity, PatternChannel(patternNum));
 
 		pendingNoteOns.insert(stepNoteP[patternNum][seqPos[patternNum]].note, seq_velocity, PatternChannel(patternNum), micros() );
@@ -2131,7 +2131,7 @@ void initPatterns( void ) {
 		49,
 		51 };
 
-	StepNote stepNote = { 0, 100, 1, STEPTYPE_MUTE, { -1, -1, -1, -1, -1 }  };
+	StepNote stepNote = { 0, 100, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1 }  };
 
 	for ( int i=0; i<NUM_PATTERNS; i++ ) {
 		stepNote.note = initNotes[i];
