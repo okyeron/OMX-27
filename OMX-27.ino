@@ -1,13 +1,18 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
-// v 1.0.5.2
+// v 1.1.0
 // 
-// Steven Noreyko, March 2021
+// Steven Noreyko, May 2021
 //
 //
 //	Big thanks to: 
 //	John Park and Gerald Stevens for initial testing and feature ideas
 //	mzero for immense amounts of code coaching/assistance
 //	drjohn for support
+//  Additional code contributions: Matt Boone, wavefiler
+
+// HW_VERSIONS
+#define DEV			0
+#define MIDIONLY	0
 
 
 #include <Adafruit_Keypad.h>
@@ -71,7 +76,7 @@ int nsmode2 = 4;
 int nspage = 0;
 int ppmode = 3;
 int ppmode2 = 4;
-int pppage = 0; // introduce multiple patterm parampages
+int pppage = 0;
 int patmode = 0;
 int mimode = 0;
 int sqmode = 0;
@@ -831,16 +836,11 @@ void dispPatternParams2(){ // Parameter Params: Page 2 (auto-step reset settings
 				break;
 		}
 
-	// ValueBoxes
-		// dispValBox(playingPattern+1, 0, pattFlip); // PAT // this is redundant
+		// ValueBoxes
 		dispValBox(patternSettings[playingPattern].startstep, 0, strtFlip); // START		
 		dispValBox(patternSettings[playingPattern].autoresetstep, 1, stpFlip); // RESET - END STEP
 		dispValBox(patternSettings[playingPattern].autoresetfreq, 2, frqFlip); // FREQUENCY
 		dispValBox(patternSettings[playingPattern].autoresetprob, 3, proFlip); // PROBABILITY
-	
-//		u8g2_display.setFont(FONT_SYMB);
-//		invertColor(rotFlip);
-//		u8g2centerText("\u25C1\u25B7", 2*32, hline*2+6, 32, 22); // "\u00BB\u00AB" // // dice: "\u2685"
 
 		// labels formatting
 		u8g2_display.setFontMode(1);  
@@ -851,7 +851,7 @@ void dispPatternParams2(){ // Parameter Params: Page 2 (auto-step reset settings
 		u8g2_display.setForegroundColor(BLACK);
 		u8g2_display.setBackgroundColor(WHITE);
 
-	// ValueBoxLabels
+		// ValueBoxLabels
 		u8g2centerText("START", 0, hline-2, 32, 10);
 		u8g2centerText("END", 32, hline-2, 32, 10);
 		u8g2centerText("FREQ", 65, hline-2, 32, 10);
@@ -1250,9 +1250,10 @@ void loop() {
 			keyState[thisKey] = true;
 		}
 
-		if (e.bit.EVENT == KEY_JUST_PRESSED && thisKey == 0) {
-			// temp - save whenever the 0 key is pressed
+		if (e.bit.EVENT == KEY_JUST_PRESSED && thisKey == 0 && enc_edit) {
+			// temp - save whenever the 0 key is pressed in encoder edit mode
 			saveToEEPROM();
+			Serial.println("EEPROM saved");
 		}
 		
 		switch(omxMode) {
@@ -1716,7 +1717,6 @@ void auto_reset(int p){
 					patternSettings[p].current_cycle++; // advance to next cycle
 				}
 				patternSettings[p].rndstep = (rand() % PatternLength(p)) + 1; // randomly choose step for next cycle
-				//patternSettings[j].new_cycle = false; // reset to check for new cycle // sort of needless now
 			}
 	// return ()
 }
@@ -1897,8 +1897,8 @@ void playNote(int patternNum) {
 	case STEPTYPE_PLAY:	// regular note on
 		seq_velocity = stepNoteP[playingPattern][seqPos[patternNum]].vel;
 		
-		pendingNoteOffs.insert(stepNoteP[patternNum][seqPos[patternNum]].note, PatternChannel(patternNum), micros()+ ( (stepNoteP[patternNum][seqPos[patternNum]].len + 1 )*step_micros)*.80); // 90% to account for jitter and avoid overlaps
-
+		pendingNoteOffs.insert(stepNoteP[patternNum][seqPos[patternNum]].note, PatternChannel(patternNum), micros()+ ( stepNoteP[patternNum][seqPos[patternNum]].len + 1 )*step_micros);
+		
 //		MM::sendNoteOn(stepNoteP[patternNum][seqPos[patternNum]].note, seq_velocity, PatternChannel(patternNum));
 
 		pendingNoteOns.insert(stepNoteP[patternNum][seqPos[patternNum]].note, seq_velocity, PatternChannel(patternNum), micros() );
@@ -2009,7 +2009,7 @@ void resetPatternDefaults(int patternNum){
 	for (int i = 0; i < NUM_STEPS; i++){
 		// {notenum,vel,len,stepType,{p1,p2,p3,p4,p5}}
 		stepNoteP[patternNum][i].note = patternDefaultNoteMap[patternNum];
-		stepNoteP[patternNum][i].len = 1;
+		stepNoteP[patternNum][i].len = 0;
 	}
 }
 
@@ -2018,7 +2018,7 @@ void clearPattern(int patternNum){
 		// {notenum,vel,len,stepType,{p1,p2,p3,p4,p5}}
 		stepNoteP[patternNum][i].note = patternDefaultNoteMap[patternNum];
 		stepNoteP[patternNum][i].vel = 100;
-		stepNoteP[patternNum][i].len = 1;
+		stepNoteP[patternNum][i].len = 0;
 		stepNoteP[patternNum][i].stepType = STEPTYPE_MUTE;
 		stepNoteP[patternNum][i].params[0] = -1;
 		stepNoteP[patternNum][i].params[1] = -1;
@@ -2139,7 +2139,7 @@ void initPatterns( void ) {
 		49,
 		51 };
 
-	StepNote stepNote = { 0, 100, 1, STEPTYPE_MUTE, { -1, -1, -1, -1, -1 }  };
+	StepNote stepNote = { 0, 100, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1 }  };
 
 	for ( int i=0; i<NUM_PATTERNS; i++ ) {
 		stepNote.note = initNotes[i];
@@ -2151,7 +2151,6 @@ void initPatterns( void ) {
 		patternSettings[i].channel = i;		// 0 - 15 becomes 1 - 16
 		patternSettings[i].mute = false;
 		patternSettings[i].reverse = false;
-		// TODO: the random step settings might go here
 	}
 }
 

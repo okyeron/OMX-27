@@ -1,3 +1,5 @@
+//const int OMX_VERSION = 1.1.0;
+
 enum OMXMode
 {
      MODE_MIDI = 0,
@@ -19,7 +21,7 @@ const uint8_t EEPROM_VERSION = 4;
 #define EEPROM_PATTERN_SIZE		     1024      // 8 * 16 * sizeof(StepNote))
 #define EEPROM_PATTERN_SETTINGS_ADDRESS 1056
 #define EEPROM_PATTERN_SETTINGS_SIZE      40      // 8 * sizeof(PatternSettings)
-// next address 1072
+// next address 1096
 
 // DEFINE CC NUMBERS FOR POTS // CCS mapped to Organelle Defaults
 const int CC1 = 21;
@@ -39,11 +41,15 @@ const int LED_BRIGHTNESS = 50;
 const int LED_PIN  = 14;
 const int LED_COUNT = 27;
 
-// POTS/ANALOG INPUTS					
-const int analogPins[] = {A10,22,21,20,16};	// teensy pins for analog inputs 
-						// {23,22,21,20,16} on beta
-						// {23,A10,21,20,16} on test
-						// {A10,22,21,20,16} on 1.0
+// POTS/ANALOG INPUTS
+// teensy pins for analog inputs 
+#if DEV			
+	const int analogPins[] = {23,22,21,20,16};	// DEV/beta boards
+#elif MIDIONLY
+	const int analogPins[] = {23,A10,21,20,16};  // on MIDI only boards
+#else
+	const int analogPins[] = {A10,22,21,20,16}; // on 1.0
+#endif
 
 #define NUM_CC_POTS 5
 int pots[NUM_CC_POTS] = {CC1,CC2,CC3,CC4,CC5};			// the MIDI CC (continuous controller) for each analog input
