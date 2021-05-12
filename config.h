@@ -1,3 +1,5 @@
+//const int OMX_VERSION = 1.1.0;
+
 enum OMXMode
 {
      MODE_MIDI = 0,
@@ -39,11 +41,15 @@ const int LED_BRIGHTNESS = 50;
 const int LED_PIN  = 14;
 const int LED_COUNT = 27;
 
-// POTS/ANALOG INPUTS					
-const int analogPins[] = {A10,22,21,20,16};	// teensy pins for analog inputs 
-						// {23,22,21,20,16} on beta
-						// {23,A10,21,20,16} on test
-						// {A10,22,21,20,16} on 1.0
+// POTS/ANALOG INPUTS
+// teensy pins for analog inputs 
+#if DEV			
+	const int analogPins[] = {23,22,21,20,16};	// DEV/beta boards
+#elif MIDIONLY
+	const int analogPins[] = {23,A10,21,20,16}  // on MIDI only boards
+#else
+	const int analogPins[] = {A10,22,21,20,16} // on 1.0
+#endif
 
 #define NUM_CC_POTS 5
 int pots[NUM_CC_POTS] = {CC1,CC2,CC3,CC4,CC5};			// the MIDI CC (continuous controller) for each analog input

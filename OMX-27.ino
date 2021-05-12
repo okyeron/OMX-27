@@ -1,13 +1,18 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
-// v 1.0.5.2
+// v 1.1.0
 // 
-// Steven Noreyko, March 2021
+// Steven Noreyko, May 2021
 //
 //
 //	Big thanks to: 
 //	John Park and Gerald Stevens for initial testing and feature ideas
 //	mzero for immense amounts of code coaching/assistance
 //	drjohn for support
+//  Additional code contributions: Matt Boone, wavefiler
+
+// HW_VERSIONS
+#define DEV			0
+#define MIDIONLY	0
 
 
 #include <Adafruit_Keypad.h>
@@ -1250,9 +1255,10 @@ void loop() {
 			keyState[thisKey] = true;
 		}
 
-		if (e.bit.EVENT == KEY_JUST_PRESSED && thisKey == 0) {
-			// temp - save whenever the 0 key is pressed
+		if (e.bit.EVENT == KEY_JUST_PRESSED && thisKey == 0 && enc_edit) {
+			// temp - save whenever the 0 key is pressed in encoder edit mode
 			saveToEEPROM();
+			Serial.println("EEPROM saved");
 		}
 		
 		switch(omxMode) {
@@ -2001,7 +2007,7 @@ void resetPatternDefaults(int patternNum){
 	for (int i = 0; i < NUM_STEPS; i++){
 		// {notenum,vel,len,stepType,{p1,p2,p3,p4,p5}}
 		stepNoteP[patternNum][i].note = patternDefaultNoteMap[patternNum];
-		stepNoteP[patternNum][i].len = 1;
+		stepNoteP[patternNum][i].len = 0;
 	}
 }
 
@@ -2010,7 +2016,7 @@ void clearPattern(int patternNum){
 		// {notenum,vel,len,stepType,{p1,p2,p3,p4,p5}}
 		stepNoteP[patternNum][i].note = patternDefaultNoteMap[patternNum];
 		stepNoteP[patternNum][i].vel = 100;
-		stepNoteP[patternNum][i].len = 1;
+		stepNoteP[patternNum][i].len = 0;
 		stepNoteP[patternNum][i].stepType = STEPTYPE_MUTE;
 		stepNoteP[patternNum][i].params[0] = -1;
 		stepNoteP[patternNum][i].params[1] = -1;
