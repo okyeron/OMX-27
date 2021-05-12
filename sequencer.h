@@ -61,7 +61,7 @@ uint8_t PatternLength( int pattern ) {
 }
 // Used for dictating what length to Auto-Reset on, if enabled
 uint8_t PatternAutoResetLength( int pattern ) {
-  return patternSettings[pattern].len - 1; // test using pattern-1 for now TODO: introduce new pattern parameter for this
+  return patternSettings[pattern].len - 1; 
 }
 
 void SetPatternLength( int pattern, int len ) {

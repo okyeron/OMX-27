@@ -76,7 +76,7 @@ int nsmode2 = 4;
 int nspage = 0;
 int ppmode = 3;
 int ppmode2 = 4;
-int pppage = 0; // introduce multiple patterm parampages
+int pppage = 0;
 int patmode = 0;
 int mimode = 0;
 int sqmode = 0;
@@ -836,16 +836,11 @@ void dispPatternParams2(){ // Parameter Params: Page 2 (auto-step reset settings
 				break;
 		}
 
-	// ValueBoxes
-		// dispValBox(playingPattern+1, 0, pattFlip); // PAT // this is redundant
+		// ValueBoxes
 		dispValBox(patternSettings[playingPattern].startstep, 0, strtFlip); // START		
 		dispValBox(patternSettings[playingPattern].autoresetstep, 1, stpFlip); // RESET - END STEP
 		dispValBox(patternSettings[playingPattern].autoresetfreq, 2, frqFlip); // FREQUENCY
 		dispValBox(patternSettings[playingPattern].autoresetprob, 3, proFlip); // PROBABILITY
-	
-//		u8g2_display.setFont(FONT_SYMB);
-//		invertColor(rotFlip);
-//		u8g2centerText("\u25C1\u25B7", 2*32, hline*2+6, 32, 22); // "\u00BB\u00AB" // // dice: "\u2685"
 
 		// labels formatting
 		u8g2_display.setFontMode(1);  
@@ -856,7 +851,7 @@ void dispPatternParams2(){ // Parameter Params: Page 2 (auto-step reset settings
 		u8g2_display.setForegroundColor(BLACK);
 		u8g2_display.setBackgroundColor(WHITE);
 
-	// ValueBoxLabels
+		// ValueBoxLabels
 		u8g2centerText("START", 0, hline-2, 32, 10);
 		u8g2centerText("END", 32, hline-2, 32, 10);
 		u8g2centerText("FREQ", 65, hline-2, 32, 10);
@@ -1722,7 +1717,6 @@ void auto_reset(int p){
 					patternSettings[p].current_cycle++; // advance to next cycle
 				}
 				patternSettings[p].rndstep = (rand() % PatternLength(p)) + 1; // randomly choose step for next cycle
-				//patternSettings[j].new_cycle = false; // reset to check for new cycle // sort of needless now
 			}
 	// return ()
 }
@@ -2149,7 +2143,6 @@ void initPatterns( void ) {
 		patternSettings[i].channel = i;		// 0 - 15 becomes 1 - 16
 		patternSettings[i].mute = false;
 		patternSettings[i].reverse = false;
-		// TODO: the random step settings might go here
 	}
 }
 
