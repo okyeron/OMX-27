@@ -45,14 +45,14 @@ struct PatternSettings {  // 5 bytes
 };
 
 PatternSettings patternSettings[NUM_PATTERNS] = { 
-  { 15, false, 0, false, 0, 0, false, 0, 0, 1, 3 },
-  { 15, false, 1, false, 0, 0, false, 0, 0, 1, 3 },
-  { 15, false, 2, false, 0, 0, false, 0, 0, 1, 3 },
-  { 15, false, 3, false, 0, 0, false, 0, 0, 1, 3 },
-  { 15, false, 4, false, 0, 0, false, 0, 0, 1, 3 },
-  { 15, false, 5, false, 0, 0, false, 0, 0, 1, 3 },
-  { 15, false, 6, false, 0, 0, false, 0, 0, 1, 3 },
-  { 15, false, 7, false, 0, 0, false, 0, 0, 1, 3 }
+  { 15, 0, 0, 0, 0, 0, 1, 3, false, false, false },
+  { 15, 1, 0, 0, 0, 0, 1, 3, false, false, false },
+  { 15, 2, 0, 0, 0, 0, 1, 3, false, false, false },
+  { 15, 3, 0, 0, 0, 0, 1, 3, false, false, false },
+  { 15, 4, 0, 0, 0, 0, 1, 3, false, false, false },
+  { 15, 5, 0, 0, 0, 0, 1, 3, false, false, false },
+  { 15, 6, 0, 0, 0, 0, 1, 3, false, false, false },
+  { 15, 7, 0, 0, 0, 0, 1, 3, false, false, false }
 };
 
 // Helpers to deal with 1-16 values for pattern length and channel when they're stored as 0-15

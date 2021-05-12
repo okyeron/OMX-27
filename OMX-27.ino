@@ -837,9 +837,9 @@ void dispPatternParams2(){ // Parameter Params: Page 2 (auto-step reset settings
 		}
 
 		// ValueBoxes
-		dispValBox(patternSettings[playingPattern].startstep, 0, strtFlip); // START		
-		dispValBox(patternSettings[playingPattern].autoresetstep, 1, stpFlip); // RESET - END STEP
-		dispValBox(patternSettings[playingPattern].autoresetfreq, 2, frqFlip); // FREQUENCY
+		dispValBox(patternSettings[playingPattern].startstep + 1, 0, strtFlip); // START		
+		dispValBox(patternSettings[playingPattern].autoresetstep + 1, 1, stpFlip); // RESET - END STEP
+		dispValBox(patternSettings[playingPattern].autoresetfreq + 1, 2, frqFlip); // FREQUENCY
 		dispValBox(patternSettings[playingPattern].autoresetprob, 3, proFlip); // PROBABILITY
 
 		// labels formatting
@@ -1085,14 +1085,15 @@ void loop() {
 							}
 							//TODO: convert to case statement
 							if (ppmode2 == 0) { 					// SET AUTO START STEP
-								patternSettings[playingPattern].startstep = constrain(patternSettings[playingPattern].startstep + amt, 1, patternSettings[playingPattern].len+1);
+								patternSettings[playingPattern].startstep = constrain(patternSettings[playingPattern].startstep + amt, 0, patternSettings[playingPattern].len);
 								//patternSettings[playingPattern].startstep--;
 							}	
 							if (ppmode2 == 1) { 					// SET AUTO RESET STEP
-								patternSettings[playingPattern].autoresetstep = constrain(patternSettings[playingPattern].autoresetstep + amt, 0, patternSettings[playingPattern].len+1);
+								int tempresetstep = patternSettings[playingPattern].autoresetstep + amt;
+								patternSettings[playingPattern].autoresetstep = constrain(tempresetstep, 0, patternSettings[playingPattern].len);
 							}	
 							if (ppmode2 == 2) { 					// SET AUTO RESET FREQUENCY	
-								patternSettings[playingPattern].autoresetfreq = constrain(patternSettings[playingPattern].autoresetfreq + amt, 0, 16); // max every 16 times
+								patternSettings[playingPattern].autoresetfreq = constrain(patternSettings[playingPattern].autoresetfreq + amt, 0, 15); // max every 16 times
 							}	
 							if (ppmode2 == 3) { 					// SET AUTO RESET PROB	
 								patternSettings[playingPattern].autoresetprob = constrain(patternSettings[playingPattern].autoresetprob + amt, 0, 4); // never, 100% - 25%
