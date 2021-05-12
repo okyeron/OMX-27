@@ -2013,7 +2013,7 @@ void initPatterns( void ) {
 		49,
 		51 };
 
-	StepNote stepNote = { 0, 100, 1, STEPTYPE_MUTE, { -1, -1, -1, -1, -1 }  };
+	StepNote stepNote = { 0, 100, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1 }  };
 
 	for ( int i=0; i<NUM_PATTERNS; i++ ) {
 		stepNote.note = initNotes[i];
