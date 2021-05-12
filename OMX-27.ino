@@ -1,5 +1,5 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
-// v 1.1.0
+// v 1.1.1
 // 
 // Steven Noreyko, May 2021
 //
@@ -126,6 +126,7 @@ unsigned long blinkInterval = clockbpm * 2;
 unsigned long longPressInterval = 1500;
 
 float swing = 0;
+float maxswing = 5;
 
 bool keyState[27] = {false};
 int midiKeyState[27] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
@@ -1073,7 +1074,7 @@ void loop() {
 							octave = newoctave;
 						}						
 					} else if (sqmode == 1){ 
-						int newswing = constrain(swing + amt, 0, 5);
+						int newswing = constrain(swing + amt, 0, maxswing);
 						swing = newswing;
 						Serial.println(newswing);
 //						transposeSeq(playingPattern, amt);
@@ -1884,7 +1885,8 @@ void playNote(int patternNum) {
 
 		// is there swing ? 
 		if ((swing != 0) && (seqPos[patternNum] % 2 == 0)) {
-			noteon_micros = micros() + (ppqInterval * swing); // constrain(swing, 0, 5);
+			noteon_micros = micros() + (ppqInterval/2 * swing); // constrain(swing, 0, 5);
+//			Serial.println(ppqInterval/2 * swing);
 		} else {
 			noteon_micros = micros();
 		}
