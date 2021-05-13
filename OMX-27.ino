@@ -838,8 +838,8 @@ void dispPatternParams2(){ // Parameter Params: Page 2 (auto-step reset settings
 
 		// ValueBoxes
 		dispValBox(patternSettings[playingPattern].startstep + 1, 0, strtFlip); // START		
-		dispValBox(patternSettings[playingPattern].autoresetstep + 1, 1, stpFlip); // RESET - END STEP
-		dispValBox(patternSettings[playingPattern].autoresetfreq + 1, 2, frqFlip); // FREQUENCY
+		dispValBox(patternSettings[playingPattern].autoresetstep, 1, stpFlip); // RESET - END STEP
+		dispValBox(patternSettings[playingPattern].autoresetfreq, 2, frqFlip); // FREQUENCY
 		dispValBox(patternSettings[playingPattern].autoresetprob, 3, proFlip); // PROBABILITY
 
 		// labels formatting
@@ -1691,10 +1691,10 @@ void step_ahead(int patternNum) {
 void auto_reset(int p){
 			// should be conditioned on whether we're in S2!!
 			if ( seqPos[p] >= PatternLength(p) || 
-			   (patternSettings[p].autoreset && (patternSettings[p].autoresetstep > (patternSettings[p].startstep-1) ) && (seqPos[p] >= patternSettings[p].autoresetstep)) ||
+			   (patternSettings[p].autoreset && (patternSettings[p].autoresetstep > (patternSettings[p].startstep) ) && (seqPos[p] >= patternSettings[p].autoresetstep)) ||
 			   (patternSettings[p].autoreset && (patternSettings[p].autoresetstep == 0 ) && (seqPos[p] >= patternSettings[p].rndstep)) ||
 			   (patternSettings[p].reverse && (seqPos[p] < 0)) || // normal reverse reset
-			   (patternSettings[p].reverse && patternSettings[p].autoreset && (seqPos[p] < (patternSettings[p].startstep-1))) ||
+			   (patternSettings[p].reverse && patternSettings[p].autoreset && (seqPos[p] < (patternSettings[p].startstep))) ||
 			   (patternSettings[p].reverse && patternSettings[p].autoreset && (patternSettings[p].autoresetstep == 0 ) && (seqPos[p] >= patternSettings[p].rndstep)) 
 			   ) {
 
@@ -1707,7 +1707,7 @@ void auto_reset(int p){
 					}
 
 				} else {
-					seqPos[p] = (patternSettings[p].startstep-1); // resets pattern in FWD
+					seqPos[p] = (patternSettings[p].startstep); // resets pattern in FWD
 				}
 				if (patternSettings[p].autoresetfreq == patternSettings[p].current_cycle){ // reset cycle logic
 					if ((rand() % patternSettings[p].autoresetprob) == 0) // chance of doing autoreset
@@ -2144,6 +2144,13 @@ void initPatterns( void ) {
 		patternSettings[i].channel = i;		// 0 - 15 becomes 1 - 16
 		patternSettings[i].mute = false;
 		patternSettings[i].reverse = false;
+		patternSettings[i].startstep = 0;
+        patternSettings[i].autoresetstep = 0;
+        patternSettings[i].autoresetfreq = 0;
+        patternSettings[i].autoresetprob = 0;
+        patternSettings[i].current_cycle = 1;
+        patternSettings[i].rndstep = 3;
+        patternSettings[i].autoreset = false;
 	}
 }
 
