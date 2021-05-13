@@ -1096,7 +1096,7 @@ void loop() {
 								patternSettings[playingPattern].autoresetfreq = constrain(patternSettings[playingPattern].autoresetfreq + amt, 0, 15); // max every 16 times
 							}	
 							if (ppmode2 == 3) { 					// SET AUTO RESET PROB	
-								patternSettings[playingPattern].autoresetprob = constrain(patternSettings[playingPattern].autoresetprob + amt, 0, 4); // never, 100% - 25%
+								patternSettings[playingPattern].autoresetprob = constrain(patternSettings[playingPattern].autoresetprob + amt, 0, 3); // never, 100% - 33%
 							}
 						
 					} else if (stepRecord && !enc_edit){
@@ -1710,8 +1710,12 @@ void auto_reset(int p){
 					seqPos[p] = (patternSettings[p].startstep); // resets pattern in FWD
 				}
 				if (patternSettings[p].autoresetfreq == patternSettings[p].current_cycle){ // reset cycle logic
-					if ((rand() % patternSettings[p].autoresetprob) == 0) // chance of doing autoreset
+					if ((rand() % patternSettings[p].autoresetprob) == 0){ 
+						// chance of doing autoreset
 						patternSettings[p].autoreset = true;
+					} else {
+						patternSettings[p].autoreset = false;
+					}
 					patternSettings[p].current_cycle = 1; // reset cycle to start new iteration
 				} else {
 					patternSettings[p].autoreset = false;
