@@ -1090,7 +1090,7 @@ void loop() {
 							}	
 							if (ppmode2 == 1) { 					// SET AUTO RESET STEP
 								int tempresetstep = patternSettings[playingPattern].autoresetstep + amt;
-								patternSettings[playingPattern].autoresetstep = constrain(tempresetstep, 0, patternSettings[playingPattern].len);
+								patternSettings[playingPattern].autoresetstep = constrain(tempresetstep, 0, patternSettings[playingPattern].len+1);
 							}	
 							if (ppmode2 == 2) { 					// SET AUTO RESET FREQUENCY	
 								patternSettings[playingPattern].autoresetfreq = constrain(patternSettings[playingPattern].autoresetfreq + amt, 0, 15); // max every 16 times
@@ -1701,9 +1701,9 @@ void auto_reset(int p){
 				if (patternSettings[p].reverse) {
 					// TODO: This logic needs work..
 					if (patternSettings[p].autoreset){
-						seqPos[p] = patternSettings[p].autoresetstep-1; // resets pattern in REV	
+						seqPos[p] = patternSettings[p].autoresetstep; // resets pattern in REV	
 					} else {
-					    seqPos[p] = PatternLength(p)-1;
+					    seqPos[p] = PatternLength(p);
 					}
 
 				} else {
