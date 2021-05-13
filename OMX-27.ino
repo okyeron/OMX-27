@@ -125,8 +125,8 @@ unsigned long tempoStartTime, tempoEndTime;
 unsigned long blinkInterval = clockbpm * 2;
 unsigned long longPressInterval = 1500;
 
-float swing = 0;
-float maxswing = 5;
+uint8_t swing = 0;
+uint8_t maxswing = 5;
 
 bool keyState[27] = {false};
 int midiKeyState[27] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
@@ -1076,7 +1076,9 @@ void loop() {
 					} else if (sqmode == 1){ 
 						int newswing = constrain(swing + amt, 0, maxswing);
 						swing = newswing;
-						Serial.println(newswing);
+						patternSettings[playingPattern].swing = newswing;
+//						Serial.println(patternSettings[playingPattern].swing);
+						
 //						transposeSeq(playingPattern, amt);
 //						int newtransp = transpose + amt;
 //						transpose = newtransp;
@@ -1884,7 +1886,13 @@ void playNote(int patternNum) {
 
 
 		// is there swing ? 
-		if ((swing != 0) && (seqPos[patternNum] % 2 == 0)) {
+//		if ((swing != 0) && (seqPos[patternNum] % 2 == 0)) {
+//Serial.print("swing:");
+//Serial.print(patternNum);
+//Serial.print(":");
+//Serial.println(patternSettings[patternNum].swing);
+
+		if ((patternSettings[patternNum].swing != 0) && (seqPos[patternNum] % 2 == 0)) {
 			noteon_micros = micros() + (ppqInterval/2 * swing); // constrain(swing, 0, 5);
 //			Serial.println(ppqInterval/2 * swing);
 		} else {
@@ -2140,6 +2148,7 @@ void initPatterns( void ) {
 		patternSettings[i].channel = i;		// 0 - 15 becomes 1 - 16
 		patternSettings[i].mute = false;
 		patternSettings[i].reverse = false;
+		patternSettings[i].swing = 0;
 	}
 }
 
