@@ -11,7 +11,7 @@
 //  Additional code contributions: Matt Boone, wavefiler
 
 // HW_VERSIONS
-#define DEV			1
+#define DEV			0
 #define MIDIONLY	0
 
 
@@ -78,8 +78,8 @@ int nsmode2 = 4;
 int nspage = 0;
 int ppmode = 3;
 int patmode = 0;
-int mimode = 0;
-int sqmode = 0;
+int mimode = 4;
+int sqmode = 4;
 
 
 // VARIABLES / FLAGS
@@ -553,11 +553,11 @@ void dispGenericMode(int submode, int selected){
 		case SUBMODE_SEQ:
 			legends[0] = "PTN";
 			legends[1] = "LEN";
-			legends[2] = "TRSP";
+			legends[2] = "SWNG"; //"TRSP";
 			legends[3] = "BPM";
 			legendVals[0] = playingPattern+1;
 			legendVals[1] = PatternLength(playingPattern);
-			legendVals[2] = (int)transpose;
+			legendVals[2] = (int)swing; //(int)transpose;
 			legendVals[3] = (int)clockbpm;
 			break;
 		default:
@@ -586,11 +586,19 @@ void dispGenericMode(int submode, int selected){
 	
 
 	switch(selected){
-		case 0: 	//
+		case 0: 	
 			display.fillRect(0*32+2, 11, 29, 21, WHITE);
 			break;
 		case 1: 	//
 			display.fillRect(1*32+2, 11, 29, 21, WHITE);
+			break;
+		case 2: 	//
+			display.fillRect(2*32+2, 11, 29, 21, WHITE);
+			break;
+		case 3: 	//
+			display.fillRect(3*32+2, 11, 29, 21, WHITE);
+			break;
+		case 4: 	//
 			break;
 		default:
 			break;
@@ -1073,7 +1081,7 @@ void loop() {
 						if (newoctave != octave){
 							octave = newoctave;
 						}						
-					} else if (sqmode == 1){ 
+					} else if (sqmode == 2){ 
 						int newswing = constrain(swing + amt, 0, maxswing);
 						swing = newswing;
 						patternSettings[playingPattern].swing = newswing;
@@ -1083,7 +1091,7 @@ void loop() {
 //						int newtransp = transpose + amt;
 //						transpose = newtransp;
 						
-					} else if (sqmode == 0){ 
+					} else if (sqmode == 3){ 
 						// otherwise set tempo
 						newtempo = constrain(clockbpm + amt, 40, 300);
 						if (newtempo != clockbpm){
@@ -1207,7 +1215,8 @@ void loop() {
 
 			if(omxMode == MODE_MIDI) {
 				// switch midi oct/chan selection
-				mimode = !mimode;
+				mimode = (mimode + 1 ) % 5;
+//				mimode = !mimode;
 			}
 			if(omxMode == MODE_OM) {
 				MM::sendControlChange(CC_OM1,100,midiChannel);									
@@ -1228,7 +1237,8 @@ void loop() {
 					selectedStep = seqPos[playingPattern];
 					
 				} else {
-					sqmode = !sqmode;
+					sqmode = (sqmode + 1 ) % 5;
+//					sqmode = !sqmode;
 					//patmode = !patmode;					
 				}
 			}
@@ -1633,7 +1643,8 @@ void loop() {
 			if (dirtyDisplay){			// DISPLAY
 				if (!enc_edit){
 					if (!noteSelect and !patternParams and !stepRecord){
-						dispSeqMode1();
+						dispGenericMode(SUBMODE_SEQ, sqmode);
+//						dispSeqMode1();
 						dispInfoDialog();
 					}				
 					if (noteSelect) {
