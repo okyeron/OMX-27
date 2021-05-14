@@ -1709,7 +1709,7 @@ void auto_reset(int p){
 					seqPos[p] = (patternSettings[p].startstep); // resets pattern in FWD
 				}
 				if (patternSettings[p].autoresetfreq == patternSettings[p].current_cycle){ // reset cycle logic
-					if ((rand() % patternSettings[p].autoresetprob) == 0){ 
+					if (probResult(patternSettings[p].autoresetprob)){ 
 						// chance of doing autoreset
 						patternSettings[p].autoreset = true;
 					} else {
@@ -1723,6 +1723,17 @@ void auto_reset(int p){
 				patternSettings[p].rndstep = (rand() % PatternLength(p)) + 1; // randomly choose step for next cycle
 			}
 	// return ()
+}
+
+bool probResult(int probSetting){
+	if (probSetting == 0){
+		return false;
+	}
+	if((rand() % probSetting)==0){
+		return true;
+	} else {
+		return false;
+	}
 }
 
 
