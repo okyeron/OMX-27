@@ -1699,11 +1699,10 @@ void auto_reset(int p){
 			   ) {
 
 				if (patternSettings[p].reverse) {
-					// TODO: This logic needs work..
 					if (patternSettings[p].autoreset){
 						seqPos[p] = patternSettings[p].autoresetstep-1; // resets pattern in REV	
 					} else {
-					    seqPos[p] = PatternLength(p);
+					    seqPos[p] = (PatternLength(p)-patternSettings[p].startstep)-1;
 					}
 
 				} else {
