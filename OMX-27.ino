@@ -76,7 +76,7 @@ OMXMode newmode = DEFAULT_MODE;
 int nsmode = 4;
 int nsmode2 = 4;
 int nspage = 0;
-int ppmode = 3;
+int ppmode = 4;
 int patmode = 0;
 int mimode = 4;
 int sqmode = 4;
@@ -539,6 +539,7 @@ void dispSymbBox(const char* v, int16_t n, bool inv){			// n is box 0-3
 void dispGenericMode(int submode, int selected){
 	const char* legends[4] = {"","","",""};
 	int legendVals[4] = {0,0,0,0};
+	const char* legendText[4] = {"","","",""};
 	switch(submode){
 		case SUBMODE_MIDI:
 			legends[0] = "OCT";
@@ -560,6 +561,54 @@ void dispGenericMode(int submode, int selected){
 			legendVals[2] = (int)swing; //(int)transpose;
 			legendVals[3] = (int)clockbpm;
 			break;
+		case SUBMODE_PATTPARAMS:
+			legends[0] = "PTN";
+			legends[1] = "LEN";
+			legends[2] = "ROT";
+			legends[3] = "CHAN";
+			legendVals[0] = playingPattern+1;
+			legendVals[1] = PatternLength(playingPattern);
+			legendVals[2] = rotationAmt; //(int)transpose;
+			legendVals[3] = PatternChannel(playingPattern);
+			break;
+		case SUBMODE_STEPREC:
+			legends[0] = "PTN";
+			legends[1] = "STEP";
+			legends[2] = "NOTE";
+			legends[3] = "OCT";
+			legendVals[0] = playingPattern+1;
+			legendVals[1] = seqPos[playingPattern]+1;
+			legendVals[2] = stepNoteP[playingPattern][selectedStep].note; //(int)transpose;
+			legendVals[3] = (int)octave+4;
+			break;
+		case SUBMODE_NOTESEL:
+			legends[0] = "L-1";
+			legends[1] = "L-2";
+			legends[2] = "L-3";
+			legends[3] = "L-4";
+			for (int j=0; j<4; j++){
+
+				int stepNoteParam = stepNoteP[playingPattern][selectedStep].params[j];
+				if (stepNoteParam > -1){
+					legendVals[j] = stepNoteParam;
+				} else {
+					legendVals[j] = -127;
+					legendText[j] = "---"; 
+				}				
+			}
+			break;
+		case SUBMODE_NOTESEL2:
+			legends[0] = "NOTE";
+			legends[1] = "OCT";
+			legends[2] = "VEL";
+			legends[3] = "LEN";
+			legendVals[0] = stepNoteP[playingPattern][selectedStep].note;
+			legendVals[1] = (int)octave+4;
+			legendVals[2] = stepNoteP[playingPattern][selectedStep].vel; 
+			legendVals[3] = stepNoteP[playingPattern][selectedStep].len + 1;
+			break;
+
+
 		default:
 			break;
 	}
@@ -612,7 +661,11 @@ void dispGenericMode(int submode, int selected){
 		}else{
 			highlight = false;
 		}
-		dispValBox(legendVals[j], j, highlight);
+		if (legendVals[j] == -127){
+			dispSymbBox(legendText[j], j, highlight);
+		} else {
+			dispValBox(legendVals[j], j, highlight);
+		}
 	}
 
 		
@@ -1081,6 +1134,8 @@ void loop() {
 						if (newoctave != octave){
 							octave = newoctave;
 						}						
+					} else if (sqmode == 1){ 
+						SetPatternLength( playingPattern, constrain(PatternLength(playingPattern) + amt, 1, 16) );
 					} else if (sqmode == 2){ 
 						int newswing = constrain(swing + amt, 0, maxswing);
 						swing = newswing;
@@ -1116,10 +1171,10 @@ void loop() {
 				case MODE_S2: // SEQ 2						
 					if (patternParams && !enc_edit){ 		// SEQUENCE EDIT MODE
 						//
-						if (ppmode == 0) { 					// SET LENGTH
+						if (ppmode == 1) { 					// SET LENGTH
 							SetPatternLength( playingPattern, constrain(PatternLength(playingPattern) + amt, 1, 16) );
 						}	
-						if (ppmode == 1) { 					// SET PATTERN ROTATION	
+						if (ppmode == 2) { 					// SET PATTERN ROTATION	
 							int rotator;
 							(u.dir() < 0 ? rotator = -1 : rotator = 1);					
 //							int rotator = constrain(rotcc, (PatternLength(playingPattern))*-1, PatternLength(playingPattern));
@@ -1129,7 +1184,7 @@ void loop() {
 							}
 							rotationAmt = constrain(rotationAmt, (PatternLength(playingPattern)-1)*-1, PatternLength(playingPattern)-1);
 						}	
-						if (ppmode == 2) { 					// SET PATTERN CHANNEL	
+						if (ppmode == 3) { 					// SET PATTERN CHANNEL	
 							patternSettings[playingPattern].channel = constrain(patternSettings[playingPattern].channel + amt, 0, 15);
 						}
 						
@@ -1166,14 +1221,15 @@ void loop() {
 								octave = newoctave;
 							}						
 						}	
-						if (nsmode2 == 3) { 				// SET NOTE LENGTH
-							int tempLen = stepNoteP[playingPattern][selectedStep].len;
-							stepNoteP[playingPattern][selectedStep].len = constrain(tempLen + amt, 0, 15); // Note Len between 1-16
-						}	
 						if (nsmode2 == 2) { 				// SET VELOCITY
 							int tempVel = stepNoteP[playingPattern][selectedStep].vel;
 							stepNoteP[playingPattern][selectedStep].vel = constrain(tempVel + amt, 0, 127);
 						}	
+						if (nsmode2 == 3) { 				// SET NOTE LENGTH
+							int tempLen = stepNoteP[playingPattern][selectedStep].len;
+							stepNoteP[playingPattern][selectedStep].len = constrain(tempLen + amt, 0, 15); // Note Len between 1-16
+						}	
+
 					} else {
 						newtempo = constrain(clockbpm + amt, 40, 300);
 						if (newtempo != clockbpm){
@@ -1231,7 +1287,7 @@ void loop() {
 					}
 				} else if (patternParams) {
 					// increment ppmode
-					ppmode = (ppmode + 1 ) % 4;
+					ppmode = (ppmode + 1 ) % 5;
 				} else if (stepRecord) {
 					step_ahead(playingPattern);
 					selectedStep = seqPos[playingPattern];
@@ -1649,17 +1705,21 @@ void loop() {
 					}				
 					if (noteSelect) {
 						if (nspage == 0){
-							dispNoteSelect2();
+							dispGenericMode(SUBMODE_NOTESEL2, nsmode2);
+//							dispNoteSelect2();
 						} else if (nspage == 1){
-							dispNoteSelect();
+							dispGenericMode(SUBMODE_NOTESEL, nsmode);
+//							dispNoteSelect();
 						}
 					}
 					if (patternParams) {
-						dispPatternParams();
+						dispGenericMode(SUBMODE_PATTPARAMS, ppmode);
+//						dispPatternParams();
 						dispInfoDialog();
 					}
 					if (stepRecord) {
-						dispStepRec();
+						dispGenericMode(SUBMODE_STEPREC, 4); // no highlight
+//						dispStepRec();
 						dispInfoDialog();
 					}
 					
