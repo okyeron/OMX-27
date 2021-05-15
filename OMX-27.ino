@@ -1788,19 +1788,19 @@ void doStep() {
 			if(playing) {
 				for (int j=0; j<8; j++){ // check all patterns for notes to play in time
 				  // this condition is for the pattern we are working on so as not to try to show all
+					if (j == 1){ // TESTING: pattern 2 w/quarter note rate. TODO: addl pattern setting
+						clockDivMult = 4;
+						// for reference: // eventually param setting:
+						// 1 = 16th notes
+						// 2 = eighth notes
+						// 4 = quarter notes
+						// 8 = half notes
+						} else {
+							clockDivMult = 1; // normal 16th notes for all other patterns
+						}
 				  	if(micros() >= timePerPattern[j].nextStepTimeP){
 						seqReset(); // check for seqReset
 						timePerPattern[j].lastStepTimeP = timePerPattern[j].nextStepTimeP;
-						if (j == 1){ // TESTING: pattern 2 w/quarter note rate. TODO: addl pattern setting
-							clockDivMult = 4;
-							// for reference: // eventually param setting:
-							// 1 = 16th notes
-							// 2 = eighth notes
-							// 4 = quarter notes
-							// 8 = half notes
-							} else {
-								clockDivMult = 1; // normal 16th notes for all other patterns
-							}
 						timePerPattern[j].nextStepTimeP += ((step_micros-1)*clockDivMult); // 16th notes
 						// only play if not muted
 						if (!patternSettings[j].mute) {
