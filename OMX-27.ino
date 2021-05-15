@@ -245,8 +245,10 @@ void setup() {
 
 	nextStepTime = micros();
 	lastStepTime = micros();
-	timePerPattern[0].nextStepTimeP = micros();
-	timePerPattern[0].lastStepTimeP = micros();
+	for (int x=0; x<8; x++){
+		timePerPattern[x].nextStepTimeP = nextStepTime; // initialize all patterns
+		timePerPattern[x].lastStepTimeP = lastStepTime; // initialize all patterns
+	}
 	
 	// SET ANALOG READ resolution to teensy's 13 usable bits
 	analogReadResolution(13);
@@ -1784,12 +1786,13 @@ void doStep() {
 
 		case MODE_S2:
 			if(playing) {
-				if(micros() >= timePerPattern[0].nextStepTimeP){
-					seqReset(); // check for seqReset
-					timePerPattern[0].lastStepTimeP = timePerPattern[0].nextStepTimeP;
-					timePerPattern[0].nextStepTimeP += step_micros; // original
-					// check all patterns for notes to play in time
-					for (int j=0; j<8; j++){
+				for (int j=0; j<8; j++){ // check all patterns for notes to play in time
+				  // this condition is for the pattern we are working on so as not to try to show all
+				  	if(micros() >= timePerPattern[j].nextStepTimeP){
+						seqReset(); // check for seqReset
+						timePerPattern[j].lastStepTimeP = timePerPattern[j].nextStepTimeP;
+						timePerPattern[j].nextStepTimeP += step_micros; // original
+				
 						// only play if not muted
 						if (!patternSettings[j].mute) {
 							int lastPos = (seqPos[j]+15) % 16;
@@ -1798,9 +1801,11 @@ void doStep() {
 							}
 							playNote(j);
 						}
+						if(j == playingPattern){ // only show selected pattern
+							show_current_step(j);
+							step_ahead(j);
+						}
 					}
-					show_current_step(playingPattern);
-					step_ahead(playingPattern);
 				}
 
         /* original code
