@@ -837,7 +837,7 @@ void dispPatternParams2(){ // Parameter Params: Page 2 (auto-step reset settings
 		}
 
 		// ValueBoxes
-		dispValBox(patternSettings[playingPattern].startstep, 0, strtFlip); // START		
+		dispValBox(patternSettings[playingPattern].startstep + 1, 0, strtFlip); // START		
 		dispValBox(patternSettings[playingPattern].autoresetstep, 1, stpFlip); // RESET - END STEP
 		dispValBox(patternSettings[playingPattern].autoresetfreq, 2, frqFlip); // FREQUENCY
 		dispValBox(patternSettings[playingPattern].autoresetprob, 3, proFlip); // PROBABILITY
@@ -1085,17 +1085,18 @@ void loop() {
 							}
 							//TODO: convert to case statement
 							if (ppmode2 == 0) { 					// SET AUTO START STEP
-								patternSettings[playingPattern].startstep = constrain(patternSettings[playingPattern].startstep + amt, 1, patternSettings[playingPattern].len+1);
+								patternSettings[playingPattern].startstep = constrain(patternSettings[playingPattern].startstep + amt, 0, patternSettings[playingPattern].len);
 								//patternSettings[playingPattern].startstep--;
 							}	
 							if (ppmode2 == 1) { 					// SET AUTO RESET STEP
-								patternSettings[playingPattern].autoresetstep = constrain(patternSettings[playingPattern].autoresetstep + amt, 0, patternSettings[playingPattern].len+1);
+								int tempresetstep = patternSettings[playingPattern].autoresetstep + amt;
+								patternSettings[playingPattern].autoresetstep = constrain(tempresetstep, 0, patternSettings[playingPattern].len+1);
 							}	
 							if (ppmode2 == 2) { 					// SET AUTO RESET FREQUENCY	
-								patternSettings[playingPattern].autoresetfreq = constrain(patternSettings[playingPattern].autoresetfreq + amt, 0, 16); // max every 16 times
+								patternSettings[playingPattern].autoresetfreq = constrain(patternSettings[playingPattern].autoresetfreq + amt, 0, 15); // max every 16 times
 							}	
 							if (ppmode2 == 3) { 					// SET AUTO RESET PROB	
-								patternSettings[playingPattern].autoresetprob = constrain(patternSettings[playingPattern].autoresetprob + amt, 0, 4); // never, 100% - 25%
+								patternSettings[playingPattern].autoresetprob = constrain(patternSettings[playingPattern].autoresetprob + amt, 0, 3); // never, 100% - 33%
 							}
 						
 					} else if (stepRecord && !enc_edit){
@@ -1690,27 +1691,30 @@ void step_ahead(int patternNum) {
 void auto_reset(int p){
 			// should be conditioned on whether we're in S2!!
 			if ( seqPos[p] >= PatternLength(p) || 
-			   (patternSettings[p].autoreset && (patternSettings[p].autoresetstep > (patternSettings[p].startstep-1) ) && (seqPos[p] >= patternSettings[p].autoresetstep)) ||
+			   (patternSettings[p].autoreset && (patternSettings[p].autoresetstep > (patternSettings[p].startstep) ) && (seqPos[p] >= patternSettings[p].autoresetstep)) ||
 			   (patternSettings[p].autoreset && (patternSettings[p].autoresetstep == 0 ) && (seqPos[p] >= patternSettings[p].rndstep)) ||
 			   (patternSettings[p].reverse && (seqPos[p] < 0)) || // normal reverse reset
-			   (patternSettings[p].reverse && patternSettings[p].autoreset && (seqPos[p] < (patternSettings[p].startstep-1))) ||
+			   (patternSettings[p].reverse && patternSettings[p].autoreset && (seqPos[p] < (patternSettings[p].startstep))) ||
 			   (patternSettings[p].reverse && patternSettings[p].autoreset && (patternSettings[p].autoresetstep == 0 ) && (seqPos[p] >= patternSettings[p].rndstep)) 
 			   ) {
 
 				if (patternSettings[p].reverse) {
-					// TODO: This logic needs work..
 					if (patternSettings[p].autoreset){
 						seqPos[p] = patternSettings[p].autoresetstep-1; // resets pattern in REV	
 					} else {
-					    seqPos[p] = PatternLength(p)-1;
+					    seqPos[p] = (PatternLength(p)-patternSettings[p].startstep)-1;
 					}
 
 				} else {
-					seqPos[p] = (patternSettings[p].startstep-1); // resets pattern in FWD
+					seqPos[p] = (patternSettings[p].startstep); // resets pattern in FWD
 				}
 				if (patternSettings[p].autoresetfreq == patternSettings[p].current_cycle){ // reset cycle logic
-					if ((rand() % patternSettings[p].autoresetprob) == 0) // chance of doing autoreset
+					if (probResult(patternSettings[p].autoresetprob)){ 
+						// chance of doing autoreset
 						patternSettings[p].autoreset = true;
+					} else {
+						patternSettings[p].autoreset = false;
+					}
 					patternSettings[p].current_cycle = 1; // reset cycle to start new iteration
 				} else {
 					patternSettings[p].autoreset = false;
@@ -1719,6 +1723,17 @@ void auto_reset(int p){
 				patternSettings[p].rndstep = (rand() % PatternLength(p)) + 1; // randomly choose step for next cycle
 			}
 	// return ()
+}
+
+bool probResult(int probSetting){
+	if (probSetting == 0){
+		return false;
+	}
+	if((rand() % probSetting)==0){
+		return true;
+	} else {
+		return false;
+	}
 }
 
 
@@ -2151,6 +2166,13 @@ void initPatterns( void ) {
 		patternSettings[i].channel = i;		// 0 - 15 becomes 1 - 16
 		patternSettings[i].mute = false;
 		patternSettings[i].reverse = false;
+		patternSettings[i].startstep = 0;
+        patternSettings[i].autoresetstep = 0;
+        patternSettings[i].autoresetfreq = 0;
+        patternSettings[i].autoresetprob = 0;
+        patternSettings[i].current_cycle = 1;
+        patternSettings[i].rndstep = 3;
+        patternSettings[i].autoreset = false;
 	}
 }
 
