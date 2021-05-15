@@ -1793,6 +1793,11 @@ void doStep() {
 						timePerPattern[j].lastStepTimeP = timePerPattern[j].nextStepTimeP;
 						if (j == 1){ // TESTING: pattern 2 w/quarter note rate. TODO: addl pattern setting
 							clockDivMult = 4;
+							// for reference: // eventually param setting:
+							// 1 = 16th notes
+							// 2 = eighth notes
+							// 4 = quarter notes
+							// 8 = half notes
 							} else {
 								clockDivMult = 1; // normal 16th notes for all other patterns
 							}
