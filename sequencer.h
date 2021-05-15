@@ -11,8 +11,9 @@ bool paused = 0;          // Are we paused?
 bool stopped = 1;         // Are we stopped? (Must init to 1)
 byte songPosition = 0;    // A place to store the current MIDI song position
 int playingPattern = 0;  // The currently playing pattern, 0-7
-bool seqResetFlag = 1;
-using Micros = unsigned long;
+bool seqResetFlag = 1;    // for autoreset functionality
+using Micros = unsigned long; // for tracking time per pattern
+int clockDivMult = 0;  // TODO: per pattern setting
 
 word stepCV;
 int seq_velocity = 100;

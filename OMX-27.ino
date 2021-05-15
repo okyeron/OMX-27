@@ -1791,8 +1791,12 @@ void doStep() {
 				  	if(micros() >= timePerPattern[j].nextStepTimeP){
 						seqReset(); // check for seqReset
 						timePerPattern[j].lastStepTimeP = timePerPattern[j].nextStepTimeP;
-						timePerPattern[j].nextStepTimeP += step_micros; // original
-				
+						if (j == 1){ // TESTING: pattern 2 w/quarter note rate. TODO: addl pattern setting
+							clockDivMult = 4;
+							} else {
+								clockDivMult = 1; // normal 16th notes for all other patterns
+							}
+						timePerPattern[j].nextStepTimeP += ((step_micros-1)*clockDivMult); // 16th notes
 						// only play if not muted
 						if (!patternSettings[j].mute) {
 							int lastPos = (seqPos[j]+15) % 16;
