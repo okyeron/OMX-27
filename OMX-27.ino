@@ -245,9 +245,10 @@ void setup() {
 
 	nextStepTime = micros();
 	lastStepTime = micros();
-	for (int x=0; x<8; x++){
+	for (int x=0; x<NUM_PATTERNS; x++){
 		timePerPattern[x].nextStepTimeP = nextStepTime; // initialize all patterns
 		timePerPattern[x].lastStepTimeP = lastStepTime; // initialize all patterns
+		patternSettings[x].clockDivMultP = 1; // set all DivMult to 1 for now
 	}
 	
 	// SET ANALOG READ resolution to teensy's 13 usable bits
@@ -1786,7 +1787,7 @@ void doStep() {
 
 		case MODE_S2:
 			if(playing) {
-				for (int j=0; j<8; j++){ // check all patterns for notes to play in time
+				for (int j=0; j<NUM_PATTERNS; j++){ // check all patterns for notes to play in time
 				  // this condition is for the pattern we are working on so as not to try to show all
 					/* if (j == 1){ // TESTING: pattern 2 w/quarter note rate. TODO: addl pattern setting
 						clockDivMult = 4;
@@ -1798,7 +1799,8 @@ void doStep() {
 					} else {
 						clockDivMult = 1; // normal 16th notes for all other patterns
 					}*/
-					if (patternSettings[j].clockDivMultP == 1){ //shouldn't need this but there's a problem with the struct
+					// if (j < 2){ //shouldn't need this but there's a problem with the struct
+					if (patternSettings[j].autoresetprob == 0){ // test with autoreset prob
 						clockDivMult = 1;
 					} else {
 						clockDivMult = 4;
@@ -2215,7 +2217,6 @@ void initPatterns( void ) {
         patternSettings[i].current_cycle = 1;
         patternSettings[i].rndstep = 3;
         patternSettings[i].autoreset = false;
-		patternSettings[i].clockDivMultP = 1;
 	}
 }
 
