@@ -12,6 +12,7 @@ bool stopped = 1;         // Are we stopped? (Must init to 1)
 byte songPosition = 0;    // A place to store the current MIDI song position
 int playingPattern = 0;  // The currently playing pattern, 0-7
 bool seqResetFlag = 1;
+using Micros = unsigned long;
 
 word stepCV;
 int seq_velocity = 100;
@@ -53,6 +54,23 @@ PatternSettings patternSettings[NUM_PATTERNS] = {
   { 15, 5, 0, 0, 0, 0, 1, 3, false, false, false },
   { 15, 6, 0, 0, 0, 0, 1, 3, false, false, false },
   { 15, 7, 0, 0, 0, 0, 1, 3, false, false, false }
+};
+
+struct TimePerPattern {
+  Micros lastProcessTimeP : 32;
+  Micros nextStepTimeP : 32;
+  Micros lastStepTimeP : 32;
+};
+
+TimePerPattern timePerPattern[NUM_PATTERNS] = {
+  { 0, 0, 0 },
+  { 0, 0, 0 },
+  { 0, 0, 0 },
+  { 0, 0, 0 },
+  { 0, 0, 0 },
+  { 0, 0, 0 },
+  { 0, 0, 0 },
+  { 0, 0, 0 }
 };
 
 // Helpers to deal with 1-16 values for pattern length and channel when they're stored as 0-15
