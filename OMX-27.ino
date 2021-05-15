@@ -1788,20 +1788,25 @@ void doStep() {
 			if(playing) {
 				for (int j=0; j<8; j++){ // check all patterns for notes to play in time
 				  // this condition is for the pattern we are working on so as not to try to show all
-					if (j == 1){ // TESTING: pattern 2 w/quarter note rate. TODO: addl pattern setting
+					/* if (j == 1){ // TESTING: pattern 2 w/quarter note rate. TODO: addl pattern setting
 						clockDivMult = 4;
 						// for reference: // eventually param setting:
 						// 1 = 16th notes
 						// 2 = eighth notes
 						// 4 = quarter notes
 						// 8 = half notes
-						} else {
-							clockDivMult = 1; // normal 16th notes for all other patterns
-						}
+					} else {
+						clockDivMult = 1; // normal 16th notes for all other patterns
+					}*/
+					if (patternSettings[j].clockDivMultP == 1){ //shouldn't need this but there's a problem with the struct
+						clockDivMult = 1;
+					} else {
+						clockDivMult = 4;
+					}
 				  	if(micros() >= timePerPattern[j].nextStepTimeP){
-						seqReset(); // check for seqReset
+						//seqReset(); // check for seqReset
 						timePerPattern[j].lastStepTimeP = timePerPattern[j].nextStepTimeP;
-						timePerPattern[j].nextStepTimeP += ((step_micros-1)*clockDivMult); // 16th notes
+						timePerPattern[j].nextStepTimeP += ((step_micros-1)*clockDivMult); //patternSettings[j].clockDivMult); // 16th notes
 						// only play if not muted
 						if (!patternSettings[j].mute) {
 							int lastPos = (seqPos[j]+15) % 16;
@@ -1812,7 +1817,7 @@ void doStep() {
 						}
 						if(j == playingPattern){ // only show selected pattern
 							show_current_step(j);
-							step_ahead(j);
+							step_ahead(j);	
 						}
 					}
 				}
@@ -2210,6 +2215,7 @@ void initPatterns( void ) {
         patternSettings[i].current_cycle = 1;
         patternSettings[i].rndstep = 3;
         patternSettings[i].autoreset = false;
+		patternSettings[i].clockDivMultP = 1;
 	}
 }
 
