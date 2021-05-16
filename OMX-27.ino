@@ -11,7 +11,7 @@
 //  Additional code contributions: Matt Boone, Steven Zydek
 
 // HW_VERSIONS
-#define DEV			0
+#define DEV			1
 #define MIDIONLY	0
 
 
@@ -75,7 +75,7 @@ OMXMode omxMode = DEFAULT_MODE;
 OMXMode newmode = DEFAULT_MODE;
 int nspage = 0;
 int pppage = 0;
-	int patmode = 0;
+int sqpage = 0;
 
 int nsmode = 4;
 int nsmode2 = 4;
@@ -83,6 +83,7 @@ int ppmode = 4;
 int ppmode2 = 4;
 int mimode = 4;
 int sqmode = 4;
+int sqmode2 = 4;
 int modehilight = 4;
 
 // VARIABLES / FLAGS
@@ -161,6 +162,7 @@ void advanceClock(Micros advance) {
 	}
 	timeToNextClock -= advance;
 }
+
 void advanceSteps(Micros advance) {
 	static Micros timeToNextStep = 0;
 //	static Micros stepnow = micros();	
@@ -177,7 +179,6 @@ void advanceSteps(Micros advance) {
 	timeToNextStep -= advance;
 }
 
-
 void resetClocks(){
 	// BPM tempo to step_delay calculation
 	ppqInterval = 60000000/(PPQ * clockbpm); 		// ppq interval is in microseconds
@@ -187,7 +188,11 @@ void resetClocks(){
 	step_delay = step_micros * 0.001; 	// ppqInterval * 0.006; // 60000 / clockbpm / 4; 
 }
 
-
+void setGlobalSwing(int swng_amt){
+	for(int z=0; z<NUM_PATTERNS; z++) {
+		patternSettings[z].swing = swng_amt;
+	}
+}
 
 // ####### POTENTIMETERS #######
 
@@ -556,13 +561,23 @@ void dispGenericMode(int submode, int selected){
 			break;
 		case SUBMODE_SEQ:
 			legends[0] = "PTN";
-			legends[1] = "LEN";
+			legends[1] = "TRSP";
 			legends[2] = "SWNG"; //"TRSP";
 			legends[3] = "BPM";
 			legendVals[0] = playingPattern+1;
-			legendVals[1] = PatternLength(playingPattern);
+			legendVals[1] = (int)transpose;
 			legendVals[2] = (int)swing; //(int)transpose;
 			legendVals[3] = (int)clockbpm;
+			break;
+		case SUBMODE_SEQ2:
+			legends[0] = "PTN";
+			legends[1] = "LEN";
+			legends[2] = "---"; //"";
+			legends[3] = "---";
+			legendVals[0] = playingPattern+1;
+			legendVals[1] = PatternLength(playingPattern);
+			legendVals[2] = 0;
+			legendVals[3] = 0;
 			break;
 		case SUBMODE_PATTPARAMS:
 			legends[0] = "PTN";
@@ -574,16 +589,16 @@ void dispGenericMode(int submode, int selected){
 			legendVals[2] = rotationAmt; //(int)transpose;
 			legendVals[3] = PatternChannel(playingPattern);
 			break;
-//		case SUBMODE_PATTPARAMS2:
-//			legends[0] = "START";
-//			legends[1] = "END";
-//			legends[2] = "FREQ";
-//			legends[3] = "PROB";
-//			legendVals[0] = patternSettings[playingPattern].startstep + 1;			// STRT step to autoreset on
-//			legendVals[1] = patternSettings[playingPattern].autoresetstep;			// STP step to autoreset on - 0 = no auto reset
-//			legendVals[2] = patternSettings[playingPattern].autoresetfreq; 			// FRQ to autoreset on -- every x cycles
-//			legendVals[3] = patternSettings[playingPattern].autoresetprob;			// PRO probability of resetting 0=NEVER 1=Always 2=50%
-//			break;
+		case SUBMODE_PATTPARAMS2:
+			legends[0] = "START";
+			legends[1] = "END";
+			legends[2] = "FREQ";
+			legends[3] = "PROB";
+			legendVals[0] = patternSettings[playingPattern].startstep + 1;			// STRT step to autoreset on
+			legendVals[1] = patternSettings[playingPattern].autoresetstep;			// STP step to autoreset on - 0 = no auto reset
+			legendVals[2] = patternSettings[playingPattern].autoresetfreq; 			// FRQ to autoreset on -- every x cycles
+			legendVals[3] = patternSettings[playingPattern].autoresetprob;			// PRO probability of resetting 0=NEVER 1=Always 2=50%
+			break;
 		case SUBMODE_STEPREC:
 			legends[0] = "PTN";
 			legends[1] = "STEP";
@@ -1141,26 +1156,31 @@ void loop() {
 				case MODE_S1: // SEQ 1
 					// FALL THROUGH
 				case MODE_S2: // SEQ 2
-					if (patmode == 1) { // set octave
-						// set octave 
-						newoctave = constrain(octave + amt, -5, 4);
-						if (newoctave != octave){
-							octave = newoctave;
-						}						
-					} else if (sqmode == 1){ 
+					if (sqmode == 4 && sqmode2 == 4 ) {  // change page
+						sqpage = constrain(sqpage + amt, 0, 1);
+					}
+
+					if (sqmode2 == 1){ 
+						// set pattern length
 						SetPatternLength( playingPattern, constrain(PatternLength(playingPattern) + amt, 1, 16) );
+					}
+
+					if (sqmode == 1){ 
+						// set transpose
+						transposeSeq(playingPattern, amt); //
+						int newtransp = constrain(transpose + amt, -64, 63); 
+						transpose = newtransp;
+						
 					} else if (sqmode == 2){ 
+						// set swing
 						int newswing = constrain(swing + amt, 0, maxswing);
 						swing = newswing;
 						patternSettings[playingPattern].swing = newswing;
+//						setGlobalSwing(newswing);
 //						Serial.println(patternSettings[playingPattern].swing);
-						
-//						transposeSeq(playingPattern, amt);
-//						int newtransp = transpose + amt;
-//						transpose = newtransp;
-						
+										
 					} else if (sqmode == 3){ 
-						// otherwise set tempo
+						// set tempo
 						newtempo = constrain(clockbpm + amt, 40, 300);
 						if (newtempo != clockbpm){
 							// SET TEMPO HERE
@@ -1168,6 +1188,7 @@ void loop() {
 							resetClocks();
 						}
 					}
+					
   					dirtyDisplay = true;
 					break;
 				default:
@@ -1182,11 +1203,11 @@ void loop() {
 						// FALL THROUGH
 						
 				case MODE_S2: // SEQ 2						
-					if (patternParams && !enc_edit){ 		// SEQUENCE EDIT MODE
+					if (patternParams && !enc_edit){ 		// SEQUENCE PATTERN PARAMS MODE
 						//
-//						if (ppmode == 4 && ppmode2 == 4 ) {  // change page
-//								pppage = constrain(pppage + amt, 0, 1);
-//						}
+						if (ppmode == 4 && ppmode2 == 4 ) {  // change page
+							pppage = constrain(pppage + amt, 0, 1);
+						}
 
 						if (ppmode == 1) { 					// SET LENGTH
 							SetPatternLength( playingPattern, constrain(PatternLength(playingPattern) + amt, 1, 16) );
@@ -1222,14 +1243,14 @@ void loop() {
 							patternSettings[playingPattern].autoresetprob = constrain(patternSettings[playingPattern].autoresetprob + amt, 0, 3); // never, 100% - 33%
 						}						
 						
-					} else if (stepRecord && !enc_edit){
+					} else if (stepRecord && !enc_edit){	// STEP RECORD MODE
 							// SET OCTAVE 
 							newoctave = constrain(octave + amt, -5, 4);
 							if (newoctave != octave){
 								octave = newoctave;
 							}						
 
-					} else if (noteSelect && noteSelection && !enc_edit){
+					} else if (noteSelect && noteSelection && !enc_edit){	// NOTE SELECT MODE
 						// {notenum,vel,len,p1,p2,p3,p4,p5}
 
 						if (nsmode >= 0 && nsmode < 4){
@@ -1737,7 +1758,11 @@ void loop() {
 			if (dirtyDisplay){			// DISPLAY
 				if (!enc_edit){
 					if (!noteSelect and !patternParams and !stepRecord){
-						dispGenericMode(SUBMODE_SEQ, sqmode);
+						if (sqpage == 0){
+							dispGenericMode(SUBMODE_SEQ, sqmode);
+						} else if (sqpage == 1){
+							dispGenericMode(SUBMODE_SEQ2, sqmode2);
+						}
 //						dispSeqMode1();
 						dispInfoDialog();
 					}				
@@ -1752,10 +1777,10 @@ void loop() {
 					}
 					if (patternParams) {
 						if (pppage == 0){
-//							dispPatternParams();
 							dispGenericMode(SUBMODE_PATTPARAMS, ppmode);
+//							dispPatternParams();
 						} else if (pppage == 1){
-//							dispGenericMode(SUBMODE_PATTPARAMS2, ppmode2);
+							dispGenericMode(SUBMODE_PATTPARAMS2, ppmode2);
 //							dispPatternParams2();
 						}
 						dispInfoDialog();
@@ -1766,7 +1791,6 @@ void loop() {
 //						dispStepRec();
 						dispInfoDialog();
 					}
-					
 				}
 			}
 			
@@ -2058,7 +2082,7 @@ void playNote(int patternNum) {
 //Serial.println(patternSettings[patternNum].swing);
 
 		if ((patternSettings[patternNum].swing != 0) && (seqPos[patternNum] % 2 == 0)) {
-			noteon_micros = micros() + (ppqInterval/2 * swing); // constrain(swing, 0, 5);
+			noteon_micros = micros() + (ppqInterval/2 * patternSettings[patternNum].swing); // constrain(swing, 0, 5);
 		} else {
 			noteon_micros = micros();
 		}
