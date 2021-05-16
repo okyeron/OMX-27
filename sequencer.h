@@ -62,6 +62,7 @@ struct TimePerPattern {
   Micros lastProcessTimeP : 32;
   Micros nextStepTimeP : 32;
   Micros lastStepTimeP : 32;
+  int lastPosP : 16;
 };
 
 TimePerPattern timePerPattern[NUM_PATTERNS] = {

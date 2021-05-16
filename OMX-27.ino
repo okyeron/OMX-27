@@ -1143,7 +1143,7 @@ void loop() {
 								patternSettings[playingPattern].autoresetprob = constrain(patternSettings[playingPattern].autoresetprob + amt, 0, 3); // never, 100% - 33%
 							}
 							if (ppmode3 == 0) { 					// SET AUTO RESET PROB	
-								patternSettings[playingPattern].clockDivMultP = constrain(patternSettings[playingPattern].clockDivMultP + amt, 0, 5); // set clock div/mult
+								patternSettings[playingPattern].clockDivMultP = constrain(patternSettings[playingPattern].clockDivMultP + amt, 0, 15); // set clock div/mult
 							}
 						
 					} else if (stepRecord && !enc_edit){
@@ -1740,6 +1740,19 @@ void step_ahead(int patternNum) {
 
 }
 
+void new_step_ahead(int patternNum) {
+	// step each pattern ahead one place
+		if (patternSettings[patternNum].reverse) {
+			seqPos[patternNum]--;
+			// if (seqPos[j] < 0)
+			auto_reset(patternNum); // determine whether to reset or not based on param settings
+				// seqPos[j] = PatternLength(j)-1;	
+		} else {
+			seqPos[patternNum]++;
+			auto_reset(patternNum); // determine whether to reset or not based on param settings
+		}
+}
+
 void auto_reset(int p){
 			// should be conditioned on whether we're in S2!!
 			if ( seqPos[p] >= PatternLength(p) || 
@@ -1835,39 +1848,77 @@ void doStep() {
 		case MODE_S2:
 			if(playing) {
 				for (int j=0; j<NUM_PATTERNS; j++){ // check all patterns for notes to play in time
-				  // this condition is for the pattern we are working on so as not to try to show all
-					/* if (j == 1){ // TESTING: pattern 2 w/quarter note rate. TODO: addl pattern setting
-						clockDivMult = 4;
-						// for reference: // eventually param setting:
-						// 1 = 16th notes
-						// 2 = eighth notes
-						// 4 = quarter notes
-						// 8 = half notes
-					} else {
-						clockDivMult = 1; // normal 16th notes for all other patterns
-					}*/
-					// if (j < 2){ //shouldn't need this but there's a problem with the struct
+				/* // early test conditions:
+				    // this condition is for the pattern we are working on so as not to try to show all TODO FUNCTION
 					if (patternSettings[j].clockDivMultP == 0){ // test with autoreset prob
-						clockDivMult = 1;
+						clockDivMult = 1; // default 16th notes
+					} else if (patternSettings[j].clockDivMultP == 1) {
+						clockDivMult = 2; // 8th notes 
+					} else if (patternSettings[j].clockDivMultP == 2) {
+						clockDivMult = 4; // quarter notes
+					} else if (patternSettings[j].clockDivMultP == 3) {
+						clockDivMult = 8; // half notes
+					} else if (patternSettings[j].clockDivMultP == 4) {
+						clockDivMult = 16; // whole notes
 					} else {
-						clockDivMult = 4;
+						clockDivMult = 1; // default 16th 
 					}
+				*/
+				/*
+					// PLAYING PATTERN OUTER APPROACH -- not as elegant?
+					if(j == playingPattern){  // for visualized pattern
+						if(micros() >= timePerPattern[j].nextStepTimeP){
+							seqReset();
+							timePerPattern[j].lastStepTimeP = timePerPattern[j].nextStepTimeP;
+							timePerPattern[j].nextStepTimeP += ((step_micros-1)*patternSettings[j].clockDivMultP); //patternSettings[j].clockDivMult); // 16th notes
+							if (!patternSettings[j].mute) {
+								int lastPos = (seqPos[j]+15) % 16;
+								if (lastNote[j][lastPos] > 0){
+									step_off(j, lastPos);
+								}
+								playNote(j);
+							}
+							show_current_step(j);
+							step_ahead(j);
+						}
+					} else { // for non-visible patterns
+						if(micros() >= timePerPattern[j].nextStepTimeP){
+							timePerPattern[j].lastStepTimeP = timePerPattern[j].nextStepTimeP;
+							timePerPattern[j].nextStepTimeP += ((step_micros-1)*patternSettings[j].clockDivMultP); //patternSettings[j].clockDivMult); // 16th notes
+							if (!patternSettings[j].mute) {
+								int lastPos = (seqPos[j]+15) % 16;
+								if (lastNote[j][lastPos] > 0){
+									step_off(j, lastPos);
+								}
+								playNote(j);
+								// step_ahead(j);
+							}
+							//step_ahead(j);
+						}
+					}
+					*/
+
+					// TIME BASED APPROACH
 				  	if(micros() >= timePerPattern[j].nextStepTimeP){
 						//seqReset(); // check for seqReset
+						if(j == playingPattern){  // only trigger reset for current sequence
+							seqReset();
+						}
 						timePerPattern[j].lastStepTimeP = timePerPattern[j].nextStepTimeP;
-						timePerPattern[j].nextStepTimeP += ((step_micros-1)*clockDivMult); //patternSettings[j].clockDivMult); // 16th notes
+						timePerPattern[j].nextStepTimeP += ((step_micros-1)*(patternSettings[j].clockDivMultP+1)); // calc step based on rate
 						// only play if not muted
 						if (!patternSettings[j].mute) {
-							int lastPos = (seqPos[j]+15) % 16;
-							if (lastNote[j][lastPos] > 0){
-								step_off(j, lastPos);
+							timePerPattern[j].lastPosP = (seqPos[j]+15) % 16;
+							if (lastNote[j][timePerPattern[j].lastPosP] > 0){
+								step_off(j, timePerPattern[j].lastPosP);
 							}
 							playNote(j);
 						}
 						if(j == playingPattern){ // only show selected pattern
 							show_current_step(j);
-							step_ahead(j);	
+							// step_ahead(j);	// old step ahead with all in sync
 						}
+						new_step_ahead(j);
 					}
 				}
 
