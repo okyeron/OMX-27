@@ -76,6 +76,7 @@ int nsmode2 = 4;
 int nspage = 0;
 int ppmode = 3;
 int ppmode2 = 4;
+int ppmode3 = 1;
 int pppage = 0;
 int patmode = 0;
 int mimode = 0;
@@ -865,6 +866,44 @@ void dispPatternParams2(){ // Parameter Params: Page 2 (auto-step reset settings
 	}
 }
 
+void dispPatternParams3(){ // Parameter Params: Page 2 (auto-step reset settings)
+	if (patternParams){
+
+		// values formatting
+		u8g2_display.setFontMode(1); 
+		u8g2_display.setFont(FONT_VALUES);
+		
+		bool clkFlip = false;	
+		switch(ppmode3){ 
+			case 0:  // STRT step to autoreset on
+				display.fillRect(0*32, 11, 33, 22, WHITE);
+				clkFlip = true;
+				break;
+			default:
+				break;
+		}
+
+		// ValueBoxes
+		dispValBox(patternSettings[playingPattern].clockDivMultP , 0, clkFlip); // CLOCK RATE SETTING
+
+		// labels formatting
+		u8g2_display.setFontMode(1);  
+		u8g2_display.setFont(FONT_LABELS);
+		u8g2_display.setCursor(0, 0);	
+		dispGridBoxes();
+		// labels
+		u8g2_display.setForegroundColor(BLACK);
+		u8g2_display.setBackgroundColor(WHITE);
+
+		// ValueBoxLabels
+		u8g2centerText("RATE", 0, hline-2, 32, 10); // RATE OF STEPS
+		u8g2centerText("TBD", 32, hline-2, 32, 10);
+		u8g2centerText("TBD", 65, hline-2, 32, 10);
+		u8g2centerText("TBD", 97, hline-2, 32, 10);
+		
+	}
+}
+
 void dispInfoDialog(){	
 	for (int q=0; q <6; q++){
 		if (dialogFlags[q]){ //  copied	
@@ -1067,8 +1106,8 @@ void loop() {
 				case MODE_S2: // SEQ 2						
 					if (patternParams && !enc_edit){ 		// SEQUENCE EDIT MODE
 
-							if (ppmode == 3 && ppmode2 == 4 ) {  // change page
-								pppage = constrain(pppage + amt, 0, 1);
+							if (ppmode == 3 && ppmode2 == 4 && ppmode3 == 1) {  // change page
+								pppage = constrain(pppage + amt, 0, 2);
 							}
 	
 							//TODO: convert to case statement
@@ -1102,6 +1141,9 @@ void loop() {
 							}	
 							if (ppmode2 == 3) { 					// SET AUTO RESET PROB	
 								patternSettings[playingPattern].autoresetprob = constrain(patternSettings[playingPattern].autoresetprob + amt, 0, 3); // never, 100% - 33%
+							}
+							if (ppmode3 == 0) { 					// SET AUTO RESET PROB	
+								patternSettings[playingPattern].clockDivMultP = constrain(patternSettings[playingPattern].clockDivMultP + amt, 0, 5); // set clock div/mult
 							}
 						
 					} else if (stepRecord && !enc_edit){
@@ -1206,6 +1248,8 @@ void loop() {
 						ppmode = (ppmode + 1 ) % 4;
 					}else if (pppage == 1){
 						ppmode2 = (ppmode2 + 1 ) % 5;
+					}else if (pppage == 2){
+						ppmode3 = (ppmode3 + 1) % 2;
 					}
 				} else if (stepRecord) {
 					step_ahead(playingPattern);
@@ -1627,6 +1671,9 @@ void loop() {
 						} else if (pppage == 1){
 						dispPatternParams2();
 						dispInfoDialog();
+						} else if (pppage == 2){
+						dispPatternParams3();
+						dispInfoDialog();
 						}
 					}
 					if (stepRecord) {
@@ -1800,7 +1847,7 @@ void doStep() {
 						clockDivMult = 1; // normal 16th notes for all other patterns
 					}*/
 					// if (j < 2){ //shouldn't need this but there's a problem with the struct
-					if (patternSettings[j].autoresetprob == 0){ // test with autoreset prob
+					if (patternSettings[j].clockDivMultP == 0){ // test with autoreset prob
 						clockDivMult = 1;
 					} else {
 						clockDivMult = 4;
