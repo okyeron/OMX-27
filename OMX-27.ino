@@ -11,7 +11,7 @@
 //  Additional code contributions: Matt Boone, Steven Zydek
 
 // HW_VERSIONS
-#define DEV			1
+#define DEV			0
 #define MIDIONLY	0
 
 
