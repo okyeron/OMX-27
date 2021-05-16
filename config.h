@@ -20,8 +20,8 @@ const uint8_t EEPROM_VERSION = 5;
 #define EEPROM_PATTERN_ADDRESS 	     32
 #define EEPROM_PATTERN_SIZE		     1024      // 8 * 16 * sizeof(StepNote))
 #define EEPROM_PATTERN_SETTINGS_ADDRESS 1056
-#define EEPROM_PATTERN_SETTINGS_SIZE      16      // 8 * sizeof(PatternSettings)
-// next address 1072
+#define EEPROM_PATTERN_SETTINGS_SIZE      40      // 8 * sizeof(PatternSettings)
+// next address 1096
 
 // DEFINE CC NUMBERS FOR POTS // CCS mapped to Organelle Defaults
 const int CC1 = 21;
@@ -90,14 +90,15 @@ InfoDialogs infoDialog[NUM_DIALOGS] = {
 
 enum SubModes
 {
-     SUBMODE_MIDI = 0,
-     SUBMODE_SEQ,
-     SUBMODE_NOTESEL,
-     SUBMODE_NOTESEL2,
-     SUBMODE_PATTPARAMS,
-     SUBMODE_STEPREC,
+	SUBMODE_MIDI = 0,
+	SUBMODE_SEQ,
+	SUBMODE_NOTESEL,
+	SUBMODE_NOTESEL2,
+	SUBMODE_PATTPARAMS,
+	SUBMODE_PATTPARAMS2,
+	SUBMODE_STEPREC,
 
-     SUBMODES_COUNT
+	SUBMODES_COUNT
 };
 
 // KEY SWITCH ROWS/COLS

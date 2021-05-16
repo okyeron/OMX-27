@@ -8,10 +8,10 @@
 //	John Park and Gerald Stevens for initial testing and feature ideas
 //	mzero for immense amounts of code coaching/assistance
 //	drjohn for support
-//  Additional code contributions: Matt Boone, wavefiler
+//  Additional code contributions: Matt Boone, Steven Zydek
 
 // HW_VERSIONS
-#define DEV			0
+#define DEV			1
 #define MIDIONLY	0
 
 
@@ -73,14 +73,17 @@ int prevPlock[] = {0,0,0,0,0};
 // MODES
 OMXMode omxMode = DEFAULT_MODE;
 OMXMode newmode = DEFAULT_MODE;
+int nspage = 0;
+int pppage = 0;
+	int patmode = 0;
+
 int nsmode = 4;
 int nsmode2 = 4;
-int nspage = 0;
 int ppmode = 4;
-int patmode = 0;
+int ppmode2 = 4;
 int mimode = 4;
 int sqmode = 4;
-
+int modehilight = 4;
 
 // VARIABLES / FLAGS
 float step_delay;
@@ -571,6 +574,16 @@ void dispGenericMode(int submode, int selected){
 			legendVals[2] = rotationAmt; //(int)transpose;
 			legendVals[3] = PatternChannel(playingPattern);
 			break;
+//		case SUBMODE_PATTPARAMS2:
+//			legends[0] = "START";
+//			legends[1] = "END";
+//			legends[2] = "FREQ";
+//			legends[3] = "PROB";
+//			legendVals[0] = patternSettings[playingPattern].startstep + 1;			// STRT step to autoreset on
+//			legendVals[1] = patternSettings[playingPattern].autoresetstep;			// STP step to autoreset on - 0 = no auto reset
+//			legendVals[2] = patternSettings[playingPattern].autoresetfreq; 			// FRQ to autoreset on -- every x cycles
+//			legendVals[3] = patternSettings[playingPattern].autoresetprob;			// PRO probability of resetting 0=NEVER 1=Always 2=50%
+//			break;
 		case SUBMODE_STEPREC:
 			legends[0] = "PTN";
 			legends[1] = "STEP";
@@ -1171,6 +1184,10 @@ void loop() {
 				case MODE_S2: // SEQ 2						
 					if (patternParams && !enc_edit){ 		// SEQUENCE EDIT MODE
 						//
+//						if (ppmode == 4 && ppmode2 == 4 ) {  // change page
+//								pppage = constrain(pppage + amt, 0, 1);
+//						}
+
 						if (ppmode == 1) { 					// SET LENGTH
 							SetPatternLength( playingPattern, constrain(PatternLength(playingPattern) + amt, 1, 16) );
 						}	
@@ -1187,6 +1204,23 @@ void loop() {
 						if (ppmode == 3) { 					// SET PATTERN CHANNEL	
 							patternSettings[playingPattern].channel = constrain(patternSettings[playingPattern].channel + amt, 0, 15);
 						}
+						
+						// Pattern Params Page 2
+						//TODO: convert to case statement ??
+						if (ppmode2 == 0) { 					// SET AUTO START STEP
+							patternSettings[playingPattern].startstep = constrain(patternSettings[playingPattern].startstep + amt, 0, patternSettings[playingPattern].len);
+							//patternSettings[playingPattern].startstep--;
+						}	
+						if (ppmode2 == 1) { 					// SET AUTO RESET STEP
+							int tempresetstep = patternSettings[playingPattern].autoresetstep + amt;
+							patternSettings[playingPattern].autoresetstep = constrain(tempresetstep, 0, patternSettings[playingPattern].len+1);
+						}	
+						if (ppmode2 == 2) { 					// SET AUTO RESET FREQUENCY	
+							patternSettings[playingPattern].autoresetfreq = constrain(patternSettings[playingPattern].autoresetfreq + amt, 0, 15); // max every 16 times
+						}	
+						if (ppmode2 == 3) { 					// SET AUTO RESET PROB	
+							patternSettings[playingPattern].autoresetprob = constrain(patternSettings[playingPattern].autoresetprob + amt, 0, 3); // never, 100% - 33%
+						}						
 						
 					} else if (stepRecord && !enc_edit){
 							// SET OCTAVE 
@@ -1287,15 +1321,19 @@ void loop() {
 					}
 				} else if (patternParams) {
 					// increment ppmode
-					ppmode = (ppmode + 1 ) % 5;
+					if (pppage == 0){
+						// increment ppmode
+						ppmode = (ppmode + 1 ) % 5;
+					}else if (pppage == 1){
+						ppmode2 = (ppmode2 + 1 ) % 5;
+					}
+										
 				} else if (stepRecord) {
 					step_ahead(playingPattern);
 					selectedStep = seqPos[playingPattern];
 					
 				} else {
-					sqmode = (sqmode + 1 ) % 5;
-//					sqmode = !sqmode;
-					//patmode = !patmode;					
+					sqmode = (sqmode + 1 ) % 5;			
 				}
 			}
 			dirtyDisplay = true;
@@ -1713,9 +1751,15 @@ void loop() {
 						}
 					}
 					if (patternParams) {
-						dispGenericMode(SUBMODE_PATTPARAMS, ppmode);
-//						dispPatternParams();
+						if (pppage == 0){
+//							dispPatternParams();
+							dispGenericMode(SUBMODE_PATTPARAMS, ppmode);
+						} else if (pppage == 1){
+//							dispGenericMode(SUBMODE_PATTPARAMS2, ppmode2);
+//							dispPatternParams2();
+						}
 						dispInfoDialog();
+
 					}
 					if (stepRecord) {
 						dispGenericMode(SUBMODE_STEPREC, 4); // no highlight
@@ -1772,18 +1816,68 @@ void step_ahead(int patternNum) {
 		// what direction?
 		if (patternSettings[j].reverse) {
 			seqPos[j]--;
-			if (seqPos[j] < 0)
-				seqPos[j] = PatternLength(j)-1;
+			auto_reset(j); // determine whether to reset or not based on param settings
+//			if (seqPos[j] < 0)
+//				seqPos[j] = PatternLength(j)-1;
 	
 		} else {
 			seqPos[j]++;
-			if (seqPos[j] >= PatternLength(j))
-				seqPos[j] = 0;
+ 			auto_reset(j); // determine whether to reset or not based on param settings
+//			if (seqPos[j] >= PatternLength(j))
+//				seqPos[j] = 0;
 
 		}
 	}
 }
 
+void auto_reset(int p){
+	// should be conditioned on whether we're in S2!!
+	if ( seqPos[p] >= PatternLength(p) || 
+	   (patternSettings[p].autoreset && (patternSettings[p].autoresetstep > (patternSettings[p].startstep) ) && (seqPos[p] >= patternSettings[p].autoresetstep)) ||
+	   (patternSettings[p].autoreset && (patternSettings[p].autoresetstep == 0 ) && (seqPos[p] >= patternSettings[p].rndstep)) ||
+	   (patternSettings[p].reverse && (seqPos[p] < 0)) || // normal reverse reset
+	   (patternSettings[p].reverse && patternSettings[p].autoreset && (seqPos[p] < (patternSettings[p].startstep))) ||
+	   (patternSettings[p].reverse && patternSettings[p].autoreset && (patternSettings[p].autoresetstep == 0 ) && (seqPos[p] >= patternSettings[p].rndstep)) 
+	   ) {
+
+		if (patternSettings[p].reverse) {
+			if (patternSettings[p].autoreset){
+				seqPos[p] = patternSettings[p].autoresetstep-1; // resets pattern in REV	
+			} else {
+				seqPos[p] = (PatternLength(p)-patternSettings[p].startstep)-1;
+			}
+
+		} else {
+			seqPos[p] = (patternSettings[p].startstep); // resets pattern in FWD
+		}
+		if (patternSettings[p].autoresetfreq == patternSettings[p].current_cycle){ // reset cycle logic
+			if (probResult(patternSettings[p].autoresetprob)){ 
+				// chance of doing autoreset
+				patternSettings[p].autoreset = true;
+			} else {
+				patternSettings[p].autoreset = false;
+			}
+			patternSettings[p].current_cycle = 1; // reset cycle to start new iteration
+		} else {
+			patternSettings[p].autoreset = false;
+			patternSettings[p].current_cycle++; // advance to next cycle
+		}
+		patternSettings[p].rndstep = (rand() % PatternLength(p)) + 1; // randomly choose step for next cycle
+	}
+// return ()
+}
+
+ bool probResult(int probSetting){
+ 	if (probSetting == 0){
+ 		return false;
+ 	}
+ 	if((rand() % probSetting)==0){
+ 		return true;
+ 	} else {
+ 		return false;
+ 	}
+ }
+ 
 void step_on(int patternNum){
 //		Serial.print(patternNum);
 //		Serial.println(" step on");
@@ -1965,14 +2059,11 @@ void playNote(int patternNum) {
 
 		if ((patternSettings[patternNum].swing != 0) && (seqPos[patternNum] % 2 == 0)) {
 			noteon_micros = micros() + (ppqInterval/2 * swing); // constrain(swing, 0, 5);
-//			Serial.println(ppqInterval/2 * swing);
 		} else {
 			noteon_micros = micros();
 		}
-//		pendingNoteOns.insert(stepNoteP[patternNum][seqPos[patternNum]].note, seq_velocity, PatternChannel(patternNum), micros() 
 		pendingNoteOns.insert(stepNoteP[patternNum][seqPos[patternNum]].note, seq_velocity, PatternChannel(patternNum), noteon_micros );
-
-		
+	
 		// send param locks // {notenum,vel,len,p1,p2,p3,p4,p5}
 		for (int q=0; q<4; q++){	
 			int tempCC = stepNoteP[patternNum][seqPos[patternNum]].params[q];
@@ -2220,6 +2311,13 @@ void initPatterns( void ) {
 		patternSettings[i].mute = false;
 		patternSettings[i].reverse = false;
 		patternSettings[i].swing = 0;
+		patternSettings[i].startstep = 0;
+		patternSettings[i].autoresetstep = 0;
+		patternSettings[i].autoresetfreq = 0;
+		patternSettings[i].autoresetprob = 0;
+		patternSettings[i].current_cycle = 1;
+		patternSettings[i].rndstep = 3;
+		patternSettings[i].autoreset = false;
 	}
 }
 
