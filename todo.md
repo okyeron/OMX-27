@@ -1,14 +1,8 @@
 # TO-DO 
 
-* Pattern saving
-
-* Reset copiedFlag/clearedFlag/pastedFlag after some timeout
-
-* Play direction
+* Sequence direction - add pendulum and random
 
 * Additional mode for MIDI settings (channel, etc)?
-
-* Change MIDI channel per pattern  
 
 * Clock divide/mulitply?
 
@@ -16,16 +10,15 @@
 
 * Copy note to other steps - or assign same note to all steps?
 
-* Panic/all-notes-off on AUX?
-
-* Conditional triggers (see grid step on norns )
+* Conditional triggers / step probability (see grid step on norns )
 
 * what happens on CV when you have multiple keys pressed?
+
+* Panic/all-notes-off on AUX?
 
 
 # NEEDS MORE TESTING
 
-* Step recording (needs testing)
  
 * transpose entire sequence (needs testing)
 
@@ -34,9 +27,11 @@
 
 * step record skipping steps - sometimes led stays on
 
-* missing note off if octave is changed while holding note on
+* missing note off if octave is changed while holding note on - FIXED?
 
 * CV sequence running all day and twice, the sequencer just paused for awhile and then started up again
+
+* Can't change octave in OM mode
 
 
 # IDEAS / FEATURE REQUESTS / WISH LIST
