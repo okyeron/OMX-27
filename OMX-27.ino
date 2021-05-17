@@ -1354,7 +1354,12 @@ void loop() {
 					selectedStep = seqPos[playingPattern];
 					
 				} else {
-					sqmode = (sqmode + 1 ) % 5;			
+					if (sqpage == 0){
+ 						sqmode = (sqmode + 1 ) % 5;
+ 					} else if (sqpage == 1){
+ 						sqmode2 = (sqmode2 + 1 ) % 5;
+ 					}			
+
 				}
 			}
 			dirtyDisplay = true;
