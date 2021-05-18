@@ -74,13 +74,16 @@ int prevPlock[] = {0,0,0,0,0};
 OMXMode omxMode = DEFAULT_MODE;
 OMXMode newmode = DEFAULT_MODE;
 int nspage = 0;
+
 int pppage = 0;
 int sqpage = 0;
+int patmode = 0;
 
 int nsmode = 4;
 int nsmode2 = 4;
 int ppmode = 4;
 int ppmode2 = 4;
+int ppmode3 = 4;
 int mimode = 4;
 int sqmode = 4;
 int sqmode2 = 4;
@@ -115,7 +118,6 @@ int newoctave = octave;
 int transpose = 0;
 int rotationAmt = 0;
 int hline = 8;
-// CV 
 int pitchCV;
 uint8_t RES;
 uint16_t AMAX;
@@ -267,6 +269,11 @@ void setup() {
 
 	nextStepTime = micros();
 	lastStepTime = micros();
+	for (int x=0; x<NUM_PATTERNS; x++){
+		timePerPattern[x].nextStepTimeP = nextStepTime; // initialize all patterns
+		timePerPattern[x].lastStepTimeP = lastStepTime; // initialize all patterns
+		patternSettings[x].clockDivMultP = 1; // set all DivMult to 1 for now
+	}
 	
 	// SET ANALOG READ resolution to teensy's 13 usable bits
 	analogReadResolution(13);
@@ -598,6 +605,16 @@ void dispGenericMode(int submode, int selected){
 			legendVals[1] = patternSettings[playingPattern].autoresetstep;			// STP step to autoreset on - 0 = no auto reset
 			legendVals[2] = patternSettings[playingPattern].autoresetfreq; 			// FRQ to autoreset on -- every x cycles
 			legendVals[3] = patternSettings[playingPattern].autoresetprob;			// PRO probability of resetting 0=NEVER 1=Always 2=50%
+			break;
+		case SUBMODE_PATTPARAMS3:
+			legends[0] = "RATE";
+			legends[1] = "---";
+			legends[2] = "---";
+			legends[3] = "---";
+			legendVals[0] = patternSettings[playingPattern].clockDivMultP + 1;			// STRT step to autoreset on
+			legendVals[1] = 0;			// STP step to autoreset on - 0 = no auto reset
+			legendVals[2] = 0; 			// FRQ to autoreset on -- every x cycles
+			legendVals[3] = 0;			// PRO probability of resetting 0=NEVER 1=Always 2=50%
 			break;
 		case SUBMODE_STEPREC:
 			legends[0] = "PTN";
@@ -936,7 +953,7 @@ void dispNoteSelect2(){
 	dispValBox(stepNoteP[playingPattern][selectedStep].len + 1, 3, lenFlip); 	// NOTE LENGTH
 }
 
-void dispPatternParams(){
+void dispPatternParams(){ // Parameter Params: Page 1 (general settings)
 	if (patternParams){
 
 		// values formatting
@@ -989,10 +1006,62 @@ void dispPatternParams(){
 	}
 }
 
+void dispPatternParams2(){ // Parameter Params: Page 2 (auto-step reset settings)
+	if (patternParams){
+
+		// values formatting
+		u8g2_display.setFontMode(1); 
+		u8g2_display.setFont(FONT_VALUES);
+		
+		bool strtFlip = false, stpFlip = false, frqFlip = false, proFlip = false;		
+		switch(ppmode2){ 
+			case 0:  // STRT step to autoreset on
+				display.fillRect(0*32, 11, 33, 22, WHITE);
+				strtFlip = true;
+				break;
+			case 1:  // STP step to autoreset on - 0 = no auto reset
+				display.fillRect(1*32, 11, 33, 22, WHITE);
+				stpFlip = true;
+				break;
+			case 2: 	// FRQ to autoreset on -- every x cycles
+				display.fillRect(2*32, 11, 33, 22, WHITE);
+				frqFlip = true;
+				break;
+			case 3: 	// PRO probability of resetting 0=NEVER 1=Always 2=50%
+				display.fillRect(3*32, 11, 33, 22, WHITE);
+				proFlip = true;
+				break;
+			default:
+				break;
+		}
+
+		// ValueBoxes
+		dispValBox(patternSettings[playingPattern].startstep + 1, 0, strtFlip); // START		
+		dispValBox(patternSettings[playingPattern].autoresetstep, 1, stpFlip); // RESET - END STEP
+		dispValBox(patternSettings[playingPattern].autoresetfreq, 2, frqFlip); // FREQUENCY
+		dispValBox(patternSettings[playingPattern].autoresetprob, 3, proFlip); // PROBABILITY
+
+		// labels formatting
+		u8g2_display.setFontMode(1);  
+		u8g2_display.setFont(FONT_LABELS);
+		u8g2_display.setCursor(0, 0);	
+		dispGridBoxes();
+		// labels
+		u8g2_display.setForegroundColor(BLACK);
+		u8g2_display.setBackgroundColor(WHITE);
+
+		// ValueBoxLabels
+		u8g2centerText("START", 0, hline-2, 32, 10);
+		u8g2centerText("END", 32, hline-2, 32, 10);
+		u8g2centerText("FREQ", 65, hline-2, 32, 10);
+		u8g2centerText("PROB", 97, hline-2, 32, 10);
+		
+	}
+}
+
 void dispInfoDialog(){			
 	for (int key=0; key < NUM_DIALOGS; key++){ 	
 		if (infoDialog[key].state){ 
-			// reset timer
 			dialogTimeout = 0;
 			display.clearDisplay();
 			u8g2_display.setFontMode(1);  
@@ -1205,8 +1274,8 @@ void loop() {
 				case MODE_S2: // SEQ 2						
 					if (patternParams && !enc_edit){ 		// SEQUENCE PATTERN PARAMS MODE
 						//
-						if (ppmode == 4 && ppmode2 == 4 ) {  // change page
-							pppage = constrain(pppage + amt, 0, 1);
+						if (ppmode == 4 && ppmode2 == 4 && ppmode3 == 4) {  // change page
+							pppage = constrain(pppage + amt, 0, 2);
 						}
 
 						if (ppmode == 1) { 					// SET LENGTH
@@ -1225,7 +1294,11 @@ void loop() {
 						if (ppmode == 3) { 					// SET PATTERN CHANNEL	
 							patternSettings[playingPattern].channel = constrain(patternSettings[playingPattern].channel + amt, 0, 15);
 						}
-						
+
+						if (ppmode3 == 0) { 					// SET AUTO RESET PROB	
+							patternSettings[playingPattern].clockDivMultP = constrain(patternSettings[playingPattern].clockDivMultP + amt, 0, 15); // set clock div/mult
+						}
+
 						// Pattern Params Page 2
 						//TODO: convert to case statement ??
 						if (ppmode2 == 0) { 					// SET AUTO START STEP
@@ -1341,14 +1414,15 @@ void loop() {
 						nsmode2 = (nsmode2 + 1 ) % 5;
 					}
 				} else if (patternParams) {
-					// increment ppmode
+
 					if (pppage == 0){
 						// increment ppmode
 						ppmode = (ppmode + 1 ) % 5;
 					}else if (pppage == 1){
 						ppmode2 = (ppmode2 + 1 ) % 5;
+					}else if (pppage == 2){
+						ppmode3 = (ppmode3 + 1) % 5;
 					}
-										
 				} else if (stepRecord) {
 					step_ahead(playingPattern);
 					selectedStep = seqPos[playingPattern];
@@ -1786,6 +1860,9 @@ void loop() {
 						} else if (pppage == 1){
 							dispGenericMode(SUBMODE_PATTPARAMS2, ppmode2);
 //							dispPatternParams2();
+						} else if (pppage == 2){
+							dispGenericMode(SUBMODE_PATTPARAMS3, ppmode3);
+							// dispPatternParams3();
 						}
 						dispInfoDialog();
 
@@ -1841,7 +1918,6 @@ void loop() {
 void step_ahead(int patternNum) {
 	// step each pattern ahead one place
 	for (int j=0; j<8; j++){
-		// what direction?
 		if (patternSettings[j].reverse) {
 			seqPos[j]--;
 			auto_reset(j); // determine whether to reset or not based on param settings
@@ -1856,6 +1932,19 @@ void step_ahead(int patternNum) {
 
 		}
 	}
+}
+
+void new_step_ahead(int patternNum) {
+	// step each pattern ahead one place
+		if (patternSettings[patternNum].reverse) {
+			seqPos[patternNum]--;
+			// if (seqPos[j] < 0)
+			auto_reset(patternNum); // determine whether to reset or not based on param settings
+				// seqPos[j] = PatternLength(j)-1;	
+		} else {
+			seqPos[patternNum]++;
+			auto_reset(patternNum); // determine whether to reset or not based on param settings
+		}
 }
 
 void auto_reset(int p){
@@ -1930,6 +2019,7 @@ void doStep() {
 				if(micros() >= nextStepTime){
 					seqReset();
 					// DO STUFF
+
 					int lastPos = (seqPos[playingPattern]+15) % 16;
 					if (lastNote[playingPattern][lastPos] > 0){
 						step_off(playingPattern, lastPos);
@@ -1950,10 +2040,94 @@ void doStep() {
 
 		case MODE_S2:
 			if(playing) {
+				for (int j=0; j<NUM_PATTERNS; j++){ // check all patterns for notes to play in time
+				/* // early test conditions:
+				    // this condition is for the pattern we are working on so as not to try to show all TODO FUNCTION
+					if (patternSettings[j].clockDivMultP == 0){ // test with autoreset prob
+						clockDivMult = 1; // default 16th notes
+					} else if (patternSettings[j].clockDivMultP == 1) {
+						clockDivMult = 2; // 8th notes 
+					} else if (patternSettings[j].clockDivMultP == 2) {
+						clockDivMult = 4; // quarter notes
+					} else if (patternSettings[j].clockDivMultP == 3) {
+						clockDivMult = 8; // half notes
+					} else if (patternSettings[j].clockDivMultP == 4) {
+						clockDivMult = 16; // whole notes
+					} else {
+						clockDivMult = 1; // default 16th 
+					}
+				*/
+				/*
+					// PLAYING PATTERN OUTER APPROACH -- not as elegant?
+					if(j == playingPattern){  // for visualized pattern
+						if(micros() >= timePerPattern[j].nextStepTimeP){
+							seqReset();
+							timePerPattern[j].lastStepTimeP = timePerPattern[j].nextStepTimeP;
+							timePerPattern[j].nextStepTimeP += ((step_micros-1)*patternSettings[j].clockDivMultP); //patternSettings[j].clockDivMult); // 16th notes
+							if (!patternSettings[j].mute) {
+								int lastPos = (seqPos[j]+15) % 16;
+								if (lastNote[j][lastPos] > 0){
+									step_off(j, lastPos);
+								}
+								playNote(j);
+							}
+							show_current_step(j);
+							step_ahead(j);
+						}
+					} else { // for non-visible patterns
+						if(micros() >= timePerPattern[j].nextStepTimeP){
+							timePerPattern[j].lastStepTimeP = timePerPattern[j].nextStepTimeP;
+							timePerPattern[j].nextStepTimeP += ((step_micros-1)*patternSettings[j].clockDivMultP); //patternSettings[j].clockDivMult); // 16th notes
+							if (!patternSettings[j].mute) {
+								int lastPos = (seqPos[j]+15) % 16;
+								if (lastNote[j][lastPos] > 0){
+									step_off(j, lastPos);
+								}
+								playNote(j);
+								// step_ahead(j);
+							}
+							//step_ahead(j);
+						}
+					}
+					*/
+
+					// TIME BASED APPROACH
+				  	if(micros() >= timePerPattern[j].nextStepTimeP){
+						//seqReset(); // check for seqReset
+						if(j == playingPattern){  // only trigger reset for current sequence
+							seqReset();
+						}
+						timePerPattern[j].lastStepTimeP = timePerPattern[j].nextStepTimeP;
+						timePerPattern[j].nextStepTimeP += ((step_micros-1)*(patternSettings[j].clockDivMultP+1)); // calc step based on rate
+						// only play if not muted
+						if (!patternSettings[j].mute) {
+							timePerPattern[j].lastPosP = (seqPos[j]+15) % 16;
+							if (lastNote[j][timePerPattern[j].lastPosP] > 0){
+								step_off(j, timePerPattern[j].lastPosP);
+							}
+							playNote(j);
+						}
+						if(j == playingPattern){ // only show selected pattern
+							show_current_step(j);
+							// step_ahead(j);	// old step ahead with all in sync
+						}
+						new_step_ahead(j);
+					}
+				}
+
+        /* original code
 				if(micros() >= nextStepTime){
 					seqReset();
 					lastStepTime = nextStepTime;
-					nextStepTime += step_micros;
+					// nextStepTime += step_micros; // original
+					// nextStepTime += ((step_micros-1)*1); // 16th notes - default
+				    // nextStepTime += ((step_micros-1)*16); // whole notes
+					// nextStepTime += ((step_micros-1)*8); // half notes
+					nextStepTime += ((step_micros-1)*4); // quarter notes	
+					// nextStepTime += ((step_micros-1)*2); // 8th notes					
+					// nextStepTime += ((step_micros-1)/2); // 32nd notes
+					//nextStepTime += ((step_micros-1)/4); // 64th notes
+
 
 					// check all patterns for notes to play
 					for (int j=0; j<8; j++){
@@ -1969,7 +2143,8 @@ void doStep() {
 					show_current_step(playingPattern);
 					step_ahead(playingPattern);
 
-				}			
+				}		
+        */	
 			} else {
 				show_current_step(playingPattern);
 			}
@@ -2075,6 +2250,8 @@ void playNote(int patternNum) {
 		noteoff_micros = micros() + ( stepNoteP[patternNum][seqPos[patternNum]].len + 1 )* step_micros ;
 		pendingNoteOffs.insert(stepNoteP[patternNum][seqPos[patternNum]].note, PatternChannel(patternNum), noteoff_micros);
 
+		// ORIG: /// pendingNoteOffs.insert(stepNoteP[patternNum][seqPos[patternNum]].note, PatternChannel(patternNum), micros()+ ( stepNoteP[patternNum][seqPos[patternNum]].len + 1 )*step_micros);
+		
 //		MM::sendNoteOn(stepNoteP[patternNum][seqPos[patternNum]].note, seq_velocity, PatternChannel(patternNum));
 
 
@@ -2145,6 +2322,7 @@ void transposeSeq(int patternNum, int amt) {
 }
 
 void seqReset(){
+
 	if (seqResetFlag) {
 		for (int k=0; k<8; k++){
 			if (patternSettings[k].reverse) { // REVERSE

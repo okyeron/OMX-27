@@ -20,8 +20,8 @@ const uint8_t EEPROM_VERSION = 5;
 #define EEPROM_PATTERN_ADDRESS 	     32
 #define EEPROM_PATTERN_SIZE		     1024      // 8 * 16 * sizeof(StepNote))
 #define EEPROM_PATTERN_SETTINGS_ADDRESS 1056
-#define EEPROM_PATTERN_SETTINGS_SIZE      40      // 8 * sizeof(PatternSettings)
-// next address 1096
+#define EEPROM_PATTERN_SETTINGS_SIZE      48      // 8 * sizeof(PatternSettings)
+// next address 1104 (was 1096 before clock)
 
 // DEFINE CC NUMBERS FOR POTS // CCS mapped to Organelle Defaults
 const int CC1 = 21;
@@ -46,9 +46,9 @@ const int LED_COUNT = 27;
 #if DEV			
 	const int analogPins[] = {23,22,21,20,16};	// DEV/beta boards
 #elif MIDIONLY
-	const int analogPins[] = {23,A10,21,20,16}  // on MIDI only boards
+	const int analogPins[] = {23,A10,21,20,16};  // on MIDI only boards
 #else
-	const int analogPins[] = {A10,22,21,20,16} // on 1.0
+	const int analogPins[] = {A10,22,21,20,16}; // on 1.0
 #endif
 
 #define NUM_CC_POTS 5
@@ -97,6 +97,7 @@ enum SubModes
 	SUBMODE_NOTESEL2,
 	SUBMODE_PATTPARAMS,
 	SUBMODE_PATTPARAMS2,
+	SUBMODE_PATTPARAMS3,
 	SUBMODE_STEPREC,
 
 	SUBMODES_COUNT
