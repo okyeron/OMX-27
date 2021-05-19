@@ -482,6 +482,9 @@ void show_current_step(int patternNum) {
 
 		for(int i = 0; i < NUM_STEPS; i++){
 			if (i < PatternLength(patternNum)){
+				if (patternParams){
+ 					strip.setPixelColor(i+11, SEQMARKER); 
+ 				}
 				if(i % 4 == 0){ // mark groups of 4
 					if(i == seqPos[patternNum]){
 						if (playing){
@@ -510,7 +513,7 @@ void show_current_step(int patternNum) {
 
 					strip.setPixelColor(i+11, stepColor); // step on color
 
-				} else {
+				} else if (!patternParams){
 					strip.setPixelColor(i+11, LEDOFF); 
 				}
 			}
@@ -1208,13 +1211,15 @@ void loop() {
 		} else if (!noteSelect && !patternParams && !stepRecord){  
 			switch(omxMode) { 
 				case MODE_OM: // Organelle Mother
-					if(u.dir() < 0){									// if turn ccw
-						MM::sendControlChange(CC_OM2,0,midiChannel);
-					} else if (u.dir() > 0){							// if turn cw
-						MM::sendControlChange(CC_OM2,127,midiChannel);
-					}    
+					if (mimode == 4) {
+						if(u.dir() < 0){									// if turn ccw
+							MM::sendControlChange(CC_OM2,0,midiChannel);
+						} else if (u.dir() > 0){							// if turn cw
+							MM::sendControlChange(CC_OM2,127,midiChannel);
+						}
+					}
   					dirtyDisplay = true;
-					break;
+//					break;
 				case MODE_MIDI: // MIDI			
 					if (mimode == 1) { // set length
 						int newchan = constrain(midiChannel + amt, 1, 16);
@@ -1222,7 +1227,7 @@ void loop() {
 							midiChannel = newchan;
 						}
 						
-					}else {
+					} else if (mimode == 0){
 						// set octave 
 						newoctave = constrain(octave + amt, -5, 4);
 						if (newoctave != octave){
@@ -1412,7 +1417,8 @@ void loop() {
 //				mimode = !mimode;
 			}
 			if(omxMode == MODE_OM) {
-				MM::sendControlChange(CC_OM1,100,midiChannel);									
+				mimode = (mimode + 1 ) % 5;
+//				MM::sendControlChange(CC_OM1,100,midiChannel);									
 			}
 			if(omxMode == MODE_S1 || omxMode == MODE_S2) {
 				if (noteSelect && noteSelection && !patternParams) {
@@ -1462,7 +1468,7 @@ void loop() {
 			break;
 		case Button::Up: //Serial.println("Button up"); 
 			if(omxMode == MODE_OM) {
-				MM::sendControlChange(CC_OM1,0,midiChannel);											
+//				MM::sendControlChange(CC_OM1,0,midiChannel);											
 			}
 			break;
 		case Button::UpLong: //Serial.println("Button uplong"); 
