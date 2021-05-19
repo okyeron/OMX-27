@@ -725,351 +725,6 @@ void dispGenericMode(int submode, int selected){
 		
 }
 
-/*
-
-void dispMidiMode(){
-	// value text formatting
-	u8g2_display.setFontMode(1); 
-	u8g2_display.setFont(FONT_VALUES);
-	u8g2_display.setForegroundColor(WHITE);
-	u8g2_display.setBackgroundColor(BLACK);
-	
-	// ValueBoxes
-	dispValBox(potVal, 0, false);
-	dispValBox(midiLastNote, 1, false);
-
-	bool octFlip = false;		
-	bool chFlip = false;		
-	switch(mimode){
-		case 0: 	//
-			display.fillRect(2*32, 11, 33, 22, WHITE);
-			octFlip = true;
-			break;
-		case 1: 	//
-			display.fillRect(3*32, 11, 33, 22, WHITE);
-			chFlip = true;
-			break;
-		default:
-			break;
-	}
-
-	dispValBox((int)octave+4, 2, octFlip);
-	dispValBox(midiChannel, 3, chFlip);
-	dispGridBoxes();
-
-	u8g2_display.setFontMode(1);  
-	u8g2_display.setFont(FONT_LABELS);
-	u8g2_display.setCursor(0, 0);
-	
-	// labels
-	u8g2_display.setForegroundColor(BLACK);
-	u8g2_display.setBackgroundColor(WHITE);
-
-	u8g2_display.setCursor(7, hline);
-	u8g2_display.print("CC");
-	u8g2_display.print(potCC);
-
-	u8g2centerText("NOTE", 33, hline-2, 32, 10);
-	u8g2centerText("OCT", 65, hline-2, 32, 10);
-	u8g2centerText("CH", 97, hline-2, 32, 10);
-	
-}
-
-void dispSeqMode1(){
-	u8g2_display.setFontMode(1);  
-	u8g2_display.setFont(FONT_LABELS);
-	u8g2_display.setCursor(0, 0);	
-	dispGridBoxes();
-	// labels
-	u8g2_display.setForegroundColor(BLACK);
-	u8g2_display.setBackgroundColor(WHITE);
-
-	u8g2centerText("PTN", 1, hline-2, 32, 10);
-	u8g2centerText("LEN", 33, hline-2, 32, 10);
-	u8g2centerText("TRSP", 65, hline-2, 32, 10);
-	u8g2centerText("BPM", 97, hline-2, 32, 10);
-
-	// value text formatting
-	u8g2_display.setFontMode(1); 
-	u8g2_display.setFont(FONT_VALUES);
-	u8g2_display.setForegroundColor(WHITE);
-	u8g2_display.setBackgroundColor(BLACK);
-	
-	// ValueBoxes
-	bool trspFlip = false;			
-	switch(sqmode){
-		case 1: 	//
-			display.fillRect(2*32, 10, 33, 22, WHITE);
-			trspFlip = true;
-			break;
-		default:
-			break;
-	}
-		
-	dispValBox(playingPattern+1, 0, false);
-	dispValBox(PatternLength(playingPattern), 1, false);
-	dispValBox((int)transpose, 2, trspFlip);
-	dispValBox((int)clockbpm, 3, false);
-}
-
-void dispStepRec(){
-	u8g2_display.setFontMode(1);  
-	u8g2_display.setFont(FONT_LABELS);
-	u8g2_display.setCursor(0, 0);
-	
-	dispGridBoxes();
-
-	// labels
-	u8g2_display.setForegroundColor(BLACK);
-	u8g2_display.setBackgroundColor(WHITE);
-
-	u8g2centerText("PATT", 0, hline-2, 32, 10);
-	u8g2centerText("STEP", 33, hline-2, 32, 10);
-	u8g2centerText("NOTE", 65, hline-2, 32, 10);
-	u8g2centerText("OCT", 97, hline-2, 32, 10);
-	
-	// value text formatting
-	u8g2_display.setFontMode(1); 
-	u8g2_display.setFont(FONT_VALUES);
-	u8g2_display.setForegroundColor(WHITE);
-	u8g2_display.setBackgroundColor(BLACK);
-	
-	// ValueBoxes
-	dispValBox(playingPattern+1, 0, false);
-	dispValBox(seqPos[playingPattern]+1, 1, false);
-	dispValBox(stepNoteP[playingPattern][selectedStep].note, 2, false);
-	dispValBox((int)octave+4, 3, false);
-
-}
-
-void dispNoteSelect(){
-	if (!noteSelection){
-
-	}else{
-		// labels formatting
-		u8g2_display.setFontMode(1);  
-		u8g2_display.setFont(FONT_LABELS);
-		u8g2_display.setCursor(0, 0);	
-		dispGridBoxes();
-		display.drawFastHLine(0, 20, 64, WHITE);
-		// labels
-		u8g2_display.setForegroundColor(BLACK);
-		u8g2_display.setBackgroundColor(WHITE);
-
-		u8g2centerText("L-1/2", 0, hline-2, 32, 10);
-		u8g2centerText("L-3/4", 32, hline-2, 32, 10);
-//		u8g2centerText("NOTE", 65, hline-2, 32, 10);
-//		u8g2centerText("VEL", 97, hline-2, 32, 10);
-
-		// value text formatting
-		u8g2_display.setFontMode(1); 
-
-		bool ccFlip[] = {false,false,false,false};
-		switch(nsmode){
-			case 0:  	// CC1
-				display.fillRect(0*32, 11, 33, 11, WHITE);
-				ccFlip[0] = true;
-				break;
-			case 1: 	// CC2
-				display.fillRect(0*32, 11*2-1, 33, 11, WHITE);
-				ccFlip[1] = true;
-				break;
-			case 2: 	// CC3
-				display.fillRect(1*32, 10, 33, 11, WHITE);
-				ccFlip[2] = true;
-				break;
-			case 3: 	// CC4
-				display.fillRect(1*32, 11*2-1, 33, 11, WHITE);
-				ccFlip[3] = true;
-				break;
-			default:
-				break;
-		}
-
-		u8g2_display.setFont(FONT_LABELS);		
-		for (int j=0; j<4; j++){
-			char tempText[4];
-
-			int stepNoteParam = stepNoteP[playingPattern][selectedStep].params[j];
-			if (stepNoteParam > -1){
-				itoa( stepNoteParam, tempText, 10 );
-			} else {
-				snprintf( tempText, sizeof(tempText), "---");
-			}
-			// this is ugly
-			int xoffset = 0;
-			int yoffset = 0;
-			if (j==1 || j==3){
-				yoffset = 11;
-			}
-			if (j==2 || j==3){
-				xoffset = 32; 
-			}
-			invertColor(ccFlip[j]);
-			u8g2centerText(tempText, xoffset, hline*2+yoffset, 32, 11); 	// CC VALUES
-		}
-
-		u8g2_display.setFont(FONT_VALUES);
-		// ValueBoxes
-
-	}
-}
-
-void dispNoteSelect2(){
-	// labels formatting
-	u8g2_display.setFontMode(1);  
-	u8g2_display.setFont(FONT_LABELS);
-	u8g2_display.setCursor(0, 0);	
-	dispGridBoxes();
-	// labels
-	u8g2_display.setForegroundColor(BLACK);
-	u8g2_display.setBackgroundColor(WHITE);
-
-	u8g2centerText("NOTE", 0, hline-2, 32, 10);
-	u8g2centerText("OCT", 32, hline-2, 32, 10);
-	u8g2centerText("VEL", 65, hline-2, 32, 10);
-	u8g2centerText("LEN", 97, hline-2, 32, 10);
-
-	// value text formatting
-	u8g2_display.setFontMode(1); 
-
-	bool lenFlip = false, octFlip = false, noteFlip = false, velFlip = false;		
-	switch(nsmode2){
-		case 0: 	//
-			display.fillRect(0*32, 10, 33, 22, WHITE);
-			noteFlip = true;
-			break;
-		case 1: 	//
-			display.fillRect(1*32, 10, 33, 22, WHITE);
-			octFlip = true;
-			break;
-		case 2: 	//
-			display.fillRect(2*32, 10, 33, 22, WHITE);
-			velFlip = true;
-			break;
-		case 3: 	//
-			display.fillRect(3*32, 10, 33, 22, WHITE);
-			lenFlip = true;
-			break;
-		default:
-			break;
-	}
-
-	u8g2_display.setFont(FONT_VALUES);
-	// ValueBoxes
-	dispValBox(stepNoteP[playingPattern][selectedStep].note, 0, noteFlip); 		// NOTE NUM
-	dispValBox((int)octave+4, 1, octFlip); 		// OCTAVE
-	dispValBox(stepNoteP[playingPattern][selectedStep].vel, 2, velFlip); 	// VELOCITY
-	dispValBox(stepNoteP[playingPattern][selectedStep].len + 1, 3, lenFlip); 	// NOTE LENGTH
-}
-
-void dispPatternParams(){ // Parameter Params: Page 1 (general settings)
-	if (patternParams){
-
-		// values formatting
-		u8g2_display.setFontMode(1); 
-		u8g2_display.setFont(FONT_VALUES);
-		
-		bool pattFlip = false, lenFlip = false, rotFlip = false, chFlip = false;		
-		switch(ppmode){
-			case 0:  // LEN
-				display.fillRect(1*32, 11, 33, 22, WHITE);
-				lenFlip = true;
-				break;
-			case 1: 	// ROTATE
-				display.fillRect(2*32, 11, 33, 22, WHITE);
-				rotFlip = true;
-				break;
-			case 2: 	// CHANNEL
-				display.fillRect(3*32, 11, 33, 22, WHITE);
-				chFlip = true;
-				break;
-			default:
-				break;
-		}
-
-	// ValueBoxes
-		dispValBox(playingPattern+1, 0, pattFlip); // PAT
-		dispValBox(PatternLength(playingPattern), 1, lenFlip); // LEN
-		dispValBox(rotationAmt, 2, rotFlip); // LEN
-		dispValBox(PatternChannel(playingPattern), 3, chFlip); // CHANNEL
-	
-//		u8g2_display.setFont(FONT_SYMB);
-//		invertColor(rotFlip);
-//		u8g2centerText("\u25C1\u25B7", 2*32, hline*2+6, 32, 22); // "\u00BB\u00AB" // // dice: "\u2685"
-
-		// labels formatting
-		u8g2_display.setFontMode(1);  
-		u8g2_display.setFont(FONT_LABELS);
-		u8g2_display.setCursor(0, 0);	
-		dispGridBoxes();
-		// labels
-		u8g2_display.setForegroundColor(BLACK);
-		u8g2_display.setBackgroundColor(WHITE);
-
-	// ValueBoxLabels
-		u8g2centerText("PTN", 0, hline-2, 32, 10);
-		u8g2centerText("LEN", 32, hline-2, 32, 10);
-		u8g2centerText("ROT", 65, hline-2, 32, 10);
-		u8g2centerText("CHAN", 97, hline-2, 32, 10);
-		
-	}
-}
-
-void dispPatternParams2(){ // Parameter Params: Page 2 (auto-step reset settings)
-	if (patternParams){
-
-		// values formatting
-		u8g2_display.setFontMode(1); 
-		u8g2_display.setFont(FONT_VALUES);
-		
-		bool strtFlip = false, stpFlip = false, frqFlip = false, proFlip = false;		
-		switch(ppmode2){ 
-			case 0:  // STRT step to autoreset on
-				display.fillRect(0*32, 11, 33, 22, WHITE);
-				strtFlip = true;
-				break;
-			case 1:  // STP step to autoreset on - 0 = no auto reset
-				display.fillRect(1*32, 11, 33, 22, WHITE);
-				stpFlip = true;
-				break;
-			case 2: 	// FRQ to autoreset on -- every x cycles
-				display.fillRect(2*32, 11, 33, 22, WHITE);
-				frqFlip = true;
-				break;
-			case 3: 	// PRO probability of resetting 0=NEVER 1=Always 2=50%
-				display.fillRect(3*32, 11, 33, 22, WHITE);
-				proFlip = true;
-				break;
-			default:
-				break;
-		}
-
-		// ValueBoxes
-		dispValBox(patternSettings[playingPattern].startstep + 1, 0, strtFlip); // START		
-		dispValBox(patternSettings[playingPattern].autoresetstep, 1, stpFlip); // RESET - END STEP
-		dispValBox(patternSettings[playingPattern].autoresetfreq, 2, frqFlip); // FREQUENCY
-		dispValBox(patternSettings[playingPattern].autoresetprob, 3, proFlip); // PROBABILITY
-
-		// labels formatting
-		u8g2_display.setFontMode(1);  
-		u8g2_display.setFont(FONT_LABELS);
-		u8g2_display.setCursor(0, 0);	
-		dispGridBoxes();
-		// labels
-		u8g2_display.setForegroundColor(BLACK);
-		u8g2_display.setBackgroundColor(WHITE);
-
-		// ValueBoxLabels
-		u8g2centerText("START", 0, hline-2, 32, 10);
-		u8g2centerText("END", 32, hline-2, 32, 10);
-		u8g2centerText("FREQ", 65, hline-2, 32, 10);
-		u8g2centerText("PROB", 97, hline-2, 32, 10);
-		
-	}
-}
-*/
-
 void dispInfoDialog(){			
 	for (int key=0; key < NUM_DIALOGS; key++){ 	
 		if (infoDialog[key].state){ 
@@ -1103,67 +758,6 @@ void dispMode(){
 	}
 	u8g2centerText(displaymode, 86, 20, 44, 32);
 }
-
-/*
-void dispPattLen(){
-	display.setCursor(1, 19);
-	display.setTextSize(1);
-	display.print("LEN");	
-	display.setCursor(29, 18);
-	display.setTextSize(2);
-	display.print(PatternLength(playingPattern));
-}
-void dispPattStrt(){
-	display.setCursor(1, 19);
-	display.setTextSize(1);
-	display.print("SRT");	
-	display.setCursor(29, 18);
-	display.setTextSize(2);
-	display.print(PatternLength(playingPattern));
-}
-
-void dispPatt(){
-	display.setCursor(0, 0);
-	display.setTextSize(1);
-	display.print("PTN");		
-	display.setCursor(30, 0);
-	display.setTextSize(2);
-	display.print(playingPattern+1);
-}
-
-void dispTempo(){
-	display.setCursor(65, 19);
-	display.setTextSize(1);
-	display.print("BPM");		
-	display.setCursor(92, 18);
-	display.setTextSize(2);
-	display.print((int)clockbpm);
-}
-
-void dispPots(){
-	display.setTextSize(1);
-	display.setCursor(0, 0);
-	display.print("CC");
-	display.print(potCC);
-	display.print(": ");
-	display.setCursor(30, 0);
-	display.print(potVal);
-}
-
-void dispOctave(){
-	display.setTextSize(1);
-	display.setCursor(0, 24);
-	display.print("Octave:");
-	display.print((int)octave+4);
-}
-
-void dispNotes(){
-	display.setTextSize(1);
-	display.setCursor(0, 12);
-	display.print("NOTE:");
-	display.print(lastNote[playingPattern][seqPos[playingPattern]]);
-}
-*/
 
 
 // ############## MAIN LOOP ##############
@@ -1244,17 +838,25 @@ void loop() {
 						sqpage = constrain(sqpage + amt, 0, 1);
 					}
 
-					if (sqmode2 == 1){ 
-						// set pattern length
-						SetPatternLength( playingPattern, constrain(PatternLength(playingPattern) + amt, 1, 16) );
+					if (sqmode2 == 0){ 
+						// SET PLAYING PATTERN
+						playingPattern = constrain(playingPattern + amt, 0, 7);
+					} else if (sqmode2 == 1){ 
+						// SET PATTERN LENGTH
+						SetPatternLength( playingPattern, constrain(PatternLength(playingPattern) + amt, 1, 16) );					
+					} else if (sqmode2 == 2){  
+						// SET CLOCK DIV/MULT
+						patternSettings[playingPattern].clockDivMultP = constrain(patternSettings[playingPattern].clockDivMultP + amt, 0, NUM_MULTDIVS-1); 
 					}
-
-					if (sqmode == 1){ 
+					if (sqmode == 0){ 
+						playingPattern = constrain(playingPattern + amt, 0, 7);
+						
+					} else if (sqmode == 1){ 
 						// set transpose
 						transposeSeq(playingPattern, amt); //
 						int newtransp = constrain(transpose + amt, -64, 63); 
 						transpose = newtransp;
-						
+
 					} else if (sqmode == 2){ 
 						// set swing
 						int newswing = constrain(swing + amt, 0, maxswing);
@@ -1293,6 +895,9 @@ void loop() {
 							pppage = constrain(pppage + amt, 0, 2);
 						}
 
+						if (ppmode == 0) { 					// SET PLAYING PATTERN
+							playingPattern = constrain(playingPattern + amt, 0, 7);
+						}	
 						if (ppmode == 1) { 					// SET LENGTH
 							SetPatternLength( playingPattern, constrain(PatternLength(playingPattern) + amt, 1, 16) );
 						}	
@@ -1314,8 +919,8 @@ void loop() {
 							patternSettings[playingPattern].clockDivMultP = constrain(patternSettings[playingPattern].clockDivMultP + amt, 0, NUM_MULTDIVS-1); // set clock div/mult
 						}
 
-						// Pattern Params Page 2
-						//TODO: convert to case statement ??
+						// PATTERN PARAMS PAGE 2
+							//TODO: convert to case statement ??
 						if (ppmode2 == 0) { 					// SET AUTO START STEP
 							patternSettings[playingPattern].startstep = constrain(patternSettings[playingPattern].startstep + amt, 0, patternSettings[playingPattern].len);
 							//patternSettings[playingPattern].startstep--;
