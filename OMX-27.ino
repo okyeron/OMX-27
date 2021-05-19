@@ -611,10 +611,10 @@ void dispGenericMode(int submode, int selected){
 			legends[1] = "---";
 			legends[2] = "---";
 			legends[3] = "---";
-			legendVals[0] = patternSettings[playingPattern].clockDivMultP + 1;			// STRT step to autoreset on
-			legendVals[1] = 0;			// STP step to autoreset on - 0 = no auto reset
-			legendVals[2] = 0; 			// FRQ to autoreset on -- every x cycles
-			legendVals[3] = 0;			// PRO probability of resetting 0=NEVER 1=Always 2=50%
+			legendVals[0] = patternSettings[playingPattern].clockDivMultP + 1;			// RATE FOR CURR PATTERN
+			legendVals[1] = 0;			// TBD
+			legendVals[2] = 0; 			// TBD
+			legendVals[3] = 0;			// TBD
 			break;
 		case SUBMODE_STEPREC:
 			legends[0] = "PTN";
@@ -2041,57 +2041,8 @@ void doStep() {
 		case MODE_S2:
 			if(playing) {
 				for (int j=0; j<NUM_PATTERNS; j++){ // check all patterns for notes to play in time
-				/* // early test conditions:
-				    // this condition is for the pattern we are working on so as not to try to show all TODO FUNCTION
-					if (patternSettings[j].clockDivMultP == 0){ // test with autoreset prob
-						clockDivMult = 1; // default 16th notes
-					} else if (patternSettings[j].clockDivMultP == 1) {
-						clockDivMult = 2; // 8th notes 
-					} else if (patternSettings[j].clockDivMultP == 2) {
-						clockDivMult = 4; // quarter notes
-					} else if (patternSettings[j].clockDivMultP == 3) {
-						clockDivMult = 8; // half notes
-					} else if (patternSettings[j].clockDivMultP == 4) {
-						clockDivMult = 16; // whole notes
-					} else {
-						clockDivMult = 1; // default 16th 
-					}
-				*/
-				/*
-					// PLAYING PATTERN OUTER APPROACH -- not as elegant?
-					if(j == playingPattern){  // for visualized pattern
-						if(micros() >= timePerPattern[j].nextStepTimeP){
-							seqReset();
-							timePerPattern[j].lastStepTimeP = timePerPattern[j].nextStepTimeP;
-							timePerPattern[j].nextStepTimeP += ((step_micros-1)*patternSettings[j].clockDivMultP); //patternSettings[j].clockDivMult); // 16th notes
-							if (!patternSettings[j].mute) {
-								int lastPos = (seqPos[j]+15) % 16;
-								if (lastNote[j][lastPos] > 0){
-									step_off(j, lastPos);
-								}
-								playNote(j);
-							}
-							show_current_step(j);
-							step_ahead(j);
-						}
-					} else { // for non-visible patterns
-						if(micros() >= timePerPattern[j].nextStepTimeP){
-							timePerPattern[j].lastStepTimeP = timePerPattern[j].nextStepTimeP;
-							timePerPattern[j].nextStepTimeP += ((step_micros-1)*patternSettings[j].clockDivMultP); //patternSettings[j].clockDivMult); // 16th notes
-							if (!patternSettings[j].mute) {
-								int lastPos = (seqPos[j]+15) % 16;
-								if (lastNote[j][lastPos] > 0){
-									step_off(j, lastPos);
-								}
-								playNote(j);
-								// step_ahead(j);
-							}
-							//step_ahead(j);
-						}
-					}
-					*/
 
-					// TIME BASED APPROACH
+					// CLOCK PER PATTERN BASED APPROACH
 				  	if(micros() >= timePerPattern[j].nextStepTimeP){
 						//seqReset(); // check for seqReset
 						if(j == playingPattern){  // only trigger reset for current sequence
@@ -2115,36 +2066,6 @@ void doStep() {
 					}
 				}
 
-        /* original code
-				if(micros() >= nextStepTime){
-					seqReset();
-					lastStepTime = nextStepTime;
-					// nextStepTime += step_micros; // original
-					// nextStepTime += ((step_micros-1)*1); // 16th notes - default
-				    // nextStepTime += ((step_micros-1)*16); // whole notes
-					// nextStepTime += ((step_micros-1)*8); // half notes
-					nextStepTime += ((step_micros-1)*4); // quarter notes	
-					// nextStepTime += ((step_micros-1)*2); // 8th notes					
-					// nextStepTime += ((step_micros-1)/2); // 32nd notes
-					//nextStepTime += ((step_micros-1)/4); // 64th notes
-
-
-					// check all patterns for notes to play
-					for (int j=0; j<8; j++){
-						// only play if not muted
-						if (!patternSettings[j].mute) {
-							int lastPos = (seqPos[j]+15) % 16;
-							if (lastNote[j][lastPos] > 0){
-								step_off(j, lastPos);
-							}
-							playNote(j);
-						}
-					}
-					show_current_step(playingPattern);
-					step_ahead(playingPattern);
-
-				}		
-        */	
 			} else {
 				show_current_step(playingPattern);
 			}
