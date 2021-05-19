@@ -1,5 +1,5 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
-// v 1.1.1
+// v 1.2.0
 // 
 // Steven Noreyko, May 2021
 //
@@ -11,7 +11,7 @@
 //  Additional code contributions: Matt Boone, Steven Zydek
 
 // HW_VERSIONS
-#define DEV			1
+#define DEV			0
 #define MIDIONLY	0
 
 
@@ -582,11 +582,12 @@ void dispGenericMode(int submode, int selected){
 		case SUBMODE_SEQ2:
 			legends[0] = "PTN";
 			legends[1] = "LEN";
-			legends[2] = "---"; //"";
+			legends[2] = "RATE"; //"";
 			legends[3] = "---";
 			legendVals[0] = playingPattern+1;
 			legendVals[1] = PatternLength(playingPattern);
-			legendVals[2] = 0;
+			legendVals[2] = -127;
+			legendText[2] = mdivs[patternSettings[playingPattern].clockDivMultP]; 
 			legendVals[3] = 0;
 			break;
 		case SUBMODE_PATTPARAMS:
