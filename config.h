@@ -10,7 +10,7 @@ enum OMXMode
      NUM_OMX_MODES
 };
 
-const OMXMode DEFAULT_MODE = MODE_S1;
+const OMXMode DEFAULT_MODE = MODE_S2;
 
 // Increment this when data layout in EEPROM changes. May need to write version upgrade readers when this changes.
 const uint8_t EEPROM_VERSION = 5;
@@ -60,6 +60,22 @@ const int PPQ = 48;
 
 const char* modes[] = {"MI","S1","S2","OM"};
 const char* infoDialogText[] = {"COPIED","PASTED","CLEARED","RESET","FWD >>","<< REV","SAVED","SAVE?"};
+
+enum multDiv
+{
+     MD_QUART = 0,
+     MD_HALF,
+     MD_ONE,
+     MD_TWO,
+     MD_FOUR,
+     MD_EIGHT,
+     MD_SIXTEEN,
+
+     NUM_MULTDIVS
+};
+
+float multValues[] = {.25, .5, 1, 2, 4, 8, 16};
+const char* mdivs[] = {"1/4", "1/2", "1x", "2x", "4x", "8x", "16x"};
 
 enum Dialogs{
      COPY = 0,
