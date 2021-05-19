@@ -410,7 +410,7 @@ void show_current_step(int patternNum) {
 		stepColor = seqColors[patternNum];
 	}
 
-	if (noteSelect && noteSelection) {
+	if (noteSelect && noteSelection) {				// noteSelect
 		for(int j = 1; j < NUM_STEPS+11; j++){
 			if (j < PatternLength(patternNum)+11){
 				if (j == selectedNote){
@@ -425,7 +425,7 @@ void show_current_step(int patternNum) {
 			}
 		}
 		
-	} else if (stepRecord) {
+	} else if (stepRecord) {						// stepRecord
 		for(int j = 1; j < NUM_STEPS+11; j++){
 			if (j < PatternLength(patternNum)+11){
 				if (j == seqPos[playingPattern]+11){ 
@@ -439,13 +439,13 @@ void show_current_step(int patternNum) {
 				strip.setPixelColor(j, LEDOFF);
 			}
 		}
-		
-	} else {
+				
+	} else { 	// SEQUENCERS 
 		for(int j = 1; j < NUM_STEPS+11; j++){		
 			if (j < PatternLength(patternNum)+11){
 				if (j == 1) {								
 
-					// NOTE SELECT
+					// NOTE SELECT FUNCTION KEY
 					if (keyState[j] && blinkState){
 						strip.setPixelColor(j, LEDOFF);
 					} else {
@@ -453,14 +453,14 @@ void show_current_step(int patternNum) {
 					}
 				} else if (j == 2) {
 
-					// PATTERN PARAMS
+					// PATTERN PARAMS FUNCTION KEY
 					if (keyState[j] && blinkState){
 						strip.setPixelColor(j, LEDOFF);
 					} else {
 						strip.setPixelColor(j, FUNKTWO);
 					}
 					
-				} else if (j == patternNum+3){  			// PATTERN SELECT
+				} else if (j == patternNum+3){ 
 					strip.setPixelColor(j, stepColor); 
 					if (patternParams && blinkState){
 						strip.setPixelColor(j, LEDOFF);						
@@ -475,6 +475,10 @@ void show_current_step(int patternNum) {
 
 		for(int i = 0; i < NUM_STEPS; i++){
 			if (i < PatternLength(patternNum)){
+				if (patternParams){
+					strip.setPixelColor(i+11, SEQMARKER); 
+				}
+
 				if(i % 4 == 0){ // mark groups of 4
 					if(i == seqPos[patternNum]){
 						if (playing){
@@ -503,7 +507,7 @@ void show_current_step(int patternNum) {
 
 					strip.setPixelColor(i+11, stepColor); // step on color
 
-				} else {
+				} else if (!patternParams){
 					strip.setPixelColor(i+11, LEDOFF); 
 				}
 			}
@@ -1130,21 +1134,23 @@ void loop() {
 		} else if (!noteSelect && !patternParams && !stepRecord){  
 			switch(omxMode) { 
 				case MODE_OM: // Organelle Mother
-					if(u.dir() < 0){									// if turn ccw
-						MM::sendControlChange(CC_OM2,0,midiChannel);
-					} else if (u.dir() > 0){							// if turn cw
-						MM::sendControlChange(CC_OM2,127,midiChannel);
-					}    
+					if (mimode == 4) { 
+						if(u.dir() < 0){									// if turn ccw
+							MM::sendControlChange(CC_OM2,0,midiChannel);
+						} else if (u.dir() > 0){							// if turn cw
+							MM::sendControlChange(CC_OM2,127,midiChannel);
+						}    
+					}
   					dirtyDisplay = true;
-					break;
+					//break;
 				case MODE_MIDI: // MIDI			
-					if (mimode == 1) { // set length
+					if (mimode == 1) { 
+						// set channel
 						int newchan = constrain(midiChannel + amt, 1, 16);
 						if (newchan != midiChannel){
 							midiChannel = newchan;
 						}
-						
-					}else {
+					} else if (mimode == 0) { // set length
 						// set octave 
 						newoctave = constrain(octave + amt, -5, 4);
 						if (newoctave != octave){
@@ -1330,7 +1336,8 @@ void loop() {
 //				mimode = !mimode;
 			}
 			if(omxMode == MODE_OM) {
-				MM::sendControlChange(CC_OM1,100,midiChannel);									
+				mimode = (mimode + 1 ) % 5;
+//				MM::sendControlChange(CC_OM1,100,midiChannel);									
 			}
 			if(omxMode == MODE_S1 || omxMode == MODE_S2) {
 				if (noteSelect && noteSelection && !patternParams) {
@@ -1380,7 +1387,7 @@ void loop() {
 			break;
 		case Button::Up: //Serial.println("Button up"); 
 			if(omxMode == MODE_OM) {
-				MM::sendControlChange(CC_OM1,0,midiChannel);											
+//				MM::sendControlChange(CC_OM1,0,midiChannel);											
 			}
 			break;
 		case Button::UpLong: //Serial.println("Button uplong"); 
