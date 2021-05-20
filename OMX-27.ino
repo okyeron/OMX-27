@@ -10,10 +10,6 @@
 //	drjohn for support
 //  Additional code contributions: Matt Boone, Steven Zydek
 
-// HW_VERSIONS
-#define DEV			0
-#define MIDIONLY	0
-
 
 #include <Adafruit_Keypad.h>
 #include <Adafruit_NeoPixel.h>
@@ -308,7 +304,7 @@ void setup() {
 		
 	//CV gate pin
 	pinMode(CVGATE_PIN, OUTPUT); 
-		
+
   	// set DAC Resolution CV/GATE
     RES = 12;
     analogWriteResolution(RES); // set resolution for DAC
@@ -593,13 +589,19 @@ void dispGenericMode(int submode, int selected){
 		case SUBMODE_SEQ2:
 			legends[0] = "PTN";
 			legends[1] = "LEN";
-			legends[2] = "RATE"; //"";
-			legends[3] = "---";
+			legends[2] = "RATE"; 
+			legends[3] = "CV"; //cvPattern
 			legendVals[0] = playingPattern+1;
 			legendVals[1] = PatternLength(playingPattern);
 			legendVals[2] = -127;
 			legendText[2] = mdivs[patternSettings[playingPattern].clockDivMultP]; 
-			legendVals[3] = 0;
+
+			legendVals[3] = -127;
+			if (cvPattern[playingPattern]) {
+				legendText[3] = "On"; 
+			} else {
+				legendText[3] = "Off"; 
+			}
 			break;
 		case SUBMODE_PATTPARAMS:
 			legends[0] = "PTN";
@@ -858,7 +860,11 @@ void loop() {
 					} else if (sqmode2 == 2){  
 						// SET CLOCK DIV/MULT
 						patternSettings[playingPattern].clockDivMultP = constrain(patternSettings[playingPattern].clockDivMultP + amt, 0, NUM_MULTDIVS-1); 
+					} else if (sqmode2 == 3){  
+						// SET CV ON/OFF
+						cvPattern[playingPattern] = constrain(cvPattern[playingPattern] + amt, 0, 1);
 					}
+
 					if (sqmode == 0){ 
 						playingPattern = constrain(playingPattern + amt, 0, 7);
 						
@@ -1643,12 +1649,19 @@ void doStep() {
 					seqReset();
 					// DO STUFF
 
-					int lastPos = (seqPos[playingPattern]+15) % 16;
-					if (lastNote[playingPattern][lastPos] > 0){
-						step_off(playingPattern, lastPos);
+//					int lastPos = (seqPos[playingPattern]+15) % 16;
+//					if (lastNote[playingPattern][lastPos] > 0){
+//						step_off(playingPattern, lastPos);
+//					}
+//					lastStepTime = nextStepTime;
+//					nextStepTime += step_micros;
+
+					timePerPattern[playingPattern].lastPosP = (seqPos[playingPattern]+15) % 16;
+					if (lastNote[playingPattern][timePerPattern[playingPattern].lastPosP] > 0){
+						step_off(playingPattern, timePerPattern[playingPattern].lastPosP);
 					}
-					lastStepTime = nextStepTime;
-					nextStepTime += step_micros;
+					timePerPattern[playingPattern].lastStepTimeP = timePerPattern[playingPattern].nextStepTimeP;
+					timePerPattern[playingPattern].nextStepTimeP += (step_micros)*( multValues[patternSettings[playingPattern].clockDivMultP] ); // calc step based on rate
 
 					playNote(playingPattern);
 //					step_on(playingPattern);
@@ -1682,7 +1695,10 @@ void doStep() {
 							}
 							playNote(j);
 						}
-						show_current_step(playingPattern);
+//						show_current_step(playingPattern);
+						if(j == playingPattern){ // only show selected pattern
+                            show_current_step(playingPattern);
+                        }
 						new_step_ahead(j);
 					}
 				}
@@ -1755,7 +1771,9 @@ void seqNoteOn(int notenum, int velocity, int patternNum){
 		midiKeyState[notenum] = adjnote;
 
 		// CV
-		cvNoteOn(adjnote);
+		if (cvPattern[playingPattern]){
+			cvNoteOn(adjnote);
+		}
 	}
 
 	strip.setPixelColor(notenum, MIDINOTEON);         //  Set pixel's color (in RAM)
@@ -1769,7 +1787,9 @@ void seqNoteOff(int notenum, int patternNum){
 	if (adjnote>=0 && adjnote <128){
 		MM::sendNoteOff(adjnote, 0, PatternChannel(playingPattern));
 		// CV off
-		cvNoteOff();
+		if (cvPattern[playingPattern]){
+			cvNoteOff();
+		}
 	}
 	
 	strip.setPixelColor(notenum, LEDOFF); 
@@ -1782,20 +1802,20 @@ void seqNoteOff(int notenum, int patternNum){
 void playNote(int patternNum) {
 //	Serial.println(stepNoteP[patternNum][seqPos[patternNum]].note); // Debug
 
+	bool sendnoteCV = false;
 	switch (stepNoteP[patternNum][seqPos[patternNum]].stepType) {
 	case STEPTYPE_MUTE:
 		break;      
 
 	case STEPTYPE_PLAY:	// regular note on
+		if (cvPattern[playingPattern]){
+			sendnoteCV = true;
+		}
+
 		seq_velocity = stepNoteP[playingPattern][seqPos[patternNum]].vel;
 
 		noteoff_micros = micros() + ( stepNoteP[patternNum][seqPos[patternNum]].len + 1 )* step_micros ;
-		pendingNoteOffs.insert(stepNoteP[patternNum][seqPos[patternNum]].note, PatternChannel(patternNum), noteoff_micros);
-
-		// ORIG: /// pendingNoteOffs.insert(stepNoteP[patternNum][seqPos[patternNum]].note, PatternChannel(patternNum), micros()+ ( stepNoteP[patternNum][seqPos[patternNum]].len + 1 )*step_micros);
-		
-//		MM::sendNoteOn(stepNoteP[patternNum][seqPos[patternNum]].note, seq_velocity, PatternChannel(patternNum));
-
+		pendingNoteOffs.insert(stepNoteP[patternNum][seqPos[patternNum]].note, PatternChannel(patternNum), noteoff_micros, sendnoteCV );
 
 		// is there swing ? 
 //		if ((swing != 0) && (seqPos[patternNum] % 2 == 0)) {
@@ -1809,7 +1829,8 @@ void playNote(int patternNum) {
 		} else {
 			noteon_micros = micros();
 		}
-		pendingNoteOns.insert(stepNoteP[patternNum][seqPos[patternNum]].note, seq_velocity, PatternChannel(patternNum), noteon_micros );
+			
+		pendingNoteOns.insert(stepNoteP[patternNum][seqPos[patternNum]].note, seq_velocity, PatternChannel(patternNum), noteon_micros, sendnoteCV );
 	
 		// send param locks // {notenum,vel,len,p1,p2,p3,p4,p5}
 		for (int q=0; q<4; q++){	
@@ -1825,9 +1846,10 @@ void playNote(int patternNum) {
 		}
 		lastNote[patternNum][seqPos[patternNum]] = stepNoteP[patternNum][seqPos[patternNum]].note;
 		
-		// CV
-		cvNoteOn(stepNoteP[patternNum][seqPos[patternNum]].note);
-		
+		// CV is sent from pendingNoteOns/pendingNoteOffs
+//		if (cvPattern[playingPattern]){
+//			cvNoteOn(stepNoteP[patternNum][seqPos[patternNum]].note);
+//		}
 		break;
 
 	case STEPTYPE_ACCENT:		 // NOT USED?      

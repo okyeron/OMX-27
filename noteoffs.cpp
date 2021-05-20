@@ -11,13 +11,14 @@ PendingNoteOffs::PendingNoteOffs() {
 }
 
 
-bool PendingNoteOffs::insert(int note, int channel, uint32_t time) {
+bool PendingNoteOffs::insert(int note, int channel, uint32_t time, bool sendCV) {
 	for (int i = 0; i < queueSize; ++i) {
 		if (queue[i].inUse) continue;
 		queue[i].inUse = true;
 		queue[i].note = note;
 		queue[i].time = time;
 		queue[i].channel = channel;
+		queue[i].sendCV = sendCV;
 		return true;
 	}
 	return false; // couldn't find room!
@@ -26,11 +27,11 @@ bool PendingNoteOffs::insert(int note, int channel, uint32_t time) {
 void PendingNoteOffs::play(uint32_t now) {
 	for (int i = 0; i < queueSize; ++i) {
 		if (queue[i].inUse && queue[i].time <= now) {
-		MM::sendNoteOff(queue[i].note, 0, queue[i].channel);
-
-// 		analogWrite(CVPITCH_PIN, 0);
-		digitalWrite(CVGATE_PIN, LOW);
-
+			MM::sendNoteOff(queue[i].note, 0, queue[i].channel);
+//	 		analogWrite(CVPITCH_PIN, 0);
+			if (queue[i].sendCV) {
+				digitalWrite(CVGATE_PIN, LOW);
+			}
 		queue[i].inUse = false;
 		}
 	}
@@ -49,7 +50,7 @@ PendingNoteOns::PendingNoteOns() {
 		queue[i].inUse = false;
 }
 
-bool PendingNoteOns::insert(int note, int velocity, int channel, uint32_t time) {
+bool PendingNoteOns::insert(int note, int velocity, int channel, uint32_t time, bool sendCV) {
 	for (int i = 0; i < queueSize; ++i) {
 		if (queue[i].inUse) continue;
 		queue[i].inUse = true;
@@ -57,6 +58,7 @@ bool PendingNoteOns::insert(int note, int velocity, int channel, uint32_t time) 
 		queue[i].time = time;
 		queue[i].channel = channel;
 		queue[i].velocity = velocity;
+		queue[i].sendCV = sendCV;
 		return true;
 	}
 	return false; // couldn't find room!
@@ -68,12 +70,13 @@ void PendingNoteOns::play(uint32_t now) {
 		if (queue[i].inUse && queue[i].time <= now) {
 		MM::sendNoteOn(queue[i].note, queue[i].velocity, queue[i].channel);
 
-		if (queue[i].note>=midiLowestNote && queue[i].note <midiHightestNote){
-			pCV = static_cast<int>(roundf( (queue[i].note - midiLowestNote) * stepsPerSemitone));
-			digitalWrite(CVGATE_PIN, HIGH);
-			analogWrite(CVPITCH_PIN, pCV);
+		if (queue[i].sendCV){
+			if (queue[i].note>=midiLowestNote && queue[i].note <midiHightestNote){
+				pCV = static_cast<int>(roundf( (queue[i].note - midiLowestNote) * stepsPerSemitone));
+				digitalWrite(CVGATE_PIN, HIGH);
+				analogWrite(CVPITCH_PIN, pCV);
+			}
 		}
-
 		queue[i].inUse = false;
 		}
 	}

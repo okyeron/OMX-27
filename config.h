@@ -1,4 +1,4 @@
-//const int OMX_VERSION = 1.1.0;
+//const int OMX_VERSION = 1.2.0;
 
 enum OMXMode
 {
