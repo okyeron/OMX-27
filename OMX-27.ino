@@ -242,8 +242,19 @@ void readPotentimeters(){
 						sendPots(k, PatternChannel(playingPattern));
 						dirtyDisplay = true;
 						
-					} else if (!noteSelect){
+					} else if (stepRecord){
+						potNum = k;
+						potCC = pots[k];
+						potVal = analogValues[k];
+
+						if (k < 4){ // only store p-lock value for first 4 knobs
+							stepNoteP[playingPattern][seqPos[playingPattern]].params[k] = analogValues[k];
+						}
 						sendPots(k, PatternChannel(playingPattern));
+						dirtyDisplay = true;
+					} else if (!noteSelect && !stepRecord){
+						sendPots(k, PatternChannel(playingPattern));
+
 					}
 					break;  
 
@@ -1227,13 +1238,6 @@ void loop() {
 						int adjnote = notes[thisKey] + (octave * 12);
 						stepNoteP[playingPattern][selectedStep].note = adjnote;
 
-//							Serial.print("seqPos: ");
-//							Serial.println(seqPos[playingPattern]);
-//							Serial.print("selectedStep: ");
-//							Serial.println(selectedStep);
-//							Serial.print("adjnote: ");
-//							Serial.println(adjnote);
-
 						if (!playing){
 							seqNoteOn(thisKey, noteon_velocity, playingPattern);
 						} // see RELEASE events for more
@@ -1245,8 +1249,6 @@ void loop() {
 						if (thisKey == 1) {	
 //							seqResetFlag = true;					// RESET ALL SEQUENCES TO FIRST/LAST STEP 
 																	// MOVED DOWN TO AUX KEY
-//								Serial.print("set seqResetFlag: ");
-//								Serial.println(seqResetFlag);
 
 						} else if (thisKey == 2) { 					// CHANGE PATTERN DIRECTION
 //							patternSettings[playingPattern].reverse = !patternSettings[playingPattern].reverse;
