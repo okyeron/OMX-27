@@ -2260,10 +2260,14 @@ void seqReset(){
 
 void seqStart() {
 	playing = 1;
-	nextStepTime = micros();
-	if (!seqResetFlag) {
-		MM::continueClock();
-	}
+//    nextStepTime = micros();
+    for (int x=0; x<NUM_PATTERNS; x++){
+        timePerPattern[x].nextStepTimeP = micros();
+    }
+
+    if (!seqResetFlag) {
+        MM::continueClock();
+    }
 }
 
 void seqStop() {
