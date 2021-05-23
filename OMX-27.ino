@@ -583,7 +583,7 @@ void dispGenericMode(int submode, int selected){
 			legends[3] = "BPM";
 			legendVals[0] = playingPattern+1;
 			legendVals[1] = (int)transpose;
-			legendVals[2] = (int)swing; //(int)transpose;
+			legendVals[2] = (int)patternSettings[playingPattern].swing; //(int)swing; 
 			legendVals[3] = (int)clockbpm;
 			break;
 		case SUBMODE_SEQ2:
@@ -876,7 +876,7 @@ void loop() {
 
 					} else if (sqmode == 2){ 
 						// set swing
-						int newswing = constrain(swing + amt, 0, maxswing);
+						int newswing = constrain(patternSettings[playingPattern].swing + amt, 0, maxswing);
 						swing = newswing;
 						patternSettings[playingPattern].swing = newswing;
 //						setGlobalSwing(newswing);
