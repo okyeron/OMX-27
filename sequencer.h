@@ -43,7 +43,7 @@ struct PatternSettings {  // 5 bytes
   uint8_t current_cycle : 4; // tracking current cycle of autoreset counter / start it at 1
   uint8_t rndstep : 4; // for random autostep functionality
   uint8_t clockDivMultP : 4;
-  uint8_t swing : 3;
+  uint8_t swing : 4;
   bool reverse : 1;
   bool mute : 1;
   bool autoreset : 1; // whether autoreset is enabled

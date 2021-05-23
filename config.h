@@ -10,7 +10,7 @@ enum OMXMode
      NUM_OMX_MODES
 };
 
-const OMXMode DEFAULT_MODE = MODE_MIDI;
+const OMXMode DEFAULT_MODE = MODE_S2;
 
 // Increment this when data layout in EEPROM changes. May need to write version upgrade readers when this changes.
 const uint8_t EEPROM_VERSION = 5;

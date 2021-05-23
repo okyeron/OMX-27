@@ -877,6 +877,7 @@ void loop() {
 					} else if (sqmode == 2){ 
 						// set swing
 						int newswing = constrain(patternSettings[playingPattern].swing + amt, 0, maxswing);
+//						Serial.println(newswing);
 						swing = newswing;
 						patternSettings[playingPattern].swing = newswing;
 //						setGlobalSwing(newswing);
@@ -1833,7 +1834,8 @@ void playNote(int patternNum) {
 //			noteon_micros = micros();
 //		}
 		if (seqPos[patternNum] % 2 == 0){
-			noteon_micros = micros() + (ppqInterval/2 * patternSettings[patternNum].swing);
+//			noteon_micros = micros() + (ppqInterval/2 * patternSettings[patternNum].swing);
+			noteon_micros = micros() + ((ppqInterval * multValues[patternSettings[patternNum].clockDivMultP])/2 * patternSettings[patternNum].swing);
 		} else {
 			noteon_micros = micros();
 		}
