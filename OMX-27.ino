@@ -579,11 +579,13 @@ void dispGenericMode(int submode, int selected){
 		case SUBMODE_SEQ:
 			legends[0] = "PTN";
 			legends[1] = "TRSP";
-			legends[2] = "SWNG"; //"TRSP";
+			legends[2] = "SWNG"; 
 			legends[3] = "BPM";
 			legendVals[0] = playingPattern+1;
 			legendVals[1] = (int)transpose;
-			legendVals[2] = (int)patternSettings[playingPattern].swing; //(int)swing; 
+//			legendVals[2] = (int)patternSettings[playingPattern].swing; //(int)swing; 
+			legendVals[2] = -127;
+			legendText[2] = swingpcnt[patternSettings[playingPattern].swing]; 
 			legendVals[3] = (int)clockbpm;
 			break;
 		case SUBMODE_SEQ2:
@@ -1815,18 +1817,18 @@ void playNote(int patternNum) {
 		break;      
 
 	case STEPTYPE_PLAY:	// regular note on
-
 		seq_velocity = stepNoteP[playingPattern][seqPos[patternNum]].vel;
 
-		noteoff_micros = micros() + ( stepNoteP[patternNum][seqPos[patternNum]].len + 1 )* step_micros ;
-		pendingNoteOffs.insert(stepNoteP[patternNum][seqPos[patternNum]].note, PatternChannel(patternNum), noteoff_micros, sendnoteCV );
-
-		// is there swing ? 
-//		if ((swing != 0) && (seqPos[patternNum] % 2 == 0)) {
+// is there swing ? 
 //Serial.print("swing:");
 //Serial.print(patternNum);
 //Serial.print(":");
 //Serial.println(patternSettings[patternNum].swing);
+
+
+		noteoff_micros = micros() + ( stepNoteP[patternNum][seqPos[patternNum]].len + 1 )* step_micros ;
+		pendingNoteOffs.insert(stepNoteP[patternNum][seqPos[patternNum]].note, PatternChannel(patternNum), noteoff_micros, sendnoteCV );
+
 
 //		if ((patternSettings[patternNum].swing != 0) && (seqPos[patternNum] % 2 == 0)) {
 //			noteon_micros = micros() + (ppqInterval/2 * patternSettings[patternNum].swing); // constrain(swing, 0, 5);

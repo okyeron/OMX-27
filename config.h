@@ -77,6 +77,10 @@ enum multDiv
 float multValues[] = {.25, .5, 1, 2, 4, 8, 16};
 const char* mdivs[] = {"1/64", "1/32", "1/16", "1/8", "1/4", "1/2", "W"};
 
+const char* swingpcnt[] = {"50%","52%","54%","56%","58%","60%","62%","64%","66%","68%","70%"};
+// const char* swingpcnt[] = {"50%","54%","58%","62%","66%","70%"};
+
+
 enum Dialogs{
      COPY = 0,
      PASTE,
