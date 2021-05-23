@@ -558,7 +558,7 @@ void dispValBox(int v, int16_t n, bool inv){			// n is box 0-3
 
 void dispSymbBox(const char* v, int16_t n, bool inv){			// n is box 0-3
 	invertColor(inv);
-	u8g2centerText(v, n*32, hline*2+6, 32, 22);
+	u8g2centerText(v, n*32, hline*2+5, 32, 22);
 }
 
 void dispGenericMode(int submode, int selected){
