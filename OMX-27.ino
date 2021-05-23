@@ -128,7 +128,7 @@ unsigned long blinkInterval = clockbpm * 2;
 unsigned long longPressInterval = 1500;
 
 uint8_t swing = 0;
-uint8_t maxswing = 5;
+uint8_t maxswing = 10;
 
 bool keyState[27] = {false};
 int midiKeyState[27] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
@@ -1214,19 +1214,16 @@ void loop() {
 							if (keyState[1] && !keyState[2]) { 	
 								copyPattern(playingPattern);
 								infoDialog[COPY].state = true; // copied flag
-//								dialogFlags[0] = true; // copied flag
-								Serial.print("copy: ");
-								Serial.println(playingPattern);
+//								Serial.print("copy: ");
+//								Serial.println(playingPattern);
 							} else if (!keyState[1] && keyState[2]) {
 								pastePattern(playingPattern);
 								infoDialog[PASTE].state = true; // pasted flag
-//								dialogFlags[1] = true; // pasted flag
-								Serial.print("paste: ");
-								Serial.println(playingPattern);							
+//								Serial.print("paste: ");
+//								Serial.println(playingPattern);							
 							} else if (keyState[1] && keyState[2]) {
 								clearPattern(playingPattern);
 								infoDialog[CLEAR].state = true; // cleared flag
-//								dialogFlags[2] = true; // cleared flag
 							}
 						
 							dirtyDisplay = true;
@@ -1266,8 +1263,8 @@ void loop() {
 							
 							// If KEY 1 is down + pattern and not playing = STEP RECORD
 							if (keyState[1] && !playing) { 		
-								Serial.print("step record on - pattern: ");
-								Serial.println(thisKey-3);
+//								Serial.print("step record on - pattern: ");
+//								Serial.println(thisKey-3);
 								playingPattern = thisKey-3;
 								seqPos[playingPattern] = 0;
 								stepRecord = true;
@@ -1579,16 +1576,21 @@ void new_step_ahead(int patternNum) {
 void auto_reset(int p){
 	// should be conditioned on whether we're in S2!!
 	if ( seqPos[p] >= PatternLength(p) || 
-	   (patternSettings[p].autoreset && (patternSettings[p].autoresetstep > (patternSettings[p].startstep) ) && (seqPos[p] >= patternSettings[p].autoresetstep)) ||
-	   (patternSettings[p].autoreset && (patternSettings[p].autoresetstep == 0 ) && (seqPos[p] >= patternSettings[p].rndstep)) ||
-	   (patternSettings[p].reverse && (seqPos[p] < 0)) || // normal reverse reset
-	   (patternSettings[p].reverse && patternSettings[p].autoreset && (seqPos[p] < (patternSettings[p].startstep))) ||
-	   (patternSettings[p].reverse && patternSettings[p].autoreset && (patternSettings[p].autoresetstep == 0 ) && (seqPos[p] >= patternSettings[p].rndstep)) 
-	   ) {
+		(patternSettings[p].autoreset && (patternSettings[p].autoresetstep > (patternSettings[p].startstep) ) && (seqPos[p] >= patternSettings[p].autoresetstep)) ||
+		(patternSettings[p].autoreset && (patternSettings[p].autoresetstep == 0 ) && (seqPos[p] >= patternSettings[p].rndstep)) ||
+		(patternSettings[p].reverse && (seqPos[p] < 0)) || // normal reverse reset
+		(patternSettings[p].reverse && patternSettings[p].autoreset && (seqPos[p] < patternSettings[p].startstep )) // ||
+		//(patternSettings[p].reverse && patternSettings[p].autoreset && (patternSettings[p].autoresetstep == 0 ) && (seqPos[p] < patternSettings[p].rndstep)) 
+		) {
 
 		if (patternSettings[p].reverse) {
 			if (patternSettings[p].autoreset){
-				seqPos[p] = patternSettings[p].autoresetstep-1; // resets pattern in REV	
+//				seqPos[p] = patternSettings[p].autoresetstep-1; // resets pattern in REV	
+				if (patternSettings[p].autoresetstep == 0){
+					seqPos[p] = patternSettings[p].rndstep-1;
+				}else{
+					seqPos[p] = patternSettings[p].autoresetstep-1; // resets pattern in REV
+				}	
 			} else {
 				seqPos[p] = (PatternLength(p)-patternSettings[p].startstep)-1;
 			}
@@ -1825,8 +1827,13 @@ void playNote(int patternNum) {
 //Serial.print(":");
 //Serial.println(patternSettings[patternNum].swing);
 
-		if ((patternSettings[patternNum].swing != 0) && (seqPos[patternNum] % 2 == 0)) {
-			noteon_micros = micros() + (ppqInterval/2 * patternSettings[patternNum].swing); // constrain(swing, 0, 5);
+//		if ((patternSettings[patternNum].swing != 0) && (seqPos[patternNum] % 2 == 0)) {
+//			noteon_micros = micros() + (ppqInterval/2 * patternSettings[patternNum].swing); // constrain(swing, 0, 5);
+//		} else {
+//			noteon_micros = micros();
+//		}
+		if (seqPos[patternNum] % 2 == 0){
+			noteon_micros = micros() + (ppqInterval/2 * patternSettings[patternNum].swing);
 		} else {
 			noteon_micros = micros();
 		}
@@ -1930,9 +1937,7 @@ void rotatePattern(int patternNum, int rot) {
 		return;
 	int size = PatternLength(patternNum);
 	StepNote arr[size];
-	//rot = rot % size;
 	rot = (rot + size) % size;
-//	Serial.println(rot);
 	for (int d = rot, s = 0; s < size; d = (d+1) % size, ++s)
 		arr[d] = stepNoteP[patternNum][s];
 	for (int i = 0; i < size; ++i)
