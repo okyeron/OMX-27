@@ -1,5 +1,5 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
-// v 1.2.0
+// v 1.2.0b6
 // 
 // Steven Noreyko, May 2021
 //
@@ -42,12 +42,12 @@ int temp;
 elapsedMillis msec = 0;
 elapsedMillis pots_msec = 0;
 elapsedMillis dialogTimeout = 0;
-elapsedMicros clksTimer = 0;
-unsigned long clksDelay;
-elapsedMillis keyPressTime[27] = {0};
-//bool step_dirty[] = {false,false,false,false,false,false,false,false};
+elapsedMillis dirtyDisplayTimer = 0;
+unsigned long displayRefreshRate = 60;
+elapsedMicros clksTimer = 0;		// is this still in use?
 
-volatile unsigned long ppqInterval; 
+//unsigned long clksDelay;
+elapsedMillis keyPressTime[27] = {0};
 
 using Micros = unsigned long;
 Micros lastProcessTime;
@@ -56,6 +56,7 @@ Micros lastStepTime;
 volatile unsigned long step_micros; 
 volatile unsigned long noteon_micros;
 volatile unsigned long noteoff_micros;
+volatile unsigned long ppqInterval; 
 
 // ANALOGS
 int analogValues[] = {0,0,0,0,0};		// default values
@@ -128,7 +129,8 @@ unsigned long blinkInterval = clockbpm * 2;
 unsigned long longPressInterval = 1500;
 
 uint8_t swing = 0;
-uint8_t maxswing = 10;
+const int maxswing = 100;
+// int swing_values[maxswing] = {0, 1, 3, 5, 52, 66, 70, 72, 80, 99 }; // 0 = off, <50 early swing , >50 late swing, 99=drunken swing
 
 bool keyState[27] = {false};
 int midiKeyState[27] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
@@ -248,9 +250,8 @@ void readPotentimeters(){
 						}
 						sendPots(k, PatternChannel(playingPattern));
 						dirtyDisplay = true;
-					} else if (!noteSelect && !stepRecord){
+					} else if (!noteSelect || !stepRecord){
 						sendPots(k, PatternChannel(playingPattern));
-
 					}
 					break;  
 
@@ -558,7 +559,7 @@ void dispValBox(int v, int16_t n, bool inv){			// n is box 0-3
 
 void dispSymbBox(const char* v, int16_t n, bool inv){			// n is box 0-3
 	invertColor(inv);
-	u8g2centerText(v, n*32, hline*2+5, 32, 22);
+	u8g2centerText(v, n*32, hline*2+6, 32, 22);
 }
 
 void dispGenericMode(int submode, int selected){
@@ -579,13 +580,12 @@ void dispGenericMode(int submode, int selected){
 		case SUBMODE_SEQ:
 			legends[0] = "PTN";
 			legends[1] = "TRSP";
-			legends[2] = "SWNG"; 
+			legends[2] = "SWNG"; //"TRSP";
 			legends[3] = "BPM";
 			legendVals[0] = playingPattern+1;
 			legendVals[1] = (int)transpose;
-//			legendVals[2] = (int)patternSettings[playingPattern].swing; //(int)swing; 
-			legendVals[2] = -127;
-			legendText[2] = swingpcnt[patternSettings[playingPattern].swing]; 
+			legendVals[2] = (int)patternSettings[playingPattern].swing; //(int)swing; 
+			// legendVals[2] =  swing_values[patternSettings[playingPattern].swing]; 
 			legendVals[3] = (int)clockbpm;
 			break;
 		case SUBMODE_SEQ2:
@@ -816,6 +816,7 @@ void loop() {
 //			Serial.println(modesize);
 	    	newmode = (OMXMode)constrain(newmode + amt, 0, NUM_OMX_MODES - 1);
 	    	dispMode();
+			dirtyDisplayTimer = displayRefreshRate+1;
 	    	dirtyDisplay = true;
 
 		} else if (!noteSelect && !patternParams && !stepRecord){  
@@ -878,8 +879,7 @@ void loop() {
 
 					} else if (sqmode == 2){ 
 						// set swing
-						int newswing = constrain(patternSettings[playingPattern].swing + amt, 0, maxswing);
-//						Serial.println(newswing);
+						int newswing = constrain(patternSettings[playingPattern].swing + amt, 0, maxswing-1); // -1 to deal with display values
 						swing = newswing;
 						patternSettings[playingPattern].swing = newswing;
 //						setGlobalSwing(newswing);
@@ -1119,7 +1119,7 @@ void loop() {
 		if (e.bit.EVENT == KEY_JUST_PRESSED && thisKey == 0 && enc_edit) {
 			// temp - save whenever the 0 key is pressed in encoder edit mode
 			saveToEEPROM();
-			Serial.println("EEPROM saved");
+//			Serial.println("EEPROM saved");
 		}
 		
 		switch(omxMode) {
@@ -1275,9 +1275,6 @@ void loop() {
 
 							// If KEY 2 is down + pattern = PATTERN MUTE
 							} else if (keyState[2]) { 		
-//								Serial.print("mute ");
-//								Serial.println(thisKey);
-//								Serial.println(patternSettings[thisKey].mute);
 								patternSettings[thisKey-3].mute = !patternSettings[thisKey-3].mute;
 								
 							} else {
@@ -1339,19 +1336,14 @@ void loop() {
 							if (keyState[1]) {	
 								seqResetFlag = true;					// RESET ALL SEQUENCES TO FIRST/LAST STEP 
 								infoDialog[RESET].state = true; // reset flag
-//								dialogFlags[3] = true; // reset flag
-								
 
 							} else if (keyState[2]) { 					// CHANGE PATTERN DIRECTION
 								patternSettings[playingPattern].reverse = !patternSettings[playingPattern].reverse;
 								if (patternSettings[playingPattern].reverse) {
 									infoDialog[REV].state = true; // rev direction flag
-//									dialogFlags[5] = true; // rev direction flag
 								} else{
 									infoDialog[FWD].state = true; // fwd direction flag
-//									dialogFlags[4] = true; // fwd direction flag
 								}
-
 							}
 							dirtyDisplay = true;
 						} else {
@@ -1447,7 +1439,6 @@ void loop() {
 			if (dirtyDisplay){			// DISPLAY
 				if (!enc_edit){
 					dispGenericMode(SUBMODE_MIDI, mimode);
-//					dispMidiMode();
 				}
 			}
 			break;
@@ -1458,7 +1449,6 @@ void loop() {
 			if (!enc_edit) {
 				if (dialogTimeout > dialogDuration && dialogTimeout < dialogDuration + 20) {
 					dirtyDisplay = true;
-//					Serial.println("dirty");
 				}
 			}
 	
@@ -1470,7 +1460,6 @@ void loop() {
 						} else if (sqpage == 1){
 							dispGenericMode(SUBMODE_SEQ2, sqmode2);
 						}
-//						dispSeqMode1();
 						dispInfoDialog();
 					}				
 					if (noteSelect) {
@@ -1511,20 +1500,17 @@ void loop() {
 
 	}
 
-//	Serial.print("one:");
-//	Serial.println(checktime1);
 
 	// DISPLAY at end of loop
 
 	if (dirtyDisplay){
-		display.display();
-		dirtyDisplay = false;
+		if (dirtyDisplayTimer > displayRefreshRate) {
+			display.display();
+			dirtyDisplay = false;
+			dirtyDisplayTimer = 0;
+		}
 	}
 	
-//	if (checktime1 >3){
-//		Serial.print("two:");
-//		Serial.println(checktime1);
-//	}
 	
 	// are pixels dirty
 	if (dirtyPixels){
@@ -1567,9 +1553,7 @@ void new_step_ahead(int patternNum) {
 	// step each pattern ahead one place
 		if (patternSettings[patternNum].reverse) {
 			seqPos[patternNum]--;
-			// if (seqPos[j] < 0)
 			auto_reset(patternNum); // determine whether to reset or not based on param settings
-				// seqPos[j] = PatternLength(j)-1;	
 		} else {
 			seqPos[patternNum]++;
 			auto_reset(patternNum); // determine whether to reset or not based on param settings
@@ -1579,16 +1563,15 @@ void new_step_ahead(int patternNum) {
 void auto_reset(int p){
 	// should be conditioned on whether we're in S2!!
 	if ( seqPos[p] >= PatternLength(p) || 
-		(patternSettings[p].autoreset && (patternSettings[p].autoresetstep > (patternSettings[p].startstep) ) && (seqPos[p] >= patternSettings[p].autoresetstep)) ||
-		(patternSettings[p].autoreset && (patternSettings[p].autoresetstep == 0 ) && (seqPos[p] >= patternSettings[p].rndstep)) ||
-		(patternSettings[p].reverse && (seqPos[p] < 0)) || // normal reverse reset
-		(patternSettings[p].reverse && patternSettings[p].autoreset && (seqPos[p] < patternSettings[p].startstep )) // ||
-		//(patternSettings[p].reverse && patternSettings[p].autoreset && (patternSettings[p].autoresetstep == 0 ) && (seqPos[p] < patternSettings[p].rndstep)) 
-		) {
+	   (patternSettings[p].autoreset && (patternSettings[p].autoresetstep > (patternSettings[p].startstep) ) && (seqPos[p] >= patternSettings[p].autoresetstep)) ||
+	   (patternSettings[p].autoreset && (patternSettings[p].autoresetstep == 0 ) && (seqPos[p] >= patternSettings[p].rndstep)) ||
+	   (patternSettings[p].reverse && (seqPos[p] < 0)) || // normal reverse reset
+	   (patternSettings[p].reverse && patternSettings[p].autoreset && (seqPos[p] < patternSettings[p].startstep )) // ||
+	   //(patternSettings[p].reverse && patternSettings[p].autoreset && (patternSettings[p].autoresetstep == 0 ) && (seqPos[p] < patternSettings[p].rndstep)) 
+	   ) {
 
 		if (patternSettings[p].reverse) {
 			if (patternSettings[p].autoreset){
-//				seqPos[p] = patternSettings[p].autoresetstep-1; // resets pattern in REV	
 				if (patternSettings[p].autoresetstep == 0){
 					seqPos[p] = patternSettings[p].rndstep-1;
 				}else{
@@ -1633,7 +1616,6 @@ void step_on(int patternNum){
 //		Serial.print(patternNum);
 //		Serial.println(" step on");
 //	playNote(playingPattern);
-	
 }
 
 void step_off(int patternNum, int position){
@@ -1682,15 +1664,15 @@ void doStep() {
 
 		case MODE_S2:
 			if(playing) {
-			
+				unsigned long playstepmicros = micros();
+				
 				for (int j=0; j<NUM_PATTERNS; j++){ // check all patterns for notes to play in time
 
 					// CLOCK PER PATTERN BASED APPROACH
-				  	if(micros() >= timePerPattern[j].nextStepTimeP){
+				  	if(playstepmicros >= timePerPattern[j].nextStepTimeP){
 
 						seqReset(); // check for seqReset
 						timePerPattern[j].lastStepTimeP = timePerPattern[j].nextStepTimeP;
-//						timePerPattern[j].nextStepTimeP += ((step_micros-1)*(patternSettings[j].clockDivMultP+1)); // calc step based on rate
 						timePerPattern[j].nextStepTimeP += (step_micros)*( multValues[patternSettings[j].clockDivMultP] ); // calc step based on rate
 
 						// only play if not muted
@@ -1808,6 +1790,7 @@ void seqNoteOff(int notenum, int patternNum){
 void playNote(int patternNum) {
 //	Serial.println(stepNoteP[patternNum][seqPos[patternNum]].note); // Debug
 	bool sendnoteCV = false;
+	int rnd_swing;
 	if (cvPattern[patternNum]){
 		sendnoteCV = true;
 	}
@@ -1817,31 +1800,42 @@ void playNote(int patternNum) {
 		break;      
 
 	case STEPTYPE_PLAY:	// regular note on
+
 		seq_velocity = stepNoteP[playingPattern][seqPos[patternNum]].vel;
-
-// is there swing ? 
-//Serial.print("swing:");
-//Serial.print(patternNum);
-//Serial.print(":");
-//Serial.println(patternSettings[patternNum].swing);
-
 
 		noteoff_micros = micros() + ( stepNoteP[patternNum][seqPos[patternNum]].len + 1 )* step_micros ;
 		pendingNoteOffs.insert(stepNoteP[patternNum][seqPos[patternNum]].note, PatternChannel(patternNum), noteoff_micros, sendnoteCV );
 
+		// is there swing ?  debug 
+//			Serial.print("swing:");
+//			Serial.print(patternNum);
+//			Serial.print(":");
+//			Serial.println(patternSettings[patternNum].swing);
 
-//		if ((patternSettings[patternNum].swing != 0) && (seqPos[patternNum] % 2 == 0)) {
-//			noteon_micros = micros() + (ppqInterval/2 * patternSettings[patternNum].swing); // constrain(swing, 0, 5);
-//		} else {
-//			noteon_micros = micros();
-//		}
-		if (seqPos[patternNum] % 2 == 0){
-//			noteon_micros = micros() + (ppqInterval/2 * patternSettings[patternNum].swing);
-			noteon_micros = micros() + ((ppqInterval * multValues[patternSettings[patternNum].clockDivMultP])/2 * patternSettings[patternNum].swing);
+		/*if ((patternSettings[patternNum].swing != 0) && (seqPos[patternNum] % 2 == 0)) {
+			noteon_micros = micros() + (ppqInterval/2 * patternSettings[patternNum].swing); // constrain(swing, 0, 5);
 		} else {
 			noteon_micros = micros();
-		}
-			
+		}*/
+
+//		if (seqPos[patternNum] % 2 == 0){
+		if ((seqPos[patternNum]+1) % 2 == 0){	// why is this +1
+
+			if (patternSettings[patternNum].swing < 99){
+				noteon_micros = micros() + ((ppqInterval * multValues[patternSettings[patternNum].clockDivMultP])/(PPQ / 24) * patternSettings[patternNum].swing); // full range swing					
+//				Serial.println((ppqInterval * multValues[patternSettings[patternNum].clockDivMultP])/(PPQ / 24) * patternSettings[patternNum].swing);					
+//			} else if ((patternSettings[patternNum].swing > 50) && (patternSettings[patternNum].swing < 99)){
+//			   noteon_micros = micros() + ((step_micros * multValues[patternSettings[patternNum].clockDivMultP]) * ((patternSettings[patternNum].swing - 50)* .01) ); // late swing
+//			   Serial.println(((step_micros * multValues[patternSettings[patternNum].clockDivMultP]) * ((patternSettings[patternNum].swing - 50)* .01) ));
+			} else if (patternSettings[patternNum].swing == 99){ // random drunken swing
+				rnd_swing = rand() % 95 + 1; // rand 1 - 95 // randomly apply swing value 
+				noteon_micros = micros() + ((ppqInterval * multValues[patternSettings[patternNum].clockDivMultP])/(PPQ / 24) * rnd_swing);
+			}
+
+		} else {
+			noteon_micros = micros();
+		}	
+
 		pendingNoteOns.insert(stepNoteP[patternNum][seqPos[patternNum]].note, seq_velocity, PatternChannel(patternNum), noteon_micros, sendnoteCV );
 	
 		// send param locks // {notenum,vel,len,p1,p2,p3,p4,p5}
@@ -1864,14 +1858,9 @@ void playNote(int patternNum) {
 //		}
 		break;
 
-	case STEPTYPE_ACCENT:		 // NOT USED?      
-//		MM::sendNoteOn(stepNoteP[patternNum][seqPos[patternNum]][0], seq_acc_velocity, midiChannel);
-//		lastNote[patternNum][seqPos[patternNum]] = stepNoteP[patternNum][seqPos[patternNum]].note;
-//      	stepCV = map (lastNote[patternNum][seqPos[patternNum]], 35, 90, 0, 4096);
-//      	digitalWrite(CVGATE_PIN, HIGH);
-//      	analogWrite(CVPITCH_PIN, stepCV);
+	case STEPTYPE_ACCENT:		 // NOT USED
 
-	case STEPTYPE_RESTART:
+	case STEPTYPE_RESTART:		 // NOT USED?
 		// Skip the remaining notes
 		seqPos[patternNum] = 15;
 		break;
@@ -1915,13 +1904,16 @@ void seqReset(){
 void seqStart() {
 	playing = 1;
 	
-//	nextStepTime = micros();
+
 	for (int x=0; x<NUM_PATTERNS; x++){
 		timePerPattern[x].nextStepTimeP = micros();
+		timePerPattern[x].lastStepTimeP = micros();
 	}
 
 	if (!seqResetFlag) {
 		MM::continueClock();
+//	} else if (seqPos[playingPattern]==0) {
+//		MM::startClock();
 	}
 }
 

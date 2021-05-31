@@ -20,7 +20,7 @@ const uint8_t EEPROM_VERSION = 5;
 #define EEPROM_PATTERN_ADDRESS 	     32
 #define EEPROM_PATTERN_SIZE		     1024      // 8 * 16 * sizeof(StepNote))
 #define EEPROM_PATTERN_SETTINGS_ADDRESS 1056
-#define EEPROM_PATTERN_SETTINGS_SIZE      48      // 8 * sizeof(PatternSettings)
+#define EEPROM_PATTERN_SETTINGS_SIZE      51      // 8 * sizeof(PatternSettings)
 // next address 1104 (was 1096 before clock)
 
 // DEFINE CC NUMBERS FOR POTS // CCS mapped to Organelle Defaults
@@ -56,7 +56,7 @@ int pots[NUM_CC_POTS] = {CC1,CC2,CC3,CC4,CC5};			// the MIDI CC (continuous cont
 
 const int gridh = 32;
 const int gridw = 128;
-const int PPQ = 48;
+const int PPQ = 96;
 
 const char* modes[] = {"MI","S1","S2","OM"};
 const char* infoDialogText[] = {"COPIED","PASTED","CLEARED","RESET","FWD >>","<< REV","SAVED","SAVE?"};
@@ -76,10 +76,6 @@ enum multDiv
 
 float multValues[] = {.25, .5, 1, 2, 4, 8, 16};
 const char* mdivs[] = {"1/64", "1/32", "1/16", "1/8", "1/4", "1/2", "W"};
-
-const char* swingpcnt[] = {"50%","52%","54%","56%","58%","60%","62%","64%","66%","68%","70%"};
-// const char* swingpcnt[] = {"50%","54%","58%","62%","66%","70%"};
-
 
 enum Dialogs{
      COPY = 0,
