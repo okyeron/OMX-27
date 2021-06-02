@@ -47,7 +47,8 @@ struct PatternSettings {  // 5 bytes
   bool reverse : 1;
   bool mute : 1;
   bool autoreset : 1; // whether autoreset is enabled
-}; // 6 bytes
+  bool solo : 1;
+}; // ? bytes
 
 PatternSettings patternSettings[NUM_PATTERNS] = { 
   { 15, 0, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false },
