@@ -29,11 +29,15 @@ int patternDefaultNoteMap[NUM_PATTERNS] = {36, 38, 37, 39, 42, 46, 49, 51}; // d
 enum StepType {
   STEPTYPE_MUTE = 0,
   STEPTYPE_PLAY,
-  STEPTYPE_ACCENT,
-  STEPTYPE_RESTART
+  STEPTYPE_RESTART,
+  STEPTYPE_FWD,
+  STEPTYPE_REV,
+  STEPTYPE_RAND
 };
+const char* stepTypes[6] = {"M", "P", "1", ">>", "<<", "R"};
 
-struct PatternSettings {  // 5 bytes
+
+struct PatternSettings {  // ?? bytes
   uint8_t len : 4;    // 0 - 15, maps to 1 - 16
   uint8_t channel : 4;    // 0 - 15 , maps to channels 1 - 16
   uint8_t startstep : 4; // step to begin pattern. must be < patternlength-1
@@ -51,14 +55,14 @@ struct PatternSettings {  // 5 bytes
 }; // ? bytes
 
 PatternSettings patternSettings[NUM_PATTERNS] = { 
-  { 15, 0, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false },
-  { 15, 1, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false },
-  { 15, 2, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false },
-  { 15, 3, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false },
-  { 15, 4, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false },
-  { 15, 5, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false },
-  { 15, 6, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false },
-  { 15, 7, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false }
+  { 15, 0, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false },
+  { 15, 1, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false },
+  { 15, 2, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false },
+  { 15, 3, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false },
+  { 15, 4, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false },
+  { 15, 5, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false },
+  { 15, 6, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false },
+  { 15, 7, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false }
 };
 
 struct TimePerPattern {
@@ -92,19 +96,15 @@ uint8_t PatternChannel( int pattern ) {
   return patternSettings[pattern].channel + 1;
 }
 
-struct StepNote {           // 8 bytes
+struct StepNote {           // ?? bytes
   uint8_t note : 7;        // 0 - 127
   // uint8_t unused : 1;       // not hooked up. example of how to sneak a bool into the first byte in the structure
-
-  uint8_t vel : 7;         // 0 - 127
-  // uint8_t unused : 1;
-
-  uint8_t len : 4;         // 0 - 15
-  StepType stepType : 2;    // can be 2 bits as long as StepType has 4 values or fewer
-  // uint8_t unused : 2;
-
-  int8_t params[5];       // -128 -> 127
-};
+  uint8_t vel : 7;			// 0 - 127
+  uint8_t len : 4;			// 0 - 15
+  StepType stepType : 3;	// can be 2 bits as long as StepType has 4 values or fewer
+  int8_t params[5];			// -128 -> 127
+  uint8_t prob : 7;			// 0 - 100
+}; // {note, vel, len, STEP_TYPE, {params0, params1, params2, params3}, prob}
 
 // default to GM Drum Map for now
 StepNote stepNoteP[NUM_PATTERNS][NUM_STEPS];
@@ -116,20 +116,20 @@ uint8_t lastNote[NUM_PATTERNS][NUM_STEPS] = {
 uint8_t midiLastNote = 0;
 
 StepNote copyPatternBuffer[NUM_STEPS] = { 
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1} },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1} },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1} },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1} },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1} },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1} },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1} },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1} },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1} },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1} },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1} },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1} },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1} },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1} },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1} },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1} } 
+  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100 },
+  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100 },
+  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100 },
+  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100 },
+  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100 },
+  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100 },
+  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100 },
+  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100 },
+  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100 },
+  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100 },
+  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100 },
+  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100 },
+  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100 },
+  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100 },
+  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100 },
+  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100 } 
 };

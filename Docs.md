@@ -114,7 +114,9 @@ Pretty much the same as MI, but with the following tweaks for Organelle Mother o
 
 AUX-key exits sub-modes  
 
-### Note Select
+### Note Select / Step Parameters
+
+Long press a step key to enter this mode. Here you can change the note values (note number, velocity, note length and octave), set CC parameter values with the knobs, and set step parameters (step probability, trig conditions).
 
 
 ### Step Record
