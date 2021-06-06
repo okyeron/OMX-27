@@ -43,10 +43,10 @@ struct PatternSettings {  // ?? bytes
   uint8_t startstep : 4; // step to begin pattern. must be < patternlength-1
   uint8_t autoresetstep : 4;  // step to reset on / 0 = off
   uint8_t autoresetfreq : 4; // tracking reset iteration if enabled / ie Freq of autoreset. should be renamed
-  uint8_t autoresetprob : 4; // probability of autoreset - 1 is always and totally random if autoreset is 0
   uint8_t current_cycle : 4; // tracking current cycle of autoreset counter / start it at 1
   uint8_t rndstep : 4; // for random autostep functionality
   uint8_t clockDivMultP : 4;
+  uint8_t autoresetprob : 7; // probability of autoreset - 1 is always and totally random if autoreset is 0
   uint8_t swing : 7;
   bool reverse : 1;
   bool mute : 1;

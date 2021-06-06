@@ -990,7 +990,7 @@ void loop() {
 							patternSettings[playingPattern].autoresetfreq = constrain(patternSettings[playingPattern].autoresetfreq + amt, 0, 15); // max every 16 times
 						}	
 						if (ppmode2 == 3) { 					// SET AUTO RESET PROB	
-							patternSettings[playingPattern].autoresetprob = constrain(patternSettings[playingPattern].autoresetprob + amt, 0, 3); // never, 100% - 33%
+							patternSettings[playingPattern].autoresetprob = constrain(patternSettings[playingPattern].autoresetprob + amt, 0, 100); // never, 100% - 33%
 						}						
 						
 					} else if (stepRecord && !enc_edit){	// STEP RECORD MODE
@@ -1668,7 +1668,7 @@ bool probResult(int probSetting){
  	if (probSetting == 0){
  		return false;
  	}
- 	if((rand() % probSetting)==0){
+	if((rand() % 100) < probSetting){ // assumes probSetting is a range 0-100
  		return true;
  	} else {
  		return false;
@@ -1691,6 +1691,9 @@ void step_off(int patternNum, int position){
 }
 
 void doStep() {
+// // probability test
+	bool testProb = probResult(stepNoteP[playingPattern][seqPos[playingPattern]].prob);
+
 	switch(omxMode){
 		case MODE_S1:
 			if(playing) {
@@ -1714,8 +1717,11 @@ void doStep() {
 					timePerPattern[playingPattern].lastStepTimeP = timePerPattern[playingPattern].nextStepTimeP;
 					timePerPattern[playingPattern].nextStepTimeP += (step_micros)*( multValues[patternSettings[playingPattern].clockDivMultP] ); // calc step based on rate
 
-					playNote(playingPattern);
-//					step_on(playingPattern);
+					if (testProb){
+						playNote(playingPattern);
+	//					step_on(playingPattern);
+					}
+
 
 					show_current_step(playingPattern); // show led for step
 					step_ahead(playingPattern);
@@ -1744,7 +1750,9 @@ void doStep() {
 							if (lastNote[j][timePerPattern[j].lastPosP] > 0){
 								step_off(j, timePerPattern[j].lastPosP);
 							}
-							playNote(j);
+							if (testProb){							
+								playNote(j);
+							}
 						}
 //						show_current_step(playingPattern);
 						if(j == playingPattern){ // only show selected pattern
@@ -1865,11 +1873,6 @@ void playNote(int patternNum) {
 		break;      
 
 	case STEPTYPE_PLAY:	// regular note on
-
-// // probability test
-//		bool testProb = probResult(stepNoteP[patternNum][seqPos[patternNum]].prob);
-//		if (testProb){
-//		}
 
 		seq_velocity = stepNoteP[playingPattern][seqPos[patternNum]].vel;
 
