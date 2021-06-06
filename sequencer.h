@@ -35,6 +35,7 @@ enum StepType {
   STEPTYPE_RAND
 };
 const char* stepTypes[6] = {"M", "P", "1", ">>", "<<", "R"};
+// int stepTypeNumber[6] = {STEPTYPE_MUTE,STEPTYPE_PLAY,STEPTYPE_RESTART,STEPTYPE_FWD,STEPTYPE_REV,STEPTYPE_RAND};
 
 
 struct PatternSettings {  // ?? bytes

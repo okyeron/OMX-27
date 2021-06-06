@@ -1040,8 +1040,30 @@ void loop() {
 							stepNoteP[playingPattern][selectedStep].prob = constrain(tempProb + amt, 0, 100); // Note Len between 1-16
 						}	
 						if (nsmode3 == 1) { 				// SET STEP TYPE
-//							auto tempType = stepNoteP[playingPattern][selectedStep].stepType;
-//							stepNoteP[playingPattern][selectedStep].stepType = tempType + amt; // 
+							auto tempType = stepNoteP[playingPattern][selectedStep].stepType + amt;
+							
+							// this is fucking hacky to increment the enum for stepType
+							switch(tempType){
+								case 0:
+									stepNoteP[playingPattern][selectedStep].stepType = STEPTYPE_MUTE;
+									break;
+								case 1:
+									stepNoteP[playingPattern][selectedStep].stepType = STEPTYPE_PLAY;
+									break;
+								case 2:
+									stepNoteP[playingPattern][selectedStep].stepType = STEPTYPE_RESTART;
+									break;
+								case 3:
+									stepNoteP[playingPattern][selectedStep].stepType = STEPTYPE_FWD;
+									break;
+								case 4:
+									stepNoteP[playingPattern][selectedStep].stepType = STEPTYPE_REV;
+									break;
+								case 5:
+									stepNoteP[playingPattern][selectedStep].stepType = STEPTYPE_RAND;
+									break;
+							}								
+//							Serial.println(stepNoteP[playingPattern][selectedStep].stepType);
 						}	
 
 					} else {
