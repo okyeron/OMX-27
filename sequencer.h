@@ -32,10 +32,13 @@ enum StepType {
   STEPTYPE_RESTART,
   STEPTYPE_FWD,
   STEPTYPE_REV,
-  STEPTYPE_RAND
+  STEPTYPE_RANDSTEP,
+  STEPTYPE_RAND,
+
+  STEPTYPE_COUNT
 };
-const char* stepTypes[6] = {"M", "P", "1", ">>", "<<", "R"};
-// int stepTypeNumber[6] = {STEPTYPE_MUTE,STEPTYPE_PLAY,STEPTYPE_RESTART,STEPTYPE_FWD,STEPTYPE_REV,STEPTYPE_RAND};
+const char* stepTypes[STEPTYPE_COUNT] = {"-", "+", "1", ">>", "<<", "#?", "?"};
+// int stepTypeNumber[STEPTYPE_COUNT] = {STEPTYPE_MUTE,STEPTYPE_PLAY,STEPTYPE_RESTART,STEPTYPE_FWD,STEPTYPE_REV,STEPTYPE_RANDSTEP,STEPTYPE_RAND};
 
 
 struct PatternSettings {  // ?? bytes
@@ -133,4 +136,17 @@ StepNote copyPatternBuffer[NUM_STEPS] = {
   {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100 },
   {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100 },
   {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100 } 
+};
+
+int stepCount = 0;
+int ABcondition = 0;
+int trigConditionsAB[36][2] ={
+	{1,1}, 
+    {1,2}, {2,2},
+    {1,3}, {2,3}, {3,3},
+    {1,4}, {2,4}, {3,4}, {4,4},
+    {1,5}, {2,5}, {3,5}, {4,5}, {5,5},
+    {1,6}, {2,6}, {3,6}, {4,6}, {5,6}, {6,6},
+    {1,7}, {2,7}, {3,7}, {4,7}, {5,7}, {6,7}, {7,7},
+    {1,8}, {2,8}, {3,8}, {4,8}, {5,8}, {6,8}, {7,8}, {8,8}
 };

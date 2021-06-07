@@ -116,7 +116,16 @@ AUX-key exits sub-modes
 
 ### Note Select / Step Parameters
 
-Long press a step key to enter this mode. Here you can change the note values (note number, velocity, note length and octave), set CC parameter values with the knobs, and set step parameters (step probability, trig conditions).
+Long press a step key to enter this mode. Here you can change the note values (note number, velocity, note length and octave), set CC parameter values with the knobs, and set step parameters (step events, step probability, trig conditions).
+
+Step Events:
+"-" mute 
+"+" play  
+"1" reset to first step  
+">>" set parttern direction forward  
+"<<" set parttern direction reverse  
+"#?" jump to random step number
+"?" set random event (of any of the previous events) for that one step  
 
 
 ### Step Record

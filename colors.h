@@ -65,6 +65,7 @@ const auto LOWWHITE = 0x202020;
 const auto LEDOFF = 0x000000;
 
 uint32_t stepColor = 0x000000;
+uint32_t muteColor = 0x000000;
 
 // sequencer pattern colors
 const uint32_t seqColors[] = {ORANGE,YELLOW,GREEN,MAGENTA,CYAN,BLUE,LIME,LTPURPLE};
