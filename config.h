@@ -1,4 +1,4 @@
-//const int OMX_VERSION = 1.1.0;
+//const int OMX_VERSION = 1.2.0;
 
 enum OMXMode
 {
@@ -10,18 +10,18 @@ enum OMXMode
      NUM_OMX_MODES
 };
 
-const OMXMode DEFAULT_MODE = MODE_MIDI;
+const OMXMode DEFAULT_MODE = MODE_S2;
 
 // Increment this when data layout in EEPROM changes. May need to write version upgrade readers when this changes.
-const uint8_t EEPROM_VERSION = 4;
+const uint8_t EEPROM_VERSION = 5;
 
 #define EEPROM_HEADER_ADDRESS	          0
 #define EEPROM_HEADER_SIZE		     32
 #define EEPROM_PATTERN_ADDRESS 	     32
 #define EEPROM_PATTERN_SIZE		     1024      // 8 * 16 * sizeof(StepNote))
 #define EEPROM_PATTERN_SETTINGS_ADDRESS 1056
-#define EEPROM_PATTERN_SETTINGS_SIZE      16      // 8 * sizeof(PatternSettings)
-// next address 1072
+#define EEPROM_PATTERN_SETTINGS_SIZE      51      // 8 * sizeof(PatternSettings)
+// next address 1104 (was 1096 before clock)
 
 // DEFINE CC NUMBERS FOR POTS // CCS mapped to Organelle Defaults
 const int CC1 = 21;
@@ -56,10 +56,68 @@ int pots[NUM_CC_POTS] = {CC1,CC2,CC3,CC4,CC5};			// the MIDI CC (continuous cont
 
 const int gridh = 32;
 const int gridw = 128;
-const int PPQ = 24;
+const int PPQ = 96;
 
 const char* modes[] = {"MI","S1","S2","OM"};
-const char* infoDialogText[] = {"COPIED","PASTED","CLEARED","RESET","FWD >>","<< REV"};
+const char* infoDialogText[] = {"COPIED","PASTED","CLEARED","RESET","FWD >>","<< REV","SAVED","SAVE?"};
+
+enum multDiv
+{
+     MD_QUART = 0,
+     MD_HALF,
+     MD_ONE,
+     MD_TWO,
+     MD_FOUR,
+     MD_EIGHT,
+     MD_SIXTEEN,
+
+     NUM_MULTDIVS
+};
+
+float multValues[] = {.25, .5, 1, 2, 4, 8, 16};
+const char* mdivs[] = {"1/64", "1/32", "1/16", "1/8", "1/4", "1/2", "W"};
+
+enum Dialogs{
+     COPY = 0,
+     PASTE,
+     CLEAR,
+     RESET,
+     FWD,
+     REV,
+     SAVED,
+     SAVE,
+
+     NUM_DIALOGS
+};
+struct InfoDialogs {
+  const char*  text;
+  bool state;
+};
+InfoDialogs infoDialog[NUM_DIALOGS] = {
+  {"COPIED", false},
+  {"PASTED", false},
+  {"CLEARED", false},
+  {"RESET", false},
+  {"FWD >>", false},
+  {"<< REV", false},
+  {"SAVED", false},
+  {"SAVE?", false}
+};
+
+enum SubModes
+{
+	SUBMODE_MIDI = 0,
+	SUBMODE_SEQ,
+	SUBMODE_SEQ2,
+	SUBMODE_NOTESEL,
+	SUBMODE_NOTESEL2,
+	SUBMODE_PATTPARAMS,
+	SUBMODE_PATTPARAMS2,
+	SUBMODE_PATTPARAMS3,
+	SUBMODE_STEPREC,
+
+	SUBMODES_COUNT
+};
 
 // KEY SWITCH ROWS/COLS
 const byte ROWS = 5; //five rows

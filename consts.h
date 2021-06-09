@@ -1,5 +1,9 @@
 // OMX-27 shared constants
 
+// HW_VERSIONS
+#define DEV			0
+#define MIDIONLY	0
+
 // HARDWARE Pin for CVGATE_PIN = 13 on beta1 boards, 22 on test/midi, 23 on 1.0
 #if DEV			
 	const int CVGATE_PIN = 13;  
@@ -33,4 +37,3 @@ const int midiHightestNote = midiLowestNote + int(fullRangeV * 12) - 1;
 #define FONT_SYMB_BIG u8g2_font_cu12_h_symbols
 #define FONT_TENFAT u8g2_font_tenfatguys_tf
 #define FONT_BIG u8g2_font_helvB18_tr
-
