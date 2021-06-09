@@ -108,6 +108,7 @@ struct StepNote {           // ?? bytes
   StepType stepType : 3;	// can be 2 bits as long as StepType has 4 values or fewer
   int8_t params[5];			// -128 -> 127
   uint8_t prob : 7;			// 0 - 100
+  uint8_t condition : 6;			// 0 - 36
 }; // {note, vel, len, STEP_TYPE, {params0, params1, params2, params3}, prob}
 
 // default to GM Drum Map for now
@@ -120,25 +121,36 @@ uint8_t lastNote[NUM_PATTERNS][NUM_STEPS] = {
 uint8_t midiLastNote = 0;
 
 StepNote copyPatternBuffer[NUM_STEPS] = { 
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100 },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100 },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100 },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100 },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100 },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100 },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100 },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100 },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100 },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100 },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100 },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100 },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100 },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100 },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100 },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100 } 
+  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0 },
+  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0 },
+  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0 },
+  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0 },
+  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0 },
+  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0 },
+  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0 },
+  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0 },
+  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0 },
+  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0 },
+  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0 },
+  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0 },
+  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0 },
+  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0 },
+  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0 },
+  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0 } 
 };
 
-int stepCount = 0;
+int loopCount[NUM_PATTERNS][NUM_STEPS] = {
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+};
+
+const char* trigConditions[36] = {"1:1","1:2","2:2","1:3","2:3","3:3","1:4","2:4","3:4","4:4","1:5","2:5","3:5","4:5","5:5","1:6","2:6","3:6","4:6","5:6","6:6","1:7","2:7","3:7","4:7","5:7","6:7","7:7","1:8","2:8","3:8","4:8","5:8","6:8","7:8","8:8"};
 int ABcondition = 0;
 int trigConditionsAB[36][2] ={
 	{1,1}, 

@@ -275,7 +275,7 @@ void setup() {
 
 	dialogTimeout = 0;
 	clksTimer = 0;
-		
+	
 	lastProcessTime = micros();
 	resetClocks();
 
@@ -724,16 +724,20 @@ void dispGenericMode(int submode, int selected){
 		case SUBMODE_NOTESEL3:
 			legends[0] = "TYPE";
 			legends[1] = "PROB";
-			legends[2] = "";
+			legends[2] = "COND";
 			legends[3] = "";
 			legendVals[0] = -127;
 			legendText[0] = stepTypes[stepNoteP[playingPattern][selectedStep].stepType];
 
 			legendVals[1] = stepNoteP[playingPattern][selectedStep].prob;
-			legendVals[2] = 0;
+//				String ac = String(trigConditionsAB[][0]);
+//				String bc = String(trigConditionsAB[stepNoteP[playingPattern][selectedStep].condition][1]);
+
+			legendVals[2] = -127;
+			legendText[2] = trigConditions[stepNoteP[playingPattern][selectedStep].condition]; //ac + bc; // trigConditions
+			
 			legendVals[3] = 0;
 			break;
-
 
 		default:
 			break;
@@ -1098,6 +1102,10 @@ void loop() {
 						if (nsmode3 == 1) { 				// SET STEP PROB
 							int tempProb = stepNoteP[playingPattern][selectedStep].prob;
 							stepNoteP[playingPattern][selectedStep].prob = constrain(tempProb + amt, 0, 100); // Note Len between 1-16
+						}	
+						if (nsmode3 == 2) { 				// SET STEP TRIG CONDITION
+							int tempCondition = stepNoteP[playingPattern][selectedStep].condition;
+							stepNoteP[playingPattern][selectedStep].condition = constrain(tempCondition + amt, 0, 35); // 0-32
 						}	
 
 
@@ -1731,20 +1739,34 @@ bool probResult(int probSetting){
  	}
  }
 
-bool evaluate_AB(int condition) {
-	bool shouldTrigger;
-	stepCount = stepCount + 1;
+bool evaluate_AB(int condition, int patternNum) {
+	bool shouldTrigger = false;;
+
+	loopCount[patternNum][seqPos[patternNum]]++;		
+
 	int a = trigConditionsAB[condition][0];
 	int b = trigConditionsAB[condition][1];
 
-	if (stepCount == a){
+//Serial.print (patternNum);
+//Serial.print ("/");
+//Serial.print (seqPos[patternNum]);
+//Serial.print (" ");
+//Serial.print (loopCount[patternNum][seqPos[patternNum]]);
+//Serial.print (" ");
+//Serial.print (a);
+//Serial.print (":");
+//Serial.print (b);
+//Serial.print (" ");
+
+	if (loopCount[patternNum][seqPos[patternNum]] == a){
 		shouldTrigger = true;
 	} else {
 		shouldTrigger = false;
 	}
-	if (stepCount >= b){
-		stepCount = 0;
+	if (loopCount[patternNum][seqPos[patternNum]] >= b){
+		loopCount[patternNum][seqPos[patternNum]] = 0;
 	}
+//	Serial.println (shouldTrigger);
 	return shouldTrigger;
 }
 
@@ -1766,7 +1788,8 @@ void step_off(int patternNum, int position){
 void doStep() {
 // // probability test
 	bool testProb = probResult(stepNoteP[playingPattern][seqPos[playingPattern]].prob);
-
+	
+	
 	switch(omxMode){
 		case MODE_S1:
 			if(playing) {
@@ -1790,7 +1813,7 @@ void doStep() {
 					timePerPattern[playingPattern].lastStepTimeP = timePerPattern[playingPattern].nextStepTimeP;
 					timePerPattern[playingPattern].nextStepTimeP += (step_micros)*( multValues[patternSettings[playingPattern].clockDivMultP] ); // calc step based on rate
 
-					if (testProb){
+					if (testProb){ //  && evaluate_AB(stepNoteP[playingPattern][seqPos[playingPattern]].condition, playingPattern)
 						playNote(playingPattern);
 	//					step_on(playingPattern);
 					}
@@ -1823,8 +1846,10 @@ void doStep() {
 							if (lastNote[j][timePerPattern[j].lastPosP] > 0){
 								step_off(j, timePerPattern[j].lastPosP);
 							}
-							if (testProb){							
-								playNote(j);
+							if (testProb){
+								if (evaluate_AB(stepNoteP[j][seqPos[j]].condition, j)){							
+									playNote(j);
+								}
 							}
 						}
 //						show_current_step(playingPattern);
@@ -1977,7 +2002,7 @@ void playNote(int patternNum) {
 
 	case STEPTYPE_PLAY:	// regular note on
 
-		seq_velocity = stepNoteP[playingPattern][seqPos[patternNum]].vel;
+		seq_velocity = stepNoteP[patternNum][seqPos[patternNum]].vel;
 
 		noteoff_micros = micros() + ( stepNoteP[patternNum][seqPos[patternNum]].len + 1 )* step_micros ;
 		pendingNoteOffs.insert(stepNoteP[patternNum][seqPos[patternNum]].note, PatternChannel(patternNum), noteoff_micros, sendnoteCV );
@@ -2074,7 +2099,10 @@ void transposeSeq(int patternNum, int amt) {
 
 void seqReset(){
 	if (seqResetFlag) {
-		for (int k=0; k<8; k++){
+		for (int k=0; k<NUM_PATTERNS; k++){
+			for (int q=0; q<NUM_STEPS; q++){
+				loopCount[k][q] = 0;
+			}
 			if (patternSettings[k].reverse) { // REVERSE
 				seqPos[k] = PatternLength(k) - 1;
 			} else {
@@ -2147,6 +2175,7 @@ void clearPattern(int patternNum){
 		stepNoteP[patternNum][i].params[3] = -1;
 		stepNoteP[patternNum][i].params[4] = -1;
 		stepNoteP[patternNum][i].prob = 100;
+		stepNoteP[patternNum][i].condition = 0;
 	}
 }
 
@@ -2261,8 +2290,8 @@ void initPatterns( void ) {
 //		49,
 //		51 };
 
-	StepNote stepNote = { 0, 100, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1 }, 100 };
-					// {note, vel, len, STEP_TYPE, {params0, params1, params2, params3, params4}, prob}
+	StepNote stepNote = { 0, 100, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1 }, 100, 0 };
+					// {note, vel, len, STEP_TYPE, {params0, params1, params2, params3, params4}, prob, condition}
 
 	for ( int i=0; i<NUM_PATTERNS; i++ ) {
 		stepNote.note = patternDefaultNoteMap[i];		// Defined in sequencer.h
