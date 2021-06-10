@@ -10,6 +10,12 @@ Conditional trigs (elektron style)
 
 Added led status for step events (pulsing)
 
+Bug fix - disable key long press in pattern params
+
+Bug fix - correct wrong velocity sent in playnote on pattern switching
+
+Pot 5 will change/set step velocity in Step Record
+
 
 ### 1.2.x
 

@@ -1,5 +1,5 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
-// v 1.3.0b2
+// v 1.3.0b6
 // 
 // Steven Noreyko, May 2021
 //
@@ -240,8 +240,9 @@ void readPotentimeters(){
 						
 						if (k < 4){ // only store p-lock value for first 4 knobs
 							stepNoteP[playingPattern][selectedStep].params[k] = analogValues[k];
+							sendPots(k, PatternChannel(playingPattern));
 						}
-						sendPots(k, PatternChannel(playingPattern));
+						sendPots(k, PatternChannel(playingPattern));					
 						dirtyDisplay = true;
 						
 					} else if (stepRecord){
@@ -251,8 +252,10 @@ void readPotentimeters(){
 
 						if (k < 4){ // only store p-lock value for first 4 knobs
 							stepNoteP[playingPattern][seqPos[playingPattern]].params[k] = analogValues[k];
+							sendPots(k, PatternChannel(playingPattern));
+						} else if (k == 4){
+							stepNoteP[playingPattern][seqPos[playingPattern]].vel = analogValues[k]; // SET POT 5 to NOTE VELOCITY HERE
 						}
-						sendPots(k, PatternChannel(playingPattern));
 						dirtyDisplay = true;
 					} else if (!noteSelect || !stepRecord){
 						sendPots(k, PatternChannel(playingPattern));
@@ -1029,7 +1032,7 @@ void loop() {
 						}						
 						
 					} else if (stepRecord && !enc_edit){	// STEP RECORD MODE
-							// SET OCTAVE 
+							// encoder only SETS OCTAVE 
 							newoctave = constrain(octave + amt, -5, 4);
 							if (newoctave != octave){
 								octave = newoctave;
@@ -1521,7 +1524,7 @@ void loop() {
 									dirtyDisplay = true;
 						
 								} else if (j > 10){
-									if (!stepRecord){ 		// IGNORING LONG PRESSES IN STEP RECORD?
+									if (!stepRecord && !patternParams){ 		// IGNORE LONG PRESSES IN STEP RECORD and Pattern Params
 										selectedStep = j - 11; // set noteSelection to this step
 										noteSelect = true;
 										stepSelect = true;
