@@ -70,7 +70,7 @@ Any MX-compatible keycaps will work, but you'll want one designed for backlighti
 I like the DSA profile caps for this application.
 
 [DSA "Dolch" Keyset (Two Shot) "Windowed" Keys](https://pimpmykeyboard.com/dsa-dolch-keyset-two-shot/) (choose the __LED Kit__ option).  
-These come in a pack of 4 keycaps. You will need 7 packs (@ ~$42 total).  
+These come in a pack of 4 keycaps. You will need 7 packs (@ ~$70 total).  
 
 [Flashquark Translucent DSA Keycaps](https://flashquark.com/product/translucent-dsa-keycaps/) (in Black, White, Clear, Blue, Red) - __50 per pack__. ($12.99-$15.99 per pack)
 
