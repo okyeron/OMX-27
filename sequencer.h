@@ -105,15 +105,15 @@ uint8_t PatternChannel( int pattern ) {
 }
 
 struct StepNote {           // ?? bytes
-  uint8_t note : 7;        // 0 - 127
-  // uint8_t unused : 1;       // not hooked up. example of how to sneak a bool into the first byte in the structure
-  uint8_t vel : 7;			// 0 - 127
-  uint8_t len : 4;			// 0 - 15
-  TrigType trig : 1;	// 0 - 1
-  int8_t params[5];			// -128 -> 127
-  uint8_t prob : 7;			// 0 - 100
-  uint8_t condition : 6;			// 0 - 36
+  int8_t params[5];			// -128 -> 127 // 40 bits     // byte 5
+  uint8_t len : 4;			// 0 - 15 //
   StepType stepType : 3;	// can be 2 bits as long as StepType has 4 values or fewer
+  TrigType trig : 1;	// 0 - 1                        // byte 6
+  uint8_t note : 7;        // 0 - 127                 // byte 7
+  uint8_t vel : 7;			// 0 - 127                    // byte 8
+  uint8_t prob : 7;			// 0 - 100                    // byte 9
+  uint8_t condition : 6;			// 0 - 36               // byte 10
+  // uint8_t unused : 1;       // not hooked up. example of how to sneak a bool into the first byte in the structure
 }; // {note, vel, len, TRIG_TYPE, {params0, params1, params2, params3}, prob, cond, STEP_TYPE}
 
 // default to GM Drum Map for now
