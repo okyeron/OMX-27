@@ -27,19 +27,25 @@ bool cvPattern[NUM_PATTERNS] = {1, 0, 0, 0, 0, 0, 0, 0};
 int patternDefaultNoteMap[NUM_PATTERNS] = {36, 38, 37, 39, 42, 46, 49, 51}; // default to GM Drum Map for now
 
 enum StepType {
-  STEPTYPE_MUTE = 0,
-  STEPTYPE_PLAY,
+  STEPTYPE_NONE = 0,
   STEPTYPE_RESTART,
   STEPTYPE_FWD,
   STEPTYPE_REV,
+  STEPTYPE_PONG,
   STEPTYPE_RANDSTEP,
   STEPTYPE_RAND,
 
   STEPTYPE_COUNT
 };
-const char* stepTypes[STEPTYPE_COUNT] = {"-", "+", "1", ">>", "<<", "#?", "?"};
-// int stepTypeNumber[STEPTYPE_COUNT] = {STEPTYPE_MUTE,STEPTYPE_PLAY,STEPTYPE_RESTART,STEPTYPE_FWD,STEPTYPE_REV,STEPTYPE_RANDSTEP,STEPTYPE_RAND};
+const char* stepTypes[STEPTYPE_COUNT] = {"--", "1", ">>", "<<", "<>", "#?", "?"};
+// int stepTypeNumber[STEPTYPE_COUNT] = {STEPTYPE_NONE,STEPTYPE_RESTART,STEPTYPE_FWD,STEPTYPE_REV,STEPTYPE_RANDSTEP,STEPTYPE_RAND};
 
+enum TrigType {
+  TRIGTYPE_MUTE = 0,
+  TRIGTYPE_PLAY,
+
+  TRIGTYPE_COUNT
+};
 
 struct PatternSettings {  // ?? bytes
   uint8_t len : 4;    // 0 - 15, maps to 1 - 16
@@ -105,11 +111,12 @@ struct StepNote {           // ?? bytes
   // uint8_t unused : 1;       // not hooked up. example of how to sneak a bool into the first byte in the structure
   uint8_t vel : 7;			// 0 - 127
   uint8_t len : 4;			// 0 - 15
-  StepType stepType : 3;	// can be 2 bits as long as StepType has 4 values or fewer
+  TrigType trig : 2;	// 0 - 1
   int8_t params[5];			// -128 -> 127
   uint8_t prob : 7;			// 0 - 100
   uint8_t condition : 6;			// 0 - 36
-}; // {note, vel, len, STEP_TYPE, {params0, params1, params2, params3}, prob}
+  StepType stepType : 4;	// can be 2 bits as long as StepType has 4 values or fewer
+}; // {note, vel, len, TRIG_TYPE, {params0, params1, params2, params3}, prob, cond, STEP_TYPE}
 
 // default to GM Drum Map for now
 StepNote stepNoteP[NUM_PATTERNS][NUM_STEPS];
@@ -121,22 +128,22 @@ uint8_t lastNote[NUM_PATTERNS][NUM_STEPS] = {
 uint8_t midiLastNote = 0;
 
 StepNote copyPatternBuffer[NUM_STEPS] = { 
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0 },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0 },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0 },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0 },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0 },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0 },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0 },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0 },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0 },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0 },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0 },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0 },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0 },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0 },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0 },
-  {0, 0, 0, STEPTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0 } 
+  {0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
+  {0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
+  {0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
+  {0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
+  {0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
+  {0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
+  {0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
+  {0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
+  {0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
+  {0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
+  {0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
+  {0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
+  {0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
+  {0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
+  {0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
+  {0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE } 
 };
 
 int loopCount[NUM_PATTERNS][NUM_STEPS] = {
