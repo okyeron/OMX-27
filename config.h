@@ -18,8 +18,8 @@ const uint8_t EEPROM_VERSION = 7;
 #define EEPROM_HEADER_ADDRESS	          0
 #define EEPROM_HEADER_SIZE		     32
 #define EEPROM_PATTERN_ADDRESS 	     32
-#define EEPROM_PATTERN_SIZE		     1280      // 8 * 16 * sizeof(StepNote))
-#define EEPROM_PATTERN_SETTINGS_ADDRESS 1312
+#define EEPROM_PATTERN_SIZE		     1024      // 8 * 16 * sizeof(StepNote))
+#define EEPROM_PATTERN_SETTINGS_ADDRESS 1056
 #define EEPROM_PATTERN_SETTINGS_SIZE      56      // 8 * sizeof(PatternSettings)
 // next address 1104 (was 1096 before clock)
 
