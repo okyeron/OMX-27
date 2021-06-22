@@ -1,5 +1,5 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
-// v 1.3.0b8
+// v 1.4.0b1
 // 
 // Steven Noreyko, May 2021
 //
@@ -128,7 +128,7 @@ uint16_t AMAX;
 int V_scale;
 
 // clock
-float clockbpm = 120;
+float clockbpm = 100;
 float newtempo = clockbpm;
 unsigned long tempoStartTime, tempoEndTime;
 
@@ -184,6 +184,7 @@ void advanceSteps(Micros advance) {
 		pendingNoteOns.play(micros());
 	}
 	timeToNextStep -= advance;
+	
 }
 
 void resetClocks(){
@@ -603,9 +604,9 @@ void show_current_step(int patternNum) {
 
 void dispGridBoxes(){
 	display.fillRect(0, 0, gridw, 10, WHITE);
-	display.drawFastVLine(gridw/4, 0, gridh, INVERSE);
-	display.drawFastVLine(gridw/2, 0, gridh, INVERSE);
-	display.drawFastVLine(gridw*0.75, 0, gridh, INVERSE);
+	display.drawFastVLine(gridw/4, 0, gridh-2, INVERSE);
+	display.drawFastVLine(gridw/2, 0, gridh-2, INVERSE);
+	display.drawFastVLine(gridw*0.75, 0, gridh-2, INVERSE);
 }
 void invertColor(bool flip){
 	if (flip) {
@@ -618,12 +619,12 @@ void invertColor(bool flip){
 }
 void dispValBox(int v, int16_t n, bool inv){			// n is box 0-3
 	invertColor(inv);
-	u8g2centerNumber(v, n*32, hline*2+5, 32, 22);
+	u8g2centerNumber(v, n*32, hline*2+4, 32, 22);
 }
 
 void dispSymbBox(const char* v, int16_t n, bool inv){			// n is box 0-3
 	invertColor(inv);
-	u8g2centerText(v, n*32, hline*2+6, 32, 22);
+	u8g2centerText(v, n*32, hline*2+4, 32, 22);
 }
 
 void dispGenericMode(int submode, int selected){
@@ -785,16 +786,16 @@ void dispGenericMode(int submode, int selected){
 
 	switch(selected){
 		case 0: 	
-			display.fillRect(0*32+2, 11, 29, 21, WHITE);
+			display.fillRect(0*32+2, 11, 29, 19, WHITE);
 			break;
 		case 1: 	//
-			display.fillRect(1*32+2, 11, 29, 21, WHITE);
+			display.fillRect(1*32+2, 11, 29, 19, WHITE);
 			break;
 		case 2: 	//
-			display.fillRect(2*32+2, 11, 29, 21, WHITE);
+			display.fillRect(2*32+2, 11, 29, 19, WHITE);
 			break;
 		case 3: 	//
-			display.fillRect(3*32+2, 11, 29, 21, WHITE);
+			display.fillRect(3*32+2, 11, 29, 19, WHITE);
 			break;
 		case 4: 	//
 			break;
@@ -816,8 +817,22 @@ void dispGenericMode(int submode, int selected){
 			dispValBox(legendVals[j], j, highlight);
 		}
 	}
+	for (int k=0; k<4; k++){
+		if (sqpage == k){
+			dispPageIndicators(k, true);
+		} else {
+			dispPageIndicators(k, false);
+		}
+	}
+	
+}
 
-		
+void dispPageIndicators(int page, bool selected){
+	if (selected){
+		display.fillRect(43 + (page * 12), 30, 6, 2, WHITE);
+	} else {
+		display.fillRect(43 + (page * 12), 31, 6, 1, WHITE);
+	}
 }
 
 void dispInfoDialog(){			
@@ -860,19 +875,23 @@ void dispMode(){
 void loop() {
 	customKeypad.tick();
 	clksTimer = 0;
-	
+
 	Micros now = micros();
 	Micros passed = now - lastProcessTime;
 	lastProcessTime = now;
 	
 	if (passed > 0) {
-		if (playing){
+		if (playing || arpPlaying){
 			advanceClock(passed);
 			advanceSteps(passed);
 		}
 	}
 	doStep();
-	
+	if (ArpPattern[0].Note == 0 ){
+		arpPlaying = false;
+	}
+
+
 	// DISPLAY SETUP
 	display.clearDisplay();
 				
@@ -1260,9 +1279,23 @@ void loop() {
 		}
 		
 		switch(omxMode) {
+			case MODE_ARP:
+				if (e.bit.EVENT == KEY_JUST_PRESSED && thisKey != 0) {
+					arpPlaying = true;
+					// add note to arp queue 
+					arpNoteOn(thisKey, defaultVelocity, midiChannel);
+
+				} else if(e.bit.EVENT == KEY_JUST_RELEASED && thisKey != 0) {
+//					arpPlaying = false;
+					// remove note to arp queue
+					arpNoteOff(thisKey, midiChannel);
+
+				}
+
+
+				break;
 			case MODE_OM: // Organelle
 				// Fall Through		
-				
 			case MODE_MIDI: // MIDI CONTROLLER
 		
 				// ### KEY PRESS EVENTS
@@ -1721,6 +1754,20 @@ void step_back(int patternNum) {
 	}
 }
 
+void arp_step_ahead(int patternNum) {
+	// step each pattern ahead one place
+	if (patternSettings[patternNum].reverse) {
+		seqPos[patternNum]--;
+		if (seqPos[patternNum] < 0)
+			seqPos[patternNum] = PatternLength(patternNum)-1;
+	} else {
+		seqPos[patternNum]++;
+		if (seqPos[patternNum] >= PatternLength(patternNum))
+			seqPos[patternNum] = 0;
+	}
+//	Serial.println(seqPos[patternNum]);
+}
+
 void new_step_ahead(int patternNum) {
 	// step each pattern ahead one place
 		if (patternSettings[patternNum].reverse) {
@@ -1869,6 +1916,16 @@ void doStep() {
 	
 	
 	switch(omxMode){
+		case MODE_ARP:
+			if(arpPlaying) {
+			if(micros() >= nextStepTime){
+				lastStepTime = nextStepTime;
+				nextStepTime += step_micros;
+				playArpNotes(playingPattern);
+				arp_step_ahead(playingPattern);
+			}
+			}
+			break;
 		case MODE_S1:
 			if(playing) {
 				// ############## STEP TIMING ##############
@@ -2033,7 +2090,112 @@ void seqNoteOff(int notenum, int patternNum){
 	dirtyDisplay = true;
 }
 
+void arpNoteOn(int notenum, int velocity, int channel) {
+	int adjnote = notes[notenum] + (octave * 12); // adjust key for octave range
+	if (adjnote>=0 && adjnote <128){
+		midiLastNote = adjnote;
+		// keep track of adjusted note when pressed so that when key is released we send the correct note off message
+		midiKeyState[notenum] = adjnote;
+		
+		// do stuff
+		for (int i = 31; i >=0; i--) {
+			if (i != 0) {
+				ArpPattern[i].Note = ArpPattern[i - 1].Note;
+				ArpPattern[i].Velocity = ArpPattern[i - 1].Velocity;
+				ArpPattern[i].Channel = ArpPattern[i - 1].Channel;
+				ArpPattern[i].Length = ArpPattern[i - 1].Length; // default to 1/16th notes
+				ArpPattern[i].Order = ArpPattern[i - 1].Order; // no order yet
+			} else {
+				ArpPattern[i].Note = adjnote;
+				ArpPattern[i].Velocity = velocity;
+				ArpPattern[i].Channel = channel;
+				ArpPattern[i].Length = 1; // default to 1/16th notes
+				ArpPattern[i].Order = 0; // no order yet
+//				noteon_micros = micros() + (i * step_micros) ;
+//				pendingNoteOns.insert(ArpPattern[i].Note, ArpPattern[i].Velocity, ArpPattern[i].Channel, noteon_micros, false );
+			}
 
+		}
+		int temp_arp_len = 0;
+		for (int i = 0; i < 16; i++) {
+			if (ArpPattern[i].Note != 0 ){
+				temp_arp_len = temp_arp_len + 1;
+			}
+		}
+		patternSettings[playingPattern].len =  temp_arp_len;
+//		Serial.println(patternSettings[playingPattern].len);
+	}
+
+	strip.setPixelColor(notenum, MIDINOTEON);         //  Set pixel's color (in RAM)
+	dirtyPixels = true;	
+	dirtyDisplay = true;
+}
+void arpNoteOff(int notenum, int channel) {
+	int adjnote = notes[notenum] + (octave * 12); // adjust key for octave range
+	if (adjnote>=0 && adjnote <128){
+		// do stuff
+		for (int i = 0; i < PatternLength(playingPattern); i++) {
+			if (ArpPattern[i].Note == adjnote) {
+				noteoff_micros = micros();
+				pendingNoteOffs.insert(ArpPattern[i].Note, ArpPattern[i].Channel, noteoff_micros, false );
+
+				ArpPattern[i].Note = 0;
+				ArpPattern[i].Velocity = 0;
+				ArpPattern[i].Channel = 0;
+				ArpPattern[i].Length = 0; // default to 1/16th notes
+				ArpPattern[i].Order = 0; // no order yet
+			}
+		}
+		patternSettings[playingPattern].len--;
+		if (patternSettings[playingPattern].len < 0)
+			patternSettings[playingPattern].len = 0;
+
+	}
+
+	strip.setPixelColor(notenum, LEDOFF); 
+	dirtyPixels = true;
+	dirtyDisplay = true;
+}
+
+void playArpNotes(int patternNum){
+	int rnd_swing;
+	bool sendnoteCV = false;
+//	Serial.println(seqPos[patternNum]);
+	for (int i = 0; i < PatternLength(patternNum); i++) {
+		if (i == seqPos[patternNum]){
+			if (ArpPattern[i].Note != 0) {
+	Serial.print("adding note ");
+	Serial.println(ArpPattern[i].Note);
+			
+				// remove it from queue first?
+				noteoff_micros = micros() + (ArpPattern[i].Length  * step_micros); // ((i+1) * ( ArpPattern[i].Length  * step_micros));
+				pendingNoteOffs.insert(ArpPattern[i].Note, ArpPattern[i].Channel, noteoff_micros, false );
+
+				noteon_micros = micros() ;
+				pendingNoteOns.insert(ArpPattern[i].Note, ArpPattern[i].Velocity, ArpPattern[i].Channel, noteon_micros, false );
+			}
+		}
+
+//		if (ArpPattern[i].Note != 0) {
+//			noteoff_micros = micros() + (i+1 * ( ArpPattern[i].Length  * step_micros));
+//			pendingNoteOffs.insert(ArpPattern[i].Note, ArpPattern[i].Channel, noteoff_micros, sendnoteCV );
+//
+////			if (seqPos[patternNum] % 2 == 0){
+////				if (patternSettings[patternNum].swing < 99){
+////					noteon_micros = micros() + ((ppqInterval * multValues[patternSettings[patternNum].clockDivMultP])/(PPQ / 24) * patternSettings[patternNum].swing); // full range swing					
+////				} else if (patternSettings[patternNum].swing == 99){ // random drunken swing
+////					rnd_swing = rand() % 95 + 1; // rand 1 - 95 // randomly apply swing value 
+////					noteon_micros = micros() + ((ppqInterval * multValues[patternSettings[patternNum].clockDivMultP])/(PPQ / 24) * rnd_swing);
+////				}
+////			} else {
+////				noteon_micros = micros() + (i * step_micros) ;
+////			}		
+//
+//			noteon_micros = micros() + (i * step_micros) ;
+//			pendingNoteOns.insert(ArpPattern[i].Note, ArpPattern[i].Velocity, ArpPattern[i].Channel, noteon_micros, sendnoteCV );
+//		}
+	}
+}
 // Play a note / step (SEQUENCERS)
 void playNote(int patternNum) {
 //	Serial.println(stepNoteP[patternNum][seqPos[patternNum]].note); // Debug
@@ -2355,8 +2517,8 @@ void initPatterns( void ) {
 //		49,
 //		51 };
 
-	StepNote stepNote = { 0, 100, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1 }, 100, 0, STEPTYPE_NONE };
-					// {note, vel, len, TRIGTYPE, {params0, params1, params2, params3, params4}, prob, condition, STEPTYPE}
+	StepNote stepNote = {0, 0, 0, STEPTYPE_NONE, TRIGTYPE_MUTE, 100, 0, { -1, -1, -1, -1, -1}};
+					// {note, vel, len, STEPTYPE, TRIGTYPE, prob, condition, {params0, params1, params2, params3, params4}}
 
 	for ( int i=0; i<NUM_PATTERNS; i++ ) {
 		stepNote.note = patternDefaultNoteMap[i];		// Defined in sequencer.h

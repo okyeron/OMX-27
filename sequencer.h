@@ -7,6 +7,7 @@ int midiChannel = 1;
 int ticks = 0;            // A tick of the clock
 bool clockSource = 0;     // Internal clock (0), external clock (1)
 bool playing = 0;         // Are we playing?
+bool arpPlaying = 0;         // Are we playing?
 bool paused = 0;          // Are we paused?
 bool stopped = 1;         // Are we stopped? (Must init to 1)
 byte songPosition = 0;    // A place to store the current MIDI song position
@@ -109,12 +110,12 @@ struct StepNote {           // ?? bytes
   // uint8_t unused : 1;       // not hooked up. example of how to sneak a bool into the first byte in the structure
   uint8_t vel : 7;			// 0 - 127
   uint8_t len : 4;			// 0 - 15
-  TrigType trig : 1;	// 0 - 1
-  int8_t params[5];			// -128 -> 127
+  StepType stepType : 3;	// 
+  TrigType trig : 1;		// 0 - 1
   uint8_t prob : 7;			// 0 - 100
   uint8_t condition : 6;			// 0 - 36
-  StepType stepType : 3;	// can be 2 bits as long as StepType has 4 values or fewer
-}; // {note, vel, len, TRIG_TYPE, {params0, params1, params2, params3}, prob, cond, STEP_TYPE}
+  int8_t params[5];			// -128 -> 127	// 40 bits
+}; // {note, vel, len, STEPTYPE, TRIGTYPE, prob, condition, {params0, params1, params2, params3, params4}}
 
 // default to GM Drum Map for now
 StepNote stepNoteP[NUM_PATTERNS][NUM_STEPS];
@@ -126,23 +127,33 @@ uint8_t lastNote[NUM_PATTERNS][NUM_STEPS] = {
 uint8_t midiLastNote = 0;
 
 StepNote copyPatternBuffer[NUM_STEPS] = { 
-  {0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
-  {0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
-  {0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
-  {0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
-  {0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
-  {0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
-  {0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
-  {0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
-  {0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
-  {0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
-  {0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
-  {0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
-  {0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
-  {0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
-  {0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
-  {0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE } 
+  {0, 0, 0, STEPTYPE_NONE, TRIGTYPE_MUTE, 100, 0, { -1, -1, -1, -1, -1}},
+  {0, 0, 0, STEPTYPE_NONE, TRIGTYPE_MUTE, 100, 0, { -1, -1, -1, -1, -1}},
+  {0, 0, 0, STEPTYPE_NONE, TRIGTYPE_MUTE, 100, 0, { -1, -1, -1, -1, -1}},
+  {0, 0, 0, STEPTYPE_NONE, TRIGTYPE_MUTE, 100, 0, { -1, -1, -1, -1, -1}},
+  {0, 0, 0, STEPTYPE_NONE, TRIGTYPE_MUTE, 100, 0, { -1, -1, -1, -1, -1}},
+  {0, 0, 0, STEPTYPE_NONE, TRIGTYPE_MUTE, 100, 0, { -1, -1, -1, -1, -1}},
+  {0, 0, 0, STEPTYPE_NONE, TRIGTYPE_MUTE, 100, 0, { -1, -1, -1, -1, -1}},
+  {0, 0, 0, STEPTYPE_NONE, TRIGTYPE_MUTE, 100, 0, { -1, -1, -1, -1, -1}},
+  {0, 0, 0, STEPTYPE_NONE, TRIGTYPE_MUTE, 100, 0, { -1, -1, -1, -1, -1}},
+  {0, 0, 0, STEPTYPE_NONE, TRIGTYPE_MUTE, 100, 0, { -1, -1, -1, -1, -1}},
+  {0, 0, 0, STEPTYPE_NONE, TRIGTYPE_MUTE, 100, 0, { -1, -1, -1, -1, -1}},
+  {0, 0, 0, STEPTYPE_NONE, TRIGTYPE_MUTE, 100, 0, { -1, -1, -1, -1, -1}},
+  {0, 0, 0, STEPTYPE_NONE, TRIGTYPE_MUTE, 100, 0, { -1, -1, -1, -1, -1}},
+  {0, 0, 0, STEPTYPE_NONE, TRIGTYPE_MUTE, 100, 0, { -1, -1, -1, -1, -1}},
+  {0, 0, 0, STEPTYPE_NONE, TRIGTYPE_MUTE, 100, 0, { -1, -1, -1, -1, -1}},
+  {0, 0, 0, STEPTYPE_NONE, TRIGTYPE_MUTE, 100, 0, { -1, -1, -1, -1, -1}} 
 };
+
+struct ArpData_t {
+	int8_t Note;
+	int8_t Velocity;
+	int8_t Channel;
+	int16_t Length;
+	int Order;
+};
+
+ArpData_t ArpPattern[32];
 
 int loopCount[NUM_PATTERNS][NUM_STEPS] = {
 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},

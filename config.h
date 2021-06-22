@@ -1,4 +1,4 @@
-//const int OMX_VERSION = 1.3.0;
+//const int OMX_VERSION = 1.4.x;
 
 enum OMXMode
 {
@@ -6,11 +6,12 @@ enum OMXMode
      MODE_S1,
      MODE_S2,
      MODE_OM,
+     MODE_ARP,
 
      NUM_OMX_MODES
 };
 
-const OMXMode DEFAULT_MODE = MODE_S2;
+const OMXMode DEFAULT_MODE = MODE_ARP;
 
 // Increment this when data layout in EEPROM changes. May need to write version upgrade readers when this changes.
 const uint8_t EEPROM_VERSION = 7;
@@ -58,7 +59,7 @@ const int gridh = 32;
 const int gridw = 128;
 const int PPQ = 96;
 
-const char* modes[] = {"MI","S1","S2","OM"};
+const char* modes[] = {"MI","S1","S2","OM","ARP"};
 const char* infoDialogText[] = {"COPIED","PASTED","CLEARED","RESET","FWD >>","<< REV","SAVED","SAVE?"};
 
 enum multDiv
