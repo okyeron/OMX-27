@@ -1,5 +1,5 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
-// v 1.3.0b8
+// v 1.3.0
 // 
 // Steven Noreyko, May 2021
 //
@@ -816,8 +816,12 @@ void dispGenericMode(int submode, int selected){
 			dispValBox(legendVals[j], j, highlight);
 		}
 	}
-
+//	dispPageIndicators(1);
 		
+}
+
+void dispPageIndicators(int page){
+	display.fillRect(3*16, 30, 2, 2, WHITE);
 }
 
 void dispInfoDialog(){			

@@ -10,10 +10,10 @@ enum OMXMode
      NUM_OMX_MODES
 };
 
-const OMXMode DEFAULT_MODE = MODE_S2;
+const OMXMode DEFAULT_MODE = MODE_MIDI;
 
 // Increment this when data layout in EEPROM changes. May need to write version upgrade readers when this changes.
-const uint8_t EEPROM_VERSION = 7;
+const uint8_t EEPROM_VERSION = 8;
 
 #define EEPROM_HEADER_ADDRESS	          0
 #define EEPROM_HEADER_SIZE		     32

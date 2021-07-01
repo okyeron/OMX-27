@@ -110,7 +110,7 @@ struct StepNote {           // ?? bytes
   uint8_t vel : 7;			// 0 - 127
   uint8_t len : 4;			// 0 - 15
   TrigType trig : 1;	// 0 - 1
-  int8_t params[5];			// -128 -> 127
+  int8_t params[5];			// -128 -> 127 // 40 bits    
   uint8_t prob : 7;			// 0 - 100
   uint8_t condition : 6;			// 0 - 36
   StepType stepType : 3;	// can be 2 bits as long as StepType has 4 values or fewer
