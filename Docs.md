@@ -114,7 +114,25 @@ Pretty much the same as MI, but with the following tweaks for Organelle Mother o
 
 AUX-key exits sub-modes  
 
-### Note Select
+### Note Select / Step Parameters
+
+Long press a step key to enter this mode. Here you can change the note values (note number, velocity, note length and octave), set CC parameter values with the knobs, and set step parameters (step events, step probability, trig conditions).
+
+Step Events:
+"-" mute 
+"+" play  
+"1" reset to first step  
+">>" set parttern direction forward  
+"<<" set parttern direction reverse  
+"#?" jump to random step number
+"?" set random event (of any of the previous events) for that one step  
+
+Trig conditions - A/B Ratios:  
+Play that step on the A cycle of B total cycles (or bars) of the pattern. Default is 1:1 (every time).
+First number - play step on that cycle thru the pattern
+Second number - resets the counter after that pattern cycle.
+
+So 1:4 would play on the first cycle, not play on the next three and then reset (after the 4th cycle). 3:8 would play only the 3rd cycle and reset after the 8th.
 
 
 ### Step Record
@@ -123,18 +141,29 @@ AUX-key exits sub-modes
 
 Holding F1 + a Pattern Key will enter Step Record Mode.
 
-Enter notes from the keyboard and the sequence step will automatically advance to the next step. Change knob positions to set CC plock for that step.
+Enter notes from the keyboard and the sequence step will automatically advance to the next step. Change knob 1-4 positions to set a CC parameter lock for that step. Knob #5 (far right) will enter a velocity value for that step (there is no visual feedback when entering values from the knobs.
 
-You can use the encoder button to skip a step (making no note change)
+You can short-press the encoder button to skip a step (making no note change). However, you can still record plocks/velocity for that step with the knobs. A nice trick might be to make one pass through playing notes on the keyboard and then make a second pass using the encoder button to add plocks or velocity values for each step.
 
-Short-press encoder to highlight specific params (like octave) and turn the encoder to change the value.
+In this sub-mode, turning the encoder is locked to change octave. The display will show you the current pattern, step, note-value, and octave.
+
+Use the AUX to exit this sub-mode.
 
 
 ### Pattern Params
 
-Long press Pattern Key to enter pattern params
+Long press Pattern Key to enter Pattern Params Mode.
 
-Encoder press to get parameters for length, rotation and MIDI channel for that pattern (blinking)
+Turning the encoder will show different pages of parameters.
+
+A short-press on the encoder will select the active parameter for editing. Press the encoder repeatedly until nothing is selected to change pages.
+
+Page 1: Pattern, pattern length, rotation, midi channel
+
+Page 2 (see Sequence Reset Automation below): Start, end, frequency, probability
+
+Page 3: Rate (sixteenth notes, eight notes, etc.), MIDI solo.
+
 
 Step Keys also set pattern length 
 F1 + pattern will copy pattern  
@@ -143,12 +172,18 @@ F1 + F2 + pattern will clear the pattern back to GM drum map default (and clear 
 
 (you can paste multiple times - paste buffer should stay the same until you copy again)
 
+MIDI solo:
+Set a pattern to MIDI solo and you can play the keyboard while that pattern is selected.
+
+Note - once in MIDI solo, you will only be able to change the active pattern by using the encoder knob.
 
 ### Pattern Params: Sequence Reset Automation
 
 This is located on the second page of pattern parameters
 
 The goal of this "Sequence Reset Automation" feature was developed in the spirit of classic sequencers that can generate more complex sequences from simpler ones by setting any step in a given sequence to trigger a "reset" based on some constraint (i.e., number of cycles, probability, random).
+
+Note - This behavior is a pattern-based solution. You can also execute step-based resets in Step Parameters.
 
 Settings:
 
@@ -158,7 +193,7 @@ Settings:
 
 - FREQ of trigger reset (i.e., every X sequence cycle iterations) 
 
-- PROB of triggering reset (0 = Off, 1 = 100%, 2 = 50%, 3 = 33%) - TODO: change to glyphs 
+- PROB of triggering reset (percentage) 
 
 NOTE: Setting STEP = 0 and PROB = 1 dictates random trigger steps which can lead to interesting results by jumping to random position/step.
 

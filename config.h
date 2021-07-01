@@ -1,4 +1,4 @@
-//const int OMX_VERSION = 1.2.0;
+//const int OMX_VERSION = 1.3.0;
 
 enum OMXMode
 {
@@ -10,17 +10,17 @@ enum OMXMode
      NUM_OMX_MODES
 };
 
-const OMXMode DEFAULT_MODE = MODE_S2;
+const OMXMode DEFAULT_MODE = MODE_MIDI;
 
 // Increment this when data layout in EEPROM changes. May need to write version upgrade readers when this changes.
-const uint8_t EEPROM_VERSION = 5;
+const uint8_t EEPROM_VERSION = 8;
 
 #define EEPROM_HEADER_ADDRESS	          0
 #define EEPROM_HEADER_SIZE		     32
 #define EEPROM_PATTERN_ADDRESS 	     32
 #define EEPROM_PATTERN_SIZE		     1024      // 8 * 16 * sizeof(StepNote))
 #define EEPROM_PATTERN_SETTINGS_ADDRESS 1056
-#define EEPROM_PATTERN_SETTINGS_SIZE      51      // 8 * sizeof(PatternSettings)
+#define EEPROM_PATTERN_SETTINGS_SIZE      56      // 8 * sizeof(PatternSettings)
 // next address 1104 (was 1096 before clock)
 
 // DEFINE CC NUMBERS FOR POTS // CCS mapped to Organelle Defaults
@@ -46,7 +46,7 @@ const int LED_COUNT = 27;
 #if DEV			
 	const int analogPins[] = {23,22,21,20,16};	// DEV/beta boards
 #elif MIDIONLY
-	const int analogPins[] = {23,A10,21,20,16};  // on MIDI only boards
+	const int analogPins[] = {23,22,21,20,16};  // on MIDI only boards - {23,A10,21,20,16} on Bodged MIDI boards
 #else
 	const int analogPins[] = {A10,22,21,20,16}; // on 1.0
 #endif
@@ -111,6 +111,7 @@ enum SubModes
 	SUBMODE_SEQ2,
 	SUBMODE_NOTESEL,
 	SUBMODE_NOTESEL2,
+	SUBMODE_NOTESEL3,
 	SUBMODE_PATTPARAMS,
 	SUBMODE_PATTPARAMS2,
 	SUBMODE_PATTPARAMS3,

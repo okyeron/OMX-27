@@ -18,8 +18,6 @@
 
 * Panic/all-notes-off on AUX?
 
-* Conditional triggers (see grid step on norns )
-
 * what happens on CV when you have multiple keys pressed?
 
 
@@ -29,12 +27,12 @@
  
 * transpose entire sequence (needs testing)
 
+* Conditional triggers (see grid step on norns )
+
 
 # BUGS
 
 * step record skipping steps - sometimes led stays on
-
-* missing note off if octave is changed while holding note on
 
 * CV sequence running all day and twice, the sequencer just paused for awhile and then started up again
 
@@ -46,8 +44,6 @@
 * extend pattern length - needs "pages" (1-8 bar drum patterns)
 
 * knob banks (pots)?
-
-* step probability
 
 * Record CC automation (playback on clock ticks)
 
@@ -67,8 +63,4 @@
 
 * while ??
 
-
-# DONE?
-
-* add octave to note select
-* note length?
+  
