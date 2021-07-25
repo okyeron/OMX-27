@@ -141,7 +141,9 @@ const int maxswing = 100;
 
 bool keyState[27] = {false};
 int midiKeyState[27] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
-
+int midiChannelState[27] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+int rrChannel = 0;
+bool midiRoundRobin = true;
 
 // ENCODER
 Encoder myEncoder(12, 11); 	// encoder pins on hardware
@@ -279,6 +281,9 @@ void readPotentimeters(){
 void setup() {
 	Serial.begin(115200);
 
+	usbMIDI.setHandleNoteOff(OnNoteOff);
+	usbMIDI.setHandleNoteOn(OnNoteOn);
+  
 	dialogTimeout = 0;
 	clksTimer = 0;
 	
@@ -1271,7 +1276,8 @@ void loop() {
 		
 				// ### KEY PRESS EVENTS
 				if (e.bit.EVENT == KEY_JUST_PRESSED && thisKey != 0) {
-					//Serial.println(" pressed");
+//					Serial.print(thisKey);
+//					Serial.println(" pressed");
 					midiNoteOn(thisKey, defaultVelocity, midiChannel);
 
 				} else if(e.bit.EVENT == KEY_JUST_RELEASED && thisKey != 0) {
@@ -1692,6 +1698,56 @@ void loop() {
 } // ######## END MAIN LOOP ########
 
 
+void OnNoteOn(byte channel, byte note, byte velocity) {
+
+// const int midiKeyMap[] = {12,1,13,2,14,15,3,16,4,17,5,18,19,6,20,7,21,22,8,23,9,24,10,25,26};
+	int whatoct = (note / 12);
+	int thisKey;
+	uint32_t keyColor = MIDINOTEON;
+
+	if ( (whatoct % 2) == 0) {
+		thisKey = note - (12 * whatoct);
+	} else {
+		thisKey = note - (12 * whatoct) + 12;
+	}
+	if (whatoct == 0){
+	} else if(whatoct == 1){ keyColor = ORANGE;
+	} else if(whatoct == 2){ keyColor = YELLOW; // ORANGE,YELLOW,GREEN,MAGENTA,CYAN,BLUE,LIME,LTPURPLE
+	} else if(whatoct == 3){ keyColor = GREEN;
+	} else if(whatoct == 4){ keyColor = MAGENTA;
+	} else if(whatoct == 5){ keyColor = CYAN;
+	} else if(whatoct == 6){ keyColor = LIME;
+	} else if(whatoct == 7){ keyColor = CYAN;
+	}
+//switch (whatoct){
+//	case: 0
+//		thisKey = note - (12 * whatoct); 
+//		keyColor = MIDINOTEON;
+//	break;
+//}
+
+  	strip.setPixelColor(midiKeyMap[thisKey], keyColor);         //  Set pixel's color (in RAM)
+//	dirtyPixels = true;	
+	strip.show();
+	dirtyDisplay = true;
+}
+
+void OnNoteOff(byte channel, byte note, byte velocity) {
+	int whatoct = (note / 12);
+	int thisKey;
+	if ( (whatoct % 2) == 0) {
+		thisKey = note - (12 * whatoct);
+	} else {
+		thisKey = note - (12 * whatoct) + 12;
+	}
+//	Serial.println("midi note off");  // Any Note-Off turns off LED
+
+	strip.setPixelColor(midiKeyMap[thisKey], LEDOFF);         //  Set pixel's color (in RAM)
+//	dirtyPixels = true;	
+	strip.show();
+	dirtyDisplay = true;
+}
+
 // ####### SEQENCER FUNCTIONS
 
 void step_ahead(int patternNum) {
@@ -1968,14 +2024,26 @@ void cvNoteOff(){
 // #### MIDI Mode note on/off
 void midiNoteOn(int notenum, int velocity, int channel) {
 	int adjnote = notes[notenum] + (octave * 12); // adjust key for octave range
+
+	rrChannel = (rrChannel % 8) + 1;
+	int adjchan = rrChannel;
+//Serial.println(adjchan);
 	if (adjnote>=0 && adjnote <128){
 		midiLastNote = adjnote;
 
 		// keep track of adjusted note when pressed so that when key is released we send
 		// the correct note off message
 		midiKeyState[notenum] = adjnote;
-
-		MM::sendNoteOn(adjnote, velocity, channel);
+		
+		
+		if (midiRoundRobin) {
+			adjchan = rrChannel;
+		} else {
+			adjchan = channel;
+		}
+		midiChannelState[notenum] = adjchan;
+		MM::sendNoteOn(adjnote, velocity, adjchan);
+		
 		// CV
 		cvNoteOn(adjnote);
 	}
@@ -1988,8 +2056,9 @@ void midiNoteOn(int notenum, int velocity, int channel) {
 void midiNoteOff(int notenum, int channel) {
 	// we use the key state captured at the time we pressed the key to send the correct note off message
 	int adjnote = midiKeyState[notenum];
+	int adjchan = midiChannelState[notenum];
 	if (adjnote>=0 && adjnote <128){
-		MM::sendNoteOff(adjnote, 0, channel);
+		MM::sendNoteOff(adjnote, 0, adjchan);
 		// CV off
 		cvNoteOff();
 	}
