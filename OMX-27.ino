@@ -140,7 +140,10 @@ const int maxswing = 100;
 // int swing_values[maxswing] = {0, 1, 3, 5, 52, 66, 70, 72, 80, 99 }; // 0 = off, <50 early swing , >50 late swing, 99=drunken swing
 
 bool keyState[27] = {false};
-int midiKeyState[27] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+int midiKeyState[27] =     {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+int midiChannelState[27] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+int rrChannel = 0;
+bool midiRoundRobin = false;
 
 
 // ENCODER
@@ -278,6 +281,10 @@ void readPotentimeters(){
 
 void setup() {
 	Serial.begin(115200);
+	
+	// incoming usbMIDI callbacks
+	usbMIDI.setHandleNoteOff(OnNoteOff);
+	usbMIDI.setHandleNoteOn(OnNoteOn);
 
 	dialogTimeout = 0;
 	clksTimer = 0;
@@ -2005,7 +2012,15 @@ void cvNoteOff(){
 //	analogWrite(CVPITCH_PIN, 0);
 }
 
-// #### MIDI Mode note on/off
+// #### Inbound MIDI callbacks
+void OnNoteOn(byte channel, byte note, byte velocity) {
+	cvNoteOn(note);
+}
+void OnNoteOff(byte channel, byte note, byte velocity) {
+	cvNoteOff();
+}
+
+// #### Outbound MIDI Mode note on/off
 void midiNoteOn(int notenum, int velocity, int channel) {
 	int adjnote = notes[notenum] + (octave * 12); // adjust key for octave range
 	if (adjnote>=0 && adjnote <128){
