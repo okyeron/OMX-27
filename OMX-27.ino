@@ -144,7 +144,7 @@ int midiKeyState[27] =     {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
 int midiChannelState[27] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
 int rrChannel = 0;
 bool midiRoundRobin = false;
-
+bool midiInToCV = true;
 
 // ENCODER
 Encoder myEncoder(12, 11); 	// encoder pins on hardware
@@ -2014,10 +2014,52 @@ void cvNoteOff(){
 
 // #### Inbound MIDI callbacks
 void OnNoteOn(byte channel, byte note, byte velocity) {
-	cvNoteOn(note);
+	if (midiInToCV){
+		cvNoteOn(note);
+	}
+	
+	if (omxMode == MODE_MIDI){				
+		int whatoct = (note / 12);
+		int thisKey;
+		uint32_t keyColor = MIDINOTEON;
+
+		if ( (whatoct % 2) == 0) {
+			thisKey = note - (12 * whatoct);
+		} else {
+			thisKey = note - (12 * whatoct) + 12;
+		}
+		if (whatoct == 0){ // ORANGE,YELLOW,GREEN,MAGENTA,CYAN,BLUE,LIME,LTPURPLE
+		} else if(whatoct == 1){ keyColor = ORANGE;
+		} else if(whatoct == 2){ keyColor = YELLOW; 
+		} else if(whatoct == 3){ keyColor = GREEN;
+		} else if(whatoct == 4){ keyColor = MAGENTA;
+		} else if(whatoct == 5){ keyColor = CYAN;
+		} else if(whatoct == 6){ keyColor = LIME;
+		} else if(whatoct == 7){ keyColor = CYAN;
+		}
+		strip.setPixelColor(midiKeyMap[thisKey], keyColor);         //  Set pixel's color (in RAM)
+	//	dirtyPixels = true;	
+		strip.show();
+		dirtyDisplay = true;
+	}
 }
 void OnNoteOff(byte channel, byte note, byte velocity) {
-	cvNoteOff();
+	if (midiInToCV){
+		cvNoteOff();
+	}
+	if (omxMode == MODE_MIDI){
+		int whatoct = (note / 12);
+		int thisKey;
+		if ( (whatoct % 2) == 0) {
+			thisKey = note - (12 * whatoct);
+		} else {
+			thisKey = note - (12 * whatoct) + 12;
+		}
+		strip.setPixelColor(midiKeyMap[thisKey], LEDOFF);         //  Set pixel's color (in RAM)
+	//	dirtyPixels = true;	
+		strip.show();
+		dirtyDisplay = true;
+	}
 }
 
 // #### Outbound MIDI Mode note on/off
