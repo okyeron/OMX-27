@@ -1,4 +1,4 @@
-//const int OMX_VERSION = 1.3.0;
+//const int OMX_VERSION = 1.4.0b1;
 
 enum OMXMode
 {
@@ -10,7 +10,7 @@ enum OMXMode
      NUM_OMX_MODES
 };
 
-const OMXMode DEFAULT_MODE = MODE_MIDI;
+const OMXMode DEFAULT_MODE = MODE_S2;
 
 // Increment this when data layout in EEPROM changes. May need to write version upgrade readers when this changes.
 const uint8_t EEPROM_VERSION = 8;

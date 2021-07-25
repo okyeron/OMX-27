@@ -1,7 +1,7 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
-// v 1.3.0
+// v 1.4.0b1
 // 
-// Steven Noreyko, May 2021
+// Steven Noreyko, Last update: July 2021
 //
 //
 //	Big thanks to: 
@@ -618,17 +618,18 @@ void invertColor(bool flip){
 }
 void dispValBox(int v, int16_t n, bool inv){			// n is box 0-3
 	invertColor(inv);
-	u8g2centerNumber(v, n*32, hline*2+5, 32, 22);
+	u8g2centerNumber(v, n*32, hline*2+3, 32, 22);
 }
 
 void dispSymbBox(const char* v, int16_t n, bool inv){			// n is box 0-3
 	invertColor(inv);
-	u8g2centerText(v, n*32, hline*2+6, 32, 22);
+	u8g2centerText(v, n*32, hline*2+3, 32, 22);
 }
 
 void dispGenericMode(int submode, int selected){
 	const char* legends[4] = {"","","",""};
 	int legendVals[4] = {0,0,0,0};
+	int dispPage = 0;
 	const char* legendText[4] = {"","","",""};
 	switch(submode){
 		case SUBMODE_MIDI:
@@ -651,6 +652,7 @@ void dispGenericMode(int submode, int selected){
 			legendVals[2] = (int)patternSettings[playingPattern].swing; //(int)swing; 
 			// legendVals[2] =  swing_values[patternSettings[playingPattern].swing]; 
 			legendVals[3] = (int)clockbpm;
+			dispPage = 1;
 			break;
 		case SUBMODE_SEQ2:
 			legends[0] = "SOLO";
@@ -668,6 +670,7 @@ void dispGenericMode(int submode, int selected){
 			} else {
 				legendText[3] = "Off"; 
 			}
+			dispPage = 2;
 			break;
 		case SUBMODE_PATTPARAMS:
 			legends[0] = "PTN";
@@ -678,6 +681,7 @@ void dispGenericMode(int submode, int selected){
 			legendVals[1] = PatternLength(playingPattern);
 			legendVals[2] = rotationAmt; //(int)transpose;
 			legendVals[3] = PatternChannel(playingPattern);
+			dispPage = 1;
 			break;
 		case SUBMODE_PATTPARAMS2:
 			legends[0] = "START";
@@ -688,6 +692,7 @@ void dispGenericMode(int submode, int selected){
 			legendVals[1] = patternSettings[playingPattern].autoresetstep;			// STP step to autoreset on - 0 = no auto reset
 			legendVals[2] = patternSettings[playingPattern].autoresetfreq; 			// FRQ to autoreset on -- every x cycles
 			legendVals[3] = patternSettings[playingPattern].autoresetprob;			// PRO probability of resetting 0=NEVER 1=Always 2=50%
+			dispPage = 2;
 			break;
 		case SUBMODE_PATTPARAMS3:
 			legends[0] = "RATE";
@@ -702,6 +707,7 @@ void dispGenericMode(int submode, int selected){
 			legendVals[1] = patternSettings[playingPattern].solo; 
 			legendVals[2] = 0; 			// TBD
 			legendVals[3] = 0;			// TBD
+			dispPage = 3;
 			break;
 		case SUBMODE_STEPREC:
 			legends[0] = "OCT";
@@ -728,6 +734,7 @@ void dispGenericMode(int submode, int selected){
 					legendText[j] = "---"; 
 				}				
 			}
+			dispPage = 1;
 			break;
 		case SUBMODE_NOTESEL2:
 			legends[0] = "NOTE";
@@ -738,6 +745,7 @@ void dispGenericMode(int submode, int selected){
 			legendVals[1] = (int)octave+4;
 			legendVals[2] = stepNoteP[playingPattern][selectedStep].vel; 
 			legendVals[3] = stepNoteP[playingPattern][selectedStep].len + 1;
+			dispPage = 2;
 			break;
 
 		case SUBMODE_NOTESEL3:
@@ -756,6 +764,7 @@ void dispGenericMode(int submode, int selected){
 			legendText[2] = trigConditions[stepNoteP[playingPattern][selectedStep].condition]; //ac + bc; // trigConditions
 			
 			legendVals[3] = 0;
+			dispPage = 3;
 			break;
 
 		default:
@@ -785,16 +794,16 @@ void dispGenericMode(int submode, int selected){
 
 	switch(selected){
 		case 0: 	
-			display.fillRect(0*32+2, 11, 29, 21, WHITE);
+			display.fillRect(0*32+2, 9, 29, 21, WHITE);
 			break;
 		case 1: 	//
-			display.fillRect(1*32+2, 11, 29, 21, WHITE);
+			display.fillRect(1*32+2, 9, 29, 21, WHITE);
 			break;
 		case 2: 	//
-			display.fillRect(2*32+2, 11, 29, 21, WHITE);
+			display.fillRect(2*32+2, 9, 29, 21, WHITE);
 			break;
 		case 3: 	//
-			display.fillRect(3*32+2, 11, 29, 21, WHITE);
+			display.fillRect(3*32+2, 9, 29, 21, WHITE);
 			break;
 		case 4: 	//
 			break;
@@ -816,12 +825,24 @@ void dispGenericMode(int submode, int selected){
 			dispValBox(legendVals[j], j, highlight);
 		}
 	}
-//	dispPageIndicators(1);
-		
+	if (dispPage != 0) {		
+		for (int k=0; k<4; k++){
+			if (dispPage == k+1){
+				dispPageIndicators(k, true);
+			} else {
+				dispPageIndicators(k, false);
+			}
+		}
+	}
+	
 }
 
-void dispPageIndicators(int page){
-	display.fillRect(3*16, 30, 2, 2, WHITE);
+void dispPageIndicators(int page, bool selected){
+	if (selected){
+		display.fillRect(43 + (page * 12), 30, 6, 2, WHITE);
+	} else {
+		display.fillRect(43 + (page * 12), 31, 6, 1, WHITE);
+	}
 }
 
 void dispInfoDialog(){			
@@ -1400,7 +1421,7 @@ void loop() {
 						if (thisKey == 1) {	
 //							seqResetFlag = true;					// RESET ALL SEQUENCES TO FIRST/LAST STEP 
 																	// MOVED DOWN TO AUX KEY
-
+																	
 						} else if (thisKey == 2) { 					// CHANGE PATTERN DIRECTION
 //							patternSettings[playingPattern].reverse = !patternSettings[playingPattern].reverse;
 
@@ -1429,6 +1450,23 @@ void loop() {
 						
 						// SEQUENCE 1-16 STEP KEYS
 						} else if (thisKey > 10) { 
+						
+							if (keyState[1]) { 
+									if (!stepRecord && !patternParams){ 		// IGNORE LONG PRESSES IN STEP RECORD and Pattern Params
+										selectedStep = thisKey - 11; // set noteSelection to this step
+										noteSelect = true;
+										stepSelect = true;
+										noteSelection = true;
+										dirtyDisplay = true;
+										// re-toggle the key you just held
+										if ( stepNoteP[playingPattern][selectedStep].trig == TRIGTYPE_PLAY || stepNoteP[playingPattern][selectedStep].trig == TRIGTYPE_MUTE ) {
+											stepNoteP[playingPattern][selectedStep].trig = ( stepNoteP[playingPattern][selectedStep].trig == TRIGTYPE_PLAY ) ? TRIGTYPE_MUTE : TRIGTYPE_PLAY;
+										}
+									}
+
+							} else if (keyState[2]) {	
+
+							}
 							// TOGGLE STEP ON/OFF
 //							if ( stepNoteP[playingPattern][keyPos].stepType == STEPTYPE_PLAY || stepNoteP[playingPattern][keyPos].stepType == STEPTYPE_MUTE ) {
 //								stepNoteP[playingPattern][keyPos].stepType = ( stepNoteP[playingPattern][keyPos].stepType == STEPTYPE_PLAY ) ? STEPTYPE_MUTE : STEPTYPE_PLAY;
