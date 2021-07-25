@@ -719,6 +719,19 @@ void dispGenericMode(int submode, int selected){
 			legendVals[2] = stepNoteP[playingPattern][selectedStep].note; //(int)transpose;
 			legendVals[3] = playingPattern+1;
 			break;
+
+		case SUBMODE_NOTESEL2:
+			legends[0] = "NOTE";
+			legends[1] = "OCT";
+			legends[2] = "VEL";
+			legends[3] = "LEN";
+			legendVals[0] = stepNoteP[playingPattern][selectedStep].note;
+			legendVals[1] = (int)octave+4;
+			legendVals[2] = stepNoteP[playingPattern][selectedStep].vel; 
+			legendVals[3] = stepNoteP[playingPattern][selectedStep].len + 1;
+			dispPage = 1;
+			break;
+
 		case SUBMODE_NOTESEL:
 			legends[0] = "L-1";
 			legends[1] = "L-2";
@@ -734,18 +747,7 @@ void dispGenericMode(int submode, int selected){
 					legendText[j] = "---"; 
 				}				
 			}
-			dispPage = 1;
-			break;
-		case SUBMODE_NOTESEL2:
-			legends[0] = "NOTE";
-			legends[1] = "OCT";
-			legends[2] = "VEL";
-			legends[3] = "LEN";
-			legendVals[0] = stepNoteP[playingPattern][selectedStep].note;
-			legendVals[1] = (int)octave+4;
-			legendVals[2] = stepNoteP[playingPattern][selectedStep].vel; 
-			legendVals[3] = stepNoteP[playingPattern][selectedStep].len + 1;
-			dispPage = 2;
+			dispPage = 3;
 			break;
 
 		case SUBMODE_NOTESEL3:
