@@ -130,7 +130,11 @@ You may need to gently squeeze the snap-in mounting pins together a tiny bit to 
 
 # STOP HERE AND TEST THINGS
 
-At this point you can flash the firmware and do some testing. The OLED should display something as soon as you plug into USB power.
+At this point you can flash the firmware and do some testing.  
+
+See the instructions here (loading a HEX file) - https://llllllll.co/t/how-to-flash-the-firmware-on-a-teensy-micro-controller/20317 if you don't know how to flash firmware to a Teensy. 
+
+The OLED should display something as soon as you plug into USB power.
 
 ### LED test
 
