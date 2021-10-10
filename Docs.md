@@ -6,7 +6,7 @@ OMX-27 is a MIDI Keyboard and Sequencer. Both USBMIDI and hardware MIDI (via 1.8
 
 Sequencer modes have 8 patterns (tracks). Sequencer modes currently send MIDI clock and transport control (start/stop) by default.
 
-CV pitch output is limited to about 4.5 octaves.
+CV pitch output is limited to about 4.3 octaves.
 
 USBMIDI should be plug-and-play with any USBMIDI compatible host. iPad works great with the camera connection kit. Hardware MIDI TRS jack is switchable between Type-A and Type-B.
 
@@ -19,13 +19,11 @@ Top left key = AUX Key.
 
 Potentiometers are mapped by default to CCs 21, 22, 23, 24 and 7 (volume). These can be changed in the firmware. Hopefully this will be configurable from a device menu or a web-MIDI interface in future.
 
-__Encoder__
+### Encoder
 
-Long press encoder to enable mode change. Turn to switch modes, short-press to enter mode.
+Long press encoder to enable mode change. Turn to change modes, short-press to enter mode.
 
 Within the modes a short press on the encoder will select a parameter to edit.
-
-In some modes, turning the encoder is set to a default param (like octave or BPM)
 
 
 ### Key Switches

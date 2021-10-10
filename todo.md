@@ -51,6 +51,8 @@
 
 * quantization for the live playing.
 
+* quantize record 
+
 * Arps
 
 * midi delay?
@@ -59,6 +61,5 @@
 
 * CV mode - like a single channel version of a 0-control? maybe presets on the "white" keys and LFO's on the "black" 
 
-* while ??
 
   
