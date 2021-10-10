@@ -12,6 +12,7 @@ Adafruit_NeoPixel
 Adafruit_SSD1306  
 Adafruit_GFX_Library  
 U8g2_for_Adafruit_GFX
+Adafruit_FRAM_I2C
 
 Also check to be sure MIDI Library (by Francois Best / fortyseveneffects) is updated to 5.02  
 I believe this is installed by default with Teensyduino 
@@ -19,7 +20,7 @@ I believe this is installed by default with Teensyduino
 Set the following for the Teensy under the Tools menu:  
 
 __Board:  Teensy 3.2/3.1__  
-__USB Type: Serial + MIDI__  
+__USB Type: MIDI__  
 __CPU Speed: 120 MHz (overclock)__
   
 
@@ -29,7 +30,7 @@ __CPU Speed: 120 MHz (overclock)__
 
 ### Build
 
-[Build Guide](<Build.md>)
+[Build Guide](<Build-Kit.md>)
 
 ### Docs
 
