@@ -1,6 +1,6 @@
 # TO-DO 
 
-* Pattern saving
+* Pattern saving w/ FRAM
 
 * Reset copiedFlag/clearedFlag/pastedFlag after some timeout
 
@@ -9,8 +9,6 @@
 * Additional mode for MIDI settings (channel, etc)?
 
 * Change MIDI channel per pattern  
-
-* Clock divide/mulitply?
 
 * UI
 
