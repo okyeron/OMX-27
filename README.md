@@ -26,11 +26,11 @@ __CPU Speed: 120 MHz (overclock)__
 
 ### BOM
 
-[Bill of Materials](<BOM.md>)
+[Bill of Materials](<build/BOM.md>)
 
 ### Build
 
-[Build Guide](<Build-Kit.md>)
+[Build Guide](<build/Build-Kit.md>)
 
 ### Docs
 
