@@ -13,6 +13,8 @@ USBMIDI should be plug-and-play with any USBMIDI compatible host. iPad works gre
 
 ## Layout
 
+<img src="omx27_layout3.png" alt="layout" width="1195" height="480" />
+
 Top left key = AUX Key. 
 
 Potentiometers are mapped by default to CCs 21, 22, 23, 24 and 7 (volume). These can be changed in the firmware. Hopefully this will be configurable from a device menu or a web-MIDI interface in future.
@@ -30,10 +32,7 @@ In some modes, turning the encoder is set to a default param (like octave or BPM
 
 In MIDI modes the key switches work as a normal MIDI keyboard.
 
-In sequencer modes the switches are broken into groups - Function Keys, Pattern Keys and Sequence Step Keys.
-
-
-<img src="omx27_layout2.png" alt="omx27_layout2" width="1017" height="233" />
+In sequencer modes the switches are broken into groups - Function Keys, Pattern Keys and Step Keys.
 
 
 __"Black keys" (sharp/flat keyboard keys)__ 
@@ -49,9 +48,9 @@ Hold a key (long press) to access parameters for that pattern. This is "Pattern 
 
 __"White keys" (bottom row)__
 
-Step Keys - These are your sequencer step on/off keys. 
+Sequencer Step Keys - These are your sequencer step on/off keys. 
 
-Hold a key (long press) to access parameters for that step. This is "Note Select".
+Hold a key (long press) to access parameters for that step. This is "Note Select / Step Parameters". F1 + Step Key is also a quick shortcut.
 
 
 ---
