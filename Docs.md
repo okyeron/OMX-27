@@ -30,10 +30,10 @@ In some modes, turning the encoder is set to a default param (like octave or BPM
 
 In MIDI modes the key switches work as a normal MIDI keyboard.
 
-In sequencer modes the switches are broken into groups - Function Keys, Pattern Keys and Step Keys.
+In sequencer modes the switches are broken into groups - Function Keys, Pattern Keys and Sequence Step Keys.
 
 
-<img src="omx27_layout.png" alt="layout" width="884" height="220" />
+<img src="omx27_layout2.png" alt="omx27_layout2" width="1017" height="233" />
 
 
 __"Black keys" (sharp/flat keyboard keys)__ 
