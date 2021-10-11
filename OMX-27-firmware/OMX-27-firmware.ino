@@ -15,7 +15,6 @@
 #include <Adafruit_NeoPixel.h>
 #include <ResponsiveAnalogRead.h>
 #include <U8g2_for_Adafruit_GFX.h>
-#include <EEPROM.h>
 
 #include "consts.h"
 #include "config.h"
@@ -24,6 +23,7 @@
 #include "ClearUI.h"
 #include "sequencer.h"
 #include "noteoffs.h"
+#include "storage.h"
 
 
 U8G2_FOR_ADAFRUIT_GFX u8g2_display;
@@ -156,6 +156,8 @@ Adafruit_Keypad customKeypad = Adafruit_Keypad( makeKeymap(keys), rowPins, colPi
 // Declare NeoPixel strip object
 Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 
+// setup EEPROM/FRAM storage
+Storage* storage = Storage::initStorage();
 
 // ####### CLOCK/TIMING #######
 
@@ -325,7 +327,7 @@ void setup() {
     analogWrite(CVPITCH_PIN, 0);
 
 	// Load from EEPROM
-	bool bLoaded = loadFromEEPROM();
+	bool bLoaded = loadFromStorage();
 	if ( !bLoaded )
 	{
 		// Failed to load due to initialized EEPROM or version mismatch
@@ -2386,20 +2388,20 @@ void initPatterns( void ) {
 
 void saveHeader( void ) {
 	// 1 byte for EEPROM version
-	EEPROM.update( EEPROM_HEADER_ADDRESS + 0, EEPROM_VERSION );
+	storage->write( EEPROM_HEADER_ADDRESS + 0, EEPROM_VERSION );
 
 	// 1 byte for mode
-	EEPROM.update( EEPROM_HEADER_ADDRESS + 1, (uint8_t)omxMode );
+	storage->write( EEPROM_HEADER_ADDRESS + 1, (uint8_t)omxMode );
 
 	// 1 byte for the active pattern
-	EEPROM.update( EEPROM_HEADER_ADDRESS + 2, (uint8_t)playingPattern );
+	storage->write( EEPROM_HEADER_ADDRESS + 2, (uint8_t)playingPattern );
 
 	// 1 byte for Midi channel
 	uint8_t unMidiChannel = (uint8_t)( midiChannel - 1 );
-	EEPROM.update( EEPROM_HEADER_ADDRESS + 3, unMidiChannel );
+	storage->write( EEPROM_HEADER_ADDRESS + 3, unMidiChannel );
 
 	for ( int i=0; i<NUM_CC_POTS; i++ ) {
-		EEPROM.update( EEPROM_HEADER_ADDRESS + 4 + i, pots[i] );
+		storage->write( EEPROM_HEADER_ADDRESS + 4 + i, pots[i] );
 	}
 
 	// 23 bytes remain for header fields
@@ -2408,7 +2410,7 @@ void saveHeader( void ) {
 // returns true if the header contained initialized data
 // false means we shouldn't attempt to load any further information
 bool loadHeader( void ) {
-	uint8_t version = EEPROM.read( EEPROM_HEADER_ADDRESS + 0 );
+	uint8_t version = storage->read( EEPROM_HEADER_ADDRESS + 0 );
 
 	//char buf[64];
 	//snprintf( buf, sizeof(buf), "EEPROM Header Version is %d\n", version );
@@ -2426,16 +2428,16 @@ bool loadHeader( void ) {
 		// for now, return false will essentially reset the state
 		return false;
 	}
-	
-	omxMode = (OMXMode)EEPROM.read( EEPROM_HEADER_ADDRESS + 1 );
 
-	playingPattern = EEPROM.read( EEPROM_HEADER_ADDRESS + 2 );
+	omxMode = (OMXMode)storage->read( EEPROM_HEADER_ADDRESS + 1 );
 
-	uint8_t unMidiChannel = EEPROM.read( EEPROM_HEADER_ADDRESS + 3 );
+	playingPattern = storage->read( EEPROM_HEADER_ADDRESS + 2 );
+
+	uint8_t unMidiChannel = storage->read( EEPROM_HEADER_ADDRESS + 3 );
 	midiChannel = unMidiChannel + 1;
 
 	for ( int i=0; i<NUM_CC_POTS; i++ ) {
-		pots[i] = EEPROM.read( EEPROM_HEADER_ADDRESS + 4 + i );
+		pots[i] = storage->read( EEPROM_HEADER_ADDRESS + 4 + i );
 	}
 
 	return true;
@@ -2445,12 +2447,12 @@ void savePatterns( void ) {
 	int nLocalAddress = EEPROM_PATTERN_ADDRESS;
 	int s = sizeof( StepNote );
 
-	// EEPROM.put uses EEPROM.update under the hood, so writes here of the same data are a noop
+	// storage->writeObject uses storage->write under the hood, so writes here of the same data are a noop
 
 	// for each pattern
 	for ( int i=0; i<NUM_PATTERNS; i++ ) {
 		for ( int j=0; j<NUM_STEPS; j++ ) {
-			EEPROM.put( nLocalAddress, stepNoteP[i][j] );
+			storage->writeObject( nLocalAddress, stepNoteP[i][j] );
 			nLocalAddress += s;
 		}
 	}
@@ -2460,7 +2462,7 @@ void savePatterns( void ) {
 
 	// save pattern settings
 	for ( int i=0; i<NUM_PATTERNS; i++ ) {
-		EEPROM.put( nLocalAddress, patternSettings[i] );
+		storage->writeObject( nLocalAddress, patternSettings[i] );
 		nLocalAddress += s;
 	}
 }
@@ -2474,7 +2476,7 @@ void loadPatterns( void ) {
 	// for each pattern
 	for ( int i=0; i<NUM_PATTERNS; i++ ) {
 		for ( int j=0; j<NUM_STEPS; j++ ) {
-			EEPROM.get( nLocalAddress, stepNoteP[i][j] );
+			storage->readObject( nLocalAddress, stepNoteP[i][j] );
 			nLocalAddress += s;
 		}
 	}
@@ -2484,20 +2486,20 @@ void loadPatterns( void ) {
 
 	// load pattern length
 	for ( int i=0; i<NUM_PATTERNS; i++ ) {
-		EEPROM.get( nLocalAddress, patternSettings[i] );
+		storage->readObject( nLocalAddress, patternSettings[i] );
 		nLocalAddress += s;
 	}
 }
 
 // currently saves everything ( mode + patterns )
-void saveToEEPROM( void ) {
+void saveToStorage( void ) {
 	//Serial.println( "saving..." );
 	saveHeader();
 	savePatterns();
 }
 
 // currently loads everything ( mode + patterns )
-bool loadFromEEPROM( void ) {
+bool loadFromStorage( void ) {
 	// This load can happen soon after Serial.begin - enable this 'wait for Serial' if you need to Serial.print during loading
 	//while( !Serial );
 
@@ -2509,7 +2511,7 @@ bool loadFromEEPROM( void ) {
 		//Serial.println( "loading patterns" );
 		loadPatterns();
 		return true;
-	}	
+	}
 
 	return false;
 }
