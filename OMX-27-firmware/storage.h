@@ -11,7 +11,7 @@ enum StorageType {
 // abstract storage class
 class Storage {
 public:
-  Storage() {}
+  static Storage* initStorage();
 
   virtual int capacity() = 0;
 
@@ -19,29 +19,48 @@ public:
   virtual void write(size_t address, uint8_t val) = 0;
   virtual uint8_t read(size_t address) = 0;
 
-// template reader/writer implementation copied from Adafruit_FRAM_I2C which implements them both
-// in terms of reading/writing bytes
+  // template reader/writer implementation copied from Adafruit_FRAM_I2C which implements them both
+  // in terms of reading/writing bytes
 
-template <class T> uint16_t writeObject(uint16_t addr, const T &value) {
-  const byte *p = (const byte *)(const void *)&value;
-  uint16_t n;
-  for (n = 0; n < sizeof(value); n++)
-  {
-    write(addr++, *p++);
+  /**************************************************************************/
+  /*!
+      @brief  Write any object to memory
+      @param addr
+                  The 16-bit address to write to in EEPROM memory
+      @param value  The templated object we will be writing
+      @returns    The number of bytes written
+  */
+  /**************************************************************************/
+  template <class T> uint16_t writeObject(uint16_t addr, const T &value) {
+    const byte *p = (const byte *)(const void *)&value;
+    uint16_t n;
+    for (n = 0; n < sizeof(value); n++)
+    {
+      write(addr++, *p++);
+    }
+    return n;
   }
-  return n;
-}
 
-template <class T> uint16_t readObject(uint16_t addr, T &value) {
-  byte *p = (byte *)(void *)&value;
-  uint16_t n;
-  for (n = 0; n < sizeof(value); n++) {
-    *p++ = read(addr++);
+  /**************************************************************************/
+  /*!
+      @brief Read any object from memory
+      @param addr
+                  The 16-bit address to write to in EEPROM memory
+      @param value  The address of the templated object we will be writing INTO
+      @returns    The number of bytes read
+  */
+  /**************************************************************************/
+  template <class T> uint16_t readObject(uint16_t addr, T &value) {
+    byte *p = (byte *)(void *)&value;
+    uint16_t n;
+    for (n = 0; n < sizeof(value); n++) {
+      *p++ = read(addr++);
+    }
+    return n;
   }
-  return n;
-}
 
-  static Storage* initStorage();
+protected:
+  Storage() {}
 };
 
 class EEPROMStorage : public Storage {
@@ -56,7 +75,7 @@ public:
 class FRAMStorage : public Storage {
 public:
   FRAMStorage(Adafruit_FRAM_I2C fram) {
-    fram = fram;
+    this->fram = fram;
   }
 
   void write(size_t address, uint8_t val) override;

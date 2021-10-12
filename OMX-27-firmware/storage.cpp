@@ -11,7 +11,6 @@ Storage* Storage::initStorage() {
   if (fram.begin()) {
     return new FRAMStorage(fram);
   }
-
   // fall back to EEPROM
   return new EEPROMStorage();
 }
@@ -29,9 +28,9 @@ uint8_t EEPROMStorage::read(size_t address) {
 // FRAM
 
 void FRAMStorage::write(size_t address, uint8_t value) {
-  fram.write(address, value);
+  this->fram.write(address, value);
 }
 
 uint8_t FRAMStorage::read(size_t address) {
-  return fram.read(address);
+  return this->fram.read(address);
 }

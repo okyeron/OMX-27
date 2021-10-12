@@ -157,7 +157,7 @@ Adafruit_Keypad customKeypad = Adafruit_Keypad( makeKeymap(keys), rowPins, colPi
 Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 
 // setup EEPROM/FRAM storage
-Storage* storage = Storage::initStorage();
+Storage* storage;
 
 // ####### CLOCK/TIMING #######
 
@@ -281,6 +281,7 @@ void readPotentimeters(){
 void setup() {
 	Serial.begin(115200);
 
+	storage = Storage::initStorage();
 	dialogTimeout = 0;
 	clksTimer = 0;
 	
@@ -2410,7 +2411,7 @@ void saveHeader( void ) {
 // returns true if the header contained initialized data
 // false means we shouldn't attempt to load any further information
 bool loadHeader( void ) {
-	uint8_t version = storage->read( EEPROM_HEADER_ADDRESS + 0 );
+	uint8_t version = storage->read(EEPROM_HEADER_ADDRESS + 0);
 
 	//char buf[64];
 	//snprintf( buf, sizeof(buf), "EEPROM Header Version is %d\n", version );
