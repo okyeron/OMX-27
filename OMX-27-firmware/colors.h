@@ -77,10 +77,10 @@ const auto SEQMARKER = LOWWHITE;
 const auto SEQSTEP = ORANGE;
 
 const auto NOTESEL = DKCYAN;
-const auto PATTSEL = LIME; 
+const auto PATTSEL = LIME;
 
-const auto FUNKONE = LTCYAN; 
-const auto FUNKTWO = MINT; 
+const auto FUNKONE = LTCYAN;
+const auto FUNKTWO = MINT;
 
-const auto SEQ1C = HALFWHITE; 
-const auto SEQ2C = DKBLUE; 
+const auto SEQ1C = HALFWHITE;
+const auto SEQ2C = DKBLUE;

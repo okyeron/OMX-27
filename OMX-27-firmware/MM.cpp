@@ -17,7 +17,7 @@ namespace MM {
 	}
 	void sendNoteOn(int note, int velocity, int channel) {
 		usbMIDI.sendNoteOn(note, velocity, channel);
-		HWMIDI.sendNoteOn(note, velocity, channel);	
+		HWMIDI.sendNoteOn(note, velocity, channel);
 
 	}
 	void sendNoteOff(int note, int velocity, int channel) {
@@ -29,12 +29,12 @@ namespace MM {
 		usbMIDI.sendControlChange(control, value, channel);
 		HWMIDI.sendControlChange(control, value, channel);
 	}
-	
+
 	void sendClock() {
 		usbMIDI.sendRealTime(usbMIDI.Clock);
 		HWMIDI.sendClock();
 	}
-	
+
 	void startClock(){
 		usbMIDI.sendRealTime(usbMIDI.Start);
 		HWMIDI.sendStart();
@@ -49,7 +49,7 @@ namespace MM {
 	}
 
 	// NEED SOMETHING FOR usbMIDI.read() / MIDI.read()
-	
+
 	bool usbMidiRead(){
 		return usbMIDI.read();
 	}

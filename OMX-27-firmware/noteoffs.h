@@ -9,7 +9,7 @@ class PendingNoteOffs {
 		void play(uint32_t time);
 		void allOff();
 
-	private:    
+	private:
 		struct Entry {
 			bool inUse;
 			int note;
@@ -30,7 +30,7 @@ class PendingNoteOns {
 		bool insert(int note, int velocity, int channel, uint32_t time, bool sendCV);
 		void play(uint32_t time);
 
-	private:    
+	private:
 		struct Entry {
 			bool inUse;
 			int note;
@@ -46,4 +46,4 @@ class PendingNoteOns {
 extern PendingNoteOns pendingNoteOns;
 
 
-		
+
