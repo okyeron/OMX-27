@@ -1,5 +1,4 @@
-#ifndef _INCLUDE_STORAGE_H
-#define _INCLUDE_STORAGE_H
+#pragma once
 
 #include <Adafruit_FRAM_I2C.h>
 
@@ -85,6 +84,3 @@ public:
 private:
   Adafruit_FRAM_I2C fram;
 };
-
-// _INCLUDE_STORAGE_H
-#endif
