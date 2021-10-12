@@ -1,4 +1,5 @@
 #include "config.h"
+#include "consts.h"
 
 const OMXMode DEFAULT_MODE = MODE_MIDI;
 const uint8_t EEPROM_VERSION = 8;

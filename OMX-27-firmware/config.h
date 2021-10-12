@@ -1,8 +1,9 @@
 #pragma once
-//const int OMX_VERSION = 1.3.0;
 
 #include <Arduino.h>
 #include <stdint.h>
+
+//const int OMX_VERSION = 1.4.0;
 
 enum OMXMode
 {
