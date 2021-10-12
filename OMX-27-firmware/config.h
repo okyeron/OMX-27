@@ -47,7 +47,7 @@ extern const int LED_PIN;
 extern const int LED_COUNT;
 
 // POTS/ANALOG INPUTS
-// teensy pins for analog inputs 
+// teensy pins for analog inputs
 extern const int analogPins[];
 
 #define NUM_CC_POTS 5
