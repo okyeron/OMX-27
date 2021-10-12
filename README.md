@@ -1,5 +1,7 @@
 # OMX-27
 
+![Build Status](https://github.com/okyeron/OMX-27/actions/workflows/platformio-ci.yml/badge.svg)
+
 Mechanical key switch midi keyboard and sequencer. Based on Teensy 3.2 and Cherry MX RGB key switches.
 
 ### Arduino Requirements
