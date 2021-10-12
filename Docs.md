@@ -13,7 +13,7 @@ USBMIDI should be plug-and-play with any USBMIDI compatible host. iPad works gre
 
 ## Layout
 
-<img src="omx27_layout3.png" alt="omx27_layout3" width="1195" height="480" />
+<img src="omx27_layout3.png" alt="omx27_layout3" width="1000" height="402" />
 
 Top left key = AUX Key.
 
