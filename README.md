@@ -1,8 +1,14 @@
 # OMX-27
 
+![Build Status](https://github.com/okyeron/OMX-27/actions/workflows/platformio-ci.yml/badge.svg)
+
 Mechanical key switch midi keyboard and sequencer. Based on Teensy 3.2 and Cherry MX RGB key switches.
 
-### Arduino Requirements
+## Firmware Requirements
+
+### Teensyduino
+
+Install Teensyduino from the [PJRC website](https://www.pjrc.com/teensy/teensyduino.html).
 
 In Teensyduino Library Manager - check to be sure these are installed and on the most recent versions.
 
@@ -23,20 +29,50 @@ __Board:  Teensy 3.2/3.1__
 __USB Type: MIDI__
 __CPU Speed: 120 MHz (overclock)__
 
+Open the sketch at `OMX-27-firmware/OMX-27-firmware.ino`, click verify to ensure it all compiles and upload to flash the firmware to the hardware, pushing the button on the Teensy first.
 
-### BOM
+### PlatformIO / VSCode (optional)
+
+Ensure Homebrew in installed. [Instructions](https://brew.sh/)
+Install PlatformIO CLI tools. [Detailed Instructions](https://platformio.org/install/cli)
+
+```sh
+# Mac OSX
+brew install platformio
+
+# check out the project
+git checkout https://github.com/okyeron/OMX-27.git
+
+# go to the project directory
+cd OMX-27
+
+# compile the project (this may take a while the first time)
+pio run -t build
+
+# upload to hardware (don't forget to push button on Teensy)
+pio run -t upload
+
+# use serial monitor for debugging
+pio device monitor
+```
+
+- (optional) Install PlatformIO IDE VSCode extension. [Instructions](https://platformio.org/platformio-ide)
+
+Note: when making changes using the PlatformIO toolchain, please ensure the sketch still builds on Teensyduino before opening a PR.
+
+## BOM
 
 [Bill of Materials](<build/BOM.md>)
 
-### Build
+## Build
 
 [Build Guide](<build/Build-Kit.md>)
 
-### Docs
+## Docs
 
 [Documentation](<Docs.md>)
 
-# FAQ
+## FAQ
 
 Q: What key switches are recommended?
 A: Any RGB switches with a Cherry MX footprint can be used - I'm using Cherry MX RGB and these are linked in the [BOM](<BOM.md>). Different varieties are available (Red, Brown, etc.)
