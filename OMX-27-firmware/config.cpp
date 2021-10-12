@@ -6,13 +6,13 @@ const uint8_t EEPROM_VERSION = 8;
 
 // DEFINE CC NUMBERS FOR POTS // CCS mapped to Organelle Defaults
 const int CC1 = 21;
-const int CC2 = 22; 
+const int CC2 = 22;
 const int CC3 = 23;
 const int CC4 = 24;
 const int CC5 = 7;		// change to 25 for EYESY Knob 5
 
 const int CC_AUX = 25; // Mother mode - AUX key
-const int CC_OM1 = 26; // Mother mode - enc switch 
+const int CC_OM1 = 26; // Mother mode - enc switch
 const int CC_OM2 = 28; // Mother mode - enc turn
 
 const int LED_BRIGHTNESS = 50;
@@ -22,7 +22,7 @@ const int LED_BRIGHTNESS = 50;
 const int LED_PIN  = 14;
 const int LED_COUNT = 27;
 
-#if DEV			
+#if DEV
 	const int analogPins[] = {23,22,21,20,16};	// DEV/beta boards
 #elif MIDIONLY
 	const int analogPins[] = {23,22,21,20,16};  // on MIDI only boards - {23,A10,21,20,16} on Bodged MIDI boards
