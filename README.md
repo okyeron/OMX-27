@@ -12,7 +12,7 @@ Install Teensyduino from the [PJRC website](https://www.pjrc.com/teensy/teensydu
 
 In Teensyduino Library Manager - check to be sure these are installed and on the most recent versions.
 
-__Libraries:__
+__Libraries:__  
 Adafruit_Keypad  
 Adafruit_NeoPixel  
 Adafruit_SSD1306  
