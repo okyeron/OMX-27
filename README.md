@@ -20,8 +20,7 @@ Adafruit_GFX_Library
 U8g2_for_Adafruit_GFX
 Adafruit_FRAM_I2C
 
-Also check to be sure MIDI Library (by Francois Best / fortyseveneffects) is updated to 5.02
-I believe this is installed by default with Teensyduino
+Also check to be sure MIDI Library (by Francois Best / fortyseveneffects) is updated to 5.02 (I believe this is installed by default with Teensyduino)
 
 Set the following for the Teensy under the Tools menu:
 
