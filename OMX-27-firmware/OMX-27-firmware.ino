@@ -1,5 +1,5 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
-// v 1.3.0
+// v 1.4.0
 //
 // Steven Noreyko, May 2021
 //
@@ -8,7 +8,7 @@
 //	John Park and Gerald Stevens for initial testing and feature ideas
 //	mzero for immense amounts of code coaching/assistance
 //	drjohn for support
-//  Additional code contributions: Matt Boone, Steven Zydek
+//  Additional code contributions: Matt Boone, Steven Zydek, Chris Atkins, Will Winder
 
 
 #include <Adafruit_Keypad.h>
