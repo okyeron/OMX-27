@@ -29,11 +29,12 @@ __Board:  Teensy 3.2/3.1__
 __USB Type: MIDI__
 __CPU Speed: 120 MHz (overclock)__
 
-### PlatformIO / VSCode
+Open the sketch at `OMX-27-firmware/OMX-27-firmware.ino`, click verify to ensure it all compiles and upload to flash the firmware to the hardware, pushing the button on the Teensy first.
+
+### PlatformIO / VSCode (optional)
 
 Ensure Homebrew in installed. [Instructions](https://brew.sh/)
 Install PlatformIO CLI tools. [Detailed Instructions](https://platformio.org/install/cli)
-
 
 ```sh
 # Mac OSX
@@ -56,6 +57,8 @@ pio device monitor
 ```
 
 - (optional) Install PlatformIO IDE VSCode extension. [Instructions](https://platformio.org/platformio-ide)
+
+Note: when making changes using the PlatformIO toolchain, please ensure the sketch still builds on Teensyduino before opening a PR.
 
 ## BOM
 
