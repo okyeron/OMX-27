@@ -1262,7 +1262,7 @@ void loop() {
 
 		if (e.bit.EVENT == KEY_JUST_PRESSED && thisKey == 0 && enc_edit) {
 			// temp - save whenever the 0 key is pressed in encoder edit mode
-			saveToEEPROM();
+			saveToStorage();
 //			Serial.println("EEPROM saved");
 		}
 		
