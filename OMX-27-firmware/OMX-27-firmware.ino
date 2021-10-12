@@ -459,6 +459,10 @@ void show_current_step(int patternNum) {
 			} else {
 				strip.setPixelColor(j, LEDOFF);
 			}
+			// Blink left/right keys for octave select indicators.
+			auto color = blinkState ? RED : WHITE;
+			strip.setPixelColor(11, color);
+			strip.setPixelColor(26, color);
 		}
 
 	} else if (stepRecord) {
@@ -1320,12 +1324,23 @@ void loop() {
 					// NOTE SELECT
 					if (noteSelect){
 						if (noteSelection) {		// SET NOTE
-							stepSelect = false;
-							selectedNote = thisKey;
-							int adjnote = notes[thisKey] + (octave * 12);
-							stepNoteP[playingPattern][selectedStep].note = adjnote;
-							if (!playing){
-								seqNoteOn(thisKey, defaultVelocity, playingPattern);
+							// left and right keys change the octave
+							if (thisKey == 11 || thisKey == 26) {
+								int amt = thisKey == 11 ? -1 : 1;
+								newoctave = constrain(octave + amt, -5, 4);
+								if (newoctave != octave){
+									octave = newoctave;
+								}
+							}
+							// otherwise select the note
+							else {
+								stepSelect = false;
+								selectedNote = thisKey;
+								int adjnote = notes[thisKey] + (octave * 12);
+								stepNoteP[playingPattern][selectedStep].note = adjnote;
+								if (!playing){
+									seqNoteOn(thisKey, defaultVelocity, playingPattern);
+								}
 							}
 							// see RELEASE events for more
 							dirtyDisplay = true;
