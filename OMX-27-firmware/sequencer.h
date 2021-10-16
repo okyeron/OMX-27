@@ -1,3 +1,8 @@
+#pragma once
+
+#include <arduino.h>
+
+
 #define NUM_PATTERNS 8
 #define NUM_STEPS 64
 #define NUM_STEPKEYS 16
