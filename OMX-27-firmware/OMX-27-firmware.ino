@@ -570,19 +570,19 @@ void show_current_step(int patternNum) {
  					strip.setPixelColor(i+11, SEQMARKER);
  				}
 
-				if(i % 4 == 0){ // mark groups of 4
+				if(i % 4 == 0){ // MARK GROUPS OF 4
 					if(i == seqPos[patternNum]){
 						if (playing){
 							strip.setPixelColor(i+11, SEQCHASE); // step chase
 						} else if (stepNoteP[patternNum][i].trig == TRIGTYPE_PLAY){
 							if (stepNoteP[patternNum][i].stepType != STEPTYPE_NONE){
 								if (slowBlinkState){
-									strip.setPixelColor(i+11, stepColor); // step event color
+									strip.setPixelColor(i+11, stepColor); // STEP EVENT COLOR
 								}else{
-									strip.setPixelColor(i+11, muteColor); // step event color
+									strip.setPixelColor(i+11, muteColor); // STEP EVENT COLOR
 								}
 							} else {
-								strip.setPixelColor(i+11, stepColor); // step on color
+								strip.setPixelColor(i+11, stepColor); // STEP ON COLOR
 							}
 						} else if (stepNoteP[patternNum][i].trig == TRIGTYPE_MUTE){
 							strip.setPixelColor(i+11, SEQMARKER);
@@ -591,30 +591,30 @@ void show_current_step(int patternNum) {
 					} else if (stepNoteP[patternNum][i].trig == TRIGTYPE_PLAY){
 						if (stepNoteP[patternNum][i].stepType != STEPTYPE_NONE){
 							if (slowBlinkState){
-								strip.setPixelColor(i+11, stepColor); // step event color
+								strip.setPixelColor(i+11, stepColor); // STEP EVENT COLOR
 							}else{
-								strip.setPixelColor(i+11, muteColor); // step event color
+								strip.setPixelColor(i+11, muteColor); // STEP EVENT COLOR
 							}
 						} else {
-							strip.setPixelColor(i+11, stepColor); // step on color
+							strip.setPixelColor(i+11, stepColor); // STEP ON COLOR
 						}
 					} else if (stepNoteP[patternNum][i].trig == TRIGTYPE_MUTE){
 						strip.setPixelColor(i+11, SEQMARKER);
 					}
 
-				} else if (i == seqPos[patternNum]){ 	// step chase
+				} else if (i == seqPos[patternNum]){ 	// STEP CHASE
 					if (playing){
 						strip.setPixelColor(i+11, SEQCHASE);
 
 					} else if (stepNoteP[patternNum][i].trig == TRIGTYPE_PLAY){
 						if (stepNoteP[patternNum][i].stepType != STEPTYPE_NONE){
 							if (slowBlinkState){
-								strip.setPixelColor(i+11, stepColor); // step event color
+								strip.setPixelColor(i+11, stepColor); // STEP EVENT COLOR
 							}else{
-								strip.setPixelColor(i+11, muteColor); // step event color
+								strip.setPixelColor(i+11, muteColor); // STEP EVENT COLOR
 							}
 						} else {
-							strip.setPixelColor(i+11, stepColor); // step on color
+							strip.setPixelColor(i+11, stepColor); // STEP ON COLOR
 						}
 					} else if (stepNoteP[patternNum][i].trig == TRIGTYPE_MUTE){
 						strip.setPixelColor(i+11, LEDOFF);  // DO WE NEED TO MARK PLAYHEAD WHEN STOPPED?
@@ -623,12 +623,12 @@ void show_current_step(int patternNum) {
 				} else if (stepNoteP[patternNum][i].trig == TRIGTYPE_PLAY){
 					if (stepNoteP[patternNum][i].stepType != STEPTYPE_NONE){
 						if (slowBlinkState){
-							strip.setPixelColor(i+11, stepColor); // step event color
+							strip.setPixelColor(i+11, stepColor); // STEP EVENT COLOR
 						}else{
-							strip.setPixelColor(i+11, muteColor); // step event color
+							strip.setPixelColor(i+11, muteColor); // STEP EVENT COLOR
 						}
 					} else {
-						strip.setPixelColor(i+11, stepColor); // step on color
+						strip.setPixelColor(i+11, stepColor); // STEP ON COLOR
 					}
 
 				} else if (!patternParams && stepNoteP[patternNum][i].trig == TRIGTYPE_MUTE){
