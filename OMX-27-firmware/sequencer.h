@@ -22,6 +22,7 @@ int seq_acc_velocity = 127;
 
 int seqPos[NUM_PATTERNS] = {0, 0, 0, 0, 0, 0, 0, 0};				// What position in the sequence are we in?
 bool cvPattern[NUM_PATTERNS] = {1, 0, 0, 0, 0, 0, 0, 0};
+int patternPage[NUM_PATTERNS] = {0, 0, 0, 0, 0, 0, 0, 0};
 
 // int patternStart[NUM_PATTERNS] = {0, 0, 0, 0, 0, 0, 0, 0};
 

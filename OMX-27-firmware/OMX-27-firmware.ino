@@ -496,33 +496,35 @@ void show_current_step(int patternNum) {
 //			}
 //		}	
 	} else if (seqPages){
+	
+		// SHOW LEDS FOR WHAT PAGE OF SEQ PATTERN YOURE ON
 		for(int j = 1; j < NUM_STEPKEYS+11; j++){
 			strip.setPixelColor(j, LEDOFF);
 		}
-//		Serial.println(PatternLength(patternNum));
-		if (PatternLength(patternNum) > 0){ //<= 16)  // should this be NUM_STEPKEYS ?
-			if (blinkState && seqPos[patternNum] <= 16){
+		
+		if (PatternLength(patternNum) > 0){
+			if (blinkState && patternPage[patternNum] == 0){
 				strip.setPixelColor(11, LEDOFF);
 			} else {
 				strip.setPixelColor(11, RED);
 			}
 		}
-		if (PatternLength(patternNum) > 16){ // && PatternLength(patternNum) <= 32)
-			if (blinkState && seqPos[patternNum] > 16 && seqPos[patternNum] <= 32){
+		if (PatternLength(patternNum) > 16){
+			if (blinkState && patternPage[patternNum] == 1){
 				strip.setPixelColor(12, LEDOFF);
 			} else {
 				strip.setPixelColor(12, ORANGE);
 			}
 		}
-		if (PatternLength(patternNum) > 32){ // && PatternLength(patternNum) <= 48)
-			if (blinkState && seqPos[patternNum] > 32 && seqPos[patternNum] <= 48){
+		if (PatternLength(patternNum) > 32){
+			if (blinkState && patternPage[patternNum] == 2){
 				strip.setPixelColor(13, LEDOFF);
 			} else {
 				strip.setPixelColor(13, YELLOW);
 			}
 		}
-		if (PatternLength(patternNum) > 48){ // && PatternLength(patternNum) <= 64)
-			if (blinkState && seqPos[patternNum] > 48 && seqPos[patternNum] <= 64){
+		if (PatternLength(patternNum) > 48){
+			if (blinkState && patternPage[patternNum] == 3){
 				strip.setPixelColor(14, LEDOFF);
 			} else {
 				strip.setPixelColor(14, LIME);
@@ -1502,8 +1504,10 @@ void loop() {
 						
 							if (keyState[1] && keyState[2]) { 
 								if (!stepRecord && !patternParams){ // IGNORE LONG PRESSES IN STEP RECORD and Pattern Params
-				
-// toggle which page							
+									if (thisKey <= 11 + getPatternPage(patternSettings[playingPattern].len) ){
+										patternPage[playingPattern] = thisKey - 11;
+										Serial.println(patternPage[playingPattern]);
+									}
 								}
 							} else if (keyState[1]) { 
 									if (!stepRecord && !patternParams){ 		// IGNORE LONG PRESSES IN STEP RECORD and Pattern Params
@@ -2359,6 +2363,12 @@ void seqStop() {
 
 void seqContinue() {
 	playing = 1;
+}
+
+int getPatternPage(int position){
+	int pagenum;
+	pagenum = position / NUM_STEPKEYS;
+	return pagenum;
 }
 
 void rotatePattern(int patternNum, int rot) {
