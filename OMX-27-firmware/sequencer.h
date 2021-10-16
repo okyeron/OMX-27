@@ -1,5 +1,6 @@
 #define NUM_PATTERNS 8
-#define NUM_STEPS 16
+#define NUM_STEPS 32
+#define NUM_STEPKEYS 16
 
 // the MIDI channel number to send messages
 int midiChannel = 1;
@@ -46,7 +47,7 @@ enum TrigType {
 };
 
 struct PatternSettings {  // ?? bytes
-  uint8_t len : 4;    // 0 - 15, maps to 1 - 16
+  uint8_t len : 6;    // 0 - ?, maps to 1 to (NUM_STEPS - 1)
   uint8_t channel : 4;    // 0 - 15 , maps to channels 1 - 16
   uint8_t startstep : 4; // step to begin pattern. must be < patternlength-1
   uint8_t autoresetstep : 4;  // step to reset on / 0 = off

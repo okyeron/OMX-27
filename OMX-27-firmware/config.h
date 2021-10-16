@@ -123,3 +123,4 @@ extern byte colPins[COLS]; // column pins for key switches
 // KEYBOARD MIDI NOTE LAYOUT
 extern const int notes[];
 extern const int steps[];
+extern const int midiKeyMap[];
