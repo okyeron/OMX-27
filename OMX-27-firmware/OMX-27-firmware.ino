@@ -500,15 +500,35 @@ void show_current_step(int patternNum) {
 			strip.setPixelColor(j, LEDOFF);
 		}
 //		Serial.println(PatternLength(patternNum));
-		if (PatternLength(patternNum) <= 16)  // should this be NUM_STEPKEYS ?
-			strip.setPixelColor(11, SEQCHASE);
-		if (PatternLength(patternNum) > 16 && PatternLength(patternNum) <= 32)
-			strip.setPixelColor(12, SEQCHASE);
-		if (PatternLength(patternNum) > 32 && PatternLength(patternNum) <= 48)
-			strip.setPixelColor(13, SEQCHASE);
-		if (PatternLength(patternNum) > 48 && PatternLength(patternNum) <= 64)
-			strip.setPixelColor(14, SEQCHASE);
-		
+		if (PatternLength(patternNum) > 0){ //<= 16)  // should this be NUM_STEPKEYS ?
+			if (blinkState && seqPos[patternNum] <= 16){
+				strip.setPixelColor(11, LEDOFF);
+			} else {
+				strip.setPixelColor(11, RED);
+			}
+		}
+		if (PatternLength(patternNum) > 16){ // && PatternLength(patternNum) <= 32)
+			if (blinkState && seqPos[patternNum] > 16 && seqPos[patternNum] <= 32){
+				strip.setPixelColor(12, LEDOFF);
+			} else {
+				strip.setPixelColor(12, ORANGE);
+			}
+		}
+		if (PatternLength(patternNum) > 32){ // && PatternLength(patternNum) <= 48)
+			if (blinkState && seqPos[patternNum] > 32 && seqPos[patternNum] <= 48){
+				strip.setPixelColor(13, LEDOFF);
+			} else {
+				strip.setPixelColor(13, YELLOW);
+			}
+		}
+		if (PatternLength(patternNum) > 48){ // && PatternLength(patternNum) <= 64)
+			if (blinkState && seqPos[patternNum] > 48 && seqPos[patternNum] <= 64){
+				strip.setPixelColor(14, LEDOFF);
+			} else {
+				strip.setPixelColor(14, LIME);
+			}
+		}
+
 	} else {
 		for(int j = 1; j < NUM_STEPKEYS+11; j++){
 			if (j < PatternLength(patternNum)+11){
@@ -1482,9 +1502,8 @@ void loop() {
 						
 							if (keyState[1] && keyState[2]) { 
 								if (!stepRecord && !patternParams){ // IGNORE LONG PRESSES IN STEP RECORD and Pattern Params
-									
-// toggle which page
-									
+				
+// toggle which page							
 								}
 							} else if (keyState[1]) { 
 									if (!stepRecord && !patternParams){ 		// IGNORE LONG PRESSES IN STEP RECORD and Pattern Params
@@ -1501,15 +1520,15 @@ void loop() {
 
 							} else if (keyState[2]) {	
 
+							} else {
+								// TOGGLE STEP ON/OFF
+	//							if ( stepNoteP[playingPattern][keyPos].stepType == STEPTYPE_PLAY || stepNoteP[playingPattern][keyPos].stepType == STEPTYPE_MUTE ) {
+	//								stepNoteP[playingPattern][keyPos].stepType = ( stepNoteP[playingPattern][keyPos].stepType == STEPTYPE_PLAY ) ? STEPTYPE_MUTE : STEPTYPE_PLAY;
+	//							}
+								if ( stepNoteP[playingPattern][keyPos].trig == TRIGTYPE_PLAY || stepNoteP[playingPattern][keyPos].trig == TRIGTYPE_MUTE ) {
+									stepNoteP[playingPattern][keyPos].trig = ( stepNoteP[playingPattern][keyPos].trig == TRIGTYPE_PLAY ) ? TRIGTYPE_MUTE : TRIGTYPE_PLAY;
+								}
 							}
-							// TOGGLE STEP ON/OFF
-//							if ( stepNoteP[playingPattern][keyPos].stepType == STEPTYPE_PLAY || stepNoteP[playingPattern][keyPos].stepType == STEPTYPE_MUTE ) {
-//								stepNoteP[playingPattern][keyPos].stepType = ( stepNoteP[playingPattern][keyPos].stepType == STEPTYPE_PLAY ) ? STEPTYPE_MUTE : STEPTYPE_PLAY;
-//							}
-							if ( stepNoteP[playingPattern][keyPos].trig == TRIGTYPE_PLAY || stepNoteP[playingPattern][keyPos].trig == TRIGTYPE_MUTE ) {
-								stepNoteP[playingPattern][keyPos].trig = ( stepNoteP[playingPattern][keyPos].trig == TRIGTYPE_PLAY ) ? TRIGTYPE_MUTE : TRIGTYPE_PLAY;
-							}
-
 						}
 					}
 				}
@@ -1626,7 +1645,7 @@ void loop() {
 					case MODE_S2:
 						if (!patternSettings[playingPattern].solo){
 							if (keyState[1] && keyState[2]) {	
-//								seqPages = true;
+								seqPages = true;
 								
 							} else if (!keyState[1] && !keyState[2]) {  // SKIP LONG PRESS IF FUNC KEYS ARE ALREDY HELD
 								if (j > 2 && j < 11){ // skip AUX key, get pattern keys
@@ -2051,8 +2070,8 @@ void OnNoteOn(byte channel, byte note, byte velocity) {
 	if (midiInToCV){
 		cvNoteOn(note);
 	}
-	
 	if (omxMode == MODE_MIDI){				
+		midiLastNote = note;
 		int whatoct = (note / 12);
 		int thisKey;
 		uint32_t keyColor = MIDINOTEON;

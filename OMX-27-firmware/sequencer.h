@@ -1,5 +1,5 @@
 #define NUM_PATTERNS 8
-#define NUM_STEPS 32
+#define NUM_STEPS 64
 #define NUM_STEPKEYS 16
 
 // the MIDI channel number to send messages
