@@ -127,7 +127,6 @@ int pitchCV;
 uint8_t RES;
 uint16_t AMAX;
 int V_scale;
-int midiChannel; // the MIDI channel number to send messages (MIDI/OM mode)
 
 // clock
 float clockbpm = 120;
@@ -144,6 +143,7 @@ const int maxswing = 100;
 bool keyState[27] = {false};
 int midiKeyState[27] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
 uint8_t midiLastNote = 0;
+int midiChannel; // the MIDI channel number to send messages (MIDI/OM mode)
 
 // ENCODER
 Encoder myEncoder(12, 11); 	// encoder pins on hardware
