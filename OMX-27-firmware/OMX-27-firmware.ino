@@ -502,49 +502,28 @@ void show_current_step(int patternNum) {
 			strip.setPixelColor(j, LEDOFF);
 		}
 		
-		if (PatternLength(patternNum) > 0){
-			if (blinkState && patternPage[patternNum] == 0){
-				strip.setPixelColor(11, LEDOFF);
-			} else {
-				strip.setPixelColor(11, RED);
+		auto len = (patternSettings[patternNum].len/NUM_STEPKEYS);
+		for(int h = 0; h <= len; h++){
+			auto currentpage = patternPage[patternNum];
+			auto color = sequencePageColors[h];
+			if (h == currentpage){
+				color = blinkState ? sequencePageColors[currentpage] : LEDOFF;
 			}
+			strip.setPixelColor(11 + h, color);
 		}
-		if (PatternLength(patternNum) > 16){
-			if (blinkState && patternPage[patternNum] == 1){
-				strip.setPixelColor(12, LEDOFF);
-			} else {
-				strip.setPixelColor(12, ORANGE);
-			}
-		}
-		if (PatternLength(patternNum) > 32){
-			if (blinkState && patternPage[patternNum] == 2){
-				strip.setPixelColor(13, LEDOFF);
-			} else {
-				strip.setPixelColor(13, YELLOW);
-			}
-		}
-		if (PatternLength(patternNum) > 48){
-			if (blinkState && patternPage[patternNum] == 3){
-				strip.setPixelColor(14, LEDOFF);
-			} else {
-				strip.setPixelColor(14, LIME);
-			}
-		}
-
+		
 	} else {
 		for(int j = 1; j < NUM_STEPKEYS+11; j++){
 			if (j < PatternLength(patternNum)+11){
 				if (j == 1) {
-
-					// NOTE SELECT
+															// NOTE SELECT / F1
 					if (keyState[j] && blinkState){
 						strip.setPixelColor(j, LEDOFF);
 					} else {
 						strip.setPixelColor(j, FUNKONE);
 					}
 				} else if (j == 2) {
-
-					// PATTERN PARAMS
+															// PATTERN PARAMS / F2
 					if (keyState[j] && blinkState){
 						strip.setPixelColor(j, LEDOFF);
 					} else {
@@ -564,13 +543,15 @@ void show_current_step(int patternNum) {
 			}
 		}
 
-		for(int i = 0; i < NUM_STEPKEYS; i++){
-			if (i < PatternLength(patternNum)){
+												// WHAT TO DO HERE FOR MULTIPLE PAGES
+		for(int i = 0; i < NUM_STEPKEYS; i++){	// NUM_STEPS INSTEAD?>
+			if (i < PatternLength(patternNum)){ 
+			
 				if (patternParams){
  					strip.setPixelColor(i+11, SEQMARKER);
  				}
 
-				if(i % 4 == 0){ // MARK GROUPS OF 4
+				if(i % 4 == 0){ 					// MARK GROUPS OF 4
 					if(i == seqPos[patternNum]){
 						if (playing){
 							strip.setPixelColor(i+11, SEQCHASE); // step chase
@@ -602,7 +583,7 @@ void show_current_step(int patternNum) {
 						strip.setPixelColor(i+11, SEQMARKER);
 					}
 
-				} else if (i == seqPos[patternNum]){ 	// STEP CHASE
+				} else if (i == seqPos[patternNum]){ 		// STEP CHASE
 					if (playing){
 						strip.setPixelColor(i+11, SEQCHASE);
 
