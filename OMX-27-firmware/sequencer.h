@@ -25,39 +25,46 @@ struct PatternSettings {  // ?? bytes
 	bool solo : 1;
 }; // ? bytes
 
+struct TimePerPattern {
+  Micros lastProcessTimeP : 32;
+  Micros nextStepTimeP : 32;
+  Micros lastStepTimeP : 32;
+  int lastPosP : 16;
+};
+
 // holds state for sequencer
 class SequencerState {
 
 public:
+  // TODO: is this needed by other modes?
+  int midiChannel;                // the MIDI channel number to send messages
 
-	// TODO: is this needed by other modes?
-	int midiChannel;                // the MIDI channel number to send messages
-	int ticks;                      // A tick of the clock
-	bool clockSource;               // Internal clock (0), external clock (1)
-	bool playing;                   // Are we playing?
-	bool paused;                    // Are we paused?
-	bool stopped;                   // Are we stopped? (Must init to 1)
-	byte songPosition;              // A place to store the current MIDI song position
-	int playingPattern;             // The currently playing pattern, 0-7
-	bool seqResetFlag;              // for autoreset functionality
-	int clockDivMult;               // TODO: per pattern setting
-	word stepCV;
-	int seq_velocity;
-	int seq_acc_velocity;
-	int seqPos[NUM_PATTERNS]; // What position in the sequence are we in?
-	bool cvPattern[NUM_PATTERNS];
-	int patternDefaultNoteMap[NUM_PATTERNS]; // default to GM Drum Map for now
+  int ticks;                      // A tick of the clock
+  bool clockSource;               // Internal clock (0), external clock (1)
+  bool playing;                   // Are we playing?
+  bool paused;                    // Are we paused?
+  bool stopped;                   // Are we stopped? (Must init to 1)
+  byte songPosition;              // A place to store the current MIDI song position
+  int playingPattern;             // The currently playing pattern, 0-7
+  bool seqResetFlag;              // for autoreset functionality
+  int clockDivMult;               // TODO: per pattern setting
+  word stepCV;
+  int seq_velocity;
+  int seq_acc_velocity;
+  int seqPos[NUM_PATTERNS]; // What position in the sequence are we in?
+  bool cvPattern[NUM_PATTERNS];
+  int patternDefaultNoteMap[NUM_PATTERNS]; // default to GM Drum Map for now
 	int patternPage[NUM_PATTERNS];
-	PatternSettings patternSettings[NUM_PATTERNS];
+  PatternSettings patternSettings[NUM_PATTERNS];
+  TimePerPattern timePerPattern[NUM_PATTERNS];
 
+  PatternSettings* getSettings(int pattern) {
+    return &this->patternSettings[pattern];
+  }
 
-	PatternSettings* getSettings(int pattern) {
-		return &this->patternSettings[pattern];
-	}
-
-	PatternSettings* getCurrentPattern() {
-		return getSettings(this->playingPattern);
-	}
+  PatternSettings* getCurrentPattern() {
+    return getSettings(this->playingPattern);
+  }
 
 	// Helpers to deal with 1-16 values for pattern length and channel when they're stored as 0-15
   uint8_t getPatternLength(int pattern) {
@@ -74,36 +81,48 @@ public:
 };
 
 SequencerState defaultSequencerState() {
-	auto state = SequencerState{
-		midiChannel: 1,
-		ticks: 0,
-		clockSource: 0,
-		playing: 0,
-		paused: 0,
-		stopped: 1,
-		songPosition: 0,
-		playingPattern: 0,
-		seqResetFlag: 1,
-		clockDivMult: 0,
-		stepCV: 0,
-		seq_velocity: 100,
-		seq_acc_velocity: 127,
-		seqPos: {0, 0, 0, 0, 0, 0, 0, 0},
-		cvPattern: {1, 0, 0, 0, 0, 0, 0, 0},
-		patternDefaultNoteMap: {36, 38, 37, 39, 42, 46, 49, 51}, // default to GM Drum Map for now
-		patternPage: {0, 0, 0, 0, 0, 0, 0, 0},
-		patternSettings: {
-			{15, 0, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false},
-			{15, 1, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false},
-			{15, 2, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false},
-			{15, 3, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false},
-			{15, 4, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false},
-			{15, 5, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false},
-			{15, 6, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false},
-			{15, 7, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false}}
-	};
+  auto nextStepTime = micros();
+  auto lastStepTime = micros();
 
-	return state;
+  auto state = SequencerState{
+    midiChannel: 1,
+    ticks: 0,
+    clockSource: 0,
+    playing: 0,
+    paused: 0,
+    stopped: 1,
+    songPosition: 0,
+    playingPattern: 0,
+    seqResetFlag: 1,
+    clockDivMult: 0,
+    stepCV: 0,
+    seq_velocity: 100,
+    seq_acc_velocity: 127,
+    seqPos: {0, 0, 0, 0, 0, 0, 0, 0},
+    cvPattern: {1, 0, 0, 0, 0, 0, 0, 0},
+    patternDefaultNoteMap: {36, 38, 37, 39, 42, 46, 49, 51}, // default to GM Drum Map for now
+		patternPage: {0, 0, 0, 0, 0, 0, 0, 0},
+    patternSettings: {
+      {15, 0, 0, 0, 0, 0, 1, 2, 1, 0, false, false, false, false},
+      {15, 1, 0, 0, 0, 0, 1, 2, 1, 0, false, false, false, false},
+      {15, 2, 0, 0, 0, 0, 1, 2, 1, 0, false, false, false, false},
+      {15, 3, 0, 0, 0, 0, 1, 2, 1, 0, false, false, false, false},
+      {15, 4, 0, 0, 0, 0, 1, 2, 1, 0, false, false, false, false},
+      {15, 5, 0, 0, 0, 0, 1, 2, 1, 0, false, false, false, false},
+      {15, 6, 0, 0, 0, 0, 1, 2, 1, 0, false, false, false, false},
+      {15, 7, 0, 0, 0, 0, 1, 2, 1, 0, false, false, false, false}},
+    timePerPattern: {
+      {0, nextStepTime, lastStepTime, 0},
+      {0, nextStepTime, lastStepTime, 0},
+      {0, nextStepTime, lastStepTime, 0},
+      {0, nextStepTime, lastStepTime, 0},
+      {0, nextStepTime, lastStepTime, 0},
+      {0, nextStepTime, lastStepTime, 0},
+      {0, nextStepTime, lastStepTime, 0},
+      {0, nextStepTime, lastStepTime, 0}},
+  };
+
+  return state;
 }
 
 // global sequencer shared state
@@ -126,25 +145,6 @@ const char* stepTypes[STEPTYPE_COUNT] = {"--", "1", ">>", "<<", "<>", "#?", "?"}
 enum TrigType {
 	TRIGTYPE_MUTE = 0,
 	TRIGTYPE_PLAY
-};
-
-
-struct TimePerPattern {
-	Micros lastProcessTimeP : 32;
-	Micros nextStepTimeP : 32;
-	Micros lastStepTimeP : 32;
-	int lastPosP : 16;
-};
-
-TimePerPattern timePerPattern[NUM_PATTERNS] = {
-	{ 0, 0, 0 },
-	{ 0, 0, 0 },
-	{ 0, 0, 0 },
-	{ 0, 0, 0 },
-	{ 0, 0, 0 },
-	{ 0, 0, 0 },
-	{ 0, 0, 0 },
-	{ 0, 0, 0 }
 };
 
 struct StepNote {           // ?? bytes
