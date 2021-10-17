@@ -124,6 +124,7 @@ int pitchCV;
 uint8_t RES;
 uint16_t AMAX;
 int V_scale;
+int midiChannel; // the MIDI channel number to send messages (MIDI/OM mode)
 
 // clock
 float clockbpm = 120;
@@ -229,7 +230,7 @@ void readPotentimeters(){
 				case MODE_OM:
 						// fall through - same as MIDI
 				case MODE_MIDI: // MIDI
-					sendPots(k, seqState.midiChannel);
+					sendPots(k, midiChannel);
 					dirtyDisplay = true;
 					break;
 
@@ -326,7 +327,7 @@ void setup() {
 		// defaults
 		omxMode = DEFAULT_MODE;
 		seqState.playingPattern = 0;
-		seqState.midiChannel = 1;
+		midiChannel = 1;
 		pots[0] = CC1;
 		pots[1] = CC2;
 		pots[2] = CC3;
@@ -637,7 +638,7 @@ void dispGenericMode(int submode, int selected){
 			legends[2] = "CC";
 			legends[3] = "NOTE";
 			legendVals[0] = (int)octave+4;
-			legendVals[1] = seqState.midiChannel;
+			legendVals[1] = midiChannel;
 			legendVals[2] = potVal;
 			legendVals[3] = midiLastNote;
 			break;
@@ -908,18 +909,18 @@ void loop() {
 				case MODE_OM: // Organelle Mother
 					if (mimode == 4) {
 						if(u.dir() < 0){									// if turn ccw
-							MM::sendControlChange(CC_OM2, 0, seqState.midiChannel);
+							MM::sendControlChange(CC_OM2, 0, midiChannel);
 						} else if (u.dir() > 0){							// if turn cw
-							MM::sendControlChange(CC_OM2, 127, seqState.midiChannel);
+							MM::sendControlChange(CC_OM2, 127, midiChannel);
 						}
 					}
 						dirtyDisplay = true;
 //					break;
 				case MODE_MIDI: // MIDI
 					if (mimode == 1) { // set length
-						int newchan = constrain(seqState.midiChannel + amt, 1, 16);
-						if (newchan != seqState.midiChannel) {
-							seqState.midiChannel = newchan;
+						int newchan = constrain(midiChannel + amt, 1, 16);
+						if (newchan != midiChannel) {
+							midiChannel = newchan;
 						}
 
 					} else if (mimode == 0){
@@ -1272,17 +1273,17 @@ void loop() {
 				// ### KEY PRESS EVENTS
 				if (e.bit.EVENT == KEY_JUST_PRESSED && thisKey != 0) {
 					//Serial.println(" pressed");
-					midiNoteOn(thisKey, defaultVelocity, seqState.midiChannel);
+					midiNoteOn(thisKey, defaultVelocity, midiChannel);
 				} else if(e.bit.EVENT == KEY_JUST_RELEASED && thisKey != 0) {
 					//Serial.println(" released");
-					midiNoteOff(thisKey, seqState.midiChannel);
+					midiNoteOff(thisKey, midiChannel);
 				}
 
 				// AUX KEY
 				if (e.bit.EVENT == KEY_JUST_PRESSED && thisKey == 0) {
 
 					// Hard coded Organelle stuff
-					MM::sendControlChange(CC_AUX, 100, seqState.midiChannel);
+					MM::sendControlChange(CC_AUX, 100, midiChannel);
 					if (midiAUX) {
 						// STOP CLOCK
 //						Serial.println("stop clock");
@@ -1296,7 +1297,7 @@ void loop() {
 
 				} else if (e.bit.EVENT == KEY_JUST_RELEASED && thisKey == 0) {
 					// Hard coded Organelle stuff
-					MM::sendControlChange(CC_AUX, 0, seqState.midiChannel);
+					MM::sendControlChange(CC_AUX, 0, midiChannel);
 					//					midiAUX = false;
 				}
 				break;
@@ -2163,7 +2164,7 @@ void allNotesOffPanic() {
 	analogWrite(CVPITCH_PIN, 0);
 	digitalWrite(CVGATE_PIN, LOW);
 	for (int j=0; j<128; j++){
-		MM::sendNoteOff(j, 0, seqState.midiChannel); // NEEDS FIXING
+		MM::sendNoteOff(j, 0, midiChannel); // NEEDS FIXING
 	}
 }
 
@@ -2420,7 +2421,7 @@ void saveHeader( void ) {
 	storage->write(EEPROM_HEADER_ADDRESS + 2, (uint8_t)seqState.playingPattern);
 
 	// 1 byte for Midi channel
-	uint8_t unMidiChannel = (uint8_t)(seqState.midiChannel - 1);
+	uint8_t unMidiChannel = (uint8_t)(midiChannel - 1);
 	storage->write( EEPROM_HEADER_ADDRESS + 3, unMidiChannel );
 
 	for ( int i=0; i<NUM_CC_POTS; i++ ) {
@@ -2457,7 +2458,7 @@ bool loadHeader( void ) {
 	seqState.playingPattern = storage->read(EEPROM_HEADER_ADDRESS + 2);
 
 	uint8_t unMidiChannel = storage->read( EEPROM_HEADER_ADDRESS + 3 );
-	seqState.midiChannel = unMidiChannel + 1;
+	midiChannel = unMidiChannel + 1;
 
 	for ( int i=0; i<NUM_CC_POTS; i++ ) {
 		pots[i] = storage->read( EEPROM_HEADER_ADDRESS + 4 + i );

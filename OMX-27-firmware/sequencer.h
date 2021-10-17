@@ -70,9 +70,6 @@ struct Pattern {  // ?? bytes
 class SequencerState {
 
 public:
-  // TODO: is this needed by other modes?
-  int midiChannel;                // the MIDI channel number to send messages
-
   int ticks;                      // A tick of the clock
   bool clockSource;               // Internal clock (0), external clock (1)
   bool playing;                   // Are we playing?
@@ -124,7 +121,6 @@ SequencerState defaultSequencerState() {
   auto lastStepTime = micros();
 
   auto state = SequencerState{
-    midiChannel: 1,
     ticks: 0,
     clockSource: 0,
     playing: 0,
