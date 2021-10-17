@@ -116,7 +116,7 @@ public:
   }
 };
 
-SequencerState defaultSequencerState() {
+SequencerState defaultSequencer() {
   auto nextStepTime = micros();
   auto lastStepTime = micros();
 
@@ -158,10 +158,6 @@ SequencerState defaultSequencerState() {
 
   return state;
 }
-
-// global sequencer shared state
-SequencerState seqState = defaultSequencerState();
-
 
 uint8_t lastNote[NUM_PATTERNS][NUM_STEPS] = {
 	{0},{0},{0},{0},{0},{0},{0},{0}
