@@ -242,7 +242,7 @@ void readPotentimeters(){
 						potVal = analogValues[k];
 
 						if (k < 4){ // only store p-lock value for first 4 knobs
-							stepNoteP[seqState.playingPattern][selectedStep].params[k] = analogValues[k];
+							seqState.stepNoteP[seqState.playingPattern][selectedStep].params[k] = analogValues[k];
 							sendPots(k, seqState.setPatternChannel(seqState.playingPattern));
 						}
 						sendPots(k, seqState.setPatternChannel(seqState.playingPattern));
@@ -254,10 +254,10 @@ void readPotentimeters(){
 						potVal = analogValues[k];
 
 						if (k < 4){ // only store p-lock value for first 4 knobs
-							stepNoteP[seqState.playingPattern][seqState.seqPos[seqState.playingPattern]].params[k] = analogValues[k];
+							seqState.stepNoteP[seqState.playingPattern][seqState.seqPos[seqState.playingPattern]].params[k] = analogValues[k];
 							sendPots(k, seqState.setPatternChannel(seqState.playingPattern));
 						} else if (k == 4){
-							stepNoteP[seqState.playingPattern][seqState.seqPos[seqState.playingPattern]].vel = analogValues[k]; // SET POT 5 to NOTE VELOCITY HERE
+							seqState.stepNoteP[seqState.playingPattern][seqState.seqPos[seqState.playingPattern]].vel = analogValues[k]; // SET POT 5 to NOTE VELOCITY HERE
 						}
 						dirtyDisplay = true;
 					} else if (!noteSelect || !stepRecord){
@@ -522,8 +522,8 @@ void show_current_step(int patternNum) {
 					if (i == seqState.seqPos[patternNum]) {
 						if (seqState.playing){
 							strip.setPixelColor(i+11, SEQCHASE); // step chase
-						} else if (stepNoteP[patternNum][i].trig == TRIGTYPE_PLAY){
-							if (stepNoteP[patternNum][i].stepType != STEPTYPE_NONE){
+						} else if (seqState.stepNoteP[patternNum][i].trig == TRIGTYPE_PLAY){
+							if (seqState.stepNoteP[patternNum][i].stepType != STEPTYPE_NONE){
 								if (slowBlinkState){
 									strip.setPixelColor(i+11, stepColor); // step event color
 								}else{
@@ -532,11 +532,11 @@ void show_current_step(int patternNum) {
 							} else {
 								strip.setPixelColor(i+11, stepColor); // step on color
 							}
-						} else if (stepNoteP[patternNum][i].trig == TRIGTYPE_MUTE){
+						} else if (seqState.stepNoteP[patternNum][i].trig == TRIGTYPE_MUTE){
 							strip.setPixelColor(i+11, SEQMARKER);
 						}
-					} else if (stepNoteP[patternNum][i].trig == TRIGTYPE_PLAY) {
-						if (stepNoteP[patternNum][i].stepType != STEPTYPE_NONE){
+					} else if (seqState.stepNoteP[patternNum][i].trig == TRIGTYPE_PLAY) {
+						if (seqState.stepNoteP[patternNum][i].stepType != STEPTYPE_NONE){
 							if (slowBlinkState){
 								strip.setPixelColor(i+11, stepColor); // step event color
 							}else{
@@ -546,7 +546,7 @@ void show_current_step(int patternNum) {
 							strip.setPixelColor(i+11, stepColor); // step on color
 						}
 					}
-					else if (stepNoteP[patternNum][i].trig == TRIGTYPE_MUTE)
+					else if (seqState.stepNoteP[patternNum][i].trig == TRIGTYPE_MUTE)
 					{
 						strip.setPixelColor(i+11, SEQMARKER);
 					}
@@ -555,8 +555,8 @@ void show_current_step(int patternNum) {
 				{ // step chase
 					if (seqState.playing){
 						strip.setPixelColor(i+11, SEQCHASE);
-					} else if (stepNoteP[patternNum][i].trig == TRIGTYPE_PLAY){
-						if (stepNoteP[patternNum][i].stepType != STEPTYPE_NONE){
+					} else if (seqState.stepNoteP[patternNum][i].trig == TRIGTYPE_PLAY){
+						if (seqState.stepNoteP[patternNum][i].stepType != STEPTYPE_NONE){
 							if (slowBlinkState){
 								strip.setPixelColor(i+11, stepColor); // step event color
 							}else{
@@ -565,13 +565,13 @@ void show_current_step(int patternNum) {
 						} else {
 							strip.setPixelColor(i+11, stepColor); // step on color
 						}
-					} else if (stepNoteP[patternNum][i].trig == TRIGTYPE_MUTE){
+					} else if (seqState.stepNoteP[patternNum][i].trig == TRIGTYPE_MUTE){
 						strip.setPixelColor(i+11, LEDOFF);  // DO WE NEED TO MARK PLAYHEAD WHEN STOPPED?
 					}
 				}
-				else if (stepNoteP[patternNum][i].trig == TRIGTYPE_PLAY)
+				else if (seqState.stepNoteP[patternNum][i].trig == TRIGTYPE_PLAY)
 				{
-					if (stepNoteP[patternNum][i].stepType != STEPTYPE_NONE){
+					if (seqState.stepNoteP[patternNum][i].stepType != STEPTYPE_NONE){
 						if (slowBlinkState){
 							strip.setPixelColor(i+11, stepColor); // step event color
 						}else{
@@ -581,7 +581,7 @@ void show_current_step(int patternNum) {
 						strip.setPixelColor(i+11, stepColor); // step on color
 					}
 				}
-				else if (!patternParams && stepNoteP[patternNum][i].trig == TRIGTYPE_MUTE)
+				else if (!patternParams && seqState.stepNoteP[patternNum][i].trig == TRIGTYPE_MUTE)
 				{
 					strip.setPixelColor(i+11, LEDOFF);
 				}
@@ -707,7 +707,7 @@ void dispGenericMode(int submode, int selected){
 			legends[3] = "PTN";
 			legendVals[0] = (int)octave+4;
 			legendVals[1] = seqState.seqPos[seqState.playingPattern] + 1;
-			legendVals[2] = stepNoteP[seqState.playingPattern][selectedStep].note; //(int)transpose;
+			legendVals[2] = seqState.stepNoteP[seqState.playingPattern][selectedStep].note; //(int)transpose;
 			legendVals[3] = seqState.playingPattern + 1;
 			break;
 		case SUBMODE_NOTESEL:
@@ -717,7 +717,7 @@ void dispGenericMode(int submode, int selected){
 			legends[3] = "L-4";
 			for (int j=0; j<4; j++){
 
-				int stepNoteParam = stepNoteP[seqState.playingPattern][selectedStep].params[j];
+				int stepNoteParam = seqState.stepNoteP[seqState.playingPattern][selectedStep].params[j];
 				if (stepNoteParam > -1){
 					legendVals[j] = stepNoteParam;
 				} else {
@@ -731,10 +731,10 @@ void dispGenericMode(int submode, int selected){
 			legends[1] = "OCT";
 			legends[2] = "VEL";
 			legends[3] = "LEN";
-			legendVals[0] = stepNoteP[seqState.playingPattern][selectedStep].note;
+			legendVals[0] = seqState.stepNoteP[seqState.playingPattern][selectedStep].note;
 			legendVals[1] = (int)octave+4;
-			legendVals[2] = stepNoteP[seqState.playingPattern][selectedStep].vel;
-			legendVals[3] = stepNoteP[seqState.playingPattern][selectedStep].len + 1;
+			legendVals[2] = seqState.stepNoteP[seqState.playingPattern][selectedStep].vel;
+			legendVals[3] = seqState.stepNoteP[seqState.playingPattern][selectedStep].len + 1;
 			break;
 
 		case SUBMODE_NOTESEL3:
@@ -743,14 +743,14 @@ void dispGenericMode(int submode, int selected){
 			legends[2] = "COND";
 			legends[3] = "";
 			legendVals[0] = -127;
-			legendText[0] = stepTypes[stepNoteP[seqState.playingPattern][selectedStep].stepType];
+			legendText[0] = stepTypes[seqState.stepNoteP[seqState.playingPattern][selectedStep].stepType];
 
-			legendVals[1] = stepNoteP[seqState.playingPattern][selectedStep].prob;
+			legendVals[1] = seqState.stepNoteP[seqState.playingPattern][selectedStep].prob;
 //				String ac = String(trigConditionsAB[][0]);
-//				String bc = String(trigConditionsAB[stepNoteP[seqState.playingPattern][selectedStep].condition][1]);
+//				String bc = String(trigConditionsAB[seqState.stepNoteP[seqState.playingPattern][selectedStep].condition][1]);
 
 			legendVals[2] = -127;
-			legendText[2] = trigConditions[stepNoteP[seqState.playingPattern][selectedStep].condition]; //ac + bc; // trigConditions
+			legendText[2] = trigConditions[seqState.stepNoteP[seqState.playingPattern][selectedStep].condition]; //ac + bc; // trigConditions
 
 			legendVals[3] = 0;
 			break;
@@ -1076,12 +1076,12 @@ void loop() {
 							changeStepType(amt);
 						}
 						if (srmode2 == 1) {
-							int tempProb = stepNoteP[seqState.playingPattern][selectedStep].prob;
-							stepNoteP[seqState.playingPattern][selectedStep].prob = constrain(tempProb + amt, 0, 100); // Note Len between 1-16
+							int tempProb = seqState.stepNoteP[seqState.playingPattern][selectedStep].prob;
+							seqState.stepNoteP[seqState.playingPattern][selectedStep].prob = constrain(tempProb + amt, 0, 100); // Note Len between 1-16
 						}
 						if (srmode2 == 2) {
-							int tempCondition = stepNoteP[seqState.playingPattern][selectedStep].condition;
-							stepNoteP[seqState.playingPattern][selectedStep].condition = constrain(tempCondition + amt, 0, 35); // 0-32
+							int tempCondition = seqState.stepNoteP[seqState.playingPattern][selectedStep].condition;
+							seqState.stepNoteP[seqState.playingPattern][selectedStep].condition = constrain(tempCondition + amt, 0, 35); // 0-32
 						}
 
 					} else if (noteSelect && noteSelection && !enc_edit){	// NOTE SELECT MODE
@@ -1091,7 +1091,7 @@ void loop() {
 //							Serial.print("nsmode ");
 //							Serial.println(nsmode);
 							if(u.dir() < 0){			// RESET PLOCK IF TURN CCW
-								stepNoteP[seqState.playingPattern][selectedStep].params[nsmode] = -1;
+								seqState.stepNoteP[seqState.playingPattern][selectedStep].params[nsmode] = -1;
 							}
 						}
 						if (nsmode == 4 && nsmode2 == 4 && nsmode3 == 4) { 	// CHANGE PAGE
@@ -1101,8 +1101,8 @@ void loop() {
 						}
 
 						if (nsmode2 == 0) { 				// SET NOTE NUM
-							int tempNote = stepNoteP[seqState.playingPattern][selectedStep].note;
-							stepNoteP[seqState.playingPattern][selectedStep].note = constrain(tempNote + amt, 0, 127);
+							int tempNote = seqState.stepNoteP[seqState.playingPattern][selectedStep].note;
+							seqState.stepNoteP[seqState.playingPattern][selectedStep].note = constrain(tempNote + amt, 0, 127);
 						}
 						if (nsmode2 == 1) { 				// SET OCTAVE
 							newoctave = constrain(octave + amt, -5, 4);
@@ -1111,24 +1111,24 @@ void loop() {
 							}
 						}
 						if (nsmode2 == 2) { 				// SET VELOCITY
-							int tempVel = stepNoteP[seqState.playingPattern][selectedStep].vel;
-							stepNoteP[seqState.playingPattern][selectedStep].vel = constrain(tempVel + amt, 0, 127);
+							int tempVel = seqState.stepNoteP[seqState.playingPattern][selectedStep].vel;
+							seqState.stepNoteP[seqState.playingPattern][selectedStep].vel = constrain(tempVel + amt, 0, 127);
 						}
 						if (nsmode2 == 3) { 				// SET NOTE LENGTH
-							int tempLen = stepNoteP[seqState.playingPattern][selectedStep].len;
-							stepNoteP[seqState.playingPattern][selectedStep].len = constrain(tempLen + amt, 0, 15); // Note Len between 1-16
+							int tempLen = seqState.stepNoteP[seqState.playingPattern][selectedStep].len;
+							seqState.stepNoteP[seqState.playingPattern][selectedStep].len = constrain(tempLen + amt, 0, 15); // Note Len between 1-16
 						}
 
 						if (nsmode3 == 0) { 				// SET STEP TYPE
 							changeStepType(amt);
 						}
 						if (nsmode3 == 1) { 				// SET STEP PROB
-							int tempProb = stepNoteP[seqState.playingPattern][selectedStep].prob;
-							stepNoteP[seqState.playingPattern][selectedStep].prob = constrain(tempProb + amt, 0, 100); // Note Len between 1-16
+							int tempProb = seqState.stepNoteP[seqState.playingPattern][selectedStep].prob;
+							seqState.stepNoteP[seqState.playingPattern][selectedStep].prob = constrain(tempProb + amt, 0, 100); // Note Len between 1-16
 						}
 						if (nsmode3 == 2) { 				// SET STEP TRIG CONDITION
-							int tempCondition = stepNoteP[seqState.playingPattern][selectedStep].condition;
-							stepNoteP[seqState.playingPattern][selectedStep].condition = constrain(tempCondition + amt, 0, 35); // 0-32
+							int tempCondition = seqState.stepNoteP[seqState.playingPattern][selectedStep].condition;
+							seqState.stepNoteP[seqState.playingPattern][selectedStep].condition = constrain(tempCondition + amt, 0, 35); // 0-32
 						}
 
 
@@ -1316,7 +1316,7 @@ void loop() {
 							stepSelect = false;
 							selectedNote = thisKey;
 							int adjnote = notes[thisKey] + (octave * 12);
-							stepNoteP[seqState.playingPattern][selectedStep].note = adjnote;
+							seqState.stepNoteP[seqState.playingPattern][selectedStep].note = adjnote;
 							if (!seqState.playing){
 								seqNoteOn(thisKey, defaultVelocity, seqState.playingPattern);
 							}
@@ -1379,7 +1379,7 @@ void loop() {
 						selectedStep = seqState.seqPos[seqState.playingPattern];
 
 						int adjnote = notes[thisKey] + (octave * 12);
-						stepNoteP[seqState.playingPattern][selectedStep].note = adjnote;
+						seqState.stepNoteP[seqState.playingPattern][selectedStep].note = adjnote;
 
 						if (!seqState.playing){
 							seqNoteOn(thisKey, defaultVelocity, seqState.playingPattern);
@@ -1426,11 +1426,11 @@ void loop() {
 						// SEQUENCE 1-16 STEP KEYS
 						} else if (thisKey > 10) {
 							// TOGGLE STEP ON/OFF
-//							if ( stepNoteP[seqState.playingPattern][keyPos].stepType == STEPTYPE_PLAY || stepNoteP[seqState.playingPattern][keyPos].stepType == STEPTYPE_MUTE ) {
-//								stepNoteP[seqState.playingPattern][keyPos].stepType = ( stepNoteP[seqState.playingPattern][keyPos].stepType == STEPTYPE_PLAY ) ? STEPTYPE_MUTE : STEPTYPE_PLAY;
+//							if ( seqState.stepNoteP[seqState.playingPattern][keyPos].stepType == STEPTYPE_PLAY || seqState.stepNoteP[seqState.playingPattern][keyPos].stepType == STEPTYPE_MUTE ) {
+//								seqState.stepNoteP[seqState.playingPattern][keyPos].stepType = ( seqState.stepNoteP[seqState.playingPattern][keyPos].stepType == STEPTYPE_PLAY ) ? STEPTYPE_MUTE : STEPTYPE_PLAY;
 //							}
-							if ( stepNoteP[seqState.playingPattern][keyPos].trig == TRIGTYPE_PLAY || stepNoteP[seqState.playingPattern][keyPos].trig == TRIGTYPE_MUTE ) {
-								stepNoteP[seqState.playingPattern][keyPos].trig = ( stepNoteP[seqState.playingPattern][keyPos].trig == TRIGTYPE_PLAY ) ? TRIGTYPE_MUTE : TRIGTYPE_PLAY;
+							if ( seqState.stepNoteP[seqState.playingPattern][keyPos].trig == TRIGTYPE_PLAY || seqState.stepNoteP[seqState.playingPattern][keyPos].trig == TRIGTYPE_MUTE ) {
+								seqState.stepNoteP[seqState.playingPattern][keyPos].trig = ( seqState.stepNoteP[seqState.playingPattern][keyPos].trig == TRIGTYPE_PLAY ) ? TRIGTYPE_MUTE : TRIGTYPE_PLAY;
 							}
 						}
 					}
@@ -1556,11 +1556,11 @@ void loop() {
 										noteSelection = true;
 										dirtyDisplay = true;
 										// re-toggle the key you just held
-//										if ( stepNoteP[seqState.playingPattern][selectedStep].stepType == STEPTYPE_PLAY || stepNoteP[seqState.playingPattern][selectedStep].stepType == STEPTYPE_MUTE ) {
-//											stepNoteP[seqState.playingPattern][selectedStep].stepType = ( stepNoteP[seqState.playingPattern][selectedStep].stepType == STEPTYPE_PLAY ) ? STEPTYPE_MUTE : STEPTYPE_PLAY;
+//										if ( seqState.stepNoteP[seqState.playingPattern][selectedStep].stepType == STEPTYPE_PLAY || seqState.stepNoteP[seqState.playingPattern][selectedStep].stepType == STEPTYPE_MUTE ) {
+//											seqState.stepNoteP[seqState.playingPattern][selectedStep].stepType = ( seqState.stepNoteP[seqState.playingPattern][selectedStep].stepType == STEPTYPE_PLAY ) ? STEPTYPE_MUTE : STEPTYPE_PLAY;
 //										}
-										if ( stepNoteP[seqState.playingPattern][selectedStep].trig == TRIGTYPE_PLAY || stepNoteP[seqState.playingPattern][selectedStep].trig == TRIGTYPE_MUTE ) {
-											stepNoteP[seqState.playingPattern][selectedStep].trig = ( stepNoteP[seqState.playingPattern][selectedStep].trig == TRIGTYPE_PLAY ) ? TRIGTYPE_MUTE : TRIGTYPE_PLAY;
+										if ( seqState.stepNoteP[seqState.playingPattern][selectedStep].trig == TRIGTYPE_PLAY || seqState.stepNoteP[seqState.playingPattern][selectedStep].trig == TRIGTYPE_MUTE ) {
+											seqState.stepNoteP[seqState.playingPattern][selectedStep].trig = ( seqState.stepNoteP[seqState.playingPattern][selectedStep].trig == TRIGTYPE_PLAY ) ? TRIGTYPE_MUTE : TRIGTYPE_PLAY;
 										}
 									}
 								}
@@ -1819,35 +1819,35 @@ bool evaluate_AB(int condition, int patternNum) {
 }
 
 void changeStepType(int amount){
-	auto tempType = stepNoteP[seqState.playingPattern][selectedStep].stepType + amount;
+	auto tempType = seqState.stepNoteP[seqState.playingPattern][selectedStep].stepType + amount;
 
 	// this is fucking hacky to increment the enum for stepType
 	switch(tempType){
 		case 0:
-			stepNoteP[seqState.playingPattern][selectedStep].stepType = STEPTYPE_NONE;
+			seqState.stepNoteP[seqState.playingPattern][selectedStep].stepType = STEPTYPE_NONE;
 			break;
 		case 1:
-			stepNoteP[seqState.playingPattern][selectedStep].stepType = STEPTYPE_RESTART;
+			seqState.stepNoteP[seqState.playingPattern][selectedStep].stepType = STEPTYPE_RESTART;
 			break;
 		case 2:
-			stepNoteP[seqState.playingPattern][selectedStep].stepType = STEPTYPE_FWD;
+			seqState.stepNoteP[seqState.playingPattern][selectedStep].stepType = STEPTYPE_FWD;
 			break;
 		case 3:
-			stepNoteP[seqState.playingPattern][selectedStep].stepType = STEPTYPE_REV;
+			seqState.stepNoteP[seqState.playingPattern][selectedStep].stepType = STEPTYPE_REV;
 			break;
 		case 4:
-			stepNoteP[seqState.playingPattern][selectedStep].stepType = STEPTYPE_PONG;
+			seqState.stepNoteP[seqState.playingPattern][selectedStep].stepType = STEPTYPE_PONG;
 			break;
 		case 5:
-			stepNoteP[seqState.playingPattern][selectedStep].stepType = STEPTYPE_RANDSTEP;
+			seqState.stepNoteP[seqState.playingPattern][selectedStep].stepType = STEPTYPE_RANDSTEP;
 			break;
 		case 6:
-			stepNoteP[seqState.playingPattern][selectedStep].stepType = STEPTYPE_RAND;
+			seqState.stepNoteP[seqState.playingPattern][selectedStep].stepType = STEPTYPE_RAND;
 			break;
 		default:
 			break;
 	}
-	//							Serial.println(stepNoteP[seqState.playingPattern][selectedStep].stepType);
+	//							Serial.println(seqState.stepNoteP[seqState.playingPattern][selectedStep].stepType);
 }
 void step_on(int patternNum){
 //		Serial.print(patternNum);
@@ -1866,7 +1866,7 @@ void step_off(int patternNum, int position){
 
 void doStep() {
 	// probability test
-	bool testProb = probResult(stepNoteP[seqState.playingPattern][seqState.seqPos[seqState.playingPattern]].prob);
+	bool testProb = probResult(seqState.stepNoteP[seqState.playingPattern][seqState.seqPos[seqState.playingPattern]].prob);
 
 	switch(omxMode){
 		case MODE_S1:
@@ -1891,7 +1891,7 @@ void doStep() {
 					seqState.timePerPattern[seqState.playingPattern].lastStepTimeP = seqState.timePerPattern[seqState.playingPattern].nextStepTimeP;
 					seqState.timePerPattern[seqState.playingPattern].nextStepTimeP += (step_micros)*( multValues[seqState.getCurrentPattern()->clockDivMultP] ); // calc step based on rate
 
-					if (testProb){ //  && evaluate_AB(stepNoteP[seqState.playingPattern][seqPos[seqState.playingPattern]].condition, playingPattern)
+					if (testProb){ //  && evaluate_AB(seqState.stepNoteP[seqState.playingPattern][seqPos[seqState.playingPattern]].condition, playingPattern)
 						playNote(seqState.playingPattern);
 						//					step_on(playingPattern);
 					}
@@ -1925,7 +1925,7 @@ void doStep() {
 								step_off(j, seqState.timePerPattern[j].lastPosP);
 							}
 							if (testProb){
-								if (evaluate_AB(stepNoteP[j][seqState.seqPos[j]].condition, j)){
+								if (evaluate_AB(seqState.stepNoteP[j][seqState.seqPos[j]].condition, j)){
 									playNote(j);
 								}
 							}
@@ -2036,15 +2036,15 @@ void seqNoteOff(int notenum, int patternNum){
 
 // Play a note / step (SEQUENCERS)
 void playNote(int patternNum) {
-//	Serial.println(stepNoteP[patternNum][seqPos[patternNum]].note); // Debug
+//	Serial.println(seqState.stepNoteP[patternNum][seqPos[patternNum]].note); // Debug
 	bool sendnoteCV = false;
 	int rnd_swing;
 	if (seqState.cvPattern[patternNum]){
 		sendnoteCV = true;
 	}
-	StepType playStepType = stepNoteP[patternNum][seqState.seqPos[patternNum]].stepType;
+	StepType playStepType = (StepType) seqState.stepNoteP[patternNum][seqState.seqPos[patternNum]].stepType;
 
-	if (stepNoteP[patternNum][seqState.seqPos[patternNum]].stepType == STEPTYPE_RAND){
+	if (seqState.stepNoteP[patternNum][seqState.seqPos[patternNum]].stepType == STEPTYPE_RAND){
 		auto tempType = random(STEPTYPE_COUNT);
 
 		// this is fucking hacky to increment the enum for stepType
@@ -2099,11 +2099,11 @@ void playNote(int patternNum) {
 
 	// regular note on trigger
 
-	if (stepNoteP[patternNum][seqState.seqPos[patternNum]].trig == TRIGTYPE_PLAY) {
-		seqState.seq_velocity = stepNoteP[patternNum][seqState.seqPos[patternNum]].vel;
+	if (seqState.stepNoteP[patternNum][seqState.seqPos[patternNum]].trig == TRIGTYPE_PLAY) {
+		seqState.seq_velocity = seqState.stepNoteP[patternNum][seqState.seqPos[patternNum]].vel;
 
-		noteoff_micros = micros() + (stepNoteP[patternNum][seqState.seqPos[patternNum]].len + 1) * step_micros;
-		pendingNoteOffs.insert(stepNoteP[patternNum][seqState.seqPos[patternNum]].note, seqState.setPatternChannel(patternNum), noteoff_micros, sendnoteCV);
+		noteoff_micros = micros() + (seqState.stepNoteP[patternNum][seqState.seqPos[patternNum]].len + 1) * step_micros;
+		pendingNoteOffs.insert(seqState.stepNoteP[patternNum][seqState.seqPos[patternNum]].note, seqState.setPatternChannel(patternNum), noteoff_micros, sendnoteCV);
 
 		if (seqState.seqPos[patternNum] % 2 == 0){
 
@@ -2123,12 +2123,12 @@ void playNote(int patternNum) {
 		}
 
 		// Queue note-on
-		pendingNoteOns.insert(stepNoteP[patternNum][seqState.seqPos[patternNum]].note, seqState.seq_velocity, seqState.setPatternChannel(patternNum), noteon_micros, sendnoteCV);
+		pendingNoteOns.insert(seqState.stepNoteP[patternNum][seqState.seqPos[patternNum]].note, seqState.seq_velocity, seqState.setPatternChannel(patternNum), noteon_micros, sendnoteCV);
 
 		// {notenum, vel, notelen, step_type, {p1,p2,p3,p4}, prob}
 		// send param locks
 		for (int q=0; q<4; q++){
-			int tempCC = stepNoteP[patternNum][seqState.seqPos[patternNum]].params[q];
+			int tempCC = seqState.stepNoteP[patternNum][seqState.seqPos[patternNum]].params[q];
 			if (tempCC > -1) {
 				MM::sendControlChange(pots[q],tempCC,seqState.setPatternChannel(patternNum));
 				prevPlock[q] = tempCC;
@@ -2138,7 +2138,7 @@ void playNote(int patternNum) {
 				prevPlock[q] = potValues[q];
 			}
 		}
-		lastNote[patternNum][seqState.seqPos[patternNum]] = stepNoteP[patternNum][seqState.seqPos[patternNum]].note;
+		lastNote[patternNum][seqState.seqPos[patternNum]] = seqState.stepNoteP[patternNum][seqState.seqPos[patternNum]].note;
 
 		// CV is sent from pendingNoteOns/pendingNoteOffs
 
@@ -2159,7 +2159,7 @@ void allNotesOffPanic() {
 
 void transposeSeq(int patternNum, int amt) {
 	for (int k=0; k<NUM_STEPS; k++){
-		stepNoteP[patternNum][k].note += amt;
+		seqState.stepNoteP[patternNum][k].note += amt;
 	}
 }
 
@@ -2214,50 +2214,50 @@ void rotatePattern(int patternNum, int rot) {
 	StepNote arr[size];
 	rot = (rot + size) % size;
 	for (int d = rot, s = 0; s < size; d = (d+1) % size, ++s)
-		arr[d] = stepNoteP[patternNum][s];
+		arr[d] = seqState.stepNoteP[patternNum][s];
 	for (int i = 0; i < size; ++i)
-		stepNoteP[patternNum][i] = arr[i];
+		seqState.stepNoteP[patternNum][i] = arr[i];
 }
 
 void resetPatternDefaults(int patternNum){
 	for (int i = 0; i < NUM_STEPS; i++){
 		// {notenum,vel,len,stepType,{p1,p2,p3,p4,p5}}
-		stepNoteP[patternNum][i].note = seqState.patternDefaultNoteMap[patternNum];
-		stepNoteP[patternNum][i].len = 0;
+		seqState.stepNoteP[patternNum][i].note = seqState.patternDefaultNoteMap[patternNum];
+		seqState.stepNoteP[patternNum][i].len = 0;
 	}
 }
 
 void clearPattern(int patternNum){
 	for (int i = 0; i < NUM_STEPS; i++){
 		// {notenum,vel,len,stepType,{p1,p2,p3,p4,p5}}
-		stepNoteP[patternNum][i].note = seqState.patternDefaultNoteMap[patternNum];
-		stepNoteP[patternNum][i].vel = defaultVelocity;
-		stepNoteP[patternNum][i].len = 0;
-		stepNoteP[patternNum][i].stepType = STEPTYPE_NONE;
-		stepNoteP[patternNum][i].params[0] = -1;
-		stepNoteP[patternNum][i].params[1] = -1;
-		stepNoteP[patternNum][i].params[2] = -1;
-		stepNoteP[patternNum][i].params[3] = -1;
-		stepNoteP[patternNum][i].params[4] = -1;
-		stepNoteP[patternNum][i].prob = 100;
-		stepNoteP[patternNum][i].condition = 0;
+		seqState.stepNoteP[patternNum][i].note = seqState.patternDefaultNoteMap[patternNum];
+		seqState.stepNoteP[patternNum][i].vel = defaultVelocity;
+		seqState.stepNoteP[patternNum][i].len = 0;
+		seqState.stepNoteP[patternNum][i].stepType = STEPTYPE_NONE;
+		seqState.stepNoteP[patternNum][i].params[0] = -1;
+		seqState.stepNoteP[patternNum][i].params[1] = -1;
+		seqState.stepNoteP[patternNum][i].params[2] = -1;
+		seqState.stepNoteP[patternNum][i].params[3] = -1;
+		seqState.stepNoteP[patternNum][i].params[4] = -1;
+		seqState.stepNoteP[patternNum][i].prob = 100;
+		seqState.stepNoteP[patternNum][i].condition = 0;
 	}
 }
 
 void copyPattern(int patternNum){
 	//for( int i = 0 ; i < NUM_STEPS ; ++i ){
-	//	copyPatternBuffer[i] = stepNoteP[patternNum][i];
+	//	copyPatternBuffer[i] = seqState.stepNoteP[patternNum][i];
 	//}
 
-	memcpy( &copyPatternBuffer, &stepNoteP[patternNum], NUM_STEPS * sizeof(StepNote) );
+	memcpy( &copyPatternBuffer, &seqState.stepNoteP[patternNum], NUM_STEPS * sizeof(StepNote) );
 }
 
 void pastePattern(int patternNum){
 	//for( int i = 0 ; i < NUM_STEPS ; ++i ){
-	//	stepNoteP[patternNum][i] = copyPatternBuffer[i] ;
+	//	seqState.stepNoteP[patternNum][i] = copyPatternBuffer[i] ;
 	//}
 
-	memcpy( &stepNoteP[patternNum], &copyPatternBuffer, NUM_STEPS * sizeof(StepNote) );
+	memcpy( &seqState.stepNoteP[patternNum], &copyPatternBuffer, NUM_STEPS * sizeof(StepNote) );
 }
 
 void u8g2centerText(const char* s, int16_t x, int16_t y, uint16_t w, uint16_t h) {
@@ -2361,9 +2361,10 @@ void initPatterns( void ) {
 	for ( int i=0; i<NUM_PATTERNS; i++ ) {
 		stepNote.note = seqState.patternDefaultNoteMap[i]; // Defined in sequencer.h
 		for ( int j=0; j<NUM_STEPS; j++ ) {
-			memcpy( &stepNoteP[i][j], &stepNote, sizeof(StepNote) );
+			memcpy( &seqState.stepNoteP[i][j], &stepNote, sizeof(StepNote) );
 		}
 
+		// TODO: move to sequencer
 		auto settings = seqState.getSettings(i);
 		settings->len = 15;
 		settings->channel = i;		// 0 - 15 becomes 1 - 16
@@ -2447,7 +2448,7 @@ void savePatterns( void ) {
 	// for each pattern
 	for ( int i=0; i<NUM_PATTERNS; i++ ) {
 		for ( int j=0; j<NUM_STEPS; j++ ) {
-			storage->writeObject( nLocalAddress, stepNoteP[i][j] );
+			storage->writeObject( nLocalAddress, seqState.stepNoteP[i][j] );
 			nLocalAddress += s;
 		}
 	}
@@ -2471,7 +2472,7 @@ void loadPatterns( void ) {
 	// for each pattern
 	for ( int i=0; i<NUM_PATTERNS; i++ ) {
 		for ( int j=0; j<NUM_STEPS; j++ ) {
-			storage->readObject( nLocalAddress, stepNoteP[i][j] );
+			storage->readObject( nLocalAddress, seqState.stepNoteP[i][j] );
 			nLocalAddress += s;
 		}
 	}
