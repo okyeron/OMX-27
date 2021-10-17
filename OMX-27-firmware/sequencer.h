@@ -55,6 +55,19 @@ public:
   PatternSettings* getCurrentPattern() {
     return getSettings(this->playingPattern);
   }
+
+  // Helpers to deal with 1-16 values for pattern length and channel when they're stored as 0-15
+  uint8_t getPatternLength(int pattern) {
+    return this->patternSettings[pattern].len + 1;
+  }
+
+  void setPatternLength(int pattern, int len) {
+    this->patternSettings[pattern].len = len - 1;
+  }
+
+  uint8_t setPatternChannel(int pattern) {
+    return this->patternSettings[pattern].channel + 1;
+  }
 };
 
 SequencerState defaultSequencerState() {
@@ -129,19 +142,6 @@ TimePerPattern timePerPattern[NUM_PATTERNS] = {
   { 0, 0, 0 },
   { 0, 0, 0 }
 };
-
-// Helpers to deal with 1-16 values for pattern length and channel when they're stored as 0-15
-uint8_t PatternLength( int pattern ) {
-  return seqState.patternSettings[pattern].len + 1;
-}
-
-void SetPatternLength( int pattern, int len ) {
-  seqState.patternSettings[pattern].len = len - 1;
-}
-
-uint8_t PatternChannel( int pattern ) {
-  return seqState.patternSettings[pattern].channel + 1;
-}
 
 struct StepNote {           // ?? bytes
   uint8_t note : 7;        // 0 - 127
