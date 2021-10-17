@@ -1,7 +1,6 @@
 #pragma once
 
-#include <arduino.h>
-
+#include <Arduino.h>
 
 #define NUM_PATTERNS 8
 #define NUM_STEPS 16
