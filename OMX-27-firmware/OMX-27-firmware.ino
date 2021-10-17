@@ -123,7 +123,6 @@ int pitchCV;
 uint8_t RES;
 uint16_t AMAX;
 int V_scale;
-int midiChannel; // the MIDI channel number to send messages (MIDI/OM mode)
 
 // clock
 float clockbpm = 120;
@@ -148,6 +147,7 @@ int currpgm = 0;
 int currbank = 0;
 bool midiInToCV = true;
 uint8_t midiLastNote = 0;
+int midiChannel; // the MIDI channel number to send messages (MIDI/OM mode)
 
 // ENCODER
 Encoder myEncoder(12, 11); 	// encoder pins on hardware
