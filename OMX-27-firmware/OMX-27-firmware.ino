@@ -243,9 +243,9 @@ void readPotentimeters(){
 
 						if (k < 4){ // only store p-lock value for first 4 knobs
 							seqState.stepNoteP[seqState.playingPattern][selectedStep].params[k] = analogValues[k];
-							sendPots(k, seqState.setPatternChannel(seqState.playingPattern));
+							sendPots(k, seqState.getPatternChannel(seqState.playingPattern));
 						}
-						sendPots(k, seqState.setPatternChannel(seqState.playingPattern));
+						sendPots(k, seqState.getPatternChannel(seqState.playingPattern));
 						dirtyDisplay = true;
 
 					} else if (stepRecord){
@@ -255,13 +255,13 @@ void readPotentimeters(){
 
 						if (k < 4){ // only store p-lock value for first 4 knobs
 							seqState.stepNoteP[seqState.playingPattern][seqState.seqPos[seqState.playingPattern]].params[k] = analogValues[k];
-							sendPots(k, seqState.setPatternChannel(seqState.playingPattern));
+							sendPots(k, seqState.getPatternChannel(seqState.playingPattern));
 						} else if (k == 4){
 							seqState.stepNoteP[seqState.playingPattern][seqState.seqPos[seqState.playingPattern]].vel = analogValues[k]; // SET POT 5 to NOTE VELOCITY HERE
 						}
 						dirtyDisplay = true;
 					} else if (!noteSelect || !stepRecord){
-						sendPots(k, seqState.setPatternChannel(seqState.playingPattern));
+						sendPots(k, seqState.getPatternChannel(seqState.playingPattern));
 					}
 					break;
 
@@ -674,7 +674,7 @@ void dispGenericMode(int submode, int selected){
 			legendVals[0] = seqState.playingPattern + 1;
 			legendVals[1] = seqState.getPatternLength(seqState.playingPattern);
 			legendVals[2] = rotationAmt; //(int)transpose;
-			legendVals[3] = seqState.setPatternChannel(seqState.playingPattern);
+			legendVals[3] = seqState.getPatternChannel(seqState.playingPattern);
 			break;
 		case SUBMODE_PATTPARAMS2:
 			legends[0] = "START";
@@ -2000,7 +2000,7 @@ void seqNoteOn(int notenum, int velocity, int patternNum){
 	int adjnote = notes[notenum] + (octave * 12); // adjust key for octave range
 	if (adjnote>=0 && adjnote <128){
 		lastNote[patternNum][seqState.seqPos[patternNum]] = adjnote;
-		MM::sendNoteOn(adjnote, velocity, seqState.setPatternChannel(seqState.playingPattern));
+		MM::sendNoteOn(adjnote, velocity, seqState.getPatternChannel(seqState.playingPattern));
 
 		// keep track of adjusted note when pressed so that when key is released we send
 		// the correct note off message
@@ -2021,7 +2021,7 @@ void seqNoteOff(int notenum, int patternNum){
 	// we use the key state captured at the time we pressed the key to send the correct note off message
 	int adjnote = midiKeyState[notenum];
 	if (adjnote>=0 && adjnote <128){
-		MM::sendNoteOff(adjnote, 0, seqState.setPatternChannel(seqState.playingPattern));
+		MM::sendNoteOff(adjnote, 0, seqState.getPatternChannel(seqState.playingPattern));
 		// CV off
 		if (seqState.cvPattern[seqState.playingPattern]){
 			cvNoteOff();
@@ -2103,7 +2103,7 @@ void playNote(int patternNum) {
 		seqState.seq_velocity = seqState.stepNoteP[patternNum][seqState.seqPos[patternNum]].vel;
 
 		noteoff_micros = micros() + (seqState.stepNoteP[patternNum][seqState.seqPos[patternNum]].len + 1) * step_micros;
-		pendingNoteOffs.insert(seqState.stepNoteP[patternNum][seqState.seqPos[patternNum]].note, seqState.setPatternChannel(patternNum), noteoff_micros, sendnoteCV);
+		pendingNoteOffs.insert(seqState.stepNoteP[patternNum][seqState.seqPos[patternNum]].note, seqState.getPatternChannel(patternNum), noteoff_micros, sendnoteCV);
 
 		if (seqState.seqPos[patternNum] % 2 == 0){
 
@@ -2123,18 +2123,18 @@ void playNote(int patternNum) {
 		}
 
 		// Queue note-on
-		pendingNoteOns.insert(seqState.stepNoteP[patternNum][seqState.seqPos[patternNum]].note, seqState.seq_velocity, seqState.setPatternChannel(patternNum), noteon_micros, sendnoteCV);
+		pendingNoteOns.insert(seqState.stepNoteP[patternNum][seqState.seqPos[patternNum]].note, seqState.seq_velocity, seqState.getPatternChannel(patternNum), noteon_micros, sendnoteCV);
 
 		// {notenum, vel, notelen, step_type, {p1,p2,p3,p4}, prob}
 		// send param locks
 		for (int q=0; q<4; q++){
 			int tempCC = seqState.stepNoteP[patternNum][seqState.seqPos[patternNum]].params[q];
 			if (tempCC > -1) {
-				MM::sendControlChange(pots[q],tempCC,seqState.setPatternChannel(patternNum));
+				MM::sendControlChange(pots[q],tempCC,seqState.getPatternChannel(patternNum));
 				prevPlock[q] = tempCC;
 			} else if (prevPlock[q] != potValues[q]) {
 				//if (tempCC != prevPlock[q]) {
-				MM::sendControlChange(pots[q],potValues[q],seqState.setPatternChannel(patternNum));
+				MM::sendControlChange(pots[q],potValues[q],seqState.getPatternChannel(patternNum));
 				prevPlock[q] = potValues[q];
 			}
 		}

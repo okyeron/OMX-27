@@ -31,6 +31,26 @@ struct TimePerPattern {
   int lastPosP : 16;
 };
 
+enum TrigType {
+  TRIGTYPE_MUTE = 0,
+  TRIGTYPE_PLAY
+};
+
+enum StepType {
+  STEPTYPE_NONE = 0,
+  STEPTYPE_RESTART,
+  STEPTYPE_FWD,
+  STEPTYPE_REV,
+  STEPTYPE_PONG,
+  STEPTYPE_RANDSTEP,
+  STEPTYPE_RAND,
+
+  STEPTYPE_COUNT
+};
+
+const char *stepTypes[STEPTYPE_COUNT] = {"--", "1", ">>", "<<", "<>", "#?", "?"};
+// int stepTypeNumber[STEPTYPE_COUNT] = {STEPTYPE_NONE,STEPTYPE_RESTART,STEPTYPE_FWD,STEPTYPE_REV,STEPTYPE_RANDSTEP,STEPTYPE_RAND};
+
 struct StepNote {           // ?? bytes
   uint8_t note : 7;        // 0 - 127
   // uint8_t unused : 1;       // not hooked up. example of how to sneak a bool into the first byte in the structure
@@ -87,7 +107,7 @@ public:
     this->patterns[pattern].len = len - 1;
   }
 
-  uint8_t setPatternChannel(int pattern) {
+  uint8_t getPatternChannel(int pattern) {
     return this->patterns[pattern].channel + 1;
   }
 };
@@ -139,24 +159,6 @@ SequencerState defaultSequencerState() {
 // global sequencer shared state
 SequencerState seqState = defaultSequencerState();
 
-enum StepType {
-  STEPTYPE_NONE = 0,
-  STEPTYPE_RESTART,
-  STEPTYPE_FWD,
-  STEPTYPE_REV,
-  STEPTYPE_PONG,
-  STEPTYPE_RANDSTEP,
-  STEPTYPE_RAND,
-
-  STEPTYPE_COUNT
-};
-const char* stepTypes[STEPTYPE_COUNT] = {"--", "1", ">>", "<<", "<>", "#?", "?"};
-// int stepTypeNumber[STEPTYPE_COUNT] = {STEPTYPE_NONE,STEPTYPE_RESTART,STEPTYPE_FWD,STEPTYPE_REV,STEPTYPE_RANDSTEP,STEPTYPE_RAND};
-
-enum TrigType {
-  TRIGTYPE_MUTE = 0,
-  TRIGTYPE_PLAY
-};
 
 uint8_t lastNote[NUM_PATTERNS][NUM_STEPS] = {
 	{0},{0},{0},{0},{0},{0},{0},{0}
