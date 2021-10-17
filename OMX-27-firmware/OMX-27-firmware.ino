@@ -667,7 +667,7 @@ void dispGenericMode(int submode, int selected){
 			legendText[2] = mdivs[sequencer.getCurrentPattern()->clockDivMultP];
 
 			legendVals[3] = -127;
-			if (sequencer.cvPattern[sequencer.playingPattern]) {
+			if (sequencer.getCurrentPattern()->sendCV) {
 				legendText[3] = "On";
 			} else {
 				legendText[3] = "Off";
@@ -988,7 +988,7 @@ void loop() {
 						sequencer.getCurrentPattern()->clockDivMultP = constrain(sequencer.getCurrentPattern()->clockDivMultP + amt, 0, NUM_MULTDIVS - 1);
 					} else if (sqmode2 == 3){
 						// SET CV ON/OFF
-						sequencer.cvPattern[sequencer.playingPattern] = constrain(sequencer.cvPattern[sequencer.playingPattern] + amt, 0, 1);
+						sequencer.getCurrentPattern()->sendCV = constrain(sequencer.getCurrentPattern()->sendCV + amt, 0, 1);
 					}
 
 						dirtyDisplay = true;
@@ -2020,7 +2020,7 @@ void seqNoteOn(int notenum, int velocity, int patternNum){
 		midiKeyState[notenum] = adjnote;
 
 		// CV
-		if (sequencer.cvPattern[sequencer.playingPattern]) {
+		if (sequencer.getCurrentPattern()->sendCV) {
 			cvNoteOn(adjnote);
 		}
 	}
@@ -2036,7 +2036,7 @@ void seqNoteOff(int notenum, int patternNum){
 	if (adjnote>=0 && adjnote <128){
 		MM::sendNoteOff(adjnote, 0, sequencer.getPatternChannel(sequencer.playingPattern));
 		// CV off
-		if (sequencer.cvPattern[sequencer.playingPattern]){
+		if (sequencer.getCurrentPattern()->sendCV){
 			cvNoteOff();
 		}
 	}
@@ -2055,7 +2055,7 @@ void playNote(int patternNum) {
 
 	bool sendnoteCV = false;
 	int rnd_swing;
-	if (sequencer.cvPattern[patternNum]){
+	if (sequencer.getPattern(patternNum)->sendCV) {
 		sendnoteCV = true;
 	}
 	StepType playStepType = (StepType) pattern->steps[sequencer.seqPos[patternNum]].stepType;

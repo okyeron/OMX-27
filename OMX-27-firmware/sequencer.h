@@ -62,6 +62,7 @@ struct Pattern {  // ?? bytes
   bool mute : 1;
   bool autoreset : 1; // whether autoreset is enabled
   bool solo : 1;
+  bool sendCV : 1;
 
   StepNote steps[NUM_STEPS]; // note data
 }; // ? bytes
@@ -86,8 +87,6 @@ public:
   // TODO: move into Pattern?
   int seqPos[NUM_PATTERNS]; // What position in the sequence are we in?
 
-  // TODO: move into Pattern?
-  bool cvPattern[NUM_PATTERNS];
   int patternDefaultNoteMap[NUM_PATTERNS]; // default to GM Drum Map for now
   Pattern patterns[NUM_PATTERNS];
 
@@ -134,17 +133,16 @@ SequencerState defaultSequencer() {
     seq_velocity: 100,
     seq_acc_velocity: 127,
     seqPos: {0, 0, 0, 0, 0, 0, 0, 0},
-    cvPattern: {1, 0, 0, 0, 0, 0, 0, 0},
     patternDefaultNoteMap: {36, 38, 37, 39, 42, 46, 49, 51}, // default to GM Drum Map for now
     patterns: {
-      {15, 0, 0, 0, 0, 0, 1, 2, 1, 0, false, false, false, false},
-      {15, 1, 0, 0, 0, 0, 1, 2, 1, 0, false, false, false, false},
-      {15, 2, 0, 0, 0, 0, 1, 2, 1, 0, false, false, false, false},
-      {15, 3, 0, 0, 0, 0, 1, 2, 1, 0, false, false, false, false},
-      {15, 4, 0, 0, 0, 0, 1, 2, 1, 0, false, false, false, false},
-      {15, 5, 0, 0, 0, 0, 1, 2, 1, 0, false, false, false, false},
-      {15, 6, 0, 0, 0, 0, 1, 2, 1, 0, false, false, false, false},
-      {15, 7, 0, 0, 0, 0, 1, 2, 1, 0, false, false, false, false}},
+      {15, 0, 0, 0, 0, 0, 1, 2, 1, 0, false, false, false, false, false},
+      {15, 1, 0, 0, 0, 0, 1, 2, 1, 0, false, false, false, false, false},
+      {15, 2, 0, 0, 0, 0, 1, 2, 1, 0, false, false, false, false, false},
+      {15, 3, 0, 0, 0, 0, 1, 2, 1, 0, false, false, false, false, false},
+      {15, 4, 0, 0, 0, 0, 1, 2, 1, 0, false, false, false, false, false},
+      {15, 5, 0, 0, 0, 0, 1, 2, 1, 0, false, false, false, false, false},
+      {15, 6, 0, 0, 0, 0, 1, 2, 1, 0, false, false, false, false, false},
+      {15, 7, 0, 0, 0, 0, 1, 2, 1, 0, false, false, false, false, false}},
     timePerPattern: {
       {0, nextStepTime, lastStepTime, 0},
       {0, nextStepTime, lastStepTime, 0},
