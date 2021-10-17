@@ -85,10 +85,16 @@ public:
   word stepCV;
   int seq_velocity;
   int seq_acc_velocity;
+
+  // TODO: move into Pattern?
   int seqPos[NUM_PATTERNS]; // What position in the sequence are we in?
+
+  // TODO: move into Pattern?
   bool cvPattern[NUM_PATTERNS];
   int patternDefaultNoteMap[NUM_PATTERNS]; // default to GM Drum Map for now
   Pattern patterns[NUM_PATTERNS];
+
+  // TODO: move into Pattern?
   TimePerPattern timePerPattern[NUM_PATTERNS];
 
   Pattern* getPattern(int pattern) {
