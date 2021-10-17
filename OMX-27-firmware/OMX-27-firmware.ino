@@ -141,7 +141,7 @@ const int maxswing = 100;
 
 bool keyState[27] = {false};
 int midiKeyState[27] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
-
+uint8_t midiLastNote = 0;
 
 // ENCODER
 Encoder myEncoder(12, 11); 	// encoder pins on hardware
