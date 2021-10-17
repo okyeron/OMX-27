@@ -120,6 +120,7 @@ int pitchCV;
 uint8_t RES;
 uint16_t AMAX;
 int V_scale;
+int midiChannel; // the MIDI channel number to send messages (MIDI/OM mode)
 
 // clock
 float clockbpm = 120;
@@ -233,7 +234,7 @@ void readPotentimeters(){
 				case MODE_OM:
 						// fall through - same as MIDI
 				case MODE_MIDI: // MIDI
-					sendPots(k, seqState.midiChannel);
+					sendPots(k, midiChannel);
 					dirtyDisplay = true;
 					break;
 
@@ -334,7 +335,7 @@ void setup() {
 		// defaults
 		omxMode = DEFAULT_MODE;
 		seqState.playingPattern = 0;
-		seqState.midiChannel = 1;
+		midiChannel = 1;
 		pots[0][0] = CC1;
 		pots[0][1] = CC2;
 		pots[0][2] = CC3;
@@ -708,7 +709,7 @@ void dispGenericMode(int submode, int selected){
 			legends[2] = "CC";
 			legends[3] = "NOTE";
 			legendVals[0] = (int)octave+4;
-			legendVals[1] = seqState.midiChannel;
+			legendVals[1] = midiChannel;
 			legendVals[2] = potVal;
 			legendVals[3] = midiLastNote;
 			dispPage = 1;
@@ -1019,9 +1020,9 @@ void loop() {
 					// CHANGE PAGE
 					if (miparam == 0) {
 						if(u.dir() < 0){									// if turn ccw
-							MM::sendControlChange(CC_OM2, 0, seqState.midiChannel);
+							MM::sendControlChange(CC_OM2, 0, midiChannel);
 						} else if (u.dir() > 0){							// if turn cw
-							MM::sendControlChange(CC_OM2, 127, seqState.midiChannel);
+							MM::sendControlChange(CC_OM2, 127, midiChannel);
 						}
 					}
 					dirtyDisplay = true;
@@ -1034,9 +1035,9 @@ void loop() {
 					}
 					// PAGE ONE
 					if (miparam == 2) {
-						int newchan = constrain(seqState.midiChannel + amt, 1, 16);
-						if (newchan != seqState.midiChannel){
-							seqState.midiChannel = newchan;
+						int newchan = constrain(midiChannel + amt, 1, 16);
+						if (newchan != midiChannel){
+							midiChannel = newchan;
 						}
 					} else if (miparam == 1){
 						// set octave
@@ -1066,15 +1067,15 @@ void loop() {
 								MM::sendProgramChange(currpgm, q);
 							}
 						} else {
-							MM::sendProgramChange(currpgm, seqState.midiChannel);
+							MM::sendProgramChange(currpgm, midiChannel);
 						}
 
 					} else if (miparam == 9){
 						currbank = constrain(currbank + amt, 0, 127);
 						// Bank Select is 2 mesages
-						MM::sendControlChange(0, 0, seqState.midiChannel);
-						MM::sendControlChange(32, currbank, seqState.midiChannel);
-						MM::sendProgramChange(currpgm, seqState.midiChannel);
+						MM::sendControlChange(0, 0, midiChannel);
+						MM::sendControlChange(32, currbank, midiChannel);
+						MM::sendProgramChange(currpgm, midiChannel);
 					}
 					// PAGE THREE
 					if (miparam == 11) {
@@ -1460,17 +1461,17 @@ void loop() {
 								mmpage = miparam / NUM_DISP_PARAMS;
 							}
 						} else {
-							midiNoteOn(thisKey, defaultVelocity, seqState.midiChannel);
+							midiNoteOn(thisKey, defaultVelocity, midiChannel);
 						}
 					} else {
-						midiNoteOn(thisKey, defaultVelocity, seqState.midiChannel);
+						midiNoteOn(thisKey, defaultVelocity, midiChannel);
 					}
 
 
 
 				} else if(e.bit.EVENT == KEY_JUST_RELEASED && thisKey != 0) {
 					//Serial.println(" released");
-					midiNoteOff(thisKey, seqState.midiChannel);
+					midiNoteOff(thisKey, midiChannel);
 				}
 
 				// AUX KEY
@@ -2487,7 +2488,7 @@ void allNotesOffPanic() {
 	analogWrite(CVPITCH_PIN, 0);
 	digitalWrite(CVGATE_PIN, LOW);
 	for (int j=0; j<128; j++){
-		MM::sendNoteOff(j, 0, seqState.midiChannel); // NEEDS FIXING
+		MM::sendNoteOff(j, 0, midiChannel); // NEEDS FIXING
 	}
 }
 
@@ -2747,7 +2748,7 @@ void saveHeader( void ) {
 	storage->write(EEPROM_HEADER_ADDRESS + 2, (uint8_t)seqState.playingPattern);
 
 	// 1 byte for Midi channel
-	uint8_t unMidiChannel = (uint8_t)(seqState.midiChannel - 1);
+	uint8_t unMidiChannel = (uint8_t)(midiChannel - 1);
 	storage->write( EEPROM_HEADER_ADDRESS + 3, unMidiChannel );
 
 	for ( int i=0; i<NUM_CC_POTS; i++ ) {
@@ -2784,7 +2785,7 @@ bool loadHeader( void ) {
 	seqState.playingPattern = storage->read(EEPROM_HEADER_ADDRESS + 2);
 
 	uint8_t unMidiChannel = storage->read( EEPROM_HEADER_ADDRESS + 3 );
-	seqState.midiChannel = unMidiChannel + 1;
+	midiChannel = unMidiChannel + 1;
 
 	for ( int i=0; i<NUM_CC_POTS; i++ ) {
 		pots[potbank][i] = storage->read( EEPROM_HEADER_ADDRESS + 4 + i );
