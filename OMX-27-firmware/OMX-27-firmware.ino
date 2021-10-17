@@ -145,6 +145,7 @@ int midiRRChannelOffset = 0;
 int currpgm = 0;
 int currbank = 0;
 bool midiInToCV = true;
+uint8_t midiLastNote = 0;
 
 // ENCODER
 Encoder myEncoder(12, 11); 	// encoder pins on hardware
