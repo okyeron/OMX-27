@@ -8,8 +8,28 @@
 
 using Micros = unsigned long; // for tracking time per pattern
 
+struct PatternSettings {  // ?? bytes
+	uint8_t len : 4;    // 0 - 15, maps to 1 - 16
+	uint8_t channel : 4;    // 0 - 15 , maps to channels 1 - 16
+	uint8_t startstep : 4; // step to begin pattern. must be < patternlength-1
+	uint8_t autoresetstep : 4;  // step to reset on / 0 = off
+	uint8_t autoresetfreq : 4; // tracking reset iteration if enabled / ie Freq of autoreset. should be renamed
+	uint8_t current_cycle : 4; // tracking current cycle of autoreset counter / start it at 1
+	uint8_t rndstep : 4; // for random autostep functionality
+	uint8_t clockDivMultP : 4;
+	uint8_t autoresetprob : 7; // probability of autoreset - 1 is always and totally random if autoreset is 0
+	uint8_t swing : 7;
+	bool reverse : 1;
+	bool mute : 1;
+	bool autoreset : 1; // whether autoreset is enabled
+	bool solo : 1;
+}; // ? bytes
+
 // holds state for sequencer
-struct SequencerState {
+class SequencerState {
+
+public:
+
 	// TODO: is this needed by other modes?
 	int midiChannel;                // the MIDI channel number to send messages
 	int ticks;                      // A tick of the clock
@@ -28,6 +48,16 @@ struct SequencerState {
 	bool cvPattern[NUM_PATTERNS];
 	int patternDefaultNoteMap[NUM_PATTERNS]; // default to GM Drum Map for now
 	int patternPage[NUM_PATTERNS];
+	PatternSettings patternSettings[NUM_PATTERNS];
+
+
+	PatternSettings* getSettings(int pattern) {
+		return &this->patternSettings[pattern];
+	}
+
+	PatternSettings* getCurrentPattern() {
+		return getSettings(this->playingPattern);
+	}
 };
 
 SequencerState defaultSequencerState() {
@@ -49,6 +79,15 @@ SequencerState defaultSequencerState() {
 		cvPattern: {1, 0, 0, 0, 0, 0, 0, 0},
 		patternDefaultNoteMap: {36, 38, 37, 39, 42, 46, 49, 51}, // default to GM Drum Map for now
 		patternPage: {0, 0, 0, 0, 0, 0, 0, 0},
+		patternSettings: {
+			{15, 0, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false},
+			{15, 1, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false},
+			{15, 2, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false},
+			{15, 3, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false},
+			{15, 4, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false},
+			{15, 5, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false},
+			{15, 6, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false},
+			{15, 7, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false}}
 	};
 
 	return state;
@@ -76,33 +115,6 @@ enum TrigType {
 	TRIGTYPE_PLAY
 };
 
-struct PatternSettings {  // ?? bytes
-	uint8_t len : 6;    // 0 - ?, maps to 1 to (NUM_STEPS - 1)
-	uint8_t channel : 4;    // 0 - 15 , maps to channels 1 - 16
-	uint8_t startstep : 4; // step to begin pattern. must be < patternlength-1
-	uint8_t autoresetstep : 4;  // step to reset on / 0 = off
-	uint8_t autoresetfreq : 4; // tracking reset iteration if enabled / ie Freq of autoreset. should be renamed
-	uint8_t current_cycle : 4; // tracking current cycle of autoreset counter / start it at 1
-	uint8_t rndstep : 4; // for random autostep functionality
-	uint8_t clockDivMultP : 4;
-	uint8_t autoresetprob : 7; // probability of autoreset - 1 is always and totally random if autoreset is 0
-	uint8_t swing : 7;
-	bool reverse : 1;
-	bool mute : 1;
-	bool autoreset : 1; // whether autoreset is enabled
-	bool solo : 1;
-}; // ? bytes
-
-PatternSettings patternSettings[NUM_PATTERNS] = {
-	{ 15, 0, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false },
-	{ 15, 1, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false },
-	{ 15, 2, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false },
-	{ 15, 3, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false },
-	{ 15, 4, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false },
-	{ 15, 5, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false },
-	{ 15, 6, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false },
-	{ 15, 7, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false }
-};
 
 struct TimePerPattern {
 	Micros lastProcessTimeP : 32;
@@ -124,15 +136,15 @@ TimePerPattern timePerPattern[NUM_PATTERNS] = {
 
 // Helpers to deal with 1-16 values for pattern length and channel when they're stored as 0-15
 uint8_t PatternLength( int pattern ) {
-	return patternSettings[pattern].len + 1;
+	return seqState.patternSettings[pattern].len + 1;
 }
 
 void SetPatternLength( int pattern, int len ) {
-	patternSettings[pattern].len = len - 1;
+	seqState.patternSettings[pattern].len = len - 1;
 }
 
 uint8_t PatternChannel( int pattern ) {
-	return patternSettings[pattern].channel + 1;
+	return seqState.patternSettings[pattern].channel + 1;
 }
 
 struct StepNote {           // ?? bytes
@@ -190,11 +202,11 @@ const char* trigConditions[36] = {"1:1","1:2","2:2","1:3","2:3","3:3","1:4","2:4
 int ABcondition = 0;
 int trigConditionsAB[36][2] ={
 	{1,1},
-		{1,2}, {2,2},
-		{1,3}, {2,3}, {3,3},
-		{1,4}, {2,4}, {3,4}, {4,4},
-		{1,5}, {2,5}, {3,5}, {4,5}, {5,5},
-		{1,6}, {2,6}, {3,6}, {4,6}, {5,6}, {6,6},
-		{1,7}, {2,7}, {3,7}, {4,7}, {5,7}, {6,7}, {7,7},
-		{1,8}, {2,8}, {3,8}, {4,8}, {5,8}, {6,8}, {7,8}, {8,8}
+	{1,2}, {2,2},
+	{1,3}, {2,3}, {3,3},
+	{1,4}, {2,4}, {3,4}, {4,4},
+	{1,5}, {2,5}, {3,5}, {4,5}, {5,5},
+	{1,6}, {2,6}, {3,6}, {4,6}, {5,6}, {6,6},
+	{1,7}, {2,7}, {3,7}, {4,7}, {5,7}, {6,7}, {7,7},
+	{1,8}, {2,8}, {3,8}, {4,8}, {5,8}, {6,8}, {7,8}, {8,8}
 };
