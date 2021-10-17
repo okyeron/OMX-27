@@ -201,7 +201,7 @@ void resetClocks(){
 
 void setGlobalSwing(int swng_amt){
 	for(int z=0; z<NUM_PATTERNS; z++) {
-		seqState.getSettings(z)->swing = swng_amt;
+		seqState.getPattern(z)->swing = swng_amt;
 	}
 }
 
@@ -456,7 +456,7 @@ void show_current_step(int patternNum) {
 		}
 	}
 
-	if (seqState.getSettings(patternNum)->mute) {
+	if (seqState.getPattern(patternNum)->mute) {
 		stepColor = muteColors[patternNum];
 	} else {
 		stepColor = seqColors[patternNum];
@@ -530,7 +530,7 @@ void show_current_step(int patternNum) {
 			strip.setPixelColor(j, LEDOFF);
 		}
 		// SHOW LEDS FOR WHAT PAGE OF SEQ PATTERN YOURE ON
-		auto len = (seqState.patternSettings[patternNum].len/NUM_STEPKEYS);
+		auto len = (seqState.getPattern(patternNum)->len/NUM_STEPKEYS);
 		for(int h = 0; h <= len; h++){
 			auto currentpage = seqState.patternPage[patternNum];
 			auto color = sequencePageColors[h];
@@ -1639,7 +1639,7 @@ void loop() {
 
 							// If KEY 2 is down + pattern = PATTERN MUTE
 							} else if (keyState[2]) {
-								seqState.getSettings(thisKey - 3)->mute = !seqState.getSettings(thisKey-3)->mute;
+								seqState.getPattern(thisKey - 3)->mute = !seqState.getPattern(thisKey-3)->mute;
 
 							} else {
 								seqState.playingPattern = thisKey - 3;
@@ -1956,7 +1956,7 @@ void loop() {
 void step_ahead(int patternNum) {
 	// step each pattern ahead one place
 	for (int j=0; j<8; j++){
-		if (seqState.getSettings(j)->reverse) {
+		if (seqState.getPattern(j)->reverse) {
 			seqState.seqPos[j]--;
 			auto_reset(j); // determine whether to reset or not based on param settings
 //			if (seqPos[j] < 0)
@@ -1972,7 +1972,7 @@ void step_ahead(int patternNum) {
 void step_back(int patternNum) {
 	// step each pattern ahead one place
 	for (int j=0; j<8; j++){
-		if (seqState.getSettings(j)->reverse) {
+		if (seqState.getPattern(j)->reverse) {
 			seqState.seqPos[j]++;
 			auto_reset(j); // determine whether to reset or not based on param settings
 		} else {
@@ -1986,7 +1986,7 @@ void step_back(int patternNum) {
 
 void new_step_ahead(int patternNum) {
 	// step each pattern ahead one place
-		if (seqState.getSettings(patternNum)->reverse) {
+		if (seqState.getPattern(patternNum)->reverse) {
 			seqState.seqPos[patternNum]--;
 			auto_reset(patternNum); // determine whether to reset or not based on param settings
 		} else {
@@ -1996,7 +1996,7 @@ void new_step_ahead(int patternNum) {
 }
 
 void auto_reset(int p) {
-	auto settings = seqState.getSettings(p);
+	auto settings = seqState.getPattern(p);
 
 	// should be conditioned on whether we're in S2!!
 	if (seqState.seqPos[p] >= seqState.getPatternLength(p) ||
@@ -2179,10 +2179,10 @@ void doStep() {
 
 						seqReset(); // check for seqReset
 						seqState.timePerPattern[j].lastStepTimeP = seqState.timePerPattern[j].nextStepTimeP;
-						seqState.timePerPattern[j].nextStepTimeP += (step_micros)*( multValues[seqState.getSettings(j)->clockDivMultP] ); // calc step based on rate
+						seqState.timePerPattern[j].nextStepTimeP += (step_micros)*( multValues[seqState.getPattern(j)->clockDivMultP] ); // calc step based on rate
 
 						// only play if not muted
-						if (!seqState.getSettings(j)->mute) {
+						if (!seqState.getPattern(j)->mute) {
 							seqState.timePerPattern[j].lastPosP = (seqState.seqPos[j] + 15) % 16;
 							if (lastNote[j][seqState.timePerPattern[j].lastPosP] > 0) {
 								step_off(j, seqState.timePerPattern[j].lastPosP);
@@ -2395,7 +2395,7 @@ void playNote(int patternNum) {
 //		Serial.println(playStepType);
 	}
 
-	auto settings = seqState.getSettings(patternNum);
+	auto settings = seqState.getPattern(patternNum);
 
 	switch (playStepType) {
 		case STEPTYPE_COUNT:	// fall through
@@ -2493,7 +2493,7 @@ void seqReset(){
 			for (int q=0; q<NUM_STEPS; q++){
 				loopCount[k][q] = 0;
 			}
-			if (seqState.getSettings(k)->reverse) { // REVERSE
+			if (seqState.getPattern(k)->reverse) { // REVERSE
 				seqState.seqPos[k] = seqState.getPatternLength(k) - 1;
 			} else {
 				seqState.seqPos[k] = 0;
@@ -2693,7 +2693,7 @@ void initPatterns( void ) {
 		}
 
 		// TODO: move to sequencer
-		auto settings = seqState.getSettings(i);
+		auto settings = seqState.getPattern(i);
 		settings->len = 15;
 		settings->channel = i;		// 0 - 15 becomes 1 - 16
 		settings->mute = false;
@@ -2782,11 +2782,11 @@ void savePatterns( void ) {
 	}
 
 	nLocalAddress = EEPROM_PATTERN_SETTINGS_ADDRESS;
-	s = sizeof( PatternSettings );
+	s = sizeof( Pattern );
 
 	// save pattern settings
 	for ( int i=0; i<NUM_PATTERNS; i++ ) {
-		storage->writeObject( nLocalAddress, seqState.getSettings(i));
+		storage->writeObject( nLocalAddress, seqState.getPattern(i));
 		nLocalAddress += s;
 	}
 }
@@ -2806,11 +2806,11 @@ void loadPatterns( void ) {
 	}
 
 	nLocalAddress = EEPROM_PATTERN_SETTINGS_ADDRESS;
-	s = sizeof( PatternSettings );
+	s = sizeof( Pattern );
 
 	// load pattern length
 	for ( int i=0; i<NUM_PATTERNS; i++ ) {
-		auto settings = seqState.getSettings(i);
+		auto settings = seqState.getPattern(i);
 		storage->readObject(nLocalAddress, settings);
 		nLocalAddress += s;
 	}

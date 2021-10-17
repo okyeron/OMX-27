@@ -8,21 +8,21 @@
 
 using Micros = unsigned long; // for tracking time per pattern
 
-struct PatternSettings {  // ?? bytes
-	uint8_t len : 4;    // 0 - 15, maps to 1 - 16
-	uint8_t channel : 4;    // 0 - 15 , maps to channels 1 - 16
-	uint8_t startstep : 4; // step to begin pattern. must be < patternlength-1
-	uint8_t autoresetstep : 4;  // step to reset on / 0 = off
-	uint8_t autoresetfreq : 4; // tracking reset iteration if enabled / ie Freq of autoreset. should be renamed
-	uint8_t current_cycle : 4; // tracking current cycle of autoreset counter / start it at 1
-	uint8_t rndstep : 4; // for random autostep functionality
-	uint8_t clockDivMultP : 4;
-	uint8_t autoresetprob : 7; // probability of autoreset - 1 is always and totally random if autoreset is 0
-	uint8_t swing : 7;
-	bool reverse : 1;
-	bool mute : 1;
-	bool autoreset : 1; // whether autoreset is enabled
-	bool solo : 1;
+struct Pattern {  // ?? bytes
+  uint8_t len : 4;    // 0 - 15, maps to 1 - 16
+  uint8_t channel : 4;    // 0 - 15 , maps to channels 1 - 16
+  uint8_t startstep : 4; // step to begin pattern. must be < patternlength-1
+  uint8_t autoresetstep : 4;  // step to reset on / 0 = off
+  uint8_t autoresetfreq : 4; // tracking reset iteration if enabled / ie Freq of autoreset. should be renamed
+  uint8_t current_cycle : 4; // tracking current cycle of autoreset counter / start it at 1
+  uint8_t rndstep : 4; // for random autostep functionality
+  uint8_t clockDivMultP : 4;
+  uint8_t autoresetprob : 7; // probability of autoreset - 1 is always and totally random if autoreset is 0
+  uint8_t swing : 7;
+  bool reverse : 1;
+  bool mute : 1;
+  bool autoreset : 1; // whether autoreset is enabled
+  bool solo : 1;
 }; // ? bytes
 
 struct TimePerPattern {
@@ -86,29 +86,29 @@ public:
   bool cvPattern[NUM_PATTERNS];
   int patternDefaultNoteMap[NUM_PATTERNS]; // default to GM Drum Map for now
 	int patternPage[NUM_PATTERNS];
-  PatternSettings patternSettings[NUM_PATTERNS];
+  Pattern patterns[NUM_PATTERNS];
   TimePerPattern timePerPattern[NUM_PATTERNS];
   StepNote stepNoteP[NUM_PATTERNS][NUM_STEPS];
 
-  PatternSettings* getSettings(int pattern) {
-    return &this->patternSettings[pattern];
+  Pattern* getPattern(int pattern) {
+    return &this->patterns[pattern];
   }
 
-  PatternSettings* getCurrentPattern() {
-    return getSettings(this->playingPattern);
+  Pattern* getCurrentPattern() {
+    return getPattern(this->playingPattern);
   }
 
 	// Helpers to deal with 1-16 values for pattern length and channel when they're stored as 0-15
   uint8_t getPatternLength(int pattern) {
-    return this->patternSettings[pattern].len + 1;
+    return this->patterns[pattern].len + 1;
   }
 
   void setPatternLength(int pattern, int len) {
-    this->patternSettings[pattern].len = len - 1;
+    this->patterns[pattern].len = len - 1;
   }
 
   uint8_t getPatternChannel(int pattern) {
-    return this->patternSettings[pattern].channel + 1;
+    return this->patterns[pattern].channel + 1;
   }
 };
 
@@ -134,7 +134,7 @@ SequencerState defaultSequencerState() {
     cvPattern: {1, 0, 0, 0, 0, 0, 0, 0},
     patternDefaultNoteMap: {36, 38, 37, 39, 42, 46, 49, 51}, // default to GM Drum Map for now
 		patternPage: {0, 0, 0, 0, 0, 0, 0, 0},
-    patternSettings: {
+    patterns: {
       {15, 0, 0, 0, 0, 0, 1, 2, 1, 0, false, false, false, false},
       {15, 1, 0, 0, 0, 0, 1, 2, 1, 0, false, false, false, false},
       {15, 2, 0, 0, 0, 0, 1, 2, 1, 0, false, false, false, false},
