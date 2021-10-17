@@ -24,6 +24,13 @@ struct PatternSettings {  // ?? bytes
   bool solo : 1;
 }; // ? bytes
 
+struct TimePerPattern {
+  Micros lastProcessTimeP : 32;
+  Micros nextStepTimeP : 32;
+  Micros lastStepTimeP : 32;
+  int lastPosP : 16;
+};
+
 // holds state for sequencer
 class SequencerState {
 
@@ -47,6 +54,7 @@ public:
   bool cvPattern[NUM_PATTERNS];
   int patternDefaultNoteMap[NUM_PATTERNS]; // default to GM Drum Map for now
   PatternSettings patternSettings[NUM_PATTERNS];
+  TimePerPattern timePerPattern[NUM_PATTERNS];
 
   PatternSettings* getSettings(int pattern) {
     return &this->patternSettings[pattern];
@@ -71,6 +79,9 @@ public:
 };
 
 SequencerState defaultSequencerState() {
+  auto nextStepTime = micros();
+  auto lastStepTime = micros();
+
   auto state = SequencerState{
     midiChannel: 1,
     ticks: 0,
@@ -89,14 +100,23 @@ SequencerState defaultSequencerState() {
     cvPattern: {1, 0, 0, 0, 0, 0, 0, 0},
     patternDefaultNoteMap: {36, 38, 37, 39, 42, 46, 49, 51}, // default to GM Drum Map for now
     patternSettings: {
-      {15, 0, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false},
-      {15, 1, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false},
-      {15, 2, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false},
-      {15, 3, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false},
-      {15, 4, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false},
-      {15, 5, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false},
-      {15, 6, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false},
-      {15, 7, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false}}
+      {15, 0, 0, 0, 0, 0, 1, 2, 1, 0, false, false, false, false},
+      {15, 1, 0, 0, 0, 0, 1, 2, 1, 0, false, false, false, false},
+      {15, 2, 0, 0, 0, 0, 1, 2, 1, 0, false, false, false, false},
+      {15, 3, 0, 0, 0, 0, 1, 2, 1, 0, false, false, false, false},
+      {15, 4, 0, 0, 0, 0, 1, 2, 1, 0, false, false, false, false},
+      {15, 5, 0, 0, 0, 0, 1, 2, 1, 0, false, false, false, false},
+      {15, 6, 0, 0, 0, 0, 1, 2, 1, 0, false, false, false, false},
+      {15, 7, 0, 0, 0, 0, 1, 2, 1, 0, false, false, false, false}},
+    timePerPattern: {
+      {0, nextStepTime, lastStepTime, 0},
+      {0, nextStepTime, lastStepTime, 0},
+      {0, nextStepTime, lastStepTime, 0},
+      {0, nextStepTime, lastStepTime, 0},
+      {0, nextStepTime, lastStepTime, 0},
+      {0, nextStepTime, lastStepTime, 0},
+      {0, nextStepTime, lastStepTime, 0},
+      {0, nextStepTime, lastStepTime, 0}},
   };
 
   return state;
@@ -122,25 +142,6 @@ const char* stepTypes[STEPTYPE_COUNT] = {"--", "1", ">>", "<<", "<>", "#?", "?"}
 enum TrigType {
   TRIGTYPE_MUTE = 0,
   TRIGTYPE_PLAY
-};
-
-
-struct TimePerPattern {
-  Micros lastProcessTimeP : 32;
-  Micros nextStepTimeP : 32;
-  Micros lastStepTimeP : 32;
-  int lastPosP : 16;
-};
-
-TimePerPattern timePerPattern[NUM_PATTERNS] = {
-  { 0, 0, 0 },
-  { 0, 0, 0 },
-  { 0, 0, 0 },
-  { 0, 0, 0 },
-  { 0, 0, 0 },
-  { 0, 0, 0 },
-  { 0, 0, 0 },
-  { 0, 0, 0 }
 };
 
 struct StepNote {           // ?? bytes

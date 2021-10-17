@@ -52,8 +52,6 @@ elapsedMillis keyPressTime[27] = {0};
 
 using Micros = unsigned long;
 Micros lastProcessTime;
-Micros nextStepTime;
-Micros lastStepTime;
 volatile unsigned long step_micros;
 volatile unsigned long noteon_micros;
 volatile unsigned long noteoff_micros;
@@ -288,13 +286,6 @@ void setup() {
 	lastProcessTime = micros();
 	resetClocks();
 
-	nextStepTime = micros();
-	lastStepTime = micros();
-	for (int x=0; x<NUM_PATTERNS; x++){
-		timePerPattern[x].nextStepTimeP = nextStepTime; // initialize all patterns
-		timePerPattern[x].lastStepTimeP = lastStepTime; // initialize all patterns
-		seqState.getSettings(x)->clockDivMultP = 2; // set all DivMult to 2 for now
-	}
 	randomSeed(analogRead(13));
 
 	// SET ANALOG READ resolution to teensy's 13 usable bits
@@ -1882,23 +1873,23 @@ void doStep() {
 			if(seqState.playing) {
 				// ############## STEP TIMING ##############
 //				if(micros() >= nextStepTime){
-				if(micros() >= timePerPattern[seqState.playingPattern].nextStepTimeP){
+				if(micros() >= seqState.timePerPattern[seqState.playingPattern].nextStepTimeP) {
 					seqReset();
 					// DO STUFF
 
-//					int lastPos = (seqPos[seqState.playingPattern]+15) % 16;
-//					if (lastNote[seqState.playingPattern][lastPos] > 0){
-//						step_off(seqState.playingPattern, lastPos);
-//					}
-//					lastStepTime = nextStepTime;
-//					nextStepTime += step_micros;
-
-					timePerPattern[seqState.playingPattern].lastPosP = (seqState.seqPos[seqState.playingPattern] + 15) % 16;
-					if (lastNote[seqState.playingPattern][timePerPattern[seqState.playingPattern].lastPosP] > 0){
-						step_off(seqState.playingPattern, timePerPattern[seqState.playingPattern].lastPosP);
+					// int lastPos = (seqPos[seqState.playingPattern]+15) % 16;
+					// if (lastNote[seqState.playingPattern][lastPos] > 0){
+					// 	step_off(seqState.playingPattern, lastPos);
+					// }
+					// lastStepTime = nextStepTime;
+					// nextStepTime += step_micros;
+					// TODO: refactor timePerPattern stuff into sequencer.h
+					seqState.timePerPattern[seqState.playingPattern].lastPosP = (seqState.seqPos[seqState.playingPattern] + 15) % 16;
+					if (lastNote[seqState.playingPattern][seqState.timePerPattern[seqState.playingPattern].lastPosP] > 0){
+						step_off(seqState.playingPattern, seqState.timePerPattern[seqState.playingPattern].lastPosP);
 					}
-					timePerPattern[seqState.playingPattern].lastStepTimeP = timePerPattern[seqState.playingPattern].nextStepTimeP;
-					timePerPattern[seqState.playingPattern].nextStepTimeP += (step_micros)*( multValues[seqState.getCurrentPattern()->clockDivMultP] ); // calc step based on rate
+					seqState.timePerPattern[seqState.playingPattern].lastStepTimeP = seqState.timePerPattern[seqState.playingPattern].nextStepTimeP;
+					seqState.timePerPattern[seqState.playingPattern].nextStepTimeP += (step_micros)*( multValues[seqState.getCurrentPattern()->clockDivMultP] ); // calc step based on rate
 
 					if (testProb){ //  && evaluate_AB(stepNoteP[seqState.playingPattern][seqPos[seqState.playingPattern]].condition, playingPattern)
 						playNote(seqState.playingPattern);
@@ -1917,20 +1908,21 @@ void doStep() {
 			if(seqState.playing) {
 				unsigned long playstepmicros = micros();
 
-				for (int j=0; j<NUM_PATTERNS; j++){ // check all patterns for notes to play in time
-
+				for (int j=0; j<NUM_PATTERNS; j++){  // check all patterns for notes to play in time
 					// CLOCK PER PATTERN BASED APPROACH
-						if(playstepmicros >= timePerPattern[j].nextStepTimeP){
+					// TODO: refactor timePerPattern stuff into sequencer.h
+
+					if (playstepmicros >= seqState.timePerPattern[j].nextStepTimeP) {
 
 						seqReset(); // check for seqReset
-						timePerPattern[j].lastStepTimeP = timePerPattern[j].nextStepTimeP;
-						timePerPattern[j].nextStepTimeP += (step_micros)*( multValues[seqState.getSettings(j)->clockDivMultP] ); // calc step based on rate
+						seqState.timePerPattern[j].lastStepTimeP = seqState.timePerPattern[j].nextStepTimeP;
+						seqState.timePerPattern[j].nextStepTimeP += (step_micros)*( multValues[seqState.getSettings(j)->clockDivMultP] ); // calc step based on rate
 
 						// only play if not muted
 						if (!seqState.getSettings(j)->mute) {
-							timePerPattern[j].lastPosP = (seqState.seqPos[j] + 15) % 16;
-							if (lastNote[j][timePerPattern[j].lastPosP] > 0) {
-								step_off(j, timePerPattern[j].lastPosP);
+							seqState.timePerPattern[j].lastPosP = (seqState.seqPos[j] + 15) % 16;
+							if (lastNote[j][seqState.timePerPattern[j].lastPosP] > 0) {
+								step_off(j, seqState.timePerPattern[j].lastPosP);
 							}
 							if (testProb){
 								if (evaluate_AB(stepNoteP[j][seqState.seqPos[j]].condition, j)){
@@ -2193,8 +2185,8 @@ void seqStart() {
 	seqState.playing = 1;
 
 	for (int x=0; x<NUM_PATTERNS; x++){
-		timePerPattern[x].nextStepTimeP = micros();
-		timePerPattern[x].lastStepTimeP = micros();
+		seqState.timePerPattern[x].nextStepTimeP = micros();
+		seqState.timePerPattern[x].lastStepTimeP = micros();
 	}
 
 	if (!seqState.seqResetFlag) {
