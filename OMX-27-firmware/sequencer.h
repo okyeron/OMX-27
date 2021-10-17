@@ -32,24 +32,25 @@ struct TimePerPattern {
   int lastPosP : 16;
 };
 
-enum StepType {
-	STEPTYPE_NONE = 0,
-	STEPTYPE_RESTART,
-	STEPTYPE_FWD,
-	STEPTYPE_REV,
-	STEPTYPE_PONG,
-	STEPTYPE_RANDSTEP,
-	STEPTYPE_RAND,
-
-	STEPTYPE_COUNT
-};
-const char* stepTypes[STEPTYPE_COUNT] = {"--", "1", ">>", "<<", "<>", "#?", "?"};
-// int stepTypeNumber[STEPTYPE_COUNT] = {STEPTYPE_NONE,STEPTYPE_RESTART,STEPTYPE_FWD,STEPTYPE_REV,STEPTYPE_RANDSTEP,STEPTYPE_RAND};
-
 enum TrigType {
-	TRIGTYPE_MUTE = 0,
-	TRIGTYPE_PLAY
+  TRIGTYPE_MUTE = 0,
+  TRIGTYPE_PLAY
 };
+
+enum StepType {
+  STEPTYPE_NONE = 0,
+  STEPTYPE_RESTART,
+  STEPTYPE_FWD,
+  STEPTYPE_REV,
+  STEPTYPE_PONG,
+  STEPTYPE_RANDSTEP,
+  STEPTYPE_RAND,
+
+  STEPTYPE_COUNT
+};
+
+const char *stepTypes[STEPTYPE_COUNT] = {"--", "1", ">>", "<<", "<>", "#?", "?"};
+// int stepTypeNumber[STEPTYPE_COUNT] = {STEPTYPE_NONE,STEPTYPE_RESTART,STEPTYPE_FWD,STEPTYPE_REV,STEPTYPE_RANDSTEP,STEPTYPE_RAND};
 
 struct StepNote {           // ?? bytes
   uint8_t note : 7;        // 0 - 127
