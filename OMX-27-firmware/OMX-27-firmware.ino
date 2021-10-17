@@ -84,6 +84,9 @@ int sqparam = 0;	// seq params
 int srparam = 0;	// step record params
 int tmpmmode = 9;
 
+// global sequencer shared state
+SequencerState sequencer = defaultSequencer();
+
 // VARIABLES / FLAGS
 float step_delay;
 bool dirtyPixels = false;
@@ -202,7 +205,7 @@ void resetClocks(){
 
 void setGlobalSwing(int swng_amt){
 	for(int z=0; z<NUM_PATTERNS; z++) {
-		seqState.getPattern(z)->swing = swng_amt;
+		sequencer.getPattern(z)->swing = swng_amt;
 	}
 }
 
@@ -248,9 +251,9 @@ void readPotentimeters(){
 
 						if (k < 4){ // only store p-lock value for first 4 knobs
 							getSelectedStep()->params[k] = analogValues[k];
-							sendPots(k, seqState.getPatternChannel(seqState.playingPattern));
+							sendPots(k, sequencer.getPatternChannel(sequencer.playingPattern));
 						}
-						sendPots(k, seqState.getPatternChannel(seqState.playingPattern));
+						sendPots(k, sequencer.getPatternChannel(sequencer.playingPattern));
 						dirtyDisplay = true;
 
 					} else if (stepRecord){
@@ -259,14 +262,14 @@ void readPotentimeters(){
 						potVal = analogValues[k];
 
 						if (k < 4){ // only store p-lock value for first 4 knobs
-							seqState.getCurrentPattern()->steps[seqState.seqPos[seqState.playingPattern]].params[k] = analogValues[k];
-							sendPots(k, seqState.getPatternChannel(seqState.playingPattern));
+							sequencer.getCurrentPattern()->steps[sequencer.seqPos[sequencer.playingPattern]].params[k] = analogValues[k];
+							sendPots(k, sequencer.getPatternChannel(sequencer.playingPattern));
 						} else if (k == 4){
-							seqState.getCurrentPattern()->steps[seqState.seqPos[seqState.playingPattern]].vel = analogValues[k]; // SET POT 5 to NOTE VELOCITY HERE
+							sequencer.getCurrentPattern()->steps[sequencer.seqPos[sequencer.playingPattern]].vel = analogValues[k]; // SET POT 5 to NOTE VELOCITY HERE
 						}
 						dirtyDisplay = true;
 					} else if (!noteSelect || !stepRecord){
-						sendPots(k, seqState.getPatternChannel(seqState.playingPattern));
+						sendPots(k, sequencer.getPatternChannel(sequencer.playingPattern));
 					}
 					break;
 
@@ -334,7 +337,7 @@ void setup() {
 		// Failed to load due to initialized EEPROM or version mismatch
 		// defaults
 		omxMode = DEFAULT_MODE;
-		seqState.playingPattern = 0;
+		sequencer.playingPattern = 0;
 		midiChannel = 1;
 		pots[0][0] = CC1;
 		pots[0][1] = CC2;
@@ -435,7 +438,7 @@ void show_current_step(int patternNum) {
 
 	// AUX KEY
 
-	if (seqState.playing && blinkState) {
+	if (sequencer.playing && blinkState) {
 		strip.setPixelColor(0, WHITE);
 	} else if (noteSelect && blinkState){
 		strip.setPixelColor(0, NOTESEL);
@@ -457,14 +460,14 @@ void show_current_step(int patternNum) {
 		}
 	}
 
-	if (seqState.getPattern(patternNum)->mute) {
+	if (sequencer.getPattern(patternNum)->mute) {
 		stepColor = muteColors[patternNum];
 	} else {
 		stepColor = seqColors[patternNum];
 		muteColor = muteColors[patternNum];
 	}
 
-	auto currentpage = seqState.patternPage[patternNum];
+	auto currentpage = sequencer.patternPage[patternNum];
 	auto pagestepstart = (currentpage * NUM_STEPKEYS);
 
 	if (noteSelect && noteSelection) {
@@ -495,10 +498,10 @@ void show_current_step(int patternNum) {
 		for(int j = pagestepstart; j < (pagestepstart + NUM_STEPKEYS); j++){	// NUM_STEPKEYS or NUM_STEPS INSTEAD?>
 			auto pixelpos = j - pagestepstart + 11;
 
-			if (j < seqState.getPatternLength(patternNum)){
+			if (j < sequencer.getPatternLength(patternNum)){
 				// ONLY DO LEDS FOR THE CURRENT PAGE
 
-				if (j == seqState.seqPos[seqState.playingPattern]){
+				if (j == sequencer.seqPos[sequencer.playingPattern]){
 					strip.setPixelColor(pixelpos, SEQCHASE);
 				} else if (pixelpos != selectedNote){
 					strip.setPixelColor(pixelpos, LEDOFF);
@@ -507,7 +510,7 @@ void show_current_step(int patternNum) {
 				strip.setPixelColor(pixelpos, LEDOFF);
 			}
 		}
-	} else if (seqState.getCurrentPattern()->solo){
+	} else if (sequencer.getCurrentPattern()->solo){
 //		for(int i = 0; i < NUM_STEPKEYS; i++){
 //			if (i == seqPos[patternNum]){
 //				if (playing){
@@ -531,9 +534,9 @@ void show_current_step(int patternNum) {
 			strip.setPixelColor(j, LEDOFF);
 		}
 		// SHOW LEDS FOR WHAT PAGE OF SEQ PATTERN YOURE ON
-		auto len = (seqState.getPattern(patternNum)->len/NUM_STEPKEYS);
+		auto len = (sequencer.getPattern(patternNum)->len/NUM_STEPKEYS);
 		for(int h = 0; h <= len; h++){
-			auto currentpage = seqState.patternPage[patternNum];
+			auto currentpage = sequencer.patternPage[patternNum];
 			auto color = sequencePageColors[h];
 			if (h == currentpage){
 				color = blinkState ? sequencePageColors[currentpage] : LEDOFF;
@@ -542,7 +545,7 @@ void show_current_step(int patternNum) {
 		}
 	} else {
 		for(int j = 1; j < NUM_STEPKEYS+11; j++){
-			if (j < seqState.getPatternLength(patternNum)+11){
+			if (j < sequencer.getPatternLength(patternNum)+11){
 				if (j == 1) {
 															// NOTE SELECT / F1
 					if (keyState[j] && blinkState){
@@ -571,15 +574,15 @@ void show_current_step(int patternNum) {
 			}
 		}
 
-		auto pattern = seqState.getPattern(patternNum);
+		auto pattern = sequencer.getPattern(patternNum);
 		auto steps = pattern->steps;
-		auto currentpage = seqState.patternPage[patternNum];
+		auto currentpage = sequencer.patternPage[patternNum];
 		auto pagestepstart = (currentpage * NUM_STEPKEYS);
 
 		// WHAT TO DO HERE FOR MULTIPLE PAGES
 		// NUM_STEPKEYS or NUM_STEPS INSTEAD?
 		for(int i = pagestepstart; i < (pagestepstart + NUM_STEPKEYS); i++){
-			if (i < seqState.getPatternLength(patternNum)){
+			if (i < sequencer.getPatternLength(patternNum)){
 
 				// ONLY DO LEDS FOR THE CURRENT PAGE
 				auto pixelpos = i - pagestepstart + 11;
@@ -588,8 +591,8 @@ void show_current_step(int patternNum) {
 // 				}
 
 				if(i % 4 == 0){ 					// MARK GROUPS OF 4
-					if(i == seqState.seqPos[patternNum]){
-						if (seqState.playing){
+					if(i == sequencer.seqPos[patternNum]){
+						if (sequencer.playing){
 							strip.setPixelColor(pixelpos, SEQCHASE); // step chase
 						} else if (steps[i].trig == TRIGTYPE_PLAY){
 							if (steps[i].stepType != STEPTYPE_NONE){
@@ -618,8 +621,8 @@ void show_current_step(int patternNum) {
 						strip.setPixelColor(pixelpos, SEQMARKER);
 					}
 
-				} else if (i == seqState.seqPos[patternNum]){ 		// STEP CHASE
-					if (seqState.playing){
+				} else if (i == sequencer.seqPos[patternNum]){ 		// STEP CHASE
+					if (sequencer.playing){
 						strip.setPixelColor(pixelpos, SEQCHASE);
 
 					} else if (steps[i].trig == TRIGTYPE_PLAY){
@@ -632,7 +635,7 @@ void show_current_step(int patternNum) {
 						} else {
 							strip.setPixelColor(pixelpos, stepColor); // STEP ON COLOR
 						}
-					} else if (!patternParams && seqState.patterns[patternNum].steps[i].trig == TRIGTYPE_MUTE){
+					} else if (!patternParams && sequencer.patterns[patternNum].steps[i].trig == TRIGTYPE_MUTE){
 						strip.setPixelColor(pixelpos, LEDOFF);  // DO WE NEED TO MARK PLAYHEAD WHEN STOPPED?
 					} else if (patternParams){
 						strip.setPixelColor(pixelpos, SEQMARKER);
@@ -741,10 +744,10 @@ void dispGenericMode(int submode, int selected){
 			legends[1] = "TRSP";
 			legends[2] = "SWNG"; //"TRSP";
 			legends[3] = "BPM";
-			legendVals[0] = seqState.playingPattern + 1;
+			legendVals[0] = sequencer.playingPattern + 1;
 			legendVals[1] = (int)transpose;
-			legendVals[2] = (int)seqState.getCurrentPattern()->swing; //(int)swing;
-			// legendVals[2] =  swing_values[seqState.getCurrentPattern()->swing];
+			legendVals[2] = (int)sequencer.getCurrentPattern()->swing; //(int)swing;
+			// legendVals[2] =  swing_values[sequencer.getCurrentPattern()->swing];
 			legendVals[3] = (int)clockbpm;
 			dispPage = 1;
 			break;
@@ -753,13 +756,13 @@ void dispGenericMode(int submode, int selected){
 			legends[1] = "LEN";
 			legends[2] = "RATE";
 			legends[3] = "CV"; //cvPattern
-			legendVals[0] = seqState.getCurrentPattern()->solo; // playingPattern+1;
-			legendVals[1] = seqState.getPatternLength(seqState.playingPattern);
+			legendVals[0] = sequencer.getCurrentPattern()->solo; // playingPattern+1;
+			legendVals[1] = sequencer.getPatternLength(sequencer.playingPattern);
 			legendVals[2] = -127;
-			legendText[2] = mdivs[seqState.getCurrentPattern()->clockDivMultP];
+			legendText[2] = mdivs[sequencer.getCurrentPattern()->clockDivMultP];
 
 			legendVals[3] = -127;
-			if (seqState.cvPattern[seqState.playingPattern]) {
+			if (sequencer.cvPattern[sequencer.playingPattern]) {
 				legendText[3] = "On";
 			} else {
 				legendText[3] = "Off";
@@ -771,10 +774,10 @@ void dispGenericMode(int submode, int selected){
 			legends[1] = "LEN";
 			legends[2] = "ROT";
 			legends[3] = "CHAN";
-			legendVals[0] = seqState.playingPattern + 1;
-			legendVals[1] = seqState.getPatternLength(seqState.playingPattern);
+			legendVals[0] = sequencer.playingPattern + 1;
+			legendVals[1] = sequencer.getPatternLength(sequencer.playingPattern);
 			legendVals[2] = rotationAmt; //(int)transpose;
-			legendVals[3] = seqState.getPatternChannel(seqState.playingPattern);
+			legendVals[3] = sequencer.getPatternChannel(sequencer.playingPattern);
 			dispPage = 1;
 			break;
 		case SUBMODE_PATTPARAMS2:
@@ -782,10 +785,10 @@ void dispGenericMode(int submode, int selected){
 			legends[1] = "END";
 			legends[2] = "FREQ";
 			legends[3] = "PROB";
-			legendVals[0] = seqState.getCurrentPattern()->startstep + 1;			// STRT step to autoreset on
-			legendVals[1] = seqState.getCurrentPattern()->autoresetstep;			// STP step to autoreset on - 0 = no auto reset
-			legendVals[2] = seqState.getCurrentPattern()->autoresetfreq; 			// FRQ to autoreset on -- every x cycles
-			legendVals[3] = seqState.getCurrentPattern()->autoresetprob;			// PRO probability of resetting 0=NEVER 1=Always 2=50%
+			legendVals[0] = sequencer.getCurrentPattern()->startstep + 1;			// STRT step to autoreset on
+			legendVals[1] = sequencer.getCurrentPattern()->autoresetstep;			// STP step to autoreset on - 0 = no auto reset
+			legendVals[2] = sequencer.getCurrentPattern()->autoresetfreq; 			// FRQ to autoreset on -- every x cycles
+			legendVals[3] = sequencer.getCurrentPattern()->autoresetprob;			// PRO probability of resetting 0=NEVER 1=Always 2=50%
 			dispPage = 2;
 			break;
 		case SUBMODE_PATTPARAMS3:
@@ -796,9 +799,9 @@ void dispGenericMode(int submode, int selected){
 
 			// RATE FOR CURR PATTERN
 			legendVals[0] = -127;
-			legendText[0] = mdivs[seqState.getCurrentPattern()->clockDivMultP];
+			legendText[0] = mdivs[sequencer.getCurrentPattern()->clockDivMultP];
 
-			legendVals[1] = seqState.getCurrentPattern()->solo;
+			legendVals[1] = sequencer.getCurrentPattern()->solo;
 			legendVals[2] = 0; 			// TBD
 			legendVals[3] = 0;			// TBD
 			dispPage = 3;
@@ -809,9 +812,9 @@ void dispGenericMode(int submode, int selected){
 			legends[2] = "NOTE";
 			legends[3] = "PTN";
 			legendVals[0] = (int)octave+4;
-			legendVals[1] = seqState.seqPos[seqState.playingPattern]+1;
+			legendVals[1] = sequencer.seqPos[sequencer.playingPattern]+1;
 			legendVals[2] = getSelectedStep()->note; //(int)transpose;
-			legendVals[3] = seqState.playingPattern+1;
+			legendVals[3] = sequencer.playingPattern+1;
 			dispPage = 1;
 			break;
 		case SUBMODE_NOTESEL:
@@ -848,7 +851,7 @@ void dispGenericMode(int submode, int selected){
 			legends[2] = "L-3";
 			legends[3] = "L-4";
 			for (int j=0; j<4; j++){
-				int stepNoteParam = seqState.getCurrentPattern()->steps[selectedStep].params[j];
+				int stepNoteParam = sequencer.getCurrentPattern()->steps[selectedStep].params[j];
 				if (stepNoteParam > -1){
 					legendVals[j] = stepNoteParam;
 				} else {
@@ -982,7 +985,7 @@ void loop() {
 	lastProcessTime = now;
 
 	if (passed > 0) {
-		if (seqState.playing){
+		if (sequencer.playing){
 			advanceClock(passed);
 			advanceSteps(passed);
 		}
@@ -1095,20 +1098,20 @@ void loop() {
 
 					// PAGE ONE
 					if (sqparam == 1){
-						seqState.playingPattern = constrain(seqState.playingPattern + amt, 0, 7);
-						if (seqState.getCurrentPattern()->solo) {
+						sequencer.playingPattern = constrain(sequencer.playingPattern + amt, 0, 7);
+						if (sequencer.getCurrentPattern()->solo) {
 							setAllLEDS(0,0,0);
 						}
 					} else if (sqparam == 2){
 						// set transpose
-						transposeSeq(seqState.playingPattern, amt); //
+						transposeSeq(sequencer.playingPattern, amt); //
 						int newtransp = constrain(transpose + amt, -64, 63);
 						transpose = newtransp;
 					} else if (sqparam == 3){
 						// set swing
-						int newswing = constrain(seqState.getCurrentPattern()->swing + amt, 0, maxswing - 1); // -1 to deal with display values
+						int newswing = constrain(sequencer.getCurrentPattern()->swing + amt, 0, maxswing - 1); // -1 to deal with display values
 						swing = newswing;
-						seqState.getCurrentPattern()->swing = newswing;
+						sequencer.getCurrentPattern()->swing = newswing;
 						//	setGlobalSwing(newswing);
 					} else if (sqparam == 4){
 						// set tempo
@@ -1125,25 +1128,25 @@ void loop() {
 						// SET PLAYING PATTERN
 //						playingPattern = constrain(playingPattern + amt, 0, 7);
 						// MIDI SOLO
-						seqState.getCurrentPattern()->solo = constrain(seqState.getCurrentPattern()->solo + amt, 0, 1);
-						if (seqState.getCurrentPattern()->solo)
+						sequencer.getCurrentPattern()->solo = constrain(sequencer.getCurrentPattern()->solo + amt, 0, 1);
+						if (sequencer.getCurrentPattern()->solo)
 						{
 							setAllLEDS(0,0,0);
 						}
 					} else if (sqparam == 7){
 						// SET PATTERN LENGTH
-						auto newPatternLen = constrain(seqState.getPatternLength(seqState.playingPattern) + amt, 1, NUM_STEPS);
-						seqState.setPatternLength( seqState.playingPattern, newPatternLen);
-						if (seqState.seqPos[seqState.playingPattern] >= newPatternLen){
-							seqState.seqPos[seqState.playingPattern] = newPatternLen-1;
-							seqState.patternPage[seqState.playingPattern] = getPatternPage(seqState.seqPos[seqState.playingPattern]);
+						auto newPatternLen = constrain(sequencer.getPatternLength(sequencer.playingPattern) + amt, 1, NUM_STEPS);
+						sequencer.setPatternLength( sequencer.playingPattern, newPatternLen);
+						if (sequencer.seqPos[sequencer.playingPattern] >= newPatternLen){
+							sequencer.seqPos[sequencer.playingPattern] = newPatternLen-1;
+							sequencer.patternPage[sequencer.playingPattern] = getPatternPage(sequencer.seqPos[sequencer.playingPattern]);
 						}
 					} else if (sqparam == 8){
 						// SET CLOCK DIV/MULT
-						seqState.getCurrentPattern()->clockDivMultP = constrain(seqState.getCurrentPattern()->clockDivMultP + amt, 0, NUM_MULTDIVS - 1);
+						sequencer.getCurrentPattern()->clockDivMultP = constrain(sequencer.getCurrentPattern()->clockDivMultP + amt, 0, NUM_MULTDIVS - 1);
 					} else if (sqparam == 9){
 						// SET CV ON/OFF
-						seqState.cvPattern[seqState.playingPattern] = constrain(seqState.cvPattern[seqState.playingPattern] + amt, 0, 1);
+						sequencer.cvPattern[sequencer.playingPattern] = constrain(sequencer.cvPattern[sequencer.playingPattern] + amt, 0, 1);
 					}
 					dirtyDisplay = true;
 					break;
@@ -1168,53 +1171,53 @@ void loop() {
 
 						// PAGE ONE
 						if (ppparam == 1) { 					// SET PLAYING PATTERN
-							seqState.playingPattern = constrain(seqState.playingPattern + amt, 0, 7);
+							sequencer.playingPattern = constrain(sequencer.playingPattern + amt, 0, 7);
 						}
 						if (ppparam == 2) { 					// SET LENGTH
-							auto newPatternLen = constrain(seqState.getPatternLength(seqState.playingPattern) + amt, 1, NUM_STEPS);
-							seqState.setPatternLength(seqState.playingPattern, newPatternLen);
-							if (seqState.seqPos[seqState.playingPattern] >= newPatternLen){
-								seqState.seqPos[seqState.playingPattern] = newPatternLen-1;
-								seqState.patternPage[seqState.playingPattern] = getPatternPage(seqState.seqPos[seqState.playingPattern]);
+							auto newPatternLen = constrain(sequencer.getPatternLength(sequencer.playingPattern) + amt, 1, NUM_STEPS);
+							sequencer.setPatternLength(sequencer.playingPattern, newPatternLen);
+							if (sequencer.seqPos[sequencer.playingPattern] >= newPatternLen){
+								sequencer.seqPos[sequencer.playingPattern] = newPatternLen-1;
+								sequencer.patternPage[sequencer.playingPattern] = getPatternPage(sequencer.seqPos[sequencer.playingPattern]);
 							}
 						}
 						if (ppparam == 3) { 					// SET PATTERN ROTATION
 							int rotator;
 							(u.dir() < 0 ? rotator = -1 : rotator = 1);
-//							int rotator = constrain(rotcc, (seqState.PatternLength(seqState.playingPattern))*-1, seqState.PatternLength(seqState.playingPattern));
+//							int rotator = constrain(rotcc, (sequencer.PatternLength(sequencer.playingPattern))*-1, sequencer.PatternLength(sequencer.playingPattern));
 							rotationAmt = rotationAmt + rotator;
 							if (rotationAmt < 16 && rotationAmt > -16 ){ // NUM_STEPS??
-								rotatePattern(seqState.playingPattern, rotator);
+								rotatePattern(sequencer.playingPattern, rotator);
 							}
-							rotationAmt = constrain(rotationAmt, (seqState.getPatternLength(seqState.playingPattern) - 1) * -1, seqState.getPatternLength(seqState.playingPattern) - 1);
+							rotationAmt = constrain(rotationAmt, (sequencer.getPatternLength(sequencer.playingPattern) - 1) * -1, sequencer.getPatternLength(sequencer.playingPattern) - 1);
 						}
 
 						if (ppparam == 4) { 					// SET PATTERN CHANNEL
-							seqState.getCurrentPattern()->channel = constrain(seqState.getCurrentPattern()->channel + amt, 0, 15);
+							sequencer.getCurrentPattern()->channel = constrain(sequencer.getCurrentPattern()->channel + amt, 0, 15);
 						}
 						// PATTERN PARAMS PAGE 2
 							//TODO: convert to case statement ??
 						if (ppparam == 6) { 					// SET AUTO START STEP
-							seqState.getCurrentPattern()->startstep = constrain(seqState.getCurrentPattern()->startstep + amt, 0, seqState.getCurrentPattern()->len);
-							//seqState.getCurrentPattern()->startstep--;
+							sequencer.getCurrentPattern()->startstep = constrain(sequencer.getCurrentPattern()->startstep + amt, 0, sequencer.getCurrentPattern()->len);
+							//sequencer.getCurrentPattern()->startstep--;
 						}
 						if (ppparam == 7) { 					// SET AUTO RESET STEP
-							int tempresetstep = seqState.getCurrentPattern()->autoresetstep + amt;
-							seqState.getCurrentPattern()->autoresetstep = constrain(tempresetstep, 0, seqState.getCurrentPattern()->len+1);
+							int tempresetstep = sequencer.getCurrentPattern()->autoresetstep + amt;
+							sequencer.getCurrentPattern()->autoresetstep = constrain(tempresetstep, 0, sequencer.getCurrentPattern()->len+1);
 						}
 						if (ppparam == 8) { 					// SET AUTO RESET FREQUENCY
-							seqState.getCurrentPattern()->autoresetfreq = constrain(seqState.getCurrentPattern()->autoresetfreq + amt, 0, 15); // max every 16 times
+							sequencer.getCurrentPattern()->autoresetfreq = constrain(sequencer.getCurrentPattern()->autoresetfreq + amt, 0, 15); // max every 16 times
 						}
 						if (ppparam == 9) { 					// SET AUTO RESET PROB
-							seqState.getCurrentPattern()->autoresetprob = constrain(seqState.getCurrentPattern()->autoresetprob + amt, 0, 100); // never, 100% - 33%
+							sequencer.getCurrentPattern()->autoresetprob = constrain(sequencer.getCurrentPattern()->autoresetprob + amt, 0, 100); // never, 100% - 33%
 						}
 
 						// PAGE THREE
 						if (ppparam == 11) { 					// SET CLOCK-DIV-MULT
-							seqState.getCurrentPattern()->clockDivMultP = constrain(seqState.getCurrentPattern()->clockDivMultP + amt, 0, NUM_MULTDIVS - 1); // set clock div/mult
+							sequencer.getCurrentPattern()->clockDivMultP = constrain(sequencer.getCurrentPattern()->clockDivMultP + amt, 0, NUM_MULTDIVS - 1); // set clock div/mult
 						}
 						if (ppparam == 12) { 					// SET MIDI SOLO
-							seqState.getCurrentPattern()->solo = constrain(seqState.getCurrentPattern()->solo + amt, 0, 1);
+							sequencer.getCurrentPattern()->solo = constrain(sequencer.getCurrentPattern()->solo + amt, 0, 1);
 						}
 
 					// STEP RECORD SUB MODE
@@ -1234,11 +1237,11 @@ void loop() {
 						}
 						if (srparam == 2) {
 							if (u.dir() > 0){
-								step_ahead(seqState.playingPattern);
+								step_ahead(sequencer.playingPattern);
 							} else if (u.dir() < 0) {
-								step_back(seqState.playingPattern);
+								step_back(sequencer.playingPattern);
 							}
-							selectedStep = seqState.seqPos[seqState.playingPattern];
+							selectedStep = sequencer.seqPos[sequencer.playingPattern];
 						}
 						if (srparam == 3) {
 						}
@@ -1396,7 +1399,7 @@ void loop() {
 		// LONG PRESS
 		case Button::DownLong: //Serial.println("Button downlong");
 			if (stepRecord) {
-				resetPatternDefaults(seqState.playingPattern);
+				resetPatternDefaults(sequencer.playingPattern);
 				clearedFlag = true;
 			} else {
 				enc_edit = true;
@@ -1425,7 +1428,7 @@ void loop() {
 		keypadEvent e = customKeypad.read();
 		int thisKey = e.bit.KEY;
 		int keyPos = thisKey - 11;
-		int seqKey = keyPos + (seqState.patternPage[seqState.playingPattern] * NUM_STEPKEYS);
+		int seqKey = keyPos + (sequencer.patternPage[sequencer.playingPattern] * NUM_STEPKEYS);
 
 		if (e.bit.EVENT == KEY_JUST_PRESSED){
 			keyState[thisKey] = true;
@@ -1534,8 +1537,8 @@ void loop() {
 								selectedNote = thisKey;
 								int adjnote = notes[thisKey] + (octave * 12);
 								getSelectedStep()->note = adjnote;
-								if (!seqState.playing){
-									seqNoteOn(thisKey, defaultVelocity, seqState.playingPattern);
+								if (!sequencer.playing){
+									seqNoteOn(thisKey, defaultVelocity, sequencer.playingPattern);
 								}
 							}
 							// see RELEASE events for more
@@ -1546,7 +1549,7 @@ void loop() {
 						} else if (thisKey == 2) {
 
 						} else if (thisKey > 2 && thisKey < 11) { // Pattern select keys
-							seqState.playingPattern = thisKey - 3;
+							sequencer.playingPattern = thisKey - 3;
 							dirtyDisplay = true;
 
 						} else if ( thisKey > 10 ) {
@@ -1566,21 +1569,21 @@ void loop() {
 
 						} else if (thisKey > 2 && thisKey < 11) { // Pattern select keys
 
-							seqState.playingPattern = thisKey - 3;
+							sequencer.playingPattern = thisKey - 3;
 
 							// COPY / PASTE / CLEAR
 							if (keyState[1] && !keyState[2]) {
-								copyPattern(seqState.playingPattern);
+								copyPattern(sequencer.playingPattern);
 								infoDialog[COPY].state = true; // copied flag
 //								Serial.print("copy: ");
 //								Serial.println(playingPattern);
 							} else if (!keyState[1] && keyState[2]) {
-								pastePattern(seqState.playingPattern);
+								pastePattern(sequencer.playingPattern);
 								infoDialog[PASTE].state = true; // pasted flag
 //								Serial.print("paste: ");
 //								Serial.println(playingPattern);
 							} else if (keyState[1] && keyState[2]) {
-								clearPattern(seqState.playingPattern);
+								clearPattern(sequencer.playingPattern);
 								infoDialog[CLEAR].state = true; // cleared flag
 							}
 
@@ -1588,10 +1591,10 @@ void loop() {
 						} else if ( thisKey > 10 ) {
 							// set pattern length with key
 							auto newPatternLen = thisKey - 10;
-							seqState.setPatternLength(seqState.playingPattern, newPatternLen );
-							if (seqState.seqPos[seqState.playingPattern] >= newPatternLen){
-								seqState.seqPos[seqState.playingPattern] = newPatternLen-1;
-								seqState.patternPage[seqState.playingPattern] = getPatternPage(seqState.seqPos[seqState.playingPattern]);
+							sequencer.setPatternLength(sequencer.playingPattern, newPatternLen );
+							if (sequencer.seqPos[sequencer.playingPattern] >= newPatternLen){
+								sequencer.seqPos[sequencer.playingPattern] = newPatternLen-1;
+								sequencer.patternPage[sequencer.playingPattern] = getPatternPage(sequencer.seqPos[sequencer.playingPattern]);
 							}
 							dirtyDisplay = true;
 						}
@@ -1599,20 +1602,20 @@ void loop() {
 					// STEP RECORD
 					} else if (stepRecord) {
 						selectedNote = thisKey;
-						selectedStep = seqState.seqPos[seqState.playingPattern];
+						selectedStep = sequencer.seqPos[sequencer.playingPattern];
 
 						int adjnote = notes[thisKey] + (octave * 12);
 						getSelectedStep()->note = adjnote;
 
-						if (!seqState.playing){
-							seqNoteOn(thisKey, defaultVelocity, seqState.playingPattern);
+						if (!sequencer.playing){
+							seqNoteOn(thisKey, defaultVelocity, sequencer.playingPattern);
 						} // see RELEASE events for more
 						stepDirty = true;
 						dirtyDisplay = true;
 
 					// MIDI SOLO
-					} else if (seqState.getCurrentPattern()->solo) {
-						midiNoteOn(thisKey, defaultVelocity, seqState.getCurrentPattern()->channel+1);
+					} else if (sequencer.getCurrentPattern()->solo) {
+						midiNoteOn(thisKey, defaultVelocity, sequencer.getCurrentPattern()->channel+1);
 
 					// REGULAR SEQ MODE
 					} else {
@@ -1624,7 +1627,7 @@ void loop() {
 																	// MOVED DOWN TO AUX KEY
 
 						} else if (thisKey == 2) { 					// CHANGE PATTERN DIRECTION
-//							seqState.getCurrentPattern()->reverse = !seqState.getCurrentPattern()->reverse;
+//							sequencer.getCurrentPattern()->reverse = !sequencer.getCurrentPattern()->reverse;
 
 						// BLACK KEYS
 						} else if (thisKey > 2 && thisKey < 11) { // Pattern select
@@ -1632,20 +1635,20 @@ void loop() {
 							// CHECK keyState[] FOR LONG PRESS THINGS
 
 							// If ONLY KEY 1 is down + pattern is not playing = STEP RECORD
-							if (keyState[1] && !keyState[2] && !seqState.playing) {
+							if (keyState[1] && !keyState[2] && !sequencer.playing) {
 //								Serial.print("step record on - pattern: ");
 //								Serial.println(thisKey-3);
-								seqState.playingPattern = thisKey-3;
-								seqState.seqPos[seqState.playingPattern] = 0;
+								sequencer.playingPattern = thisKey-3;
+								sequencer.seqPos[sequencer.playingPattern] = 0;
 								stepRecord = true;
 								dirtyDisplay = true;
 
 							// If KEY 2 is down + pattern = PATTERN MUTE
 							} else if (keyState[2]) {
-								seqState.getPattern(thisKey - 3)->mute = !seqState.getPattern(thisKey-3)->mute;
+								sequencer.getPattern(thisKey - 3)->mute = !sequencer.getPattern(thisKey-3)->mute;
 
 							} else {
-								seqState.playingPattern = thisKey - 3;
+								sequencer.playingPattern = thisKey - 3;
 								dirtyDisplay = true;
 							}
 
@@ -1654,8 +1657,8 @@ void loop() {
 
 							if (keyState[1] && keyState[2]) {		// F1+F2 HOLD
 								if (!stepRecord && !patternParams){ // IGNORE LONG PRESSES IN STEP RECORD and Pattern Params
-									if (keyPos <= getPatternPage(seqState.getCurrentPattern()->len) ){
-										seqState.patternPage[seqState.playingPattern] = keyPos;
+									if (keyPos <= getPatternPage(sequencer.getCurrentPattern()->len) ){
+										sequencer.patternPage[sequencer.playingPattern] = keyPos;
 									}
 								}
 							} else if (keyState[1]) {		// F1 HOLD
@@ -1666,8 +1669,8 @@ void loop() {
 										noteSelection = true;
 										dirtyDisplay = true;
 										// re-toggle the key you just held
-										if ( seqState.getCurrentPattern()->steps[selectedStep].trig == TRIGTYPE_PLAY || seqState.getCurrentPattern()->steps[selectedStep].trig == TRIGTYPE_MUTE ) {
-											seqState.getCurrentPattern()->steps[selectedStep].trig = ( seqState.getCurrentPattern()->steps[selectedStep].trig == TRIGTYPE_PLAY ) ? TRIGTYPE_MUTE : TRIGTYPE_PLAY;
+										if (sequencer.getCurrentPattern()->steps[selectedStep].trig == TRIGTYPE_PLAY || sequencer.getCurrentPattern()->steps[selectedStep].trig == TRIGTYPE_MUTE ) {
+											sequencer.getCurrentPattern()->steps[selectedStep].trig = (sequencer.getCurrentPattern()->steps[selectedStep].trig == TRIGTYPE_PLAY ) ? TRIGTYPE_MUTE : TRIGTYPE_PLAY;
 										}
 									}
 
@@ -1675,11 +1678,11 @@ void loop() {
 
 							} else {
 								// TOGGLE STEP ON/OFF
-	//							if ( stepNoteP[seqState.playingPattern][keyPos].stepType == STEPTYPE_PLAY || stepNoteP[seqState.playingPattern][keyPos].stepType == STEPTYPE_MUTE ) {
-	//								stepNoteP[seqState.playingPattern][keyPos].stepType = ( stepNoteP[seqState.playingPattern][keyPos].stepType == STEPTYPE_PLAY ) ? STEPTYPE_MUTE : STEPTYPE_PLAY;
+	//							if ( stepNoteP[sequencer.playingPattern][keyPos].stepType == STEPTYPE_PLAY || stepNoteP[sequencer.playingPattern][keyPos].stepType == STEPTYPE_MUTE ) {
+	//								stepNoteP[sequencer.playingPattern][keyPos].stepType = ( stepNoteP[sequencer.playingPattern][keyPos].stepType == STEPTYPE_PLAY ) ? STEPTYPE_MUTE : STEPTYPE_PLAY;
 	//							}
-								if ( seqState.getCurrentPattern()->steps[seqKey].trig == TRIGTYPE_PLAY || seqState.getCurrentPattern()->steps[seqKey].trig == TRIGTYPE_MUTE ) {
-									seqState.getCurrentPattern()->steps[seqKey].trig = ( seqState.getCurrentPattern()->steps[seqKey].trig == TRIGTYPE_PLAY ) ? TRIGTYPE_MUTE : TRIGTYPE_PLAY;
+								if (sequencer.getCurrentPattern()->steps[seqKey].trig == TRIGTYPE_PLAY || sequencer.getCurrentPattern()->steps[seqKey].trig == TRIGTYPE_MUTE ) {
+									sequencer.getCurrentPattern()->steps[seqKey].trig = (sequencer.getCurrentPattern()->steps[seqKey].trig == TRIGTYPE_PLAY ) ? TRIGTYPE_MUTE : TRIGTYPE_PLAY;
 								}
 							}
 						}
@@ -1690,17 +1693,17 @@ void loop() {
 
 				if (e.bit.EVENT == KEY_JUST_RELEASED && thisKey != 0) {
 					// MIDI SOLO
-					if (seqState.getCurrentPattern()->solo) {
-						midiNoteOff(thisKey, seqState.getCurrentPattern()->channel+1);
+					if (sequencer.getCurrentPattern()->solo) {
+						midiNoteOff(thisKey, sequencer.getCurrentPattern()->channel+1);
 					}
 				}
 
 				if (e.bit.EVENT == KEY_JUST_RELEASED && thisKey != 0 && (noteSelection || stepRecord) && selectedNote > 0) {
-					if (!seqState.playing){
-						seqNoteOff(thisKey, seqState.playingPattern);
+					if (!sequencer.playing){
+						seqNoteOff(thisKey, sequencer.playingPattern);
 					}
 					if (stepRecord && stepDirty) {
-						step_ahead(seqState.playingPattern);
+						step_ahead(sequencer.playingPattern);
 						stepDirty = false;
 					}
 				}
@@ -1732,12 +1735,12 @@ void loop() {
 					} else {
 						if (keyState[1] || keyState[2]) { 				// CHECK keyState[] FOR LONG PRESS OF FUNC KEYS
 							if (keyState[1]) {
-								seqState.seqResetFlag = true;		// RESET ALL SEQUENCES TO FIRST/LAST STEP
+								sequencer.seqResetFlag = true;		// RESET ALL SEQUENCES TO FIRST/LAST STEP
 								infoDialog[RESET].state = true; // reset flag
 
 							} else if (keyState[2]) { 					// CHANGE PATTERN DIRECTION
-								seqState.getCurrentPattern()->reverse = !seqState.getCurrentPattern()->reverse;
-								if (seqState.getCurrentPattern()->reverse) {
+								sequencer.getCurrentPattern()->reverse = !sequencer.getCurrentPattern()->reverse;
+								if (sequencer.getCurrentPattern()->reverse) {
 									infoDialog[REV].state = true; // rev direction flag
 								} else{
 									infoDialog[FWD].state = true; // fwd direction flag
@@ -1745,9 +1748,9 @@ void loop() {
 							}
 							dirtyDisplay = true;
 						} else {
-							if (seqState.playing){
+							if (sequencer.playing){
 								// stop transport
-								seqState.playing = 0;
+								sequencer.playing = 0;
 								allNotesOff();
 	//							Serial.println("stop transport");
 								seqStop();
@@ -1796,7 +1799,7 @@ void loop() {
 					case MODE_S1:
 						// fall through
 					case MODE_S2:
-						if (!seqState.getCurrentPattern()->solo){
+						if (!sequencer.getCurrentPattern()->solo){
 							if (keyState[1] && keyState[2]) {
 								seqPages = true;
 
@@ -1807,7 +1810,7 @@ void loop() {
 
 								} else if (j > 10){
 									if (!stepRecord && !patternParams){ 		// IGNORE LONG PRESSES IN STEP RECORD and Pattern Params
-										selectedStep = (j - 11) + (seqState.patternPage[seqState.playingPattern] * NUM_STEPKEYS); // set noteSelection to this step
+										selectedStep = (j - 11) + (sequencer.patternPage[sequencer.playingPattern] * NUM_STEPKEYS); // set noteSelection to this step
 										noteSelect = true;
 										stepSelect = true;
 										noteSelection = true;
@@ -1817,7 +1820,7 @@ void loop() {
 //											getSelectedStep()->stepType = ( getSelectedStep()->stepType == STEPTYPE_PLAY ) ? STEPTYPE_MUTE : STEPTYPE_PLAY;
 //										}
 										if ( getSelectedStep()->trig == TRIGTYPE_PLAY || getSelectedStep()->trig == TRIGTYPE_MUTE ) {
-											seqState.getCurrentPattern()->steps[selectedStep].trig = ( getSelectedStep()->trig == TRIGTYPE_PLAY ) ? TRIGTYPE_MUTE : TRIGTYPE_PLAY;
+											sequencer.getCurrentPattern()->steps[selectedStep].trig = ( getSelectedStep()->trig == TRIGTYPE_PLAY ) ? TRIGTYPE_MUTE : TRIGTYPE_PLAY;
 										}
 									}
 								}
@@ -1869,7 +1872,7 @@ void loop() {
 				}
 			}
 			// MIDI SOLO
-			if (seqState.getCurrentPattern()->solo) {
+			if (sequencer.getCurrentPattern()->solo) {
 				midi_leds();
 			}
 
@@ -1957,21 +1960,21 @@ void loop() {
 // ####### SEQENCER FUNCTIONS
 
 StepNote* getSelectedStep() {
-	return &seqState.getCurrentPattern()->steps[selectedStep];
+	return &sequencer.getCurrentPattern()->steps[selectedStep];
 }
 
 void step_ahead(int patternNum) {
 	// step each pattern ahead one place
 	for (int j=0; j<8; j++){
-		if (seqState.getPattern(j)->reverse) {
-			seqState.seqPos[j]--;
+		if (sequencer.getPattern(j)->reverse) {
+			sequencer.seqPos[j]--;
 			auto_reset(j); // determine whether to reset or not based on param settings
 //			if (seqPos[j] < 0)
-//				seqPos[j] = seqState.PatternLength(j)-1;
+//				seqPos[j] = sequencer.PatternLength(j)-1;
 		} else {
-			seqState.seqPos[j]++;
+			sequencer.seqPos[j]++;
 			auto_reset(j); // determine whether to reset or not based on param settings
-//			if (seqPos[j] >= seqState.PatternLength(j))
+//			if (seqPos[j] >= sequencer.PatternLength(j))
 //				seqPos[j] = 0;
 		}
 	}
@@ -1979,54 +1982,54 @@ void step_ahead(int patternNum) {
 void step_back(int patternNum) {
 	// step each pattern ahead one place
 	for (int j=0; j<8; j++){
-		if (seqState.getPattern(j)->reverse) {
-			seqState.seqPos[j]++;
+		if (sequencer.getPattern(j)->reverse) {
+			sequencer.seqPos[j]++;
 			auto_reset(j); // determine whether to reset or not based on param settings
 		} else {
-			seqState.seqPos[j]--;
+			sequencer.seqPos[j]--;
 			// 			auto_reset(j);
-			if (seqState.seqPos[j] < 0)
-				seqState.seqPos[j] = seqState.getPatternLength(j) - 1;
+			if (sequencer.seqPos[j] < 0)
+				sequencer.seqPos[j] = sequencer.getPatternLength(j) - 1;
 		}
 	}
 }
 
 void new_step_ahead(int patternNum) {
 	// step each pattern ahead one place
-		if (seqState.getPattern(patternNum)->reverse) {
-			seqState.seqPos[patternNum]--;
+		if (sequencer.getPattern(patternNum)->reverse) {
+			sequencer.seqPos[patternNum]--;
 			auto_reset(patternNum); // determine whether to reset or not based on param settings
 		} else {
-			seqState.seqPos[patternNum]++;
+			sequencer.seqPos[patternNum]++;
 			auto_reset(patternNum); // determine whether to reset or not based on param settings
 		}
 }
 
 void auto_reset(int p) {
-	auto pattern = seqState.getPattern(p);
+	auto pattern = sequencer.getPattern(p);
 
 	// should be conditioned on whether we're in S2!!
-	if (seqState.seqPos[p] >= seqState.getPatternLength(p) ||
-			(pattern->autoreset && (pattern->autoresetstep > (pattern->startstep) ) && (seqState.seqPos[p] >= pattern->autoresetstep)) ||
-			(pattern->autoreset && (pattern->autoresetstep == 0 ) && (seqState.seqPos[p] >= pattern->rndstep)) ||
-			(pattern->reverse && (seqState.seqPos[p] < 0)) || // normal reverse reset
-			(pattern->reverse && pattern->autoreset && (seqState.seqPos[p] < pattern->startstep )) // ||
+	if (sequencer.seqPos[p] >= sequencer.getPatternLength(p) ||
+			(pattern->autoreset && (pattern->autoresetstep > (pattern->startstep) ) && (sequencer.seqPos[p] >= pattern->autoresetstep)) ||
+			(pattern->autoreset && (pattern->autoresetstep == 0 ) && (sequencer.seqPos[p] >= pattern->rndstep)) ||
+			(pattern->reverse && (sequencer.seqPos[p] < 0)) || // normal reverse reset
+			(pattern->reverse && pattern->autoreset && (sequencer.seqPos[p] < pattern->startstep )) // ||
 			//(settings->reverse && settings->autoreset && (settings->autoresetstep == 0 ) && (seqPos[p] < settings->rndstep))
 		 ) {
 
 		if (pattern->reverse) {
 			if (pattern->autoreset){
 				if (pattern->autoresetstep == 0){
-					seqState.seqPos[p] = pattern->rndstep-1;
+					sequencer.seqPos[p] = pattern->rndstep-1;
 				}else{
-					seqState.seqPos[p] = pattern->autoresetstep-1; // resets pattern in REV
+					sequencer.seqPos[p] = pattern->autoresetstep-1; // resets pattern in REV
 				}
 			} else {
-				seqState.seqPos[p] = (seqState.getPatternLength(p)-pattern->startstep)-1;
+				sequencer.seqPos[p] = (sequencer.getPatternLength(p)-pattern->startstep)-1;
 			}
 
 		} else {
-			seqState.seqPos[p] = (pattern->startstep); // resets pattern in FWD
+			sequencer.seqPos[p] = (pattern->startstep); // resets pattern in FWD
 		}
 		if (pattern->autoresetfreq == pattern->current_cycle){ // reset cycle logic
 			if (probResult(pattern->autoresetprob)){
@@ -2040,9 +2043,9 @@ void auto_reset(int p) {
 			pattern->autoreset = false;
 			pattern->current_cycle++; // advance to next cycle
 		}
-		pattern->rndstep = (rand() % seqState.getPatternLength(p)) + 1; // randomly choose step for next cycle
+		pattern->rndstep = (rand() % sequencer.getPatternLength(p)) + 1; // randomly choose step for next cycle
 	}
-	seqState.patternPage[p] = getPatternPage(seqState.seqPos[p]); // FOLLOW MODE FOR SEQ PAGE
+	sequencer.patternPage[p] = getPatternPage(sequencer.seqPos[p]); // FOLLOW MODE FOR SEQ PAGE
 
 // return ()
 }
@@ -2062,7 +2065,7 @@ bool probResult(int probSetting){
 bool evaluate_AB(int condition, int patternNum) {
 	bool shouldTrigger = false;;
 
-	loopCount[patternNum][seqState.seqPos[patternNum]]++;
+	loopCount[patternNum][sequencer.seqPos[patternNum]]++;
 
 	int a = trigConditionsAB[condition][0];
 	int b = trigConditionsAB[condition][1];
@@ -2078,13 +2081,13 @@ bool evaluate_AB(int condition, int patternNum) {
 //Serial.print (b);
 //Serial.print (" ");
 
-	if (loopCount[patternNum][seqState.seqPos[patternNum]] == a){
+	if (loopCount[patternNum][sequencer.seqPos[patternNum]] == a){
 		shouldTrigger = true;
 	} else {
 		shouldTrigger = false;
 	}
-	if (loopCount[patternNum][seqState.seqPos[patternNum]] >= b){
-		loopCount[patternNum][seqState.seqPos[patternNum]] = 0;
+	if (loopCount[patternNum][sequencer.seqPos[patternNum]] >= b){
+		loopCount[patternNum][sequencer.seqPos[patternNum]] = 0;
 	}
 	return shouldTrigger;
 }
@@ -2137,75 +2140,75 @@ void step_off(int patternNum, int position){
 
 void doStep() {
 // // probability test
-	bool testProb = probResult(seqState.getCurrentPattern()->steps[seqState.seqPos[seqState.playingPattern]].prob);
+	bool testProb = probResult(sequencer.getCurrentPattern()->steps[sequencer.seqPos[sequencer.playingPattern]].prob);
 
 	switch(omxMode){
 		case MODE_S1:
-			if(seqState.playing) {
+			if(sequencer.playing) {
 				// ############## STEP TIMING ##############
 //				if(micros() >= nextStepTime){
-				if(micros() >= seqState.timePerPattern[seqState.playingPattern].nextStepTimeP) {
+				if(micros() >= sequencer.timePerPattern[sequencer.playingPattern].nextStepTimeP) {
 					seqReset();
 					// DO STUFF
 
-					// int lastPos = (seqPos[seqState.playingPattern]+15) % 16;
-					// if (lastNote[seqState.playingPattern][lastPos] > 0){
-					// 	step_off(seqState.playingPattern, lastPos);
+					// int lastPos = (seqPos[sequencer.playingPattern]+15) % 16;
+					// if (lastNote[sequencer.playingPattern][lastPos] > 0){
+					// 	step_off(sequencer.playingPattern, lastPos);
 					// }
 					// lastStepTime = nextStepTime;
 					// nextStepTime += step_micros;
 					// TODO: refactor timePerPattern stuff into sequencer.h
-					seqState.timePerPattern[seqState.playingPattern].lastPosP = (seqState.seqPos[seqState.playingPattern] + 15) % 16;
-					if (lastNote[seqState.playingPattern][seqState.timePerPattern[seqState.playingPattern].lastPosP] > 0){
-						step_off(seqState.playingPattern, seqState.timePerPattern[seqState.playingPattern].lastPosP);
+					sequencer.timePerPattern[sequencer.playingPattern].lastPosP = (sequencer.seqPos[sequencer.playingPattern] + 15) % 16;
+					if (lastNote[sequencer.playingPattern][sequencer.timePerPattern[sequencer.playingPattern].lastPosP] > 0){
+						step_off(sequencer.playingPattern, sequencer.timePerPattern[sequencer.playingPattern].lastPosP);
 					}
-					seqState.timePerPattern[seqState.playingPattern].lastStepTimeP = seqState.timePerPattern[seqState.playingPattern].nextStepTimeP;
-					seqState.timePerPattern[seqState.playingPattern].nextStepTimeP += (step_micros)*( multValues[seqState.getCurrentPattern()->clockDivMultP] ); // calc step based on rate
+					sequencer.timePerPattern[sequencer.playingPattern].lastStepTimeP = sequencer.timePerPattern[sequencer.playingPattern].nextStepTimeP;
+					sequencer.timePerPattern[sequencer.playingPattern].nextStepTimeP += (step_micros)*( multValues[sequencer.getCurrentPattern()->clockDivMultP] ); // calc step based on rate
 
-					if (testProb){ //  && evaluate_AB(seqState.getCurrentPattern()->steps[seqPos[seqState.playingPattern]].condition, playingPattern)
-						playNote(seqState.playingPattern);
+					if (testProb){ //  && evaluate_AB(sequencer.getCurrentPattern()->steps[seqPos[sequencer.playingPattern]].condition, playingPattern)
+						playNote(sequencer.playingPattern);
 						//					step_on(playingPattern);
 					}
 
-					show_current_step(seqState.playingPattern); // show led for step
-					step_ahead(seqState.playingPattern);
+					show_current_step(sequencer.playingPattern); // show led for step
+					step_ahead(sequencer.playingPattern);
 				}
 			} else {
-				show_current_step(seqState.playingPattern);
+				show_current_step(sequencer.playingPattern);
 			}
 			break;
 
 		case MODE_S2:
-			if(seqState.playing) {
+			if(sequencer.playing) {
 				unsigned long playstepmicros = micros();
 
 				for (int j=0; j<NUM_PATTERNS; j++){  // check all patterns for notes to play in time
 					// CLOCK PER PATTERN BASED APPROACH
-					auto pattern = seqState.getPattern(j);
+					auto pattern = sequencer.getPattern(j);
 
 					// TODO: refactor timePerPattern stuff into sequencer.h
 
-					if (playstepmicros >= seqState.timePerPattern[j].nextStepTimeP) {
+					if (playstepmicros >= sequencer.timePerPattern[j].nextStepTimeP) {
 
 						seqReset(); // check for seqReset
-						seqState.timePerPattern[j].lastStepTimeP = seqState.timePerPattern[j].nextStepTimeP;
-						seqState.timePerPattern[j].nextStepTimeP += (step_micros)*( multValues[seqState.getPattern(j)->clockDivMultP] ); // calc step based on rate
+						sequencer.timePerPattern[j].lastStepTimeP = sequencer.timePerPattern[j].nextStepTimeP;
+						sequencer.timePerPattern[j].nextStepTimeP += (step_micros)*( multValues[sequencer.getPattern(j)->clockDivMultP] ); // calc step based on rate
 
 						// only play if not muted
-						if (!seqState.getPattern(j)->mute) {
-							seqState.timePerPattern[j].lastPosP = (seqState.seqPos[j] + 15) % 16;
-							if (lastNote[j][seqState.timePerPattern[j].lastPosP] > 0) {
-								step_off(j, seqState.timePerPattern[j].lastPosP);
+						if (!sequencer.getPattern(j)->mute) {
+							sequencer.timePerPattern[j].lastPosP = (sequencer.seqPos[j] + 15) % 16;
+							if (lastNote[j][sequencer.timePerPattern[j].lastPosP] > 0) {
+								step_off(j, sequencer.timePerPattern[j].lastPosP);
 							}
 							if (testProb){
-								if (evaluate_AB(pattern->steps[seqState.seqPos[j]].condition, j)){
+								if (evaluate_AB(pattern->steps[sequencer.seqPos[j]].condition, j)){
 									playNote(j);
 								}
 							}
 						}
 //						show_current_step(playingPattern);
-						if(j == seqState.playingPattern){ // only show selected pattern
-							show_current_step(seqState.playingPattern);
+						if(j == sequencer.playingPattern){ // only show selected pattern
+							show_current_step(sequencer.playingPattern);
 						}
 						new_step_ahead(j);
 					}
@@ -2213,7 +2216,7 @@ void doStep() {
 
 
 			} else {
-				show_current_step(seqState.playingPattern);
+				show_current_step(sequencer.playingPattern);
 			}
 			break;
 
@@ -2333,15 +2336,15 @@ void midiNoteOff(int notenum, int channel) {
 void seqNoteOn(int notenum, int velocity, int patternNum){
 	int adjnote = notes[notenum] + (octave * 12); // adjust key for octave range
 	if (adjnote>=0 && adjnote <128){
-		lastNote[patternNum][seqState.seqPos[patternNum]] = adjnote;
-		MM::sendNoteOn(adjnote, velocity, seqState.getPatternChannel(seqState.playingPattern));
+		lastNote[patternNum][sequencer.seqPos[patternNum]] = adjnote;
+		MM::sendNoteOn(adjnote, velocity, sequencer.getPatternChannel(sequencer.playingPattern));
 
 		// keep track of adjusted note when pressed so that when key is released we send
 		// the correct note off message
 		midiKeyState[notenum] = adjnote;
 
 		// CV
-		if (seqState.cvPattern[seqState.playingPattern]) {
+		if (sequencer.cvPattern[sequencer.playingPattern]) {
 			cvNoteOn(adjnote);
 		}
 	}
@@ -2355,9 +2358,9 @@ void seqNoteOff(int notenum, int patternNum){
 	// we use the key state captured at the time we pressed the key to send the correct note off message
 	int adjnote = midiKeyState[notenum];
 	if (adjnote>=0 && adjnote <128){
-		MM::sendNoteOff(adjnote, 0, seqState.getPatternChannel(seqState.playingPattern));
+		MM::sendNoteOff(adjnote, 0, sequencer.getPatternChannel(sequencer.playingPattern));
 		// CV off
-		if (seqState.cvPattern[seqState.playingPattern]){
+		if (sequencer.cvPattern[sequencer.playingPattern]){
 			cvNoteOff();
 		}
 	}
@@ -2370,18 +2373,18 @@ void seqNoteOff(int notenum, int patternNum){
 
 // Play a note / step (SEQUENCERS)
 void playNote(int patternNum) {
-//	Serial.println(seqState.stepNoteP[patternNum][seqPos[patternNum]].note); // Debug
-	auto pattern = seqState.getPattern(patternNum);
+//	Serial.println(sequencer.stepNoteP[patternNum][seqPos[patternNum]].note); // Debug
+	auto pattern = sequencer.getPattern(patternNum);
 	auto steps = pattern->steps;
 
 	bool sendnoteCV = false;
 	int rnd_swing;
-	if (seqState.cvPattern[patternNum]){
+	if (sequencer.cvPattern[patternNum]){
 		sendnoteCV = true;
 	}
-	StepType playStepType = (StepType) pattern->steps[seqState.seqPos[patternNum]].stepType;
+	StepType playStepType = (StepType) pattern->steps[sequencer.seqPos[patternNum]].stepType;
 
-	if (steps[seqState.seqPos[patternNum]].stepType == STEPTYPE_RAND){
+	if (steps[sequencer.seqPos[patternNum]].stepType == STEPTYPE_RAND){
 		auto tempType = random(STEPTYPE_COUNT);
 
 		// this is fucking hacky to increment the enum for stepType
@@ -2424,23 +2427,23 @@ void playNote(int patternNum) {
 			pattern->reverse = !pattern->reverse;
 			break;
 		case STEPTYPE_RANDSTEP:
-			seqState.seqPos[patternNum] = (rand() % seqState.getPatternLength(patternNum)) + 1;
+			sequencer.seqPos[patternNum] = (rand() % sequencer.getPatternLength(patternNum)) + 1;
 			break;
 		case STEPTYPE_RESTART:
-			seqState.seqPos[patternNum] = 0;
+			sequencer.seqPos[patternNum] = 0;
 			break;
 		break;
 	}
 
 	// regular note on trigger
 
-	if (steps[seqState.seqPos[patternNum]].trig == TRIGTYPE_PLAY) {
-		seqState.seq_velocity = steps[seqState.seqPos[patternNum]].vel;
+	if (steps[sequencer.seqPos[patternNum]].trig == TRIGTYPE_PLAY) {
+		sequencer.seq_velocity = steps[sequencer.seqPos[patternNum]].vel;
 
-		noteoff_micros = micros() + (steps[seqState.seqPos[patternNum]].len + 1) * step_micros;
-		pendingNoteOffs.insert(steps[seqState.seqPos[patternNum]].note, seqState.getPatternChannel(patternNum), noteoff_micros, sendnoteCV);
+		noteoff_micros = micros() + (steps[sequencer.seqPos[patternNum]].len + 1) * step_micros;
+		pendingNoteOffs.insert(steps[sequencer.seqPos[patternNum]].note, sequencer.getPatternChannel(patternNum), noteoff_micros, sendnoteCV);
 
-		if (seqState.seqPos[patternNum] % 2 == 0){
+		if (sequencer.seqPos[patternNum] % 2 == 0){
 
 			if (pattern->swing < 99){
 				noteon_micros = micros() + ((ppqInterval * multValues[pattern->clockDivMultP])/(PPQ / 24) * pattern->swing); // full range swing
@@ -2458,22 +2461,22 @@ void playNote(int patternNum) {
 		}
 
 		// Queue note-on
-		pendingNoteOns.insert(steps[seqState.seqPos[patternNum]].note, seqState.seq_velocity, seqState.getPatternChannel(patternNum), noteon_micros, sendnoteCV);
+		pendingNoteOns.insert(steps[sequencer.seqPos[patternNum]].note, sequencer.seq_velocity, sequencer.getPatternChannel(patternNum), noteon_micros, sendnoteCV);
 
 		// {notenum, vel, notelen, step_type, {p1,p2,p3,p4}, prob}
 		// send param locks
 		for (int q=0; q<4; q++){
-			int tempCC = steps[seqState.seqPos[patternNum]].params[q];
+			int tempCC = steps[sequencer.seqPos[patternNum]].params[q];
 			if (tempCC > -1) {
-				MM::sendControlChange(pots[potbank][q],tempCC,seqState.getPatternChannel(patternNum));
+				MM::sendControlChange(pots[potbank][q],tempCC,sequencer.getPatternChannel(patternNum));
 				prevPlock[q] = tempCC;
 			} else if (prevPlock[q] != potValues[q]) {
 				//if (tempCC != prevPlock[q]) {
-				MM::sendControlChange(pots[potbank][q],potValues[q],seqState.getPatternChannel(patternNum));
+				MM::sendControlChange(pots[potbank][q],potValues[q],sequencer.getPatternChannel(patternNum));
 				prevPlock[q] = potValues[q];
 			}
 		}
-		lastNote[patternNum][seqState.seqPos[patternNum]] = steps[seqState.seqPos[patternNum]].note;
+		lastNote[patternNum][sequencer.seqPos[patternNum]] = steps[sequencer.seqPos[patternNum]].note;
 
 		// CV is sent from pendingNoteOns/pendingNoteOffs
 
@@ -2493,54 +2496,54 @@ void allNotesOffPanic() {
 }
 
 void transposeSeq(int patternNum, int amt) {
-	auto pattern = seqState.getPattern(patternNum);
+	auto pattern = sequencer.getPattern(patternNum);
 	for (int k = 0; k < NUM_STEPS; k++) {
 		pattern->steps[k].note += amt;
 	}
 }
 
 void seqReset(){
-	if (seqState.seqResetFlag) {
+	if (sequencer.seqResetFlag) {
 		for (int k=0; k<NUM_PATTERNS; k++){
 			for (int q=0; q<NUM_STEPS; q++){
 				loopCount[k][q] = 0;
 			}
-			if (seqState.getPattern(k)->reverse) { // REVERSE
-				seqState.seqPos[k] = seqState.getPatternLength(k) - 1;
+			if (sequencer.getPattern(k)->reverse) { // REVERSE
+				sequencer.seqPos[k] = sequencer.getPatternLength(k) - 1;
 			} else {
-				seqState.seqPos[k] = 0;
+				sequencer.seqPos[k] = 0;
 			}
 		}
 		MM::stopClock();
 		MM::startClock();
-		seqState.seqResetFlag = false;
+		sequencer.seqResetFlag = false;
 	}
 }
 
 void seqStart() {
-	seqState.playing = 1;
+	sequencer.playing = 1;
 
 	for (int x=0; x<NUM_PATTERNS; x++){
-		seqState.timePerPattern[x].nextStepTimeP = micros();
-		seqState.timePerPattern[x].lastStepTimeP = micros();
+		sequencer.timePerPattern[x].nextStepTimeP = micros();
+		sequencer.timePerPattern[x].lastStepTimeP = micros();
 	}
 
-	if (!seqState.seqResetFlag) {
+	if (!sequencer.seqResetFlag) {
 		MM::continueClock();
-//	} else if (seqPos[seqState.playingPattern]==0) {
+//	} else if (seqPos[sequencer.playingPattern]==0) {
 //		MM::startClock();
 	}
 }
 
 void seqStop() {
-	seqState.ticks = 0;
-	seqState.playing = 0;
+	sequencer.ticks = 0;
+	sequencer.playing = 0;
 	MM::stopClock();
 	allNotesOff();
 }
 
 void seqContinue() {
-	seqState.playing = 1;
+	sequencer.playing = 1;
 }
 
 int getPatternPage(int position){
@@ -2551,8 +2554,8 @@ void rotatePattern(int patternNum, int rot) {
 	if ( patternNum < 0 || patternNum >= NUM_PATTERNS )
 		return;
 
-	auto pattern = seqState.getPattern(patternNum);
-	int size = seqState.getPatternLength(patternNum);
+	auto pattern = sequencer.getPattern(patternNum);
+	int size = sequencer.getPatternLength(patternNum);
 	StepNote arr[size];
 	rot = (rot + size) % size;
 
@@ -2565,22 +2568,22 @@ void rotatePattern(int patternNum, int rot) {
 
 // TODO: move to sequencer.h
 void resetPatternDefaults(int patternNum){
-	auto pattern = seqState.getPattern(patternNum);
+	auto pattern = sequencer.getPattern(patternNum);
 
 	for (int i = 0; i < NUM_STEPS; i++){
 		// {notenum,vel,len,stepType,{p1,p2,p3,p4,p5}}
-		pattern->steps[i].note = seqState.patternDefaultNoteMap[patternNum];
+		pattern->steps[i].note = sequencer.patternDefaultNoteMap[patternNum];
 		pattern->steps[i].len = 0;
 	}
 }
 
 // TODO: move to sequencer.h
 void clearPattern(int patternNum){
-	auto steps = seqState.getPattern(patternNum)->steps;
+	auto steps = sequencer.getPattern(patternNum)->steps;
 
 	for (int i = 0; i < NUM_STEPS; i++){
 		// {notenum,vel,len,stepType,{p1,p2,p3,p4,p5}}
-		steps[i].note = seqState.patternDefaultNoteMap[patternNum];
+		steps[i].note = sequencer.patternDefaultNoteMap[patternNum];
 		steps[i].vel = defaultVelocity;
 		steps[i].len = 0;
 		steps[i].stepType = STEPTYPE_NONE;
@@ -2597,18 +2600,18 @@ void clearPattern(int patternNum){
 // TODO: move to sequencer.h
 void copyPattern(int patternNum){
 	//for( int i = 0 ; i < NUM_STEPS ; ++i ){
-	//	copyPatternBuffer[i] = seqState.stepNoteP[patternNum][i];
+	//	copyPatternBuffer[i] = sequencer.stepNoteP[patternNum][i];
 	//}
-	auto pattern = seqState.getPattern(patternNum);
+	auto pattern = sequencer.getPattern(patternNum);
 	memcpy(&copyPatternBuffer, &pattern->steps, NUM_STEPS * sizeof(StepNote));
 }
 
 // TODO: move to sequencer.h
 void pastePattern(int patternNum){
 	//for( int i = 0 ; i < NUM_STEPS ; ++i ){
-	//	seqState.stepNoteP[patternNum][i] = copyPatternBuffer[i] ;
+	//	sequencer.stepNoteP[patternNum][i] = copyPatternBuffer[i] ;
 	//}
-	auto pattern = seqState.getPattern(patternNum);
+	auto pattern = sequencer.getPattern(patternNum);
 	memcpy(&pattern->steps, &copyPatternBuffer, NUM_STEPS * sizeof(StepNote));
 }
 
@@ -2712,9 +2715,9 @@ void initPatterns( void ) {
 					// {note, vel, len, TRIGTYPE, {params0, params1, params2, params3, params4}, prob, condition, STEPTYPE}
 
 	for ( int i=0; i<NUM_PATTERNS; i++ ) {
-		auto pattern = seqState.getPattern(i);
+		auto pattern = sequencer.getPattern(i);
 
-		stepNote.note = seqState.patternDefaultNoteMap[i]; // Defined in sequencer.h
+		stepNote.note = sequencer.patternDefaultNoteMap[i]; // Defined in sequencer.h
 
 		for ( int j=0; j<NUM_STEPS; j++ ) {
 			memcpy( &pattern->steps[j], &stepNote, sizeof(StepNote) );
@@ -2745,7 +2748,7 @@ void saveHeader( void ) {
 	storage->write( EEPROM_HEADER_ADDRESS + 1, (uint8_t)omxMode );
 
 	// 1 byte for the active pattern
-	storage->write(EEPROM_HEADER_ADDRESS + 2, (uint8_t)seqState.playingPattern);
+	storage->write(EEPROM_HEADER_ADDRESS + 2, (uint8_t)sequencer.playingPattern);
 
 	// 1 byte for Midi channel
 	uint8_t unMidiChannel = (uint8_t)(midiChannel - 1);
@@ -2782,7 +2785,7 @@ bool loadHeader( void ) {
 
 	omxMode = (OMXMode)storage->read( EEPROM_HEADER_ADDRESS + 1 );
 
-	seqState.playingPattern = storage->read(EEPROM_HEADER_ADDRESS + 2);
+	sequencer.playingPattern = storage->read(EEPROM_HEADER_ADDRESS + 2);
 
 	uint8_t unMidiChannel = storage->read( EEPROM_HEADER_ADDRESS + 3 );
 	midiChannel = unMidiChannel + 1;
@@ -2802,7 +2805,7 @@ void savePatterns( void ) {
 
 	// for each pattern
 	for ( int i=0; i<NUM_PATTERNS; i++ ) {
-		auto pattern = seqState.getPattern(i);
+		auto pattern = sequencer.getPattern(i);
 		for ( int j=0; j<NUM_STEPS; j++ ) {
 			storage->writeObject( nLocalAddress, pattern->steps[j] );
 			nLocalAddress += s;
@@ -2814,7 +2817,7 @@ void savePatterns( void ) {
 
 	// save pattern settings
 	for ( int i=0; i<NUM_PATTERNS; i++ ) {
-		storage->writeObject( nLocalAddress, seqState.getPattern(i));
+		storage->writeObject( nLocalAddress, sequencer.getPattern(i));
 		nLocalAddress += s;
 	}
 }
@@ -2827,7 +2830,7 @@ void loadPatterns( void ) {
 
 	// for each pattern
 	for ( int i=0; i<NUM_PATTERNS; i++ ) {
-		auto pattern = seqState.getPattern(i);
+		auto pattern = sequencer.getPattern(i);
 		for ( int j=0; j<NUM_STEPS; j++ ) {
 			storage->readObject(nLocalAddress, pattern->steps[j]);
 			nLocalAddress += s;
@@ -2839,7 +2842,7 @@ void loadPatterns( void ) {
 
 	// load pattern length
 	for ( int i=0; i<NUM_PATTERNS; i++ ) {
-		auto pattern = seqState.getPattern(i);
+		auto pattern = sequencer.getPattern(i);
 		storage->readObject(nLocalAddress, pattern);
 		nLocalAddress += s;
 	}
