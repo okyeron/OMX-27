@@ -7,23 +7,6 @@
 
 using Micros = unsigned long; // for tracking time per pattern
 
-struct Pattern {  // ?? bytes
-  uint8_t len : 4;    // 0 - 15, maps to 1 - 16
-  uint8_t channel : 4;    // 0 - 15 , maps to channels 1 - 16
-  uint8_t startstep : 4; // step to begin pattern. must be < patternlength-1
-  uint8_t autoresetstep : 4;  // step to reset on / 0 = off
-  uint8_t autoresetfreq : 4; // tracking reset iteration if enabled / ie Freq of autoreset. should be renamed
-  uint8_t current_cycle : 4; // tracking current cycle of autoreset counter / start it at 1
-  uint8_t rndstep : 4; // for random autostep functionality
-  uint8_t clockDivMultP : 4;
-  uint8_t autoresetprob : 7; // probability of autoreset - 1 is always and totally random if autoreset is 0
-  uint8_t swing : 7;
-  bool reverse : 1;
-  bool mute : 1;
-  bool autoreset : 1; // whether autoreset is enabled
-  bool solo : 1;
-}; // ? bytes
-
 struct TimePerPattern {
   Micros lastProcessTimeP : 32;
   Micros nextStepTimeP : 32;
@@ -64,6 +47,25 @@ struct StepNote {           // ?? bytes
 }; // {note, vel, len, TRIG_TYPE, {params0, params1, params2, params3}, prob, cond, STEP_TYPE}
 
 
+struct Pattern {  // ?? bytes
+  uint8_t len : 4;    // 0 - 15, maps to 1 - 16
+  uint8_t channel : 4;    // 0 - 15 , maps to channels 1 - 16
+  uint8_t startstep : 4; // step to begin pattern. must be < patternlength-1
+  uint8_t autoresetstep : 4;  // step to reset on / 0 = off
+  uint8_t autoresetfreq : 4; // tracking reset iteration if enabled / ie Freq of autoreset. should be renamed
+  uint8_t current_cycle : 4; // tracking current cycle of autoreset counter / start it at 1
+  uint8_t rndstep : 4; // for random autostep functionality
+  uint8_t clockDivMultP : 4;
+  uint8_t autoresetprob : 7; // probability of autoreset - 1 is always and totally random if autoreset is 0
+  uint8_t swing : 7;
+  bool reverse : 1;
+  bool mute : 1;
+  bool autoreset : 1; // whether autoreset is enabled
+  bool solo : 1;
+
+  StepNote steps[NUM_STEPS]; // note data
+}; // ? bytes
+
 // holds state for sequencer
 class SequencerState {
 
@@ -88,7 +90,6 @@ public:
   int patternDefaultNoteMap[NUM_PATTERNS]; // default to GM Drum Map for now
   Pattern patterns[NUM_PATTERNS];
   TimePerPattern timePerPattern[NUM_PATTERNS];
-  StepNote stepNoteP[NUM_PATTERNS][NUM_STEPS];
 
   Pattern* getPattern(int pattern) {
     return &this->patterns[pattern];
