@@ -1733,44 +1733,44 @@ void new_step_ahead(int patternNum) {
 }
 
 void auto_reset(int p) {
-	auto settings = seqState.getPattern(p);
+	auto pattern = seqState.getPattern(p);
 
 	// should be conditioned on whether we're in S2!!
 	if (seqState.seqPos[p] >= seqState.getPatternLength(p) ||
-			(settings->autoreset && (settings->autoresetstep > (settings->startstep) ) && (seqState.seqPos[p] >= settings->autoresetstep)) ||
-			(settings->autoreset && (settings->autoresetstep == 0 ) && (seqState.seqPos[p] >= settings->rndstep)) ||
-			(settings->reverse && (seqState.seqPos[p] < 0)) || // normal reverse reset
-			(settings->reverse && settings->autoreset && (seqState.seqPos[p] < settings->startstep )) // ||
+			(pattern->autoreset && (pattern->autoresetstep > (pattern->startstep) ) && (seqState.seqPos[p] >= pattern->autoresetstep)) ||
+			(pattern->autoreset && (pattern->autoresetstep == 0 ) && (seqState.seqPos[p] >= pattern->rndstep)) ||
+			(pattern->reverse && (seqState.seqPos[p] < 0)) || // normal reverse reset
+			(pattern->reverse && pattern->autoreset && (seqState.seqPos[p] < pattern->startstep )) // ||
 			//(settings->reverse && settings->autoreset && (settings->autoresetstep == 0 ) && (seqPos[p] < settings->rndstep))
 		 ) {
 
-		if (settings->reverse) {
-			if (settings->autoreset){
-				if (settings->autoresetstep == 0){
-					seqState.seqPos[p] = settings->rndstep-1;
+		if (pattern->reverse) {
+			if (pattern->autoreset){
+				if (pattern->autoresetstep == 0){
+					seqState.seqPos[p] = pattern->rndstep-1;
 				}else{
-					seqState.seqPos[p] = settings->autoresetstep-1; // resets pattern in REV
+					seqState.seqPos[p] = pattern->autoresetstep-1; // resets pattern in REV
 				}
 			} else {
-				seqState.seqPos[p] = (seqState.getPatternLength(p)-settings->startstep)-1;
+				seqState.seqPos[p] = (seqState.getPatternLength(p)-pattern->startstep)-1;
 			}
 
 		} else {
-			seqState.seqPos[p] = (settings->startstep); // resets pattern in FWD
+			seqState.seqPos[p] = (pattern->startstep); // resets pattern in FWD
 		}
-		if (settings->autoresetfreq == settings->current_cycle){ // reset cycle logic
-			if (probResult(settings->autoresetprob)){
+		if (pattern->autoresetfreq == pattern->current_cycle){ // reset cycle logic
+			if (probResult(pattern->autoresetprob)){
 				// chance of doing autoreset
-				settings->autoreset = true;
+				pattern->autoreset = true;
 			} else {
-				settings->autoreset = false;
+				pattern->autoreset = false;
 			}
-			settings->current_cycle = 1; // reset cycle to start new iteration
+			pattern->current_cycle = 1; // reset cycle to start new iteration
 		} else {
-			settings->autoreset = false;
-			settings->current_cycle++; // advance to next cycle
+			pattern->autoreset = false;
+			pattern->current_cycle++; // advance to next cycle
 		}
-		settings->rndstep = (rand() % seqState.getPatternLength(p)) + 1; // randomly choose step for next cycle
+		pattern->rndstep = (rand() % seqState.getPatternLength(p)) + 1; // randomly choose step for next cycle
 	}
 }
 
@@ -2071,7 +2071,7 @@ void playNote(int patternNum) {
 //		Serial.println(playStepType);
 	}
 
-	auto settings = seqState.getPattern(patternNum);
+	auto pattern = seqState.getPattern(patternNum);
 
 	switch (playStepType) {
 		case STEPTYPE_COUNT:	// fall through
@@ -2080,13 +2080,13 @@ void playNote(int patternNum) {
 		case STEPTYPE_NONE:
 			break;
 		case STEPTYPE_FWD:
-			settings->reverse = 0;
+			pattern->reverse = 0;
 			break;
 		case STEPTYPE_REV:
-			settings->reverse = 1;
+			pattern->reverse = 1;
 			break;
 		case STEPTYPE_PONG:
-			settings->reverse = !settings->reverse;
+			pattern->reverse = !pattern->reverse;
 			break;
 		case STEPTYPE_RANDSTEP:
 			seqState.seqPos[patternNum] = (rand() % seqState.getPatternLength(patternNum)) + 1;
@@ -2107,15 +2107,15 @@ void playNote(int patternNum) {
 
 		if (seqState.seqPos[patternNum] % 2 == 0){
 
-			if (settings->swing < 99){
-				noteon_micros = micros() + ((ppqInterval * multValues[settings->clockDivMultP])/(PPQ / 24) * settings->swing); // full range swing
+			if (pattern->swing < 99){
+				noteon_micros = micros() + ((ppqInterval * multValues[pattern->clockDivMultP])/(PPQ / 24) * pattern->swing); // full range swing
 			// 	Serial.println((ppqInterval * multValues[settings->clockDivMultP])/(PPQ / 24) * settings->swing);
 			// } else if ((settings->swing > 50) && (settings->swing < 99)){
 			//    noteon_micros = micros() + ((step_micros * multValues[settings->clockDivMultP]) * ((settings->swing - 50)* .01) ); // late swing
 			//    Serial.println(((step_micros * multValues[settings->clockDivMultP]) * ((settings->swing - 50)* .01) ));
-			} else if (settings->swing == 99){ // random drunken swing
+			} else if (pattern->swing == 99){ // random drunken swing
 				rnd_swing = rand() % 95 + 1; // rand 1 - 95 // randomly apply swing value
-				noteon_micros = micros() + ((ppqInterval * multValues[settings->clockDivMultP])/(PPQ / 24) * rnd_swing);
+				noteon_micros = micros() + ((ppqInterval * multValues[pattern->clockDivMultP])/(PPQ / 24) * rnd_swing);
 			}
 
 		} else {
@@ -2365,20 +2365,20 @@ void initPatterns( void ) {
 		}
 
 		// TODO: move to sequencer
-		auto settings = seqState.getPattern(i);
-		settings->len = 15;
-		settings->channel = i;		// 0 - 15 becomes 1 - 16
-		settings->mute = false;
-		settings->reverse = false;
-		settings->swing = 0;
-		settings->startstep = 0;
-		settings->autoresetstep = 0;
-		settings->autoresetfreq = 0;
-		settings->autoresetprob = 0;
-		settings->current_cycle = 1;
-		settings->rndstep = 3;
-		settings->autoreset = false;
-		settings->solo = false;
+		auto pattern = seqState.getPattern(i);
+		pattern->len = 15;
+		pattern->channel = i;		// 0 - 15 becomes 1 - 16
+		pattern->mute = false;
+		pattern->reverse = false;
+		pattern->swing = 0;
+		pattern->startstep = 0;
+		pattern->autoresetstep = 0;
+		pattern->autoresetfreq = 0;
+		pattern->autoresetprob = 0;
+		pattern->current_cycle = 1;
+		pattern->rndstep = 3;
+		pattern->autoreset = false;
+		pattern->solo = false;
 	}
 }
 
@@ -2482,8 +2482,8 @@ void loadPatterns( void ) {
 
 	// load pattern length
 	for ( int i=0; i<NUM_PATTERNS; i++ ) {
-		auto settings = seqState.getPattern(i);
-		storage->readObject(nLocalAddress, settings);
+		auto pattern = seqState.getPattern(i);
+		storage->readObject(nLocalAddress, pattern);
 		nLocalAddress += s;
 	}
 }
