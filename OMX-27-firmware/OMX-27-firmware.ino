@@ -242,7 +242,7 @@ void readPotentimeters(){
 						potVal = analogValues[k];
 
 						if (k < 4){ // only store p-lock value for first 4 knobs
-							seqState.getCurrentPattern()->steps[selectedStep].params[k] = analogValues[k];
+							getSelectedStep()->params[k] = analogValues[k];
 							sendPots(k, seqState.getPatternChannel(seqState.playingPattern));
 						}
 						sendPots(k, seqState.getPatternChannel(seqState.playingPattern));
@@ -710,7 +710,7 @@ void dispGenericMode(int submode, int selected){
 			legends[3] = "PTN";
 			legendVals[0] = (int)octave+4;
 			legendVals[1] = seqState.seqPos[seqState.playingPattern] + 1;
-			legendVals[2] = seqState.getCurrentPattern()->steps[selectedStep].note; //(int)transpose;
+			legendVals[2] = getSelectedStep()->note; //(int)transpose;
 			legendVals[3] = seqState.playingPattern + 1;
 			break;
 		case SUBMODE_NOTESEL:
@@ -720,7 +720,7 @@ void dispGenericMode(int submode, int selected){
 			legends[3] = "L-4";
 			for (int j=0; j<4; j++){
 
-				int stepNoteParam = seqState.getCurrentPattern()->steps[selectedStep].params[j];
+				int stepNoteParam = getSelectedStep()->params[j];
 				if (stepNoteParam > -1){
 					legendVals[j] = stepNoteParam;
 				} else {
@@ -734,10 +734,10 @@ void dispGenericMode(int submode, int selected){
 			legends[1] = "OCT";
 			legends[2] = "VEL";
 			legends[3] = "LEN";
-			legendVals[0] = seqState.getCurrentPattern()->steps[selectedStep].note;
+			legendVals[0] = getSelectedStep()->note;
 			legendVals[1] = (int)octave+4;
-			legendVals[2] = seqState.getCurrentPattern()->steps[selectedStep].vel;
-			legendVals[3] = seqState.getCurrentPattern()->steps[selectedStep].len + 1;
+			legendVals[2] = getSelectedStep()->vel;
+			legendVals[3] = getSelectedStep()->len + 1;
 			break;
 
 		case SUBMODE_NOTESEL3:
@@ -746,14 +746,14 @@ void dispGenericMode(int submode, int selected){
 			legends[2] = "COND";
 			legends[3] = "";
 			legendVals[0] = -127;
-			legendText[0] = stepTypes[seqState.getCurrentPattern()->steps[selectedStep].stepType];
+			legendText[0] = stepTypes[getSelectedStep()->stepType];
 
-			legendVals[1] = seqState.getCurrentPattern()->steps[selectedStep].prob;
+			legendVals[1] = getSelectedStep()->prob;
 //				String ac = String(trigConditionsAB[][0]);
-//				String bc = String(trigConditionsAB[seqState.getCurrentPattern()->steps[selectedStep].condition][1]);
+//				String bc = String(trigConditionsAB[getSelectedStep()->condition][1]);
 
 			legendVals[2] = -127;
-			legendText[2] = trigConditions[seqState.getCurrentPattern()->steps[selectedStep].condition]; //ac + bc; // trigConditions
+			legendText[2] = trigConditions[getSelectedStep()->condition]; //ac + bc; // trigConditions
 
 			legendVals[3] = 0;
 			break;
@@ -1079,12 +1079,12 @@ void loop() {
 							changeStepType(amt);
 						}
 						if (srmode2 == 1) {
-							int tempProb = seqState.getCurrentPattern()->steps[selectedStep].prob;
-							seqState.getCurrentPattern()->steps[selectedStep].prob = constrain(tempProb + amt, 0, 100); // Note Len between 1-16
+							int tempProb = getSelectedStep()->prob;
+							getSelectedStep()->prob = constrain(tempProb + amt, 0, 100); // Note Len between 1-16
 						}
 						if (srmode2 == 2) {
-							int tempCondition = seqState.getCurrentPattern()->steps[selectedStep].condition;
-							seqState.getCurrentPattern()->steps[selectedStep].condition = constrain(tempCondition + amt, 0, 35); // 0-32
+							int tempCondition = getSelectedStep()->condition;
+							getSelectedStep()->condition = constrain(tempCondition + amt, 0, 35); // 0-32
 						}
 
 					} else if (noteSelect && noteSelection && !enc_edit){	// NOTE SELECT MODE
@@ -1094,7 +1094,7 @@ void loop() {
 //							Serial.print("nsmode ");
 //							Serial.println(nsmode);
 							if(u.dir() < 0){			// RESET PLOCK IF TURN CCW
-								seqState.getCurrentPattern()->steps[selectedStep].params[nsmode] = -1;
+								getSelectedStep()->params[nsmode] = -1;
 							}
 						}
 						if (nsmode == 4 && nsmode2 == 4 && nsmode3 == 4) { 	// CHANGE PAGE
@@ -1104,8 +1104,8 @@ void loop() {
 						}
 
 						if (nsmode2 == 0) { 				// SET NOTE NUM
-							int tempNote = seqState.getCurrentPattern()->steps[selectedStep].note;
-							seqState.getCurrentPattern()->steps[selectedStep].note = constrain(tempNote + amt, 0, 127);
+							int tempNote = getSelectedStep()->note;
+							getSelectedStep()->note = constrain(tempNote + amt, 0, 127);
 						}
 						if (nsmode2 == 1) { 				// SET OCTAVE
 							newoctave = constrain(octave + amt, -5, 4);
@@ -1114,24 +1114,24 @@ void loop() {
 							}
 						}
 						if (nsmode2 == 2) { 				// SET VELOCITY
-							int tempVel = seqState.getCurrentPattern()->steps[selectedStep].vel;
-							seqState.getCurrentPattern()->steps[selectedStep].vel = constrain(tempVel + amt, 0, 127);
+							int tempVel = getSelectedStep()->vel;
+							getSelectedStep()->vel = constrain(tempVel + amt, 0, 127);
 						}
 						if (nsmode2 == 3) { 				// SET NOTE LENGTH
-							int tempLen = seqState.getCurrentPattern()->steps[selectedStep].len;
-							seqState.getCurrentPattern()->steps[selectedStep].len = constrain(tempLen + amt, 0, 15); // Note Len between 1-16
+							int tempLen = getSelectedStep()->len;
+							getSelectedStep()->len = constrain(tempLen + amt, 0, 15); // Note Len between 1-16
 						}
 
 						if (nsmode3 == 0) { 				// SET STEP TYPE
 							changeStepType(amt);
 						}
 						if (nsmode3 == 1) { 				// SET STEP PROB
-							int tempProb = seqState.getCurrentPattern()->steps[selectedStep].prob;
-							seqState.getCurrentPattern()->steps[selectedStep].prob = constrain(tempProb + amt, 0, 100); // Note Len between 1-16
+							int tempProb = getSelectedStep()->prob;
+							getSelectedStep()->prob = constrain(tempProb + amt, 0, 100); // Note Len between 1-16
 						}
 						if (nsmode3 == 2) { 				// SET STEP TRIG CONDITION
-							int tempCondition = seqState.getCurrentPattern()->steps[selectedStep].condition;
-							seqState.getCurrentPattern()->steps[selectedStep].condition = constrain(tempCondition + amt, 0, 35); // 0-32
+							int tempCondition = getSelectedStep()->condition;
+							getSelectedStep()->condition = constrain(tempCondition + amt, 0, 35); // 0-32
 						}
 
 
@@ -1319,7 +1319,7 @@ void loop() {
 							stepSelect = false;
 							selectedNote = thisKey;
 							int adjnote = notes[thisKey] + (octave * 12);
-							seqState.getCurrentPattern()->steps[selectedStep].note = adjnote;
+							getSelectedStep()->note = adjnote;
 							if (!seqState.playing){
 								seqNoteOn(thisKey, defaultVelocity, seqState.playingPattern);
 							}
@@ -1382,7 +1382,7 @@ void loop() {
 						selectedStep = seqState.seqPos[seqState.playingPattern];
 
 						int adjnote = notes[thisKey] + (octave * 12);
-						seqState.getCurrentPattern()->steps[selectedStep].note = adjnote;
+						getSelectedStep()->note = adjnote;
 
 						if (!seqState.playing){
 							seqNoteOn(thisKey, defaultVelocity, seqState.playingPattern);
@@ -1559,11 +1559,11 @@ void loop() {
 										noteSelection = true;
 										dirtyDisplay = true;
 										// re-toggle the key you just held
-//										if ( seqState.getCurrentPattern()->steps[selectedStep].stepType == STEPTYPE_PLAY || seqState.getCurrentPattern()->steps[selectedStep].stepType == STEPTYPE_MUTE ) {
-//											seqState.getCurrentPattern()->steps[selectedStep].stepType = ( seqState.getCurrentPattern()->steps[selectedStep].stepType == STEPTYPE_PLAY ) ? STEPTYPE_MUTE : STEPTYPE_PLAY;
+//										if ( getSelectedStep()->stepType == STEPTYPE_PLAY || getSelectedStep()->stepType == STEPTYPE_MUTE ) {
+//											getSelectedStep()->stepType = ( getSelectedStep()->stepType == STEPTYPE_PLAY ) ? STEPTYPE_MUTE : STEPTYPE_PLAY;
 //										}
-										if ( seqState.getCurrentPattern()->steps[selectedStep].trig == TRIGTYPE_PLAY || seqState.getCurrentPattern()->steps[selectedStep].trig == TRIGTYPE_MUTE ) {
-											seqState.getCurrentPattern()->steps[selectedStep].trig = ( seqState.getCurrentPattern()->steps[selectedStep].trig == TRIGTYPE_PLAY ) ? TRIGTYPE_MUTE : TRIGTYPE_PLAY;
+										if ( getSelectedStep()->trig == TRIGTYPE_PLAY || getSelectedStep()->trig == TRIGTYPE_MUTE ) {
+											seqState.getCurrentPattern()->steps[selectedStep].trig = ( getSelectedStep()->trig == TRIGTYPE_PLAY ) ? TRIGTYPE_MUTE : TRIGTYPE_PLAY;
 										}
 									}
 								}
@@ -1692,6 +1692,10 @@ void loop() {
 
 
 // ####### SEQENCER FUNCTIONS
+
+StepNote* getSelectedStep() {
+	return &seqState.getCurrentPattern()->steps[selectedStep];
+}
 
 void step_ahead(int patternNum) {
 	// step each pattern ahead one place
@@ -1822,35 +1826,35 @@ bool evaluate_AB(int condition, int patternNum) {
 }
 
 void changeStepType(int amount){
-	auto tempType = seqState.getCurrentPattern()->steps[selectedStep].stepType + amount;
+	auto tempType = getSelectedStep()->stepType + amount;
 
 	// this is fucking hacky to increment the enum for stepType
 	switch(tempType){
 		case 0:
-			seqState.getCurrentPattern()->steps[selectedStep].stepType = STEPTYPE_NONE;
+			getSelectedStep()->stepType = STEPTYPE_NONE;
 			break;
 		case 1:
-			seqState.getCurrentPattern()->steps[selectedStep].stepType = STEPTYPE_RESTART;
+			getSelectedStep()->stepType = STEPTYPE_RESTART;
 			break;
 		case 2:
-			seqState.getCurrentPattern()->steps[selectedStep].stepType = STEPTYPE_FWD;
+			getSelectedStep()->stepType = STEPTYPE_FWD;
 			break;
 		case 3:
-			seqState.getCurrentPattern()->steps[selectedStep].stepType = STEPTYPE_REV;
+			getSelectedStep()->stepType = STEPTYPE_REV;
 			break;
 		case 4:
-			seqState.getCurrentPattern()->steps[selectedStep].stepType = STEPTYPE_PONG;
+			getSelectedStep()->stepType = STEPTYPE_PONG;
 			break;
 		case 5:
-			seqState.getCurrentPattern()->steps[selectedStep].stepType = STEPTYPE_RANDSTEP;
+			getSelectedStep()->stepType = STEPTYPE_RANDSTEP;
 			break;
 		case 6:
-			seqState.getCurrentPattern()->steps[selectedStep].stepType = STEPTYPE_RAND;
+			getSelectedStep()->stepType = STEPTYPE_RAND;
 			break;
 		default:
 			break;
 	}
-	//							Serial.println(seqState.getCurrentPattern()->steps[selectedStep].stepType);
+	//							Serial.println(getSelectedStep()->stepType);
 }
 void step_on(int patternNum){
 //		Serial.print(patternNum);
