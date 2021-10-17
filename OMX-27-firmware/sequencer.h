@@ -115,6 +115,7 @@ public:
   }
 };
 
+// TODO: this should probably just be a constructor?
 SequencerState defaultSequencer() {
   auto nextStepTime = micros();
   auto lastStepTime = micros();
