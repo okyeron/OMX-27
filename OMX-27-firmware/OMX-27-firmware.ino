@@ -543,77 +543,86 @@ void show_current_step(int patternNum) {
 			}
 		}
 
+		
+		auto currentpage = patternPage[patternNum];
+		auto pagestepstart = (currentpage * NUM_STEPKEYS);
+		
 												// WHAT TO DO HERE FOR MULTIPLE PAGES
-		for(int i = 0; i < NUM_STEPKEYS; i++){	// NUM_STEPS INSTEAD?>
+		for(int i = pagestepstart; i < (pagestepstart + NUM_STEPKEYS); i++){	// NUM_STEPKEYS or NUM_STEPS INSTEAD?>
 			if (i < PatternLength(patternNum)){ 
-			
+				
+				// ONLY DO LEDS FOR THE CURRENT PAGE
+				
+				auto pixelpos = i - pagestepstart + 11;
+//				Serial.println(pixelpos);
+				
 				if (patternParams){
- 					strip.setPixelColor(i+11, SEQMARKER);
+ 					strip.setPixelColor(pixelpos, SEQMARKER);
  				}
 
 				if(i % 4 == 0){ 					// MARK GROUPS OF 4
 					if(i == seqPos[patternNum]){
 						if (playing){
-							strip.setPixelColor(i+11, SEQCHASE); // step chase
+							strip.setPixelColor(pixelpos, SEQCHASE); // step chase
 						} else if (stepNoteP[patternNum][i].trig == TRIGTYPE_PLAY){
 							if (stepNoteP[patternNum][i].stepType != STEPTYPE_NONE){
 								if (slowBlinkState){
-									strip.setPixelColor(i+11, stepColor); // STEP EVENT COLOR
+									strip.setPixelColor(pixelpos, stepColor); // STEP EVENT COLOR
 								}else{
-									strip.setPixelColor(i+11, muteColor); // STEP EVENT COLOR
+									strip.setPixelColor(pixelpos, muteColor); // STEP EVENT COLOR
 								}
 							} else {
-								strip.setPixelColor(i+11, stepColor); // STEP ON COLOR
+								strip.setPixelColor(pixelpos, stepColor); // STEP ON COLOR
 							}
 						} else if (stepNoteP[patternNum][i].trig == TRIGTYPE_MUTE){
-							strip.setPixelColor(i+11, SEQMARKER);
+							strip.setPixelColor(pixelpos, SEQMARKER);
 						}
 
 					} else if (stepNoteP[patternNum][i].trig == TRIGTYPE_PLAY){
 						if (stepNoteP[patternNum][i].stepType != STEPTYPE_NONE){
 							if (slowBlinkState){
-								strip.setPixelColor(i+11, stepColor); // STEP EVENT COLOR
+								strip.setPixelColor(pixelpos, stepColor); // STEP EVENT COLOR
 							}else{
-								strip.setPixelColor(i+11, muteColor); // STEP EVENT COLOR
+								strip.setPixelColor(pixelpos, muteColor); // STEP EVENT COLOR
 							}
 						} else {
-							strip.setPixelColor(i+11, stepColor); // STEP ON COLOR
+							strip.setPixelColor(pixelpos, stepColor); // STEP ON COLOR
 						}
 					} else if (stepNoteP[patternNum][i].trig == TRIGTYPE_MUTE){
-						strip.setPixelColor(i+11, SEQMARKER);
+						strip.setPixelColor(pixelpos, SEQMARKER);
 					}
 
 				} else if (i == seqPos[patternNum]){ 		// STEP CHASE
 					if (playing){
-						strip.setPixelColor(i+11, SEQCHASE);
+						strip.setPixelColor(pixelpos, SEQCHASE);
 
 					} else if (stepNoteP[patternNum][i].trig == TRIGTYPE_PLAY){
 						if (stepNoteP[patternNum][i].stepType != STEPTYPE_NONE){
 							if (slowBlinkState){
-								strip.setPixelColor(i+11, stepColor); // STEP EVENT COLOR
+								strip.setPixelColor(pixelpos, stepColor); // STEP EVENT COLOR
 							}else{
-								strip.setPixelColor(i+11, muteColor); // STEP EVENT COLOR
+								strip.setPixelColor(pixelpos, muteColor); // STEP EVENT COLOR
 							}
 						} else {
-							strip.setPixelColor(i+11, stepColor); // STEP ON COLOR
+							strip.setPixelColor(pixelpos, stepColor); // STEP ON COLOR
 						}
 					} else if (stepNoteP[patternNum][i].trig == TRIGTYPE_MUTE){
-						strip.setPixelColor(i+11, LEDOFF);  // DO WE NEED TO MARK PLAYHEAD WHEN STOPPED?
+						strip.setPixelColor(pixelpos, LEDOFF);  // DO WE NEED TO MARK PLAYHEAD WHEN STOPPED?
 					}
 
 				} else if (stepNoteP[patternNum][i].trig == TRIGTYPE_PLAY){
 					if (stepNoteP[patternNum][i].stepType != STEPTYPE_NONE){
 						if (slowBlinkState){
-							strip.setPixelColor(i+11, stepColor); // STEP EVENT COLOR
+							strip.setPixelColor(pixelpos, stepColor); // STEP EVENT COLOR
 						}else{
-							strip.setPixelColor(i+11, muteColor); // STEP EVENT COLOR
+							strip.setPixelColor(pixelpos, muteColor); // STEP EVENT COLOR
 						}
 					} else {
-						strip.setPixelColor(i+11, stepColor); // STEP ON COLOR
+						strip.setPixelColor(pixelpos, stepColor); // STEP ON COLOR
 					}
 
 				} else if (!patternParams && stepNoteP[patternNum][i].trig == TRIGTYPE_MUTE){
-					strip.setPixelColor(i+11, LEDOFF);
+					strip.setPixelColor(pixelpos, LEDOFF);
 				}
 
 			}
@@ -1302,6 +1311,7 @@ void loop() {
 		keypadEvent e = customKeypad.read();
 		int thisKey = e.bit.KEY;
 		int keyPos = thisKey - 11;
+		int seqKey = keyPos + (patternPage[playingPattern] * NUM_STEPKEYS);
 
 		if (e.bit.EVENT == KEY_JUST_PRESSED){
 			keyState[thisKey] = true;
@@ -1386,7 +1396,7 @@ void loop() {
 							dirtyDisplay = true;
 
 						} else if ( thisKey > 10 ) {
-							selectedStep = keyPos; // set noteSelection to this step
+							selectedStep = seqKey; // was keyPos // set noteSelection to this step
 							stepSelect = true;
 							noteSelection = true;
 							dirtyDisplay = true;
@@ -1483,14 +1493,13 @@ void loop() {
 						// SEQUENCE 1-16 STEP KEYS
 						} else if (thisKey > 10) { 
 						
-							if (keyState[1] && keyState[2]) { 
+							if (keyState[1] && keyState[2]) {		// F1+F2 HOLD
 								if (!stepRecord && !patternParams){ // IGNORE LONG PRESSES IN STEP RECORD and Pattern Params
 									if (thisKey <= 11 + getPatternPage(patternSettings[playingPattern].len) ){
 										patternPage[playingPattern] = thisKey - 11;
-										Serial.println(patternPage[playingPattern]);
 									}
 								}
-							} else if (keyState[1]) { 
+							} else if (keyState[1]) {		// F1 HOLD
 									if (!stepRecord && !patternParams){ 		// IGNORE LONG PRESSES IN STEP RECORD and Pattern Params
 										selectedStep = thisKey - 11; // set noteSelection to this step
 										noteSelect = true;
@@ -1503,15 +1512,15 @@ void loop() {
 										}
 									}
 
-							} else if (keyState[2]) {	
+							} else if (keyState[2]) {		// F2 HOLD
 
 							} else {
 								// TOGGLE STEP ON/OFF
 	//							if ( stepNoteP[playingPattern][keyPos].stepType == STEPTYPE_PLAY || stepNoteP[playingPattern][keyPos].stepType == STEPTYPE_MUTE ) {
 	//								stepNoteP[playingPattern][keyPos].stepType = ( stepNoteP[playingPattern][keyPos].stepType == STEPTYPE_PLAY ) ? STEPTYPE_MUTE : STEPTYPE_PLAY;
 	//							}
-								if ( stepNoteP[playingPattern][keyPos].trig == TRIGTYPE_PLAY || stepNoteP[playingPattern][keyPos].trig == TRIGTYPE_MUTE ) {
-									stepNoteP[playingPattern][keyPos].trig = ( stepNoteP[playingPattern][keyPos].trig == TRIGTYPE_PLAY ) ? TRIGTYPE_MUTE : TRIGTYPE_PLAY;
+								if ( stepNoteP[playingPattern][seqKey].trig == TRIGTYPE_PLAY || stepNoteP[playingPattern][seqKey].trig == TRIGTYPE_MUTE ) {
+									stepNoteP[playingPattern][seqKey].trig = ( stepNoteP[playingPattern][seqKey].trig == TRIGTYPE_PLAY ) ? TRIGTYPE_MUTE : TRIGTYPE_PLAY;
 								}
 							}
 						}
