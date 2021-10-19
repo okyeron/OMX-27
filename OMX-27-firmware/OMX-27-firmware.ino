@@ -1868,6 +1868,8 @@ void auto_reset(int p){
 		}
 		patternSettings[p].rndstep = (rand() % PatternLength(p)) + 1; // randomly choose step for next cycle
 	}
+	patternPage[p] = (seqPos[p]/NUM_STEPKEYS); // FOLLOW MODE FOR SEQ PAGE
+	
 // return ()
 }
 
@@ -1964,7 +1966,6 @@ void step_off(int patternNum, int position){
 void doStep() {
 // // probability test
 	bool testProb = probResult(stepNoteP[playingPattern][seqPos[playingPattern]].prob);
-
 
 	switch(omxMode){
 		case MODE_S1:
