@@ -477,17 +477,18 @@ void show_current_step(int patternNum) {
 //		for(int j = 1; j < NUM_STEPKEYS+11; j++){
 //			if (j < PatternLength(patternNum)+11){
 		for(int j = pagestepstart; j < (pagestepstart + NUM_STEPKEYS); j++){	// NUM_STEPKEYS or NUM_STEPS INSTEAD?>
+			auto pixelpos = j - pagestepstart + 11;
+
 			if (j < PatternLength(patternNum)){ 
 				// ONLY DO LEDS FOR THE CURRENT PAGE
-				auto pixelpos = j - pagestepstart + 11;
 
 				if (j == seqPos[playingPattern]){
 					strip.setPixelColor(pixelpos, SEQCHASE);
-				} else if (j != selectedNote){
+				} else if (pixelpos != selectedNote){
 					strip.setPixelColor(pixelpos, LEDOFF);
 				}
-//			} else  {
-//				strip.setPixelColor(j, LEDOFF);
+			} else  {
+				strip.setPixelColor(pixelpos, LEDOFF);
 			}
 		}
 	} else if (patternSettings[playingPattern].solo){
