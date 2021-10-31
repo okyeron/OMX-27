@@ -454,25 +454,28 @@ void show_current_step(int patternNum) {
 		muteColor = muteColors[patternNum];
 	}
 
+	auto currentpage = patternPage[patternNum];
+	auto pagestepstart = (currentpage * NUM_STEPKEYS);
+
 	if (noteSelect && noteSelection) {
-		for(int j = 1; j < NUM_STEPKEYS+11; j++){
-			if (j < PatternLength(patternNum)+11){
+//		for(int j = 1; j < NUM_STEPKEYS+11; j++){
+		for(int j = pagestepstart; j < (pagestepstart + NUM_STEPKEYS); j++){	// NUM_STEPKEYS or NUM_STEPS INSTEAD?>
+			auto pixelpos = j - pagestepstart + 11;
+
+			if (j < PatternLength(patternNum)){
 				if (j == selectedNote){
-					strip.setPixelColor(j, HALFWHITE);
-				} else if (j == selectedStep+11){
-					strip.setPixelColor(j, SEQSTEP);
+					strip.setPixelColor(pixelpos, HALFWHITE);
+				} else if (j == selectedStep){
+					strip.setPixelColor(pixelpos, SEQSTEP);
 				} else{
-					strip.setPixelColor(j, LEDOFF);
+					strip.setPixelColor(pixelpos, LEDOFF);
 				}
 			} else {
-				strip.setPixelColor(j, LEDOFF);
+				strip.setPixelColor(pixelpos, LEDOFF);
 			}
 		}
 
 	} else if (stepRecord) {
-	
-		auto currentpage = patternPage[patternNum];
-		auto pagestepstart = (currentpage * NUM_STEPKEYS);
 	
 //		for(int j = 1; j < NUM_STEPKEYS+11; j++){
 //			if (j < PatternLength(patternNum)+11){
@@ -1656,7 +1659,7 @@ void loop() {
 
 								} else if (j > 10){
 									if (!stepRecord && !patternParams){ 		// IGNORE LONG PRESSES IN STEP RECORD and Pattern Params
-										selectedStep = j - 11; // set noteSelection to this step
+										selectedStep = (j - 11) + (patternPage[playingPattern] * NUM_STEPKEYS); // set noteSelection to this step
 										noteSelect = true;
 										stepSelect = true;
 										noteSelection = true;
