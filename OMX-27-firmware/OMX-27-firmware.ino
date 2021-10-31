@@ -470,17 +470,24 @@ void show_current_step(int patternNum) {
 		}
 
 	} else if (stepRecord) {
-		for(int j = 1; j < NUM_STEPKEYS+11; j++){
-			if (j < PatternLength(patternNum)+11){
-				if (j == seqPos[playingPattern]+11){
-					strip.setPixelColor(j, SEQCHASE);
-//				} else if (j == selectedNote){
-//					strip.setPixelColor(j, HALFWHITE);
+	
+		auto currentpage = patternPage[patternNum];
+		auto pagestepstart = (currentpage * NUM_STEPKEYS);
+	
+//		for(int j = 1; j < NUM_STEPKEYS+11; j++){
+//			if (j < PatternLength(patternNum)+11){
+		for(int j = pagestepstart; j < (pagestepstart + NUM_STEPKEYS); j++){	// NUM_STEPKEYS or NUM_STEPS INSTEAD?>
+			if (j < PatternLength(patternNum)){ 
+				// ONLY DO LEDS FOR THE CURRENT PAGE
+				auto pixelpos = j - pagestepstart + 11;
+
+				if (j == seqPos[playingPattern]){
+					strip.setPixelColor(pixelpos, SEQCHASE);
 				} else if (j != selectedNote){
-					strip.setPixelColor(j, LEDOFF);
+					strip.setPixelColor(pixelpos, LEDOFF);
 				}
-			} else  {
-				strip.setPixelColor(j, LEDOFF);
+//			} else  {
+//				strip.setPixelColor(j, LEDOFF);
 			}
 		}
 	} else if (patternSettings[playingPattern].solo){
