@@ -76,6 +76,7 @@ int nspage = 0;
 int pppage = 0;
 int sqpage = 0;
 int srpage = 0;
+int mmpage = 0;
 
 int patmode = 0;
 int nsmode = 4;
@@ -85,6 +86,7 @@ int ppmode = 4;
 int ppmode2 = 4;
 int ppmode3 = 4;
 int mimode = 4;
+int mimode2 = 4;
 int sqmode = 4;
 int sqmode2 = 4;
 int srmode = 4;
@@ -145,6 +147,7 @@ int midiKeyState[27] =     {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
 int midiChannelState[27] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
 int rrChannel = 0;
 bool midiRoundRobin = false;
+int midiRRChannelCount = 1;
 bool midiInToCV = true;
 
 // ENCODER
@@ -679,16 +682,30 @@ void dispGenericMode(int submode, int selected){
 	int legendVals[4] = {0,0,0,0};
 	int dispPage = 0;
 	const char* legendText[4] = {"","","",""};
+	int displaychan = midiChannel;
 	switch(submode){
-		case SUBMODE_MIDI:
+		case SUBMODE_MIDI:			
+			if (midiRoundRobin) {
+				displaychan = rrChannel;
+			}
 			legends[0] = "OCT";
 			legends[1] = "CH";
 			legends[2] = "CC";
 			legends[3] = "NOTE";
 			legendVals[0] = (int)octave+4;
-			legendVals[1] = midiChannel;
+			legendVals[1] = displaychan;
 			legendVals[2] = potVal;
 			legendVals[3] = midiLastNote;
+			break;
+		case SUBMODE_MIDI2:			
+			legends[0] = "RR";
+			legends[1] = "---";
+			legends[2] = "---";
+			legends[3] = "---";
+			legendVals[0] = midiRRChannelCount;
+			legendVals[1] = 0;
+			legendVals[2] = 0;
+			legendVals[3] = 0;
 			break;
 		case SUBMODE_SEQ:
 			legends[0] = "PTN";
@@ -959,19 +976,18 @@ void loop() {
 	//
 	auto u = myEncoder.update();
 	if (u.active()) {
-			auto amt = u.accel(5); // where 5 is the acceleration factor if you want it, 0 if you don't)
+		auto amt = u.accel(5); // where 5 is the acceleration factor if you want it, 0 if you don't)
 //    	Serial.println(u.dir() < 0 ? "ccw " : "cw ");
 //    	Serial.println(amt);
 
 		// Change Mode
-			if (enc_edit) {
+		if (enc_edit) {
 			// set mode
 //			int modesize = NUM_OMX_MODES;
-//			Serial.println(modesize);
-				newmode = (OMXMode)constrain(newmode + amt, 0, NUM_OMX_MODES - 1);
-				dispMode();
+			newmode = (OMXMode)constrain(newmode + amt, 0, NUM_OMX_MODES - 1);
+			dispMode();
 			dirtyDisplayTimer = displayRefreshRate+1;
-				dirtyDisplay = true;
+			dirtyDisplay = true;
 
 		} else if (!noteSelect && !patternParams && !stepRecord){
 			switch(omxMode) {
@@ -986,7 +1002,11 @@ void loop() {
 						dirtyDisplay = true;
 //					break;
 				case MODE_MIDI: // MIDI
-					if (mimode == 1) { // set length
+					if (mimode == 4 && mimode2 == 4 ) {  // CHANGE PAGE
+						mmpage = constrain(mmpage + amt, 0, 1);
+					}
+
+					if (mimode == 1) { 
 						int newchan = constrain(midiChannel + amt, 1, 16);
 						if (newchan != midiChannel){
 							midiChannel = newchan;
@@ -999,7 +1019,19 @@ void loop() {
 							octave = newoctave;
 						}
 					}
-						dirtyDisplay = true;
+					
+					if (mimode2 == 0) { 
+						int newrrchan = constrain(midiRRChannelCount + amt, 1, 16);
+						if (newrrchan != midiRRChannelCount){
+							midiRRChannelCount = newrrchan;
+							if (midiRRChannelCount == 1){
+								midiRoundRobin = false;
+							}else{
+								midiRoundRobin = true;
+							}
+						}
+					}
+					dirtyDisplay = true;
 					break;
 				case MODE_S1: // SEQ 1
 					// FALL THROUGH
@@ -1246,8 +1278,11 @@ void loop() {
 
 			if(omxMode == MODE_MIDI) {
 				// switch midi oct/chan selection
-				mimode = (mimode + 1 ) % 5;
-//				mimode = !mimode;
+				if (mmpage == 0){
+					mimode = (mimode + 1 ) % 5;
+				}else if (mmpage == 1){
+					mimode2 = (mimode2 + 1 ) % 5;
+				}
 			}
 			if(omxMode == MODE_OM) {
 				mimode = (mimode + 1 ) % 5;
@@ -1699,7 +1734,12 @@ void loop() {
 
 			if (dirtyDisplay){			// DISPLAY
 				if (!enc_edit){
-					dispGenericMode(SUBMODE_MIDI, mimode);
+					if (mmpage == 0){
+						dispGenericMode(SUBMODE_MIDI, mimode);
+					} else if (mmpage == 1){
+						dispGenericMode(SUBMODE_MIDI2, mimode2);
+					}
+					
 				}
 			}
 			break;
@@ -2124,7 +2164,7 @@ void OnNoteOff(byte channel, byte note, byte velocity) {
 // #### Outbound MIDI Mode note on/off
 void midiNoteOn(int notenum, int velocity, int channel) {
 	int adjnote = notes[notenum] + (octave * 12); // adjust key for octave range
-	rrChannel = (rrChannel % 8) + 1;
+	rrChannel = (rrChannel % midiRRChannelCount) + 1;
 	int adjchan = rrChannel;
 
 	if (adjnote>=0 && adjnote <128){
