@@ -2124,6 +2124,9 @@ void OnNoteOff(byte channel, byte note, byte velocity) {
 // #### Outbound MIDI Mode note on/off
 void midiNoteOn(int notenum, int velocity, int channel) {
 	int adjnote = notes[notenum] + (octave * 12); // adjust key for octave range
+	rrChannel = (rrChannel % 8) + 1;
+	int adjchan = rrChannel;
+
 	if (adjnote>=0 && adjnote <128){
 		midiLastNote = adjnote;
 
@@ -2131,7 +2134,14 @@ void midiNoteOn(int notenum, int velocity, int channel) {
 		// the correct note off message
 		midiKeyState[notenum] = adjnote;
 
-		MM::sendNoteOn(adjnote, velocity, channel);
+		// RoundRobin Setting?
+		if (midiRoundRobin) {
+			adjchan = rrChannel;
+		} else {
+			adjchan = channel;
+		}
+		midiChannelState[notenum] = adjchan;
+		MM::sendNoteOn(adjnote, velocity, adjchan);
 		// CV
 		cvNoteOn(adjnote);
 	}
@@ -2144,8 +2154,9 @@ void midiNoteOn(int notenum, int velocity, int channel) {
 void midiNoteOff(int notenum, int channel) {
 	// we use the key state captured at the time we pressed the key to send the correct note off message
 	int adjnote = midiKeyState[notenum];
+	int adjchan = midiChannelState[notenum];
 	if (adjnote>=0 && adjnote <128){
-		MM::sendNoteOff(adjnote, 0, channel);
+		MM::sendNoteOff(adjnote, 0, adjchan);
 		// CV off
 		cvNoteOff();
 	}
