@@ -402,10 +402,25 @@ void setup() {
 // ####### MIDI LEDS #######
 
 void midi_leds() {
+	blinkInterval = step_delay*2;
+
+	if (blink_msec >= blinkInterval){
+		blinkState = !blinkState;
+		blink_msec = 0;
+	}
+
 	if (midiAUX){
-		strip.setPixelColor(0, MEDRED);
+		strip.setPixelColor(0, RED);
+		// Blink left/right keys for octave select indicators.
+		auto color1 = blinkState ? ORANGE : WHITE;
+		auto color2 = blinkState ? RBLUE : WHITE;
+		strip.setPixelColor(11, color1);
+		strip.setPixelColor(26, color2);
+					
 	} else {
 		strip.setPixelColor(0, LEDOFF);
+		strip.setPixelColor(11, LEDOFF);
+		strip.setPixelColor(26, LEDOFF);
 	}
 	dirtyPixels = true;
 }
@@ -476,6 +491,11 @@ void show_current_step(int patternNum) {
 			} else {
 				strip.setPixelColor(pixelpos, LEDOFF);
 			}
+			// Blink left/right keys for octave select indicators.
+			auto color1 = blinkState ? ORANGE : WHITE;
+			auto color2 = blinkState ? RBLUE : WHITE;
+			strip.setPixelColor(11, color1);
+			strip.setPixelColor(26, color2);
 		}
 
 	} else if (stepRecord) {
@@ -1378,8 +1398,23 @@ void loop() {
 				// ### KEY PRESS EVENTS
 				if (e.bit.EVENT == KEY_JUST_PRESSED && thisKey != 0) {
 					//Serial.println(" pressed");
-					midiNoteOn(thisKey, defaultVelocity, midiChannel);
-
+					
+					if (thisKey == 11 || thisKey == 26) {
+						if (midiAUX){
+							int amt = thisKey == 11 ? -1 : 1;
+							newoctave = constrain(octave + amt, -5, 4);
+							if (newoctave != octave){
+								octave = newoctave;
+							}
+						} else {
+							midiNoteOn(thisKey, defaultVelocity, midiChannel);
+						}
+					} else {
+						midiNoteOn(thisKey, defaultVelocity, midiChannel);
+					}
+					
+					
+					
 				} else if(e.bit.EVENT == KEY_JUST_RELEASED && thisKey != 0) {
 					//Serial.println(" released");
 					midiNoteOff(thisKey, midiChannel);
@@ -1387,24 +1422,27 @@ void loop() {
 
 				// AUX KEY
 				if (e.bit.EVENT == KEY_JUST_PRESSED && thisKey == 0) {
-
 					// Hard coded Organelle stuff
-					MM::sendControlChange(CC_AUX, 100, midiChannel);
-					if (midiAUX) {
-						// STOP CLOCK
+//					MM::sendControlChange(CC_AUX, 100, midiChannel);
+
+					midiAUX = true;
+
+//					if (midiAUX) {
+//						// STOP CLOCK
 //						Serial.println("stop clock");
-
-					} else {
-						// START CLOCK
+//					} else {
+//						// START CLOCK
 //						Serial.println("start clock");
+//					}
+//					midiAUX = !midiAUX;
 
-					}
-					midiAUX = !midiAUX;
 
 				} else if (e.bit.EVENT == KEY_JUST_RELEASED && thisKey == 0) {
 					// Hard coded Organelle stuff
-					MM::sendControlChange(CC_AUX, 0, midiChannel);
-//					midiAUX = false;
+//					MM::sendControlChange(CC_AUX, 0, midiChannel);
+					if (midiAUX) { 
+						midiAUX = false; 
+					}
 				}
 				break;
 
@@ -1422,13 +1460,31 @@ void loop() {
 
 					// NOTE SELECT
 					if (noteSelect){
-						if (noteSelection) {		// SET NOTE
-							stepSelect = false;
-							selectedNote = thisKey;
-							int adjnote = notes[thisKey] + (octave * 12);
-							stepNoteP[playingPattern][selectedStep].note = adjnote;
-							if (!playing){
-								seqNoteOn(thisKey, defaultVelocity, playingPattern);
+						if (noteSelection) {		// SET NOTE		
+
+//							stepSelect = false;
+//							selectedNote = thisKey;
+//							int adjnote = notes[thisKey] + (octave * 12);
+//							stepNoteP[playingPattern][selectedStep].note = adjnote;
+//							if (!playing){
+//								seqNoteOn(thisKey, defaultVelocity, playingPattern);
+
+							// left and right keys change the octave
+							if (thisKey == 11 || thisKey == 26) {
+								int amt = thisKey == 11 ? -1 : 1;
+								newoctave = constrain(octave + amt, -5, 4);
+								if (newoctave != octave){
+									octave = newoctave;
+								}
+							// otherwise select the note
+							} else {
+								stepSelect = false;
+								selectedNote = thisKey;
+								int adjnote = notes[thisKey] + (octave * 12);
+								stepNoteP[playingPattern][selectedStep].note = adjnote;
+								if (!playing){
+									seqNoteOn(thisKey, defaultVelocity, playingPattern);
+								}
 							}
 							// see RELEASE events for more
 							dirtyDisplay = true;
