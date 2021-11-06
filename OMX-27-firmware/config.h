@@ -50,8 +50,9 @@ extern const int LED_COUNT;
 // teensy pins for analog inputs
 extern const int analogPins[];
 
+#define NUM_CC_BANKS 5
 #define NUM_CC_POTS 5
-extern int pots[NUM_CC_POTS];			// the MIDI CC (continuous controller) for each analog input
+extern int pots[NUM_CC_BANKS][NUM_CC_POTS];			// the MIDI CC (continuous controller) for each analog input
 
 extern const int gridh;
 extern const int gridw;
