@@ -912,8 +912,7 @@ void dispGenericMode(int submode, int selected){
 		case 4: 	//
 			display.fillRect(3*32+2, 9, 29, 21, WHITE);
 			break;
-		case 0: 	//
-			break;
+		case 0:
 		default:
 			break;
 	}
