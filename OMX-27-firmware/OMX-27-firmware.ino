@@ -1,5 +1,5 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
-// v 1.4.1b3
+// v 1.4.1b4
 //
 // Steven Noreyko, November 2021
 //
@@ -60,7 +60,7 @@ volatile unsigned long noteoff_micros;
 volatile unsigned long ppqInterval;
 
 // ANALOGS
-int potbank = 4;
+int potbank = 0;
 int analogValues[] = {0,0,0,0,0};		// default values
 int potValues[] = {0,0,0,0,0};
 int potCC = pots[potbank][0];
@@ -157,6 +157,7 @@ int midiChannelState[27] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
 int rrChannel = 0;
 bool midiRoundRobin = false;
 int midiRRChannelCount = 1;
+int midiRRChannelOffset = 0;
 int currpgm = 0;
 int currbank = 0;
 bool midiInToCV = true;
@@ -716,29 +717,39 @@ void dispGenericMode(int submode, int selected){
 	int legendVals[4] = {0,0,0,0};
 	int dispPage = 0;
 	const char* legendText[4] = {"","","",""};
-	int displaychan = midiChannel;
+//	int displaychan = midiChannel;
 	switch(submode){
 		case SUBMODE_MIDI:			
-			if (midiRoundRobin) {
-				displaychan = rrChannel;
-			}
+//			if (midiRoundRobin) {
+//				displaychan = rrChannel;
+//			}
 			legends[0] = "OCT";
 			legends[1] = "CH";
 			legends[2] = "CC";
 			legends[3] = "NOTE";
 			legendVals[0] = (int)octave+4;
-			legendVals[1] = displaychan;
+			legendVals[1] = midiChannel;
 			legendVals[2] = potVal;
 			legendVals[3] = midiLastNote;
 			break;
 		case SUBMODE_MIDI2:			
 			legends[0] = "RR";
-			legends[1] = "BNK";
+			legends[1] = "RROF";
 			legends[2] = "PGM";
-			legends[3] = "---";
+			legends[3] = "BNK";
 			legendVals[0] = midiRRChannelCount;
-			legendVals[1] = currbank;
+			legendVals[1] = midiRRChannelOffset;
 			legendVals[2] = currpgm + 1;
+			legendVals[3] = currbank;
+			break;
+		case SUBMODE_MIDI3:			
+			legends[0] = "PBNK";
+			legends[1] = "---";
+			legends[2] = "---";
+			legends[3] = "---";
+			legendVals[0] = potbank + 1;
+			legendVals[1] = 0;
+			legendVals[2] = 0;
 			legendVals[3] = 0;
 			break;
 		case SUBMODE_SEQ:
@@ -1034,14 +1045,16 @@ void loop() {
 //					break;
 				case MODE_MIDI: // MIDI
 					// CHANGE PAGE
-					if (miparam == 0 || miparam == 5) {
-						mmpage = constrain(mmpage + amt, 0, 1);
-						if (mmpage > 0){
-							miparam = 5;
-						}else{
-							miparam = 0;
-						}
-
+					if (miparam == 0 || miparam == 5 || miparam == 10) {
+						mmpage = constrain(mmpage + amt, 0, 2);
+						miparam = mmpage * 5;
+//						if (mmpage == 2){
+//							miparam = 10;
+//						}else if (mmpage == 1){
+//							miparam = 5;
+//						}else{
+//							miparam = 0;
+//						}
 					}
 					// PAGE ONE
 					if (miparam == 2) { 
@@ -1068,15 +1081,30 @@ void loop() {
 							}
 						}
 					} else if (miparam == 7){
+						midiRRChannelOffset = constrain(midiRRChannelOffset + amt, 0, 15);
+					} else if (miparam == 8){
+						currpgm = constrain(currpgm + amt, 0, 127);
+
+						if (midiRoundRobin){
+							for (int q = midiRRChannelOffset+1 ; q < midiRRChannelOffset + midiRRChannelCount+1; q++){
+								MM::sendProgramChange(currpgm, q);
+							}
+						} else {
+							MM::sendProgramChange(currpgm, midiChannel);
+						}
+
+					} else if (miparam == 9){
 						currbank = constrain(currbank + amt, 0, 127);
 						// Bank Select is 2 mesages
 						MM::sendControlChange(0, 0, midiChannel);
 						MM::sendControlChange(32, currbank, midiChannel);
 						MM::sendProgramChange(currpgm, midiChannel);
-					} else if (miparam == 8){
-						currpgm = constrain(currpgm + amt, 0, 127);
-						MM::sendProgramChange(currpgm, midiChannel);
 					}
+					// PAGE THREE
+					if (miparam == 11) { 
+						potbank = constrain(potbank + amt, 0, NUM_CC_BANKS-1);
+					}
+					
 					dirtyDisplay = true;
 					break;
 				case MODE_S1: // SEQ 1
@@ -1086,6 +1114,8 @@ void loop() {
 					if (sqparam == 0 || sqparam == 5 ) {
 						sqpage = constrain(sqpage + amt, 0, 1);
 					}
+					sqparam = sqpage * 5;
+					
 					// PAGE ONE
 					if (sqparam == 1){
 						playingPattern = constrain(playingPattern + amt, 0, 7);
@@ -1151,6 +1181,8 @@ void loop() {
 						if (ppparam == 0 || ppparam == 5 || ppparam == 10) {
 							pppage = constrain(pppage + amt, 0, 2);		// HARDCODED - FIX WITH SIZE OF PAGES?
 						}
+						ppparam = pppage * 5;
+						
 						// PAGE ONE
 						if (ppparam == 1) { 					// SET PLAYING PATTERN
 							playingPattern = constrain(playingPattern + amt, 0, 7);
@@ -1200,6 +1232,8 @@ void loop() {
 						if (srparam == 0 || srparam == 5) { 	
 							srpage = constrain(srpage + amt, 0, 1);		// HARDCODED - FIX WITH SIZE OF PAGES?
 						}
+						srparam = srpage * 5;
+						
 						// PAGE ONE
 						if (srparam == 1) {
 							newoctave = constrain(octave + amt, -5, 4);
@@ -1239,6 +1273,8 @@ void loop() {
 						if (nsparam == 0 || nsparam == 5 || nsparam == 10) {
 							nspage = constrain(nspage + amt, 0, 2);		// HARDCODED - FIX WITH SIZE OF PAGES?
 						}
+						nsparam = nspage * 5;
+						
 						// PAGE THREE
 						if (nsparam > 10 && nsparam < 14){
 							if(u.dir() < 0){			// RESET PLOCK IF TURN CCW
@@ -1320,8 +1356,10 @@ void loop() {
 
 			if(omxMode == MODE_MIDI) {
 				// switch midi oct/chan selection
-				miparam = (miparam + 1 ) % 10;
-				if (miparam > 4){
+				miparam = (miparam + 1 ) % 15;
+				if (miparam > 9){
+					mmpage = 2;
+				}else if (miparam > 4){
 					mmpage = 1;
 				}else{
 					mmpage = 0;
@@ -1434,11 +1472,13 @@ void loop() {
 								}
 							} else if (thisKey == 1 || thisKey == 2) {
 								int chng = thisKey == 1 ? -1 : 1;
-								miparam = constrain((miparam + chng ) % 10, 0, 9);
-								if (miparam < 5){
-									mmpage = 0;
-								} else {
+								miparam = constrain((miparam + chng ) % 15, 0, 14);
+								if (miparam > 9){
+									mmpage = 2;
+								}else if (miparam > 4){
 									mmpage = 1;
+								}else{
+									mmpage = 0;
 								}
 							}
 						} else {
@@ -1835,6 +1875,8 @@ void loop() {
 						dispGenericMode(SUBMODE_MIDI, miparam % 5);
 					} else if (mmpage == 1){
 						dispGenericMode(SUBMODE_MIDI2, miparam % 5);
+					} else if (mmpage == 2){
+						dispGenericMode(SUBMODE_MIDI3, miparam % 5);
 					}
 					
 				}
@@ -2255,7 +2297,7 @@ void OnNoteOff(byte channel, byte note, byte velocity) {
 // #### Outbound MIDI Mode note on/off
 void midiNoteOn(int notenum, int velocity, int channel) {
 	int adjnote = notes[notenum] + (octave * 12); // adjust key for octave range
-	rrChannel = (rrChannel % midiRRChannelCount) + 1;
+	rrChannel = (rrChannel % midiRRChannelCount) + 1 ;
 	int adjchan = rrChannel;
 
 	if (adjnote>=0 && adjnote <128){
@@ -2267,7 +2309,7 @@ void midiNoteOn(int notenum, int velocity, int channel) {
 
 		// RoundRobin Setting?
 		if (midiRoundRobin) {
-			adjchan = rrChannel;
+			adjchan = rrChannel + midiRRChannelOffset;
 		} else {
 			adjchan = channel;
 		}

@@ -1,5 +1,23 @@
 # Change log
 
+### 1.4.x
+
+Pattern Length can now be up to 64 steps  
+
+SEQ Mode Quick Keys - Hold F1 + F2  
+- first 4 "white keys" select which "page" of the current pattern 
+
+MIDI Mode Quick Keys - Hold AUX  
+- first 2 "white keys" are octave up/down  
+- first 2 "black keys" are move param selection on the display  
+
+Add MIDI mode params for bank select and program change  
+
+Add RoundRobin MIDI Channel distribution and RR offset value  
+
+Add potentiometer bank select  (CC assignments are still hard coded)
+
+
 ### 1.3.x
 
 Step probability (percentage)
