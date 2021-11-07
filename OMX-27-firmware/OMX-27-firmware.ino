@@ -36,7 +36,7 @@ int volatile currentValue[potCount];
 int lastMidiValue[potCount];
 int potMin = 0;
 int potMax = 8190;
-int temp;
+int potTemp;
 
 // Timers and such
 elapsedMillis blink_msec = 0;
@@ -118,7 +118,7 @@ int selectedStep = 0;
 bool stepSelect = false;
 bool stepRecord = false;
 bool stepDirty = false;
-bool dialogFlags[] = {false, false, false, false, false, false};
+//bool dialogFlags[] = {false, false, false, false, false, false};
 unsigned dialogDuration = 1000;
 
 bool copiedFlag = false;
@@ -229,20 +229,21 @@ void sendPots(int val, int channel){
 	potCC = pots[potbank][val];
 	potVal = analogValues[val];
 	potValues[val] = potVal;
+	infoDialog[CC].state = true;
 }
 
 void readPotentimeters(){
 	for(int k=0; k<potCount; k++) {
-		temp = analogRead(analogPins[k]);
-		analog[k]->update(temp);
+		potTemp = analogRead(analogPins[k]);
+		analog[k]->update(potTemp);
 
 		// read from the smoother, constrain (to account for tolerances), and map it
-		temp = analog[k]->getValue();
-		temp = constrain(temp, potMin, potMax);
-		temp = map(temp, potMin, potMax, 0, 16383);
+		potTemp = analog[k]->getValue();
+		potTemp = constrain(potTemp, potMin, potMax);
+		potTemp = map(potTemp, potMin, potMax, 0, 16383);
 
 		// map and update the value
-		analogValues[k] = temp >> 7;
+		analogValues[k] = potTemp >> 7;
 
 		if(analog[k]->hasChanged()) {
 			 // do stuff
@@ -251,6 +252,7 @@ void readPotentimeters(){
 						// fall through - same as MIDI
 				case MODE_MIDI: // MIDI
 					sendPots(k, midiChannel);
+					potNum = k;
 					dirtyDisplay = true;
 					break;
 
@@ -264,7 +266,7 @@ void readPotentimeters(){
 
 						if (k < 4){ // only store p-lock value for first 4 knobs
 							stepNoteP[playingPattern][selectedStep].params[k] = analogValues[k];
-							sendPots(k, PatternChannel(playingPattern));
+//							sendPots(k, PatternChannel(playingPattern));
 						}
 						sendPots(k, PatternChannel(playingPattern));
 						dirtyDisplay = true;
@@ -283,6 +285,7 @@ void readPotentimeters(){
 						dirtyDisplay = true;
 					} else if (!noteSelect || !stepRecord){
 						sendPots(k, PatternChannel(playingPattern));
+						dirtyDisplay = true;
 					}
 					break;
 
@@ -325,7 +328,7 @@ void setup() {
 
 	// initialize ResponsiveAnalogRead
 	for (int i = 0; i < potCount; i++){
-		analog[i] = new ResponsiveAnalogRead(0, true, .001);
+		analog[i] = new ResponsiveAnalogRead(0, true, .01);
 		analog[i]->setAnalogResolution(1 << 13);
 
 		// ResponsiveAnalogRead is designed for 10-bit ADCs
@@ -952,7 +955,7 @@ void dispPageIndicators(int page, bool selected){
 	}
 }
 
-void dispInfoDialog(){
+void dispInfoDialog(int value){
 	for (int key=0; key < NUM_DIALOGS; key++){
 		if (infoDialog[key].state){
 			dialogTimeout = 0;
@@ -961,8 +964,19 @@ void dispInfoDialog(){
 			u8g2_display.setFont(FONT_TENFAT);
 			u8g2_display.setForegroundColor(WHITE);
 			u8g2_display.setBackgroundColor(BLACK);
-
-			u8g2centerText(infoDialog[key].text, 0, 10, 128, 32);
+			
+			if (infoDialog[key].text == "CC"){
+				char spacer[21] = " ";
+				char buffer[21];
+				char result[100];   
+				strcpy(result,infoDialog[key].text); 
+				strcat(result,spacer);
+				strcat(result,itoa (value,buffer,10));
+				u8g2centerText(result, 0, 10, 128, 32);
+			}else{
+				u8g2centerText(infoDialog[key].text, 0, 10, 128, 32);
+			}
+			
 			infoDialog[key].state = false;
 		}
 	}
@@ -1866,9 +1880,13 @@ void loop() {
 			// FALL THROUGH
 
 		case MODE_MIDI:							// ############## MIDI KEYBOARD
+			if (!enc_edit) {
+				if (dialogTimeout > dialogDuration && dialogTimeout < dialogDuration + 20) {
+					dirtyDisplay = true;
+				}
+			}
 			//playingPattern = 0; 		// DEFAULT MIDI MODE TO THE FIRST PATTERN SLOT
 			midi_leds();				// SHOW LEDS
-
 			if (dirtyDisplay){			// DISPLAY
 				if (!enc_edit){
 					if (mmpage == 0){
@@ -1878,7 +1896,7 @@ void loop() {
 					} else if (mmpage == 2){
 						dispGenericMode(SUBMODE_MIDI3, miparam % 5);
 					}
-					
+					dispInfoDialog(potValues[potNum]);
 				}
 			}
 			break;
@@ -1904,7 +1922,7 @@ void loop() {
 						} else if (sqpage == 1){
 							dispGenericMode(SUBMODE_SEQ2, sqparam % 5);
 						}
-						dispInfoDialog();
+						dispInfoDialog(0);
 					}
 					if (noteSelect) {
 						if (nspage == 0){
@@ -1923,16 +1941,16 @@ void loop() {
 						} else if (pppage == 2){
 							dispGenericMode(SUBMODE_PATTPARAMS3, ppparam % 5);
 						}
-						dispInfoDialog();
+						dispInfoDialog(0);
 
 					}
 					if (stepRecord) {
 						if (srpage == 0){
 							dispGenericMode(SUBMODE_STEPREC, srparam % 5);
-							dispInfoDialog();
+							dispInfoDialog(0);
 						} else if (srpage == 1){
 							dispGenericMode(SUBMODE_NOTESEL2, srparam % 5);
-							dispInfoDialog();
+							dispInfoDialog(0);
 						}
 					}
 				}

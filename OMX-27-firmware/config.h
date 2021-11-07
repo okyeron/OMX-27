@@ -86,6 +86,7 @@ enum Dialogs{
      REV,
      SAVED,
      SAVE,
+     CC,
 
      NUM_DIALOGS
 };
