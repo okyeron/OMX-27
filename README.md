@@ -76,13 +76,13 @@ Note: when making changes using the PlatformIO toolchain, please ensure the sket
 ## FAQ
 
 Q: What key switches are recommended?  
-A: Any RGB switches with a Cherry MX footprint can be used - I'm using Cherry MX RGB and these are linked in the [BOM](<BOM.md>). Different varieties are available (Red, Brown, etc.)
+A: Any RGB switches with a Cherry MX footprint can be used - I'm using Cherry MX RGB and these are linked in the [BOM](<build/BOM.md>). Different varieties are available (Red, Brown, etc.)
 
 Q: Can I use other key switches?  
 A: Yes - as long as they have the same footprint as Cherry MX switches and a window/opening for the LED to shine through. Low profile keys like the Cherry Low Profile or Kailh Choc switches have a different footprint and will not work.
 
 Q: What about recommended Keycaps?  
-A: Also listed in the [BOM](<BOM.md>). You want an MX stem cap, with translucency or a window for the LED to shine through. DSA profile caps work well.
+A: Also listed in the [BOM](<build/BOM.md>). You want an MX stem cap, with translucency or a window for the LED to shine through. DSA profile caps work well.
 
 Q: Does this project require soldering?  
 A: Yes. Thru-hole soldering is required along with some easy SMD (LEDs and jacks).
