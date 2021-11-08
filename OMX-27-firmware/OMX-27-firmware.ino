@@ -2290,7 +2290,7 @@ void OnNoteOff(byte channel, byte note, byte velocity) {
 // #### Outbound MIDI Mode note on/off
 void midiNoteOn(int notenum, int velocity, int channel) {
 	int adjnote = notes[notenum] + (octave * 12); // adjust key for octave range
-	rrChannel = (rrChannel % midiRRChannelCount) + 1 ;
+	rrChannel = (rrChannel % midiRRChannelCount) + 1;
 	int adjchan = rrChannel;
 
 	if (adjnote>=0 && adjnote <128){
