@@ -54,6 +54,8 @@ extern const int analogPins[];
 #define NUM_CC_POTS 5
 extern int pots[NUM_CC_BANKS][NUM_CC_POTS];			// the MIDI CC (continuous controller) for each analog input
 
+#define NUM_DISP_PARAMS 5
+
 extern const int gridh;
 extern const int gridw;
 extern const int PPQ;

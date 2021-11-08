@@ -1,5 +1,5 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
-// v 1.4.1b4
+// v 1.4.1b5
 //
 // Steven Noreyko, November 2021
 //
@@ -84,23 +84,7 @@ int nsparam = 0;	// note select params
 int ppparam = 0;	// pattern params
 int sqparam = 0;	// seq params
 int srparam = 0;	// step record params
-
 int tmpmmode = 9;
-
-//int patmode = 0;
-//int nsmode = 4;
-//int nsmode2 = 4;
-//int nsmode3 = 4;
-//int ppmode = 4;
-//int ppmode2 = 4;
-//int ppmode3 = 4;
-//int mimode = 4;
-//int mimode2 = 4;
-//int sqmode = 4;
-//int sqmode2 = 4;
-//int srmode = 4;
-//int srmode2 = 4;
-//int modehilight = 4;
 
 // VARIABLES / FLAGS
 float step_delay;
@@ -1047,14 +1031,7 @@ void loop() {
 					// CHANGE PAGE
 					if (miparam == 0 || miparam == 5 || miparam == 10) {
 						mmpage = constrain(mmpage + amt, 0, 2);
-						miparam = mmpage * 5;
-//						if (mmpage == 2){
-//							miparam = 10;
-//						}else if (mmpage == 1){
-//							miparam = 5;
-//						}else{
-//							miparam = 0;
-//						}
+						miparam = mmpage * NUM_DISP_PARAMS;
 					}
 					// PAGE ONE
 					if (miparam == 2) { 
@@ -1114,7 +1091,7 @@ void loop() {
 					if (sqparam == 0 || sqparam == 5 ) {
 						sqpage = constrain(sqpage + amt, 0, 1);
 					}
-					sqparam = sqpage * 5;
+					sqparam = sqpage * NUM_DISP_PARAMS;
 					
 					// PAGE ONE
 					if (sqparam == 1){
@@ -1181,7 +1158,7 @@ void loop() {
 						if (ppparam == 0 || ppparam == 5 || ppparam == 10) {
 							pppage = constrain(pppage + amt, 0, 2);		// HARDCODED - FIX WITH SIZE OF PAGES?
 						}
-						ppparam = pppage * 5;
+						ppparam = pppage * NUM_DISP_PARAMS;
 						
 						// PAGE ONE
 						if (ppparam == 1) { 					// SET PLAYING PATTERN
@@ -1232,7 +1209,7 @@ void loop() {
 						if (srparam == 0 || srparam == 5) { 	
 							srpage = constrain(srpage + amt, 0, 1);		// HARDCODED - FIX WITH SIZE OF PAGES?
 						}
-						srparam = srpage * 5;
+						srparam = srpage * NUM_DISP_PARAMS;
 						
 						// PAGE ONE
 						if (srparam == 1) {
@@ -1273,7 +1250,7 @@ void loop() {
 						if (nsparam == 0 || nsparam == 5 || nsparam == 10) {
 							nspage = constrain(nspage + amt, 0, 2);		// HARDCODED - FIX WITH SIZE OF PAGES?
 						}
-						nsparam = nspage * 5;
+						nsparam = nspage * NUM_DISP_PARAMS;
 						
 						// PAGE THREE
 						if (nsparam > 10 && nsparam < 14){
@@ -1357,10 +1334,10 @@ void loop() {
 			if(omxMode == MODE_MIDI) {
 				// switch midi oct/chan selection
 				miparam = (miparam + 1 ) % 15;
-				mmpage = miparam / 5;
+				mmpage = miparam / NUM_DISP_PARAMS;
 			}
 			if(omxMode == MODE_OM) {
-				miparam = (miparam + 1 ) % 5;
+				miparam = (miparam + 1 ) % NUM_DISP_PARAMS;
 //				MM::sendControlChange(CC_OM1,100,midiChannel);
 			}
 			if(omxMode == MODE_S1 || omxMode == MODE_S2) {
@@ -1467,7 +1444,7 @@ void loop() {
 							} else if (thisKey == 1 || thisKey == 2) {
 								int chng = thisKey == 1 ? -1 : 1;
 								miparam = constrain((miparam + chng ) % 15, 0, 14);
-								mmpage = miparam / 5;
+								mmpage = miparam / NUM_DISP_PARAMS;
 							}
 						} else {
 							midiNoteOn(thisKey, defaultVelocity, midiChannel);
@@ -1851,12 +1828,13 @@ void loop() {
 
 			if (dirtyDisplay){			// DISPLAY
 				if (!enc_edit){
+					int pselected = miparam % NUM_DISP_PARAMS;
 					if (mmpage == 0){
-						dispGenericMode(SUBMODE_MIDI, miparam % 5);
+						dispGenericMode(SUBMODE_MIDI, pselected);
 					} else if (mmpage == 1){
-						dispGenericMode(SUBMODE_MIDI2, miparam % 5);
+						dispGenericMode(SUBMODE_MIDI2, pselected);
 					} else if (mmpage == 2){
-						dispGenericMode(SUBMODE_MIDI3, miparam % 5);
+						dispGenericMode(SUBMODE_MIDI3, pselected);
 					}
 					
 				}
@@ -1879,39 +1857,43 @@ void loop() {
 			if (dirtyDisplay){			// DISPLAY
 				if (!enc_edit){
 					if (!noteSelect and !patternParams and !stepRecord){
+						int pselected = sqparam % NUM_DISP_PARAMS;
 						if (sqpage == 0){
-							dispGenericMode(SUBMODE_SEQ, sqparam % 5);
+							dispGenericMode(SUBMODE_SEQ, pselected);
 						} else if (sqpage == 1){
-							dispGenericMode(SUBMODE_SEQ2, sqparam % 5);
+							dispGenericMode(SUBMODE_SEQ2, pselected);
 						}
 						dispInfoDialog();
 					}
 					if (noteSelect) {
+						int pselected = nsparam % NUM_DISP_PARAMS;
 						if (nspage == 0){
-							dispGenericMode(SUBMODE_NOTESEL, nsparam % 5);
+							dispGenericMode(SUBMODE_NOTESEL, pselected);
 						} else if (nspage == 1){
-							dispGenericMode(SUBMODE_NOTESEL2, nsparam % 5);
+							dispGenericMode(SUBMODE_NOTESEL2, pselected);
 						} else if (nspage == 2){
-							dispGenericMode(SUBMODE_NOTESEL3, nsparam % 5);
+							dispGenericMode(SUBMODE_NOTESEL3, pselected);
 						}
 					}
 					if (patternParams) {
+						int pselected = ppparam % NUM_DISP_PARAMS;
 						if (pppage == 0){
-							dispGenericMode(SUBMODE_PATTPARAMS, ppparam % 5);
+							dispGenericMode(SUBMODE_PATTPARAMS, pselected);
 						} else if (pppage == 1){
-							dispGenericMode(SUBMODE_PATTPARAMS2, ppparam % 5);
+							dispGenericMode(SUBMODE_PATTPARAMS2, pselected);
 						} else if (pppage == 2){
-							dispGenericMode(SUBMODE_PATTPARAMS3, ppparam % 5);
+							dispGenericMode(SUBMODE_PATTPARAMS3, pselected);
 						}
 						dispInfoDialog();
 
 					}
 					if (stepRecord) {
+						int pselected = srparam % NUM_DISP_PARAMS;
 						if (srpage == 0){
-							dispGenericMode(SUBMODE_STEPREC, srparam % 5);
+							dispGenericMode(SUBMODE_STEPREC, pselected);
 							dispInfoDialog();
 						} else if (srpage == 1){
-							dispGenericMode(SUBMODE_NOTESEL2, srparam % 5);
+							dispGenericMode(SUBMODE_NOTESEL2, pselected);
 							dispInfoDialog();
 						}
 					}
