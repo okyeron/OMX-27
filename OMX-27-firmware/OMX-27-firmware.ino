@@ -1657,8 +1657,8 @@ void loop() {
 						
 							if (keyState[1] && keyState[2]) {		// F1+F2 HOLD
 								if (!stepRecord && !patternParams){ // IGNORE LONG PRESSES IN STEP RECORD and Pattern Params
-									if (thisKey <= 11 + getPatternPage(patternSettings[playingPattern].len) ){
-										patternPage[playingPattern] = thisKey - 11;
+									if (keyPos <= getPatternPage(patternSettings[playingPattern].len) ){
+										patternPage[playingPattern] = keyPos;
 									}
 								}
 							} else if (keyState[1]) {		// F1 HOLD
