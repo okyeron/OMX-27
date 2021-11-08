@@ -1535,14 +1535,6 @@ void loop() {
 					// NOTE SELECT
 					if (noteSelect){
 						if (noteSelection) {		// SET NOTE		
-
-//							stepSelect = false;
-//							selectedNote = thisKey;
-//							int adjnote = notes[thisKey] + (octave * 12);
-//							stepNoteP[playingPattern][selectedStep].note = adjnote;
-//							if (!playing){
-//								seqNoteOn(thisKey, defaultVelocity, playingPattern);
-
 							// left and right keys change the octave
 							if (thisKey == 11 || thisKey == 26) {
 								int amt = thisKey == 11 ? -1 : 1;
