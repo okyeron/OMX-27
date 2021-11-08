@@ -596,8 +596,9 @@ void show_current_step(int patternNum) {
 		auto currentpage = patternPage[patternNum];
 		auto pagestepstart = (currentpage * NUM_STEPKEYS);
 		
-												// WHAT TO DO HERE FOR MULTIPLE PAGES
-		for(int i = pagestepstart; i < (pagestepstart + NUM_STEPKEYS); i++){	// NUM_STEPKEYS or NUM_STEPS INSTEAD?>
+		// WHAT TO DO HERE FOR MULTIPLE PAGES
+		// NUM_STEPKEYS or NUM_STEPS INSTEAD?
+		for(int i = pagestepstart; i < (pagestepstart + NUM_STEPKEYS); i++){
 			if (i < PatternLength(patternNum)){ 
 				
 				// ONLY DO LEDS FOR THE CURRENT PAGE
