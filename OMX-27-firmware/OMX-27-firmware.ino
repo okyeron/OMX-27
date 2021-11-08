@@ -2035,7 +2035,7 @@ void auto_reset(int p){
 		}
 		patternSettings[p].rndstep = (rand() % PatternLength(p)) + 1; // randomly choose step for next cycle
 	}
-	patternPage[p] = (seqPos[p]/NUM_STEPKEYS); // FOLLOW MODE FOR SEQ PAGE
+	patternPage[p] = getPatternPage(seqPos[p]); // FOLLOW MODE FOR SEQ PAGE
 	
 // return ()
 }
