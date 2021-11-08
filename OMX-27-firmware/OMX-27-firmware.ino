@@ -2532,9 +2532,7 @@ void seqContinue() {
 }
 
 int getPatternPage(int position){
-	int pagenum;
-	pagenum = position / NUM_STEPKEYS;
-	return pagenum;
+	return position / NUM_STEPKEYS;
 }
 
 void rotatePattern(int patternNum, int rot) {
