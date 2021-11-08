@@ -1466,13 +1466,7 @@ void loop() {
 							} else if (thisKey == 1 || thisKey == 2) {
 								int chng = thisKey == 1 ? -1 : 1;
 								miparam = constrain((miparam + chng ) % 15, 0, 14);
-								if (miparam > 9){
-									mmpage = 2;
-								}else if (miparam > 4){
-									mmpage = 1;
-								}else{
-									mmpage = 0;
-								}
+								mmpage = miparam / 5;
 							}
 						} else {
 							midiNoteOn(thisKey, defaultVelocity, midiChannel);
