@@ -1356,13 +1356,7 @@ void loop() {
 			if(omxMode == MODE_MIDI) {
 				// switch midi oct/chan selection
 				miparam = (miparam + 1 ) % 15;
-				if (miparam > 9){
-					mmpage = 2;
-				}else if (miparam > 4){
-					mmpage = 1;
-				}else{
-					mmpage = 0;
-				}
+				mmpage = miparam / 5;
 			}
 			if(omxMode == MODE_OM) {
 				miparam = (miparam + 1 ) % 5;
