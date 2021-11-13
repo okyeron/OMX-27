@@ -529,12 +529,17 @@ void show_current_step(int patternNum) {
 //			}
 //		}	
 	} else if (seqPages){
-	
-		// SHOW LEDS FOR WHAT PAGE OF SEQ PATTERN YOURE ON
-		for(int j = 1; j < NUM_STEPKEYS+11; j++){
+		// BLINK F1+F2
+		auto color1 = blinkState ? FUNKONE : LEDOFF;
+		auto color2 = blinkState ? FUNKTWO : LEDOFF;
+		strip.setPixelColor(1, color1);
+		strip.setPixelColor(2, color2);		
+
+		// TURN OFF LEDS
+		for(int j = 3; j < NUM_STEPKEYS+11; j++){  // START WITH LEDS AFTER F-KEYS
 			strip.setPixelColor(j, LEDOFF);
 		}
-		
+		// SHOW LEDS FOR WHAT PAGE OF SEQ PATTERN YOURE ON
 		auto len = (patternSettings[patternNum].len/NUM_STEPKEYS);
 		for(int h = 0; h <= len; h++){
 			auto currentpage = patternPage[patternNum];
@@ -1713,7 +1718,7 @@ void loop() {
 						dirtyDisplay = true;
 					} else if (seqPages){
 						seqPages = false;
-					} else {
+					} else {					
 						if (keyState[1] || keyState[2]) { 				// CHECK keyState[] FOR LONG PRESS OF FUNC KEYS
 							if (keyState[1]) {
 								seqResetFlag = true;					// RESET ALL SEQUENCES TO FIRST/LAST STEP
