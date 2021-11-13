@@ -903,7 +903,7 @@ void dispGenericMode(int submode, int selected){
 	}
 	// ValueBoxes
 	int highlight = false;
-	for (int j = 1; j<5; j++){
+	for (int j = 1; j < NUM_DISP_PARAMS; j++){ // start at 1 to only highlight values 1-4
 
 		if (j == selected) {
 			highlight = true;
