@@ -716,6 +716,7 @@ void dispGenericMode(int submode, int selected){
 			legendVals[1] = midiChannel;
 			legendVals[2] = potVal;
 			legendVals[3] = midiLastNote;
+			dispPage = 1;
 			break;
 		case SUBMODE_MIDI2:			
 			legends[0] = "RR";
@@ -726,6 +727,7 @@ void dispGenericMode(int submode, int selected){
 			legendVals[1] = midiRRChannelOffset;
 			legendVals[2] = currpgm + 1;
 			legendVals[3] = currbank;
+			dispPage = 2;
 			break;
 		case SUBMODE_MIDI3:			
 			legends[0] = "PBNK";
@@ -736,6 +738,7 @@ void dispGenericMode(int submode, int selected){
 			legendVals[1] = 0;
 			legendVals[2] = 0;
 			legendVals[3] = 0;
+			dispPage = 3;
 			break;
 		case SUBMODE_SEQ:
 			legends[0] = "PTN";
