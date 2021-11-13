@@ -1098,8 +1098,8 @@ void loop() {
 					// CHANGE PAGE
 					if (sqparam == 0 || sqparam == 5 ) {
 						sqpage = constrain(sqpage + amt, 0, 1);
+						sqparam = sqpage * NUM_DISP_PARAMS;
 					}
-					sqparam = sqpage * NUM_DISP_PARAMS;
 					
 					// PAGE ONE
 					if (sqparam == 1){
@@ -1165,8 +1165,8 @@ void loop() {
 						//CHANGE PAGE
 						if (ppparam == 0 || ppparam == 5 || ppparam == 10) {
 							pppage = constrain(pppage + amt, 0, 2);		// HARDCODED - FIX WITH SIZE OF PAGES?
+							ppparam = pppage * NUM_DISP_PARAMS;
 						}
-						ppparam = pppage * NUM_DISP_PARAMS;
 						
 						// PAGE ONE
 						if (ppparam == 1) { 					// SET PLAYING PATTERN
@@ -1216,8 +1216,8 @@ void loop() {
 						// CHANGE PAGE
 						if (srparam == 0 || srparam == 5) { 	
 							srpage = constrain(srpage + amt, 0, 1);		// HARDCODED - FIX WITH SIZE OF PAGES?
+							srparam = srpage * NUM_DISP_PARAMS;
 						}
-						srparam = srpage * NUM_DISP_PARAMS;
 						
 						// PAGE ONE
 						if (srparam == 1) {
@@ -1257,8 +1257,8 @@ void loop() {
 						// CHANGE PAGE
 						if (nsparam == 0 || nsparam == 5 || nsparam == 10) {
 							nspage = constrain(nspage + amt, 0, 2);		// HARDCODED - FIX WITH SIZE OF PAGES?
+							nsparam = nspage * NUM_DISP_PARAMS;
 						}
-						nsparam = nspage * NUM_DISP_PARAMS;
 						
 						// PAGE THREE
 						if (nsparam > 10 && nsparam < 14){
