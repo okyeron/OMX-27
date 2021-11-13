@@ -452,13 +452,13 @@ const int scalePatterns[][7] = {
     // major / ionian
     {0, 2, 4, 5, 7, 9, 11},
     // dorian
-    {0, 2, 3, 5, 7, 9, 11},
+    {0, 2, 3, 5, 7, 9, 10},
     // phrygian
-    {0, 1, 3, 5, 7, 9, 11},
+    {0, 1, 3, 5, 7, 8, 10},
     // lydian
     {0, 2, 4, 6, 7, 9, 11},
     // mixolydian
-    {0, 2, 4, 6, 7, 9, 10},
+    {0, 2, 4, 5, 7, 9, 10},
     // minor / aeolian
     {0, 2, 3, 5, 7, 8, 10},
     // locrian
@@ -473,22 +473,22 @@ const int scalePatterns[][7] = {
     // lydian b7
     {0, 2, 4, 6, 7, 9, 10},
     // mixolydian b6
-    {0, 2, 4, 6, 7, 8, 10},
+    {0, 2, 4, 5, 7, 8, 10},
     // half-diminished (locrian natural 2)
     {0, 2, 3, 5, 6, 8, 10},
     // altered (super locrian)
-    {0, 1, 3, 4, 6, 10, 11},
+    {0, 1, 3, 4, 6, 8, 10},
 
     // harmonic minor
-    {0, 2, 4, 5, 7, 8, 11},
+    {0, 2, 3, 5, 7, 8, 11},
     // locrian 6
     {0, 1, 3, 5, 6, 9, 10},
     // ionian #5
     {0, 2, 4, 5, 8, 9, 11},
     // dorian #4
-    {0, 2, 3, 6, 7, 9, 11},
+    {0, 2, 3, 6, 7, 9, 10},
     // phrygian dominant
-    {0, 1, 4, 5, 7, 9, 10},
+    {0, 1, 4, 5, 7, 8, 10},
     // lydian #2
     {0, 3, 4, 6, 7, 9, 11},
     // super locrian bb7
