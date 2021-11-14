@@ -210,6 +210,7 @@ Products That Use Type-B mini TRS Jack Connections
 Products That Use Type-A mini TRS Jack Connections
 - ADDAC System products
 - Arturia BeatStep (not to be confused with the BeatStep Pro)
+- Dirtywave M8
 - IK Multimedia products
 - inMusic (Akai) products
 - Korg products

@@ -5,6 +5,7 @@ namespace MM {
 	void sendNoteOn(int note, int velocity, int channel);
 	void sendNoteOff(int note, int velocity, int channel);
 	void sendControlChange(int control, int value, int channel);
+	void sendProgramChange(int program, int channel);
 
 
 	void sendClock();

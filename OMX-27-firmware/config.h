@@ -3,7 +3,7 @@
 #include <Arduino.h>
 #include <stdint.h>
 
-//const int OMX_VERSION = 1.4.0;
+//const int OMX_VERSION = 1.4.1;
 
 enum OMXMode
 {
@@ -50,8 +50,11 @@ extern const int LED_COUNT;
 // teensy pins for analog inputs
 extern const int analogPins[];
 
+#define NUM_CC_BANKS 5
 #define NUM_CC_POTS 5
-extern int pots[NUM_CC_POTS];			// the MIDI CC (continuous controller) for each analog input
+extern int pots[NUM_CC_BANKS][NUM_CC_POTS];			// the MIDI CC (continuous controller) for each analog input
+
+#define NUM_DISP_PARAMS 5
 
 extern const int gridh;
 extern const int gridw;
@@ -107,6 +110,8 @@ enum SubModes
 	SUBMODE_PATTPARAMS2,
 	SUBMODE_PATTPARAMS3,
 	SUBMODE_STEPREC,
+	SUBMODE_MIDI2,
+	SUBMODE_MIDI3,
 
 	SUBMODES_COUNT
 };

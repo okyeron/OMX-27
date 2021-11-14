@@ -1,5 +1,5 @@
 #define NUM_PATTERNS 8
-#define NUM_STEPS 32
+#define NUM_STEPS 64
 #define NUM_STEPKEYS 16
 
 // the MIDI channel number to send messages
@@ -22,6 +22,7 @@ int seq_acc_velocity = 127;
 
 int seqPos[NUM_PATTERNS] = {0, 0, 0, 0, 0, 0, 0, 0};				// What position in the sequence are we in?
 bool cvPattern[NUM_PATTERNS] = {1, 0, 0, 0, 0, 0, 0, 0};
+int patternPage[NUM_PATTERNS] = {0, 0, 0, 0, 0, 0, 0, 0};
 
 // int patternStart[NUM_PATTERNS] = {0, 0, 0, 0, 0, 0, 0, 0};
 

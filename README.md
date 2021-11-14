@@ -58,7 +58,7 @@ pio device monitor
 (optional) Install PlatformIO IDE VSCode extension. [Instructions](https://platformio.org/platformio-ide)
 
 Install EditorConfig extension for your text editor. [Instructions](https://editorconfig.org/)
-
+ 
 Note: when making changes using the PlatformIO toolchain, please ensure the sketch still builds on Teensyduino before opening a PR.
 
 ## BOM
