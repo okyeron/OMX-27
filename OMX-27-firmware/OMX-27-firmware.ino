@@ -433,11 +433,11 @@ int getDefaultColor(int pixel) {
 			}
 		}
 		int noteInOct = notes[pixel] % 12;
-		int inScale = scaleDegrees[noteInOct];
+		int inScale = scaleOffsets[noteInOct];
 		if(inScale == -1) {
 			return LEDOFF;
 		} else {
-			return strip.gamma32(strip.ColorHSV((65535 / scaleLength) * inScale, 127, 200));
+			return strip.gamma32(strip.ColorHSV((65535 / 12) * inScale, 127, 200));
 		}
 	}
 }
