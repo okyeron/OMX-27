@@ -24,9 +24,8 @@
 #include "sequencer.h"
 #include "noteoffs.h"
 #include "storage.h"
-
-#define ARRAYLEN(x) (sizeof(x) / sizeof(x[0]))
-
+#include "scales.h"
+#include "util.h"
 
 U8G2_FOR_ADAFRUIT_GFX u8g2_display;
 
@@ -417,133 +416,27 @@ void setup() {
 
 
 
-// ####### MIDI LEDS #######
-
-const int noteToPixel[] = {
-    11, // B-0
-    12, // C-1
-      1,  // C#1
-    13, // D-1
-      2,  // D#1
-    14, // E-1
-    15, // F-1
-      3,  // F#1
-    16, // G-1
-      4,  // G#1
-    17, // A-1
-      5,  // A#1
-    18, // B-1
-    19, // C-2
-      6,  // C#2
-    20, // D-2
-      7,  // D#2
-    21, // E-2
-    22, // F-2
-      8,  // F#2
-    23, // G-2
-      9,  // G#2
-    24, // A-2
-      10, // A#2
-    25, // B-2
-    26, // C-3
-};
-
-const int scalePatterns[][7] = {
-    // major / ionian
-    {0, 2, 4, 5, 7, 9, 11},
-    // dorian
-    {0, 2, 3, 5, 7, 9, 10},
-    // phrygian
-    {0, 1, 3, 5, 7, 8, 10},
-    // lydian
-    {0, 2, 4, 6, 7, 9, 11},
-    // mixolydian
-    {0, 2, 4, 5, 7, 9, 10},
-    // minor / aeolian
-    {0, 2, 3, 5, 7, 8, 10},
-    // locrian
-    {0, 1, 3, 5, 6, 8, 10},
-
-    // melodic minor
-    {0, 2, 3, 5, 7, 9, 11},
-    // dorian b2
-    {0, 1, 3, 5, 7, 9, 10},
-    // lydian #5
-    {0, 2, 4, 6, 8, 9, 11},
-    // lydian b7
-    {0, 2, 4, 6, 7, 9, 10},
-    // mixolydian b6
-    {0, 2, 4, 5, 7, 8, 10},
-    // half-diminished (locrian natural 2)
-    {0, 2, 3, 5, 6, 8, 10},
-    // altered (super locrian)
-    {0, 1, 3, 4, 6, 8, 10},
-
-    // harmonic minor
-    {0, 2, 3, 5, 7, 8, 11},
-    // locrian 6
-    {0, 1, 3, 5, 6, 9, 10},
-    // ionian #5
-    {0, 2, 4, 5, 8, 9, 11},
-    // dorian #4
-    {0, 2, 3, 6, 7, 9, 10},
-    // phrygian dominant
-    {0, 1, 4, 5, 7, 8, 10},
-    // lydian #2
-    {0, 3, 4, 6, 7, 9, 11},
-    // super locrian bb7
-    {0, 1, 3, 4, 6, 8, 9},
-};
-
-const char* scaleNames[] = {
-    "major",
-    "dorian",
-    "phrygian",
-    "lydian",
-    "mixolydian",
-    "minor",
-    "locrian",
-
-    "mel. minor",
-    "dorian b2",
-    "lydian #5",
-    "lydian b7",
-    "mixo b6",
-    "half-dim",
-    "altered",
-
-    "harm. minor",
-    "locrian 6",
-    "ionian #5",
-    "dorian #4",
-    "phrygian dom.",
-    "lydian #2",
-    "sup loc bb7"
-};
-
-const char* noteNames[] = {
-	"C",
-	"C#",
-	"D",
-	"D#",
-	"E",
-	"F",
-	"F#",
-	"G",
-	"G#",
-	"A",
-	"A#",
-	"B",
-};
-
-int scaleRoot = 0;
+int scaleRoot = -1;
 int scalePattern = 0;
+
 const char** messageText = NULL;
 int messageTextTimer = 0;
 
-int wrap(int a, int b) {
-	return (b + (a%b)) % b;
+int getDefaultColor(int pixel) {
+	if(scaleRoot == -1) {
+		return LEDOFF;
+	} else {
+		int noteInOct = notes[pixel] % 12;
+		int inScale = scaleDegrees[noteInOct];
+		if(inScale == -1) {
+			return LEDOFF;
+		} else {
+			return strip.gamma32(strip.ColorHSV((65535 / scaleLength) * inScale, 127, 200));
+		}
+	}
 }
+
+// ####### MIDI LEDS #######
 
 void midi_leds() {
 	blinkInterval = step_delay*2;
@@ -555,10 +448,10 @@ void midi_leds() {
 
 	if (midiAUX){
 		// Blink left/right keys for octave select indicators.
-		auto color1 = blinkState ? LIME : LEDOFF;
-		auto color2 = blinkState ? MAGENTA : LEDOFF;
-		auto color3 = blinkState ? ORANGE : LEDOFF;
-		auto color4 = blinkState ? RBLUE : LEDOFF;
+		auto color1 = blinkState ? LIME : getDefaultColor(1);
+		auto color2 = blinkState ? MAGENTA : getDefaultColor(2);
+		auto color3 = blinkState ? ORANGE : getDefaultColor(3);
+		auto color4 = blinkState ? RBLUE : getDefaultColor(4);
 
 		strip.setPixelColor(0, RED);
 		strip.setPixelColor(1, color1);
@@ -570,33 +463,6 @@ void midi_leds() {
 		strip.setPixelColor(0, LEDOFF);
 	}
 
-	{
-		// scales, magenta = root, rblue = in scale
-		for(int n = 0; n < 26; n++) {
-			int noteInOct = wrap(n - 1, 12);
-			int inScale = -1;
-			for(int i = 0; i < 7; i++) {
-				if((scaleRoot + scalePatterns[scalePattern][i]) % 12 == noteInOct) {
-					inScale = i;
-					break;
-				}
-			}
-			int pixel = noteToPixel[n];
-			if(midiAUX && (pixel == 0 || pixel == 1 || pixel == 2 || pixel == 11 || pixel == 12)) {
-				// leave it
-			} else {
-				if(inScale == -1) {
-					strip.setPixelColor(pixel, LEDOFF);
-				} else if(inScale == 0) {
-					strip.setPixelColor(pixel, MAGENTA);
-				} else if(inScale == 4) {
-					strip.setPixelColor(pixel, LIME);
-				} else {
-					strip.setPixelColor(pixel, RBLUE);
-				}
-			}
-		}
-	}
 	dirtyPixels = true;
 }
 
@@ -1629,18 +1495,32 @@ void loop() {
 								miparam = constrain((miparam + chng ) % 15, 0, 14);
 								mmpage = miparam / NUM_DISP_PARAMS;
 							}
-						} else {
+						} else if(thisKey == 26) {
+							scaleRoot = -1; // disable scales
+							setScale(-1, 0);
+							for(int n = 1; n < 27; n++) {
+								strip.setPixelColor(n, getDefaultColor(n));
+							}
+							strip.show();
+							dirtyPixels = true;
+						} else if((thisKey >= 6 && thisKey <= 10) || thisKey >= 19) {
 							int oldScaleRoot = scaleRoot;
 							scaleRoot = notes[thisKey] % 12;
 							if(scaleRoot == oldScaleRoot) {
-								scalePattern = (scalePattern + 1) % ARRAYLEN(scalePatterns);
+								// selecting same root again cycles through scales
+								scalePattern = (scalePattern + 1) % getNumScales();
 							} else {
+								// new root jumps to first scale
 								scalePattern = 0;
 							}
+							setScale(scaleRoot, scalePattern);
+							for(int n = 1; n < 27; n++) {
+								strip.setPixelColor(n, getDefaultColor(n));
+							}
+							strip.show();
+							// show the name of the scale for a moment
 							setMessage(scaleNames[scalePattern], 1000);
-
 							dirtyPixels = true;
-							midi_leds();
 							//midiNoteOn(thisKey, defaultVelocity, midiChannel);
 						}
 					} else {
@@ -1679,10 +1559,10 @@ void loop() {
 					}
 					// turn off leds
 					strip.setPixelColor(0, LEDOFF);
-					strip.setPixelColor(1, LEDOFF);
-					strip.setPixelColor(2, LEDOFF);
-					strip.setPixelColor(11, LEDOFF);
-					strip.setPixelColor(12, LEDOFF);
+					strip.setPixelColor(1, getDefaultColor(1));
+					strip.setPixelColor(2, getDefaultColor(2));
+					strip.setPixelColor(11, getDefaultColor(11));
+					strip.setPixelColor(12, getDefaultColor(12));
 				}
 				break;
 
@@ -2474,8 +2354,9 @@ void OnNoteOff(byte channel, byte note, byte velocity) {
 		} else {
 			thisKey = note - (12 * whatoct) + 12;
 		}
-		strip.setPixelColor(midiKeyMap[thisKey], LEDOFF);         //  Set pixel's color (in RAM)
-	//	dirtyPixels = true;
+		int pixel = midiKeyMap[thisKey];
+		strip.setPixelColor(pixel, getDefaultColor(pixel));         //  Set pixel's color (in RAM)
+	//	dirtyPixels = true;	
 		strip.show();
 		dirtyDisplay = true;
 	}
@@ -2521,7 +2402,7 @@ void midiNoteOff(int notenum, int channel) {
 		cvNoteOff();
 	}
 
-	strip.setPixelColor(notenum, LEDOFF);
+	strip.setPixelColor(notenum, getDefaultColor(notenum));
 	dirtyPixels = true;
 	dirtyDisplay = true;
 }

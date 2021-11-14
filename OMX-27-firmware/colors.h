@@ -90,3 +90,4 @@ const auto FUNKTWO = MINT;
 
 const auto SEQ1C = HALFWHITE;
 const auto SEQ2C = DKBLUE;
+
