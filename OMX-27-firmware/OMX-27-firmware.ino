@@ -418,6 +418,7 @@ void setup() {
 
 int scaleRoot = -1;
 int scalePattern = 0;
+bool scaleSelectHold;
 
 const char** messageText = NULL;
 int messageTextTimer = 0;
@@ -1068,6 +1069,18 @@ void loop() {
 					dirtyDisplay = true;
 //					break;
 				case MODE_MIDI: // MIDI
+					if (scaleSelectHold) {
+						scalePattern = WRAP(scalePattern + amt, getNumScales());
+						setScale(scaleRoot, scalePattern);
+						for(int n = 1; n < 27; n++) {
+							strip.setPixelColor(n, getDefaultColor(n));
+						}
+						strip.show();
+						// show the name of the scale for a moment
+						setMessage(scaleNames[scalePattern], 1000);
+						dirtyPixels = true;
+						break;
+					}
 					// CHANGE PAGE
 					if (miparam == 0 || miparam == 5 || miparam == 10) {
 						mmpage = constrain(mmpage + amt, 0, 2);
@@ -1511,6 +1524,7 @@ void loop() {
 						} else if((thisKey >= 6 && thisKey <= 10) || thisKey >= 19) {
 							int oldScaleRoot = scaleRoot;
 							scaleRoot = notes[thisKey] % 12;
+							scaleSelectHold = true;
 							if(scaleRoot == oldScaleRoot) {
 								// selecting same root again cycles through scales
 								scalePattern = (scalePattern + 1) % getNumScales();
@@ -1537,6 +1551,7 @@ void loop() {
 				} else if(e.bit.EVENT == KEY_JUST_RELEASED && thisKey != 0) {
 					//Serial.println(" released");
 					midiNoteOff(thisKey, midiChannel);
+					scaleSelectHold = false;
 				}
 
 				// AUX KEY
