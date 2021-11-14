@@ -426,6 +426,11 @@ int getDefaultColor(int pixel) {
 	if(scaleRoot == -1) {
 		return LEDOFF;
 	} else {
+		if(midiAUX) {
+			if(pixel == 1 || pixel == 2 || pixel == 11 || pixel == 12) {
+				return LEDOFF;
+			}
+		}
 		int noteInOct = notes[pixel] % 12;
 		int inScale = scaleDegrees[noteInOct];
 		if(inScale == -1) {
