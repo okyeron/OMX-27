@@ -68,9 +68,11 @@ private:
 
     int lastRead;
     unsigned long validAtTime;
+    unsigned long validAtTimeDelay = 50;
 
     State state;
     unsigned long longAtTime;
+    unsigned long longDownTimeout = 1250;
 };
 
 

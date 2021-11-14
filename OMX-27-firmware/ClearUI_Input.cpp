@@ -68,7 +68,7 @@ Button::State Button::update()
   if (read != lastRead) {
     // pin changed, wait for it to be stable
     lastRead = read;
-    validAtTime = millis() + 50;
+    validAtTime = millis() + validAtTimeDelay;
     return NoChange;
   }
 
@@ -85,7 +85,7 @@ Button::State Button::update()
     case UpLong:
       if (lastRead == LOW) {
         state = Down;
-        longAtTime = now + 1250;
+        longAtTime = now + longDownTimeout;
       }
       break;
 
