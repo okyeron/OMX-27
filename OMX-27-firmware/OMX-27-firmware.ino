@@ -103,6 +103,10 @@ int selectedStep = 0;
 bool stepSelect = false;
 bool stepRecord = false;
 bool stepDirty = false;
+
+uint32_t stepColor = 0x000000;
+uint32_t muteColor = 0x000000;
+
 bool dialogFlags[] = {false, false, false, false, false, false};
 unsigned dialogDuration = 1000;
 
@@ -433,12 +437,7 @@ int getDefaultColor(int pixel) {
 			}
 		}
 		int noteInOct = notes[pixel] % 12;
-		int inScale = scaleOffsets[noteInOct];
-		if(inScale == -1) {
-			return LEDOFF;
-		} else {
-			return strip.gamma32(strip.ColorHSV((65535 / 12) * inScale, 127, 200));
-		}
+		return scaleColors[noteInOct];
 	}
 }
 

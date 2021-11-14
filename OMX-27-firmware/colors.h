@@ -1,7 +1,5 @@
 #pragma once
 
-#include <stdint.h>
-
 // COLOR PRESETS
 // https://www.rapidtables.com/web/color/color-wheel.html
 // hsl(xxx, 100%, 50%)
@@ -68,14 +66,10 @@ const auto HALFWHITE = 0x808080;
 const auto LOWWHITE = 0x202020;
 const auto LEDOFF = 0x000000;
 
-uint32_t stepColor = 0x000000;
-uint32_t muteColor = 0x000000;
-
 // sequencer pattern colors
 const uint32_t seqColors[] = {ORANGE,YELLOW,GREEN,MAGENTA,CYAN,BLUE,LIME,LTPURPLE};
 const uint32_t muteColors[] = {DKORANGE,DKYELLOW,DKGREEN,DKMAGENTA,DKCYAN,DKBLUE,DKLIME,DKPURPLE};
 const uint32_t sequencePageColors[] = {RED, ORANGE, YELLOW, LIME};
-
 
 const auto MIDINOTEON = HALFWHITE;
 const auto SEQCHASE = DKRED;

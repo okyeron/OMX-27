@@ -1,9 +1,15 @@
+#include <cstdint>
 #include "scales.h"
+#include "colors.h"
 #include "util.h"
 
 int scaleOffsets[12];
 int scaleDegrees[12];
+int scaleColors[12];
 int scaleLength = 0;
+
+#include <Adafruit_NeoPixel.h>
+extern Adafruit_NeoPixel strip;
 
 const int scalePatterns[][7] = {
 	// major / ionian
@@ -148,6 +154,7 @@ void setScale(int scaleRoot, int scalePattern) {
 		for(int n = 0; n < 12; n++) {
 			scaleOffsets[n] = -1;
 			scaleDegrees[n] = -1;
+			scaleColors[n] = LEDOFF;
 		}
 	} else {
 		for(int n = 0; n < 12; n++) {
@@ -166,6 +173,11 @@ void setScale(int scaleRoot, int scalePattern) {
 			}
 			scaleOffsets[n] = offset;
 			scaleDegrees[n] = degree;
+			if(degree == -1) {
+				scaleColors[n] = LEDOFF;
+			} else {
+				scaleColors[n] = strip.gamma32(strip.ColorHSV((65535 / 12) * offset, 127, 200));
+			}
 		}
 	}
 	scaleLength = 0;
