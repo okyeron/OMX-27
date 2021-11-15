@@ -62,17 +62,18 @@ struct PatternSettings {  // ?? bytes
   bool mute : 1;
   bool autoreset : 1; // whether autoreset is enabled
   bool solo : 1;
+  uint8_t nLenDiv : 3; // Dictates what percentage of a step a note consumes: Default 0 consumes whole step, 1 = 1/2, 2 = 1/3, 3 = 1/4 
 }; // ? bytes
 
 PatternSettings patternSettings[NUM_PATTERNS] = {
-  { 15, 0, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false },
-  { 15, 1, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false },
-  { 15, 2, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false },
-  { 15, 3, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false },
-  { 15, 4, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false },
-  { 15, 5, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false },
-  { 15, 6, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false },
-  { 15, 7, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false }
+  { 15, 0, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false, 0 },
+  { 15, 1, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false, 0 },
+  { 15, 2, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false, 0 },
+  { 15, 3, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false, 0 },
+  { 15, 4, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false, 0 },
+  { 15, 5, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false, 0 },
+  { 15, 6, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false, 0 },
+  { 15, 7, 0, 0, 0, 0, 1, 3, 1, 0, false, false, false, false, 0 }
 };
 
 struct TimePerPattern {

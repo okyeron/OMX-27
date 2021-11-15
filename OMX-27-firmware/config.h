@@ -79,6 +79,21 @@ enum multDiv
 extern float multValues[];
 extern const char* mdivs[];
 
+enum noteLengthPercentages{
+     NL_FULL = 0,
+     NL_HALF,
+     NL_THIRD,
+     NL_QUART,
+     NL_FIFTH,
+     NL_SIXTH,
+     NL_SEVENTH,
+     NL_EIGHTH,
+
+     NUM_NLPERCENTAGES
+};
+
+extern const char* npers[];
+
 enum Dialogs{
      COPY = 0,
      PASTE,

@@ -48,6 +48,8 @@ const char* infoDialogText[] = {"COPIED","PASTED","CLEARED","RESET","FWD >>","<<
 float multValues[] = {.25, .5, 1, 2, 4, 8, 16};
 const char* mdivs[] = {"1/64", "1/32", "1/16", "1/8", "1/4", "1/2", "W"};
 
+const char* npers[] = {"100%", "50%", "33%", "25%", "20%", "16%", "14%", "12%"};
+
 InfoDialogs infoDialog[NUM_DIALOGS] = {
   {"COPIED", false},
   {"PASTED", false},

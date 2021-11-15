@@ -800,7 +800,7 @@ void dispGenericMode(int submode, int selected){
 		case SUBMODE_PATTPARAMS3:
 			legends[0] = "RATE";
 			legends[1] = "SOLO";
-			legends[2] = "---";
+			legends[2] = "NLEN";
 			legends[3] = "---";
 
 			// RATE FOR CURR PATTERN
@@ -808,7 +808,10 @@ void dispGenericMode(int submode, int selected){
 			legendText[0] = mdivs[patternSettings[playingPattern].clockDivMultP];
 
 			legendVals[1] = patternSettings[playingPattern].solo;
-			legendVals[2] = 0; 			// TBD
+
+			legendVals[2] = -127;
+			legendText[2] = npers[patternSettings[playingPattern].nLenDiv];  // Note Length as Percent of "Step Slot"
+
 			legendVals[3] = 0;			// TBD
 			dispPage = 3;
 			break;
@@ -1210,6 +1213,9 @@ void loop() {
 						if (ppparam == 12) { 					// SET MIDI SOLO
 							patternSettings[playingPattern].solo = constrain(patternSettings[playingPattern].solo + amt, 0, 1);
 						}
+						if (ppparam == 13){ 					// SET nLenDiv: precentage of "Step Length"
+						    patternSettings[playingPattern].nLenDiv = constrain(patternSettings[playingPattern].nLenDiv + amt, 0, NUM_NLPERCENTAGES-1);
+					    }
 
 					// STEP RECORD MODE
 					} else if (stepRecord && !enc_edit){
@@ -2414,9 +2420,11 @@ void playNote(int patternNum) {
 	if (stepNoteP[patternNum][seqPos[patternNum]].trig == TRIGTYPE_PLAY){
 
 		seq_velocity = stepNoteP[patternNum][seqPos[patternNum]].vel;
-
-		noteoff_micros = micros() + ( stepNoteP[patternNum][seqPos[patternNum]].len + 1 )* step_micros ;
-		pendingNoteOffs.insert(stepNoteP[patternNum][seqPos[patternNum]].note, PatternChannel(patternNum), noteoff_micros, sendnoteCV );
+		// nLenDiv allows us to adjust what amount of a "step slot" is consumed by a note.
+		// The default value (0) equates to 100% of step slot being consumed by the note on/off
+		// n=1: 1/1+n = .5, n=2: .33, n=3: .25.
+		noteoff_micros = micros() + ( (stepNoteP[patternNum][seqPos[patternNum]].len + 1) * ( (double) 1 / (double) (1 + patternSettings[playingPattern].nLenDiv)) )* step_micros ;
+		pendingNoteOffs.insert(stepNoteP[patternNum][seqPos[patternNum]].note, PatternChannel(patternNum), noteoff_micros, sendnoteCV );	
 
 		if (seqPos[patternNum] % 2 == 0){
 
@@ -2695,6 +2703,7 @@ void initPatterns( void ) {
 		patternSettings[i].rndstep = 3;
 		patternSettings[i].autoreset = false;
 		patternSettings[i].solo = false;
+		patternSettings[i].nLenDiv = 0;
 	}
 }
 
