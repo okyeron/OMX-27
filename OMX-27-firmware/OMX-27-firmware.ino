@@ -301,6 +301,7 @@ void setup() {
 		timePerPattern[x].nextStepTimeP = nextStepTime; // initialize all patterns
 		timePerPattern[x].lastStepTimeP = lastStepTime; // initialize all patterns
 		patternSettings[x].clockDivMultP = 2; // set all DivMult to 2 for now
+		patternSettings[x].gateLenDivP = GATE_HALF; // forcing default of GATE length 50% for now
 	}
 	randomSeed(analogRead(13));
 
