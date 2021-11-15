@@ -79,6 +79,22 @@ enum multDiv
 extern float multValues[];
 extern const char* mdivs[];
 
+enum gateLengthPercentages{
+     GATE_FULL = 0,
+     GATE_NINETENTH,
+     GATE_THREEFOURTH,
+     GATE_TWOTHIRD,
+     GATE_HALF,
+     GATE_THIRD,
+     GATE_QUARTER,
+     GATE_TENTH,
+
+     NUM_GATEPERCENTAGES
+};
+
+extern float gateValues[];
+extern const char* gpers[];
+
 enum Dialogs{
      COPY = 0,
      PASTE,
