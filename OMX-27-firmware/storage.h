@@ -79,7 +79,7 @@ public:
 
   void write(size_t address, uint8_t val) override;
   uint8_t read(size_t address) override;
-  int capacity() override { return 256000; } // 256Kbits / 32KB
+  int capacity() override { return 32000; } // 32KB
 
 private:
   Adafruit_FRAM_I2C fram;
