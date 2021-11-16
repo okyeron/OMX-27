@@ -18,6 +18,13 @@ public:
   virtual void write(size_t address, uint8_t val) = 0;
   virtual uint8_t read(size_t address) = 0;
 
+  // reset entire storage back to 0
+  void clear() {
+    for (int address = 0; address < capacity(); address++) {
+      write(address, 0);
+    }
+  }
+
   // template reader/writer implementation copied from Adafruit_FRAM_I2C which implements them both
   // in terms of reading/writing bytes
 
