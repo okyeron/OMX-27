@@ -44,6 +44,7 @@ elapsedMillis slow_blink_msec = 0;
 elapsedMillis pots_msec = 0;
 elapsedMillis dialogTimeout = 0;
 elapsedMillis dirtyDisplayTimer = 0;
+elapsedMillis pgmChngTimer = 0;
 unsigned long displayRefreshRate = 60;
 elapsedMicros clksTimer = 0;		// is this still in use?
 
@@ -88,6 +89,8 @@ int tmpmmode = 9;
 
 // VARIABLES / FLAGS
 float step_delay;
+bool dirtyPgmChng = false;
+unsigned pgmChangeSendTimeout = 250;
 bool dirtyPixels = false;
 bool dirtyDisplay = false;
 bool blinkState = false;
@@ -1070,13 +1073,16 @@ void loop() {
 					} else if (miparam == 8){
 						currpgm = constrain(currpgm + amt, 0, 127);
 
-						if (midiRoundRobin){
-							for (int q = midiRRChannelOffset+1 ; q < midiRRChannelOffset + midiRRChannelCount+1; q++){
-								MM::sendProgramChange(currpgm, q);
-							}
-						} else {
-							MM::sendProgramChange(currpgm, midiChannel);
-						}
+						dirtyPgmChng = true;
+// send pgm change below
+
+//						if (midiRoundRobin){
+//							for (int q = midiRRChannelOffset+1 ; q < midiRRChannelOffset + midiRRChannelCount+1; q++){
+//								MM::sendProgramChange(currpgm, q);
+//							}
+//						} else {
+//							MM::sendProgramChange(currpgm, midiChannel);
+//						}
 
 					} else if (miparam == 9){
 						currbank = constrain(currbank + amt, 0, 127);
@@ -1925,7 +1931,19 @@ void loop() {
 			dirtyDisplayTimer = 0;
 		}
 	}
+		if (pgmChngTimer > pgmChangeSendTimeout && dirtyPgmChng) {
+			if (midiRoundRobin){
+				for (int q = midiRRChannelOffset+1 ; q < midiRRChannelOffset + midiRRChannelCount+1; q++){
+					MM::sendProgramChange(currpgm, q);
+				}
+			} else {
+				MM::sendProgramChange(currpgm, midiChannel);
+			}
 
+			pgmChngTimer = 0;
+			dirtyPgmChng = false;
+		}
+	
 
 	// are pixels dirty
 	if (dirtyPixels){

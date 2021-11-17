@@ -59,11 +59,28 @@ Long-press the encoder to enter Mode Select. Short-press to enter that mode.
 
 While in Mode Select (before you short-press), you can save the state of the sequencer and settings to memory by hitting the AUX key.
 
-### MI - MIDI
+### MI - MIDI Keyboard
 
-MIDI Keyboard. Encoder selects octave or channel.
+ - Hold AUX to access quick key functions. In AUX mode the 
+ 
+ - AUX + : Reset sequences to first/last step
 
-AUX does nothing here (yet)
+
+
+Parameters:
+Page 1  
+- OCT: select octave  
+- CH: select midi channel  
+- CC: display CC value  
+- NOTE: display note number  
+Page 2  
+- RR: round robin note distribution, number of channels to use 
+- RROF: offset amount for round robin, number of channels to offset from 1
+- PGM: Program Change - turn enc to set value
+- BNK: Bank Select - turn enc to set value
+Page 3  
+- PBNK: Potentiometer Bank number (1-5)
+
 
 ### S1 - Sequencer 1
 
@@ -109,7 +126,7 @@ Pretty much the same as MI, but with the following tweaks for Organelle Mother o
 
 ## Sub-Modes
 
-AUX-key exits sub-modes
+AUX-key exits sequencer sub-modes
 
 ### Note Select / Step Parameters
 
