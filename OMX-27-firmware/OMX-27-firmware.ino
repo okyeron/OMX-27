@@ -851,7 +851,7 @@ void dispGenericMode(int submode, int selected){
 			legends[2] = "L-3";
 			legends[3] = "L-4";
 			for (int j=0; j<4; j++){
-				int stepNoteParam = sequencer.getCurrentPattern()->steps[selectedStep].params[j];
+				int stepNoteParam = getSelectedStep()->params[j];
 				if (stepNoteParam > -1){
 					legendVals[j] = stepNoteParam;
 				} else {
@@ -1669,8 +1669,8 @@ void loop() {
 										noteSelection = true;
 										dirtyDisplay = true;
 										// re-toggle the key you just held
-										if (sequencer.getCurrentPattern()->steps[selectedStep].trig == TRIGTYPE_PLAY || sequencer.getCurrentPattern()->steps[selectedStep].trig == TRIGTYPE_MUTE ) {
-											sequencer.getCurrentPattern()->steps[selectedStep].trig = (sequencer.getCurrentPattern()->steps[selectedStep].trig == TRIGTYPE_PLAY ) ? TRIGTYPE_MUTE : TRIGTYPE_PLAY;
+										if (getSelectedStep()->trig == TRIGTYPE_PLAY || getSelectedStep()->trig == TRIGTYPE_MUTE ) {
+											getSelectedStep()->trig = (getSelectedStep()->trig == TRIGTYPE_PLAY ) ? TRIGTYPE_MUTE : TRIGTYPE_PLAY;
 										}
 									}
 
@@ -1820,7 +1820,7 @@ void loop() {
 //											getSelectedStep()->stepType = ( getSelectedStep()->stepType == STEPTYPE_PLAY ) ? STEPTYPE_MUTE : STEPTYPE_PLAY;
 //										}
 										if ( getSelectedStep()->trig == TRIGTYPE_PLAY || getSelectedStep()->trig == TRIGTYPE_MUTE ) {
-											sequencer.getCurrentPattern()->steps[selectedStep].trig = ( getSelectedStep()->trig == TRIGTYPE_PLAY ) ? TRIGTYPE_MUTE : TRIGTYPE_PLAY;
+											getSelectedStep()->trig = ( getSelectedStep()->trig == TRIGTYPE_PLAY ) ? TRIGTYPE_MUTE : TRIGTYPE_PLAY;
 										}
 									}
 								}
