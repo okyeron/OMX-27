@@ -3,7 +3,7 @@
 #include <Arduino.h>
 #include <stdint.h>
 
-//const int OMX_VERSION = 1.4.1;
+//const int OMX_VERSION = 1.4.2;
 
 enum OMXMode
 {

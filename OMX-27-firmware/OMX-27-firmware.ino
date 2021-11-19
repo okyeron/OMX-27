@@ -1,5 +1,5 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
-// v 1.4.1
+// v 1.4.2
 //
 // Steven Noreyko, November 2021
 //
@@ -475,14 +475,15 @@ void show_current_step(int patternNum) {
 	auto pagestepstart = (currentpage * NUM_STEPKEYS);
 
 	if (noteSelect && noteSelection) {
-//		for(int j = 1; j < NUM_STEPKEYS+11; j++){
-		for(int j = pagestepstart; j < (pagestepstart + NUM_STEPKEYS); j++){	// NUM_STEPKEYS or NUM_STEPS INSTEAD?>
-			auto pixelpos = j - pagestepstart + 11;
+		// 27 LEDS so use LED_COUNT
+		for(int j = 1; j < LED_COUNT; j++){
+			auto pixelpos = j;
+			auto selectedStepPixel = (selectedStep % NUM_STEPKEYS) + 11; 
 
 			if (j < PatternLength(patternNum)){
-				if (j == selectedNote){
+				if (pixelpos == selectedNote){
 					strip.setPixelColor(pixelpos, HALFWHITE);
-				} else if (j == selectedStep){
+				} else if (pixelpos == selectedStepPixel){
 					strip.setPixelColor(pixelpos, SEQSTEP);
 				} else{
 					strip.setPixelColor(pixelpos, LEDOFF);
