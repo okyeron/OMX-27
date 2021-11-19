@@ -1,5 +1,5 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
-// v 1.4.2
+// v 1.4.2b1
 //
 // Steven Noreyko, November 2021
 //
@@ -480,17 +480,14 @@ void show_current_step(int patternNum) {
 			auto pixelpos = j;
 			auto selectedStepPixel = (selectedStep % NUM_STEPKEYS) + 11; 
 
-			if (j < PatternLength(patternNum)){
-				if (pixelpos == selectedNote){
-					strip.setPixelColor(pixelpos, HALFWHITE);
-				} else if (pixelpos == selectedStepPixel){
-					strip.setPixelColor(pixelpos, SEQSTEP);
-				} else{
-					strip.setPixelColor(pixelpos, LEDOFF);
-				}
-			} else {
+			if (pixelpos == selectedNote){
+				strip.setPixelColor(pixelpos, HALFWHITE);
+			} else if (pixelpos == selectedStepPixel){
+				strip.setPixelColor(pixelpos, SEQSTEP);
+			} else{
 				strip.setPixelColor(pixelpos, LEDOFF);
 			}
+
 			// Blink left/right keys for octave select indicators.
 			auto color1 = blinkState ? ORANGE : WHITE;
 			auto color2 = blinkState ? RBLUE : WHITE;
@@ -1140,7 +1137,12 @@ void loop() {
 						}
 					} else if (sqparam == 7){
 						// SET PATTERN LENGTH
-						SetPatternLength( playingPattern, constrain(PatternLength(playingPattern) + amt, 1, NUM_STEPS) );					
+						auto newPatternLen = constrain(PatternLength(playingPattern) + amt, 1, NUM_STEPS);
+						SetPatternLength( playingPattern, newPatternLen );
+						if (seqPos[playingPattern] >= newPatternLen){
+							seqPos[playingPattern] = newPatternLen-1;
+							patternPage[playingPattern] = getPatternPage(seqPos[playingPattern]);
+						}
 					} else if (sqparam == 8){
 						// SET CLOCK DIV/MULT
 						patternSettings[playingPattern].clockDivMultP = constrain(patternSettings[playingPattern].clockDivMultP + amt, 0, NUM_MULTDIVS-1);
@@ -1162,7 +1164,7 @@ void loop() {
 						// FALL THROUGH
 
 				case MODE_S2: // SEQ 2
-					if (patternParams && !enc_edit){ 		// SEQUENCE PATTERN PARAMS MODE
+					if (patternParams && !enc_edit){ 		// SEQUENCE PATTERN PARAMS SUB MODE
 						//CHANGE PAGE
 						if (ppparam == 0 || ppparam == 5 || ppparam == 10) {
 							pppage = constrain(pppage + amt, 0, 2);		// HARDCODED - FIX WITH SIZE OF PAGES?
@@ -1174,7 +1176,12 @@ void loop() {
 							playingPattern = constrain(playingPattern + amt, 0, 7);
 						}
 						if (ppparam == 2) { 					// SET LENGTH
-							SetPatternLength( playingPattern, constrain(PatternLength(playingPattern) + amt, 1, NUM_STEPS) );
+							auto newPatternLen = constrain(PatternLength(playingPattern) + amt, 1, NUM_STEPS);
+							SetPatternLength( playingPattern, newPatternLen );
+							if (seqPos[playingPattern] >= newPatternLen){
+								seqPos[playingPattern] = newPatternLen-1;
+								patternPage[playingPattern] = getPatternPage(seqPos[playingPattern]);
+							}
 						}
 						if (ppparam == 3) { 					// SET PATTERN ROTATION
 							int rotator;
@@ -1212,7 +1219,7 @@ void loop() {
 							patternSettings[playingPattern].solo = constrain(patternSettings[playingPattern].solo + amt, 0, 1);
 						}
 
-					// STEP RECORD MODE
+					// STEP RECORD SUB MODE
 					} else if (stepRecord && !enc_edit){
 						// CHANGE PAGE
 						if (srparam == 0 || srparam == 5) { 	
@@ -1582,7 +1589,12 @@ void loop() {
 							dirtyDisplay = true;
 						} else if ( thisKey > 10 ) {
 							// set pattern length with key
-							SetPatternLength( playingPattern, thisKey - 10); // NEEDS TO KNOW WHAT PAGE/BANK 
+							auto newPatternLen = thisKey - 10;
+							SetPatternLength( playingPattern, newPatternLen );
+							if (seqPos[playingPattern] >= newPatternLen){
+								seqPos[playingPattern] = newPatternLen-1;
+								patternPage[playingPattern] = getPatternPage(seqPos[playingPattern]);
+							}
 							dirtyDisplay = true;
 						}
 
@@ -1621,8 +1633,8 @@ void loop() {
 
 							// CHECK keyState[] FOR LONG PRESS THINGS
 
-							// If KEY 1 is down + pattern and not playing = STEP RECORD
-							if (keyState[1] && !playing) {
+							// If ONLY KEY 1 is down + pattern is not playing = STEP RECORD
+							if (keyState[1] && !keyState[2] && !playing) {
 //								Serial.print("step record on - pattern: ");
 //								Serial.println(thisKey-3);
 								playingPattern = thisKey-3;
