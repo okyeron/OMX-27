@@ -587,15 +587,12 @@ void show_current_step(int patternNum) {
 		// NUM_STEPKEYS or NUM_STEPS INSTEAD?
 		for(int i = pagestepstart; i < (pagestepstart + NUM_STEPKEYS); i++){
 			if (i < PatternLength(patternNum)){ 
-				
+
 				// ONLY DO LEDS FOR THE CURRENT PAGE
-				
 				auto pixelpos = i - pagestepstart + 11;
-//				Serial.println(pixelpos);
-				
-				if (patternParams){
- 					strip.setPixelColor(pixelpos, SEQMARKER);
- 				}
+//				if (patternParams){
+// 					strip.setPixelColor(pixelpos, SEQMARKER);
+// 				}
 
 				if(i % 4 == 0){ 					// MARK GROUPS OF 4
 					if(i == seqPos[patternNum]){
@@ -643,8 +640,10 @@ void show_current_step(int patternNum) {
 						} else {
 							strip.setPixelColor(pixelpos, stepColor); // STEP ON COLOR
 						}
-					} else if (stepNoteP[patternNum][i].trig == TRIGTYPE_MUTE){
+					} else if (!patternParams && stepNoteP[patternNum][i].trig == TRIGTYPE_MUTE){
 						strip.setPixelColor(pixelpos, LEDOFF);  // DO WE NEED TO MARK PLAYHEAD WHEN STOPPED?
+					} else if (patternParams){
+						strip.setPixelColor(pixelpos, SEQMARKER);
 					}
 
 				} else if (stepNoteP[patternNum][i].trig == TRIGTYPE_PLAY){
@@ -660,6 +659,8 @@ void show_current_step(int patternNum) {
 
 				} else if (!patternParams && stepNoteP[patternNum][i].trig == TRIGTYPE_MUTE){
 					strip.setPixelColor(pixelpos, LEDOFF);
+				} else if (patternParams){
+					strip.setPixelColor(pixelpos, SEQMARKER);
 				}
 
 			}
@@ -1560,10 +1561,10 @@ void loop() {
 
 					// PATTERN PARAMS
 					} else if (patternParams) {
-						if (thisKey == 1) {
+						if (thisKey == 1) { // F1
 
 
-						} else if (thisKey == 2) {
+						} else if (thisKey == 2) {  // F2
 
 
 						} else if (thisKey > 2 && thisKey < 11) { // Pattern select keys
