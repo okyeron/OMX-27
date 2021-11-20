@@ -13,7 +13,7 @@ USBMIDI should be plug-and-play with any USBMIDI compatible host. iPad works gre
 
 ## Layout
 
-<img src="omx27_layout3.png" alt="omx27_layout3" width="1000" height="402" />
+<img src="omx27_layout3.png" alt="omx27_layout3" width="1045" height="425" />
 
 Top left key = AUX Key.
 
@@ -61,41 +61,56 @@ While in Mode Select (before you short-press), you can save the state of the seq
 
 ### MI - MIDI
 
-MIDI Keyboard. Encoder selects octave or channel.
+MIDI Keyboard. 
 
-AUX does nothing here (yet)
+Quick Keys - Hold AUX  
+- first 2 "white keys" are octave up/down  
+- first 2 "black keys" are move param selection on the display  
+
+Parameters:  
+- Octave  
+- MIDI Channel  
+- RoundRobin MIDI Channel distribution and RR offset value   
+- MIDI program change  
+- MIDI bank select  
+- Potentiometer bank select (CC assignments are still hard coded)  
+
 
 ### S1 - Sequencer 1
 
 Step sequencer - One pattern active at a time.
 
- - AUX is Start/Stop
- - Start/Stop sends MIDI transport control, and MIDI clock when running
- - Pattern Key: Selects playing pattern
- - F1 + AUX: Reset sequences to first/last step
- - F2 + AUX: Reverse pattern direction
- - F1 + Pattern Key: Enter "Step Record Mode" (transport must be stopped)
- - F2 + Pattern Key: Mute that pattern
- - Long press a Step Key: Enter "Note Select Mode"
- - Long press a Pattern Key: Enter "Pattern Params Mode"
- - AUX-key exits sub-modes
+Keys/Commands:   
+ - AUX is Start/Stop  
+ - Start/Stop sends MIDI transport control, and MIDI clock when running  
+ - Pattern Key: Selects playing pattern  
+ - F1 + AUX: Reset sequences to first/last step  
+ - F2 + AUX: Reverse pattern direction  
+ - F1 + Pattern Key: Enter "Step Record Mode" (transport must be stopped)  
+ - F2 + Pattern Key: Mute that pattern  
+ - Long press a Step Key: Enter "Note Select Mode"  
+ - Long press a Pattern Key: Enter "Pattern Params Mode"  
+ - AUX-key exits sub-modes  
+ - Hold F1 + F2: first 4 "white keys" select "page" of the current pattern (depending on pattern length)  
 
 ### S2 - Sequencer 2
 
 Step sequencer - All patterns active.
 
- - AUX is Start/Stop
- - Start/Stop sends MIDI transport control, and MIDI clock when running
- - Pattern Key: Selects active pattern
- - Encoder changes "page" for sequence parameters (with no parameter highlighted)
- - Short-press encoder to highlight active parameter to edit
- - F1 + AUX: Reset sequences to first/last step
- - F2 + AUX: Reverse pattern direction
- - F1 + Pattern Key: Enter "Step Record Mode"
- - F2 + Pattern Key: Mute that pattern
- - Long press a Step Key: Enter "Note Select Mode"
- - Long press a Pattern Key: Enter "Pattern Params Mode"
- - AUX-key exits sub-modes
+Keys/Commands:   
+ - AUX is Start/Stop  
+ - Start/Stop sends MIDI transport control, and MIDI clock when running  
+ - Pattern Key: Selects active pattern  
+ - Encoder changes "page" for sequence parameters (with no parameter highlighted)  
+ - Short-press encoder to highlight active parameter to edit  
+ - F1 + AUX: Reset sequences to first/last step  
+ - F2 + AUX: Reverse pattern direction  
+ - F1 + Pattern Key: Enter "Step Record Mode"  
+ - F2 + Pattern Key: Mute that pattern  
+ - Long press a Step Key: Enter "Note Select Mode"  
+ - Long press a Pattern Key: Enter "Pattern Params Mode"  
+ - AUX-key exits sub-modes  
+ - Hold F1 + F2: first 4 "white keys" select "page" of the current pattern (depending on pattern length)  
 
 In the sequencer modes, the default setup is a GM Drum Map with each pattern on a consecutive midi channel. So that's notes 36, 38, 37, 39, 42, 46, 49, 51 on channels 1-8.
 
@@ -146,6 +161,11 @@ In this sub-mode, turning the encoder is locked to change octave. The display wi
 
 Use the AUX to exit this sub-mode.
 
+Keys/Commands:  
+- Short-press encoder to skip step   
+- Potentiometers 1-4 set a CC parameter lock  
+- Potentiometers 5 sets a step velocity   
+- AUX exit this sub-mode  
 
 ### Pattern Params
 
@@ -161,11 +181,11 @@ Page 2 (see Sequence Reset Automation below): Start, end, frequency, probability
 
 Page 3: Rate (sixteenth notes, eight notes, etc.), MIDI solo.
 
-
-Step Keys also set pattern length
-F1 + pattern will copy pattern
-F2 + pattern will paste pattern to other pattern slot
-F1 + F2 + pattern will clear the pattern back to GM drum map default (and clear all plocks)
+Keys/Commands: 
+- Step Keys set pattern length  
+- F1 + pattern copies pattern  
+- F2 + pattern pastes pattern (to other pattern slot)  
+- F1 + F2 + pattern clears the pattern back to GM drum map default (and clears all plocks)  
 
 (you can paste multiple times - paste buffer should stay the same until you copy again)
 
@@ -201,12 +221,6 @@ NOTE: Setting STEP = 0 and PROB = 1 dictates random trigger steps which can lead
 A hardware switch on the device will let you swap between Type-A and Type-B for the hardware MIDI TRS jack.
 
 
-Products That Use Type-B mini TRS Jack Connections
-- Arturia BeatStep Pro
-- Novation products
-- Polyend products
-- 1010music Original Series 1 modules, Series 2 modules, Blackbox, MX4 and Euroshield
-
 Products That Use Type-A mini TRS Jack Connections
 - ADDAC System products
 - Arturia BeatStep (not to be confused with the BeatStep Pro)
@@ -217,6 +231,12 @@ Products That Use Type-A mini TRS Jack Connections
 - Line 6 products
 - little Bits w5 MIDI module
 - Make Noise 0-Coast
+
+Products That Use Type-B mini TRS Jack Connections
+- Arturia BeatStep Pro
+- Novation products
+- Polyend products
+- 1010music Original Series 1 modules, Series 2 modules, Blackbox, MX4 and Euroshield
 
 See https://1010music.com/stereo-minijacks-midi-connections-compatibility-guide for more information
 
