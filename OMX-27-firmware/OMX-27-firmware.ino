@@ -1678,8 +1678,8 @@ void loop() {
 
 							} else {
 								// TOGGLE STEP ON/OFF
-	//							if ( stepNoteP[sequencer.playingPattern][keyPos].stepType == STEPTYPE_PLAY || stepNoteP[sequencer.playingPattern][keyPos].stepType == STEPTYPE_MUTE ) {
-	//								stepNoteP[sequencer.playingPattern][keyPos].stepType = ( stepNoteP[sequencer.playingPattern][keyPos].stepType == STEPTYPE_PLAY ) ? STEPTYPE_MUTE : STEPTYPE_PLAY;
+	//							if ( sequencer.getCurrentPattern()->steps[keyPos].stepType == STEPTYPE_PLAY || sequencer.getCurrentPattern()->steps[keyPos].stepType == STEPTYPE_MUTE ) {
+	//								sequencer.getCurrentPattern()->steps[keyPos].stepType = ( sequencer.getCurrentPattern()->steps[keyPos].stepType == STEPTYPE_PLAY ) ? STEPTYPE_MUTE : STEPTYPE_PLAY;
 	//							}
 								if (sequencer.getCurrentPattern()->steps[seqKey].trig == TRIGTYPE_PLAY || sequencer.getCurrentPattern()->steps[seqKey].trig == TRIGTYPE_MUTE ) {
 									sequencer.getCurrentPattern()->steps[seqKey].trig = (sequencer.getCurrentPattern()->steps[seqKey].trig == TRIGTYPE_PLAY ) ? TRIGTYPE_MUTE : TRIGTYPE_PLAY;
