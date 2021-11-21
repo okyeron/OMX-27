@@ -7,12 +7,12 @@
 
 enum OMXMode
 {
-    MODE_MIDI = 0,
-    MODE_S1,
-    MODE_S2,
-    MODE_OM,
+	MODE_MIDI = 0,
+	MODE_S1,
+	MODE_S2,
+	MODE_OM,
 
-    NUM_OMX_MODES
+	NUM_OMX_MODES
 };
 
 extern const OMXMode DEFAULT_MODE;
@@ -64,55 +64,55 @@ extern const char* infoDialogText[];
 
 enum multDiv
 {
-    MD_QUART = 0,
-    MD_HALF,
-    MD_ONE,
-    MD_TWO,
-    MD_FOUR,
-    MD_EIGHT,
-    MD_SIXTEEN,
+	MD_QUART = 0,
+	MD_HALF,
+	MD_ONE,
+	MD_TWO,
+	MD_FOUR,
+	MD_EIGHT,
+	MD_SIXTEEN,
 
-    NUM_MULTDIVS
+	NUM_MULTDIVS
 };
 
 extern float multValues[];
 extern const char* mdivs[];
 
 enum Dialogs{
-    COPY = 0,
-    PASTE,
-    CLEAR,
-    RESET,
-    FWD,
-    REV,
-    SAVED,
-    SAVE,
+	COPY = 0,
+	PASTE,
+	CLEAR,
+	RESET,
+	FWD,
+	REV,
+	SAVED,
+	SAVE,
 
-    NUM_DIALOGS
+	NUM_DIALOGS
 };
 struct InfoDialogs {
-    const char*  text;
-    bool state;
+	const char*  text;
+	bool state;
 };
 
 extern InfoDialogs infoDialog[NUM_DIALOGS];
 
 enum SubModes
 {
-    SUBMODE_MIDI = 0,
-    SUBMODE_SEQ,
-    SUBMODE_SEQ2,
-    SUBMODE_NOTESEL,
-    SUBMODE_NOTESEL2,
-    SUBMODE_NOTESEL3,
-    SUBMODE_PATTPARAMS,
-    SUBMODE_PATTPARAMS2,
-    SUBMODE_PATTPARAMS3,
-    SUBMODE_STEPREC,
-    SUBMODE_MIDI2,
-    SUBMODE_MIDI3,
+	SUBMODE_MIDI = 0,
+	SUBMODE_SEQ,
+	SUBMODE_SEQ2,
+	SUBMODE_NOTESEL,
+	SUBMODE_NOTESEL2,
+	SUBMODE_NOTESEL3,
+	SUBMODE_PATTPARAMS,
+	SUBMODE_PATTPARAMS2,
+	SUBMODE_PATTPARAMS3,
+	SUBMODE_STEPREC,
+	SUBMODE_MIDI2,
+	SUBMODE_MIDI3,
 
-    SUBMODES_COUNT
+	SUBMODES_COUNT
 };
 
 // KEY SWITCH ROWS/COLS
