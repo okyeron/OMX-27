@@ -493,18 +493,19 @@ void show_current_step(int patternNum) {
 
 	} else if (stepRecord) {
 
-//		for(int j = 1; j < NUM_STEPKEYS+11; j++){
-//			if (j < PatternLength(patternNum)+11){
+		// BLANK THE TOP ROW
+		for(int j = 1; j < LED_COUNT - NUM_STEPKEYS; j++){
+			strip.setPixelColor(j, LEDOFF);
+		}
+
 		for(int j = pagestepstart; j < (pagestepstart + NUM_STEPKEYS); j++){	// NUM_STEPKEYS or NUM_STEPS INSTEAD?>
 			auto pixelpos = j - pagestepstart + 11;
-
 			if (j < sequencer.getPatternLength(patternNum)){
 				// ONLY DO LEDS FOR THE CURRENT PAGE
-
 				if (j == sequencer.seqPos[sequencer.playingPattern]){
 					strip.setPixelColor(pixelpos, SEQCHASE);
 				} else if (pixelpos != selectedNote){
-					strip.setPixelColor(pixelpos, LEDOFF);
+					strip.setPixelColor(pixelpos, LEDOFF);					
 				}
 			} else  {
 				strip.setPixelColor(pixelpos, LEDOFF);
@@ -530,7 +531,8 @@ void show_current_step(int patternNum) {
 		strip.setPixelColor(2, color2);
 
 		// TURN OFF LEDS
-		for(int j = 3; j < NUM_STEPKEYS+11; j++){  // START WITH LEDS AFTER F-KEYS
+		// 27 LEDS so use LED_COUNT
+		for(int j = 3; j < LED_COUNT; j++){  // START WITH LEDS AFTER F-KEYS
 			strip.setPixelColor(j, LEDOFF);
 		}
 		// SHOW LEDS FOR WHAT PAGE OF SEQ PATTERN YOURE ON
@@ -544,7 +546,7 @@ void show_current_step(int patternNum) {
 			strip.setPixelColor(11 + h, color);
 		}
 	} else {
-		for(int j = 1; j < NUM_STEPKEYS+11; j++){
+		for(int j = 1; j < LED_COUNT; j++){
 			if (j < sequencer.getPatternLength(patternNum)+11){
 				if (j == 1) {
 															// NOTE SELECT / F1
@@ -1563,9 +1565,7 @@ void loop() {
 					} else if (patternParams) {
 						if (thisKey == 1) { // F1
 
-
 						} else if (thisKey == 2) {  // F2
-
 
 						} else if (thisKey > 2 && thisKey < 11) { // Pattern select keys
 
@@ -1640,6 +1640,7 @@ void loop() {
 //								Serial.println(thisKey-3);
 								sequencer.playingPattern = thisKey-3;
 								sequencer.seqPos[sequencer.playingPattern] = 0;
+								sequencer.patternPage[sequencer.playingPattern] = 0;	// Step Record always starts from first page
 								stepRecord = true;
 								dirtyDisplay = true;
 
@@ -1656,7 +1657,7 @@ void loop() {
 						} else if (thisKey > 10) {
 
 							if (keyState[1] && keyState[2]) {		// F1+F2 HOLD
-								if (!stepRecord && !patternParams){ // IGNORE LONG PRESSES IN STEP RECORD and Pattern Params
+								if (!stepRecord){ // IGNORE LONG PRESSES IN STEP RECORD
 									if (keyPos <= getPatternPage(sequencer.getCurrentPattern()->len) ){
 										sequencer.patternPage[sequencer.playingPattern] = keyPos;
 									}
