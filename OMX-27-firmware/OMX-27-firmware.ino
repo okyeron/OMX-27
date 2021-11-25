@@ -42,7 +42,6 @@ int temp;
 elapsedMillis blink_msec = 0;
 elapsedMillis slow_blink_msec = 0;
 elapsedMillis pots_msec = 0;
-elapsedMillis dialogTimeout = 0;
 elapsedMillis dirtyDisplayTimer = 0;
 unsigned long displayRefreshRate = 60;
 elapsedMicros clksTimer = 0;		// is this still in use?
@@ -148,6 +147,29 @@ int currbank = 0;
 bool midiInToCV = true;
 uint8_t midiLastNote = 0;
 int midiChannel; // the MIDI channel number to send messages (MIDI/OM mode)
+
+// MESSAGE DISPLAY
+const auto MESSAGE_TEXT_LEN = 24;
+const auto MESSAGE_DISPLAY_TIME = 1000000;
+char messageText[MESSAGE_TEXT_LEN];
+int messageTextTimer = 0;
+
+void setMessage(int time) {
+	messageTextTimer = time;
+	dirtyDisplay = true;
+}
+
+void displayMessage() {
+	display.fillRect(0, 0, 128, 32, BLACK);
+	u8g2_display.setFontMode(1);
+	u8g2_display.setFont(FONT_VALUES);
+	u8g2_display.setForegroundColor(WHITE);
+	u8g2_display.setBackgroundColor(BLACK);
+	u8g2centerText(messageText, 0, 10, 128, 32);
+}
+
+// this throws a warning when split over multiple lines even though it improves readability
+#define MESSAGE(...) { snprintf(messageText, MESSAGE_TEXT_LEN, __VA_ARGS__); setMessage(MESSAGE_DISPLAY_TIME); dirtyDisplay = true; }
 
 // ENCODER
 Encoder myEncoder(12, 11); 	// encoder pins on hardware
@@ -292,7 +314,6 @@ void setup() {
 	usbMIDI.setHandleNoteOn(OnNoteOn);
 
 	storage = Storage::initStorage();
-	dialogTimeout = 0;
 	clksTimer = 0;
 
 	lastProcessTime = micros();
@@ -941,22 +962,6 @@ void dispPageIndicators(int page, bool selected){
 	}
 }
 
-void dispInfoDialog(){
-	for (int key=0; key < NUM_DIALOGS; key++){
-		if (infoDialog[key].state){
-			dialogTimeout = 0;
-			display.clearDisplay();
-			u8g2_display.setFontMode(1);
-			u8g2_display.setFont(FONT_TENFAT);
-			u8g2_display.setForegroundColor(WHITE);
-			u8g2_display.setBackgroundColor(BLACK);
-
-			u8g2centerText(infoDialog[key].text, 0, 10, 128, 32);
-			infoDialog[key].state = false;
-		}
-	}
-}
-
 void dispMode(){
 	// labels formatting
 	u8g2_display.setFontMode(1);
@@ -1574,17 +1579,17 @@ void loop() {
 							// COPY / PASTE / CLEAR
 							if (keyState[1] && !keyState[2]) {
 								copyPattern(sequencer.playingPattern);
-								infoDialog[COPY].state = true; // copied flag
+								MESSAGE("COPIED P%d", sequencer.playingPattern);
 //								Serial.print("copy: ");
 //								Serial.println(playingPattern);
 							} else if (!keyState[1] && keyState[2]) {
 								pastePattern(sequencer.playingPattern);
-								infoDialog[PASTE].state = true; // pasted flag
+								MESSAGE("PASTED P%d", sequencer.playingPattern);
 //								Serial.print("paste: ");
 //								Serial.println(playingPattern);
 							} else if (keyState[1] && keyState[2]) {
 								clearPattern(sequencer.playingPattern);
-								infoDialog[CLEAR].state = true; // cleared flag
+								MESSAGE("CLEARED P%d", sequencer.playingPattern);
 							}
 
 							dirtyDisplay = true;
@@ -1737,14 +1742,14 @@ void loop() {
 						if (keyState[1] || keyState[2]) { 				// CHECK keyState[] FOR LONG PRESS OF FUNC KEYS
 							if (keyState[1]) {
 								sequencer.seqResetFlag = true;		// RESET ALL SEQUENCES TO FIRST/LAST STEP
-								infoDialog[RESET].state = true; // reset flag
+								MESSAGE("RESET");
 
 							} else if (keyState[2]) { 					// CHANGE PATTERN DIRECTION
 								sequencer.getCurrentPattern()->reverse = !sequencer.getCurrentPattern()->reverse;
 								if (sequencer.getCurrentPattern()->reverse) {
-									infoDialog[REV].state = true; // rev direction flag
+									MESSAGE("<< REV");
 								} else{
-									infoDialog[FWD].state = true; // fwd direction flag
+									MESSAGE("FWD >>");
 								}
 							}
 							dirtyDisplay = true;
@@ -1841,6 +1846,13 @@ void loop() {
 
 	// ############### MODES DISPLAY  ##############
 
+	if(messageTextTimer > 0) {
+		messageTextTimer -= passed;
+		if(messageTextTimer <= 0) {
+			dirtyDisplay = true;
+		}
+	}
+
 	switch(omxMode){
 		case MODE_OM: 						// ############## ORGANELLE MODE
 			// FALL THROUGH
@@ -1867,11 +1879,6 @@ void loop() {
 		case MODE_S1: 						// ############## SEQUENCER 1
 			// FALL THROUGH
 		case MODE_S2: 						// ############## SEQUENCER 2
-			if (!enc_edit) {
-				if (dialogTimeout > dialogDuration && dialogTimeout < dialogDuration + 20) {
-					dirtyDisplay = true;
-				}
-			}
 			// MIDI SOLO
 			if (sequencer.getCurrentPattern()->solo) {
 				midi_leds();
@@ -1886,7 +1893,6 @@ void loop() {
 						} else if (sqpage == 1){
 							dispGenericMode(SUBMODE_SEQ2, pselected);
 						}
-						dispInfoDialog();
 					}
 					if (noteSelect) {
 						int pselected = nsparam % NUM_DISP_PARAMS;
@@ -1907,17 +1913,14 @@ void loop() {
 						} else if (pppage == 2){
 							dispGenericMode(SUBMODE_PATTPARAMS3, pselected);
 						}
-						dispInfoDialog();
 
 					}
 					if (stepRecord) {
 						int pselected = srparam % NUM_DISP_PARAMS;
 						if (srpage == 0){
 							dispGenericMode(SUBMODE_STEPREC, pselected);
-							dispInfoDialog();
 						} else if (srpage == 1){
 							dispGenericMode(SUBMODE_NOTESEL2, pselected);
-							dispInfoDialog();
 						}
 					}
 				}
@@ -1930,6 +1933,9 @@ void loop() {
 
 	}
 
+	if(dirtyDisplay && messageTextTimer > 0) {
+		displayMessage();
+	}
 
 	// DISPLAY at end of loop
 
