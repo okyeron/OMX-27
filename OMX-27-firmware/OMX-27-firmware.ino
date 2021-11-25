@@ -128,6 +128,12 @@ uint8_t RES;
 uint16_t AMAX;
 int V_scale;
 
+// scales
+int scaleRoot = 0; // root note of scale 0-11 (0=C)
+int scalePattern = 0; // scale pattern index from scalePatterns
+bool scaleDisplay = false; // whether to show scales or not
+bool scaleSelectHold; // while true turning the encoder selects a scale pattern
+
 // clock
 float clockbpm = 120;
 float newtempo = clockbpm;
@@ -408,6 +414,9 @@ void setup() {
 	strip.fill(0, 0, LED_COUNT);
 	strip.show();
 
+	// set default scale
+	setScale(scaleRoot, scalePattern);
+
 	delay(100);
 
 	// Clear display
@@ -420,19 +429,15 @@ void setup() {
 
 
 
-int scaleRoot = -1;
-int scalePattern = 0;
-bool scaleSelectHold;
-
-const char** messageText = NULL;
-int messageTextTimer = 0;
-
 int getDefaultColor(int pixel) {
-	if(scaleRoot == -1) {
+	if(scaleDisplay == false) {
 		return LEDOFF;
 	} else {
 		if(midiAUX) {
-			if(pixel == 1 || pixel == 2 || pixel == 11 || pixel == 12) {
+			if(pixel == 1 || pixel == 2 || pixel == 11 || pixel == 12 || pixel == 27) {
+				return LEDOFF;
+			} else if((pixel >= 1 && pixel <= 5) || (pixel >= 11 && pixel <= 18)) {
+				// disable scales on lower octave while AUX held
 				return LEDOFF;
 			}
 		}
@@ -453,16 +458,12 @@ void midi_leds() {
 
 	if (midiAUX){
 		// Blink left/right keys for octave select indicators.
-		auto color1 = blinkState ? LIME : getDefaultColor(1);
-		auto color2 = blinkState ? MAGENTA : getDefaultColor(2);
-		auto color3 = blinkState ? ORANGE : getDefaultColor(3);
-		auto color4 = blinkState ? RBLUE : getDefaultColor(4);
-
 		strip.setPixelColor(0, RED);
-		strip.setPixelColor(1, color1);
-		strip.setPixelColor(2, color2);
-		strip.setPixelColor(11, color3);
-		strip.setPixelColor(12, color4);
+		strip.setPixelColor(1, blinkState ? LIME : getDefaultColor(1));
+		strip.setPixelColor(2, blinkState ? MAGENTA : getDefaultColor(2));
+		strip.setPixelColor(11, blinkState ? ORANGE : getDefaultColor(11));
+		strip.setPixelColor(12, blinkState ? RBLUE : getDefaultColor(12));
+		strip.setPixelColor(26, blinkState ? YELLOW : getDefaultColor(26));
 
 	} else {
 		strip.setPixelColor(0, LEDOFF);
@@ -1076,7 +1077,7 @@ void loop() {
 						}
 						strip.show();
 						// show the name of the scale for a moment
-						setMessage(scaleNames[scalePattern], 1000);
+						MESSAGE("%s %s", noteNames[scaleRoot], scaleNames[scalePattern]);
 						dirtyPixels = true;
 						break;
 					}
@@ -1513,17 +1514,22 @@ void loop() {
 								mmpage = miparam / NUM_DISP_PARAMS;
 							}
 						} else if(thisKey == 26) {
-							scaleRoot = -1; // disable scales
-							setScale(-1, 0);
+							scaleDisplay = !scaleDisplay; // toggle scale display
 							for(int n = 1; n < 27; n++) {
 								strip.setPixelColor(n, getDefaultColor(n));
 							}
 							strip.show();
+							if(scaleDisplay) {
+								MESSAGE("SCALES ENABLED");
+							} else {
+								MESSAGE("SCALES DISABLED");
+							}
 							dirtyPixels = true;
 						} else if((thisKey >= 6 && thisKey <= 10) || thisKey >= 19) {
 							int oldScaleRoot = scaleRoot;
 							scaleRoot = notes[thisKey] % 12;
 							scaleSelectHold = true;
+							scaleDisplay = true;
 							if(scaleRoot == oldScaleRoot) {
 								// selecting same root again cycles through scales
 								scalePattern = (scalePattern + 1) % getNumScales();
@@ -1537,9 +1543,8 @@ void loop() {
 							}
 							strip.show();
 							// show the name of the scale for a moment
-							setMessage(scaleNames[scalePattern], 1000);
+							MESSAGE("%s %s", noteNames[scaleRoot], scaleNames[scalePattern]);
 							dirtyPixels = true;
-							//midiNoteOn(thisKey, defaultVelocity, midiChannel);
 						}
 					} else {
 						midiNoteOn(thisKey, defaultVelocity, midiChannel);
@@ -1549,8 +1554,11 @@ void loop() {
 
 				} else if(e.bit.EVENT == KEY_JUST_RELEASED && thisKey != 0) {
 					//Serial.println(" released");
-					midiNoteOff(thisKey, midiChannel);
-					scaleSelectHold = false;
+					if(scaleSelectHold == false) {
+						midiNoteOff(thisKey, midiChannel);
+					} else {
+						scaleSelectHold = false;
+					}
 				}
 
 				// AUX KEY
@@ -1559,6 +1567,10 @@ void loop() {
 //					MM::sendControlChange(CC_AUX, 100, midiChannel);
 
 					midiAUX = true;
+					for(int i = 0; i < 27; i++) {
+						strip.setPixelColor(i, getDefaultColor(i));
+					}
+					dirtyPixels = true;
 
 //					if (midiAUX) {
 //						// STOP CLOCK
@@ -1575,13 +1587,13 @@ void loop() {
 //					MM::sendControlChange(CC_AUX, 0, midiChannel);
 					if (midiAUX) {
 						midiAUX = false;
+						// restore leds
+						strip.setPixelColor(0, LEDOFF);
+						for(int i = 0; i < 27; i++) {
+							strip.setPixelColor(i, getDefaultColor(i));
+						}
+						dirtyPixels = true;
 					}
-					// turn off leds
-					strip.setPixelColor(0, LEDOFF);
-					strip.setPixelColor(1, getDefaultColor(1));
-					strip.setPixelColor(2, getDefaultColor(2));
-					strip.setPixelColor(11, getDefaultColor(11));
-					strip.setPixelColor(12, getDefaultColor(12));
 				}
 				break;
 
@@ -2016,11 +2028,6 @@ void loop() {
 
 	if(messageTextTimer > 0) {
 		displayMessage();
-		messageTextTimer--;
-		if(messageTextTimer == 0) {
-			messageText = NULL;
-			dirtyDisplay = true;
-		}
 	}
 
 	// DISPLAY at end of loop
