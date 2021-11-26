@@ -25,7 +25,7 @@ Adafruit_FRAM_I2C fram = Adafruit_FRAM_I2C();
 
 Adafruit_SSD1306 display = Adafruit_SSD1306(DISPLAY_WIDTH, DISPLAY_HEIGHT, &Wire, OLED_RST, CLKDURING, CLKAFTER);
 
-const int framCapacity = 256000;
+const int framCapacity = 32000;
 const int eepromCapacity = 2048;
 bool usingFram = false;
 
