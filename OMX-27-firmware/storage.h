@@ -18,8 +18,15 @@ public:
 	virtual void write(size_t address, uint8_t val) = 0;
 	virtual uint8_t read(size_t address) = 0;
 
-	// template reader/writer implementation copied from Adafruit_FRAM_I2C which implements them both
-	// in terms of reading/writing bytes
+  // reset entire storage back to 0
+  void clear() {
+	for (int address = 0; address < capacity(); address++) {
+	  write(address, 0);
+	}
+  }
+
+  // template reader/writer implementation copied from Adafruit_FRAM_I2C which implements them both
+  // in terms of reading/writing bytes
 
 	/**************************************************************************/
 	/*!
@@ -77,9 +84,9 @@ public:
 		this->fram = fram;
 	}
 
-	void write(size_t address, uint8_t val) override;
-	uint8_t read(size_t address) override;
-	int capacity() override { return 256000; } // 256Kbits / 32KB
+  void write(size_t address, uint8_t val) override;
+  uint8_t read(size_t address) override;
+  int capacity() override { return 32000; } // 32KB
 
 private:
 	Adafruit_FRAM_I2C fram;
