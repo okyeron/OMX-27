@@ -2,17 +2,17 @@
 
 
 bool Field::render(bool force) {
-  if (!force && !isOutOfDate())
-    return false;
+	if (!force && !isOutOfDate())
+		return false;
 
-  display.fillRect(x, y, w, h, backColor());
-  redraw();
-  selectedAsDrawn = selected;
-  return true;
+	display.fillRect(x, y, w, h, backColor());
+	redraw();
+	selectedAsDrawn = selected;
+	return true;
 }
 
 void Field::select(bool s) {
-  selected = s;
+	selected = s;
 }
 
 void Field::enter(bool alternate) { }

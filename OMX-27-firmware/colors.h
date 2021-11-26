@@ -1,3 +1,7 @@
+#pragma once
+
+#include <stdint.h>
+
 // COLOR PRESETS
 // https://www.rapidtables.com/web/color/color-wheel.html
 // hsl(xxx, 100%, 50%)

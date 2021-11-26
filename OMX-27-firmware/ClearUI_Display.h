@@ -29,11 +29,11 @@ void f5Text(int size);
 void centerText(const char* s, int16_t x, int16_t y, uint16_t w, uint16_t h);
 
 void centerNumber(unsigned int n,
-  uint16_t x, uint16_t y, uint16_t w, uint16_t h);
+	uint16_t x, uint16_t y, uint16_t w, uint16_t h);
 
 template< typename N >
 void centerNumber(const N& n, uint16_t x, uint16_t y, uint16_t w, uint16_t h)
-  { centerNumber(static_cast<unsigned int>(n), x, y, w, h); }
+	{ centerNumber(static_cast<unsigned int>(n), x, y, w, h); }
 
 
 bool updateSaver(bool);

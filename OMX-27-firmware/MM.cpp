@@ -3,11 +3,11 @@
 #include <MIDI.h>
 
 namespace {
-  using SerialMIDI = midi::SerialMIDI<HardwareSerial>;
-  using MidiInterface = midi::MidiInterface<SerialMIDI>;
+	using SerialMIDI = midi::SerialMIDI<HardwareSerial>;
+	using MidiInterface = midi::MidiInterface<SerialMIDI>;
 
-  SerialMIDI theSerialInstance(Serial1);
-  MidiInterface HWMIDI(theSerialInstance);
+	SerialMIDI theSerialInstance(Serial1);
+	MidiInterface HWMIDI(theSerialInstance);
 }
 
 namespace MM {

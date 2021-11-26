@@ -30,7 +30,9 @@
 
 # BUGS
 
-* step record skipping steps - sometimes led stays on
+* Pattern params - pattern length leds not set to correct seq-page
+
+* step record skipping steps - sometimes led stays on ??
 
 * CV sequence running all day and twice, the sequencer just paused for awhile and then started up again
 
@@ -38,10 +40,6 @@
 # IDEAS / FEATURE REQUESTS / WISH LIST
 
 * chain patterns?
-
-* extend pattern length - needs "pages" (1-8 bar drum patterns)
-
-* knob banks (pots)?
 
 * Record CC automation (playback on clock ticks)
 

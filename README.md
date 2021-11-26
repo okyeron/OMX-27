@@ -46,7 +46,7 @@ git checkout https://github.com/okyeron/OMX-27.git
 cd OMX-27
 
 # compile the project (this may take a while the first time)
-pio run -t build
+pio run
 
 # upload to hardware (don't forget to push button on Teensy)
 pio run -t upload

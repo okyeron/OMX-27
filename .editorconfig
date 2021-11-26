@@ -12,7 +12,6 @@ trim_trailing_whitespace = false
 
 [*.{cpp,c,h,ino}]
 indent_style = tab
-indent_size = 2
 
 [*.{yml,yaml}]
 indent_style = space
