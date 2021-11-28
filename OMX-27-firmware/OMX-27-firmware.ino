@@ -161,29 +161,32 @@ int midiChannel; // the MIDI channel number to send messages (MIDI/OM mode)
 
 // MESSAGE DISPLAY
 const int MESSAGE_TIMEOUT_US = 500000;
+const int MESSAGE_TIMEOUT_SCALES_US = 1000000;
 int messageTextTimer = 0;
 
-void displayMessage(const char* msg) {
+void displayMessageEx(const uint8_t* font, const int time, const char* msg) {
     display.fillRect(0, 0, 128, 32, BLACK);
     u8g2_display.setFontMode(1);
-    u8g2_display.setFont(FONT_TENFAT);
+    u8g2_display.setFont(font);
     u8g2_display.setForegroundColor(WHITE);
     u8g2_display.setBackgroundColor(BLACK);
     u8g2centerText(msg, 0, 10, 128, 32);
 
-    messageTextTimer = MESSAGE_TIMEOUT_US;
+    messageTextTimer = time;
     dirtyDisplay = true;
 }
 
-void displayMessagef(const char* fmt, ...) {
+void displayMessagefEx(const uint8_t* font, const int time, const char* fmt, ...) {
     va_list args;
     va_start(args, fmt);
     char buf[24];
     vsnprintf(buf, sizeof(buf), fmt, args);
     va_end(args);
-    displayMessage(buf);
+    displayMessageEx(font, time, buf);
 }
 
+#define displayMessage(msg) displayMessageEx(FONT_TENFAT, MESSAGE_TIMEOUT_US, msg)
+#define displayMessagef(...) displayMessagefEx(FONT_TENFAT, MESSAGE_TIMEOUT_US, __VA_ARGS__)
 
 // ENCODER
 Encoder myEncoder(12, 11); 	// encoder pins on hardware
@@ -1031,7 +1034,9 @@ void loop() {
 	doStep();
 
 	// DISPLAY SETUP
-	display.clearDisplay();
+	if(messageTextTimer == 0) {
+		display.clearDisplay();
+	}
 
 	// ############### POTS ###############
 	//
@@ -1077,7 +1082,7 @@ void loop() {
 						}
 						strip.show();
 						// show the name of the scale for a moment
-						displayMessagef("%s %s", noteNames[scaleRoot], scaleNames[scalePattern]);
+						displayMessagefEx(FONT_VALUES, MESSAGE_TIMEOUT_SCALES_US, "%s %s", noteNames[scaleRoot], scaleNames[scalePattern]);
 						dirtyPixels = true;
 						break;
 					}
@@ -1520,9 +1525,9 @@ void loop() {
 							}
 							strip.show();
 							if(scaleDisplay) {
-								displayMessage("SCALES ENABLED");
+								displayMessage("SCALES ON");
 							} else {
-								displayMessage("SCALES DISABLED");
+								displayMessage("SCALES OFF");
 							}
 							dirtyPixels = true;
 						} else if((thisKey >= 6 && thisKey <= 10) || thisKey >= 19) {
@@ -1543,7 +1548,7 @@ void loop() {
 							}
 							strip.show();
 							// show the name of the scale for a moment
-							displayMessagef("%s %s", noteNames[scaleRoot], scaleNames[scalePattern]);
+							displayMessagefEx(FONT_VALUES, MESSAGE_TIMEOUT_SCALES_US, "%s %s", noteNames[scaleRoot], scaleNames[scalePattern]);
 							dirtyPixels = true;
 						}
 					} else {
@@ -1939,6 +1944,7 @@ void loop() {
 		messageTextTimer -= passed;
 		if(messageTextTimer <= 0) {
 			dirtyDisplay = true;
+			display.clearDisplay();
 			messageTextTimer = 0;
 		}
 	}
@@ -1952,7 +1958,7 @@ void loop() {
 			midi_leds();				// SHOW LEDS
 
 			if (dirtyDisplay){			// DISPLAY
-				if (!enc_edit){
+				if (!enc_edit && messageTextTimer == 0){
 					int pselected = miparam % NUM_DISP_PARAMS;
 					if (mmpage == 0){
 						dispGenericMode(SUBMODE_MIDI, pselected);
