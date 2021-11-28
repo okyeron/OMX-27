@@ -1582,17 +1582,17 @@ void loop() {
 							// COPY / PASTE / CLEAR
 							if (keyState[1] && !keyState[2]) {
 								copyPattern(sequencer.playingPattern);
-								displayMessagef("COPIED P%d", sequencer.playingPattern + 1);
+								displayMessagef("COPIED P-%d", sequencer.playingPattern + 1);
 //								Serial.print("copy: ");
 //								Serial.println(playingPattern);
 							} else if (!keyState[1] && keyState[2]) {
 								pastePattern(sequencer.playingPattern);
-								displayMessagef("PASTED P%d", sequencer.playingPattern + 1);
+								displayMessagef("PASTED P-%d", sequencer.playingPattern + 1);
 //								Serial.print("paste: ");
 //								Serial.println(playingPattern);
 							} else if (keyState[1] && keyState[2]) {
 								clearPattern(sequencer.playingPattern);
-								displayMessagef("CLEARED P%d", sequencer.playingPattern + 1);
+								displayMessagef("CLEARED P-%d", sequencer.playingPattern + 1);
 							}
 
 							dirtyDisplay = true;
@@ -1656,9 +1656,9 @@ void loop() {
 							// If KEY 2 is down + pattern = PATTERN MUTE
 							} else if (keyState[2]) {
 								if (sequencer.getPattern(thisKey - 3)->mute){
-									displayMessagef("UNMUTE P%d", (thisKey - 3)+1);
+									displayMessagef("UNMUTE P-%d", (thisKey - 3)+1);
 								}else {
-									displayMessagef("MUTE P%d", (thisKey - 3)+1);
+									displayMessagef("MUTE P-%d", (thisKey - 3)+1);
 								}
 								sequencer.getPattern(thisKey - 3)->mute = !sequencer.getPattern(thisKey-3)->mute;
 							} else {
@@ -1674,6 +1674,7 @@ void loop() {
 									if (keyPos <= getPatternPage(sequencer.getCurrentPattern()->len) ){
 										sequencer.patternPage[sequencer.playingPattern] = keyPos;
 									}
+									displayMessagef("PATT PAGE %d", keyPos + 1);
 								}
 							} else if (keyState[1]) {		// F1 HOLD
 									if (!stepRecord && !patternParams){ 		// IGNORE LONG PRESSES IN STEP RECORD and Pattern Params
@@ -1682,6 +1683,7 @@ void loop() {
 										stepSelect = true;
 										noteSelection = true;
 										dirtyDisplay = true;
+										displayMessagef("NOTE SELECT");
 										// re-toggle the key you just held
 										if (getSelectedStep()->trig == TRIGTYPE_PLAY || getSelectedStep()->trig == TRIGTYPE_MUTE ) {
 											getSelectedStep()->trig = (getSelectedStep()->trig == TRIGTYPE_PLAY ) ? TRIGTYPE_MUTE : TRIGTYPE_PLAY;
@@ -1821,7 +1823,7 @@ void loop() {
 								if (j > 2 && j < 11){ // skip AUX key, get pattern keys
 									patternParams = true;
 									dirtyDisplay = true;
-
+									displayMessagef("PATT PARAMS");
 								} else if (j > 10){
 									if (!stepRecord && !patternParams){ 		// IGNORE LONG PRESSES IN STEP RECORD and Pattern Params
 										selectedStep = (j - 11) + (sequencer.patternPage[sequencer.playingPattern] * NUM_STEPKEYS); // set noteSelection to this step
@@ -1829,6 +1831,7 @@ void loop() {
 										stepSelect = true;
 										noteSelection = true;
 										dirtyDisplay = true;
+										displayMessagef("NOTE SELECT");
 										// re-toggle the key you just held
 //										if ( getSelectedStep()->stepType == STEPTYPE_PLAY || getSelectedStep()->stepType == STEPTYPE_MUTE ) {
 //											getSelectedStep()->stepType = ( getSelectedStep()->stepType == STEPTYPE_PLAY ) ? STEPTYPE_MUTE : STEPTYPE_PLAY;
