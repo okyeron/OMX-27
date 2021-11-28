@@ -1077,7 +1077,7 @@ void loop() {
 						}
 						strip.show();
 						// show the name of the scale for a moment
-						MESSAGE("%s %s", noteNames[scaleRoot], scaleNames[scalePattern]);
+						displayMessagef("%s %s", noteNames[scaleRoot], scaleNames[scalePattern]);
 						dirtyPixels = true;
 						break;
 					}
@@ -1520,9 +1520,9 @@ void loop() {
 							}
 							strip.show();
 							if(scaleDisplay) {
-								MESSAGE("SCALES ENABLED");
+								displayMessage("SCALES ENABLED");
 							} else {
-								MESSAGE("SCALES DISABLED");
+								displayMessage("SCALES DISABLED");
 							}
 							dirtyPixels = true;
 						} else if((thisKey >= 6 && thisKey <= 10) || thisKey >= 19) {
@@ -1543,7 +1543,7 @@ void loop() {
 							}
 							strip.show();
 							// show the name of the scale for a moment
-							MESSAGE("%s %s", noteNames[scaleRoot], scaleNames[scalePattern]);
+							displayMessagef("%s %s", noteNames[scaleRoot], scaleNames[scalePattern]);
 							dirtyPixels = true;
 						}
 					} else {
@@ -2025,10 +2025,6 @@ void loop() {
 
 //	if(dirtyDisplay && messageTextTimer > 0) {
 //	}
-
-	if(messageTextTimer > 0) {
-		displayMessage();
-	}
 
 	// DISPLAY at end of loop
 
