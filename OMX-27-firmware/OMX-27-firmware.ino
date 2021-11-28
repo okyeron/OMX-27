@@ -149,27 +149,30 @@ uint8_t midiLastNote = 0;
 int midiChannel; // the MIDI channel number to send messages (MIDI/OM mode)
 
 // MESSAGE DISPLAY
-const auto MESSAGE_TEXT_LEN = 24;
-const auto MESSAGE_DISPLAY_TIME = 1000000;
-char messageText[MESSAGE_TEXT_LEN];
+const int MESSAGE_TIMEOUT_US = 500000;
 int messageTextTimer = 0;
 
-void setMessage(int time) {
-	messageTextTimer = time;
-	dirtyDisplay = true;
+void displayMessage(const char* msg) {
+    display.fillRect(0, 0, 128, 32, BLACK);
+    u8g2_display.setFontMode(1);
+    u8g2_display.setFont(FONT_TENFAT);
+    u8g2_display.setForegroundColor(WHITE);
+    u8g2_display.setBackgroundColor(BLACK);
+    u8g2centerText(msg, 0, 10, 128, 32);
+
+    messageTextTimer = MESSAGE_TIMEOUT_US;
+    dirtyDisplay = true;
 }
 
-void displayMessage() {
-	display.fillRect(0, 0, 128, 32, BLACK);
-	u8g2_display.setFontMode(1);
-	u8g2_display.setFont(FONT_VALUES);
-	u8g2_display.setForegroundColor(WHITE);
-	u8g2_display.setBackgroundColor(BLACK);
-	u8g2centerText(messageText, 0, 10, 128, 32);
+void displayMessagef(const char* fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+    char buf[24];
+    vsnprintf(buf, sizeof(buf), fmt, args);
+    va_end(args);
+    displayMessage(buf);
 }
 
-// this throws a warning when split over multiple lines even though it improves readability
-#define MESSAGE(...) { snprintf(messageText, MESSAGE_TEXT_LEN, __VA_ARGS__); setMessage(MESSAGE_DISPLAY_TIME); dirtyDisplay = true; }
 
 // ENCODER
 Encoder myEncoder(12, 11); 	// encoder pins on hardware
@@ -1579,17 +1582,17 @@ void loop() {
 							// COPY / PASTE / CLEAR
 							if (keyState[1] && !keyState[2]) {
 								copyPattern(sequencer.playingPattern);
-								MESSAGE("COPIED P%d", sequencer.playingPattern);
+								displayMessagef("COPIED P%d", sequencer.playingPattern + 1);
 //								Serial.print("copy: ");
 //								Serial.println(playingPattern);
 							} else if (!keyState[1] && keyState[2]) {
 								pastePattern(sequencer.playingPattern);
-								MESSAGE("PASTED P%d", sequencer.playingPattern);
+								displayMessagef("PASTED P%d", sequencer.playingPattern + 1);
 //								Serial.print("paste: ");
 //								Serial.println(playingPattern);
 							} else if (keyState[1] && keyState[2]) {
 								clearPattern(sequencer.playingPattern);
-								MESSAGE("CLEARED P%d", sequencer.playingPattern);
+								displayMessagef("CLEARED P%d", sequencer.playingPattern + 1);
 							}
 
 							dirtyDisplay = true;
@@ -1647,12 +1650,17 @@ void loop() {
 								sequencer.seqPos[sequencer.playingPattern] = 0;
 								sequencer.patternPage[sequencer.playingPattern] = 0;	// Step Record always starts from first page
 								stepRecord = true;
+								displayMessagef("STEP RECORD");
 								dirtyDisplay = true;
 
 							// If KEY 2 is down + pattern = PATTERN MUTE
 							} else if (keyState[2]) {
+								if (sequencer.getPattern(thisKey - 3)->mute){
+									displayMessagef("UNMUTE P%d", (thisKey - 3)+1);
+								}else {
+									displayMessagef("MUTE P%d", (thisKey - 3)+1);
+								}
 								sequencer.getPattern(thisKey - 3)->mute = !sequencer.getPattern(thisKey-3)->mute;
-
 							} else {
 								sequencer.playingPattern = thisKey - 3;
 								dirtyDisplay = true;
@@ -1742,14 +1750,14 @@ void loop() {
 						if (keyState[1] || keyState[2]) { 				// CHECK keyState[] FOR LONG PRESS OF FUNC KEYS
 							if (keyState[1]) {
 								sequencer.seqResetFlag = true;		// RESET ALL SEQUENCES TO FIRST/LAST STEP
-								MESSAGE("RESET");
+								displayMessagef("RESET");
 
 							} else if (keyState[2]) { 					// CHANGE PATTERN DIRECTION
 								sequencer.getCurrentPattern()->reverse = !sequencer.getCurrentPattern()->reverse;
 								if (sequencer.getCurrentPattern()->reverse) {
-									MESSAGE("<< REV");
+									displayMessagef("<< REV");
 								} else{
-									MESSAGE("FWD >>");
+									displayMessagef("FWD >>");
 								}
 							}
 							dirtyDisplay = true;
@@ -1850,6 +1858,7 @@ void loop() {
 		messageTextTimer -= passed;
 		if(messageTextTimer <= 0) {
 			dirtyDisplay = true;
+			messageTextTimer = 0;
 		}
 	}
 
@@ -1885,7 +1894,7 @@ void loop() {
 			}
 
 			if (dirtyDisplay){			// DISPLAY
-				if (!enc_edit){
+				if (!enc_edit && messageTextTimer == 0){	// show only if not encoder edit or dialog display
 					if (!noteSelect and !patternParams and !stepRecord){
 						int pselected = sqparam % NUM_DISP_PARAMS;
 						if (sqpage == 0){
@@ -1933,9 +1942,8 @@ void loop() {
 
 	}
 
-	if(dirtyDisplay && messageTextTimer > 0) {
-		displayMessage();
-	}
+//	if(dirtyDisplay && messageTextTimer > 0) {
+//	}
 
 	// DISPLAY at end of loop
 
