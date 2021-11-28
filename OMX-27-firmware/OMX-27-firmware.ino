@@ -42,7 +42,6 @@ int temp;
 elapsedMillis blink_msec = 0;
 elapsedMillis slow_blink_msec = 0;
 elapsedMillis pots_msec = 0;
-elapsedMillis dialogTimeout = 0;
 elapsedMillis dirtyDisplayTimer = 0;
 unsigned long displayRefreshRate = 60;
 elapsedMicros clksTimer = 0;		// is this still in use?
@@ -148,6 +147,32 @@ int currbank = 0;
 bool midiInToCV = true;
 uint8_t midiLastNote = 0;
 int midiChannel; // the MIDI channel number to send messages (MIDI/OM mode)
+
+// MESSAGE DISPLAY
+const int MESSAGE_TIMEOUT_US = 500000;
+int messageTextTimer = 0;
+
+void displayMessage(const char* msg) {
+    display.fillRect(0, 0, 128, 32, BLACK);
+    u8g2_display.setFontMode(1);
+    u8g2_display.setFont(FONT_TENFAT);
+    u8g2_display.setForegroundColor(WHITE);
+    u8g2_display.setBackgroundColor(BLACK);
+    u8g2centerText(msg, 0, 10, 128, 32);
+
+    messageTextTimer = MESSAGE_TIMEOUT_US;
+    dirtyDisplay = true;
+}
+
+void displayMessagef(const char* fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+    char buf[24];
+    vsnprintf(buf, sizeof(buf), fmt, args);
+    va_end(args);
+    displayMessage(buf);
+}
+
 
 // ENCODER
 Encoder myEncoder(12, 11); 	// encoder pins on hardware
@@ -292,7 +317,6 @@ void setup() {
 	usbMIDI.setHandleNoteOn(OnNoteOn);
 
 	storage = Storage::initStorage();
-	dialogTimeout = 0;
 	clksTimer = 0;
 
 	lastProcessTime = micros();
@@ -941,22 +965,6 @@ void dispPageIndicators(int page, bool selected){
 	}
 }
 
-void dispInfoDialog(){
-	for (int key=0; key < NUM_DIALOGS; key++){
-		if (infoDialog[key].state){
-			dialogTimeout = 0;
-			display.clearDisplay();
-			u8g2_display.setFontMode(1);
-			u8g2_display.setFont(FONT_TENFAT);
-			u8g2_display.setForegroundColor(WHITE);
-			u8g2_display.setBackgroundColor(BLACK);
-
-			u8g2centerText(infoDialog[key].text, 0, 10, 128, 32);
-			infoDialog[key].state = false;
-		}
-	}
-}
-
 void dispMode(){
 	// labels formatting
 	u8g2_display.setFontMode(1);
@@ -1574,17 +1582,17 @@ void loop() {
 							// COPY / PASTE / CLEAR
 							if (keyState[1] && !keyState[2]) {
 								copyPattern(sequencer.playingPattern);
-								infoDialog[COPY].state = true; // copied flag
+								displayMessagef("COPIED P-%d", sequencer.playingPattern + 1);
 //								Serial.print("copy: ");
 //								Serial.println(playingPattern);
 							} else if (!keyState[1] && keyState[2]) {
 								pastePattern(sequencer.playingPattern);
-								infoDialog[PASTE].state = true; // pasted flag
+								displayMessagef("PASTED P-%d", sequencer.playingPattern + 1);
 //								Serial.print("paste: ");
 //								Serial.println(playingPattern);
 							} else if (keyState[1] && keyState[2]) {
 								clearPattern(sequencer.playingPattern);
-								infoDialog[CLEAR].state = true; // cleared flag
+								displayMessagef("CLEARED P-%d", sequencer.playingPattern + 1);
 							}
 
 							dirtyDisplay = true;
@@ -1642,12 +1650,17 @@ void loop() {
 								sequencer.seqPos[sequencer.playingPattern] = 0;
 								sequencer.patternPage[sequencer.playingPattern] = 0;	// Step Record always starts from first page
 								stepRecord = true;
+								displayMessagef("STEP RECORD");
 								dirtyDisplay = true;
 
 							// If KEY 2 is down + pattern = PATTERN MUTE
 							} else if (keyState[2]) {
+								if (sequencer.getPattern(thisKey - 3)->mute){
+									displayMessagef("UNMUTE P-%d", (thisKey - 3)+1);
+								}else {
+									displayMessagef("MUTE P-%d", (thisKey - 3)+1);
+								}
 								sequencer.getPattern(thisKey - 3)->mute = !sequencer.getPattern(thisKey-3)->mute;
-
 							} else {
 								sequencer.playingPattern = thisKey - 3;
 								dirtyDisplay = true;
@@ -1661,6 +1674,7 @@ void loop() {
 									if (keyPos <= getPatternPage(sequencer.getCurrentPattern()->len) ){
 										sequencer.patternPage[sequencer.playingPattern] = keyPos;
 									}
+									displayMessagef("PATT PAGE %d", keyPos + 1);
 								}
 							} else if (keyState[1]) {		// F1 HOLD
 									if (!stepRecord && !patternParams){ 		// IGNORE LONG PRESSES IN STEP RECORD and Pattern Params
@@ -1669,6 +1683,7 @@ void loop() {
 										stepSelect = true;
 										noteSelection = true;
 										dirtyDisplay = true;
+										displayMessagef("NOTE SELECT");
 										// re-toggle the key you just held
 										if (getSelectedStep()->trig == TRIGTYPE_PLAY || getSelectedStep()->trig == TRIGTYPE_MUTE ) {
 											getSelectedStep()->trig = (getSelectedStep()->trig == TRIGTYPE_PLAY ) ? TRIGTYPE_MUTE : TRIGTYPE_PLAY;
@@ -1737,14 +1752,14 @@ void loop() {
 						if (keyState[1] || keyState[2]) { 				// CHECK keyState[] FOR LONG PRESS OF FUNC KEYS
 							if (keyState[1]) {
 								sequencer.seqResetFlag = true;		// RESET ALL SEQUENCES TO FIRST/LAST STEP
-								infoDialog[RESET].state = true; // reset flag
+								displayMessagef("RESET");
 
 							} else if (keyState[2]) { 					// CHANGE PATTERN DIRECTION
 								sequencer.getCurrentPattern()->reverse = !sequencer.getCurrentPattern()->reverse;
 								if (sequencer.getCurrentPattern()->reverse) {
-									infoDialog[REV].state = true; // rev direction flag
+									displayMessagef("<< REV");
 								} else{
-									infoDialog[FWD].state = true; // fwd direction flag
+									displayMessagef("FWD >>");
 								}
 							}
 							dirtyDisplay = true;
@@ -1808,7 +1823,7 @@ void loop() {
 								if (j > 2 && j < 11){ // skip AUX key, get pattern keys
 									patternParams = true;
 									dirtyDisplay = true;
-
+									displayMessagef("PATT PARAMS");
 								} else if (j > 10){
 									if (!stepRecord && !patternParams){ 		// IGNORE LONG PRESSES IN STEP RECORD and Pattern Params
 										selectedStep = (j - 11) + (sequencer.patternPage[sequencer.playingPattern] * NUM_STEPKEYS); // set noteSelection to this step
@@ -1816,6 +1831,7 @@ void loop() {
 										stepSelect = true;
 										noteSelection = true;
 										dirtyDisplay = true;
+										displayMessagef("NOTE SELECT");
 										// re-toggle the key you just held
 //										if ( getSelectedStep()->stepType == STEPTYPE_PLAY || getSelectedStep()->stepType == STEPTYPE_MUTE ) {
 //											getSelectedStep()->stepType = ( getSelectedStep()->stepType == STEPTYPE_PLAY ) ? STEPTYPE_MUTE : STEPTYPE_PLAY;
@@ -1840,6 +1856,14 @@ void loop() {
 
 
 	// ############### MODES DISPLAY  ##############
+
+	if(messageTextTimer > 0) {
+		messageTextTimer -= passed;
+		if(messageTextTimer <= 0) {
+			dirtyDisplay = true;
+			messageTextTimer = 0;
+		}
+	}
 
 	switch(omxMode){
 		case MODE_OM: 						// ############## ORGANELLE MODE
@@ -1867,18 +1891,13 @@ void loop() {
 		case MODE_S1: 						// ############## SEQUENCER 1
 			// FALL THROUGH
 		case MODE_S2: 						// ############## SEQUENCER 2
-			if (!enc_edit) {
-				if (dialogTimeout > dialogDuration && dialogTimeout < dialogDuration + 20) {
-					dirtyDisplay = true;
-				}
-			}
 			// MIDI SOLO
 			if (sequencer.getCurrentPattern()->solo) {
 				midi_leds();
 			}
 
 			if (dirtyDisplay){			// DISPLAY
-				if (!enc_edit){
+				if (!enc_edit && messageTextTimer == 0){	// show only if not encoder edit or dialog display
 					if (!noteSelect and !patternParams and !stepRecord){
 						int pselected = sqparam % NUM_DISP_PARAMS;
 						if (sqpage == 0){
@@ -1886,7 +1905,6 @@ void loop() {
 						} else if (sqpage == 1){
 							dispGenericMode(SUBMODE_SEQ2, pselected);
 						}
-						dispInfoDialog();
 					}
 					if (noteSelect) {
 						int pselected = nsparam % NUM_DISP_PARAMS;
@@ -1907,17 +1925,14 @@ void loop() {
 						} else if (pppage == 2){
 							dispGenericMode(SUBMODE_PATTPARAMS3, pselected);
 						}
-						dispInfoDialog();
 
 					}
 					if (stepRecord) {
 						int pselected = srparam % NUM_DISP_PARAMS;
 						if (srpage == 0){
 							dispGenericMode(SUBMODE_STEPREC, pselected);
-							dispInfoDialog();
 						} else if (srpage == 1){
 							dispGenericMode(SUBMODE_NOTESEL2, pselected);
-							dispInfoDialog();
 						}
 					}
 				}
@@ -1930,6 +1945,8 @@ void loop() {
 
 	}
 
+//	if(dirtyDisplay && messageTextTimer > 0) {
+//	}
 
 	// DISPLAY at end of loop
 

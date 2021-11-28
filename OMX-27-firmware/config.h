@@ -1,7 +1,10 @@
 #pragma once
 
 #include <Arduino.h>
+#include <stdio.h>
+#include <stdarg.h>
 #include <stdint.h>
+// #include <cstdarg>
 
 //const int OMX_VERSION = 1.4.3b1;
 

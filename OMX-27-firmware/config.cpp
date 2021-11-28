@@ -47,18 +47,6 @@ const char* modes[] = {"MI","S1","S2","OM"};
 float multValues[] = {.25, .5, 1, 2, 4, 8, 16};
 const char* mdivs[] = {"1/64", "1/32", "1/16", "1/8", "1/4", "1/2", "W"};
 
-const char* infoDialogText[] = {"COPIED","PASTED","CLEARED","RESET","FWD >>","<< REV","SAVED","SAVE?"};
-InfoDialogs infoDialog[NUM_DIALOGS] = {
-	{"COPIED", false},
-	{"PASTED", false},
-	{"CLEARED", false},
-	{"RESET", false},
-	{"FWD >>", false},
-	{"<< REV", false},
-	{"SAVED", false},
-	{"SAVE?", false}
-};
-
 // KEY SWITCH ROWS/COLS
 
 // Map the keys
