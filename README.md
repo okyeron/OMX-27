@@ -4,9 +4,22 @@
 
 Mechanical key switch midi keyboard and sequencer. Based on Teensy 3.2 and Cherry MX RGB key switches.
 
-## Firmware Requirements
+## Firmware 
 
-### Teensyduino
+### Pre-compiled firmware w/ TyUpdater
+
+Download OMX-27 firmware "hex" file from https://github.com/okyeron/OMX-27/releases or the Firmware-Hexes directory in this repo.
+
+Get TyTools (https://koromix.dev/tytools) [from GitHub here](https://github.com/Koromix/tytools/releases).
+
+Copy TyUpdater to your machine and open it. Be sure your OMX-27 is plugged in. It should show up in the TyUpdater application.
+
+<img src="images/tyupdater.png" alt="tyupdater" width="382" height="193" />
+
+Click the Upload button and select the firmware hex file you want to upload. This should upload the firmware and the OMX-27 should reboot. That's it.
+
+
+### Teensyduino (compile yourself)
 
 Install Teensyduino from the [PJRC website](https://www.pjrc.com/teensy/teensyduino.html).
 
