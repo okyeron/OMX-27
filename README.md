@@ -6,11 +6,13 @@ Mechanical key switch midi keyboard and sequencer. Based on Teensy 3.2 and Cherr
 
 ## Firmware 
 
-### Pre-compiled firmware w/ TyUpdater
+Kits are shipped with a blank Teensy. You will need to flash the firmware to the device.
+
+### Load pre-compiled firmware w/ TyUpdater
 
 Download OMX-27 firmware "hex" file from https://github.com/okyeron/OMX-27/releases or the Firmware-Hexes directory in this repo.
 
-Get TyTools (https://koromix.dev/tytools) [from GitHub here](https://github.com/Koromix/tytools/releases).
+Get TyTools [from GitHub here](https://github.com/Koromix/tytools/releases). More info here (https://koromix.dev/tytools).
 
 Copy TyUpdater to your machine and open it. Be sure your OMX-27 is plugged in. It should show up in the TyUpdater application.
 
