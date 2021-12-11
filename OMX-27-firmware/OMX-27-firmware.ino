@@ -1,5 +1,5 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
-// v 1.4.3
+// v 1.4.4b1
 //
 // Steven Noreyko, November 2021
 //
@@ -147,6 +147,7 @@ int currbank = 0;
 bool midiInToCV = true;
 uint8_t midiLastNote = 0;
 int midiChannel; // the MIDI channel number to send messages (MIDI/OM mode)
+bool midiSoftThru = false;
 
 // MESSAGE DISPLAY
 const int MESSAGE_TIMEOUT_US = 500000;
@@ -315,6 +316,7 @@ void setup() {
 	// incoming usbMIDI callbacks
 	usbMIDI.setHandleNoteOff(OnNoteOff);
 	usbMIDI.setHandleNoteOn(OnNoteOn);
+	usbMIDI.setHandleControlChange(OnControlChange);
 
 	storage = Storage::initStorage();
 	clksTimer = 0;
@@ -755,12 +757,17 @@ void dispGenericMode(int submode, int selected){
 			dispPage = 2;
 			break;
 		case SUBMODE_MIDI3:
-			legends[0] = "PBNK";
-			legends[1] = "---";
+			legends[0] = "PBNK";	// Potentiometer Banks
+			legends[1] = "THRU";
 			legends[2] = "---";
 			legends[3] = "---";
 			legendVals[0] = potbank + 1;
-			legendVals[1] = 0;
+			legendVals[1] = -127;
+			if (midiSoftThru) {
+				legendText[1] = "On";
+			} else {
+				legendText[1] = "Off";
+			}
 			legendVals[2] = 0;
 			legendVals[3] = 0;
 			dispPage = 3;
@@ -1093,6 +1100,9 @@ void loop() {
 					// PAGE THREE
 					if (miparam == 11) {
 						potbank = constrain(potbank + amt, 0, NUM_CC_BANKS-1);
+					}
+					if (miparam == 12) {
+						midiSoftThru = constrain(midiSoftThru + amt, 0, 1);
 					}
 
 					dirtyDisplay = true;
@@ -1966,7 +1976,7 @@ void loop() {
 	}
 
 	while (MM::usbMidiRead()) {
-		// ignore incoming messages
+		// incoming messages - see handlers
 	}
 	while (MM::midiRead()) {
 		// ignore incoming messages
@@ -2257,6 +2267,9 @@ void cvNoteOff(){
 
 // #### Inbound MIDI callbacks
 void OnNoteOn(byte channel, byte note, byte velocity) {
+	if (midiSoftThru) {
+		MM::sendNoteOnHW(note, velocity, channel);
+	}
 	if (midiInToCV){
 		cvNoteOn(note);
 	}
@@ -2303,8 +2316,15 @@ void OnNoteOff(byte channel, byte note, byte velocity) {
 		strip.show();
 		dirtyDisplay = true;
 	}
+	if (midiSoftThru) {
+		MM::sendNoteOffHW(note, velocity, channel);
+	}
 }
-
+void OnControlChange(byte channel, byte control,  byte value) {
+	if (midiSoftThru) {
+		MM::sendControlChangeHW(control, value, channel);
+	}
+}
 // #### Outbound MIDI Mode note on/off
 void midiNoteOn(int notenum, int velocity, int channel) {
 	int adjnote = notes[notenum] + (octave * 12); // adjust key for octave range

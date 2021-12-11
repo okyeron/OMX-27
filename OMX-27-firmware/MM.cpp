@@ -18,15 +18,22 @@ namespace MM {
 	void sendNoteOn(int note, int velocity, int channel) {
 		usbMIDI.sendNoteOn(note, velocity, channel);
 		HWMIDI.sendNoteOn(note, velocity, channel);
-
+	}
+	void sendNoteOnHW(int note, int velocity, int channel) {
+		HWMIDI.sendNoteOn(note, velocity, channel);
 	}
 	void sendNoteOff(int note, int velocity, int channel) {
 		usbMIDI.sendNoteOff(note, velocity, channel);
 		HWMIDI.sendNoteOff(note, velocity, channel);
-
+	}
+	void sendNoteOffHW(int note, int velocity, int channel) {
+		HWMIDI.sendNoteOff(note, velocity, channel);
 	}
 	void sendControlChange(int control, int value, int channel) {
 		usbMIDI.sendControlChange(control, value, channel);
+		HWMIDI.sendControlChange(control, value, channel);
+	}
+	void sendControlChangeHW(int control, int value, int channel) {
 		HWMIDI.sendControlChange(control, value, channel);
 	}
 
