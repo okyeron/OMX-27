@@ -20,9 +20,9 @@ public:
 
   // reset entire storage back to 0
   void clear() {
-	for (int address = 0; address < capacity(); address++) {
-	  write(address, 0);
-	}
+		for (int address = 0; address < capacity(); address++) {
+			write(address, 0);
+		}
   }
 
   // template reader/writer implementation copied from Adafruit_FRAM_I2C which implements them both
