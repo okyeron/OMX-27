@@ -531,7 +531,7 @@ void show_current_step(int patternNum) {
 				if (j == sequencer.seqPos[sequencer.playingPattern]){
 					strip.setPixelColor(pixelpos, SEQCHASE);
 				} else if (pixelpos != selectedNote){
-					strip.setPixelColor(pixelpos, LEDOFF);					
+					strip.setPixelColor(pixelpos, LEDOFF);
 				}
 			} else  {
 				strip.setPixelColor(pixelpos, LEDOFF);
