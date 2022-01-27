@@ -2851,8 +2851,9 @@ void loadPatterns( void ) {
 	int s = sizeof( Pattern );
 
 	for ( int i=0; i<NUM_PATTERNS; i++ ) {
-		auto pattern = sequencer.getPattern(i);
-		storage->readObject(nLocalAddress, *pattern);
+		auto pattern = Pattern{};
+		storage->readObject(nLocalAddress, pattern);
+		sequencer.patterns[i] = pattern;
 		nLocalAddress += s;
 	}
 }
