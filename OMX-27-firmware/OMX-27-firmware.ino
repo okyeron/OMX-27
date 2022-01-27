@@ -325,7 +325,8 @@ void setup() {
 	resetClocks();
 
 	randomSeed(analogRead(13));
-
+	srand(analogRead(13));
+	
 	// SET ANALOG READ resolution to teensy's 13 usable bits
 	analogReadResolution(13);
 
@@ -1647,7 +1648,7 @@ void loop() {
 						} else if (thisKey == 2) { 					// CHANGE PATTERN DIRECTION
 //							sequencer.getCurrentPattern()->reverse = !sequencer.getCurrentPattern()->reverse;
 
-						// BLACK KEYS
+						// BLACK KEYS - PATTERNS
 						} else if (thisKey > 2 && thisKey < 11) { // Pattern select
 
 							// CHECK keyState[] FOR LONG PRESS THINGS
@@ -1991,17 +1992,20 @@ StepNote* getSelectedStep() {
 	return &sequencer.getCurrentPattern()->steps[selectedStep];
 }
 
+
 void step_ahead(int patternNum) {
-	// step each pattern ahead one place
+	// step ALL patterns ahead one place
 	for (int j=0; j<8; j++){
 		if (sequencer.getPattern(j)->reverse) {
 			sequencer.seqPos[j]--;
-			auto_reset(j); // determine whether to reset or not based on param settings
+//			auto_reset(j); // determine whether to reset or not based on param settings
+
 //			if (seqPos[j] < 0)
 //				seqPos[j] = sequencer.PatternLength(j)-1;
 		} else {
 			sequencer.seqPos[j]++;
-			auto_reset(j); // determine whether to reset or not based on param settings
+//			auto_reset(j); // determine whether to reset or not based on param settings
+
 //			if (seqPos[j] >= sequencer.PatternLength(j))
 //				seqPos[j] = 0;
 		}
@@ -2023,7 +2027,7 @@ void step_back(int patternNum) {
 }
 
 void new_step_ahead(int patternNum) {
-	// step each pattern ahead one place
+	// step ONE pattern ahead one place
 		if (sequencer.getPattern(patternNum)->reverse) {
 			sequencer.seqPos[patternNum]--;
 			auto_reset(patternNum); // determine whether to reset or not based on param settings

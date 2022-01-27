@@ -25,6 +25,8 @@ Long press encoder to enable mode change. Turn to change modes, short-press to e
 
 Within the modes a short press on the encoder will select a parameter to edit.
 
+Values changed with the encoder will update immediately as you turn the encoder. There's no need to click the encoder to "save" that new value.
+
 
 ### Key Switches
 
@@ -206,7 +208,7 @@ Settings:
 
 - START (Currently 0 - PatternLength-1): Use this to set the start step in current pattern to reset to for beginning a new cycle.
 
-- END (Currently 0 - PatternLength-1): Use this to set the last step in current sequence to end/reset pattern cycles. This in essence is the step that will be used to trigger resets.
+- END (Currently 0 - PatternLength-1): Use this to set the last step in current sequence to end/reset pattern cycles. This in essence is the step that will be used to trigger resets. 0 = off
 
 - FREQ of trigger reset (i.e., every X sequence cycle iterations)
 
