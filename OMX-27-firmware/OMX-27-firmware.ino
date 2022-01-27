@@ -2837,51 +2837,22 @@ bool loadHeader( void ) {
 
 void savePatterns( void ) {
 	int nLocalAddress = EEPROM_PATTERN_ADDRESS;
-	int s = sizeof( StepNote );
-
-	// storage->writeObject uses storage->write under the hood, so writes here of the same data are a noop
-
-	// for each pattern
-	for ( int i=0; i<NUM_PATTERNS; i++ ) {
-		auto pattern = sequencer.getPattern(i);
-		for ( int j=0; j<NUM_STEPS; j++ ) {
-			storage->writeObject( nLocalAddress, pattern->steps[j] );
-			nLocalAddress += s;
-		}
-	}
-
-	nLocalAddress = EEPROM_PATTERN_SETTINGS_ADDRESS;
-	s = sizeof( Pattern );
+	int s = sizeof( Pattern );
 
 	// save pattern settings
 	for ( int i=0; i<NUM_PATTERNS; i++ ) {
-		storage->writeObject( nLocalAddress, sequencer.getPattern(i));
+		storage->writeObject( nLocalAddress, *sequencer.getPattern(i));
 		nLocalAddress += s;
 	}
 }
 
 void loadPatterns( void ) {
-	//Serial.println( "load patterns" );
+	int nLocalAddress = EEPROM_PATTERN_SETTINGS_ADDRESS;
+	int s = sizeof( Pattern );
 
-	int nLocalAddress = EEPROM_PATTERN_ADDRESS;
-	int s = sizeof( StepNote );
-
-	// for each pattern
 	for ( int i=0; i<NUM_PATTERNS; i++ ) {
 		auto pattern = sequencer.getPattern(i);
-		for ( int j=0; j<NUM_STEPS; j++ ) {
-			storage->readObject(nLocalAddress, pattern->steps[j]);
-			nLocalAddress += s;
-		}
-	}
-
-	nLocalAddress = EEPROM_PATTERN_SETTINGS_ADDRESS;
-	s = sizeof( Pattern );
-
-	// load pattern length
-	for ( int i=0; i<NUM_PATTERNS; i++ ) {
-		auto pattern = sequencer.getPattern(i);
-		storage->readObject(nLocalAddress, pattern);
+		storage->readObject(nLocalAddress, *pattern);
 		nLocalAddress += s;
 	}
 }
