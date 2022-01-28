@@ -25,8 +25,6 @@ Long press encoder to enable mode change. Turn to change modes, short-press to e
 
 Within the modes a short press on the encoder will select a parameter to edit.
 
-Values changed with the encoder will update immediately as you turn the encoder. There's no need to click the encoder to "save" that new value.
-
 
 ### Key Switches
 
@@ -132,7 +130,7 @@ AUX-key exits sub-modes
 
 Long press a step key to enter this mode. Here you can change the note values (note number, velocity, note length and octave), set CC parameter values with the knobs, and set step parameters (step events, step probability, trig conditions).
 
-Step Events:
+Step Events (TYPE):
 "-" mute
 "+" play
 "1" reset to first step
@@ -141,7 +139,10 @@ Step Events:
 "#?" jump to random step number
 "?" set random event (of any of the previous events) for that one step
 
-Trig conditions - A/B Ratios:
+Step Probability (PROB):  
+Percentage of the step triggering.
+
+Trig conditions - A/B Ratios (COND):
 Play that step on the A cycle of B total cycles (or bars) of the pattern. Default is 1:1 (every time).
 First number - play step on that cycle thru the pattern
 Second number - resets the counter after that pattern cycle.
@@ -157,9 +158,11 @@ Holding F1 + a Pattern Key will enter Step Record Mode.
 
 Enter notes from the keyboard and the sequence step will automatically advance to the next step. Change knob 1-4 positions to set a CC parameter lock for that step. Knob #5 (far right) will enter a velocity value for that step (there is no visual feedback when entering values from the knobs.
 
-You can short-press the encoder button to skip a step (making no note change). However, you can still record plocks/velocity for that step with the knobs. A nice trick might be to make one pass through playing notes on the keyboard and then make a second pass using the encoder button to add plocks or velocity values for each step.
+~~You can short-press the encoder button to skip a step (making no note change). However, you can still record plocks/velocity for that step with the knobs. A nice trick might be to make one pass through playing notes on the keyboard and then make a second pass using the encoder button to add plocks or velocity values for each step.~~
 
-In this sub-mode, turning the encoder is locked to change octave. The display will show you the current pattern, step, note-value, and octave.
+There are two pages of parameters in Step Record. First is the current octave, step number, note-value, and pattern number. Second shows the step events TYPE, PROB and COND as described above.
+
+ 
 
 Use the AUX to exit this sub-mode.
 
@@ -208,7 +211,7 @@ Settings:
 
 - START (Currently 0 - PatternLength-1): Use this to set the start step in current pattern to reset to for beginning a new cycle.
 
-- END (Currently 0 - PatternLength-1): Use this to set the last step in current sequence to end/reset pattern cycles. This in essence is the step that will be used to trigger resets. 0 = off
+- END (Currently 0 - PatternLength-1): Use this to set the last step in current sequence to end/reset pattern cycles. This in essence is the step that will be used to trigger resets.
 
 - FREQ of trigger reset (i.e., every X sequence cycle iterations)
 

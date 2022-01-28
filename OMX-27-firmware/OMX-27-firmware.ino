@@ -1123,19 +1123,16 @@ void loop() {
 						if (sequencer.getCurrentPattern()->solo) {
 							setAllLEDS(0,0,0);
 						}
-					} else if (sqparam == 2){
-						// set transpose
+					} else if (sqparam == 2){		// SET TRANSPOSE
 						transposeSeq(sequencer.playingPattern, amt); //
 						int newtransp = constrain(transpose + amt, -64, 63);
 						transpose = newtransp;
-					} else if (sqparam == 3){
-						// set swing
+					} else if (sqparam == 3){		// SET SWING
 						int newswing = constrain(sequencer.getCurrentPattern()->swing + amt, 0, maxswing - 1); // -1 to deal with display values
 						swing = newswing;
 						sequencer.getCurrentPattern()->swing = newswing;
 						//	setGlobalSwing(newswing);
-					} else if (sqparam == 4){
-						// set tempo
+					} else if (sqparam == 4){		// SET TEMPO
 						newtempo = constrain(clockbpm + amt, 40, 300);
 						if (newtempo != clockbpm){
 							// SET TEMPO HERE
@@ -1145,28 +1142,23 @@ void loop() {
 					}
 
 					// PAGE TWO
-					if (sqparam == 6){
-						// SET PLAYING PATTERN
+					if (sqparam == 6){				//  MIDI SOLO
 //						playingPattern = constrain(playingPattern + amt, 0, 7);
-						// MIDI SOLO
 						sequencer.getCurrentPattern()->solo = constrain(sequencer.getCurrentPattern()->solo + amt, 0, 1);
 						if (sequencer.getCurrentPattern()->solo)
 						{
 							setAllLEDS(0,0,0);
 						}
-					} else if (sqparam == 7){
-						// SET PATTERN LENGTH
+					} else if (sqparam == 7){		// SET PATTERN LENGTH
 						auto newPatternLen = constrain(sequencer.getPatternLength(sequencer.playingPattern) + amt, 1, NUM_STEPS);
 						sequencer.setPatternLength( sequencer.playingPattern, newPatternLen);
 						if (sequencer.seqPos[sequencer.playingPattern] >= newPatternLen){
 							sequencer.seqPos[sequencer.playingPattern] = newPatternLen-1;
 							sequencer.patternPage[sequencer.playingPattern] = getPatternPage(sequencer.seqPos[sequencer.playingPattern]);
 						}
-					} else if (sqparam == 8){
-						// SET CLOCK DIV/MULT
+					} else if (sqparam == 8){		// SET CLOCK DIV/MULT
 						sequencer.getCurrentPattern()->clockDivMultP = constrain(sequencer.getCurrentPattern()->clockDivMultP + amt, 0, NUM_MULTDIVS - 1);
-					} else if (sqparam == 9){
-						// SET CV ON/OFF
+					} else if (sqparam == 9){		// SET CV ON/OFF
 						sequencer.getCurrentPattern()->sendCV = constrain(sequencer.getCurrentPattern()->sendCV + amt, 0, 1);
 					}
 					dirtyDisplay = true;
@@ -1250,13 +1242,13 @@ void loop() {
 						}
 
 						// PAGE ONE
-						if (srparam == 1) {
+						if (srparam == 1) {		// OCTAVE SELECTION
 							newoctave = constrain(octave + amt, -5, 4);
 							if (newoctave != octave){
 								octave = newoctave;
 							}
 						}
-						if (srparam == 2) {
+						if (srparam == 2) {		// STEP SELECTION 
 							if (u.dir() > 0){
 								step_ahead(sequencer.playingPattern);
 							} else if (u.dir() < 0) {
@@ -1264,20 +1256,22 @@ void loop() {
 							}
 							selectedStep = sequencer.seqPos[sequencer.playingPattern];
 						}
-						if (srparam == 3) {
+						if (srparam == 3) {		// SET NOTE NUM
+							int tempNote = getSelectedStep()->note;
+							getSelectedStep()->note = constrain(tempNote + amt, 0, 127);
 						}
 						if (srparam == 4) {
 //							playingPattern = constrain(playingPattern + amt, 0, 7);
 						}
 						// PAGE TWO
-						if (srparam == 6) {
+						if (srparam == 6) {		// STEP TYPE
 							changeStepType(amt);
 						}
-						if (srparam == 7) {
+						if (srparam == 7) {		// STEP PROB
 							int tempProb = getSelectedStep()->prob;
 							getSelectedStep()->prob = constrain(tempProb + amt, 0, 100); // Note Len between 1-16
 						}
-						if (srparam == 8) {
+						if (srparam == 8) {		// STEP CONDITION
 							int tempCondition = getSelectedStep()->condition;
 							getSelectedStep()->condition = constrain(tempCondition + amt, 0, 35); // 0-32
 						}
@@ -2000,14 +1994,14 @@ void step_ahead(int patternNum) {
 			sequencer.seqPos[j]--;
 //			auto_reset(j); // determine whether to reset or not based on param settings
 
-//			if (seqPos[j] < 0)
-//				seqPos[j] = sequencer.PatternLength(j)-1;
+			if (sequencer.seqPos[j] < 0)
+				sequencer.seqPos[j] = sequencer.getPatternLength(j)-1;
 		} else {
 			sequencer.seqPos[j]++;
 //			auto_reset(j); // determine whether to reset or not based on param settings
 
-//			if (seqPos[j] >= sequencer.PatternLength(j))
-//				seqPos[j] = 0;
+			if (sequencer.seqPos[j] >= sequencer.getPatternLength(j))
+				sequencer.seqPos[j] = 0;
 		}
 	}
 }
@@ -2019,7 +2013,7 @@ void step_back(int patternNum) {
 			auto_reset(j); // determine whether to reset or not based on param settings
 		} else {
 			sequencer.seqPos[j]--;
-			// 			auto_reset(j);
+// 			auto_reset(j);
 			if (sequencer.seqPos[j] < 0)
 				sequencer.seqPos[j] = sequencer.getPatternLength(j) - 1;
 		}
