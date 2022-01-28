@@ -51,11 +51,11 @@ struct StepNote {           // ?? bytes
 struct Pattern {              // ?? bytes
 	uint8_t len : 6;            // 0 - 63, maps to 1 - 64
 	uint8_t channel : 4;        // 0 - 15 , maps to channels 1 - 16
-	uint8_t startstep : 4;      // step to begin pattern. must be < patternlength-1
-	uint8_t autoresetstep : 4;  // step to reset on / 0 = off
-	uint8_t autoresetfreq : 4;  // tracking reset iteration if enabled / ie Freq of autoreset. should be renamed
-	uint8_t current_cycle : 4;  // tracking current cycle of autoreset counter / start it at 1
-	uint8_t rndstep : 4;        // for random autostep functionality
+	uint8_t startstep : 6;      // step to begin pattern. must be < patternlength-1
+	uint8_t autoresetstep : 6;  // step to reset on / 0 = off
+	uint8_t autoresetfreq : 6;  // tracking reset iteration if enabled / ie Freq of autoreset. should be renamed
+	uint8_t current_cycle : 6;  // tracking current cycle of autoreset counter / start it at 1
+	uint8_t rndstep : 6;        // for random autostep functionality
 	uint8_t clockDivMultP : 4;
 	uint8_t autoresetprob : 7;  // probability of autoreset - 1 is always and totally random if autoreset is 0
 	uint8_t swing : 7;
@@ -86,7 +86,7 @@ public:
 	int seq_acc_velocity;
 
 	// TODO: move into Pattern?
-	int seqPos[NUM_PATTERNS]; // What position in the sequence are we in?
+	int seqPos[NUM_PATTERNS]; // What position in the sequence are we in? ZERO BASED 
 
 	int patternDefaultNoteMap[NUM_PATTERNS]; // default to GM Drum Map for now
 		int patternPage[NUM_PATTERNS];
@@ -135,7 +135,7 @@ SequencerState defaultSequencer() {
 		stepCV: 0,
 		seq_velocity: 100,
 		seq_acc_velocity: 127,
-		seqPos: {0, 0, 0, 0, 0, 0, 0, 0},
+		seqPos: {0, 0, 0, 0, 0, 0, 0, 0},							// ZERO BASED
 		patternDefaultNoteMap: {36, 38, 37, 39, 42, 46, 49, 51},    // default to GM Drum Map for now
 		patternPage: {0, 0, 0, 0, 0, 0, 0, 0},
 		patterns: {

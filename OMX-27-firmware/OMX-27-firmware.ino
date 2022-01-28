@@ -1,7 +1,7 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
-// v 1.4.4b1
+// v 1.4.4b3
 //
-// Steven Noreyko, November 2021
+// Steven Noreyko, Last update: January 2022
 //
 //
 //	Big thanks to:
@@ -518,27 +518,30 @@ void show_current_step(int patternNum) {
 			strip.setPixelColor(26, color2);
 		}
 
-	} else if (stepRecord) {
+	} else if (stepRecord) {		// STEP RECORD
+//		int numPages = ceil(float(sequencer.getPatternLength(patternNum))/float(NUM_STEPKEYS));
 
 		// BLANK THE TOP ROW
 		for(int j = 1; j < LED_COUNT - NUM_STEPKEYS; j++){
 			strip.setPixelColor(j, LEDOFF);
 		}
-
-		for(int j = pagestepstart; j < (pagestepstart + NUM_STEPKEYS); j++){	// NUM_STEPKEYS or NUM_STEPS INSTEAD?>
+		
+		for(int j = pagestepstart; j < (pagestepstart + NUM_STEPKEYS); j++){
 			auto pixelpos = j - pagestepstart + 11;
-			if (j < sequencer.getPatternLength(patternNum)){
+//			if (j < sequencer.getPatternLength(patternNum)){
 				// ONLY DO LEDS FOR THE CURRENT PAGE
 				if (j == sequencer.seqPos[sequencer.playingPattern]){
 					strip.setPixelColor(pixelpos, SEQCHASE);
 				} else if (pixelpos != selectedNote){
 					strip.setPixelColor(pixelpos, LEDOFF);					
 				}
-			} else  {
-				strip.setPixelColor(pixelpos, LEDOFF);
-			}
+//			} else  {
+//				strip.setPixelColor(pixelpos, LEDOFF);
+//			}
 		}
-	} else if (sequencer.getCurrentPattern()->solo){
+
+	} else if (sequencer.getCurrentPattern()->solo){			// MIDI SOLO
+
 //		for(int i = 0; i < NUM_STEPKEYS; i++){
 //			if (i == seqPos[patternNum]){
 //				if (playing){
@@ -1250,9 +1253,9 @@ void loop() {
 						}
 						if (srparam == 2) {		// STEP SELECTION 
 							if (u.dir() > 0){
-								step_ahead(sequencer.playingPattern);
+								step_ahead();
 							} else if (u.dir() < 0) {
-								step_back(sequencer.playingPattern);
+								step_back();
 							}
 							selectedStep = sequencer.seqPos[sequencer.playingPattern];
 						}
@@ -1656,7 +1659,7 @@ void loop() {
 								sequencer.patternPage[sequencer.playingPattern] = 0;	// Step Record always starts from first page
 								stepRecord = true;
 								displayMessagef("STEP RECORD");
-								dirtyDisplay = true;
+//								dirtyDisplay = true;
 
 							// If KEY 2 is down + pattern = PATTERN MUTE
 							} else if (keyState[2]) {
@@ -1668,8 +1671,8 @@ void loop() {
 								sequencer.getPattern(thisKey - 3)->mute = !sequencer.getPattern(thisKey-3)->mute;
 							} else {
 								sequencer.playingPattern = thisKey - 3;
-								dirtyDisplay = true;
 							}
+							dirtyDisplay = true;
 
 						// SEQUENCE 1-16 STEP KEYS
 						} else if (thisKey > 10) {
@@ -1724,8 +1727,12 @@ void loop() {
 						seqNoteOff(thisKey, sequencer.playingPattern);
 					}
 					if (stepRecord && stepDirty) {
-						step_ahead(sequencer.playingPattern);
+						step_ahead();
 						stepDirty = false;
+						// EXIT STEP RECORD AFTER THE LAST STEP IN PATTERN
+						if (sequencer.seqPos[sequencer.playingPattern] == 0){
+							stepRecord = false;
+						}
 					}
 				}
 
@@ -1987,36 +1994,48 @@ StepNote* getSelectedStep() {
 }
 
 
-void step_ahead(int patternNum) {
+void step_ahead() {
 	// step ALL patterns ahead one place
 	for (int j=0; j<8; j++){
-		if (sequencer.getPattern(j)->reverse) {
-			sequencer.seqPos[j]--;
-//			auto_reset(j); // determine whether to reset or not based on param settings
+		sequencer.seqPos[j]++;
+		if (sequencer.seqPos[j] >= sequencer.getPatternLength(j))
+			sequencer.seqPos[j] = 0;
 
-			if (sequencer.seqPos[j] < 0)
-				sequencer.seqPos[j] = sequencer.getPatternLength(j)-1;
-		} else {
-			sequencer.seqPos[j]++;
-//			auto_reset(j); // determine whether to reset or not based on param settings
+		sequencer.patternPage[j] = getPatternPage(sequencer.seqPos[j]);
 
-			if (sequencer.seqPos[j] >= sequencer.getPatternLength(j))
-				sequencer.seqPos[j] = 0;
-		}
+//		if (sequencer.getPattern(j)->reverse) {
+//			sequencer.seqPos[j]--;
+////			auto_reset(j); // determine whether to reset or not based on param settings
+//			if (sequencer.seqPos[j] < 0)
+//				sequencer.seqPos[j] = sequencer.getPatternLength(j)-1;
+//		} else {
+//			sequencer.seqPos[j]++;
+////			auto_reset(j); // determine whether to reset or not based on param settings
+//			if (sequencer.seqPos[j] >= sequencer.getPatternLength(j))
+//				sequencer.seqPos[j] = 0;
+//		}
 	}
 }
-void step_back(int patternNum) {
+void step_back() {
 	// step each pattern ahead one place
 	for (int j=0; j<8; j++){
-		if (sequencer.getPattern(j)->reverse) {
-			sequencer.seqPos[j]++;
-			auto_reset(j); // determine whether to reset or not based on param settings
-		} else {
-			sequencer.seqPos[j]--;
-// 			auto_reset(j);
-			if (sequencer.seqPos[j] < 0)
-				sequencer.seqPos[j] = sequencer.getPatternLength(j) - 1;
-		}
+		sequencer.seqPos[j]--;
+		if (sequencer.seqPos[j] < 0)
+			sequencer.seqPos[j] = sequencer.getPatternLength(j) - 1;
+
+		sequencer.patternPage[j] = getPatternPage(sequencer.seqPos[j]);
+
+//			if (sequencer.getPattern(j)->reverse) {
+//				sequencer.seqPos[j]++;
+//	//			auto_reset(j); // determine whether to reset or not based on param settings
+//				if (sequencer.seqPos[j] >= sequencer.getPatternLength(j))
+//					sequencer.seqPos[j] = 0;
+//			} else {
+//				sequencer.seqPos[j]--;
+//	// 			auto_reset(j);
+//				if (sequencer.seqPos[j] < 0)
+//					sequencer.seqPos[j] = sequencer.getPatternLength(j) - 1;
+//			}
 	}
 }
 
@@ -2042,6 +2061,7 @@ void auto_reset(int p) {
 			(pattern->reverse && pattern->autoreset && (sequencer.seqPos[p] < pattern->startstep )) // ||
 			//(settings->reverse && settings->autoreset && (settings->autoresetstep == 0 ) && (seqPos[p] < settings->rndstep))
 		 ) {
+
 
 		if (pattern->reverse) {
 			if (pattern->autoreset){
@@ -2171,33 +2191,36 @@ void doStep() {
 	switch(omxMode){
 		case MODE_S1:
 			if(sequencer.playing) {
-				// ############## STEP TIMING ##############
-//				if(micros() >= nextStepTime){
-				if(micros() >= sequencer.timePerPattern[sequencer.playingPattern].nextStepTimeP) {
-					seqReset();
-					// DO STUFF
+				unsigned long playstepmicros = micros();
 
-					// int lastPos = (seqPos[sequencer.playingPattern]+15) % 16;
-					// if (lastNote[sequencer.playingPattern][lastPos] > 0){
-					// 	step_off(sequencer.playingPattern, lastPos);
-					// }
-					// lastStepTime = nextStepTime;
-					// nextStepTime += step_micros;
+				for (int j=0; j<NUM_PATTERNS; j++){  // check all patterns for notes to play in time
+					// CLOCK PER PATTERN BASED APPROACH
+					auto pattern = sequencer.getPattern(j);
+
 					// TODO: refactor timePerPattern stuff into sequencer.h
-					sequencer.timePerPattern[sequencer.playingPattern].lastPosP = (sequencer.seqPos[sequencer.playingPattern] + 15) % 16;
-					if (lastNote[sequencer.playingPattern][sequencer.timePerPattern[sequencer.playingPattern].lastPosP] > 0){
-						step_off(sequencer.playingPattern, sequencer.timePerPattern[sequencer.playingPattern].lastPosP);
-					}
-					sequencer.timePerPattern[sequencer.playingPattern].lastStepTimeP = sequencer.timePerPattern[sequencer.playingPattern].nextStepTimeP;
-					sequencer.timePerPattern[sequencer.playingPattern].nextStepTimeP += (step_micros)*( multValues[sequencer.getCurrentPattern()->clockDivMultP] ); // calc step based on rate
 
-					if (testProb){ //  && evaluate_AB(sequencer.getCurrentPattern()->steps[seqPos[sequencer.playingPattern]].condition, playingPattern)
-						playNote(sequencer.playingPattern);
-						//					step_on(playingPattern);
-					}
+					if (playstepmicros >= sequencer.timePerPattern[j].nextStepTimeP) {
 
-					show_current_step(sequencer.playingPattern); // show led for step
-					step_ahead(sequencer.playingPattern);
+						seqReset(); // check for seqReset
+						sequencer.timePerPattern[j].lastStepTimeP = sequencer.timePerPattern[j].nextStepTimeP;
+						sequencer.timePerPattern[j].nextStepTimeP += (step_micros)*( multValues[sequencer.getPattern(j)->clockDivMultP] ); // calc step based on rate
+
+						sequencer.timePerPattern[j].lastPosP = (sequencer.seqPos[j] + 15) % 16;
+						if (lastNote[j][sequencer.timePerPattern[j].lastPosP] > 0) {
+							step_off(j, sequencer.timePerPattern[j].lastPosP);
+						}
+						if (testProb){
+							if (evaluate_AB(pattern->steps[sequencer.seqPos[j]].condition, j)){
+								if (j == sequencer.playingPattern){
+									playNote(j);
+								}
+							}
+						}
+						if (j == sequencer.playingPattern){ // only show selected pattern
+							show_current_step(sequencer.playingPattern);
+						}
+						new_step_ahead(j);
+					}
 				}
 			} else {
 				show_current_step(sequencer.playingPattern);
