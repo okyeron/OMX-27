@@ -158,9 +158,9 @@ Holding F1 + a Pattern Key will enter Step Record Mode.
 
 Enter notes from the keyboard and the sequence step will automatically advance to the next step. Change knob 1-4 positions to set a CC parameter lock for that step. Knob #5 (far right) will enter a velocity value for that step (there is no visual feedback when entering values from the knobs.
 
-~~You can short-press the encoder button to skip a step (making no note change). However, you can still record plocks/velocity for that step with the knobs. A nice trick might be to make one pass through playing notes on the keyboard and then make a second pass using the encoder button to add plocks or velocity values for each step.~~
+If you want to skip steps while entering notes, use the encoder button to select the STEP parameter and rotate to the step you want to change/update. While a step is selected, you can also record plocks/velocity for that step with the knobs without changing the note value. 
 
-There are two pages of parameters in Step Record. First is the current octave, step number, note-value, and pattern number. Second shows the step events TYPE, PROB and COND as described above.
+There are two pages of parameters in Step Record. First is the current octave (OCT), step number (STEP), note-value (NOTE), and pattern number (PTN). Second shows the step event parameters TYPE, PROB and COND as described above.
 
  
 

@@ -1,5 +1,5 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
-// v 1.4.4b3
+// v 1.4.4
 //
 // Steven Noreyko, Last update: January 2022
 //
@@ -2889,7 +2889,7 @@ void loadPatterns( void ) {
 
 // currently saves everything ( mode + patterns )
 void saveToStorage( void ) {
-	Serial.println( "saving..." );
+//	Serial.println( "saving..." );
 	saveHeader();
 	savePatterns();
 }
@@ -2901,7 +2901,7 @@ bool loadFromStorage( void ) {
 
 	bool bContainedData = loadHeader();
 
-	Serial.println( "read the header" );
+//	Serial.println( "read the header" );
 
 	if ( bContainedData ) {
 		// Serial.println( "loading patterns" );
