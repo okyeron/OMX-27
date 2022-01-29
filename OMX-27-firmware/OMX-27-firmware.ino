@@ -2841,13 +2841,13 @@ void savePatterns( void ) {
 
 	// save pattern settings
 	for ( int i=0; i<NUM_PATTERNS; i++ ) {
-		storage->writeObject( nLocalAddress, *sequencer.getPattern(i));
+		storage->writeObject( nLocalAddress, *(sequencer.getPattern(i)));
 		nLocalAddress += s;
 	}
 }
 
 void loadPatterns( void ) {
-	int nLocalAddress = EEPROM_PATTERN_SETTINGS_ADDRESS;
+	int nLocalAddress = EEPROM_PATTERN_ADDRESS;
 	int s = sizeof( Pattern );
 
 	for ( int i=0; i<NUM_PATTERNS; i++ ) {
