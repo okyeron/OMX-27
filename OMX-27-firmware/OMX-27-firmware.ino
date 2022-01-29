@@ -533,7 +533,7 @@ void show_current_step(int patternNum) {
 				if (j == sequencer.seqPos[sequencer.playingPattern]){
 					strip.setPixelColor(pixelpos, SEQCHASE);
 				} else if (pixelpos != selectedNote){
-					strip.setPixelColor(pixelpos, LEDOFF);					
+					strip.setPixelColor(pixelpos, LEDOFF);
 				}
 //			} else  {
 //				strip.setPixelColor(pixelpos, LEDOFF);
@@ -2857,59 +2857,39 @@ bool loadHeader( void ) {
 }
 
 void savePatterns( void ) {
+	int patternSize = serializedPatternSize(storage->isEeprom());
 	int nLocalAddress = EEPROM_PATTERN_ADDRESS;
-	int s = sizeof( StepNote );
 
-	// storage->writeObject uses storage->write under the hood, so writes here of the same data are a noop
-
-	// for each pattern
-	for ( int i=0; i<NUM_PATTERNS; i++ ) {
-		auto pattern = sequencer.getPattern(i);
-		for ( int j=0; j<NUM_STEPS; j++ ) {
-			storage->writeObject( nLocalAddress, pattern->steps[j] );
-			nLocalAddress += s;
+	for (int i=0; i<NUM_PATTERNS; i++) {
+		auto pattern = (byte*) sequencer.getPattern(i);
+		for (int j = 0; j < patternSize; j++) {
+			storage->write(nLocalAddress + j, *pattern++);
 		}
-	}
 
-	nLocalAddress = EEPROM_PATTERN_SETTINGS_ADDRESS;
-	s = sizeof( Pattern );
-
-	// save pattern settings
-	for ( int i=0; i<NUM_PATTERNS; i++ ) {
-		storage->writeObject( nLocalAddress, sequencer.getPattern(i));
-		nLocalAddress += s;
+		nLocalAddress += patternSize;
 	}
 }
 
 void loadPatterns( void ) {
-	//Serial.println( "load patterns" );
-
+	int patternSize = serializedPatternSize(storage->isEeprom());
 	int nLocalAddress = EEPROM_PATTERN_ADDRESS;
-	int s = sizeof( StepNote );
 
-	// for each pattern
-	for ( int i=0; i<NUM_PATTERNS; i++ ) {
-		auto pattern = sequencer.getPattern(i);
-		for ( int j=0; j<NUM_STEPS; j++ ) {
-			storage->readObject(nLocalAddress, pattern->steps[j]);
-			nLocalAddress += s;
+	for (int i = 0; i < NUM_PATTERNS; i++) {
+		auto pattern = Pattern{};
+		auto current = (byte*)&pattern;
+		for (int j = 0; j < patternSize; j++) {
+			*current = storage->read(nLocalAddress + j);
+			current++;
 		}
-	}
+		sequencer.patterns[i] = pattern;
 
-	nLocalAddress = EEPROM_PATTERN_SETTINGS_ADDRESS;
-	s = sizeof( Pattern );
-
-	// load pattern length
-	for ( int i=0; i<NUM_PATTERNS; i++ ) {
-		auto pattern = sequencer.getPattern(i);
-		storage->readObject(nLocalAddress, pattern);
-		nLocalAddress += s;
+		nLocalAddress += patternSize;
 	}
 }
 
 // currently saves everything ( mode + patterns )
 void saveToStorage( void ) {
-	//Serial.println( "saving..." );
+	Serial.println( "saving..." );
 	saveHeader();
 	savePatterns();
 }
@@ -2917,14 +2897,14 @@ void saveToStorage( void ) {
 // currently loads everything ( mode + patterns )
 bool loadFromStorage( void ) {
 	// This load can happen soon after Serial.begin - enable this 'wait for Serial' if you need to Serial.print during loading
-	//while( !Serial );
+	// while( !Serial );
 
 	bool bContainedData = loadHeader();
 
-	//Serial.println( "read the header" );
+	Serial.println( "read the header" );
 
 	if ( bContainedData ) {
-		//Serial.println( "loading patterns" );
+		// Serial.println( "loading patterns" );
 		loadPatterns();
 		return true;
 	}
