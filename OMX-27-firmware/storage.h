@@ -17,6 +17,7 @@ public:
 	// read/write bytes
 	virtual void write(size_t address, uint8_t val) = 0;
 	virtual uint8_t read(size_t address) = 0;
+	virtual bool isEeprom() = 0;
 
   // reset entire storage back to 0
   void clear() {
@@ -73,6 +74,7 @@ class EEPROMStorage : public Storage {
 public:
 	EEPROMStorage() {}
 
+	bool isEeprom() override { return true; }
 	void write(size_t address, uint8_t val) override;
 	uint8_t read(size_t address) override;
 	int capacity() override { return 2048; } // 2KB
@@ -84,6 +86,7 @@ public:
 		this->fram = fram;
 	}
 
+	bool isEeprom() override { return false; }
   void write(size_t address, uint8_t val) override;
   uint8_t read(size_t address) override;
   int capacity() override { return 32000; } // 32KB

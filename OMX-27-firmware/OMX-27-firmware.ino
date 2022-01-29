@@ -2836,25 +2836,33 @@ bool loadHeader( void ) {
 }
 
 void savePatterns( void ) {
+	int patternSize = serializedPatternSize(storage->isEeprom());
 	int nLocalAddress = EEPROM_PATTERN_ADDRESS;
-	int s = sizeof( Pattern );
 
-	// save pattern settings
-	for ( int i=0; i<NUM_PATTERNS; i++ ) {
-		storage->writeObject( nLocalAddress, *(sequencer.getPattern(i)));
-		nLocalAddress += s;
+	for (int i=0; i<NUM_PATTERNS; i++) {
+		auto pattern = (byte*) sequencer.getPattern(i);
+		for (int j = 0; j < patternSize; j++) {
+			storage->write(nLocalAddress + j, *pattern++);
+		}
+
+		nLocalAddress += patternSize;
 	}
 }
 
 void loadPatterns( void ) {
+	int patternSize = serializedPatternSize(storage->isEeprom());
 	int nLocalAddress = EEPROM_PATTERN_ADDRESS;
-	int s = sizeof( Pattern );
 
-	for ( int i=0; i<NUM_PATTERNS; i++ ) {
+	for (int i = 0; i < NUM_PATTERNS; i++) {
 		auto pattern = Pattern{};
-		storage->readObject(nLocalAddress, pattern);
+		auto current = (byte*)&pattern;
+		for (int j = 0; j < patternSize; j++) {
+			*current = storage->read(nLocalAddress + j);
+			current++;
+		}
 		sequencer.patterns[i] = pattern;
-		nLocalAddress += s;
+
+		nLocalAddress += patternSize;
 	}
 }
 

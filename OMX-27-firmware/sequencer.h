@@ -65,8 +65,24 @@ struct Pattern {              // ?? bytes
 	bool solo : 1;
 	bool sendCV : 1;
 
+	// this has to stay as the last property to ensure save/load works correctly
 	StepNote steps[NUM_STEPS]; // note data
 };                           // ? bytes
+
+int serializedPatternSize(bool eeprom) {
+	int total = sizeof(Pattern);
+	int singleStep = sizeof(StepNote);
+	int totalWithoutSteps = total - (singleStep * NUM_STEPS);
+	int numSteps = NUM_STEPS;
+
+	// for EEPROM we only serialize 16 steps
+	if (eeprom) {
+		numSteps = 16;
+	}
+	int stepSize = numSteps * singleStep;
+
+	return totalWithoutSteps + stepSize;
+}
 
 // holds state for sequencer
 class SequencerState {
