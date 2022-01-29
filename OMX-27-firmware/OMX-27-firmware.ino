@@ -2860,7 +2860,7 @@ void loadPatterns( void ) {
 
 // currently saves everything ( mode + patterns )
 void saveToStorage( void ) {
-	//Serial.println( "saving..." );
+	Serial.println( "saving..." );
 	saveHeader();
 	savePatterns();
 }
@@ -2868,14 +2868,14 @@ void saveToStorage( void ) {
 // currently loads everything ( mode + patterns )
 bool loadFromStorage( void ) {
 	// This load can happen soon after Serial.begin - enable this 'wait for Serial' if you need to Serial.print during loading
-	//while( !Serial );
+	// while( !Serial );
 
 	bool bContainedData = loadHeader();
 
-	//Serial.println( "read the header" );
+	Serial.println( "read the header" );
 
 	if ( bContainedData ) {
-		//Serial.println( "loading patterns" );
+		// Serial.println( "loading patterns" );
 		loadPatterns();
 		return true;
 	}
