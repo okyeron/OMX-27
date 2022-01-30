@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Arduino.h>
 #include <Adafruit_Keypad.h>
 #include <vector>
 
@@ -24,6 +25,7 @@ class OMXKeypad {
         bool down;
         uint8_t clicks;
         uint32_t lastClickedAt;
+        uint32_t releasedAt;
     };
 
     int numRows;
@@ -34,6 +36,7 @@ class OMXKeypad {
     std::vector<keystate> keys;
     std::vector<keystate*> active;
     std::vector<keystate*> _available;
+   
 
     public:
     OMXKeypad(uint32_t holdThreshold, uint32_t clickWindow, byte *userKeymap,

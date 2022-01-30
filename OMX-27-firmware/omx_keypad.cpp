@@ -41,27 +41,29 @@ void OMXKeypad::tick() {
                     key->key = e.bit.KEY;
                     key->index = index;
                     key->held = false;
-                    key->clicks = 0;
+//                     key->clicks = 0;
                     active.push_back(key);
                 }
-
+				if (key->releasedAt < now - clickWindow){
+					key->clicks = 0;
+				}
+				
                 key->lastClickedAt = now;
                 key->down = true;
                 key->held = false;
-
                 // "press" is always available
-                _available.push_back(key);
+                _available.push_back(key); // this is what triggers the key to show up with a state change
                 break;
             case KEY_JUST_RELEASED:
                 key->down = false;
+				key->clicks++;
+				key->releasedAt = now;
 
-                if (!key->held) {
-                    key->clicks++;
-                } else {
+                if (key->held) {
                     // hold release event.
                     key->held = false;
-                    _available.push_back(key);
                 }
+                _available.push_back(key); // on key release, this is the only event added.
                 break;
             default:
                 // unknown event
@@ -80,11 +82,14 @@ void OMXKeypad::tick() {
         auto key = *it;
         if (key->lastClickedAt < held) {
             key->held = true;
-            _available.push_back(key);
+//             Serial.println("key hold");
+//             _available.push_back(key);
             active.erase(it);
         } else if (!key->down && key->lastClickedAt < click_window_close) {
-            _available.push_back(key);
+//             _available.push_back(key);
             active.erase(it);
+//         } else if (!key->down && key->lastClickedAt < now) {
+//             active.erase(it);
         } else {
             // it is not ready to become active, move to next.
             it++;
@@ -102,10 +107,11 @@ OMXKeypadEvent OMXKeypad::next() {
 
     // Simple press event.
     if (key->down && !key->held) {
-        return OMXKeypadEvent{key->key, 0, false, true};
-    }
+        return OMXKeypadEvent{key->key, key->clicks, false, true};
+    } 
 
-    // Click or hold event
-    key->lastClickedAt = 0;
-    return OMXKeypadEvent{key->key, key->clicks, key->held, key->down};
+	// Click or hold event
+	key->lastClickedAt = 0;
+	return OMXKeypadEvent{key->key, key->clicks, key->held, key->down};
+
 }
