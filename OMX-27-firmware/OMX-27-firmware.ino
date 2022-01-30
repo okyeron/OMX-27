@@ -1,5 +1,5 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
-// v 1.4.4
+// v 1.4.5b1
 //
 // Steven Noreyko, Last update: January 2022
 //
@@ -129,8 +129,6 @@ float newtempo = clockbpm;
 unsigned long tempoStartTime, tempoEndTime;
 
 unsigned long blinkInterval = clockbpm * 2;
-unsigned long longPressInterval = 1500;
-unsigned long clickWindow = 200;
 
 uint8_t swing = 0;
 const int maxswing = 100;
@@ -182,9 +180,10 @@ Button encButton(0);		// encoder button pin on hardware
 //long newPosition = 0;
 //long oldPosition = -999;
 
-
+// KEYPAD
 //initialize an instance of custom Keypad class
-//Adafruit_Keypad customKeypad = Adafruit_Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS);
+unsigned long longPressInterval = 1250;
+unsigned long clickWindow = 200;
 OMXKeypad keypad(longPressInterval, clickWindow, makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 
 // Declare NeoPixel strip object
@@ -1468,7 +1467,6 @@ void loop() {
 				// ### KEY PRESS EVENTS
 				if (e.down() && thisKey != 0) {
 					//Serial.println(" pressed");
-
 					if (thisKey == 11 || thisKey == 12 || thisKey == 1 || thisKey == 2) {
 						if (midiAUX){
 							if (thisKey == 11 || thisKey == 12){
@@ -1488,13 +1486,11 @@ void loop() {
 					} else {
 						midiNoteOn(thisKey, defaultVelocity, midiChannel);
 					}
-
-
-
 				} else if(!e.down() && thisKey != 0) {
 					//Serial.println(" released");
 					midiNoteOff(thisKey, midiChannel);
 				}
+//				Serial.println(e.clicks());
 
 				// AUX KEY
 				if (e.down() && thisKey == 0) {
