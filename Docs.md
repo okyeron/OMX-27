@@ -86,10 +86,11 @@ Keys/Commands:
  - Pattern Key: Selects playing pattern  
  - F1 + AUX: Reset sequences to first/last step  
  - F2 + AUX: Reverse pattern direction  
- - F1 + Pattern Key: Enter "Step Record Mode" (transport must be stopped)  
+ - F1 + Pattern Key: Enter __Step Record__ (transport must be stopped)  
  - F2 + Pattern Key: Mute that pattern  
- - Long press a Step Key: Enter "Note Select Mode"  
- - Long press a Pattern Key: Enter "Pattern Params Mode"  
+ - F1 + Step Key: Enter __Note Select / Step Parameters__  
+ - Long press a Step Key: Enter __Note Select / Step Parameters__   
+ - Long press a Pattern Key: Enter __Pattern Parameters__  
  - AUX-key exits sub-modes  
  - Hold F1 + F2: first 4 "white keys" select "page" of the current pattern (depending on pattern length)  
 
@@ -105,10 +106,11 @@ Keys/Commands:
  - Short-press encoder to highlight active parameter to edit  
  - F1 + AUX: Reset sequences to first/last step  
  - F2 + AUX: Reverse pattern direction  
- - F1 + Pattern Key: Enter "Step Record Mode"  
+ - F1 + Pattern Key: Enter __Step Record__    
  - F2 + Pattern Key: Mute that pattern  
- - Long press a Step Key: Enter "Note Select Mode"  
- - Long press a Pattern Key: Enter "Pattern Params Mode"  
+ - F1 + Step Key: Enter __Note Select / Step Parameters__  
+ - Long press a Step Key: Enter __Note Select / Step Parameters__   
+ - Long press a Pattern Key: Enter __Pattern Parameters__  
  - AUX-key exits sub-modes  
  - Hold F1 + F2: first 4 "white keys" select "page" of the current pattern (depending on pattern length)  
 
@@ -172,7 +174,7 @@ Keys/Commands:
 - Potentiometers 5 sets a step velocity   
 - AUX exit this sub-mode  
 
-### Pattern Params
+### Pattern Parameters
 
 Long press Pattern Key to enter Pattern Params Mode.
 
@@ -199,7 +201,7 @@ Set a pattern to MIDI solo and you can play the keyboard while that pattern is s
 
 Note - once in MIDI solo, you will only be able to change the active pattern by using the encoder knob.
 
-### Pattern Params: Sequence Reset Automation
+### Pattern Parameters: Sequence Reset Automation
 
 This is located on the second page of pattern parameters
 
