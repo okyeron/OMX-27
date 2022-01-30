@@ -64,6 +64,7 @@ void OMXKeypad::tick() {
                     key->held = false;
                 }
                 _available.push_back(key); // on key release, this is the only event added.
+                
                 break;
             default:
                 // unknown event
@@ -80,12 +81,12 @@ void OMXKeypad::tick() {
     auto it = active.begin();
     while (it != active.end()) {
         auto key = *it;
-        if (key->lastClickedAt < held) {
+        if (key->down && key->lastClickedAt < held) {
             key->held = true;
-//             Serial.println("key hold");
-//             _available.push_back(key);
+            _available.push_back(key);
             active.erase(it);
         } else if (!key->down && key->lastClickedAt < click_window_close) {
+//             key->held = false;
 //             _available.push_back(key);
             active.erase(it);
 //         } else if (!key->down && key->lastClickedAt < now) {

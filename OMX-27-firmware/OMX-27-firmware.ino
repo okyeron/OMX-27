@@ -184,7 +184,7 @@ Button encButton(0);		// encoder button pin on hardware
 
 // KEYPAD
 //initialize an instance of custom Keypad class
-unsigned long longPressInterval = 1250;
+unsigned long longPressInterval = 800;
 unsigned long clickWindow = 200;
 OMXKeypad keypad(longPressInterval, clickWindow, makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 
@@ -1469,7 +1469,7 @@ void loop() {
 		if (e.down()){
 			keyState[thisKey] = true;
 		}
-
+	
 		if (e.down() && thisKey == 0 && enc_edit) {
 			// temp - save whenever the 0 key is pressed in encoder edit mode
 			saveToStorage();
@@ -1483,20 +1483,24 @@ void loop() {
 			case MODE_MIDI: // MIDI CONTROLLER
 
 				// ### KEY PRESS EVENTS
-				if (e.down() && thisKey != 0) {
-					//Serial.println(" pressed");
-					if (thisKey == 11 || thisKey == 12 || thisKey == 1 || thisKey == 2) {
-						if (midiAUX){
-							if (thisKey == 11 || thisKey == 12){
-								int amt = thisKey == 11 ? -1 : 1;
-								newoctave = constrain(octave + amt, -5, 4);
-								if (newoctave != octave){
-									octave = newoctave;
+				if (!e.held()){ 		// IGNORE LONG PRESS EVENTS
+					if (e.down() && thisKey != 0) {
+						//Serial.println(" pressed");
+						if (thisKey == 11 || thisKey == 12 || thisKey == 1 || thisKey == 2) {
+							if (midiAUX){
+								if (thisKey == 11 || thisKey == 12){
+									int amt = thisKey == 11 ? -1 : 1;
+									newoctave = constrain(octave + amt, -5, 4);
+									if (newoctave != octave){
+										octave = newoctave;
+									}
+								} else if (thisKey == 1 || thisKey == 2) {
+									int chng = thisKey == 1 ? -1 : 1;
+									miparam = constrain((miparam + chng ) % 15, 0, 14);
+									mmpage = miparam / NUM_DISP_PARAMS;
 								}
-							} else if (thisKey == 1 || thisKey == 2) {
-								int chng = thisKey == 1 ? -1 : 1;
-								miparam = constrain((miparam + chng ) % 15, 0, 14);
-								mmpage = miparam / NUM_DISP_PARAMS;
+							} else {
+								midiNoteOn(thisKey, defaultVelocity, midiChannel);
 							}
 						} else {
 							midiNoteOn(thisKey, defaultVelocity, sysSettings.midiChannel);
@@ -1801,7 +1805,7 @@ void loop() {
 				} else if (!e.down() && thisKey == 0) {
 
 				}
-
+				
 //				strip.show();
 				break;
 
@@ -1817,7 +1821,7 @@ void loop() {
 			seqPages = false;
 		}
 
-
+		
 		// ### LONG KEY SWITCH PRESS
 		if (e.held()) {
 			// DO LONG PRESS THINGS
@@ -1859,6 +1863,8 @@ void loop() {
 		} // END IF HELD
 
 	}  // END KEYS WHILE
+
+
 
 	// ############### MODES DISPLAY  ##############
 	//
