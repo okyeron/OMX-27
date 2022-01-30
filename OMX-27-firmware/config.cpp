@@ -42,7 +42,7 @@ const int gridh = 32;
 const int gridw = 128;
 const int PPQ = 96;
 
-const char* modes[] = {"MI","S1","S2","OM"};
+const char* modes[] = {"MI","S1","S2","OM","GR"};
 
 float multValues[] = {.25, .5, 1, 2, 4, 8, 16};
 const char* mdivs[] = {"1/64", "1/32", "1/16", "1/8", "1/4", "1/2", "W"};

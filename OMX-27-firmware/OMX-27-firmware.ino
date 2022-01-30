@@ -26,6 +26,7 @@
 #include "storage.h"
 #include "sysex.h"
 #include "omx_keypad.h"
+#include "RetroGrids.cpp"
 
 U8G2_FOR_ADAFRUIT_GFX u8g2_display;
 
@@ -58,6 +59,7 @@ volatile unsigned long step_micros;
 volatile unsigned long noteon_micros;
 volatile unsigned long noteoff_micros;
 volatile unsigned long ppqInterval;
+Micros nextStepTimeGrids;
 
 // ANALOGS
 int potbank = 0;
@@ -74,6 +76,7 @@ int pppage = 0;
 int sqpage = 0;
 int srpage = 0;
 int mmpage = 0;
+int grpage = 0;
 
 int miparam = 0;	// midi params item counter
 int nsparam = 0;	// note select params
@@ -81,9 +84,16 @@ int ppparam = 0;	// pattern params
 int sqparam = 0;	// seq params
 int srparam = 0;	// step record params
 int tmpmmode = 9;
+int grparam = 0;
 
 // global sequencer shared state
 SequencerState sequencer = defaultSequencer();
+
+static GridsWrapper grids_wrapper;
+int gridsX = grids_wrapper.getX();
+int gridsY = grids_wrapper.getY();
+int gridsChaos = grids_wrapper.getChaos();
+
 
 // VARIABLES / FLAGS
 float step_delay;
@@ -110,6 +120,7 @@ bool clearedFlag = false;
 
 bool enc_edit = false;
 bool midiAUX = false;
+bool gridsAUX = false;
 
 int defaultVelocity = 100;
 int octave = 0;			// default C4 is 0 - range is -4 to +5
@@ -302,7 +313,14 @@ void readPotentimeters(){
 						sendPots(k, sequencer.getPatternChannel(sequencer.playingPattern));
 					}
 					break;
-
+				case MODE_GRIDS:
+					if (k < 4){
+						grids_wrapper.setDensity(k, analogValues[k] *2 );
+					} else if (k == 4){
+						int newres = (float(analogValues[k]) / 128.f) * 3;
+						grids_wrapper.setResolution(newres);
+					}
+				
 				default:
 					break;
 				}
@@ -429,9 +447,24 @@ void setup() {
 
 // ####### MIDI LEDS #######
 
+void grid_leds() {
+	blinkInterval = step_delay*2;
+	if (blink_msec >= blinkInterval){
+		blinkState = !blinkState;
+		blink_msec = 0;
+	}
+
+	if (gridsAUX){
+		// Blink left/right keys for octave select indicators.
+		auto color1 = blinkState ? LIME : LEDOFF;
+		strip.setPixelColor(0, color1);
+	} else {
+		strip.setPixelColor(0, LEDOFF);
+	}
+	dirtyPixels = true;
+}
 void midi_leds() {
 	blinkInterval = step_delay*2;
-
 	if (blink_msec >= blinkInterval){
 		blinkState = !blinkState;
 		blink_msec = 0;
@@ -742,6 +775,17 @@ void dispGenericMode(int submode, int selected){
 	const char* legendText[4] = {"","","",""};
 //	int displaychan = sysSettings.midiChannel;
 	switch(submode){
+		case SUBMODE_GRIDS:
+			legends[0] = "BPM";
+			legends[1] = "X";
+			legends[2] = "Y";
+			legends[3] = "XAOS";
+			legendVals[0] = (int)clockbpm;
+			legendVals[1] = gridsX;
+			legendVals[2] = gridsY;
+			legendVals[3] = gridsChaos;
+			dispPage = 1;
+			break;
 		case SUBMODE_MIDI:
 //			if (midiRoundRobin) {
 //				displaychan = rrChannel;
@@ -1059,6 +1103,31 @@ void loop() {
 
 		} else if (!noteSelect && !patternParams && !stepRecord){
 			switch(sysSettings.omxMode) {
+				case MODE_GRIDS: // MI Grids
+					// CHANGE PAGE
+					if (grparam == 1) {
+						// set tempo
+						newtempo = constrain(clockbpm + amt, 40, 300);
+						if (newtempo != clockbpm){
+							// SET TEMPO HERE
+							clockbpm = newtempo;
+							resetClocks();
+						}
+					} else if (grparam == 2){
+						int newX = constrain(grids_wrapper.getX() + amt, 0, 255);
+						gridsX = newX;
+						grids_wrapper.setX(newX);
+					} else if (grparam == 3){
+						int newY = constrain(grids_wrapper.getY() + amt, 0, 255);
+						gridsY = newY;
+						grids_wrapper.setY(newY);
+					} else if (grparam == 4){
+						int newChaos = constrain(grids_wrapper.getChaos() + amt, 0, 255);
+						gridsChaos = newChaos;
+						grids_wrapper.setChaos(newChaos);
+					}
+					dirtyDisplay = true;
+					break;
 				case MODE_OM: // Organelle Mother
 					// CHANGE PAGE
 					if (miparam == 0) {
@@ -1385,6 +1454,10 @@ void loop() {
 				enc_edit = false;
 			}
 
+			if(sysSettings.omxMode == MODE_GRIDS) {
+				grparam = (grparam + 1 ) % 5;
+				grpage = grparam / NUM_DISP_PARAMS;
+			}
 			if(sysSettings.omxMode == MODE_MIDI) {
 				// switch midi oct/chan selection
 				miparam = (miparam + 1 ) % 15;
@@ -1806,6 +1879,27 @@ void loop() {
 //				strip.show();
 				break;
 
+			case MODE_GRIDS: 
+				if (e.bit.EVENT == KEY_JUST_PRESSED && thisKey == 0) {
+					
+					if (sequencer.playing && gridsAUX){
+						gridsAUX = false;
+						grids_wrapper.stop();
+						sequencer.playing = false;
+					} else {
+						gridsAUX = true;
+						grids_wrapper.start();
+						sequencer.playing = true;
+					}
+//				} else if (e.bit.EVENT == KEY_JUST_RELEASED && thisKey == 0) {
+//				} else {
+				}
+				if (e.bit.EVENT == KEY_JUST_PRESSED && thisKey != 0) {
+//					Serial.print(thisKey);
+//					Serial.println(" pressed");
+				}
+				
+				break;
 			default:
 				break;
 		}
@@ -1823,6 +1917,8 @@ void loop() {
 		if (e.held()) {
 			// DO LONG PRESS THINGS
 			switch (sysSettings.omxMode){
+				case MODE_GRIDS:
+					break;
 				case MODE_MIDI:
 					break;
 				case MODE_S1:
@@ -1874,6 +1970,18 @@ void loop() {
 	}
 
 	switch(sysSettings.omxMode){
+		case MODE_GRIDS: 					// ############## MI GRIDS MODE
+			grid_leds();
+			if (dirtyDisplay){			// DISPLAY
+				if (!enc_edit){
+					int pselected = grparam % NUM_DISP_PARAMS;
+					if (grpage == 0){
+						dispGenericMode(SUBMODE_GRIDS, pselected);
+					}
+				}
+			}
+			break;
+			
 		case MODE_OM: 						// ############## ORGANELLE MODE
 			// FALL THROUGH
 
