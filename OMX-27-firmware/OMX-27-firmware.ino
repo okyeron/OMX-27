@@ -2785,17 +2785,19 @@ void initPatterns( void ) {
 		// TODO: move to sequencer.h
 		pattern->len = 15;
 		pattern->channel = i;		// 0 - 15 becomes 1 - 16
-		pattern->mute = false;
-		pattern->reverse = false;
-		pattern->swing = 0;
 		pattern->startstep = 0;
 		pattern->autoresetstep = 0;
 		pattern->autoresetfreq = 0;
-		pattern->autoresetprob = 0;
 		pattern->current_cycle = 1;
 		pattern->rndstep = 3;
+		pattern->clockDivMultP = 2;
+		pattern->autoresetprob = 0;
+		pattern->swing = 0;
+		pattern->reverse = false;
+		pattern->mute = false;
 		pattern->autoreset = false;
 		pattern->solo = false;
+		pattern->sendCV = false;
 	}
 }
 
