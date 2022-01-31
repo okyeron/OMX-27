@@ -11,6 +11,7 @@
 //  Additional code contributions: Matt Boone, Steven Zydek, Chris Atkins, Will Winder
 
 
+#include <functional>
 #include <Adafruit_Keypad.h>
 #include <Adafruit_NeoPixel.h>
 #include <ResponsiveAnalogRead.h>
@@ -191,7 +192,7 @@ Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 
 // setup EEPROM/FRAM storage
 Storage* storage;
-SysEx sysEx;
+SysEx* sysEx;
 
 // ####### CLOCK/TIMING #######
 
@@ -315,13 +316,15 @@ void readPotentimeters(){
 void setup() {
 	Serial.begin(115200);
 
+	storage = Storage::initStorage();
+	sysEx = &SysEx(storage);
+
 	// incoming usbMIDI callbacks
 	usbMIDI.setHandleNoteOff(OnNoteOff);
 	usbMIDI.setHandleNoteOn(OnNoteOn);
 	usbMIDI.setHandleControlChange(OnControlChange);
+	usbMIDI.setHandleSystemExclusive(OnSysEx);
 
-	storage = Storage::initStorage();
-	sysEx = SysEx(storage);
 	clksTimer = 0;
 
 	lastProcessTime = micros();
@@ -2349,6 +2352,11 @@ void OnControlChange(byte channel, byte control,  byte value) {
 		MM::sendControlChangeHW(control, value, channel);
 	}
 }
+
+void OnSysEx(const uint8_t *data, uint16_t length, bool complete) {
+	sysEx->processIncomingSysex(data, length);
+}
+
 // #### Outbound MIDI Mode note on/off
 void midiNoteOn(int notenum, int velocity, int channel) {
 	int adjnote = notes[notenum] + (octave * 12); // adjust key for octave range

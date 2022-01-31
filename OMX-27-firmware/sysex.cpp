@@ -6,7 +6,7 @@ const uint8_t INFO = 0x1F;
 const uint8_t CONFIG_EDIT = 0x0E;
 const uint8_t CONFIG_DEVICE_EDIT = 0x0D;
 
-void SysEx::processIncomingSysex(uint8_t* sysexData, unsigned size) {
+void SysEx::processIncomingSysex(const uint8_t* sysexData, unsigned size) {
 	if(size < 3) {
 		return;
 	}
@@ -41,15 +41,15 @@ void SysEx::processIncomingSysex(uint8_t* sysexData, unsigned size) {
 	}
 }
 
-void SysEx::updateAllSettingsAndStore(uint8_t* newConfig, unsigned size) {
+void SysEx::updateAllSettingsAndStore(const uint8_t* newConfig, unsigned size) {
 	this->updateSettingsBlockAndStore(newConfig,size,9,80,0);
 }
 
-void SysEx::updateDeviceSettingsAndStore(uint8_t* newConfig, unsigned size) {
+void SysEx::updateDeviceSettingsAndStore(const uint8_t* newConfig, unsigned size) {
 	this->updateSettingsBlockAndStore(newConfig,size,5,32,0);
 }
 
-void SysEx::updateSettingsBlockAndStore(uint8_t* configFromSysex, unsigned sysexSize, int configStartIndex, int configDataLength, int EEPROMStartIndex) {
+void SysEx::updateSettingsBlockAndStore(const uint8_t* configFromSysex, unsigned sysexSize, int configStartIndex, int configDataLength, int EEPROMStartIndex) {
 	// walk the config, ignoring the top, tail, and firmware version
 	uint8_t dataToWrite[configDataLength];
 

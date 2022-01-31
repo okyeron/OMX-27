@@ -1,3 +1,7 @@
+#pragma once
+
+#include <Arduino.h>
+
 namespace MM {
 
 	void begin();
