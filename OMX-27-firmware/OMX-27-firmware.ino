@@ -24,6 +24,7 @@
 #include "sequencer.h"
 #include "noteoffs.h"
 #include "storage.h"
+#include "sysex.h"
 
 
 U8G2_FOR_ADAFRUIT_GFX u8g2_display;
@@ -190,6 +191,7 @@ Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 
 // setup EEPROM/FRAM storage
 Storage* storage;
+SysEx sysEx;
 
 // ####### CLOCK/TIMING #######
 
@@ -319,6 +321,7 @@ void setup() {
 	usbMIDI.setHandleControlChange(OnControlChange);
 
 	storage = Storage::initStorage();
+	sysEx = SysEx(storage);
 	clksTimer = 0;
 
 	lastProcessTime = micros();
@@ -326,7 +329,7 @@ void setup() {
 
 	randomSeed(analogRead(13));
 	srand(analogRead(13));
-	
+
 	// SET ANALOG READ resolution to teensy's 13 usable bits
 	analogReadResolution(13);
 
@@ -525,7 +528,7 @@ void show_current_step(int patternNum) {
 		for(int j = 1; j < LED_COUNT - NUM_STEPKEYS; j++){
 			strip.setPixelColor(j, LEDOFF);
 		}
-		
+
 		for(int j = pagestepstart; j < (pagestepstart + NUM_STEPKEYS); j++){
 			auto pixelpos = j - pagestepstart + 11;
 //			if (j < sequencer.getPatternLength(patternNum)){
@@ -1251,7 +1254,7 @@ void loop() {
 								octave = newoctave;
 							}
 						}
-						if (srparam == 2) {		// STEP SELECTION 
+						if (srparam == 2) {		// STEP SELECTION
 							if (u.dir() > 0){
 								step_ahead();
 							} else if (u.dir() < 0) {

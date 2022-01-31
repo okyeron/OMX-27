@@ -19,6 +19,9 @@ public:
 	virtual uint8_t read(size_t address) = 0;
 	virtual bool isEeprom() = 0;
 
+	void readArray(size_t address, uint8_t buffer[], int length);
+	void writeArray(size_t address, uint8_t buffer[], int length);
+
   // reset entire storage back to 0
   void clear() {
 		for (int address = 0; address < capacity(); address++) {
