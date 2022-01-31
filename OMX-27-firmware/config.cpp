@@ -37,6 +37,7 @@ int pots[NUM_CC_BANKS][NUM_CC_POTS] = {
 	{39,40,41,42,43},
 	{91,93,103,104,105}
 };          // the MIDI CC (continuous controller) for each analog input
+// DEFAULTS AS HEX: 15 16 17 18 07 1D 1E 1F 20 21 22 23 24 25 26 27 28 29 2A 2B 5B 5D 67 68 69
 
 const int gridh = 32;
 const int gridw = 128;

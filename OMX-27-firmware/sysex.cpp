@@ -21,7 +21,7 @@ void processIncomingSysex(uint8_t* sysexData, unsigned size) {
 		return;
 	}
 	switch(sysexData[4]) {
-		case 0x1f:
+		case 0x1f: 		//F0 7D 00 00 1F F7
 			// 1F = "1nFo" - please send me your current config
 			D(Serial.println("Got an 1nFo request"));
 			sendCurrentState();
@@ -108,7 +108,7 @@ void updateSettingsBlockAndStoreInEEPROM(uint8_t* configFromSysex, unsigned syse
 // write new Data
 	writeEEArray(EEPROMStartIndex, dataToWrite, configDataLength);
 
-// now load that. -- maybe do this after action in main loop
+// now load that. 
 // 	loadHeader();
 }
 

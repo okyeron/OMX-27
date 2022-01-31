@@ -126,6 +126,15 @@ enum SubModes
 	SUBMODES_COUNT
 };
 
+// struct ConfigHeader {
+// 	int mode;
+// 	int pattern;
+// 	uint8_t channel;
+// 	int pots[NUM_CC_BANKS][NUM_CC_POTS];
+// };
+
+extern InfoDialogs infoDialog[NUM_DIALOGS];
+
 // KEY SWITCH ROWS/COLS
 #define ROWS 5 //five rows
 #define COLS 6 //six columns
