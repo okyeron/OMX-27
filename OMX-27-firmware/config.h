@@ -8,6 +8,14 @@
 
 //const int OMX_VERSION = 1.4.4;
 
+/* * firmware metadata  */
+// OMX_VERSION = 1.5.0
+const int MAJOR_VERSION = 1;
+const int MINOR_VERSION = 5;
+const int POINT_VERSION = 0;
+
+const int DEVICE_ID     = 2;
+
 enum OMXMode
 {
 	MODE_MIDI = 0,

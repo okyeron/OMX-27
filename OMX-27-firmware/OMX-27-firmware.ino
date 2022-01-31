@@ -24,6 +24,7 @@
 #include "sequencer.h"
 #include "noteoffs.h"
 #include "storage.h"
+#include "sysex.h"
 
 U8G2_FOR_ADAFRUIT_GFX u8g2_display;
 
@@ -191,6 +192,7 @@ Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 
 // setup EEPROM/FRAM storage
 Storage* storage;
+SysEx sysEx;
 
 // ####### CLOCK/TIMING #######
 
@@ -319,6 +321,7 @@ void setup() {
 	usbMIDI.setHandleControlChange(OnControlChange);
 
 	storage = Storage::initStorage();
+	sysEx = SysEx(storage);
 	clksTimer = 0;
 
 	lastProcessTime = micros();
