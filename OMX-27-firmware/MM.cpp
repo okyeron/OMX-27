@@ -36,7 +36,10 @@ namespace MM {
 	void sendControlChangeHW(int control, int value, int channel) {
 		HWMIDI.sendControlChange(control, value, channel);
 	}
-
+	void sendPitchBend(int bend, int channel) {
+ 		usbMIDI.sendPitchBend(bend, channel);
+ 		HWMIDI.sendPitchBend(bend, channel);
+ 	}
 	void sendProgramChange(int program, int channel) {
 		usbMIDI.sendProgramChange(program, channel);
 		HWMIDI.sendProgramChange(program, channel);
@@ -59,6 +62,10 @@ namespace MM {
 		HWMIDI.sendStop();
 	}
 
+	void sendSysEx(uint32_t length, const uint8_t *sysexData, bool hasBeginEnd){
+ 		usbMIDI.sendSysEx(length, sysexData, hasBeginEnd);
+	}
+	
 	// NEED SOMETHING FOR usbMIDI.read() / MIDI.read()
 
 	bool usbMidiRead(){

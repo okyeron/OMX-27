@@ -4,9 +4,15 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdint.h>
-// #include <cstdarg>
 
-//const int OMX_VERSION = 1.4.3b1;
+#define DEBUG 1
+
+/* * firmware metadata  */
+// OMX_VERSION = 1.5.0
+const int MAJOR_VERSION = 0x01;
+const int MINOR_VERSION = 0x05;
+const int POINT_VERSION = 0x00;
+const int DEVICE_ID = 0x02;
 
 enum OMXMode
 {
@@ -14,6 +20,8 @@ enum OMXMode
 	MODE_S1,
 	MODE_S2,
 	MODE_OM,
+	MODE_GRIDS,
+	MODE_SYS,
 
 	NUM_OMX_MODES
 };
@@ -112,6 +120,8 @@ enum SubModes
 	SUBMODE_STEPREC,
 	SUBMODE_MIDI2,
 	SUBMODE_MIDI3,
+	SUBMODE_GRIDS,
+	SUBMODE_SYS,
 
 	SUBMODES_COUNT
 };

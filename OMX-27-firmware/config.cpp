@@ -1,7 +1,7 @@
 #include "config.h"
 #include "consts.h"
 
-const OMXMode DEFAULT_MODE = MODE_MIDI;
+const OMXMode DEFAULT_MODE = MODE_SYS;
 const uint8_t EEPROM_VERSION = 9;
 
 // DEFINE CC NUMBERS FOR POTS // CCS mapped to Organelle Defaults
@@ -35,14 +35,14 @@ int pots[NUM_CC_BANKS][NUM_CC_POTS] = {
 	{29,30,31,32,33},
 	{34,35,36,37,38},
 	{39,40,41,42,43},
-	{91,93,103,104,7}
+	{91,93,103,104,105}
 };          // the MIDI CC (continuous controller) for each analog input
 
 const int gridh = 32;
 const int gridw = 128;
 const int PPQ = 96;
 
-const char* modes[] = {"MI","S1","S2","OM"};
+const char* modes[] = {"MI","S1","S2","OM","GR","SYS"};
 
 float multValues[] = {.25, .5, 1, 2, 4, 8, 16};
 const char* mdivs[] = {"1/64", "1/32", "1/16", "1/8", "1/4", "1/2", "W"};

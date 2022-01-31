@@ -94,3 +94,5 @@ public:
 private:
 	Adafruit_FRAM_I2C fram;
 };
+
+extern Storage* storage;

@@ -10,7 +10,6 @@
 //	drjohn for support
 //  Additional code contributions: Matt Boone, Steven Zydek, Chris Atkins, Will Winder
 
-
 //#include <Adafruit_Keypad.h>
 #include <Adafruit_NeoPixel.h>
 #include <ResponsiveAnalogRead.h>
@@ -25,6 +24,10 @@
 #include "noteoffs.h"
 #include "storage.h"
 #include "omx_keypad.h"
+#include "RetroGrids.cpp"
+
+#include "sysex.h"
+
 
 U8G2_FOR_ADAFRUIT_GFX u8g2_display;
 
@@ -55,6 +58,7 @@ volatile unsigned long step_micros;
 volatile unsigned long noteon_micros;
 volatile unsigned long noteoff_micros;
 volatile unsigned long ppqInterval;
+Micros nextStepTimeGrids;
 
 // ANALOGS
 int potbank = 0;
@@ -75,6 +79,7 @@ int pppage = 0;
 int sqpage = 0;
 int srpage = 0;
 int mmpage = 0;
+int grpage = 0;
 
 int miparam = 0;	// midi params item counter
 int nsparam = 0;	// note select params
@@ -82,9 +87,16 @@ int ppparam = 0;	// pattern params
 int sqparam = 0;	// seq params
 int srparam = 0;	// step record params
 int tmpmmode = 9;
+int grparam = 0;
 
 // global sequencer shared state
 SequencerState sequencer = defaultSequencer();
+
+// GRIDS
+static GridsWrapper grids_wrapper;
+int gridsX = grids_wrapper.getX();
+int gridsY = grids_wrapper.getY();
+int gridsChaos = grids_wrapper.getChaos();
 
 // VARIABLES / FLAGS
 float step_delay;
@@ -111,6 +123,7 @@ bool clearedFlag = false;
 
 bool enc_edit = false;
 bool midiAUX = false;
+bool gridsAUX = false;
 
 int defaultVelocity = 100;
 int octave = 0;			// default C4 is 0 - range is -4 to +5
@@ -299,7 +312,13 @@ void readPotentimeters(){
 						sendPots(k, sequencer.getPatternChannel(sequencer.playingPattern));
 					}
 					break;
-
+				case MODE_GRIDS:
+					if (k < 4){
+						grids_wrapper.setDensity(k, analogValues[k] *2 );
+					} else if (k == 4){
+						int newres = (float(analogValues[k]) / 128.f) * 3;
+						grids_wrapper.setResolution(newres);
+					}
 				default:
 					break;
 				}
@@ -319,6 +338,7 @@ void setup() {
 	usbMIDI.setHandleNoteOff(OnNoteOff);
 	usbMIDI.setHandleNoteOn(OnNoteOn);
 	usbMIDI.setHandleControlChange(OnControlChange);
+	usbMIDI.setHandleSystemExclusive(processIncomingSysex);
 
 	storage = Storage::initStorage();
 	clksTimer = 0;
@@ -367,13 +387,9 @@ void setup() {
 		// defaults
 		omxMode = DEFAULT_MODE;
 		sequencer.playingPattern = 0;
-		midiChannel = 1;
-		pots[0][0] = CC1;
-		pots[0][1] = CC2;
-		pots[0][2] = CC3;
-		pots[0][3] = CC4;
-		pots[0][4] = CC5;
+		midiChannel = 1;		
 		initPatterns();
+		saveToStorage();
 	}
 
 	// Init Display
@@ -422,6 +438,23 @@ void setup() {
 
 
 // ####### MIDI LEDS #######
+
+void grid_leds() {
+	blinkInterval = step_delay*2;
+	if (blink_msec >= blinkInterval){
+		blinkState = !blinkState;
+		blink_msec = 0;
+	}
+
+	if (gridsAUX){
+		// Blink left/right keys for octave select indicators.
+		auto color1 = blinkState ? LIME : LEDOFF;
+		strip.setPixelColor(0, color1);
+	} else {
+		strip.setPixelColor(0, LEDOFF);
+	}
+	dirtyPixels = true;
+}
 
 void midi_leds() {
 	blinkInterval = step_delay*2;
@@ -736,6 +769,17 @@ void dispGenericMode(int submode, int selected){
 	const char* legendText[4] = {"","","",""};
 //	int displaychan = midiChannel;
 	switch(submode){
+		case SUBMODE_GRIDS:
+			legends[0] = "BPM";
+			legends[1] = "X";
+			legends[2] = "Y";
+			legends[3] = "XAOS";
+			legendVals[0] = (int)clockbpm;
+			legendVals[1] = gridsX;
+			legendVals[2] = gridsY;
+			legendVals[3] = gridsChaos;
+			dispPage = 1;
+			break;
 		case SUBMODE_MIDI:
 //			if (midiRoundRobin) {
 //				displaychan = rrChannel;
@@ -1041,6 +1085,31 @@ void loop() {
 
 		} else if (!noteSelect && !patternParams && !stepRecord){
 			switch(omxMode) {
+				case MODE_GRIDS: // MI Grids
+					// CHANGE PAGE
+					if (grparam == 1) {
+						// set tempo
+						newtempo = constrain(clockbpm + amt, 40, 300);
+						if (newtempo != clockbpm){
+							// SET TEMPO HERE
+							clockbpm = newtempo;
+							resetClocks();
+						}
+					} else if (grparam == 2){
+						int newX = constrain(grids_wrapper.getX() + amt, 0, 255);
+						gridsX = newX;
+						grids_wrapper.setX(newX);
+					} else if (grparam == 3){
+						int newY = constrain(grids_wrapper.getY() + amt, 0, 255);
+						gridsY = newY;
+						grids_wrapper.setY(newY);
+					} else if (grparam == 4){
+						int newChaos = constrain(grids_wrapper.getChaos() + amt, 0, 255);
+						gridsChaos = newChaos;
+						grids_wrapper.setChaos(newChaos);
+					}
+					dirtyDisplay = true;
+					break;
 				case MODE_OM: // Organelle Mother
 					// CHANGE PAGE
 					if (miparam == 0) {
@@ -1367,6 +1436,10 @@ void loop() {
 				enc_edit = false;
 			}
 
+			if(omxMode == MODE_GRIDS) {
+				grparam = (grparam + 1 ) % 5;
+				grpage = grparam / NUM_DISP_PARAMS;
+			}
 			if(omxMode == MODE_MIDI) {
 				// switch midi oct/chan selection
 				miparam = (miparam + 1 ) % 15;
@@ -1533,6 +1606,16 @@ void loop() {
 				// Sequencer row keys
 
 				// ### KEY PRESS EVENTS
+				if (e.clicks() == 2){
+
+					if (thisKey == 1 || thisKey == 2) {
+						int chng = thisKey == 1 ? -1 : 1;
+						sqparam = constrain((sqparam + chng ) % 10, 0, 9);
+						sqpage = sqparam / NUM_DISP_PARAMS;
+						dirtyDisplay = true;
+					}
+
+				}
 
 				if (e.down() && thisKey != 0) {
 					// set key timer to zero
@@ -1788,6 +1871,31 @@ void loop() {
 				
 //				strip.show();
 				break;
+			case MODE_GRIDS: 
+				if (e.down() && thisKey == 0) {
+					if (sequencer.playing && gridsAUX){
+						gridsAUX = false;
+						grids_wrapper.stop();
+						sequencer.playing = false;
+					} else {
+						gridsAUX = true;
+						grids_wrapper.start();
+						sequencer.playing = true;
+					}
+//				} else if (!e.down() && thisKey == 0) {
+//				} else {
+				}
+				if (e.down() && thisKey != 0) {
+//					Serial.print(thisKey);
+//					Serial.println(" pressed");
+				}
+				break;
+			case MODE_SYS:
+				if (e.down() && thisKey == 0) {
+					Serial.println("do stuff");
+					sendCurrentState();
+				}
+				break;
 
 			default:
 				break;
@@ -1806,6 +1914,8 @@ void loop() {
 		if (e.held()) {
 			// DO LONG PRESS THINGS
 			switch (omxMode){
+				case MODE_GRIDS:
+					break;
 				case MODE_MIDI:
 					break;
 				case MODE_S1:
@@ -1857,6 +1967,18 @@ void loop() {
 	}
 
 	switch(omxMode) {
+		case MODE_GRIDS: 					// ############## MI GRIDS MODE
+			grid_leds();
+			if (dirtyDisplay){			// DISPLAY
+				if (!enc_edit){
+					int pselected = grparam % NUM_DISP_PARAMS;
+					if (grpage == 0){
+						dispGenericMode(SUBMODE_GRIDS, pselected);
+					}
+				}
+			}
+			break;
+
 		case MODE_OM: 						// ############## ORGANELLE MODE
 			// FALL THROUGH
 
@@ -2243,6 +2365,14 @@ void doStep() {
 				show_current_step(sequencer.playingPattern);
 			}
 			break;
+		case MODE_GRIDS:
+			if(micros() >= nextStepTimeGrids){
+				grids_wrapper.grids_tick();
+
+				nextStepTimeGrids += ppqInterval * (PPQ / 24);
+				
+			}
+			break;
 
 		default:
 			break;
@@ -2261,6 +2391,7 @@ void cvNoteOff(){
 //	analogWrite(CVPITCH_PIN, 0);
 }
 
+// MIDI CALLBACKS
 // #### Inbound MIDI callbacks
 void OnNoteOn(byte channel, byte note, byte velocity) {
 	if (midiSoftThru) {
@@ -2365,6 +2496,8 @@ void midiNoteOff(int notenum, int channel) {
 	dirtyPixels = true;
 	dirtyDisplay = true;
 }
+
+// SYSEX
 
 // #### SEQ Mode note on/off
 void seqNoteOn(int notenum, int velocity, int patternNum){
@@ -2788,10 +2921,12 @@ void saveHeader( void ) {
 	uint8_t unMidiChannel = (uint8_t)(midiChannel - 1);
 	storage->write( EEPROM_HEADER_ADDRESS + 3, unMidiChannel );
 
-	for ( int i=0; i<NUM_CC_POTS; i++ ) {
-		storage->write( EEPROM_HEADER_ADDRESS + 4 + i, pots[potbank][i] );
+	for (int b=0; b< NUM_CC_BANKS; b++){
+		for ( int i=0; i<NUM_CC_POTS; i++ ) {
+			storage->write( EEPROM_HEADER_ADDRESS + 4 + i + (5*b), pots[b][i] );
+		}
 	}
-
+	
 	// 23 bytes remain for header fields
 }
 
@@ -2824,8 +2959,10 @@ bool loadHeader( void ) {
 	uint8_t unMidiChannel = storage->read( EEPROM_HEADER_ADDRESS + 3 );
 	midiChannel = unMidiChannel + 1;
 
-	for ( int i=0; i<NUM_CC_POTS; i++ ) {
-		pots[potbank][i] = storage->read( EEPROM_HEADER_ADDRESS + 4 + i );
+	for (int b=0; b < NUM_CC_BANKS; b++){
+		for ( int i=0; i<NUM_CC_POTS; i++ ) {
+			pots[b][i] = storage->read( EEPROM_HEADER_ADDRESS + 4 + i + (5*b));
+		}
 	}
 
 	return true;

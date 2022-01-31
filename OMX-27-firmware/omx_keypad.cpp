@@ -57,6 +57,7 @@ void OMXKeypad::tick() {
             case KEY_JUST_RELEASED:
                 key->down = false;
 				key->clicks++;
+// 				Serial.println(key->clicks);
 				key->releasedAt = now;
 
                 if (key->held) {
