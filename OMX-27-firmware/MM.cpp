@@ -13,26 +13,31 @@ namespace {
 namespace MM {
 	void begin() {
 		HWMIDI.begin();
-
 	}
+
 	void sendNoteOn(int note, int velocity, int channel) {
 		usbMIDI.sendNoteOn(note, velocity, channel);
 		HWMIDI.sendNoteOn(note, velocity, channel);
 	}
+
 	void sendNoteOnHW(int note, int velocity, int channel) {
 		HWMIDI.sendNoteOn(note, velocity, channel);
 	}
+
 	void sendNoteOff(int note, int velocity, int channel) {
 		usbMIDI.sendNoteOff(note, velocity, channel);
 		HWMIDI.sendNoteOff(note, velocity, channel);
 	}
+
 	void sendNoteOffHW(int note, int velocity, int channel) {
 		HWMIDI.sendNoteOff(note, velocity, channel);
 	}
+
 	void sendControlChange(int control, int value, int channel) {
 		usbMIDI.sendControlChange(control, value, channel);
 		HWMIDI.sendControlChange(control, value, channel);
 	}
+
 	void sendControlChangeHW(int control, int value, int channel) {
 		HWMIDI.sendControlChange(control, value, channel);
 	}
@@ -41,6 +46,11 @@ namespace MM {
 		usbMIDI.sendProgramChange(program, channel);
 		HWMIDI.sendProgramChange(program, channel);
 	}
+
+	void sendSysEx(uint32_t length, const uint8_t *sysexData, bool hasBeginEnd) {
+ 		usbMIDI.sendSysEx(length, sysexData, hasBeginEnd);
+	}
+
 	void sendClock() {
 		usbMIDI.sendRealTime(usbMIDI.Clock);
 		HWMIDI.sendClock();
@@ -50,10 +60,12 @@ namespace MM {
 		usbMIDI.sendRealTime(usbMIDI.Start);
 		HWMIDI.sendStart();
 	}
+
 	void continueClock(){
 		usbMIDI.sendRealTime(usbMIDI.Continue);
 		HWMIDI.sendContinue();
 	}
+
 	void stopClock(){
 		usbMIDI.sendRealTime(usbMIDI.Stop);
 		HWMIDI.sendStop();
@@ -64,6 +76,7 @@ namespace MM {
 	bool usbMidiRead(){
 		return usbMIDI.read();
 	}
+
 	bool midiRead(){
 		return HWMIDI.read();
 	}
