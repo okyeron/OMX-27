@@ -32,7 +32,7 @@ enum StepType {
 	STEPTYPE_COUNT
 };
 
-const char *stepTypes[STEPTYPE_COUNT] = {"--", "1", ">>", "<<", "<>", "#?", "?"};
+extern const char *stepTypes[STEPTYPE_COUNT];
 // int stepTypeNumber[STEPTYPE_COUNT] = {STEPTYPE_NONE,STEPTYPE_RESTART,STEPTYPE_FWD,STEPTYPE_REV,STEPTYPE_RANDSTEP,STEPTYPE_RAND};
 
 struct StepNote {           // ?? bytes
@@ -69,21 +69,6 @@ struct Pattern {              // ?? bytes
 	StepNote steps[NUM_STEPS]; // note data
 };                           // ? bytes
 
-int serializedPatternSize(bool eeprom) {
-	int total = sizeof(Pattern);
-	int singleStep = sizeof(StepNote);
-	int totalWithoutSteps = total - (singleStep * NUM_STEPS);
-	int numSteps = NUM_STEPS;
-
-	// for EEPROM we only serialize 16 steps
-	if (eeprom) {
-		numSteps = 16;
-	}
-	int stepSize = numSteps * singleStep;
-
-	return totalWithoutSteps + stepSize;
-}
-
 // holds state for sequencer
 class SequencerState {
 
@@ -102,7 +87,7 @@ public:
 	int seq_acc_velocity;
 
 	// TODO: move into Pattern?
-	int seqPos[NUM_PATTERNS]; // What position in the sequence are we in? ZERO BASED 
+	int seqPos[NUM_PATTERNS]; // What position in the sequence are we in? ZERO BASED
 
 	int patternDefaultNoteMap[NUM_PATTERNS]; // default to GM Drum Map for now
 		int patternPage[NUM_PATTERNS];
@@ -133,100 +118,38 @@ public:
 	}
 };
 
-// TODO: this should probably just be a constructor?
-SequencerState defaultSequencer() {
-	auto nextStepTime = micros();
-	auto lastStepTime = micros();
+extern uint8_t lastNote[NUM_PATTERNS][NUM_STEPS];
+extern const char* trigConditions[36];
 
-	auto state = SequencerState{
-		ticks: 0,
-		clockSource: 0,
-		playing: 0,
-		paused: 0,
-		stopped: 1,
-		songPosition: 0,
-		playingPattern: 0,
-		seqResetFlag: 1,
-		clockDivMult: 0,
-		stepCV: 0,
-		seq_velocity: 100,
-		seq_acc_velocity: 127,
-		seqPos: {0, 0, 0, 0, 0, 0, 0, 0},							// ZERO BASED
-		patternDefaultNoteMap: {36, 38, 37, 39, 42, 46, 49, 51},    // default to GM Drum Map for now
-		patternPage: {0, 0, 0, 0, 0, 0, 0, 0},
-		patterns: {
-			{15, 0, 0, 0, 0, 0, 1, 2, 1, 0, false, false, false, false, false},
-			{15, 1, 0, 0, 0, 0, 1, 2, 1, 0, false, false, false, false, false},
-			{15, 2, 0, 0, 0, 0, 1, 2, 1, 0, false, false, false, false, false},
-			{15, 3, 0, 0, 0, 0, 1, 2, 1, 0, false, false, false, false, false},
-			{15, 4, 0, 0, 0, 0, 1, 2, 1, 0, false, false, false, false, false},
-			{15, 5, 0, 0, 0, 0, 1, 2, 1, 0, false, false, false, false, false},
-			{15, 6, 0, 0, 0, 0, 1, 2, 1, 0, false, false, false, false, false},
-			{15, 7, 0, 0, 0, 0, 1, 2, 1, 0, false, false, false, false, false}},
-		timePerPattern: {
-			{0, nextStepTime, lastStepTime, 0},
-			{0, nextStepTime, lastStepTime, 0},
-			{0, nextStepTime, lastStepTime, 0},
-			{0, nextStepTime, lastStepTime, 0},
-			{0, nextStepTime, lastStepTime, 0},
-			{0, nextStepTime, lastStepTime, 0},
-			{0, nextStepTime, lastStepTime, 0},
-			{0, nextStepTime, lastStepTime, 0}},
-		};
+// forward declarations
+SequencerState defaultSequencer();
+int serializedPatternSize(bool eeprom);
 
-	return state;
-}
+StepNote* getSelectedStep();
+void doStep();
+void transposeSeq(int patternNum, int amt);
+int getPatternPage(int position);
+void rotatePattern(int patternNum, int rot);
 
-uint8_t lastNote[NUM_PATTERNS][NUM_STEPS] = {
-	{0},{0},{0},{0},{0},{0},{0},{0}
-};
+void step_ahead();
+void step_back();
+void auto_reset(int p);
+bool probResult(int probSetting);
 
-StepNote copyPatternBuffer[NUM_STEPS] = {
-	{0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
-	{0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
-	{0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
-	{0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
-	{0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
-	{0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
-	{0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
-	{0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
-	{0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
-	{0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
-	{0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
-	{0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
-	{0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
-	{0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
-	{0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE },
-	{0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE }
-};
+void playNote(int patternNum);
+void seqNoteOn(int notenum, int velocity, int patternNum);
+void seqNoteOff(int notenum, int patternNum);
+void allNotesOff();
+void allNotesOffPanic(); // TODO us this used?
 
-int loopCount[NUM_PATTERNS][NUM_STEPS] = {
-	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-};
+void seqStart();
+void seqStop();
+void seqContinue();
+void seqReset();
 
-const char* trigConditions[36] = {
-	"1:1",
-	"1:2","2:2",
-	"1:3","2:3","3:3",
-	"1:4","2:4","3:4","4:4",
-	"1:5","2:5","3:5","4:5","5:5",
-	"1:6","2:6","3:6","4:6","5:6","6:6",
-	"1:7","2:7","3:7","4:7","5:7","6:7","7:7",
-	"1:8","2:8","3:8","4:8","5:8","6:8","7:8","8:8"};
-int trigConditionsAB[36][2] = {
-	{1,1},
-	{1,2}, {2,2},
-	{1,3}, {2,3}, {3,3},
-	{1,4}, {2,4}, {3,4}, {4,4},
-	{1,5}, {2,5}, {3,5}, {4,5}, {5,5},
-	{1,6}, {2,6}, {3,6}, {4,6}, {5,6}, {6,6},
-	{1,7}, {2,7}, {3,7}, {4,7}, {5,7}, {6,7}, {7,7},
-	{1,8}, {2,8}, {3,8}, {4,8}, {5,8}, {6,8}, {7,8}, {8,8}
-};
+void changeStepType(int amount);
+void resetPatternDefaults(int patternNum);
+
+void copyPattern(int patternNum);
+void pastePattern(int patternNum);
+void clearPattern(int patternNum);
