@@ -317,7 +317,7 @@ void setup() {
 	Serial.begin(115200);
 
 	storage = Storage::initStorage();
-	sysEx = &SysEx(storage);
+	sysEx = new SysEx(storage);
 
 	// incoming usbMIDI callbacks
 	usbMIDI.setHandleNoteOff(OnNoteOff);
