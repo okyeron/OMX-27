@@ -1,5 +1,5 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
-// v 1.4.4
+// v 1.5.0
 //
 // Steven Noreyko, Last update: January 2022
 //
@@ -378,6 +378,7 @@ void setup() {
 		pots[0][3] = CC4;
 		pots[0][4] = CC5;
 		initPatterns();
+		saveToStorage();
 	}
 
 	// Init Display
@@ -2257,11 +2258,11 @@ void saveHeader( void ) {
 	uint8_t unMidiChannel = (uint8_t)(midiChannel - 1);
 	storage->write( EEPROM_HEADER_ADDRESS + 3, unMidiChannel );
 
-	for ( int i=0; i<NUM_CC_POTS; i++ ) {
-		storage->write( EEPROM_HEADER_ADDRESS + 4 + i, pots[potbank][i] );
+	for (int b=0; b< NUM_CC_BANKS; b++){
+		for ( int i=0; i<NUM_CC_POTS; i++ ) {
+			storage->write( EEPROM_HEADER_ADDRESS + 4 + i + (5*b), pots[b][i] );
+		}
 	}
-
-	// 23 bytes remain for header fields
 }
 
 // returns true if the header contained initialized data
@@ -2269,34 +2270,33 @@ void saveHeader( void ) {
 bool loadHeader( void ) {
 	uint8_t version = storage->read(EEPROM_HEADER_ADDRESS + 0);
 
-	//char buf[64];
-	//snprintf( buf, sizeof(buf), "EEPROM Header Version is %d\n", version );
-	//Serial.print( buf );
+//	char buf[64];
+//	snprintf( buf, sizeof(buf), "EEPROM Header Version is %d\n", version );
+//	Serial.print( buf );
 
 	// Uninitalized EEPROM memory is filled with 0xFF
 	if ( version == 0xFF ) {
 		// EEPROM was uninitialized
-		//Serial.println( "version was 0xFF" );
+//		Serial.println( "version was 0xFF" );
 		return false;
 	}
 
 	if ( version != EEPROM_VERSION ) {
 		// write an adapter if we ever need to increment the EEPROM version and also save the existing patterns
 		// for now, return false will essentially reset the state
+//		Serial.println( "version not matched" );
 		return false;
 	}
 
 	omxMode = (OMXMode)storage->read( EEPROM_HEADER_ADDRESS + 1 );
-
 	sequencer.playingPattern = storage->read(EEPROM_HEADER_ADDRESS + 2);
-
 	uint8_t unMidiChannel = storage->read( EEPROM_HEADER_ADDRESS + 3 );
 	midiChannel = unMidiChannel + 1;
-
-	for ( int i=0; i<NUM_CC_POTS; i++ ) {
-		pots[potbank][i] = storage->read( EEPROM_HEADER_ADDRESS + 4 + i );
+	for (int b=0; b < NUM_CC_BANKS; b++){
+		for ( int i=0; i<NUM_CC_POTS; i++ ) {
+			pots[b][i] = storage->read( EEPROM_HEADER_ADDRESS + 4 + i + (5*b));
+		}
 	}
-
 	return true;
 }
 
@@ -2343,9 +2343,8 @@ bool loadFromStorage( void ) {
 	// This load can happen soon after Serial.begin - enable this 'wait for Serial' if you need to Serial.print during loading
 	// while( !Serial );
 
-	bool bContainedData = loadHeader();
-
 //	Serial.println( "read the header" );
+	bool bContainedData = loadHeader();
 
 	if ( bContainedData ) {
 		// Serial.println( "loading patterns" );
