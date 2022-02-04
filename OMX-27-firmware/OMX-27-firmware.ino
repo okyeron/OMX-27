@@ -68,8 +68,8 @@ bool plockDirty[] = {false,false,false,false,false};
 int prevPlock[] = {0,0,0,0,0};
 
 // MODES
-OMXMode omxMode = DEFAULT_MODE;
-OMXMode newmode = DEFAULT_MODE;
+//OMXMode omxMode = DEFAULT_MODE;
+//OMXMode newmode = DEFAULT_MODE;
 
 int nspage = 0;
 int pppage = 0;
@@ -147,10 +147,11 @@ int currpgm = 0;
 int currbank = 0;
 bool midiInToCV = true;
 uint8_t midiLastNote = 0;
-int midiChannel; // the MIDI channel number to send messages (MIDI/OM mode)
 bool midiSoftThru = false;
 uint32_t stepColor = 0x000000;
 uint32_t muteColor = 0x000000;
+
+//int midiChannel; // the MIDI channel number to send messages (MIDI/OM mode)
 
 // MESSAGE DISPLAY
 const int MESSAGE_TIMEOUT_US = 500000;
@@ -263,11 +264,11 @@ void readPotentimeters(){
 
 		if(analog[k]->hasChanged()) {
 			 // do stuff
-			switch(omxMode) {
+			switch(sysSettings.omxMode) {
 				case MODE_OM:
 						// fall through - same as MIDI
 				case MODE_MIDI: // MIDI
-					sendPots(k, midiChannel);
+					sendPots(k, sysSettings.midiChannel);
 					dirtyDisplay = true;
 					break;
 
@@ -369,9 +370,10 @@ void setup() {
 	{
 		// Failed to load due to initialized EEPROM or version mismatch
 		// defaults
-		omxMode = DEFAULT_MODE;
+		sysSettings.omxMode = DEFAULT_MODE;
 		sequencer.playingPattern = 0;
-		midiChannel = 1;
+		sysSettings.playingPattern = 0;
+		sysSettings.midiChannel = 1;
 		pots[0][0] = CC1;
 		pots[0][1] = CC2;
 		pots[0][2] = CC3;
@@ -480,7 +482,7 @@ void show_current_step(int patternNum) {
 	} else if (stepRecord && blinkState){
 		strip.setPixelColor(0, seqColors[patternNum]);
 	} else {
-		switch(omxMode){
+		switch(sysSettings.omxMode){
 			case MODE_S1:
 				strip.setPixelColor(0, SEQ1C);
 				break;
@@ -736,7 +738,7 @@ void dispGenericMode(int submode, int selected){
 	int legendVals[4] = {0,0,0,0};
 	int dispPage = 0;
 	const char* legendText[4] = {"","","",""};
-//	int displaychan = midiChannel;
+//	int displaychan = sysSettings.midiChannel;
 	switch(submode){
 		case SUBMODE_MIDI:
 //			if (midiRoundRobin) {
@@ -747,7 +749,7 @@ void dispGenericMode(int submode, int selected){
 			legends[2] = "CC";
 			legends[3] = "NOTE";
 			legendVals[0] = (int)octave+4;
-			legendVals[1] = midiChannel;
+			legendVals[1] = sysSettings.midiChannel;
 			legendVals[2] = potVal;
 			legendVals[3] = midiLastNote;
 			dispPage = 1;
@@ -989,10 +991,10 @@ void dispMode(){
 	u8g2_display.setBackgroundColor(BLACK);
 
 	const char* displaymode = "";
-	if (newmode != omxMode && enc_edit) {
-		displaymode = modes[newmode]; // display.print(modes[newmode]);
+	if (sysSettings.newmode != sysSettings.omxMode && enc_edit) {
+		displaymode = modes[sysSettings.newmode]; // display.print(modes[sysSettings.newmode]);
 	} else if (enc_edit) {
-		displaymode = modes[omxMode]; // display.print(modes[mode]);
+		displaymode = modes[sysSettings.omxMode]; // display.print(modes[mode]);
 	}
 	u8g2centerText(displaymode, 86, 20, 44, 32);
 }
@@ -1023,6 +1025,16 @@ void loop() {
 	//
 	readPotentimeters();
 
+	// ############### EXTERNAL MODE CHANGE / SYSEX ###############
+	if (sysSettings.omxMode != sysSettings.newmode || sysSettings.refresh){
+//		Serial.print("mode changed to: ");
+//		Serial.println(sysSettings.omxMode);
+		sysSettings.newmode = sysSettings.omxMode;
+		dirtyDisplay = true;
+		setAllLEDS(0,0,0);
+		dirtyPixels = true;
+		sysSettings.refresh = false;
+	}
 
 	// ############### ENCODER ###############
 	//
@@ -1036,20 +1048,20 @@ void loop() {
 		if (enc_edit) {
 			// set mode
 //			int modesize = NUM_OMX_MODES;
-			newmode = (OMXMode)constrain(newmode + amt, 0, NUM_OMX_MODES - 1);
+			sysSettings.newmode = (OMXMode)constrain(sysSettings.newmode + amt, 0, NUM_OMX_MODES - 1);
 			dispMode();
 			dirtyDisplayTimer = displayRefreshRate+1;
 			dirtyDisplay = true;
 
 		} else if (!noteSelect && !patternParams && !stepRecord){
-			switch(omxMode) {
+			switch(sysSettings.omxMode) {
 				case MODE_OM: // Organelle Mother
 					// CHANGE PAGE
 					if (miparam == 0) {
 						if(u.dir() < 0){									// if turn ccw
-							MM::sendControlChange(CC_OM2, 0, midiChannel);
+							MM::sendControlChange(CC_OM2, 0, sysSettings.midiChannel);
 						} else if (u.dir() > 0){							// if turn cw
-							MM::sendControlChange(CC_OM2, 127, midiChannel);
+							MM::sendControlChange(CC_OM2, 127, sysSettings.midiChannel);
 						}
 					}
 					dirtyDisplay = true;
@@ -1062,9 +1074,9 @@ void loop() {
 					}
 					// PAGE ONE
 					if (miparam == 2) {
-						int newchan = constrain(midiChannel + amt, 1, 16);
-						if (newchan != midiChannel){
-							midiChannel = newchan;
+						int newchan = constrain(sysSettings.midiChannel + amt, 1, 16);
+						if (newchan != sysSettings.midiChannel){
+							sysSettings.midiChannel = newchan;
 						}
 					} else if (miparam == 1){
 						// set octave
@@ -1094,15 +1106,15 @@ void loop() {
 								MM::sendProgramChange(currpgm, q);
 							}
 						} else {
-							MM::sendProgramChange(currpgm, midiChannel);
+							MM::sendProgramChange(currpgm, sysSettings.midiChannel);
 						}
 
 					} else if (miparam == 9){
 						currbank = constrain(currbank + amt, 0, 127);
 						// Bank Select is 2 mesages
-						MM::sendControlChange(0, 0, midiChannel);
-						MM::sendControlChange(32, currbank, midiChannel);
-						MM::sendProgramChange(currpgm, midiChannel);
+						MM::sendControlChange(0, 0, sysSettings.midiChannel);
+						MM::sendControlChange(32, currbank, sysSettings.midiChannel);
+						MM::sendProgramChange(currpgm, sysSettings.midiChannel);
 					}
 					// PAGE THREE
 					if (miparam == 11) {
@@ -1174,7 +1186,7 @@ void loop() {
 			}
 
 		} else if (noteSelect || patternParams || stepRecord) {
-			switch(omxMode) { // process encoder input depending on mode
+			switch(sysSettings.omxMode) { // process encoder input depending on mode
 				case MODE_MIDI: // MIDI
 					break;
 				case MODE_S1: // SEQ 1
@@ -1359,8 +1371,8 @@ void loop() {
 		case Button::Down: //Serial.println("Button down");
 
 			// what page are we on?
-			if (newmode != omxMode && enc_edit) {
-				omxMode = newmode;
+			if (sysSettings.newmode != sysSettings.omxMode && enc_edit) {
+				sysSettings.omxMode = sysSettings.newmode;
 				seqStop();
 				setAllLEDS(0,0,0);
 				enc_edit = false;
@@ -1369,16 +1381,16 @@ void loop() {
 				enc_edit = false;
 			}
 
-			if(omxMode == MODE_MIDI) {
+			if(sysSettings.omxMode == MODE_MIDI) {
 				// switch midi oct/chan selection
 				miparam = (miparam + 1 ) % 15;
 				mmpage = miparam / NUM_DISP_PARAMS;
 			}
-			if(omxMode == MODE_OM) {
+			if(sysSettings.omxMode == MODE_OM) {
 				miparam = (miparam + 1 ) % NUM_DISP_PARAMS;
-//				MM::sendControlChange(CC_OM1,100,midiChannel);
+//				MM::sendControlChange(CC_OM1,100,sysSettings.midiChannel);
 			}
-			if(omxMode == MODE_S1 || omxMode == MODE_S2) {
+			if(sysSettings.omxMode == MODE_S1 || sysSettings.omxMode == MODE_S2) {
 				if (noteSelect && noteSelection && !patternParams) {
 					nsparam = (nsparam + 1 ) % 15;
 					if (nsparam > 9){
@@ -1424,15 +1436,15 @@ void loop() {
 				clearedFlag = true;
 			} else {
 				enc_edit = true;
-				newmode = omxMode;
+				sysSettings.newmode = sysSettings.omxMode;
 				dispMode();
 			}
 			dirtyDisplay = true;
 
 			break;
 		case Button::Up: //Serial.println("Button up");
-			if(omxMode == MODE_OM) {
-//				MM::sendControlChange(CC_OM1,0,midiChannel);
+			if(sysSettings.omxMode == MODE_OM) {
+//				MM::sendControlChange(CC_OM1,0,sysSettings.midiChannel);
 			}
 			break;
 		case Button::UpLong: //Serial.println("Button uplong");
@@ -1461,7 +1473,7 @@ void loop() {
 			//	Serial.println("EEPROM saved");
 		}
 
-		switch(omxMode) {
+		switch(sysSettings.omxMode) {
 			case MODE_OM: // Organelle
 				// Fall Through
 
@@ -1485,23 +1497,23 @@ void loop() {
 								mmpage = miparam / NUM_DISP_PARAMS;
 							}
 						} else {
-							midiNoteOn(thisKey, defaultVelocity, midiChannel);
+							midiNoteOn(thisKey, defaultVelocity, sysSettings.midiChannel);
 						}
 					} else {
-						midiNoteOn(thisKey, defaultVelocity, midiChannel);
+						midiNoteOn(thisKey, defaultVelocity, sysSettings.midiChannel);
 					}
 
 
 
 				} else if(e.bit.EVENT == KEY_JUST_RELEASED && thisKey != 0) {
 					//Serial.println(" released");
-					midiNoteOff(thisKey, midiChannel);
+					midiNoteOff(thisKey, sysSettings.midiChannel);
 				}
 
 				// AUX KEY
 				if (e.bit.EVENT == KEY_JUST_PRESSED && thisKey == 0) {
 					// Hard coded Organelle stuff
-//					MM::sendControlChange(CC_AUX, 100, midiChannel);
+//					MM::sendControlChange(CC_AUX, 100, sysSettings.midiChannel);
 
 					midiAUX = true;
 
@@ -1517,7 +1529,7 @@ void loop() {
 
 				} else if (e.bit.EVENT == KEY_JUST_RELEASED && thisKey == 0) {
 					// Hard coded Organelle stuff
-//					MM::sendControlChange(CC_AUX, 0, midiChannel);
+//					MM::sendControlChange(CC_AUX, 0, sysSettings.midiChannel);
 					if (midiAUX) {
 						midiAUX = false;
 					}
@@ -1824,7 +1836,7 @@ void loop() {
 			if (keyPressTime[j] >= longPressInterval && keyPressTime[j] < 9999){
 
 				// DO LONG PRESS THINGS
-				switch (omxMode){
+				switch (sysSettings.omxMode){
 					case MODE_MIDI:
 						break;
 					case MODE_S1:
@@ -1879,8 +1891,8 @@ void loop() {
 			messageTextTimer = 0;
 		}
 	}
-
-	switch(omxMode){
+	
+	switch(sysSettings.omxMode){
 		case MODE_OM: 						// ############## ORGANELLE MODE
 			// FALL THROUGH
 
@@ -1973,7 +1985,6 @@ void loop() {
 		}
 	}
 
-
 	// are pixels dirty
 	if (dirtyPixels){
 		strip.show();
@@ -1988,7 +1999,6 @@ void loop() {
 	}
 
 } // ######## END MAIN LOOP ########
-
 
 
 void cvNoteOn(int notenum){
@@ -2011,7 +2021,7 @@ void OnNoteOn(byte channel, byte note, byte velocity) {
 	if (midiInToCV){
 		cvNoteOn(note);
 	}
-	if (omxMode == MODE_MIDI){
+	if (sysSettings.omxMode == MODE_MIDI){
 		midiLastNote = note;
 		int whatoct = (note / 12);
 		int thisKey;
@@ -2041,7 +2051,7 @@ void OnNoteOff(byte channel, byte note, byte velocity) {
 	if (midiInToCV){
 		cvNoteOff();
 	}
-	if (omxMode == MODE_MIDI){
+	if (sysSettings.omxMode == MODE_MIDI){
 		int whatoct = (note / 12);
 		int thisKey;
 		if ( (whatoct % 2) == 0) {
@@ -2112,10 +2122,6 @@ void midiNoteOff(int notenum, int channel) {
 	dirtyPixels = true;
 	dirtyDisplay = true;
 }
-
-
-
-// TODO: move with others
 
 void u8g2centerText(const char* s, int16_t x, int16_t y, uint16_t w, uint16_t h) {
 //  int16_t bx, by;
@@ -2249,13 +2255,13 @@ void saveHeader( void ) {
 	storage->write( EEPROM_HEADER_ADDRESS + 0, EEPROM_VERSION );
 
 	// 1 byte for mode
-	storage->write( EEPROM_HEADER_ADDRESS + 1, (uint8_t)omxMode );
+	storage->write( EEPROM_HEADER_ADDRESS + 1, (uint8_t)sysSettings.omxMode );
 
 	// 1 byte for the active pattern
 	storage->write(EEPROM_HEADER_ADDRESS + 2, (uint8_t)sequencer.playingPattern);
 
 	// 1 byte for Midi channel
-	uint8_t unMidiChannel = (uint8_t)(midiChannel - 1);
+	uint8_t unMidiChannel = (uint8_t)(sysSettings.midiChannel - 1);
 	storage->write( EEPROM_HEADER_ADDRESS + 3, unMidiChannel );
 
 	for (int b=0; b< NUM_CC_BANKS; b++){
@@ -2288,10 +2294,13 @@ bool loadHeader( void ) {
 		return false;
 	}
 
-	omxMode = (OMXMode)storage->read( EEPROM_HEADER_ADDRESS + 1 );
+	sysSettings.omxMode = (OMXMode)storage->read( EEPROM_HEADER_ADDRESS + 1 );
 	sequencer.playingPattern = storage->read(EEPROM_HEADER_ADDRESS + 2);
+	sysSettings.playingPattern = sequencer.playingPattern;
+
 	uint8_t unMidiChannel = storage->read( EEPROM_HEADER_ADDRESS + 3 );
-	midiChannel = unMidiChannel + 1;
+	sysSettings.midiChannel = unMidiChannel + 1;
+	
 	for (int b=0; b < NUM_CC_BANKS; b++){
 		for ( int i=0; i<NUM_CC_POTS; i++ ) {
 			pots[b][i] = storage->read( EEPROM_HEADER_ADDRESS + 4 + i + (5*b));

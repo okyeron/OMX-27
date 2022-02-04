@@ -20,7 +20,7 @@ void SysEx::processIncomingSysex(const uint8_t* sysexData, unsigned size) {
 	switch(sysexData[4]) {
 		case INFO:
 			// 1F = "1nFo" - please send me your current config
-// 			Serial.println("Got an 1nFo request");
+			Serial.println("Got an 1nFo request");
 			this->sendCurrentState();
 			break;
 		case CONFIG_EDIT:
@@ -65,6 +65,22 @@ void SysEx::updateSettingsBlockAndStore(const uint8_t* configFromSysex, unsigned
 
 	// write new Data
 	this->storage->writeArray(EEPROMStartIndex, dataToWrite, configDataLength);
+	this->loadGlobals();
+}
+
+void SysEx::loadGlobals( void ) {
+// 	uint8_t version = this->storage->read(EEPROM_HEADER_ADDRESS + 0);
+	sysSettings.omxMode = (OMXMode)this->storage->read( EEPROM_HEADER_ADDRESS + 1 );
+	Serial.println(sysSettings.omxMode);
+	sysSettings.playingPattern = this->storage->read(EEPROM_HEADER_ADDRESS + 2);
+	uint8_t unMidiChannel = this->storage->read( EEPROM_HEADER_ADDRESS + 3 );
+	sysSettings.midiChannel = unMidiChannel + 1;
+	for (int b=0; b < NUM_CC_BANKS; b++){
+		for ( int i=0; i<NUM_CC_POTS; i++ ) {
+			pots[b][i] = this->storage->read( EEPROM_HEADER_ADDRESS + 4 + i + (5*b));
+		}
+	}
+	sysSettings.refresh = true;
 }
 
 void SysEx::sendCurrentState() {

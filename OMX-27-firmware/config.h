@@ -62,6 +62,15 @@ extern const int analogPins[];
 #define NUM_CC_POTS 5
 extern int pots[NUM_CC_BANKS][NUM_CC_POTS];         // the MIDI CC (continuous controller) for each analog input
 
+struct SysSettings {
+	OMXMode omxMode = DEFAULT_MODE;
+	OMXMode newmode = DEFAULT_MODE;
+	uint8_t midiChannel = 0;
+	int playingPattern;
+	bool refresh = false;
+};
+extern SysSettings sysSettings;
+
 #define NUM_DISP_PARAMS 5
 
 extern const int gridh;
