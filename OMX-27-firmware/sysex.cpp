@@ -71,7 +71,6 @@ void SysEx::updateSettingsBlockAndStore(const uint8_t* configFromSysex, unsigned
 void SysEx::loadGlobals( void ) {
 // 	uint8_t version = this->storage->read(EEPROM_HEADER_ADDRESS + 0);
 	sysSettings.omxMode = (OMXMode)this->storage->read( EEPROM_HEADER_ADDRESS + 1 );
-// 	Serial.println(sysSettings.omxMode);
 	sysSettings.playingPattern = this->storage->read(EEPROM_HEADER_ADDRESS + 2);
 	uint8_t unMidiChannel = this->storage->read( EEPROM_HEADER_ADDRESS + 3 );
 	sysSettings.midiChannel = unMidiChannel + 1;

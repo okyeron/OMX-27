@@ -67,10 +67,6 @@ int potNum = 0;
 bool plockDirty[] = {false,false,false,false,false};
 int prevPlock[] = {0,0,0,0,0};
 
-// MODES
-//OMXMode omxMode = DEFAULT_MODE;
-//OMXMode newmode = DEFAULT_MODE;
-
 int nspage = 0;
 int pppage = 0;
 int sqpage = 0;
@@ -1025,16 +1021,17 @@ void loop() {
 	//
 	readPotentimeters();
 
+
 	// ############### EXTERNAL MODE CHANGE / SYSEX ###############
 	if (sysSettings.omxMode != sysSettings.newmode || sysSettings.refresh){
-//		Serial.print("mode changed to: ");
-//		Serial.println(sysSettings.omxMode);
 		sysSettings.newmode = sysSettings.omxMode;
+		sequencer.playingPattern = sysSettings.playingPattern;
 		dirtyDisplay = true;
 		setAllLEDS(0,0,0);
 		dirtyPixels = true;
 		sysSettings.refresh = false;
 	}
+
 
 	// ############### ENCODER ###############
 	//
