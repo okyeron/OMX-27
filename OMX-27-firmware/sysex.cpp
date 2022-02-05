@@ -35,6 +35,10 @@ void SysEx::processIncomingSysex(const uint8_t* sysexData, unsigned size) {
 			break;
 		default:
 			break;
+// 		case 0x0a:
+// 			// 0a - change config, don't store
+// 			this->updateDeviceSettings(sysexData, size);
+// 			break;
 //		case 0x0c:
 //			// 0C - c0nfig usb edit - here is a new config just for usb
 //			updateUSBSettingsAndStore(sysexData, size);
@@ -52,6 +56,10 @@ void SysEx::updateAllSettingsAndStore(const uint8_t* newConfig, unsigned size) {
 
 void SysEx::updateDeviceSettingsAndStore(const uint8_t* newConfig, unsigned size) {
 	this->updateSettingsBlockAndStore(newConfig,size,5,32,0);
+}
+
+void SysEx::updateDeviceSettings(const uint8_t* newConfig, unsigned size) {
+	// think about this option
 }
 
 void SysEx::updateSettingsBlockAndStore(const uint8_t* configFromSysex, unsigned sysexSize, int configStartIndex, int configDataLength, int EEPROMStartIndex) {
