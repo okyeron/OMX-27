@@ -170,14 +170,18 @@
 			
 			for (var bytes = 6; bytes < 34; bytes++) {
 				const bankval = document.getElementById(bytes);
-				outbound = outbound + " " + Number(bankval.value).toString(16);
+				var tempval = Number(bankval.value);
+				if (bytes == 6 || bytes == 7 || bytes == 8){
+					tempval = Number(bankval.value) - 1;
+				}
+				outbound = outbound + " " + tempval.toString(16);
 			}
 			outbound = outbound + " 00 00 00 F7";
 			
 			//raw(outbound)
 			//F0 7D 00 00 0D 09 01 00 00 15 16 17 18 07 1D 1E 1F 20 21 22 23 24 25 26 27 28 29 2A 2B 5B 5D 67 68 69 00 00 00 F7
 
-			console.log(outbound);
+			// console.log(outbound);
 			const sendit = raw(outbound), timeout = 100;
 			midiDevice.output.send(sendit);
 		});
@@ -202,11 +206,15 @@
 			var t = document.createElement("dl");
 			t.setAttribute("class", "grid");
 
-		function updateMode(e){
-			console.log(e.target.value);
-			var modeid = document.getElementById("6");
-			modeid.value = e.target.value;
-		}
+			function updateMode(e){
+				// console.log(e.target.value);
+				var modeid = document.getElementById("6");
+				modeid.value = Number(e.target.value) + 1;
+			}
+			function updateModeSelect(e){
+				// console.log(e.target.value);
+				document.getElementById("modes").selectedIndex = Number(e.target.value) - 1;
+			}
 
 // 			dl = document.createElement("datalist");
 // 			dl.id = "modes";
@@ -231,6 +239,7 @@
 				nr.appendChild(rr);
 
  				if (hh == 0) {
+ 					cc.onchange = updateModeSelect;
  					var chooser = document.createElement("select");
 					chooser.id = "modes";
 					chooser.onchange = updateMode;
@@ -247,10 +256,10 @@
  				}
 
 				cc.setAttribute("type", "number");
-				cc.setAttribute("min", "0");
-				cc.setAttribute("max", "127");
+				cc.setAttribute("min", "1");
+				cc.setAttribute("max", "16");
 				cc.setAttribute("id", (hh+6));
-				cc.setAttribute("value", midiDevice.data[hh+10]);
+				cc.setAttribute("value", midiDevice.data[hh+10] + 1);
 			}
 			
 
@@ -259,7 +268,7 @@
 				var newRow = document.createElement("dd");
 				newRow.className = "row"+row;
 				newRow.row = row;
-// 				console.log(newRow);
+				// console.log(newRow);
 				t.appendChild(newRow);
 
 				var label = document.createElement("span");
