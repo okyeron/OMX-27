@@ -1,3 +1,7 @@
+#pragma once
+
+#include <Arduino.h>
+
 namespace MM {
 
 	void begin();
@@ -9,6 +13,7 @@ namespace MM {
 	void sendNoteOnHW(int note, int velocity, int channel);
 	void sendNoteOffHW(int note, int velocity, int channel);
 	void sendControlChangeHW(int control, int value, int channel);
+	void sendSysEx(uint32_t length, const uint8_t *sysexData, bool hasBeginEnd);
 
 	void sendClock();
 	void startClock();

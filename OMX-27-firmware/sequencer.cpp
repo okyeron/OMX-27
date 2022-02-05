@@ -9,9 +9,9 @@
 
 // globals in main ino
 extern SequencerState sequencer;
-extern OMXMode omxMode;
+// extern OMXMode omxMode;
 
-extern int midiChannel;
+// extern int midiChannel;
 extern int selectedStep;
 
 extern Adafruit_NeoPixel strip;
@@ -353,7 +353,7 @@ void doStep() {
 // // probability test
 	bool testProb = probResult(sequencer.getCurrentPattern()->steps[sequencer.seqPos[sequencer.playingPattern]].prob);
 
-	switch(omxMode){
+	switch(sysSettings.omxMode){
 		case MODE_S1:
 			if(sequencer.playing) {
 				unsigned long playstepmicros = micros();
@@ -600,7 +600,7 @@ void allNotesOffPanic() {
 	analogWrite(CVPITCH_PIN, 0);
 	digitalWrite(CVGATE_PIN, LOW);
 	for (int j=0; j<128; j++){
-		MM::sendNoteOff(j, 0, midiChannel); // NEEDS FIXING
+		MM::sendNoteOff(j, 0, sysSettings.midiChannel); // NEEDS FIXING
 	}
 }
 

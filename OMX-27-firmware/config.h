@@ -6,7 +6,15 @@
 #include <stdint.h>
 // #include <cstdarg>
 
-//const int OMX_VERSION = 1.4.4;
+//const int OMX_VERSION = 1.5.0;
+
+/* * firmware metadata  */
+// OMX_VERSION = 1.5.0
+const int MAJOR_VERSION = 1;
+const int MINOR_VERSION = 5;
+const int POINT_VERSION = 0;
+
+const int DEVICE_ID     = 2;
 
 enum OMXMode
 {
@@ -53,6 +61,15 @@ extern const int analogPins[];
 #define NUM_CC_BANKS 5
 #define NUM_CC_POTS 5
 extern int pots[NUM_CC_BANKS][NUM_CC_POTS];         // the MIDI CC (continuous controller) for each analog input
+
+struct SysSettings {
+	OMXMode omxMode = DEFAULT_MODE;
+	OMXMode newmode = DEFAULT_MODE;
+	uint8_t midiChannel = 0;
+	int playingPattern;
+	bool refresh = false;
+};
+extern SysSettings sysSettings;
 
 #define NUM_DISP_PARAMS 5
 

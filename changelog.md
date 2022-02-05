@@ -1,5 +1,13 @@
 # Change log
 
+### 1.5.x
+
+Move sequencer into it's own header/source files 
+
+Add SysEx functionality and webmidi configuration
+
+Fix for sequencer pattern save
+
 ### 1.4.x
 
 Pattern Length can now be up to 64 steps  
