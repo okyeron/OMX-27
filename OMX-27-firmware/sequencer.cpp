@@ -9,7 +9,7 @@
 
 // globals in main ino
 extern SequencerState sequencer;
-extern OMXMode omxMode;
+// extern OMXMode omxMode;
 
 extern int midiChannel;
 extern int selectedStep;
@@ -353,7 +353,7 @@ void doStep() {
 // // probability test
 	bool testProb = probResult(sequencer.getCurrentPattern()->steps[sequencer.seqPos[sequencer.playingPattern]].prob);
 
-	switch(omxMode){
+	switch(sysSettings.omxMode){
 		case MODE_S1:
 			if(sequencer.playing) {
 				unsigned long playstepmicros = micros();
