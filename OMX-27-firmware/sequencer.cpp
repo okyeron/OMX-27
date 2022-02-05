@@ -11,7 +11,7 @@
 extern SequencerState sequencer;
 // extern OMXMode omxMode;
 
-extern int midiChannel;
+// extern int midiChannel;
 extern int selectedStep;
 
 extern Adafruit_NeoPixel strip;
@@ -600,7 +600,7 @@ void allNotesOffPanic() {
 	analogWrite(CVPITCH_PIN, 0);
 	digitalWrite(CVGATE_PIN, LOW);
 	for (int j=0; j<128; j++){
-		MM::sendNoteOff(j, 0, midiChannel); // NEEDS FIXING
+		MM::sendNoteOff(j, 0, sysSettings.midiChannel); // NEEDS FIXING
 	}
 }
 
