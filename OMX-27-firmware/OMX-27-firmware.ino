@@ -1023,7 +1023,7 @@ void loop() {
 
 
 	// ############### EXTERNAL MODE CHANGE / SYSEX ###############
-	if (sysSettings.omxMode != sysSettings.newmode || sysSettings.refresh){
+	if ((!enc_edit && (sysSettings.omxMode != sysSettings.newmode)) || sysSettings.refresh){
 		sysSettings.newmode = sysSettings.omxMode;
 		sequencer.playingPattern = sysSettings.playingPattern;
 		dirtyDisplay = true;
