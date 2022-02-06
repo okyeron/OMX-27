@@ -1500,7 +1500,7 @@ void loop() {
 									mmpage = miparam / NUM_DISP_PARAMS;
 								}
 							} else {
-								midiNoteOn(thisKey, defaultVelocity, midiChannel);
+								midiNoteOn(thisKey, defaultVelocity, sysSettings.midiChannel);
 							}
 						} else {
 							midiNoteOn(thisKey, defaultVelocity, sysSettings.midiChannel);
