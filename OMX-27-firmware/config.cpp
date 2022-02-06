@@ -1,7 +1,7 @@
 #include "config.h"
 #include "consts.h"
 
-const OMXMode DEFAULT_MODE = MODE_MIDI;
+const OMXMode DEFAULT_MODE = MODE_GRIDS;
 const uint8_t EEPROM_VERSION = 9;
 
 // DEFINE CC NUMBERS FOR POTS // CCS mapped to Organelle Defaults

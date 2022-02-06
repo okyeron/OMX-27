@@ -25,156 +25,155 @@ enum Resolutions
   COUNT
 };
 
-static const uint8_t grids_notes[4] = { 36, 40,  42, 46 };
+static const uint8_t grids_notes[4] = { 36, 40, 42, 46 };
 static const uint8_t num_notes = sizeof(grids_notes);
 
 
-class GridsWrapper
-{
-public:
-  GridsWrapper()
-  {
-    tickCount_ = 0;
-    for (auto i = 0; i < num_notes; i ++)
-    {
-      channelTriggered_[i] = false;
-      density_[i] = i == 0 ? 128 : 128;
-      perturbations_[i] = 0;
-    }
-    x_ = y_ = 128;
+class GridsWrapper {
+	public:
+		GridsWrapper()
+		{
+		tickCount_ = 0;
+		for (auto i = 0; i < num_notes; i ++){
+		  channelTriggered_[i] = false;
+		  density_[i] = i == 0 ? 128 : 128;
+		  perturbations_[i] = 0;
+		}
+		x_ = y_ = 128;
 
-    accent_ = 128;
-    chaos_ = 0;
-    divider_ = 0;
-    multiplier_ = 1;
-    running_ = false;
-  }
+		accent_ = 128;
+		chaos_ = 0;
+		divider_ = 0;
+		multiplier_ = 1;
+		running_ = false;
+		}
 
-  void start()
-  {
-    tickCount_ = 0;
-    running_ = true;
-  }
+		void start()
+		{
+			tickCount_ = 0;
+			running_ = true;
+		}
 
-  void stop()
-  {
-    running_ = false;
-  }
+		void stop()
+		{
+			running_ = false;
+		}
 
-  void proceed()
-  {
-    running_ = true;
-  }
+		void proceed()
+		{
+			running_ = true;
+		}
   
-  void grids_tick()
-  {
-    if (!running_) return;
+		void grids_tick()
+		{
+			if (!running_) return;
 
-    uint32_t ticksPerClock = 3 << divider_;
-    bool trigger = ((tickCount_ % ticksPerClock) == 0);
+			uint32_t ticksPerClock = 3 << divider_;
+			bool trigger = ((tickCount_ % ticksPerClock) == 0);
 
-    if (trigger) {
-      const auto step = (tickCount_ / ticksPerClock * multiplier_) % grids::kStepsPerPattern;
-      channel_.setStep(step);
+			if (trigger) {
+				const auto step = (tickCount_ / ticksPerClock * multiplier_) % grids::kStepsPerPattern;
+				channel_.setStep(step);
 
-      for (auto channel = 0; channel < num_notes; channel++){
-        if (step == 0){
-          std::uint32_t r = random_value();
-          perturbations_[channel] = ((r & 0xFF) * (chaos_ >> 2)) >> 8;
-        }
+				for (auto channel = 0; channel < num_notes; channel++){
+					if (step == 0){
+					  std::uint32_t r = random_value();
+					  perturbations_[channel] = ((r & 0xFF) * (chaos_ >> 2)) >> 8;
+					}
 
-        const uint8_t threshold = ~density_[channel];
-        auto level = channel_.level(channel, x_, y_);
-        if (level < 255 - perturbations_[channel]){
-          level += perturbations_[channel];
-        }
+					const uint8_t threshold = ~density_[channel];
+					auto level = channel_.level(channel, x_, y_);
+					if (level < 255 - perturbations_[channel]){
+					  level += perturbations_[channel];
+					}
 
-        if (level > threshold){
-          uint8_t targetLevel =  uint8_t(127.f * float(level - threshold) / float(256 - threshold));
-          uint8_t noteLevel = grids::U8Mix(127, targetLevel, accent_);
-				//midiNoteOn(int notenum, int velocity, int channel)
-			MM::sendNoteOn(grids_notes[channel], noteLevel, kMidiChannel);
-//           	RK002_sendNoteOn(kMidiChannel, grids_notes[channel], noteLevel);
-          channelTriggered_[channel] = true;
-        }    
-      }
-    } else {
-      for (auto channel = 0; channel < num_notes; channel++){
-        if (channelTriggered_[channel]){
-        	MM::sendNoteOff(grids_notes[channel], 0, kMidiChannel);
-//           RK002_sendNoteOff(kMidiChannel, grids_notes[channel], 0);
-          channelTriggered_[channel] = false;          
-        }
-      }
-    }
-    tickCount_++;
-  }
+					if (level > threshold){
+						uint8_t targetLevel =  uint8_t(127.f * float(level - threshold) / float(256 - threshold));
+						uint8_t noteLevel = grids::U8Mix(127, targetLevel, accent_);
+						MM::sendNoteOn(grids_notes[channel], noteLevel, kMidiChannel);
+						Serial.println("trig");
+						channelTriggered_[channel] = true;
+					}    
+				}
+			} else {
+				for (auto channel = 0; channel < num_notes; channel++){
+					if (channelTriggered_[channel]){
+						MM::sendNoteOff(grids_notes[channel], 0, kMidiChannel);
+						channelTriggered_[channel] = false;          
+					}
+				}
+			}
+			tickCount_++;
+		}
 
-  void setDensity(uint8_t channel, uint8_t density)
-  {
-    density_[channel] = density;
-  }
-    
-  void setX(uint8_t x)
-  {
-    x_ = x;
-  }
-  uint8_t getX()
-  {
-    return x_;
-  }
+		void setDensity(uint8_t channel, uint8_t density)
+		{
+			density_[channel] = density;
+		}
 
-  void setY(uint8_t y)
-  {
-    y_ = y;
-  }
-  uint8_t getY()
-  {
-    return y_;
-  }
+		void setX(uint8_t x)
+		{
+			x_ = x;
+		}
 
-  void setChaos(uint8_t c)
-  {
-    chaos_ = c;
-  }
-  uint8_t getChaos()
-  {
-    return chaos_;
-  }
+		uint8_t getX()
+		{
+			return x_;
+		}
 
-  void setResolution(uint8_t r)
-  {
-    divider_ = 0;
-    if (r == 0) { 
-    	multiplier_ = 1;
-    	divider_ = 1;
-    } else if (r == 1){
-    	multiplier_ = 1;
-    } else if (r == 2){
-		multiplier_ = 2;
-//     } else if (r == 3){
-//     	multiplier_ = 4;
-    }
-  }
+		void setY(uint8_t y)
+		{
+			y_ = y;
+		}
 
-  void setAccent(uint8_t a)
-  {
-    accent_ = a;
-  }
+		uint8_t getY()
+		{
+			return y_;
+		}
 
-private:
- Channel channel_;
- uint32_t divider_;
- uint8_t multiplier_;
- uint32_t tickCount_;
- uint8_t density_[num_notes];
- uint8_t perturbations_[num_notes];
- uint8_t x_;
- uint8_t y_;
- bool channelTriggered_[num_notes];
- uint8_t chaos_;
- uint8_t accent_;
- bool running_;  
+		void setChaos(uint8_t c)
+		{
+			chaos_ = c;
+		}
+
+		uint8_t getChaos()
+		{
+			return chaos_;
+		}
+
+		void setResolution(uint8_t r)
+		{
+			divider_ = 0;
+			if (r == 0) { 
+				multiplier_ = 1;
+				divider_ = 1;
+			} else if (r == 1){
+				multiplier_ = 1;
+			} else if (r == 2){
+				multiplier_ = 2;
+			//     } else if (r == 3){
+			//     	multiplier_ = 4;
+			}
+		}
+
+		void setAccent(uint8_t a)
+		{
+			accent_ = a;
+		}
+
+	private:
+		Channel channel_;
+		uint32_t divider_;
+		uint8_t multiplier_;
+		uint32_t tickCount_;
+		uint8_t density_[num_notes];
+		uint8_t perturbations_[num_notes];
+		uint8_t x_;
+		uint8_t y_;
+		bool channelTriggered_[num_notes];
+		uint8_t chaos_;
+		uint8_t accent_;
+		bool running_;  
 };
 
 
