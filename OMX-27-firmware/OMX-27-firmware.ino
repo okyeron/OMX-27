@@ -12,8 +12,6 @@
 
 
 #include <functional>
-
-//#include <Adafruit_Keypad.h>
 #include <Adafruit_NeoPixel.h>
 #include <ResponsiveAnalogRead.h>
 #include <U8g2_for_Adafruit_GFX.h>
@@ -1505,14 +1503,11 @@ void loop() {
 						} else {
 							midiNoteOn(thisKey, defaultVelocity, sysSettings.midiChannel);
 						}
-					} else {
-						midiNoteOn(thisKey, defaultVelocity, sysSettings.midiChannel);
+					} else if(!e.down() && thisKey != 0) {
+						midiNoteOff(thisKey, sysSettings.midiChannel);
 					}
-				} else if(!e.down() && thisKey != 0) {
-					//Serial.println(" released");
-					midiNoteOff(thisKey, sysSettings.midiChannel);
 				}
-//				Serial.println(e.clicks());
+				Serial.println(e.clicks());
 
 				// AUX KEY
 				if (e.down() && thisKey == 0) {
