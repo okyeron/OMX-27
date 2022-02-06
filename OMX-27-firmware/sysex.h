@@ -1,15 +1,17 @@
 #pragma once
 
 #include "storage.h"
+#include "config.h"
 
 class SysEx {
 	Storage *storage;
+	SysSettings *settings;
 
 public:
 
-	SysEx(Storage* storage) {
-		this->storage = storage;
-	}
+	SysEx(Storage* storage, SysSettings* settings) :
+		storage(storage),
+		settings(settings) {}
 
 	void processIncomingSysex(const uint8_t* sysexData, unsigned size);
 	void updateAllSettingsAndStore(const uint8_t* newConfig, unsigned size);

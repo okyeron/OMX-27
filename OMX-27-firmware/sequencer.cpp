@@ -9,7 +9,7 @@
 
 // globals in main ino
 extern SequencerState sequencer;
-// extern OMXMode omxMode;
+extern SysSettings sysSettings;
 
 // extern int midiChannel;
 extern int selectedStep;

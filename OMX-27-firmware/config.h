@@ -69,7 +69,6 @@ struct SysSettings {
 	int playingPattern;
 	bool refresh = false;
 };
-extern SysSettings sysSettings;
 
 #define NUM_DISP_PARAMS 5
 
