@@ -38,8 +38,6 @@ int pots[NUM_CC_BANKS][NUM_CC_POTS] = {
 	{91,93,103,104,7}
 };          // the MIDI CC (continuous controller) for each analog input
 
-SysSettings sysSettings;
-
 const int gridh = 32;
 const int gridw = 128;
 const int PPQ = 96;

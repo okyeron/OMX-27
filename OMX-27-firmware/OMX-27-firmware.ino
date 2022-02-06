@@ -29,6 +29,8 @@
 
 U8G2_FOR_ADAFRUIT_GFX u8g2_display;
 
+SysSettings sysSettings;
+
 const int potCount = 5;
 ResponsiveAnalogRead *analog[potCount];
 
@@ -316,7 +318,7 @@ void setup() {
 //	while( !Serial );
 
 	storage = Storage::initStorage();
-	sysEx = new SysEx(storage);
+	sysEx = new SysEx(storage, &sysSettings);
 
 	// incoming usbMIDI callbacks
 	usbMIDI.setHandleNoteOff(OnNoteOff);
@@ -2276,7 +2278,7 @@ bool loadHeader( void ) {
 
 	uint8_t unMidiChannel = storage->read( EEPROM_HEADER_ADDRESS + 3 );
 	sysSettings.midiChannel = unMidiChannel + 1;
-	
+
 	for (int b=0; b < NUM_CC_BANKS; b++){
 		for ( int i=0; i<NUM_CC_POTS; i++ ) {
 			pots[b][i] = storage->read( EEPROM_HEADER_ADDRESS + 4 + i + (5*b));

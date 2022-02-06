@@ -78,16 +78,16 @@ void SysEx::updateSettingsBlockAndStore(const uint8_t* configFromSysex, unsigned
 
 void SysEx::loadGlobals( void ) {
 // 	uint8_t version = this->storage->read(EEPROM_HEADER_ADDRESS + 0);
-	sysSettings.omxMode = (OMXMode)this->storage->read( EEPROM_HEADER_ADDRESS + 1 );
-	sysSettings.playingPattern = this->storage->read(EEPROM_HEADER_ADDRESS + 2);
+	this->settings->omxMode = (OMXMode)this->storage->read( EEPROM_HEADER_ADDRESS + 1 );
+	this->settings->playingPattern = this->storage->read(EEPROM_HEADER_ADDRESS + 2);
 	uint8_t unMidiChannel = this->storage->read( EEPROM_HEADER_ADDRESS + 3 );
-	sysSettings.midiChannel = unMidiChannel + 1;
+	this->settings->midiChannel = unMidiChannel + 1;
 	for (int b=0; b < NUM_CC_BANKS; b++){
 		for ( int i=0; i<NUM_CC_POTS; i++ ) {
 			pots[b][i] = this->storage->read( EEPROM_HEADER_ADDRESS + 4 + i + (5*b));
 		}
 	}
-	sysSettings.refresh = true;
+	this->settings->refresh = true;
 }
 
 void SysEx::sendCurrentState() {
