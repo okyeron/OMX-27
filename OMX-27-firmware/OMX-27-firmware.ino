@@ -1880,7 +1880,7 @@ void loop() {
 				break;
 
 			case MODE_GRIDS: 
-				if (e.bit.EVENT == KEY_JUST_PRESSED && thisKey == 0) {
+				if (e.down() && thisKey == 0) {
 					
 					if (sequencer.playing && gridsAUX){
 						gridsAUX = false;
@@ -1891,10 +1891,10 @@ void loop() {
 						grids_wrapper.start();
 						sequencer.playing = true;
 					}
-//				} else if (e.bit.EVENT == KEY_JUST_RELEASED && thisKey == 0) {
+//				} else if (!e.down()  && thisKey == 0) {
 //				} else {
 				}
-				if (e.bit.EVENT == KEY_JUST_PRESSED && thisKey != 0) {
+				if (e.down()  && thisKey != 0) {
 //					Serial.print(thisKey);
 //					Serial.println(" pressed");
 				}
