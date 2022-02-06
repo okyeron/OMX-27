@@ -1507,7 +1507,7 @@ void loop() {
 						midiNoteOff(thisKey, sysSettings.midiChannel);
 					}
 				}
-				Serial.println(e.clicks());
+//				Serial.println(e.clicks());
 
 				// AUX KEY
 				if (e.down() && thisKey == 0) {
