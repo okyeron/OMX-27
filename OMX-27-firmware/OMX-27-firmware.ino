@@ -214,6 +214,9 @@ void advanceClock(Micros advance) {
 		advance -= timeToNextClock;
 
 		MM::sendClock();
+		if (sysSettings.omxMode == MODE_GRIDS){
+			grids_wrapper.grids_tick();
+		}
 		timeToNextClock = ppqInterval * (PPQ / 24);
 	}
 	timeToNextClock -= advance;

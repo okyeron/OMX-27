@@ -91,7 +91,6 @@ class GridsWrapper {
 						uint8_t targetLevel =  uint8_t(127.f * float(level - threshold) / float(256 - threshold));
 						uint8_t noteLevel = grids::U8Mix(127, targetLevel, accent_);
 						MM::sendNoteOn(grids_notes[channel], noteLevel, kMidiChannel);
-						Serial.println("trig");
 						channelTriggered_[channel] = true;
 					}    
 				}
