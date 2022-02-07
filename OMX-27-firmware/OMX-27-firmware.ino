@@ -12,7 +12,6 @@
 
 
 #include <functional>
-#include <Adafruit_Keypad.h>
 #include <Adafruit_NeoPixel.h>
 #include <ResponsiveAnalogRead.h>
 #include <U8g2_for_Adafruit_GFX.h>
@@ -26,6 +25,7 @@
 #include "noteoffs.h"
 #include "storage.h"
 #include "sysex.h"
+#include "omx_keypad.h"
 
 U8G2_FOR_ADAFRUIT_GFX u8g2_display;
 
@@ -50,7 +50,7 @@ unsigned long displayRefreshRate = 60;
 elapsedMicros clksTimer = 0;		// is this still in use?
 
 //unsigned long clksDelay;
-elapsedMillis keyPressTime[27] = {0};
+//elapsedMillis keyPressTime[27] = {0};
 
 using Micros = unsigned long;
 Micros lastProcessTime;
@@ -128,7 +128,6 @@ float newtempo = clockbpm;
 unsigned long tempoStartTime, tempoEndTime;
 
 unsigned long blinkInterval = clockbpm * 2;
-unsigned long longPressInterval = 1500;
 
 uint8_t swing = 0;
 const int maxswing = 100;
@@ -183,9 +182,11 @@ Button encButton(0);		// encoder button pin on hardware
 //long newPosition = 0;
 //long oldPosition = -999;
 
-
-//initialize an instance of class Keypad
-Adafruit_Keypad customKeypad = Adafruit_Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS);
+// KEYPAD
+//initialize an instance of custom Keypad class
+unsigned long longPressInterval = 800;
+unsigned long clickWindow = 200;
+OMXKeypad keypad(longPressInterval, clickWindow, makeKeymap(keys), rowPins, colPins, ROWS, COLS);
 
 // Declare NeoPixel strip object
 Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
@@ -314,6 +315,7 @@ void readPotentimeters(){
 
 void setup() {
 	Serial.begin(115200);
+//	while( !Serial );
 
 	storage = Storage::initStorage();
 	sysEx = new SysEx(storage, &sysSettings);
@@ -395,8 +397,9 @@ void setup() {
 	drawLoading();
 
 	// Keypad
-	customKeypad.begin();
-
+//	customKeypad.begin();
+	keypad.begin();
+	
 	//LEDs
 	strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
 	strip.show();            // Turn OFF all pixels ASAP
@@ -704,6 +707,7 @@ void show_current_step(int patternNum) {
 }
 // ####### END LEDS
 
+
 // ####### DISPLAY FUNCTIONS #######
 
 void dispGridBoxes(){
@@ -1001,7 +1005,8 @@ void dispMode(){
 // ############## MAIN LOOP ##############
 
 void loop() {
-	customKeypad.tick();
+//	customKeypad.tick();
+	keypad.tick();
 	clksTimer = 0;
 
 	Micros now = micros();
@@ -1453,20 +1458,19 @@ void loop() {
 	}
 	// END ENCODER BUTTON
 
-
 	// ############### KEY HANDLING ###############
-
-	while(customKeypad.available()){
-		keypadEvent e = customKeypad.read();
-		int thisKey = e.bit.KEY;
+	//
+	while(keypad.available()) {
+		auto e = keypad.next();
+		int thisKey = e.key();
 		int keyPos = thisKey - 11;
 		int seqKey = keyPos + (sequencer.patternPage[sequencer.playingPattern] * NUM_STEPKEYS);
 
-		if (e.bit.EVENT == KEY_JUST_PRESSED){
+		if (e.down()){
 			keyState[thisKey] = true;
 		}
-
-		if (e.bit.EVENT == KEY_JUST_PRESSED && thisKey == 0 && enc_edit) {
+	
+		if (e.down() && thisKey == 0 && enc_edit) {
 			// temp - save whenever the 0 key is pressed in encoder edit mode
 			saveToStorage();
 			//	Serial.println("EEPROM saved");
@@ -1479,38 +1483,36 @@ void loop() {
 			case MODE_MIDI: // MIDI CONTROLLER
 
 				// ### KEY PRESS EVENTS
-				if (e.bit.EVENT == KEY_JUST_PRESSED && thisKey != 0) {
-					//Serial.println(" pressed");
-
-					if (thisKey == 11 || thisKey == 12 || thisKey == 1 || thisKey == 2) {
-						if (midiAUX){
-							if (thisKey == 11 || thisKey == 12){
-								int amt = thisKey == 11 ? -1 : 1;
-								newoctave = constrain(octave + amt, -5, 4);
-								if (newoctave != octave){
-									octave = newoctave;
+				if (!e.held()){ 		// IGNORE LONG PRESS EVENTS
+					if (e.down() && thisKey != 0) {
+						//Serial.println(" pressed");
+						if (thisKey == 11 || thisKey == 12 || thisKey == 1 || thisKey == 2) {
+							if (midiAUX){
+								if (thisKey == 11 || thisKey == 12){
+									int amt = thisKey == 11 ? -1 : 1;
+									newoctave = constrain(octave + amt, -5, 4);
+									if (newoctave != octave){
+										octave = newoctave;
+									}
+								} else if (thisKey == 1 || thisKey == 2) {
+									int chng = thisKey == 1 ? -1 : 1;
+									miparam = constrain((miparam + chng ) % 15, 0, 14);
+									mmpage = miparam / NUM_DISP_PARAMS;
 								}
-							} else if (thisKey == 1 || thisKey == 2) {
-								int chng = thisKey == 1 ? -1 : 1;
-								miparam = constrain((miparam + chng ) % 15, 0, 14);
-								mmpage = miparam / NUM_DISP_PARAMS;
+							} else {
+								midiNoteOn(thisKey, defaultVelocity, sysSettings.midiChannel);
 							}
 						} else {
 							midiNoteOn(thisKey, defaultVelocity, sysSettings.midiChannel);
 						}
-					} else {
-						midiNoteOn(thisKey, defaultVelocity, sysSettings.midiChannel);
+					} else if(!e.down() && thisKey != 0) {
+						midiNoteOff(thisKey, sysSettings.midiChannel);
 					}
-
-
-
-				} else if(e.bit.EVENT == KEY_JUST_RELEASED && thisKey != 0) {
-					//Serial.println(" released");
-					midiNoteOff(thisKey, sysSettings.midiChannel);
 				}
+//				Serial.println(e.clicks());
 
 				// AUX KEY
-				if (e.bit.EVENT == KEY_JUST_PRESSED && thisKey == 0) {
+				if (e.down() && thisKey == 0) {
 					// Hard coded Organelle stuff
 //					MM::sendControlChange(CC_AUX, 100, sysSettings.midiChannel);
 
@@ -1526,7 +1528,7 @@ void loop() {
 //					midiAUX = !midiAUX;
 
 
-				} else if (e.bit.EVENT == KEY_JUST_RELEASED && thisKey == 0) {
+				} else if (!e.down() && thisKey == 0) {
 					// Hard coded Organelle stuff
 //					MM::sendControlChange(CC_AUX, 0, sysSettings.midiChannel);
 					if (midiAUX) {
@@ -1549,9 +1551,9 @@ void loop() {
 
 				// ### KEY PRESS EVENTS
 
-				if (e.bit.EVENT == KEY_JUST_PRESSED && thisKey != 0) {
+				if (e.down() && thisKey != 0) {
 					// set key timer to zero
-					keyPressTime[thisKey] = 0;
+//					keyPressTime[thisKey] = 0;
 
 					// NOTE SELECT
 					if (noteSelect){
@@ -1605,13 +1607,9 @@ void loop() {
 							if (keyState[1] && !keyState[2]) {
 								copyPattern(sequencer.playingPattern);
 								displayMessagef("COPIED P-%d", sequencer.playingPattern + 1);
-//								Serial.print("copy: ");
-//								Serial.println(playingPattern);
 							} else if (!keyState[1] && keyState[2]) {
 								pastePattern(sequencer.playingPattern);
 								displayMessagef("PASTED P-%d", sequencer.playingPattern + 1);
-//								Serial.print("paste: ");
-//								Serial.println(playingPattern);
 							} else if (keyState[1] && keyState[2]) {
 								clearPattern(sequencer.playingPattern);
 								displayMessagef("CLEARED P-%d", sequencer.playingPattern + 1);
@@ -1666,8 +1664,6 @@ void loop() {
 
 							// If ONLY KEY 1 is down + pattern is not playing = STEP RECORD
 							if (keyState[1] && !keyState[2] && !sequencer.playing) {
-//								Serial.print("step record on - pattern: ");
-//								Serial.println(thisKey-3);
 								sequencer.playingPattern = thisKey-3;
 								sequencer.seqPos[sequencer.playingPattern] = 0;
 								sequencer.patternPage[sequencer.playingPattern] = 0;	// Step Record always starts from first page
@@ -1716,9 +1712,6 @@ void loop() {
 
 							} else {
 								// TOGGLE STEP ON/OFF
-	//							if ( sequencer.getCurrentPattern()->steps[keyPos].stepType == STEPTYPE_PLAY || sequencer.getCurrentPattern()->steps[keyPos].stepType == STEPTYPE_MUTE ) {
-	//								sequencer.getCurrentPattern()->steps[keyPos].stepType = ( sequencer.getCurrentPattern()->steps[keyPos].stepType == STEPTYPE_PLAY ) ? STEPTYPE_MUTE : STEPTYPE_PLAY;
-	//							}
 								if (sequencer.getCurrentPattern()->steps[seqKey].trig == TRIGTYPE_PLAY || sequencer.getCurrentPattern()->steps[seqKey].trig == TRIGTYPE_MUTE ) {
 									sequencer.getCurrentPattern()->steps[seqKey].trig = (sequencer.getCurrentPattern()->steps[seqKey].trig == TRIGTYPE_PLAY ) ? TRIGTYPE_MUTE : TRIGTYPE_PLAY;
 								}
@@ -1729,14 +1722,14 @@ void loop() {
 
 				// ### KEY RELEASE EVENTS
 
-				if (e.bit.EVENT == KEY_JUST_RELEASED && thisKey != 0) {
+				if (!e.down() && thisKey != 0) {
 					// MIDI SOLO
 					if (sequencer.getCurrentPattern()->solo) {
 						midiNoteOff(thisKey, sequencer.getCurrentPattern()->channel+1);
 					}
 				}
 
-				if (e.bit.EVENT == KEY_JUST_RELEASED && thisKey != 0 && (noteSelection || stepRecord) && selectedNote > 0) {
+				if (!e.down() && thisKey != 0 && (noteSelection || stepRecord) && selectedNote > 0) {
 					if (!sequencer.playing){
 						seqNoteOff(thisKey, sequencer.playingPattern);
 					}
@@ -1752,7 +1745,7 @@ void loop() {
 
 				// AUX KEY PRESS EVENTS
 
-				if (e.bit.EVENT == KEY_JUST_PRESSED && thisKey == 0) {
+				if (e.down() && thisKey == 0) {
 
 					if (noteSelect){
 						if (noteSelection){
@@ -1806,10 +1799,10 @@ void loop() {
 
 				// AUX KEY RELEASE EVENTS
 
-				} else if (e.bit.EVENT == KEY_JUST_RELEASED && thisKey == 0) {
+				} else if (!e.down() && thisKey == 0) {
 
 				}
-
+				
 //				strip.show();
 				break;
 
@@ -1818,71 +1811,60 @@ void loop() {
 		}
 		// END MODE SWITCH
 
-		if (e.bit.EVENT == KEY_JUST_RELEASED){
+		if (!e.down()){
 			keyState[thisKey] = false;
-			keyPressTime[thisKey] = 0;
 		}
 		if (!keyState[1] && !keyState[2]) {
 			seqPages = false;
 		}
 
-	} // END KEYS WHILE
-
-
-	// ### LONG KEY SWITCH PRESS
-	for (int j=0; j<LED_COUNT; j++){
-		if (keyState[j]){
-			if (keyPressTime[j] >= longPressInterval && keyPressTime[j] < 9999){
-
-				// DO LONG PRESS THINGS
-				switch (sysSettings.omxMode){
-					case MODE_MIDI:
-						break;
-					case MODE_S1:
-						// fall through
-					case MODE_S2:
-						if (!sequencer.getCurrentPattern()->solo){
-							if (keyState[1] && keyState[2]) {
-								seqPages = true;
-
-							} else if (!keyState[1] && !keyState[2]) { // SKIP LONG PRESS IF FUNC KEYS ARE ALREDY HELD
-								if (j > 2 && j < 11){ // skip AUX key, get pattern keys
-									patternParams = true;
+		
+		// ### LONG KEY SWITCH PRESS
+		if (e.held()) {
+			// DO LONG PRESS THINGS
+			switch (sysSettings.omxMode){
+				case MODE_MIDI:
+					break;
+				case MODE_S1:
+					// fall through
+				case MODE_S2:
+					if (!sequencer.getCurrentPattern()->solo){
+						// TODO: access key state directly in omx_keypad.h
+						if (keyState[1] && keyState[2]) {
+							seqPages = true;
+						} else if (!keyState[1] && !keyState[2]) { // SKIP LONG PRESS IF FUNC KEYS ARE ALREDY HELD
+							if (thisKey > 2 && thisKey < 11){ // skip AUX key, get pattern keys
+								patternParams = true;
+								dirtyDisplay = true;
+								displayMessagef("PATT PARAMS");
+							} else if (thisKey > 10){
+								if (!stepRecord && !patternParams){ 		// IGNORE LONG PRESSES IN STEP RECORD and Pattern Params
+									selectedStep = (thisKey - 11) + (sequencer.patternPage[sequencer.playingPattern] * NUM_STEPKEYS); // set noteSelection to this step
+									noteSelect = true;
+									stepSelect = true;
+									noteSelection = true;
 									dirtyDisplay = true;
-									displayMessagef("PATT PARAMS");
-								} else if (j > 10){
-									if (!stepRecord && !patternParams){ 		// IGNORE LONG PRESSES IN STEP RECORD and Pattern Params
-										selectedStep = (j - 11) + (sequencer.patternPage[sequencer.playingPattern] * NUM_STEPKEYS); // set noteSelection to this step
-										noteSelect = true;
-										stepSelect = true;
-										noteSelection = true;
-										dirtyDisplay = true;
-										displayMessagef("NOTE SELECT");
-										// re-toggle the key you just held
-//										if ( getSelectedStep()->stepType == STEPTYPE_PLAY || getSelectedStep()->stepType == STEPTYPE_MUTE ) {
-//											getSelectedStep()->stepType = ( getSelectedStep()->stepType == STEPTYPE_PLAY ) ? STEPTYPE_MUTE : STEPTYPE_PLAY;
-//										}
-										if ( getSelectedStep()->trig == TRIGTYPE_PLAY || getSelectedStep()->trig == TRIGTYPE_MUTE ) {
-											getSelectedStep()->trig = ( getSelectedStep()->trig == TRIGTYPE_PLAY ) ? TRIGTYPE_MUTE : TRIGTYPE_PLAY;
-										}
-									}
+									displayMessagef("NOTE SELECT");
+									// re-toggle the key you just held
+//									if ( getSelectedStep()->trig == TRIGTYPE_PLAY || getSelectedStep()->trig == TRIGTYPE_MUTE ) {
+//										getSelectedStep()->trig = ( getSelectedStep()->trig == TRIGTYPE_PLAY ) ? TRIGTYPE_MUTE : TRIGTYPE_PLAY;
+//									}
 								}
 							}
 						}
-						break;
-					default:
-						break;
+					}
+					break;
+				default:
+					break;
+			} // END MODE SWITCH
+		} // END IF HELD
 
-				}
-				keyPressTime[j] = 9999;
-			}
-		}
-	}
+	}  // END KEYS WHILE
 
 
 
 	// ############### MODES DISPLAY  ##############
-
+	//
 	if(messageTextTimer > 0) {
 		messageTextTimer -= passed;
 		if(messageTextTimer <= 0) {
@@ -1971,12 +1953,9 @@ void loop() {
 
 	}
 
-//	if(dirtyDisplay && messageTextTimer > 0) {
-//	}
-
 	// DISPLAY at end of loop
 
-	if (dirtyDisplay){
+	if (dirtyDisplay) {
 		if (dirtyDisplayTimer > displayRefreshRate) {
 			display.display();
 			dirtyDisplay = false;
@@ -1985,7 +1964,7 @@ void loop() {
 	}
 
 	// are pixels dirty
-	if (dirtyPixels){
+	if (dirtyPixels) {
 		strip.show();
 		dirtyPixels = false;
 	}

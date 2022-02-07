@@ -10,8 +10,8 @@ class SysEx {
 public:
 
 	SysEx(Storage* storage, SysSettings* settings) :
-		storage(storage),
-		settings(settings) {}
+ 		storage(storage),
+ 		settings(settings) {}
 
 	void processIncomingSysex(const uint8_t* sysexData, unsigned size);
 	void updateAllSettingsAndStore(const uint8_t* newConfig, unsigned size);
