@@ -90,9 +90,9 @@ int grparam = 0;
 SequencerState sequencer = defaultSequencer();
 
 static GridsWrapper grids_wrapper;
-int gridsX = grids_wrapper.getX();
-int gridsY = grids_wrapper.getY();
+int gridsXY[4][2] = {{grids_wrapper.getX(0),grids_wrapper.getY(0)},{grids_wrapper.getX(1),grids_wrapper.getY(1)},{grids_wrapper.getX(2),grids_wrapper.getY(2)},{grids_wrapper.getX(3),grids_wrapper.getY(3)} };
 int gridsChaos = grids_wrapper.getChaos();
+int gridsSelected = 4;
 
 
 // VARIABLES / FLAGS
@@ -777,15 +777,23 @@ void dispGenericMode(int submode, int selected){
 	int dispPage = 0;
 	const char* legendText[4] = {"","","",""};
 //	int displaychan = sysSettings.midiChannel;
+	int thisGrid = 0;
 	switch(submode){
 		case SUBMODE_GRIDS:
+			if (gridsSelected != 4){
+				thisGrid = gridsSelected;
+			}
+			char bufx[4];
+			char bufy[4];
+			snprintf( bufx, sizeof(bufx), "X %d", gridsSelected );
+			snprintf( bufy, sizeof(bufy), "Y %d", gridsSelected );
 			legends[0] = "BPM";
-			legends[1] = "X";
-			legends[2] = "Y";
+			legends[1] = bufx;
+			legends[2] = bufy;
 			legends[3] = "XAOS";
 			legendVals[0] = (int)clockbpm;
-			legendVals[1] = gridsX;
-			legendVals[2] = gridsY;
+			legendVals[1] = gridsXY[thisGrid][0];
+			legendVals[2] = gridsXY[thisGrid][1];
 			legendVals[3] = gridsChaos;
 			dispPage = 1;
 			break;
@@ -1117,13 +1125,31 @@ void loop() {
 							resetClocks();
 						}
 					} else if (grparam == 2){
-						int newX = constrain(grids_wrapper.getX() + amt, 0, 255);
-						gridsX = newX;
-						grids_wrapper.setX(newX);
+						if (gridsSelected == 4){
+							for (int g=0; g<gridsSelected; g++){
+								int newX = constrain(grids_wrapper.getX(g) + amt, 0, 255);
+								gridsXY[g][0] = newX;
+								grids_wrapper.setX(g, newX);
+							}
+						} else {
+							int newX = constrain(grids_wrapper.getX(gridsSelected) + amt, 0, 255);
+							gridsXY[gridsSelected][0] = newX;
+							grids_wrapper.setX(gridsSelected, newX);
+						}						
+
 					} else if (grparam == 3){
-						int newY = constrain(grids_wrapper.getY() + amt, 0, 255);
-						gridsY = newY;
-						grids_wrapper.setY(newY);
+						if (gridsSelected == 4){
+							for (int g=0; g<gridsSelected; g++){
+								int newY = constrain(grids_wrapper.getY(g) + amt, 0, 255);
+								gridsXY[g][1] = newY;
+								grids_wrapper.setY(g, newY);
+							}
+						} else {
+							int newY = constrain(grids_wrapper.getY(gridsSelected) + amt, 0, 255);
+							gridsXY[gridsSelected][1] = newY;
+							grids_wrapper.setY(gridsSelected, newY);
+						}						
+
 					} else if (grparam == 4){
 						int newChaos = constrain(grids_wrapper.getChaos() + amt, 0, 255);
 						gridsChaos = newChaos;
@@ -1894,12 +1920,17 @@ void loop() {
 						grids_wrapper.start();
 						sequencer.playing = true;
 					}
-//				} else if (!e.down()  && thisKey == 0) {
+//				} else if (!e.down() && thisKey == 0) {
 //				} else {
 				}
-				if (e.down()  && thisKey != 0) {
+				if (e.down() && (thisKey > 10 && thisKey < 15) ) {
+					gridsSelected = thisKey - 11;
+					Serial.print(gridsSelected);
+					dirtyDisplay = true;
 //					Serial.print(thisKey);
 //					Serial.println(" pressed");
+				} else if (e.down() && (thisKey > 10 && thisKey < 15) ) {
+					gridsSelected = 4;
 				}
 				
 				break;

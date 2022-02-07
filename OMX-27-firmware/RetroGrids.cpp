@@ -35,11 +35,12 @@ class GridsWrapper {
 		{
 		tickCount_ = 0;
 		for (auto i = 0; i < num_notes; i ++){
-		  channelTriggered_[i] = false;
-		  density_[i] = i == 0 ? 128 : 128;
-		  perturbations_[i] = 0;
+			channelTriggered_[i] = false;
+			density_[i] = i == 0 ? 128 : 128;
+			perturbations_[i] = 0;
+			x_[i] = 128;
+			y_[i] = 128;
 		}
-		x_ = y_ = 128;
 
 		accent_ = 128;
 		chaos_ = 0;
@@ -82,7 +83,7 @@ class GridsWrapper {
 					}
 
 					const uint8_t threshold = ~density_[channel];
-					auto level = channel_.level(channel, x_, y_);
+					auto level = channel_.level(channel, x_[channel], y_[channel]);
 					if (level < 255 - perturbations_[channel]){
 					  level += perturbations_[channel];
 					}
@@ -110,24 +111,28 @@ class GridsWrapper {
 			density_[channel] = density;
 		}
 
-		void setX(uint8_t x)
+		void setX(uint8_t channel, uint8_t x)
 		{
-			x_ = x;
+			x_[channel] = x;
+			Serial.print("setX:");
+			Serial.print(channel);
+			Serial.print(":");
+			Serial.println(x);
 		}
 
-		uint8_t getX()
+		uint8_t getX(uint8_t channel)
 		{
-			return x_;
+			return x_[channel];
 		}
 
-		void setY(uint8_t y)
+		void setY(uint8_t channel,uint8_t y)
 		{
-			y_ = y;
+			y_[channel] = y;
 		}
 
-		uint8_t getY()
+		uint8_t getY(uint8_t channel)
 		{
-			return y_;
+			return y_[channel];
 		}
 
 		void setChaos(uint8_t c)
@@ -167,8 +172,8 @@ class GridsWrapper {
 		uint32_t tickCount_;
 		uint8_t density_[num_notes];
 		uint8_t perturbations_[num_notes];
-		uint8_t x_;
-		uint8_t y_;
+		uint8_t x_[num_notes];
+		uint8_t y_[num_notes];
 		bool channelTriggered_[num_notes];
 		uint8_t chaos_;
 		uint8_t accent_;
