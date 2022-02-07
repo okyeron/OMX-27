@@ -68,6 +68,9 @@ pio run -t upload
 
 # use serial monitor for debugging
 pio device monitor
+
+# clear FRAM/EEPROM
+pio run -t clear-storage
 ```
 
 (optional) Install PlatformIO IDE VSCode extension. [Instructions](https://platformio.org/platformio-ide)
