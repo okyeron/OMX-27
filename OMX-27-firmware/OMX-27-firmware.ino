@@ -465,6 +465,20 @@ void grid_leds() {
 		strip.setPixelColor(0, LEDOFF);
 	}
 	dirtyPixels = true;
+		uint32_t colors[] = {MAGENTA,ORANGE,RED,RBLUE};
+		colors[0] = blinkState ? MAGENTA : LEDOFF;
+		colors[1] = blinkState ? ORANGE : LEDOFF;
+		colors[2] = blinkState ? RED : LEDOFF;
+		colors[3] = blinkState ? RBLUE : LEDOFF;
+		
+	for (int k = 0; k<4; k++){
+		if (keyState[k+11]){
+			strip.setPixelColor(k+11, colors[k]);
+		} else {
+			strip.setPixelColor(k+11, LEDOFF);
+		}
+	}
+	
 }
 void midi_leds() {
 	blinkInterval = step_delay*2;
@@ -780,13 +794,22 @@ void dispGenericMode(int submode, int selected){
 	int thisGrid = 0;
 	switch(submode){
 		case SUBMODE_GRIDS:
-			if (gridsSelected != 4){
-				thisGrid = gridsSelected;
+			if (keyState[11]){
+				thisGrid = 0;
+			} else if(keyState[12]){
+				thisGrid = 1;
+			} else if(keyState[13]){
+				thisGrid = 2;
+			} else if(keyState[14]){
+				thisGrid = 3;
+			}
+			if (!keyState[11] && !keyState[12] && !keyState[13] && !keyState[14]){
+				thisGrid = 0;
 			}
 			char bufx[4];
 			char bufy[4];
-			snprintf( bufx, sizeof(bufx), "X %d", gridsSelected );
-			snprintf( bufy, sizeof(bufy), "Y %d", gridsSelected );
+			snprintf( bufx, sizeof(bufx), "X %d", thisGrid );
+			snprintf( bufy, sizeof(bufy), "Y %d", thisGrid );
 			legends[0] = "BPM";
 			legends[1] = bufx;
 			legends[2] = bufy;
@@ -1925,12 +1948,13 @@ void loop() {
 				}
 				if (e.down() && (thisKey > 10 && thisKey < 15) ) {
 					gridsSelected = thisKey - 11;
-					Serial.print(gridsSelected);
+//					Serial.print(gridsSelected);
 					dirtyDisplay = true;
 //					Serial.print(thisKey);
 //					Serial.println(" pressed");
-				} else if (e.down() && (thisKey > 10 && thisKey < 15) ) {
+				} else if (!e.down() && (thisKey > 10 && thisKey < 15) ) {
 					gridsSelected = 4;
+					dirtyDisplay = true;
 				}
 				
 				break;
