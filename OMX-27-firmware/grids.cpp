@@ -3,6 +3,8 @@
 
 namespace grids
 {
+  int NumParts = 4;
+
   const uint8_t node_0[] = {
     255,      0,      0,      0,      0,      0,    145,      0,
     0,      0,      0,      0,    218,      0,      0,      0,
@@ -397,7 +399,7 @@ namespace grids
   {
     uint16_t xmap = x % 256;
     uint16_t ymap = y % 256;
-    int part = selector %3;
+    int part = selector % NumParts;
     return ReadDrumMap(step_, part, xmap, ymap);
   }
 }

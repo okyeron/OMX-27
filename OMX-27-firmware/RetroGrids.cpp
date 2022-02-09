@@ -114,10 +114,10 @@ class GridsWrapper {
 		void setX(uint8_t channel, uint8_t x)
 		{
 			x_[channel] = x;
-			Serial.print("setX:");
-			Serial.print(channel);
-			Serial.print(":");
-			Serial.println(x);
+// 			Serial.print("setX:");
+// 			Serial.print(channel);
+// 			Serial.print(":");
+// 			Serial.println(x);
 		}
 
 		uint8_t getX(uint8_t channel)

@@ -92,7 +92,7 @@ SequencerState sequencer = defaultSequencer();
 static GridsWrapper grids_wrapper;
 int gridsXY[4][2] = {{grids_wrapper.getX(0),grids_wrapper.getY(0)},{grids_wrapper.getX(1),grids_wrapper.getY(1)},{grids_wrapper.getX(2),grids_wrapper.getY(2)},{grids_wrapper.getX(3),grids_wrapper.getY(3)} };
 int gridsChaos = grids_wrapper.getChaos();
-int gridsSelected = 4;
+bool gridsSelected[] = {false,false,false,false};
 
 
 // VARIABLES / FLAGS
@@ -465,17 +465,27 @@ void grid_leds() {
 		strip.setPixelColor(0, LEDOFF);
 	}
 	dirtyPixels = true;
-		uint32_t colors[] = {MAGENTA,ORANGE,RED,RBLUE};
+		uint32_t colors[8] = {};
 		colors[0] = blinkState ? MAGENTA : LEDOFF;
 		colors[1] = blinkState ? ORANGE : LEDOFF;
 		colors[2] = blinkState ? RED : LEDOFF;
 		colors[3] = blinkState ? RBLUE : LEDOFF;
-		
+		colors[4] = blinkState ? MAGENTA : LEDOFF;
+		colors[5] = blinkState ? ORANGE : LEDOFF;
+		colors[6] = blinkState ? RED : LEDOFF;
+		colors[7] = blinkState ? RBLUE : LEDOFF;
 	for (int k = 0; k<4; k++){
 		if (keyState[k+11]){
 			strip.setPixelColor(k+11, colors[k]);
 		} else {
-			strip.setPixelColor(k+11, LEDOFF);
+			strip.setPixelColor(k+11, HALFWHITE);
+		}
+	}
+	for (int k = 4; k<8; k++){
+		if (keyState[k+11]){
+			strip.setPixelColor(k+11, colors[k]);
+		} else {
+			strip.setPixelColor(k+11, LTCYAN);
 		}
 	}
 	
@@ -794,22 +804,22 @@ void dispGenericMode(int submode, int selected){
 	int thisGrid = 0;
 	switch(submode){
 		case SUBMODE_GRIDS:
-			if (keyState[11]){
+			if (keyState[11] || keyState[15]){
 				thisGrid = 0;
-			} else if(keyState[12]){
+			} else if(keyState[12] || keyState[16]){
 				thisGrid = 1;
-			} else if(keyState[13]){
+			} else if(keyState[13] || keyState[17]){
 				thisGrid = 2;
-			} else if(keyState[14]){
+			} else if(keyState[14] || keyState[18]){
 				thisGrid = 3;
 			}
 			if (!keyState[11] && !keyState[12] && !keyState[13] && !keyState[14]){
-				thisGrid = 0;
+//				thisGrid = 0;
 			}
 			char bufx[4];
 			char bufy[4];
-			snprintf( bufx, sizeof(bufx), "X %d", thisGrid );
-			snprintf( bufy, sizeof(bufy), "Y %d", thisGrid );
+			snprintf( bufx, sizeof(bufx), "X %d", thisGrid+1 );
+			snprintf( bufy, sizeof(bufy), "Y %d", thisGrid+1 );
 			legends[0] = "BPM";
 			legends[1] = bufx;
 			legends[2] = bufy;
@@ -1148,30 +1158,24 @@ void loop() {
 							resetClocks();
 						}
 					} else if (grparam == 2){
-						if (gridsSelected == 4){
-							for (int g=0; g<gridsSelected; g++){
+						int numGrids = sizeof(gridsSelected);
+						for (int g=0; g < numGrids; g++){
+							if (gridsSelected[g]){
 								int newX = constrain(grids_wrapper.getX(g) + amt, 0, 255);
 								gridsXY[g][0] = newX;
 								grids_wrapper.setX(g, newX);
 							}
-						} else {
-							int newX = constrain(grids_wrapper.getX(gridsSelected) + amt, 0, 255);
-							gridsXY[gridsSelected][0] = newX;
-							grids_wrapper.setX(gridsSelected, newX);
-						}						
+						}
 
 					} else if (grparam == 3){
-						if (gridsSelected == 4){
-							for (int g=0; g<gridsSelected; g++){
+						int numGrids = sizeof(gridsSelected);
+						for (int g=0; g < numGrids; g++){
+							if (gridsSelected[g]){
 								int newY = constrain(grids_wrapper.getY(g) + amt, 0, 255);
 								gridsXY[g][1] = newY;
 								grids_wrapper.setY(g, newY);
 							}
-						} else {
-							int newY = constrain(grids_wrapper.getY(gridsSelected) + amt, 0, 255);
-							gridsXY[gridsSelected][1] = newY;
-							grids_wrapper.setY(gridsSelected, newY);
-						}						
+						}
 
 					} else if (grparam == 4){
 						int newChaos = constrain(grids_wrapper.getChaos() + amt, 0, 255);
@@ -1947,13 +1951,20 @@ void loop() {
 //				} else {
 				}
 				if (e.down() && (thisKey > 10 && thisKey < 15) ) {
-					gridsSelected = thisKey - 11;
-//					Serial.print(gridsSelected);
+					gridsSelected[thisKey - 11] = true;
 					dirtyDisplay = true;
-//					Serial.print(thisKey);
-//					Serial.println(" pressed");
+					grparam = 2;
 				} else if (!e.down() && (thisKey > 10 && thisKey < 15) ) {
-					gridsSelected = 4;
+					gridsSelected[thisKey - 11] = false;
+					dirtyDisplay = true;
+				}
+
+				if (e.down() && (thisKey > 14 && thisKey < 19) ) {
+					gridsSelected[thisKey - 15] = true;
+					dirtyDisplay = true;
+					grparam = 3;
+				} else if (!e.down() && (thisKey > 14 && thisKey < 19) ) {
+					gridsSelected[thisKey - 15] = false;
 					dirtyDisplay = true;
 				}
 				
