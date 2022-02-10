@@ -813,9 +813,6 @@ void dispGenericMode(int submode, int selected){
 			} else if(keyState[14] || keyState[18]){
 				thisGrid = 3;
 			}
-			if (!keyState[11] && !keyState[12] && !keyState[13] && !keyState[14]){
-//				thisGrid = 0;
-			}
 			char bufx[4];
 			char bufy[4];
 			snprintf( bufx, sizeof(bufx), "X %d", thisGrid+1 );
@@ -829,6 +826,17 @@ void dispGenericMode(int submode, int selected){
 			legendVals[2] = gridsXY[thisGrid][1];
 			legendVals[3] = gridsChaos;
 			dispPage = 1;
+			break;
+		case SUBMODE_GRIDS2:
+			legends[0] = "1";
+			legends[1] = "2";
+			legends[2] = "3";
+			legends[3] = "4";
+			legendVals[0] = grids_wrapper.grids_notes[0];
+			legendVals[1] = grids_wrapper.grids_notes[1];
+			legendVals[2] = grids_wrapper.grids_notes[2];
+			legendVals[3] = grids_wrapper.grids_notes[3];
+			dispPage = 2;
 			break;
 		case SUBMODE_MIDI:
 //			if (midiRoundRobin) {
@@ -1182,6 +1190,16 @@ void loop() {
 						gridsChaos = newChaos;
 						grids_wrapper.setChaos(newChaos);
 					}
+					// PAGE TWO
+					if (grparam == 6) {
+						grids_wrapper.grids_notes[0] = constrain(grids_wrapper.grids_notes[0] + amt, 0, 127);
+					} else if (grparam == 7){
+						grids_wrapper.grids_notes[1] = constrain(grids_wrapper.grids_notes[1] + amt, 0, 127);
+					} else if (grparam == 8){
+						grids_wrapper.grids_notes[2] = constrain(grids_wrapper.grids_notes[2] + amt, 0, 127);
+					} else if (grparam == 9){
+						grids_wrapper.grids_notes[3] = constrain(grids_wrapper.grids_notes[3] + amt, 0, 127);
+					}
 					dirtyDisplay = true;
 					break;
 				case MODE_OM: // Organelle Mother
@@ -1511,7 +1529,7 @@ void loop() {
 			}
 
 			if(sysSettings.omxMode == MODE_GRIDS) {
-				grparam = (grparam + 1 ) % 5;
+				grparam = (grparam + 1 ) % 10;
 				grpage = grparam / NUM_DISP_PARAMS;
 			}
 			if(sysSettings.omxMode == MODE_MIDI) {
@@ -2046,6 +2064,8 @@ void loop() {
 					int pselected = grparam % NUM_DISP_PARAMS;
 					if (grpage == 0){
 						dispGenericMode(SUBMODE_GRIDS, pselected);
+					} else if (grpage == 1){
+						dispGenericMode(SUBMODE_GRIDS2, pselected);
 					}
 				}
 			}

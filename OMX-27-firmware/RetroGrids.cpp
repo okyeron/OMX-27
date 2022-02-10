@@ -25,28 +25,36 @@ enum Resolutions
   COUNT
 };
 
-static const uint8_t grids_notes[4] = { 36, 40, 42, 46 };
-static const uint8_t num_notes = sizeof(grids_notes);
 
+struct gridState {
+	uint8_t channel : 2;
+	uint8_t density : 8;
+	uint8_t perturbations : 8;
+	uint8_t x : 8;
+	uint8_t y : 8;
+};
 
 class GridsWrapper {
 	public:
+		uint8_t grids_notes[4] = { 36, 40, 42, 46 };
+		static const uint8_t num_notes = sizeof(grids_notes);
+
 		GridsWrapper()
 		{
-		tickCount_ = 0;
-		for (auto i = 0; i < num_notes; i ++){
-			channelTriggered_[i] = false;
-			density_[i] = i == 0 ? 128 : 128;
-			perturbations_[i] = 0;
-			x_[i] = 128;
-			y_[i] = 128;
-		}
+			tickCount_ = 0;
+			for (auto i = 0; i < num_notes; i ++){
+				channelTriggered_[i] = false;
+				density_[i] = i == 0 ? 128 : 128;
+				perturbations_[i] = 0;
+				x_[i] = 128;
+				y_[i] = 128;
+			}
 
-		accent_ = 128;
-		chaos_ = 0;
-		divider_ = 0;
-		multiplier_ = 1;
-		running_ = false;
+			accent_ = 128;
+			chaos_ = 0;
+			divider_ = 0;
+			multiplier_ = 1;
+			running_ = false;
 		}
 
 		void start()
