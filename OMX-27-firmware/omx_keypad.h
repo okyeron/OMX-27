@@ -23,7 +23,7 @@ class OMXKeypad {
         uint8_t key;
         bool held;
         bool down;
-        uint8_t clicks;
+        uint8_t clicks = 0;
         uint32_t lastClickedAt;
         uint32_t releasedAt;
     };
