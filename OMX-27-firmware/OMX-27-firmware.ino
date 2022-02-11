@@ -456,7 +456,7 @@ void grid_leds() {
 		blinkState = !blinkState;
 		blink_msec = 0;
 	}
-
+	int patternNum = grids_wrapper.playingPattern;
 	if (gridsAUX){
 		// Blink left/right keys for octave select indicators.
 		auto color1 = blinkState ? LIME : LEDOFF;
@@ -474,11 +474,14 @@ void grid_leds() {
 		colors[5] = blinkState ? ORANGE : LEDOFF;
 		colors[6] = blinkState ? RED : LEDOFF;
 		colors[7] = blinkState ? RBLUE : LEDOFF;
+
+	// FIX THIS
+	
 	for (int k = 0; k<4; k++){
 		if (keyState[k+11]){
 			strip.setPixelColor(k+11, colors[k]);
 		} else {
-			strip.setPixelColor(k+11, HALFWHITE);
+			strip.setPixelColor(k+11, PINK);
 		}
 	}
 	for (int k = 4; k<8; k++){
@@ -488,7 +491,32 @@ void grid_leds() {
 			strip.setPixelColor(k+11, LTCYAN);
 		}
 	}
-	
+	for(int j = 1; j < LED_COUNT-16; j++){
+		if (j == 1) {
+													// F1
+			if (keyState[j] && blinkState){
+				strip.setPixelColor(j, LEDOFF);
+			} else {
+				strip.setPixelColor(j, FUNKONE);
+			}
+		} else if (j == 2) {
+													// F2
+			if (keyState[j] && blinkState){
+				strip.setPixelColor(j, LEDOFF);
+			} else {
+				strip.setPixelColor(j, FUNKTWO);
+			}
+
+		} else if (j == patternNum+3){  			// PATTERN SELECT
+			strip.setPixelColor(j, seqColors[patternNum]);
+			if (patternParams && blinkState){
+				strip.setPixelColor(j, LEDOFF);
+			}
+		} else {
+			strip.setPixelColor(j, LEDOFF);
+		}
+
+	}	
 }
 void midi_leds() {
 	blinkInterval = step_delay*2;
@@ -1953,21 +1981,52 @@ void loop() {
 //				strip.show();
 				break;
 
-			case MODE_GRIDS: 
-				if (e.down() && thisKey == 0) {
-					
-					if (sequencer.playing && gridsAUX){
-						gridsAUX = false;
-						grids_wrapper.stop();
-						sequencer.playing = false;
-					} else {
-						gridsAUX = true;
-						grids_wrapper.start();
-						sequencer.playing = true;
+			case MODE_GRIDS:
+				if (!e.held()){
+					if (e.down() && thisKey == 0) {					
+						if (sequencer.playing && gridsAUX){
+							gridsAUX = false;
+							grids_wrapper.stop();
+							sequencer.playing = false;
+						} else {
+							gridsAUX = true;
+							grids_wrapper.start();
+							sequencer.playing = true;
+						}
+					} else if (e.down() && e.clicks() == 0 && (thisKey > 2 && thisKey < 11)) {
+						int patt = thisKey-3;
+						// SAVE
+						if (!keyState[1] && keyState[2]) { // F2 + PATTERN TO SAVE
+							for (int k=0; k<4; k++){
+								grids_wrapper.gridSaves[patt][k].density = grids_wrapper.getDensity(k);
+								grids_wrapper.gridSaves[patt][k].x = grids_wrapper.getX(k);
+								grids_wrapper.gridSaves[patt][k].y = grids_wrapper.getY(k);
+								Serial.print("saved:");
+								Serial.print(grids_wrapper.gridSaves[patt][k].density);							
+								Serial.print(":");
+								Serial.print(grids_wrapper.gridSaves[patt][k].x);							
+								Serial.print(":");
+								Serial.println(grids_wrapper.gridSaves[patt][k].y);							
+							}
+						} else {
+							//SELECT
+							grids_wrapper.playingPattern = patt;
+							for (int k=0; k<4; k++){
+								grids_wrapper.setDensity(k, grids_wrapper.gridSaves[patt][k].density);
+								grids_wrapper.setX(k, grids_wrapper.gridSaves[patt][k].x);
+								grids_wrapper.setY(k, grids_wrapper.gridSaves[patt][k].y);
+								Serial.print("state:");
+								Serial.print(grids_wrapper.gridSaves[patt][k].density);							
+								Serial.print(":");
+								Serial.print(grids_wrapper.gridSaves[patt][k].x);							
+								Serial.print(":");
+								Serial.println(grids_wrapper.gridSaves[patt][k].y);							
+							}
+						}
 					}
-//				} else if (!e.down() && thisKey == 0) {
-//				} else {
 				}
+					
+				
 				if (e.down() && (thisKey > 10 && thisKey < 15) ) {
 					gridsSelected[thisKey - 11] = true;
 					dirtyDisplay = true;

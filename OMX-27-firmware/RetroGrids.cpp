@@ -4,6 +4,7 @@
 
 using namespace grids;
 
+#define NUM_GRIDS 8
 constexpr static uint8_t kMidiChannel = 1;
 
 static uint32_t random_value(std::uint32_t init = 0) {
@@ -26,25 +27,36 @@ enum Resolutions
 };
 
 
-struct gridState {
-	uint8_t channel : 2;
-	uint8_t density : 8;
-	uint8_t perturbations : 8;
-	uint8_t x : 8;
-	uint8_t y : 8;
+struct GridPatterns {
+	uint8_t density;
+	uint8_t x;
+	uint8_t y;
 };
+
 
 class GridsWrapper {
 	public:
 		uint8_t grids_notes[4] = { 36, 40, 42, 46 };
 		static const uint8_t num_notes = sizeof(grids_notes);
-
+		int playingPattern = 0;
+		
+		GridPatterns gridSaves[8][4] =  {
+			{{.density = 0, .x = 128, .y = 128},{.density = 0, .x = 128, .y = 128},{.density = 0, .x = 128, .y = 128},{.density = 0, .x = 128, .y = 128}},
+			{{.density = 0, .x = 128, .y = 128},{.density = 0, .x = 128, .y = 128},{.density = 0, .x = 128, .y = 128},{.density = 0, .x = 128, .y = 128}},
+			{{.density = 0, .x = 128, .y = 128},{.density = 0, .x = 128, .y = 128},{.density = 0, .x = 128, .y = 128},{.density = 0, .x = 128, .y = 128}},
+			{{.density = 0, .x = 128, .y = 128},{.density = 0, .x = 128, .y = 128},{.density = 0, .x = 128, .y = 128},{.density = 0, .x = 128, .y = 128}},
+			{{.density = 0, .x = 128, .y = 128},{.density = 0, .x = 128, .y = 128},{.density = 0, .x = 128, .y = 128},{.density = 0, .x = 128, .y = 128}},
+			{{.density = 0, .x = 128, .y = 128},{.density = 0, .x = 128, .y = 128},{.density = 0, .x = 128, .y = 128},{.density = 0, .x = 128, .y = 128}},
+			{{.density = 0, .x = 128, .y = 128},{.density = 0, .x = 128, .y = 128},{.density = 0, .x = 128, .y = 128},{.density = 0, .x = 128, .y = 128}},
+			{{.density = 0, .x = 128, .y = 128},{.density = 0, .x = 128, .y = 128},{.density = 0, .x = 128, .y = 128},{.density = 0, .x = 128, .y = 128}}
+			};
+		
 		GridsWrapper()
 		{
 			tickCount_ = 0;
 			for (auto i = 0; i < num_notes; i ++){
 				channelTriggered_[i] = false;
-				density_[i] = i == 0 ? 128 : 128;
+				density_[i] = i == 0 ? 128 : 64;
 				perturbations_[i] = 0;
 				x_[i] = 128;
 				y_[i] = 128;
@@ -117,6 +129,11 @@ class GridsWrapper {
 		void setDensity(uint8_t channel, uint8_t density)
 		{
 			density_[channel] = density;
+		}
+
+		uint8_t getDensity(uint8_t channel)
+		{
+			return density_[channel];
 		}
 
 		void setX(uint8_t channel, uint8_t x)
