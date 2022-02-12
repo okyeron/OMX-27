@@ -41,12 +41,11 @@ void OMXKeypad::tick() {
                     key->key = e.bit.KEY;
                     key->index = index;
                     key->held = false;
-//                     key->clicks = 0;
+					if (key->releasedAt < now - clickWindow){
+						key->clicks = 0;
+					}
                     active.push_back(key);
                 }
-				if (key->releasedAt < now - clickWindow){
-					key->clicks = 0;
-				}
 				
                 key->lastClickedAt = now;
                 key->down = true;
@@ -63,7 +62,7 @@ void OMXKeypad::tick() {
                     // hold release event.
                     key->held = false;
                 }
-                _available.push_back(key); // on key release, this is the only event added.
+                _available.push_back(key);	// on key release, this is the only event added.
                 break;
             default:
                 // unknown event
