@@ -14,7 +14,7 @@ Download OMX-27 firmware "hex" file from https://github.com/okyeron/OMX-27/relea
 
 Get TyTools [from GitHub here](https://github.com/Koromix/tytools/releases). More info here (https://koromix.dev/tytools).
 
-Copy TyUpdater to your machine and open it. Be sure your OMX-27 is plugged in. It should show up in the TyUpdater application.
+Copy TyUploader to your machine and open it. Be sure your OMX-27 is plugged in. It should show up in the TyUpdater application.
 
 <img src="images/tyupdater.png" alt="tyupdater" width="382" height="193" />
 
