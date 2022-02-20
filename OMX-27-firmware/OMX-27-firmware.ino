@@ -59,6 +59,15 @@ volatile unsigned long noteon_micros;
 volatile unsigned long noteoff_micros;
 volatile unsigned long ppqInterval;
 
+elapsedMillis screenSaver = 0;
+bool screenSaverMode = false;
+unsigned long screensaverInterval = 1000 * 60 * 2; // 2 minutes default? // 10000; 
+int ssstep = 0;
+int ssloop = 0;
+volatile unsigned long nextStepTimeSS = 0;
+bool ssreverse = false;
+int sleepTick = 80;
+
 // ANALOGS
 int potbank = 0;
 int analogValues[] = {0,0,0,0,0};		// default values
@@ -147,6 +156,7 @@ uint8_t midiLastNote = 0;
 bool midiSoftThru = false;
 uint32_t stepColor = 0x000000;
 uint32_t muteColor = 0x000000;
+uint32_t ssColor = 0xFF0000;
 
 //int midiChannel; // the MIDI channel number to send messages (MIDI/OM mode)
 
@@ -263,6 +273,9 @@ void readPotentimeters(){
 
 		if(analog[k]->hasChanged()) {
 			 // do stuff
+			if (screenSaver){
+				ssColor = analog[4]->getValue() * 4;
+			}
 			switch(sysSettings.omxMode) {
 				case MODE_OM:
 						// fall through - same as MIDI
@@ -327,6 +340,8 @@ void setup() {
 	usbMIDI.setHandleSystemExclusive(OnSysEx);
 
 	clksTimer = 0;
+	screenSaver = 0;
+	ssstep = 0;
 
 	lastProcessTime = micros();
 	resetClocks();
@@ -705,6 +720,50 @@ void show_current_step(int patternNum) {
 	dirtyPixels = true;
 //	strip.show();
 }
+
+// SLEEP MODE LEDS
+void sleepModeOne(){
+	unsigned long playstepmillis = millis();
+	if (playstepmillis > nextStepTimeSS){ 
+		ssstep = ssstep % 16;
+		ssloop = ssloop % 16 ;
+	
+		int j = 26 - ssloop;
+		int i = ssstep + 11;
+
+		if (!ssreverse) {
+			// turn off all leds
+			for (int x=0; x<16; x++){
+				if (i < j){
+					strip.setPixelColor(x+11, 0);
+				}
+				if (x+11 > j){
+					strip.setPixelColor(x+11, strip.gamma32(strip.ColorHSV(ssColor)));
+				}
+			}
+			strip.setPixelColor(i+1, strip.gamma32(strip.ColorHSV(ssColor)));
+		} else {
+			for (int y=0; y<16; y++){
+				if (i >= j){
+					strip.setPixelColor(y+11, 0);
+				}
+				if (y+11 < j){
+					strip.setPixelColor(y+11, strip.gamma32(strip.ColorHSV(ssColor)));
+				}
+			}
+			strip.setPixelColor(i+1, strip.gamma32(strip.ColorHSV(ssColor)));
+		}
+		ssstep++;
+		if (ssstep == 16){
+			ssloop++;
+		}
+		if (ssloop == 16){
+			ssreverse = !ssreverse;
+		}
+		nextStepTimeSS = nextStepTimeSS + sleepTick;
+		dirtyPixels = true;
+	}
+}
 // ####### END LEDS
 
 
@@ -1015,6 +1074,7 @@ void loop() {
 
 	if (passed > 0) {
 		if (sequencer.playing){
+			screenSaver = 0;
 			advanceClock(passed);
 			advanceSteps(passed);
 		}
@@ -1023,6 +1083,21 @@ void loop() {
 
 	// DISPLAY SETUP
 	display.clearDisplay();
+
+
+	// ############### SLEEP MODE ###############
+	if (screenSaver > screensaverInterval ){
+		screenSaverMode = true;
+	} else if (screenSaver < 10){
+		ssstep = 0;
+		ssloop = 0;
+		setAllLEDS(0,0,0);
+		screenSaverMode = false;
+		nextStepTimeSS = millis();
+	} else {
+		screenSaverMode = false;
+		nextStepTimeSS = millis();
+	}
 
 	// ############### POTS ###############
 	//
@@ -1045,6 +1120,7 @@ void loop() {
 	auto u = myEncoder.update();
 	if (u.active()) {
 		auto amt = u.accel(5); // where 5 is the acceleration factor if you want it, 0 if you don't)
+		screenSaver = 0;
 //    	Serial.println(u.dir() < 0 ? "ccw " : "cw ");
 //    	Serial.println(amt);
 
@@ -1373,6 +1449,7 @@ void loop() {
 	switch (s) {
 		// SHORT PRESS
 		case Button::Down: //Serial.println("Button down");
+			screenSaver = 0;
 
 			// what page are we on?
 			if (sysSettings.newmode != sysSettings.omxMode && enc_edit) {
@@ -1467,6 +1544,7 @@ void loop() {
 		int seqKey = keyPos + (sequencer.patternPage[sequencer.playingPattern] * NUM_STEPKEYS);
 
 		if (e.down()){
+			screenSaver = 0;
 			keyState[thisKey] = true;
 		}
 	
@@ -1862,96 +1940,106 @@ void loop() {
 	}  // END KEYS WHILE
 
 
+	if (!screenSaverMode){
 
-	// ############### MODES DISPLAY  ##############
-	//
-	if(messageTextTimer > 0) {
-		messageTextTimer -= passed;
-		if(messageTextTimer <= 0) {
-			dirtyDisplay = true;
-			messageTextTimer = 0;
+		// ############### MODES DISPLAY  ##############
+		//
+		if(messageTextTimer > 0) {
+			messageTextTimer -= passed;
+			if(messageTextTimer <= 0) {
+				dirtyDisplay = true;
+				messageTextTimer = 0;
+			}
+		}
+
+		switch(sysSettings.omxMode){
+			case MODE_OM: 						// ############## ORGANELLE MODE
+				// FALL THROUGH
+
+			case MODE_MIDI:							// ############## MIDI KEYBOARD
+				//playingPattern = 0; 		// DEFAULT MIDI MODE TO THE FIRST PATTERN SLOT
+				midi_leds();				// SHOW LEDS
+
+				if (dirtyDisplay){			// DISPLAY
+					if (!enc_edit){
+						int pselected = miparam % NUM_DISP_PARAMS;
+						if (mmpage == 0){
+							dispGenericMode(SUBMODE_MIDI, pselected);
+						} else if (mmpage == 1){
+							dispGenericMode(SUBMODE_MIDI2, pselected);
+						} else if (mmpage == 2){
+							dispGenericMode(SUBMODE_MIDI3, pselected);
+						}
+
+					}
+				}
+				break;
+
+			case MODE_S1: 						// ############## SEQUENCER 1
+				// FALL THROUGH
+			case MODE_S2: 						// ############## SEQUENCER 2
+				// MIDI SOLO
+				if (sequencer.getCurrentPattern()->solo) {
+					midi_leds();
+				}
+
+				if (dirtyDisplay){			// DISPLAY
+					if (!enc_edit && messageTextTimer == 0){	// show only if not encoder edit or dialog display
+						if (!noteSelect and !patternParams and !stepRecord){
+							int pselected = sqparam % NUM_DISP_PARAMS;
+							if (sqpage == 0){
+								dispGenericMode(SUBMODE_SEQ, pselected);
+							} else if (sqpage == 1){
+								dispGenericMode(SUBMODE_SEQ2, pselected);
+							}
+						}
+						if (noteSelect) {
+							int pselected = nsparam % NUM_DISP_PARAMS;
+							if (nspage == 0){
+								dispGenericMode(SUBMODE_NOTESEL, pselected);
+							} else if (nspage == 1){
+								dispGenericMode(SUBMODE_NOTESEL2, pselected);
+							} else if (nspage == 2){
+								dispGenericMode(SUBMODE_NOTESEL3, pselected);
+							}
+						}
+						if (patternParams) {
+							int pselected = ppparam % NUM_DISP_PARAMS;
+							if (pppage == 0){
+								dispGenericMode(SUBMODE_PATTPARAMS, pselected);
+							} else if (pppage == 1){
+								dispGenericMode(SUBMODE_PATTPARAMS2, pselected);
+							} else if (pppage == 2){
+								dispGenericMode(SUBMODE_PATTPARAMS3, pselected);
+							}
+
+						}
+						if (stepRecord) {
+							int pselected = srparam % NUM_DISP_PARAMS;
+							if (srpage == 0){
+								dispGenericMode(SUBMODE_STEPREC, pselected);
+							} else if (srpage == 1){
+								dispGenericMode(SUBMODE_NOTESEL2, pselected);
+							}
+						}
+					}
+				}
+
+				break;
+
+			default:
+				break;
+
 		}
 	}
-
-	switch(sysSettings.omxMode){
-		case MODE_OM: 						// ############## ORGANELLE MODE
-			// FALL THROUGH
-
-		case MODE_MIDI:							// ############## MIDI KEYBOARD
-			//playingPattern = 0; 		// DEFAULT MIDI MODE TO THE FIRST PATTERN SLOT
-			midi_leds();				// SHOW LEDS
-
-			if (dirtyDisplay){			// DISPLAY
-				if (!enc_edit){
-					int pselected = miparam % NUM_DISP_PARAMS;
-					if (mmpage == 0){
-						dispGenericMode(SUBMODE_MIDI, pselected);
-					} else if (mmpage == 1){
-						dispGenericMode(SUBMODE_MIDI2, pselected);
-					} else if (mmpage == 2){
-						dispGenericMode(SUBMODE_MIDI3, pselected);
-					}
-
-				}
-			}
-			break;
-
-		case MODE_S1: 						// ############## SEQUENCER 1
-			// FALL THROUGH
-		case MODE_S2: 						// ############## SEQUENCER 2
-			// MIDI SOLO
-			if (sequencer.getCurrentPattern()->solo) {
-				midi_leds();
-			}
-
-			if (dirtyDisplay){			// DISPLAY
-				if (!enc_edit && messageTextTimer == 0){	// show only if not encoder edit or dialog display
-					if (!noteSelect and !patternParams and !stepRecord){
-						int pselected = sqparam % NUM_DISP_PARAMS;
-						if (sqpage == 0){
-							dispGenericMode(SUBMODE_SEQ, pselected);
-						} else if (sqpage == 1){
-							dispGenericMode(SUBMODE_SEQ2, pselected);
-						}
-					}
-					if (noteSelect) {
-						int pselected = nsparam % NUM_DISP_PARAMS;
-						if (nspage == 0){
-							dispGenericMode(SUBMODE_NOTESEL, pselected);
-						} else if (nspage == 1){
-							dispGenericMode(SUBMODE_NOTESEL2, pselected);
-						} else if (nspage == 2){
-							dispGenericMode(SUBMODE_NOTESEL3, pselected);
-						}
-					}
-					if (patternParams) {
-						int pselected = ppparam % NUM_DISP_PARAMS;
-						if (pppage == 0){
-							dispGenericMode(SUBMODE_PATTPARAMS, pselected);
-						} else if (pppage == 1){
-							dispGenericMode(SUBMODE_PATTPARAMS2, pselected);
-						} else if (pppage == 2){
-							dispGenericMode(SUBMODE_PATTPARAMS3, pselected);
-						}
-
-					}
-					if (stepRecord) {
-						int pselected = srparam % NUM_DISP_PARAMS;
-						if (srpage == 0){
-							dispGenericMode(SUBMODE_STEPREC, pselected);
-						} else if (srpage == 1){
-							dispGenericMode(SUBMODE_NOTESEL2, pselected);
-						}
-					}
-				}
-			}
-
-			break;
-
-		default:
-			break;
-
+	if (screenSaverMode){
+		sleepModeOne();
+		// clear display
+		display.clearDisplay();
+		dirtyDisplay = true;
+		
 	}
+
 
 	// DISPLAY at end of loop
 
@@ -2151,6 +2239,102 @@ void setAllLEDS(int R, int G, int B) {
 		strip.setPixelColor(i, strip.Color(R, G, B));
 	}
 	dirtyPixels = true;
+}
+
+// Input a value 0 to 255 to get a color value.
+// The colours are a transition r - g - b - back to r.
+uint32_t Wheel(byte WheelPos) {
+	WheelPos = 255 - WheelPos;
+	if(WheelPos < 85) {
+		return strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
+	}
+	if(WheelPos < 170) {
+		WheelPos -= 85;
+		return strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
+	}
+	WheelPos -= 170;
+	return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
+}
+
+void colorWipe(byte red, byte green, byte blue, int SpeedDelay) {
+  for(uint16_t i=0; i<strip.numPixels(); i++) {
+      strip.setPixelColor(i, strip.Color(red, green, blue));
+      strip.show();
+      delay(SpeedDelay);
+  }
+}
+
+void theaterChaseRainbow(uint8_t wait) {		//Theatre-style crawling lights with rainbow effect
+	for (int j=0; j < 256; j++) {     // cycle all 256 colors in the wheel
+		for (int q=0; q < 3; q++) {
+			for (uint16_t i=0; i < strip.numPixels(); i=i+3) {
+				strip.setPixelColor(i+q, Wheel( (i+j) % 255));    //turn every third pixel on
+			}
+			strip.show();
+			delay(wait);
+			for (uint16_t i=0; i < strip.numPixels(); i=i+3) {
+				strip.setPixelColor(i+q, 0);        //turn every third pixel off
+			}
+		}
+	}
+}
+void CylonBounce(byte red, byte green, byte blue, int EyeSize, int SpeedDelay, int ReturnDelay, int start, int end){
+  for(int i = start; i < end-EyeSize-2; i++) {
+    setAllLEDS(0,0,0);
+    strip.setPixelColor(i, strip.Color(red/10, green/10, blue/10));
+    for(int j = 1; j <= EyeSize; j++) {
+      strip.setPixelColor(i+j, strip.Color(red, green, blue));
+    }
+    strip.setPixelColor(i+EyeSize+1, strip.Color(red/10, green/10, blue/10));
+    strip.show();
+    delay(SpeedDelay);
+  }
+  delay(ReturnDelay);
+  for(int i = end-EyeSize-2; i > start; i--) {
+    setAllLEDS(0,0,0);
+    strip.setPixelColor(i, strip.Color(red/10, green/10, blue/10));
+    for(int j = 1; j <= EyeSize; j++) {
+      strip.setPixelColor(i+j, strip.Color(red, green, blue));
+    }
+    strip.setPixelColor(i+EyeSize+1, strip.Color(red/10, green/10, blue/10));
+    strip.show();
+    delay(SpeedDelay);
+  }
+  delay(ReturnDelay);
+}
+void RolandFill(byte red, byte green, byte blue, int start, int end, int SpeedDelay){
+	for(uint16_t j=end; j>start; j--) {
+		for(uint16_t i=start; i<end; i++) {
+			strip.setPixelColor(i, strip.Color(red, green, blue));
+			strip.show();
+			if (i < j){
+				strip.setPixelColor(i, 0);
+
+			}
+			if (!screenSaverMode){
+				return;
+			}
+		}
+		strip.setPixelColor(j, strip.Color(red, green, blue));
+		strip.show();
+	}
+	for(uint16_t j=end; j>start-1; j--) {
+		for(uint16_t i=start; i<end+1; i++) {
+			strip.setPixelColor(i, strip.Color(red, green, blue));
+			strip.show();
+			if (i > j){
+				strip.setPixelColor(i, 0);
+
+			}
+			if (!screenSaverMode){
+				return;
+			}
+		}
+		if (j != start){
+			strip.setPixelColor(j, strip.Color(red, green, blue));
+		}
+		strip.show();
+	}
 }
 
 // #### OLED STUFF
