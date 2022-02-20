@@ -36,6 +36,9 @@ struct GridPatterns {
 
 class GridsWrapper {
 	public:
+		uint8_t chaos;
+		uint8_t accent;
+
 		uint8_t grids_notes[4] = { 36, 40, 42, 46 };
 		static const uint8_t num_notes = sizeof(grids_notes);
 		int playingPattern = 0;
@@ -62,8 +65,8 @@ class GridsWrapper {
 				y_[i] = 128;
 			}
 
-			accent_ = 128;
-			chaos_ = 0;
+			accent = 128;
+			chaos = 0;
 			divider_ = 0;
 			multiplier_ = 1;
 			running_ = false;
@@ -99,7 +102,7 @@ class GridsWrapper {
 				for (auto channel = 0; channel < num_notes; channel++){
 					if (step == 0){
 					  std::uint32_t r = random_value();
-					  perturbations_[channel] = ((r & 0xFF) * (chaos_ >> 2)) >> 8;
+					  perturbations_[channel] = ((r & 0xFF) * (chaos >> 2)) >> 8;
 					}
 
 					const uint8_t threshold = ~density_[channel];
@@ -110,7 +113,7 @@ class GridsWrapper {
 
 					if (level > threshold){
 						uint8_t targetLevel =  uint8_t(127.f * float(level - threshold) / float(256 - threshold));
-						uint8_t noteLevel = grids::U8Mix(127, targetLevel, accent_);
+						uint8_t noteLevel = grids::U8Mix(127, targetLevel, accent);
 						MM::sendNoteOn(grids_notes[channel], noteLevel, kMidiChannel);
 						channelTriggered_[channel] = true;
 					}    
@@ -162,12 +165,12 @@ class GridsWrapper {
 
 		void setChaos(uint8_t c)
 		{
-			chaos_ = c;
+			chaos = c;
 		}
 
 		uint8_t getChaos()
 		{
-			return chaos_;
+			return chaos;
 		}
 
 		void setResolution(uint8_t r)
@@ -187,7 +190,11 @@ class GridsWrapper {
 
 		void setAccent(uint8_t a)
 		{
-			accent_ = a;
+			accent = a;
+		}
+		uint8_t getAccent()
+		{
+			return accent;
 		}
 
 	private:
@@ -200,8 +207,6 @@ class GridsWrapper {
 		uint8_t x_[num_notes];
 		uint8_t y_[num_notes];
 		bool channelTriggered_[num_notes];
-		uint8_t chaos_;
-		uint8_t accent_;
 		bool running_;  
 };
 

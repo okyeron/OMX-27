@@ -91,7 +91,8 @@ SequencerState sequencer = defaultSequencer();
 
 static GridsWrapper grids_wrapper;
 int gridsXY[4][2] = {{grids_wrapper.getX(0),grids_wrapper.getY(0)},{grids_wrapper.getX(1),grids_wrapper.getY(1)},{grids_wrapper.getX(2),grids_wrapper.getY(2)},{grids_wrapper.getX(3),grids_wrapper.getY(3)} };
-int gridsChaos = grids_wrapper.getChaos();
+//int gridsChaos = grids_wrapper.getChaos();
+//int gridsAccent = grids_wrapper.getAccent();
 bool gridsSelected[] = {false,false,false,false};
 
 
@@ -277,6 +278,7 @@ void readPotentimeters(){
 
 		if(analog[k]->hasChanged()) {
 			 // do stuff
+
 			switch(sysSettings.omxMode) {
 				case MODE_OM:
 						// fall through - same as MIDI
@@ -348,7 +350,7 @@ void setup() {
 	usbMIDI.setHandleSystemExclusive(OnSysEx);
 
 	clksTimer = 0;
-
+	
 	lastProcessTime = micros();
 	resetClocks();
 
@@ -426,10 +428,13 @@ void setup() {
 	strip.show();            // Turn OFF all pixels ASAP
 	strip.setBrightness(LED_BRIGHTNESS); // Set BRIGHTNESS to about 1/5 (max = 255)
 	for(int i=0; i<LED_COUNT; i++) { // For each pixel...
-		strip.setPixelColor(i, HALFWHITE);
+//		strip.setPixelColor(i, HALFWHITE);
 		strip.show();   // Send the updated pixel colors to the hardware.
 		delay(5); // Pause before next pass through loop
 	}
+
+	
+//	CylonBounce(0xff, 0, 0, 3, 100, 100, 11, 28);
 	rainbow(5); // rainbow startup pattern
 	delay(500);
 
@@ -515,8 +520,8 @@ void grid_leds() {
 		} else {
 			strip.setPixelColor(j, LEDOFF);
 		}
-
-	}	
+	}
+	dirtyPixels = true;
 }
 void midi_leds() {
 	blinkInterval = step_delay*2;
@@ -793,6 +798,7 @@ void show_current_step(int patternNum) {
 	dirtyPixels = true;
 //	strip.show();
 }
+
 // ####### END LEDS
 
 
@@ -845,14 +851,14 @@ void dispGenericMode(int submode, int selected){
 			char bufy[4];
 			snprintf( bufx, sizeof(bufx), "X %d", thisGrid+1 );
 			snprintf( bufy, sizeof(bufy), "Y %d", thisGrid+1 );
-			legends[0] = "BPM";
+			legends[0] = "ACNT"; //"BPM";
 			legends[1] = bufx;
 			legends[2] = bufy;
 			legends[3] = "XAOS";
-			legendVals[0] = (int)clockbpm;
+			legendVals[0] = grids_wrapper.accent; // (int)clockbpm;
 			legendVals[1] = gridsXY[thisGrid][0];
 			legendVals[2] = gridsXY[thisGrid][1];
-			legendVals[3] = gridsChaos;
+			legendVals[3] = grids_wrapper.chaos;
 			dispPage = 1;
 			break;
 		case SUBMODE_GRIDS2:
@@ -1147,7 +1153,7 @@ void loop() {
 
 	// DISPLAY SETUP
 	display.clearDisplay();
-
+	
 	// ############### POTS ###############
 	//
 	readPotentimeters();
@@ -1187,12 +1193,15 @@ void loop() {
 					// CHANGE PAGE
 					if (grparam == 1) {
 						// set tempo
-						newtempo = constrain(clockbpm + amt, 40, 300);
-						if (newtempo != clockbpm){
-							// SET TEMPO HERE
-							clockbpm = newtempo;
-							resetClocks();
-						}
+//						newtempo = constrain(clockbpm + amt, 40, 300);
+//						if (newtempo != clockbpm){
+//							// SET TEMPO HERE
+//							clockbpm = newtempo;
+//							resetClocks();
+//						}
+						int newAccent = constrain(grids_wrapper.accent + amt, 0, 255);
+						grids_wrapper.accent = newAccent;
+
 					} else if (grparam == 2){
 						int numGrids = sizeof(gridsSelected);
 						for (int g=0; g < numGrids; g++){
@@ -1214,9 +1223,9 @@ void loop() {
 						}
 
 					} else if (grparam == 4){
-						int newChaos = constrain(grids_wrapper.getChaos() + amt, 0, 255);
-						gridsChaos = newChaos;
-						grids_wrapper.setChaos(newChaos);
+						int newChaos = constrain(grids_wrapper.chaos + amt, 0, 255);
+						grids_wrapper.chaos = newChaos;
+//						grids_wrapper.setChaos(newChaos);
 					}
 					// PAGE TWO
 					if (grparam == 6) {
@@ -1651,6 +1660,14 @@ void loop() {
 			//	Serial.println("EEPROM saved");
 		}
 
+//		Serial.print("clicks: ");
+//		Serial.println(e.clicks());
+//
+//		if (!e.down() && (e.clicks() == 2)){
+//		Serial.print("double ");
+//		Serial.print("click: ");
+//		Serial.println(e.clicks());
+//		}
 		switch(sysSettings.omxMode) {
 			case MODE_OM: // Organelle
 				// Fall Through
@@ -1684,7 +1701,9 @@ void loop() {
 						midiNoteOff(thisKey, sysSettings.midiChannel);
 					}
 				}
-//				Serial.println(e.clicks());
+//				if (e.down()){
+
+//				}
 
 				// AUX KEY
 				if (e.down() && thisKey == 0) {
@@ -2105,6 +2124,7 @@ void loop() {
 
 
 
+	
 	// ############### MODES DISPLAY  ##############
 	//
 	if(messageTextTimer > 0) {
@@ -2208,6 +2228,7 @@ void loop() {
 			break;
 
 	}
+	
 
 	// DISPLAY at end of loop
 
@@ -2233,7 +2254,6 @@ void loop() {
 	}
 
 } // ######## END MAIN LOOP ########
-
 
 void cvNoteOn(int notenum){
 	if (notenum>=midiLowestNote && notenum <midiHightestNote){
@@ -2402,6 +2422,7 @@ void rainbow(int wait) {
 		delay(wait);  // Pause for a moment
 	}
 }
+
 void setAllLEDS(int R, int G, int B) {
 	for(int i=0; i<LED_COUNT; i++) { // For each pixel...
 		strip.setPixelColor(i, strip.Color(R, G, B));
