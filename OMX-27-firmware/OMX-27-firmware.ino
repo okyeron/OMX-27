@@ -61,7 +61,7 @@ volatile unsigned long ppqInterval;
 
 elapsedMillis screenSaver = 0;
 bool screenSaverMode = false;
-unsigned long screensaverInterval = 1000 * 60 * 2; // 2 minutes default? // 10000; 
+unsigned long screensaverInterval = 15000; //1000 * 60 * 2; // 2 minutes default? // 10000; 
 int ssstep = 0;
 int ssloop = 0;
 volatile unsigned long nextStepTimeSS = 0;
