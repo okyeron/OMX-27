@@ -1,5 +1,5 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
-// v 1.5.0
+// v 1.5.1
 //
 // Steven Noreyko, Last update: January 2022
 //
@@ -239,7 +239,7 @@ void setGlobalSwing(int swng_amt){
 	}
 }
 
-// ####### POTENTIMETERS #######
+// ####### POTENTIOMETERS #######
 
 void sendPots(int val, int channel){
 	MM::sendControlChange(pots[potbank][val], analogValues[val], channel);
