@@ -90,6 +90,7 @@
         this.model = null;
         this.version = null;
         this.ver = null;
+        this.eeprom_version = null;
         this.input = null;
         this.output = null;
         this.data = null;
@@ -118,6 +119,7 @@
         })[message[5]];
         const version = message => (message[6] + "." + message[7] + "." + message[8]);
         const ver = message => (message[6]);
+        const eeprom_version = message => (message[9]);
 		
         if (this.model)
           if (this.input && this.input.state == "connected")
@@ -131,6 +133,7 @@
               if (this.model = model(event.data), this.model) {
                 this.version = version(event.data);
                 this.ver = ver(event.data);
+                this.eeprom_version = eeprom_version(event.data);
                 this.input = event.target;
                 this.output = port;
                 this.data = event.data;
@@ -161,12 +164,13 @@
 	
 	document.addEventListener("DOMContentLoaded", async function() {
 		const status = document.getElementById("status");
+		const alert = document.getElementById("alert");
 		const access = await midi();
 		let interrupt = () => null;
 
 		const saveconfig = document.getElementById("saveconfig");		
 		saveconfig.addEventListener("click", function(){
-			var outbound = "F0 7D 00 00 0D 09";
+			var outbound = "F0 7D 00 00 0D " + document.getElementById("eeprom").value;
 			
 			for (var bytes = 6; bytes < 34; bytes++) {
 				const bankval = document.getElementById(bytes);
@@ -184,6 +188,11 @@
 			// console.log(outbound);
 			const sendit = raw(outbound), timeout = 100;
 			midiDevice.output.send(sendit);
+			
+			alert.style.visibility = "visible"
+			alert.textContent = "Saved!";
+			var timeoutID = setTimeout(function() { alert.style.visibility = "hidden", alert.textContent = ""; }, 4000);
+			
 		});
 		
 
@@ -203,6 +212,7 @@
 			const main = document.getElementById("main");
 			var labels = ["Mode", "Playing Pattern", "Midi Channel"];
 			var modelist = ["MIDI", "S1", "S2", "OM"];
+
 			var t = document.createElement("dl");
 			t.setAttribute("class", "grid");
 
@@ -224,6 +234,7 @@
 // 			   dl.appendChild(option);
 // 			});
 // 			t.appendChild(dl);
+
 			
 			for (var hh = 0; hh < 3; hh++) {
 				var nr = document.createElement("dd");
@@ -293,6 +304,12 @@
 				newRow.appendChild(label);
 			}
 			main.appendChild(t);
+			var ee = document.createElement("input");
+			ee.setAttribute("type", "hidden");
+			ee.setAttribute("id", "eeprom");
+			ee.setAttribute("value", midiDevice.data[9]);
+			main.appendChild(ee);
+
 		}
 
 // 		while (true) {
@@ -303,7 +320,7 @@
 
 			if (await midiDevice.find(access)) {
 				status.style.color = "green";
-				status.textContent = midiDevice.model + " v" + midiDevice.version;
+				status.textContent = midiDevice.model + " v" + midiDevice.version + " (ep-" + midiDevice.eeprom_version + ")";
 			}
 			showgrid();
  			await new Promise(resolve => setTimeout(interrupt = resolve, 1000));
@@ -405,7 +422,7 @@
 		<div id="title">OMX-27 WebMIDI SYSEX Config</div>
 		<span id="status"></span>
 	</header>
-	<div id="main">
+	<div id="main">	
 	</div>
 
 	<div id="nav">
@@ -413,6 +430,8 @@
 		<span class="fas fa-file-import"></span> 
 		Save Config
 	</button>
+	<span id="alert"></span>
+
 	</div>
 
 </body>
