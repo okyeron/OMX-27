@@ -4,6 +4,8 @@
 
 Mechanical key switch midi keyboard and sequencer. Based on Teensy 3.2 and Cherry MX RGB key switches.
 
+Full kits and partial kits are [available for sale here](https://denki-oto.weebly.com/#/).
+
 ## Firmware 
 
 Kits are shipped with a blank Teensy. You will need to flash the firmware to the device.
