@@ -169,7 +169,6 @@ There are two pages of parameters in Step Record. First is the current octave (O
 Use the AUX to exit this sub-mode.
 
 Keys/Commands:  
-- Short-press encoder to skip step   
 - Potentiometers 1-4 set a CC parameter lock  
 - Potentiometers 5 sets a step velocity   
 - AUX exit this sub-mode  
