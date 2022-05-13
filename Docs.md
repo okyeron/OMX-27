@@ -164,14 +164,13 @@ If you want to skip steps while entering notes, use the encoder button to select
 
 There are two pages of parameters in Step Record. First is the current octave (OCT), step number (STEP), note-value (NOTE), and pattern number (PTN). Second shows the step event parameters TYPE, PROB and COND as described above.
 
- 
-
 Use the AUX to exit this sub-mode.
 
 Keys/Commands:  
 - Potentiometers 1-4 set a CC parameter lock  
 - Potentiometers 5 sets a step velocity   
 - AUX exit this sub-mode  
+
 
 ### Pattern Parameters
 
