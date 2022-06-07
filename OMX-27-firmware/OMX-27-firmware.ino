@@ -1,7 +1,7 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
-// v 1.5.1
+// v 1.6.0
 //
-// Steven Noreyko, Last update: January 2022
+// Steven Noreyko, Last update: June 2022
 //
 //
 //	Big thanks to:
@@ -110,6 +110,9 @@ bool clearedFlag = false;
 
 bool enc_edit = false;
 bool midiAUX = false;
+bool m8extra = true;
+bool m8AUX = false;
+bool m8mutesolo[] = {false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false};
 
 int defaultVelocity = 100;
 int octave = 0;			// default C4 is 0 - range is -4 to +5
@@ -449,6 +452,25 @@ void midi_leds() {
 		strip.setPixelColor(2, color2);
 		strip.setPixelColor(11, color3);
 		strip.setPixelColor(12, color4);
+	} else if (m8AUX){
+		auto color5 = blinkState ? ORANGE : LEDOFF;
+		auto color6 = blinkState ? RED : LEDOFF;
+
+		strip.setPixelColor(0, BLUE);
+		for(int m = 11; m < LED_COUNT-8; m++){
+			if (m8mutesolo[m-11]){
+				strip.setPixelColor(m, color5);
+			}else{
+				strip.setPixelColor(m, ORANGE);
+			}
+		}
+		for(int m = 19; m < LED_COUNT; m++){
+			if (m8mutesolo[m-11]){
+				strip.setPixelColor(m, color6);
+			}else{
+				strip.setPixelColor(m, RED);
+			}
+		}
 
 	} else {
 		strip.setPixelColor(0, LEDOFF);
@@ -771,7 +793,7 @@ void dispGenericMode(int submode, int selected){
 			legends[0] = "PBNK";	// Potentiometer Banks
 			legends[1] = "THRU";
 			legends[2] = "---";
-			legends[3] = "---";
+			legends[3] = " M8 ";
 			legendVals[0] = potbank + 1;
 			legendVals[1] = -127;
 			if (midiSoftThru) {
@@ -780,7 +802,12 @@ void dispGenericMode(int submode, int selected){
 				legendText[1] = "Off";
 			}
 			legendVals[2] = 0;
-			legendVals[3] = 0;
+			legendVals[3] = -127;
+			if (m8extra) {
+				legendText[3] = "On";
+			} else {
+				legendText[3] = "Off";
+			}
 			dispPage = 3;
 			break;
 		case SUBMODE_SEQ:
@@ -1127,6 +1154,10 @@ void loop() {
 					if (miparam == 12) {
 						midiSoftThru = constrain(midiSoftThru + amt, 0, 1);
 					}
+					if (miparam == 14) {
+						m8extra = constrain(m8extra + amt, 0, 1);
+					}
+
 
 					dirtyDisplay = true;
 					break;
@@ -1483,6 +1514,36 @@ void loop() {
 			case MODE_MIDI: // MIDI CONTROLLER
 
 				// ### KEY PRESS EVENTS
+				if (m8extra){
+					if (e.clicks()==2 && thisKey == 0) {
+						m8AUX = !m8AUX;
+						if (!m8AUX) {
+							for(int m = 1; m < LED_COUNT; m++){
+								strip.setPixelColor(m, LEDOFF);
+							}
+						}
+					}
+					if (m8AUX) {
+						if (!e.held()){ 
+							if (e.down() && (thisKey > 10 || thisKey < 27 )){
+	//							Serial.println(keyPos);
+								m8mutesolo[keyPos] = !m8mutesolo[keyPos];
+								int mutePos = keyPos + 12;
+								if (m8mutesolo[keyPos]){
+									MM::sendNoteOn(mutePos, 1, sysSettings.midiChannel);
+								} else {
+									MM::sendNoteOff(mutePos, 0, sysSettings.midiChannel);
+								}							
+//								Serial.print(keyPos);
+//								Serial.print(": ");
+//								Serial.println(m8mutesolo[keyPos]);
+								break;
+							}
+						}	
+					}
+				}
+
+				// REGULAR KEY PRESSES
 				if (!e.held()){ 		// IGNORE LONG PRESS EVENTS
 					if (e.down() && thisKey != 0) {
 						//Serial.println(" pressed");
