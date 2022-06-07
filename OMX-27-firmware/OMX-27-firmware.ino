@@ -110,8 +110,9 @@ bool clearedFlag = false;
 
 bool enc_edit = false;
 bool midiAUX = false;
-bool m8extra = true;
+bool m8macro = true;
 bool m8AUX = false;
+int m8chan = 10;
 bool m8mutesolo[] = {false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false};
 
 int defaultVelocity = 100;
@@ -452,11 +453,19 @@ void midi_leds() {
 		strip.setPixelColor(2, color2);
 		strip.setPixelColor(11, color3);
 		strip.setPixelColor(12, color4);
+
+	// M8 Macros
+
 	} else if (m8AUX){
 		auto color5 = blinkState ? ORANGE : LEDOFF;
 		auto color6 = blinkState ? RED : LEDOFF;
 
 		strip.setPixelColor(0, BLUE);
+		strip.setPixelColor(1, ORANGE); // all mute
+		strip.setPixelColor(3, LIME); // MIXER
+		strip.setPixelColor(4, CYAN); // snap save
+		strip.setPixelColor(5, MAGENTA); // snap save
+
 		for(int m = 11; m < LED_COUNT-8; m++){
 			if (m8mutesolo[m-11]){
 				strip.setPixelColor(m, color5);
@@ -464,6 +473,8 @@ void midi_leds() {
 				strip.setPixelColor(m, ORANGE);
 			}
 		}
+		
+		strip.setPixelColor(6, RED); // all solo
 		for(int m = 19; m < LED_COUNT; m++){
 			if (m8mutesolo[m-11]){
 				strip.setPixelColor(m, color6);
@@ -471,6 +482,8 @@ void midi_leds() {
 				strip.setPixelColor(m, RED);
 			}
 		}
+		strip.setPixelColor(9, YELLOW); // WAVES
+		strip.setPixelColor(10, BLUE); // PLAY
 
 	} else {
 		strip.setPixelColor(0, LEDOFF);
@@ -792,22 +805,22 @@ void dispGenericMode(int submode, int selected){
 		case SUBMODE_MIDI3:
 			legends[0] = "PBNK";	// Potentiometer Banks
 			legends[1] = "THRU";
-			legends[2] = "---";
-			legends[3] = " M8 ";
+			legends[2] = " M8 ";
+			legends[3] = "M8CH";
 			legendVals[0] = potbank + 1;
 			legendVals[1] = -127;
 			if (midiSoftThru) {
 				legendText[1] = "On";
 			} else {
 				legendText[1] = "Off";
-			}
-			legendVals[2] = 0;
-			legendVals[3] = -127;
-			if (m8extra) {
-				legendText[3] = "On";
+			}			
+			legendVals[2] = -127;
+			if (m8macro) {
+				legendText[2] = "On";
 			} else {
-				legendText[3] = "Off";
+				legendText[2] = "Off";
 			}
+			legendVals[3] = m8chan;
 			dispPage = 3;
 			break;
 		case SUBMODE_SEQ:
@@ -1154,8 +1167,11 @@ void loop() {
 					if (miparam == 12) {
 						midiSoftThru = constrain(midiSoftThru + amt, 0, 1);
 					}
+					if (miparam == 13) {
+						m8macro = constrain(m8macro + amt, 0, 1);
+					}
 					if (miparam == 14) {
-						m8extra = constrain(m8extra + amt, 0, 1);
+						m8chan = constrain(m8chan + amt, 1, 16);
 					}
 
 
@@ -1514,7 +1530,7 @@ void loop() {
 			case MODE_MIDI: // MIDI CONTROLLER
 
 				// ### KEY PRESS EVENTS
-				if (m8extra){
+				if (m8macro){
 					if (e.clicks()==2 && thisKey == 0) {
 						m8AUX = !m8AUX;
 						if (!m8AUX) {
@@ -1525,18 +1541,121 @@ void loop() {
 					}
 					if (m8AUX) {
 						if (!e.held()){ 
-							if (e.down() && (thisKey > 10 || thisKey < 27 )){
+							if (e.down() && (thisKey > 10 && thisKey < 27 )){
 	//							Serial.println(keyPos);
 								m8mutesolo[keyPos] = !m8mutesolo[keyPos];
 								int mutePos = keyPos + 12;
 								if (m8mutesolo[keyPos]){
-									MM::sendNoteOn(mutePos, 1, sysSettings.midiChannel);
+									MM::sendNoteOn(mutePos, 1, m8chan);
 								} else {
-									MM::sendNoteOff(mutePos, 0, sysSettings.midiChannel);
+									MM::sendNoteOff(mutePos, 0, m8chan);
 								}							
 //								Serial.print(keyPos);
 //								Serial.print(": ");
 //								Serial.println(m8mutesolo[keyPos]);
+								break;
+							} else if (e.down() && (thisKey == 1)){
+								// release all mutes
+								for(int z = 0; z < 8; z++){
+									int mutePos = z + 12;
+									if(m8mutesolo[z]){
+										m8mutesolo[z] = false;
+										MM::sendNoteOff(mutePos, 0, m8chan);
+									}
+								}								
+								break;
+							} else if (e.down() && (thisKey == 2)){
+								// ?
+								break;
+							} else if (e.down() && (thisKey == 3)){
+								// return to mixer
+								// hold shift 4 left 1 down, release shift
+								MM::sendNoteOn(1, 1, m8chan); // Shift								
+								delay(40); 
+								MM::sendNoteOn(6, 1, m8chan); // Up								
+								MM::sendNoteOff(6, 0, m8chan);
+								delay(40); 
+								MM::sendNoteOn(4, 1, m8chan); // Left 
+								MM::sendNoteOff(4, 0, m8chan);
+								delay(40);
+								MM::sendNoteOn(4, 1, m8chan); // Left 
+								MM::sendNoteOff(4, 0, m8chan);
+								delay(40);
+								MM::sendNoteOn(4, 1, m8chan); // Left 
+								MM::sendNoteOff(4, 0, m8chan);
+								delay(40);
+								MM::sendNoteOn(4, 1, m8chan); // Left 
+								MM::sendNoteOff(4, 0, m8chan);
+								delay(40);
+								MM::sendNoteOn(7, 1, m8chan); // Down
+								delay(40);
+								MM::sendNoteOff(7, 0, m8chan);		
+								MM::sendNoteOff(1, 0, m8chan);
+								
+								break;
+							} else if (e.down() && (thisKey == 4)){
+								// snap load
+								MM::sendNoteOn(1, 1, m8chan); // Shift								
+								delay(40); 
+								MM::sendNoteOn(2, 1, m8chan); // Edit
+								delay(40); 
+								MM::sendNoteOff(2, 0, m8chan); // Edit
+								MM::sendNoteOff(1, 0, m8chan);
+								
+								
+								break;
+							} else if (e.down() && (thisKey == 5)){
+								// snap save
+								MM::sendNoteOn(2, 1, m8chan); // Edit
+								delay(40);
+								MM::sendNoteOn(3, 1, m8chan); // Option
+								delay(40);
+								MM::sendNoteOff(3, 0, m8chan); // Option
+								MM::sendNoteOff(2, 0, m8chan); // Edit
+								
+								break;
+							} else if (e.down() && (thisKey == 6)){
+								// release all solos
+								for(int z = 8; z < 16; z++){
+									int mutePos = z + 12;
+									if(m8mutesolo[z]){
+										m8mutesolo[z] = false;
+										MM::sendNoteOff(mutePos, 0, m8chan);
+									}
+								}
+								break;
+							} else if (e.down() && (thisKey == 7)){
+								// ??
+								break;
+							} else if (e.down() && (thisKey == 8)){
+								// ??
+								break;
+							} else if (e.down() && (thisKey == 9)){
+								// waveform
+								MM::sendNoteOn(6, 1, m8chan); // Up
+								MM::sendNoteOn(7, 1, m8chan); // Down
+								MM::sendNoteOn(5, 1, m8chan); // Right
+								MM::sendNoteOn(4, 1, m8chan); // Left
+								delay(40);
+
+								MM::sendNoteOff(6, 0, m8chan); // Up
+								MM::sendNoteOff(7, 0, m8chan); // Down
+								MM::sendNoteOff(5, 0, m8chan); // Right
+								MM::sendNoteOff(4, 0, m8chan); // Left
+
+								break;
+							} else if (e.down() && (thisKey == 10)){
+								// play
+								MM::sendNoteOn(0, 1, m8chan); // Play
+								MM::sendNoteOff(0, 0, m8chan); // Play
+
+//								MM::sendNoteOn(1, 1, m8chan); // Shift
+//								MM::sendNoteOn(3, 1, m8chan); // Option
+//								MM::sendNoteOn(2, 1, m8chan); // Edit
+//								MM::sendNoteOn(6, 1, m8chan); // Up
+//								MM::sendNoteOn(7, 1, m8chan); // Down
+//								MM::sendNoteOn(4, 1, m8chan); // Left
+//								MM::sendNoteOn(5, 1, m8chan); // Right
 								break;
 							}
 						}	
