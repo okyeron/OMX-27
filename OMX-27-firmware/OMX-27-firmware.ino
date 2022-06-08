@@ -1,5 +1,5 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
-// v 1.6.0
+// v 1.6.0b3
 //
 // Steven Noreyko, Last update: June 2022
 //
@@ -1700,8 +1700,10 @@ void loop() {
 					// Hard coded Organelle stuff
 //					MM::sendControlChange(CC_AUX, 100, sysSettings.midiChannel);
 
-					midiAUX = true;
-
+					if (!m8AUX){
+						midiAUX = true;
+					}
+					
 //					if (midiAUX) {
 //						// STOP CLOCK
 //						Serial.println("stop clock");
