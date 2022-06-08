@@ -271,7 +271,11 @@ void readPotentimeters(){
 				case MODE_OM:
 						// fall through - same as MIDI
 				case MODE_MIDI: // MIDI
-					sendPots(k, sysSettings.midiChannel);
+					if (m8macro){
+						sendPots(k, m8chan);
+					} else {
+						sendPots(k, sysSettings.midiChannel);
+					}
 					dirtyDisplay = true;
 					break;
 
@@ -1599,19 +1603,19 @@ void loop() {
 								delay(40); 
 								MM::sendNoteOn(2, 1, m8chan); // Edit
 								delay(40); 
-								MM::sendNoteOff(2, 0, m8chan); // Edit
+								MM::sendNoteOff(2, 0, m8chan);
 								MM::sendNoteOff(1, 0, m8chan);
 								
 								
 								break;
 							} else if (e.down() && (thisKey == 5)){
 								// snap save
-								MM::sendNoteOn(2, 1, m8chan); // Edit
+								MM::sendNoteOn(1, 1, m8chan); // Shift	
 								delay(40);
 								MM::sendNoteOn(3, 1, m8chan); // Option
 								delay(40);
-								MM::sendNoteOff(3, 0, m8chan); // Option
-								MM::sendNoteOff(2, 0, m8chan); // Edit
+								MM::sendNoteOff(3, 0, m8chan); 
+								MM::sendNoteOff(1, 0, m8chan);
 								
 								break;
 							} else if (e.down() && (thisKey == 6)){
