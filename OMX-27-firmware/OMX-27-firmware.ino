@@ -467,7 +467,7 @@ void midi_leds() {
 		strip.setPixelColor(0, BLUE);
 		strip.setPixelColor(1, ORANGE); // all mute
 		strip.setPixelColor(3, LIME); // MIXER
-		strip.setPixelColor(4, CYAN); // snap save
+		strip.setPixelColor(4, CYAN); // snap load
 		strip.setPixelColor(5, MAGENTA); // snap save
 
 		for(int m = 11; m < LED_COUNT-8; m++){
@@ -1598,17 +1598,6 @@ void loop() {
 								
 								break;
 							} else if (e.down() && (thisKey == 4)){
-								// snap load
-								MM::sendNoteOn(1, 1, m8chan); // Shift								
-								delay(40); 
-								MM::sendNoteOn(2, 1, m8chan); // Edit
-								delay(40); 
-								MM::sendNoteOff(2, 0, m8chan);
-								MM::sendNoteOff(1, 0, m8chan);
-								
-								
-								break;
-							} else if (e.down() && (thisKey == 5)){
 								// snap save
 								MM::sendNoteOn(1, 1, m8chan); // Shift	
 								delay(40);
@@ -1616,7 +1605,15 @@ void loop() {
 								delay(40);
 								MM::sendNoteOff(3, 0, m8chan); 
 								MM::sendNoteOff(1, 0, m8chan);
-								
+								break;
+							} else if (e.down() && (thisKey == 5)){
+								// snap load
+								MM::sendNoteOn(1, 1, m8chan); // Shift								
+								delay(40); 
+								MM::sendNoteOn(2, 1, m8chan); // Edit
+								delay(40); 
+								MM::sendNoteOff(2, 0, m8chan);
+								MM::sendNoteOff(1, 0, m8chan);								
 								break;
 							} else if (e.down() && (thisKey == 6)){
 								// release all solos
