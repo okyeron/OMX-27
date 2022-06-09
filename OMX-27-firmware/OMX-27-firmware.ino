@@ -1,5 +1,5 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
-// v 1.6.0b3
+// v 1.6.0b4
 //
 // Steven Noreyko, Last update: June 2022
 //
@@ -1576,23 +1576,28 @@ void loop() {
 								// hold shift 4 left 1 down, release shift
 								MM::sendNoteOn(1, 1, m8chan); // Shift								
 								delay(40); 
-								MM::sendNoteOn(6, 1, m8chan); // Up								
+								MM::sendNoteOn(6, 1, m8chan); // Up	
+								delay(20);							
 								MM::sendNoteOff(6, 0, m8chan);
 								delay(40); 
 								MM::sendNoteOn(4, 1, m8chan); // Left 
+								delay(20);
 								MM::sendNoteOff(4, 0, m8chan);
 								delay(40);
 								MM::sendNoteOn(4, 1, m8chan); // Left 
+								delay(20);
 								MM::sendNoteOff(4, 0, m8chan);
 								delay(40);
 								MM::sendNoteOn(4, 1, m8chan); // Left 
+								delay(20);
 								MM::sendNoteOff(4, 0, m8chan);
 								delay(40);
 								MM::sendNoteOn(4, 1, m8chan); // Left 
+								delay(20);
 								MM::sendNoteOff(4, 0, m8chan);
 								delay(40);
 								MM::sendNoteOn(7, 1, m8chan); // Down
-								delay(40);
+								delay(20);
 								MM::sendNoteOff(7, 0, m8chan);		
 								MM::sendNoteOff(1, 0, m8chan);
 								
@@ -1648,6 +1653,7 @@ void loop() {
 							} else if (e.down() && (thisKey == 10)){
 								// play
 								MM::sendNoteOn(0, 1, m8chan); // Play
+								delay(40);
 								MM::sendNoteOff(0, 0, m8chan); // Play
 
 //								MM::sendNoteOn(1, 1, m8chan); // Shift
