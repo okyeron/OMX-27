@@ -280,15 +280,22 @@ void readPotentimeters(){
 
 		if(analog[k]->hasChanged()) {
 			 // do stuff
-			if (screenSaverCounter){
+			if (screenSaverMode){
 				screensaverColor = analog[4]->getValue() * 4;
+				if(analog[0]->hasChanged()) { 
+//					screenSaverMode = false;
+					screenSaverCounter = 0;
+				}
 			}
+			
 			switch(sysSettings.omxMode) {
 				case MODE_OM:
 						// fall through - same as MIDI
 				case MODE_MIDI: // MIDI
-					if (m8macro){
+					if (m8macro && !screenSaverMode){
 						sendPots(k, m8chan);
+					} else if (screenSaverMode) {
+						// don't send pots in screensaver
 					} else {
 						sendPots(k, sysSettings.midiChannel);
 					}
