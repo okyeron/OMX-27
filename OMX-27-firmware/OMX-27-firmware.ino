@@ -1,5 +1,5 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
-// v 1.6.0b6
+// v 1.6.0b7
 //
 // Steven Noreyko, Last update: June 2022
 //
@@ -281,9 +281,10 @@ void readPotentimeters(){
 		if(analog[k]->hasChanged()) {
 			 // do stuff
 			if (screenSaverMode){
-				screensaverColor = analog[4]->getValue() * 4;
-				if(analog[0]->hasChanged()) { 
-//					screenSaverMode = false;
+				screensaverColor = analog[4]->getValue() * 4;	// value is 0-32764 for strip.ColorHSV
+
+				// reset screensaver
+				if(analog[0]->hasChanged() || analog[1]->hasChanged() || analog[2]->hasChanged() || analog[3]->hasChanged()) { 
 					screenSaverCounter = 0;
 				}
 			}
@@ -1654,7 +1655,7 @@ void loop() {
 					if (m8AUX) {
 						if (!e.held()){ 
 							if (e.down() && (thisKey > 10 && thisKey < 27 )){
-	//							Serial.println(keyPos);
+								// Mutes / Solos
 								m8mutesolo[keyPos] = !m8mutesolo[keyPos];
 								int mutePos = keyPos + 12;
 								if (m8mutesolo[keyPos]){
@@ -1662,9 +1663,6 @@ void loop() {
 								} else {
 									MM::sendNoteOff(mutePos, 0, m8chan);
 								}							
-//								Serial.print(keyPos);
-//								Serial.print(": ");
-//								Serial.println(m8mutesolo[keyPos]);
 								break;
 							} else if (e.down() && (thisKey == 1)){
 								// release all mutes
@@ -1718,6 +1716,7 @@ void loop() {
 								delay(40);
 								MM::sendNoteOff(3, 0, m8chan); 
 								MM::sendNoteOff(1, 0, m8chan);
+								
 								break;
 							} else if (e.down() && (thisKey == 5)){
 								// snap load
@@ -1727,6 +1726,14 @@ void loop() {
 								delay(40); 
 								MM::sendNoteOff(2, 0, m8chan);
 								MM::sendNoteOff(1, 0, m8chan);								
+								
+								// then reset mutes/solos
+								for(int z = 0; z < 16; z++){
+									if(m8mutesolo[z]){
+										m8mutesolo[z] = false;
+									}
+								}
+
 								break;
 							} else if (e.down() && (thisKey == 6)){
 								// release all solos
