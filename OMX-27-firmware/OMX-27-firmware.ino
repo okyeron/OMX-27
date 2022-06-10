@@ -1,5 +1,5 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
-// v 1.6.0b5
+// v 1.6.0b6
 //
 // Steven Noreyko, Last update: June 2022
 //
@@ -511,8 +511,13 @@ void midi_leds() {
 				strip.setPixelColor(m, RED);
 			}
 		}
+		strip.setPixelColor(2, LEDOFF);
+		strip.setPixelColor(7, LEDOFF);
+		strip.setPixelColor(8, LEDOFF);
+
 		strip.setPixelColor(9, YELLOW); // WAVES
 		strip.setPixelColor(10, BLUE); // PLAY
+
 
 	} else {
 		// AUX key
