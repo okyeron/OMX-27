@@ -61,7 +61,7 @@ volatile unsigned long ppqInterval;
 
 elapsedMillis screenSaverCounter = 0;
 bool screenSaverMode = false;
-unsigned long screensaverInterval = 1000 * 60 * 2; // 2 minutes default? // 10000;  15000;
+unsigned long screensaverInterval = 1000 * 60 * 3; // 3 minutes default? // 10000;  15000; //
 int ssstep = 0;
 int ssloop = 0;
 volatile unsigned long nextStepTimeSS = 0;
@@ -72,7 +72,9 @@ int sleepTick = 80;
 uint32_t screensaverColor = 0xFF0000;
 uint32_t stepColor = 0x000000;
 uint32_t muteColor = 0x000000;
-uint32_t midiBgColor = MIDIBG;
+uint16_t midiBg_Hue = 0;
+uint8_t midiBg_Sat = 255;
+uint8_t midiBg_Brightness = 255;
 
 // ANALOGS
 int potbank = 0;
@@ -125,9 +127,9 @@ bool clearedFlag = false;
 
 bool enc_edit = false;
 bool midiAUX = false;
-bool m8macro = true;
+int midiMacro = 0;
 bool m8AUX = false;
-int m8chan = 10;
+int midiMacroChan = 10;
 bool m8mutesolo[] = {false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false};
 
 int defaultVelocity = 100;
@@ -293,8 +295,8 @@ void readPotentimeters(){
 				case MODE_OM:
 						// fall through - same as MIDI
 				case MODE_MIDI: // MIDI
-					if (m8macro && !screenSaverMode){
-						sendPots(k, m8chan);
+					if (midiMacro && !screenSaverMode){
+						sendPots(k, midiMacroChan);
 					} else if (screenSaverMode) {
 						// don't send pots in screensaver
 					} else {
@@ -478,13 +480,25 @@ void midi_leds() {
 		auto color3 = blinkState ? ORANGE : LEDOFF;
 		auto color4 = blinkState ? RBLUE : LEDOFF;
 
+		for (int q = 1; q < LED_COUNT; q++){				
+			if (midiKeyState[q] == -1){
+				if (midiBg_Hue == 0){
+					strip.setPixelColor(q, LEDOFF);
+				} else if (midiBg_Hue == 32){
+					strip.setPixelColor(q, LOWWHITE);
+				} else {
+					strip.setPixelColor(q, strip.ColorHSV(midiBg_Hue, midiBg_Sat, midiBg_Brightness));
+				}
+			}
+		}
 		strip.setPixelColor(0, RED);
 		strip.setPixelColor(1, color1);
 		strip.setPixelColor(2, color2);
 		strip.setPixelColor(11, color3);
 		strip.setPixelColor(12, color4);
 
-	// M8 Macros
+
+	// Macros
 
 	} else if (m8AUX){
 		auto color5 = blinkState ? ORANGE : LEDOFF;
@@ -523,12 +537,19 @@ void midi_leds() {
 	} else {
 		// AUX key
 		strip.setPixelColor(0, LEDOFF);
+		
 		// Other keys
 		if (!screenSaverMode){
 			// clear not held leds
 			for (int q = 1; q < LED_COUNT; q++){				
 				if (midiKeyState[q] == -1){
-					strip.setPixelColor(q, midiBgColor);
+					if (midiBg_Hue == 0){
+						strip.setPixelColor(q, LEDOFF);
+					} else if (midiBg_Hue == 32){
+						strip.setPixelColor(q, LOWWHITE);
+					} else {
+						strip.setPixelColor(q, strip.ColorHSV(midiBg_Hue, midiBg_Sat, midiBg_Brightness));
+					}
 				}
 			}
 		}
@@ -896,9 +917,9 @@ void dispGenericMode(int submode, int selected){
 			break;
 		case SUBMODE_MIDI3:
 			legends[0] = "PBNK";	// Potentiometer Banks
-			legends[1] = "THRU";
-			legends[2] = " M8 ";
-			legends[3] = "M8CH";
+			legends[1] = "THRU";	// MIDI thru (usb to hardware)
+			legends[2] = "MCRO";	// Macro mode
+			legends[3] = "M-CH";
 			legendVals[0] = potbank + 1;
 			legendVals[1] = -127;
 			if (midiSoftThru) {
@@ -907,13 +928,20 @@ void dispGenericMode(int submode, int selected){
 				legendText[1] = "Off";
 			}			
 			legendVals[2] = -127;
-			if (m8macro) {
-				legendText[2] = "On";
-			} else {
-				legendText[2] = "Off";
-			}
-			legendVals[3] = m8chan;
+			legendText[2] = macromodes[midiMacro];
+			legendVals[3] = midiMacroChan;
 			dispPage = 3;
+			break;
+		case SUBMODE_MIDI4:
+			legends[0] = " BG ";	
+			legends[1] = "---";
+			legends[2] = "---";
+			legends[3] = "---";
+			legendVals[0] = 0;
+			legendVals[1] = 0;
+			legendVals[2] = 0;
+			legendVals[3] = 0;
+			dispPage = 4;
 			break;
 		case SUBMODE_SEQ:
 			legends[0] = "PTN";
@@ -1222,6 +1250,12 @@ void loop() {
 					dirtyDisplay = true;
 //					break;
 				case MODE_MIDI: // MIDI
+					if (midiAUX){
+						
+						midiBg_Hue = constrain(midiBg_Hue + (amt * 32), 0, 65534); // 65535 
+						
+						break;
+					}
 					// CHANGE PAGE
 					if (miparam == 0 || miparam == 5 || miparam == 10) {
 						mmpage = constrain(mmpage + amt, 0, 2);
@@ -1279,10 +1313,10 @@ void loop() {
 						midiSoftThru = constrain(midiSoftThru + amt, 0, 1);
 					}
 					if (miparam == 13) {
-						m8macro = constrain(m8macro + amt, 0, 1);
+						midiMacro = constrain(midiMacro + amt, 0, nummacromodes);
 					}
 					if (miparam == 14) {
-						m8chan = constrain(m8chan + amt, 1, 16);
+						midiMacroChan = constrain(midiMacroChan + amt, 1, 16);
 					}
 
 
@@ -1643,7 +1677,7 @@ void loop() {
 			case MODE_MIDI: // MIDI CONTROLLER
 
 				// ### KEY PRESS EVENTS
-				if (m8macro){
+				if (midiMacro){
 					if (e.clicks()==2 && thisKey == 0) {
 						m8AUX = !m8AUX;
 						if (!m8AUX) {
@@ -1659,9 +1693,9 @@ void loop() {
 								m8mutesolo[keyPos] = !m8mutesolo[keyPos];
 								int mutePos = keyPos + 12;
 								if (m8mutesolo[keyPos]){
-									MM::sendNoteOn(mutePos, 1, m8chan);
+									MM::sendNoteOn(mutePos, 1, midiMacroChan);
 								} else {
-									MM::sendNoteOff(mutePos, 0, m8chan);
+									MM::sendNoteOff(mutePos, 0, midiMacroChan);
 								}							
 								break;
 							} else if (e.down() && (thisKey == 1)){
@@ -1670,7 +1704,7 @@ void loop() {
 									int mutePos = z + 12;
 									if(m8mutesolo[z]){
 										m8mutesolo[z] = false;
-										MM::sendNoteOff(mutePos, 0, m8chan);
+										MM::sendNoteOff(mutePos, 0, midiMacroChan);
 									}
 								}								
 								break;
@@ -1680,52 +1714,52 @@ void loop() {
 							} else if (e.down() && (thisKey == 3)){
 								// return to mixer
 								// hold shift 4 left 1 down, release shift
-								MM::sendNoteOn(1, 1, m8chan); // Shift								
+								MM::sendNoteOn(1, 1, midiMacroChan); // Shift								
 								delay(40); 
-								MM::sendNoteOn(6, 1, m8chan); // Up	
+								MM::sendNoteOn(6, 1, midiMacroChan); // Up	
 								delay(20);							
-								MM::sendNoteOff(6, 0, m8chan);
+								MM::sendNoteOff(6, 0, midiMacroChan);
 								delay(40); 
-								MM::sendNoteOn(4, 1, m8chan); // Left 
+								MM::sendNoteOn(4, 1, midiMacroChan); // Left 
 								delay(20);
-								MM::sendNoteOff(4, 0, m8chan);
+								MM::sendNoteOff(4, 0, midiMacroChan);
 								delay(40);
-								MM::sendNoteOn(4, 1, m8chan); // Left 
+								MM::sendNoteOn(4, 1, midiMacroChan); // Left 
 								delay(20);
-								MM::sendNoteOff(4, 0, m8chan);
+								MM::sendNoteOff(4, 0, midiMacroChan);
 								delay(40);
-								MM::sendNoteOn(4, 1, m8chan); // Left 
+								MM::sendNoteOn(4, 1, midiMacroChan); // Left 
 								delay(20);
-								MM::sendNoteOff(4, 0, m8chan);
+								MM::sendNoteOff(4, 0, midiMacroChan);
 								delay(40);
-								MM::sendNoteOn(4, 1, m8chan); // Left 
+								MM::sendNoteOn(4, 1, midiMacroChan); // Left 
 								delay(20);
-								MM::sendNoteOff(4, 0, m8chan);
+								MM::sendNoteOff(4, 0, midiMacroChan);
 								delay(40);
-								MM::sendNoteOn(7, 1, m8chan); // Down
+								MM::sendNoteOn(7, 1, midiMacroChan); // Down
 								delay(20);
-								MM::sendNoteOff(7, 0, m8chan);		
-								MM::sendNoteOff(1, 0, m8chan);
+								MM::sendNoteOff(7, 0, midiMacroChan);		
+								MM::sendNoteOff(1, 0, midiMacroChan);
 								
 								break;
 							} else if (e.down() && (thisKey == 4)){
 								// snap save
-								MM::sendNoteOn(1, 1, m8chan); // Shift	
+								MM::sendNoteOn(1, 1, midiMacroChan); // Shift	
 								delay(40);
-								MM::sendNoteOn(3, 1, m8chan); // Option
+								MM::sendNoteOn(3, 1, midiMacroChan); // Option
 								delay(40);
-								MM::sendNoteOff(3, 0, m8chan); 
-								MM::sendNoteOff(1, 0, m8chan);
+								MM::sendNoteOff(3, 0, midiMacroChan); 
+								MM::sendNoteOff(1, 0, midiMacroChan);
 								
 								break;
 							} else if (e.down() && (thisKey == 5)){
 								// snap load
-								MM::sendNoteOn(1, 1, m8chan); // Shift								
+								MM::sendNoteOn(1, 1, midiMacroChan); // Shift								
 								delay(40); 
-								MM::sendNoteOn(2, 1, m8chan); // Edit
+								MM::sendNoteOn(2, 1, midiMacroChan); // Edit
 								delay(40); 
-								MM::sendNoteOff(2, 0, m8chan);
-								MM::sendNoteOff(1, 0, m8chan);								
+								MM::sendNoteOff(2, 0, midiMacroChan);
+								MM::sendNoteOff(1, 0, midiMacroChan);								
 								
 								// then reset mutes/solos
 								for(int z = 0; z < 16; z++){
@@ -1741,7 +1775,7 @@ void loop() {
 									int mutePos = z + 12;
 									if(m8mutesolo[z]){
 										m8mutesolo[z] = false;
-										MM::sendNoteOff(mutePos, 0, m8chan);
+										MM::sendNoteOff(mutePos, 0, midiMacroChan);
 									}
 								}
 								break;
@@ -1753,31 +1787,31 @@ void loop() {
 								break;
 							} else if (e.down() && (thisKey == 9)){
 								// waveform
-								MM::sendNoteOn(6, 1, m8chan); // Up
-								MM::sendNoteOn(7, 1, m8chan); // Down
-								MM::sendNoteOn(5, 1, m8chan); // Right
-								MM::sendNoteOn(4, 1, m8chan); // Left
+								MM::sendNoteOn(6, 1, midiMacroChan); // Up
+								MM::sendNoteOn(7, 1, midiMacroChan); // Down
+								MM::sendNoteOn(5, 1, midiMacroChan); // Right
+								MM::sendNoteOn(4, 1, midiMacroChan); // Left
 								delay(40);
 
-								MM::sendNoteOff(6, 0, m8chan); // Up
-								MM::sendNoteOff(7, 0, m8chan); // Down
-								MM::sendNoteOff(5, 0, m8chan); // Right
-								MM::sendNoteOff(4, 0, m8chan); // Left
+								MM::sendNoteOff(6, 0, midiMacroChan); // Up
+								MM::sendNoteOff(7, 0, midiMacroChan); // Down
+								MM::sendNoteOff(5, 0, midiMacroChan); // Right
+								MM::sendNoteOff(4, 0, midiMacroChan); // Left
 
 								break;
 							} else if (e.down() && (thisKey == 10)){
 								// play
-								MM::sendNoteOn(0, 1, m8chan); // Play
+								MM::sendNoteOn(0, 1, midiMacroChan); // Play
 								delay(40);
-								MM::sendNoteOff(0, 0, m8chan); // Play
+								MM::sendNoteOff(0, 0, midiMacroChan); // Play
 
-//								MM::sendNoteOn(1, 1, m8chan); // Shift
-//								MM::sendNoteOn(3, 1, m8chan); // Option
-//								MM::sendNoteOn(2, 1, m8chan); // Edit
-//								MM::sendNoteOn(6, 1, m8chan); // Up
-//								MM::sendNoteOn(7, 1, m8chan); // Down
-//								MM::sendNoteOn(4, 1, m8chan); // Left
-//								MM::sendNoteOn(5, 1, m8chan); // Right
+//								MM::sendNoteOn(1, 1, midiMacroChan); // Shift
+//								MM::sendNoteOn(3, 1, midiMacroChan); // Option
+//								MM::sendNoteOn(2, 1, midiMacroChan); // Edit
+//								MM::sendNoteOn(6, 1, midiMacroChan); // Up
+//								MM::sendNoteOn(7, 1, midiMacroChan); // Down
+//								MM::sendNoteOn(4, 1, midiMacroChan); // Left
+//								MM::sendNoteOn(5, 1, midiMacroChan); // Right
 								break;
 							}
 						}	

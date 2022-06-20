@@ -77,6 +77,8 @@ extern const int gridw;
 extern const int PPQ;
 
 extern const char* modes[];
+extern const char* macromodes[];
+extern const int nummacromodes;
 extern const char* infoDialogText[];
 
 enum multDiv
@@ -128,6 +130,7 @@ enum SubModes
 	SUBMODE_STEPREC,
 	SUBMODE_MIDI2,
 	SUBMODE_MIDI3,
+	SUBMODE_MIDI4,
 
 	SUBMODES_COUNT
 };
