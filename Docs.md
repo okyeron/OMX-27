@@ -65,15 +65,42 @@ MIDI Keyboard.
 
 Quick Keys - Hold AUX  
 - first 2 "white keys" are octave up/down  
-- first 2 "black keys" are move param selection on the display  
+- first 2 "black keys" cycle through the selected parameter on the display  
 
 Parameters:  
-- Octave  
-- MIDI Channel  
-- RoundRobin MIDI Channel distribution and RR offset value   
-- MIDI program change  
-- MIDI bank select  
-- Potentiometer bank select (CC assignments are still hard coded)  
+- `OCT`: current Octave  
+- `CH`: active MIDI Channel 
+
+- `RR`: RoundRobin MIDI Channel distribution
+- `RROF`: RR offset value   
+- `PGM`: MIDI program change  
+- `BNK`: MIDI bank select  
+
+- `PBNK`: Potentiometer bank select (CC assignments are still hard coded)  
+- `THRU`: when "On" incoming USBMIDI will be passed to TRS MIDI Out.
+- `MCRO`: MIDI Macro Mode Select (default is OFF)
+- `M-CH`: MIDI Macro Mode Channel
+
+#### MIDI Macro Modes
+
+__M8 Macro Mode__
+
+From MI Mode, be sure `M8` is selected from the `MCRO` parameter and then double click the AUX button to enter Macro Mode.
+
+Double click the AUX button again to exit Macro Mode.
+
+The bottom row of keys correspond to mutes (orange) and solos (red). The top "black keys" are as follows:
+```
+Orange - release all mutes  
+Lime - go to mixer screen  
+Cyan - snapshot load/paste  
+Magenta - snapshot save/copy  
+Red - release all solos  
+Yellow - waveform display  
+Blue - play  
+```
+
+When in the M8 Macro Mode - potentiometers will send on the `M-CH` MIDI channel. When you exit Macro Mode, the CCs will send on the currently selected `CH` MIDI channel.
 
 
 ### S1 - Sequencer 1

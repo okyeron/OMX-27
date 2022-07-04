@@ -1,7 +1,7 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
-// v 1.6.0b7
+// v 1.6.0b8
 //
-// Steven Noreyko, Last update: June 2022
+// Steven Noreyko, Last update: July 2022
 //
 //
 //	Big thanks to:
@@ -1251,9 +1251,8 @@ void loop() {
 //					break;
 				case MODE_MIDI: // MIDI
 					if (midiAUX){
-						
-						midiBg_Hue = constrain(midiBg_Hue + (amt * 32), 0, 65534); // 65535 
-						
+						// change MIDI Background Color
+						// midiBg_Hue = constrain(midiBg_Hue + (amt * 32), 0, 65534); // 65535 
 						break;
 					}
 					// CHANGE PAGE
