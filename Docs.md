@@ -103,10 +103,6 @@ Blue - play
 When M8 is selected from the `MCRO` parameter - potentiometers will send on the `M-CH` MIDI channel in both regular keyboard mode and in the macro mode. However, notes played on keys will send on the currently selected `CH` MIDI channel.
 
 
-#### Screensaver 
-After a default timeout (3 minutes), the display will be blanked and a "scrensaver" patter will show on the LEDs. The rightmost pot (#5) can be turned to adjust the color. Touching any keys or any of the other pots will exit the screensaver.  
-
-
 ### S1 - Sequencer 1
 
 Step sequencer - One pattern active at a time.
@@ -170,6 +166,12 @@ Pretty much the same as MI, but with the following tweaks for Organelle Mother o
 
 - AUX key sends CC 25 (127 on press, 0 on release)
 - Encoder turn sends CC 28 (127 on CW, 0 on CCW)
+
+
+### Screensaver 
+After a default timeout (3 minutes), the display will be blanked and in MI Mode a "screensaver" animation will show on the LEDs. The rightmost pot (#5) can be turned to adjust the color. Touching any keys or any of the other pots will exit the screensaver.  
+
+In S1/S2 the screen will blank, but there is no LED animation.
 
 
 ## Sub-Modes
