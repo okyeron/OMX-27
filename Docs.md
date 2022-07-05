@@ -87,6 +87,8 @@ __M8 Macro Mode__
 
 From MI Mode, be sure `M8` is selected from the `MCRO` parameter and then double click the AUX button to enter Macro Mode.
 
+`M-CH` should be set to the same value as the Control Map Channel in the M8 MIDI settings screen.  
+
 Double click the AUX button again to exit Macro Mode.
 
 The bottom row of keys correspond to mutes (orange) and solos (red). The top "black keys" are as follows:
