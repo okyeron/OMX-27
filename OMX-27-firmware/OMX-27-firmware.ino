@@ -1,7 +1,7 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
-// v 1.5.1
+// v 1.6.0b8
 //
-// Steven Noreyko, Last update: January 2022
+// Steven Noreyko, Last update: July 2022
 //
 //
 //	Big thanks to:
@@ -59,6 +59,23 @@ volatile unsigned long noteon_micros;
 volatile unsigned long noteoff_micros;
 volatile unsigned long ppqInterval;
 
+elapsedMillis screenSaverCounter = 0;
+bool screenSaverMode = false;
+unsigned long screensaverInterval = 1000 * 60 * 3; // 3 minutes default? // 10000;  15000; //
+int ssstep = 0;
+int ssloop = 0;
+volatile unsigned long nextStepTimeSS = 0;
+bool ssreverse = false;
+int sleepTick = 80;
+
+// DEFAULT COLOR VARIABLES
+uint32_t screensaverColor = 0xFF0000;
+uint32_t stepColor = 0x000000;
+uint32_t muteColor = 0x000000;
+uint16_t midiBg_Hue = 0;
+uint8_t midiBg_Sat = 255;
+uint8_t midiBg_Brightness = 255;
+
 // ANALOGS
 int potbank = 0;
 int analogValues[] = {0,0,0,0,0};		// default values
@@ -110,6 +127,10 @@ bool clearedFlag = false;
 
 bool enc_edit = false;
 bool midiAUX = false;
+int midiMacro = 0;
+bool m8AUX = false;
+int midiMacroChan = 10;
+bool m8mutesolo[] = {false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false};
 
 int defaultVelocity = 100;
 int octave = 0;			// default C4 is 0 - range is -4 to +5
@@ -145,8 +166,6 @@ int currbank = 0;
 bool midiInToCV = true;
 uint8_t midiLastNote = 0;
 bool midiSoftThru = false;
-uint32_t stepColor = 0x000000;
-uint32_t muteColor = 0x000000;
 
 //int midiChannel; // the MIDI channel number to send messages (MIDI/OM mode)
 
@@ -263,11 +282,26 @@ void readPotentimeters(){
 
 		if(analog[k]->hasChanged()) {
 			 // do stuff
+			if (screenSaverMode){
+				screensaverColor = analog[4]->getValue() * 4;	// value is 0-32764 for strip.ColorHSV
+
+				// reset screensaver
+				if(analog[0]->hasChanged() || analog[1]->hasChanged() || analog[2]->hasChanged() || analog[3]->hasChanged()) { 
+					screenSaverCounter = 0;
+				}
+			}
+			
 			switch(sysSettings.omxMode) {
 				case MODE_OM:
 						// fall through - same as MIDI
 				case MODE_MIDI: // MIDI
-					sendPots(k, sysSettings.midiChannel);
+					if (midiMacro && !screenSaverMode){
+						sendPots(k, midiMacroChan);
+					} else if (screenSaverMode) {
+						// don't send pots in screensaver
+					} else {
+						sendPots(k, sysSettings.midiChannel);
+					}
 					dirtyDisplay = true;
 					break;
 
@@ -327,7 +361,9 @@ void setup() {
 	usbMIDI.setHandleSystemExclusive(OnSysEx);
 
 	clksTimer = 0;
-
+	screenSaverCounter = 0;
+	ssstep = 0;
+	
 	lastProcessTime = micros();
 	resetClocks();
 
@@ -444,14 +480,79 @@ void midi_leds() {
 		auto color3 = blinkState ? ORANGE : LEDOFF;
 		auto color4 = blinkState ? RBLUE : LEDOFF;
 
+		for (int q = 1; q < LED_COUNT; q++){				
+			if (midiKeyState[q] == -1){
+				if (midiBg_Hue == 0){
+					strip.setPixelColor(q, LEDOFF);
+				} else if (midiBg_Hue == 32){
+					strip.setPixelColor(q, LOWWHITE);
+				} else {
+					strip.setPixelColor(q, strip.ColorHSV(midiBg_Hue, midiBg_Sat, midiBg_Brightness));
+				}
+			}
+		}
 		strip.setPixelColor(0, RED);
 		strip.setPixelColor(1, color1);
 		strip.setPixelColor(2, color2);
 		strip.setPixelColor(11, color3);
 		strip.setPixelColor(12, color4);
 
+
+	// Macros
+
+	} else if (m8AUX){
+		auto color5 = blinkState ? ORANGE : LEDOFF;
+		auto color6 = blinkState ? RED : LEDOFF;
+
+		strip.setPixelColor(0, BLUE);
+		strip.setPixelColor(1, ORANGE); // all mute
+		strip.setPixelColor(3, LIME); // MIXER
+		strip.setPixelColor(4, CYAN); // snap load
+		strip.setPixelColor(5, MAGENTA); // snap save
+
+		for(int m = 11; m < LED_COUNT-8; m++){
+			if (m8mutesolo[m-11]){
+				strip.setPixelColor(m, color5);
+			}else{
+				strip.setPixelColor(m, ORANGE);
+			}
+		}
+		
+		strip.setPixelColor(6, RED); // all solo
+		for(int m = 19; m < LED_COUNT; m++){
+			if (m8mutesolo[m-11]){
+				strip.setPixelColor(m, color6);
+			}else{
+				strip.setPixelColor(m, RED);
+			}
+		}
+		strip.setPixelColor(2, LEDOFF);
+		strip.setPixelColor(7, LEDOFF);
+		strip.setPixelColor(8, LEDOFF);
+
+		strip.setPixelColor(9, YELLOW); // WAVES
+		strip.setPixelColor(10, BLUE); // PLAY
+
+
 	} else {
+		// AUX key
 		strip.setPixelColor(0, LEDOFF);
+		
+		// Other keys
+		if (!screenSaverMode){
+			// clear not held leds
+			for (int q = 1; q < LED_COUNT; q++){				
+				if (midiKeyState[q] == -1){
+					if (midiBg_Hue == 0){
+						strip.setPixelColor(q, LEDOFF);
+					} else if (midiBg_Hue == 32){
+						strip.setPixelColor(q, LOWWHITE);
+					} else {
+						strip.setPixelColor(q, strip.ColorHSV(midiBg_Hue, midiBg_Sat, midiBg_Brightness));
+					}
+				}
+			}
+		}
 	}
 	dirtyPixels = true;
 }
@@ -705,6 +806,53 @@ void show_current_step(int patternNum) {
 	dirtyPixels = true;
 //	strip.show();
 }
+
+// SLEEP MODE LEDS
+void sleepModeOne(){
+	unsigned long playstepmillis = millis();
+	if (playstepmillis > nextStepTimeSS){ 
+		ssstep = ssstep % 16;
+		ssloop = ssloop % 16 ;
+	
+		int j = 26 - ssloop;
+		int i = ssstep + 11;
+
+		for (int z=1; z<11; z++){
+			strip.setPixelColor(z, 0);
+		}
+		if (!ssreverse) {
+			// turn off all leds
+			for (int x=0; x<16; x++){
+				if (i < j){
+					strip.setPixelColor(x+11, 0);
+				}
+				if (x+11 > j){
+					strip.setPixelColor(x+11, strip.gamma32(strip.ColorHSV(screensaverColor)));
+				}
+			}
+			strip.setPixelColor(i+1, strip.gamma32(strip.ColorHSV(screensaverColor)));
+		} else {
+			for (int y=0; y<16; y++){
+				if (i >= j){
+					strip.setPixelColor(y+11, 0);
+				}
+				if (y+11 < j){
+					strip.setPixelColor(y+11, strip.gamma32(strip.ColorHSV(screensaverColor)));
+				}
+			}
+			strip.setPixelColor(i+1, strip.gamma32(strip.ColorHSV(screensaverColor)));
+		}
+		ssstep++;
+		if (ssstep == 16){
+			ssloop++;
+		}
+		if (ssloop == 16){
+			ssreverse = !ssreverse;
+		}
+		nextStepTimeSS = nextStepTimeSS + sleepTick;
+		dirtyPixels = true;
+	}
+}
 // ####### END LEDS
 
 
@@ -769,19 +917,31 @@ void dispGenericMode(int submode, int selected){
 			break;
 		case SUBMODE_MIDI3:
 			legends[0] = "PBNK";	// Potentiometer Banks
-			legends[1] = "THRU";
-			legends[2] = "---";
-			legends[3] = "---";
+			legends[1] = "THRU";	// MIDI thru (usb to hardware)
+			legends[2] = "MCRO";	// Macro mode
+			legends[3] = "M-CH";
 			legendVals[0] = potbank + 1;
 			legendVals[1] = -127;
 			if (midiSoftThru) {
 				legendText[1] = "On";
 			} else {
 				legendText[1] = "Off";
-			}
+			}			
+			legendVals[2] = -127;
+			legendText[2] = macromodes[midiMacro];
+			legendVals[3] = midiMacroChan;
+			dispPage = 3;
+			break;
+		case SUBMODE_MIDI4:
+			legends[0] = " BG ";	
+			legends[1] = "---";
+			legends[2] = "---";
+			legends[3] = "---";
+			legendVals[0] = 0;
+			legendVals[1] = 0;
 			legendVals[2] = 0;
 			legendVals[3] = 0;
-			dispPage = 3;
+			dispPage = 4;
 			break;
 		case SUBMODE_SEQ:
 			legends[0] = "PTN";
@@ -1015,6 +1175,7 @@ void loop() {
 
 	if (passed > 0) {
 		if (sequencer.playing){
+			screenSaverCounter = 0;
 			advanceClock(passed);
 			advanceSteps(passed);
 		}
@@ -1023,6 +1184,23 @@ void loop() {
 
 	// DISPLAY SETUP
 	display.clearDisplay();
+
+	// ############### SLEEP MODE ###############
+	//
+//	Serial.println(screenSaverCounter);
+	if (screenSaverCounter > screensaverInterval ){
+		screenSaverMode = true;
+	} else if (screenSaverCounter < 10){
+		ssstep = 0;
+		ssloop = 0;
+//		setAllLEDS(0,0,0);
+		screenSaverMode = false;
+		nextStepTimeSS = millis();
+	} else {
+		screenSaverMode = false;
+		nextStepTimeSS = millis();
+	}
+
 
 	// ############### POTS ###############
 	//
@@ -1045,6 +1223,7 @@ void loop() {
 	auto u = myEncoder.update();
 	if (u.active()) {
 		auto amt = u.accel(5); // where 5 is the acceleration factor if you want it, 0 if you don't)
+		screenSaverCounter = 0;
 //    	Serial.println(u.dir() < 0 ? "ccw " : "cw ");
 //    	Serial.println(amt);
 
@@ -1071,6 +1250,11 @@ void loop() {
 					dirtyDisplay = true;
 //					break;
 				case MODE_MIDI: // MIDI
+					if (midiAUX){
+						// change MIDI Background Color
+						// midiBg_Hue = constrain(midiBg_Hue + (amt * 32), 0, 65534); // 65535 
+						break;
+					}
 					// CHANGE PAGE
 					if (miparam == 0 || miparam == 5 || miparam == 10) {
 						mmpage = constrain(mmpage + amt, 0, 2);
@@ -1127,6 +1311,13 @@ void loop() {
 					if (miparam == 12) {
 						midiSoftThru = constrain(midiSoftThru + amt, 0, 1);
 					}
+					if (miparam == 13) {
+						midiMacro = constrain(midiMacro + amt, 0, nummacromodes);
+					}
+					if (miparam == 14) {
+						midiMacroChan = constrain(midiMacroChan + amt, 1, 16);
+					}
+
 
 					dirtyDisplay = true;
 					break;
@@ -1373,7 +1564,8 @@ void loop() {
 	switch (s) {
 		// SHORT PRESS
 		case Button::Down: //Serial.println("Button down");
-
+			screenSaverCounter = 0;
+			
 			// what page are we on?
 			if (sysSettings.newmode != sysSettings.omxMode && enc_edit) {
 				sysSettings.omxMode = sysSettings.newmode;
@@ -1467,6 +1659,7 @@ void loop() {
 		int seqKey = keyPos + (sequencer.patternPage[sequencer.playingPattern] * NUM_STEPKEYS);
 
 		if (e.down()){
+			screenSaverCounter = 0;
 			keyState[thisKey] = true;
 		}
 	
@@ -1483,6 +1676,148 @@ void loop() {
 			case MODE_MIDI: // MIDI CONTROLLER
 
 				// ### KEY PRESS EVENTS
+				if (midiMacro){
+					if (e.clicks()==2 && thisKey == 0) {
+						m8AUX = !m8AUX;
+						if (!m8AUX) {
+							for(int m = 1; m < LED_COUNT; m++){
+								strip.setPixelColor(m, LEDOFF);
+							}
+						}
+					}
+					if (m8AUX) {
+						if (!e.held()){ 
+							if (e.down() && (thisKey > 10 && thisKey < 27 )){
+								// Mutes / Solos
+								m8mutesolo[keyPos] = !m8mutesolo[keyPos];
+								int mutePos = keyPos + 12;
+								if (m8mutesolo[keyPos]){
+									MM::sendNoteOn(mutePos, 1, midiMacroChan);
+								} else {
+									MM::sendNoteOff(mutePos, 0, midiMacroChan);
+								}							
+								break;
+							} else if (e.down() && (thisKey == 1)){
+								// release all mutes
+								for(int z = 0; z < 8; z++){
+									int mutePos = z + 12;
+									if(m8mutesolo[z]){
+										m8mutesolo[z] = false;
+										MM::sendNoteOff(mutePos, 0, midiMacroChan);
+									}
+								}								
+								break;
+							} else if (e.down() && (thisKey == 2)){
+								// ?
+								break;
+							} else if (e.down() && (thisKey == 3)){
+								// return to mixer
+								// hold shift 4 left 1 down, release shift
+								MM::sendNoteOn(1, 1, midiMacroChan); // Shift								
+								delay(40); 
+								MM::sendNoteOn(6, 1, midiMacroChan); // Up	
+								delay(20);							
+								MM::sendNoteOff(6, 0, midiMacroChan);
+								delay(40); 
+								MM::sendNoteOn(4, 1, midiMacroChan); // Left 
+								delay(20);
+								MM::sendNoteOff(4, 0, midiMacroChan);
+								delay(40);
+								MM::sendNoteOn(4, 1, midiMacroChan); // Left 
+								delay(20);
+								MM::sendNoteOff(4, 0, midiMacroChan);
+								delay(40);
+								MM::sendNoteOn(4, 1, midiMacroChan); // Left 
+								delay(20);
+								MM::sendNoteOff(4, 0, midiMacroChan);
+								delay(40);
+								MM::sendNoteOn(4, 1, midiMacroChan); // Left 
+								delay(20);
+								MM::sendNoteOff(4, 0, midiMacroChan);
+								delay(40);
+								MM::sendNoteOn(7, 1, midiMacroChan); // Down
+								delay(20);
+								MM::sendNoteOff(7, 0, midiMacroChan);		
+								MM::sendNoteOff(1, 0, midiMacroChan);
+								
+								break;
+							} else if (e.down() && (thisKey == 4)){
+								// snap save
+								MM::sendNoteOn(1, 1, midiMacroChan); // Shift	
+								delay(40);
+								MM::sendNoteOn(3, 1, midiMacroChan); // Option
+								delay(40);
+								MM::sendNoteOff(3, 0, midiMacroChan); 
+								MM::sendNoteOff(1, 0, midiMacroChan);
+								
+								break;
+							} else if (e.down() && (thisKey == 5)){
+								// snap load
+								MM::sendNoteOn(1, 1, midiMacroChan); // Shift								
+								delay(40); 
+								MM::sendNoteOn(2, 1, midiMacroChan); // Edit
+								delay(40); 
+								MM::sendNoteOff(2, 0, midiMacroChan);
+								MM::sendNoteOff(1, 0, midiMacroChan);								
+								
+								// then reset mutes/solos
+								for(int z = 0; z < 16; z++){
+									if(m8mutesolo[z]){
+										m8mutesolo[z] = false;
+									}
+								}
+
+								break;
+							} else if (e.down() && (thisKey == 6)){
+								// release all solos
+								for(int z = 8; z < 16; z++){
+									int mutePos = z + 12;
+									if(m8mutesolo[z]){
+										m8mutesolo[z] = false;
+										MM::sendNoteOff(mutePos, 0, midiMacroChan);
+									}
+								}
+								break;
+							} else if (e.down() && (thisKey == 7)){
+								// ??
+								break;
+							} else if (e.down() && (thisKey == 8)){
+								// ??
+								break;
+							} else if (e.down() && (thisKey == 9)){
+								// waveform
+								MM::sendNoteOn(6, 1, midiMacroChan); // Up
+								MM::sendNoteOn(7, 1, midiMacroChan); // Down
+								MM::sendNoteOn(5, 1, midiMacroChan); // Right
+								MM::sendNoteOn(4, 1, midiMacroChan); // Left
+								delay(40);
+
+								MM::sendNoteOff(6, 0, midiMacroChan); // Up
+								MM::sendNoteOff(7, 0, midiMacroChan); // Down
+								MM::sendNoteOff(5, 0, midiMacroChan); // Right
+								MM::sendNoteOff(4, 0, midiMacroChan); // Left
+
+								break;
+							} else if (e.down() && (thisKey == 10)){
+								// play
+								MM::sendNoteOn(0, 1, midiMacroChan); // Play
+								delay(40);
+								MM::sendNoteOff(0, 0, midiMacroChan); // Play
+
+//								MM::sendNoteOn(1, 1, midiMacroChan); // Shift
+//								MM::sendNoteOn(3, 1, midiMacroChan); // Option
+//								MM::sendNoteOn(2, 1, midiMacroChan); // Edit
+//								MM::sendNoteOn(6, 1, midiMacroChan); // Up
+//								MM::sendNoteOn(7, 1, midiMacroChan); // Down
+//								MM::sendNoteOn(4, 1, midiMacroChan); // Left
+//								MM::sendNoteOn(5, 1, midiMacroChan); // Right
+								break;
+							}
+						}	
+					}
+				}
+
+				// REGULAR KEY PRESSES
 				if (!e.held()){ 		// IGNORE LONG PRESS EVENTS
 					if (e.down() && thisKey != 0) {
 						//Serial.println(" pressed");
@@ -1516,8 +1851,10 @@ void loop() {
 					// Hard coded Organelle stuff
 //					MM::sendControlChange(CC_AUX, 100, sysSettings.midiChannel);
 
-					midiAUX = true;
-
+					if (!m8AUX){
+						midiAUX = true;
+					}
+					
 //					if (midiAUX) {
 //						// STOP CLOCK
 //						Serial.println("stop clock");
@@ -1861,96 +2198,103 @@ void loop() {
 
 	}  // END KEYS WHILE
 
+	if (!screenSaverMode){
 
-
-	// ############### MODES DISPLAY  ##############
-	//
-	if(messageTextTimer > 0) {
-		messageTextTimer -= passed;
-		if(messageTextTimer <= 0) {
-			dirtyDisplay = true;
-			messageTextTimer = 0;
+		// ############### MODES DISPLAY  ##############
+		//
+		if(messageTextTimer > 0) {
+			messageTextTimer -= passed;
+			if(messageTextTimer <= 0) {
+				dirtyDisplay = true;
+				messageTextTimer = 0;
+			}
 		}
-	}
-
-	switch(sysSettings.omxMode){
-		case MODE_OM: 						// ############## ORGANELLE MODE
-			// FALL THROUGH
-
-		case MODE_MIDI:							// ############## MIDI KEYBOARD
-			//playingPattern = 0; 		// DEFAULT MIDI MODE TO THE FIRST PATTERN SLOT
-			midi_leds();				// SHOW LEDS
-
-			if (dirtyDisplay){			// DISPLAY
-				if (!enc_edit){
-					int pselected = miparam % NUM_DISP_PARAMS;
-					if (mmpage == 0){
-						dispGenericMode(SUBMODE_MIDI, pselected);
-					} else if (mmpage == 1){
-						dispGenericMode(SUBMODE_MIDI2, pselected);
-					} else if (mmpage == 2){
-						dispGenericMode(SUBMODE_MIDI3, pselected);
-					}
-
-				}
-			}
-			break;
-
-		case MODE_S1: 						// ############## SEQUENCER 1
-			// FALL THROUGH
-		case MODE_S2: 						// ############## SEQUENCER 2
-			// MIDI SOLO
-			if (sequencer.getCurrentPattern()->solo) {
-				midi_leds();
-			}
-
-			if (dirtyDisplay){			// DISPLAY
-				if (!enc_edit && messageTextTimer == 0){	// show only if not encoder edit or dialog display
-					if (!noteSelect and !patternParams and !stepRecord){
-						int pselected = sqparam % NUM_DISP_PARAMS;
-						if (sqpage == 0){
-							dispGenericMode(SUBMODE_SEQ, pselected);
-						} else if (sqpage == 1){
-							dispGenericMode(SUBMODE_SEQ2, pselected);
-						}
-					}
-					if (noteSelect) {
-						int pselected = nsparam % NUM_DISP_PARAMS;
-						if (nspage == 0){
-							dispGenericMode(SUBMODE_NOTESEL, pselected);
-						} else if (nspage == 1){
-							dispGenericMode(SUBMODE_NOTESEL2, pselected);
-						} else if (nspage == 2){
-							dispGenericMode(SUBMODE_NOTESEL3, pselected);
-						}
-					}
-					if (patternParams) {
-						int pselected = ppparam % NUM_DISP_PARAMS;
-						if (pppage == 0){
-							dispGenericMode(SUBMODE_PATTPARAMS, pselected);
-						} else if (pppage == 1){
-							dispGenericMode(SUBMODE_PATTPARAMS2, pselected);
-						} else if (pppage == 2){
-							dispGenericMode(SUBMODE_PATTPARAMS3, pselected);
-						}
-
-					}
-					if (stepRecord) {
-						int pselected = srparam % NUM_DISP_PARAMS;
-						if (srpage == 0){
-							dispGenericMode(SUBMODE_STEPREC, pselected);
-						} else if (srpage == 1){
-							dispGenericMode(SUBMODE_NOTESEL2, pselected);
+	
+		switch(sysSettings.omxMode){
+			case MODE_OM: 						// ############## ORGANELLE MODE
+				// FALL THROUGH
+			case MODE_MIDI:							// ############## MIDI KEYBOARD
+				//playingPattern = 0; 		// DEFAULT MIDI MODE TO THE FIRST PATTERN SLOT
+				midi_leds();				// SHOW LEDS
+				if (dirtyDisplay){			// DISPLAY
+					if (!enc_edit){
+						int pselected = miparam % NUM_DISP_PARAMS;
+						if (mmpage == 0){
+							dispGenericMode(SUBMODE_MIDI, pselected);
+						} else if (mmpage == 1){
+							dispGenericMode(SUBMODE_MIDI2, pselected);
+						} else if (mmpage == 2){
+							dispGenericMode(SUBMODE_MIDI3, pselected);
 						}
 					}
 				}
-			}
+				break;
+			case MODE_S1: 						// ############## SEQUENCER 1
+				// FALL THROUGH
+			case MODE_S2: 						// ############## SEQUENCER 2
+				// MIDI SOLO
+				if (sequencer.getCurrentPattern()->solo) {
+					midi_leds();
+				}
+				if (dirtyDisplay){			// DISPLAY
+					if (!enc_edit && messageTextTimer == 0){	// show only if not encoder edit or dialog display
+						if (!noteSelect and !patternParams and !stepRecord){
+							int pselected = sqparam % NUM_DISP_PARAMS;
+							if (sqpage == 0){
+								dispGenericMode(SUBMODE_SEQ, pselected);
+							} else if (sqpage == 1){
+								dispGenericMode(SUBMODE_SEQ2, pselected);
+							}
+						}
+						if (noteSelect) {
+							int pselected = nsparam % NUM_DISP_PARAMS;
+							if (nspage == 0){
+								dispGenericMode(SUBMODE_NOTESEL, pselected);
+							} else if (nspage == 1){
+								dispGenericMode(SUBMODE_NOTESEL2, pselected);
+							} else if (nspage == 2){
+								dispGenericMode(SUBMODE_NOTESEL3, pselected);
+							}
+						}
+						if (patternParams) {
+							int pselected = ppparam % NUM_DISP_PARAMS;
+							if (pppage == 0){
+								dispGenericMode(SUBMODE_PATTPARAMS, pselected);
+							} else if (pppage == 1){
+								dispGenericMode(SUBMODE_PATTPARAMS2, pselected);
+							} else if (pppage == 2){
+								dispGenericMode(SUBMODE_PATTPARAMS3, pselected);
+							}
 
-			break;
+						}
+						if (stepRecord) {
+							int pselected = srparam % NUM_DISP_PARAMS;
+							if (srpage == 0){
+								dispGenericMode(SUBMODE_STEPREC, pselected);
+							} else if (srpage == 1){
+								dispGenericMode(SUBMODE_NOTESEL2, pselected);
+							}
+						}
+					}
+				}
+				break;
+			default:
+				break;
+		} // END SWITCH
 
-		default:
-			break;
-
+	} else {	// if !screensaver
+		switch(sysSettings.omxMode){
+			case MODE_OM: 						// ############## ORGANELLE MODE
+				// FALL THROUGH
+			case MODE_MIDI:							// ############## MIDI KEYBOARD
+					sleepModeOne();
+				break;
+			default:
+				break;
+		}
+		// clear display
+		display.clearDisplay();
+		dirtyDisplay = true;
 	}
 
 	// DISPLAY at end of loop
@@ -2094,8 +2438,9 @@ void midiNoteOff(int notenum, int channel) {
 		MM::sendNoteOff(adjnote, 0, adjchan);
 		// CV off
 		cvNoteOff();
+		midiKeyState[notenum] = -1;
 	}
-
+	
 	strip.setPixelColor(notenum, LEDOFF);
 	dirtyPixels = true;
 	dirtyDisplay = true;
@@ -2151,6 +2496,101 @@ void setAllLEDS(int R, int G, int B) {
 		strip.setPixelColor(i, strip.Color(R, G, B));
 	}
 	dirtyPixels = true;
+}
+
+// #### COLOR FUNCTIONS
+// Input a value 0 to 255 to get a color value.
+// The colours are a transition r - g - b - back to r.
+uint32_t Wheel(byte WheelPos) {
+	WheelPos = 255 - WheelPos;
+	if(WheelPos < 85) {
+		return strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
+	}
+	if(WheelPos < 170) {
+		WheelPos -= 85;
+		return strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
+	}
+	WheelPos -= 170;
+	return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
+}
+void colorWipe(byte red, byte green, byte blue, int SpeedDelay) {
+  for(uint16_t i=0; i<strip.numPixels(); i++) {
+      strip.setPixelColor(i, strip.Color(red, green, blue));
+      strip.show();
+      delay(SpeedDelay);
+  }
+}
+void theaterChaseRainbow(uint8_t wait) {		//Theatre-style crawling lights with rainbow effect
+	for (int j=0; j < 256; j++) {     // cycle all 256 colors in the wheel
+		for (int q=0; q < 3; q++) {
+			for (uint16_t i=0; i < strip.numPixels(); i=i+3) {
+				strip.setPixelColor(i+q, Wheel( (i+j) % 255));    //turn every third pixel on
+			}
+			strip.show();
+			delay(wait);
+			for (uint16_t i=0; i < strip.numPixels(); i=i+3) {
+				strip.setPixelColor(i+q, 0);        //turn every third pixel off
+			}
+		}
+	}
+}
+void CylonBounce(byte red, byte green, byte blue, int EyeSize, int SpeedDelay, int ReturnDelay, int start, int end){
+  for(int i = start; i < end-EyeSize-2; i++) {
+    setAllLEDS(0,0,0);
+    strip.setPixelColor(i, strip.Color(red/10, green/10, blue/10));
+    for(int j = 1; j <= EyeSize; j++) {
+      strip.setPixelColor(i+j, strip.Color(red, green, blue));
+    }
+    strip.setPixelColor(i+EyeSize+1, strip.Color(red/10, green/10, blue/10));
+    strip.show();
+    delay(SpeedDelay);
+  }
+  delay(ReturnDelay);
+  for(int i = end-EyeSize-2; i > start; i--) {
+    setAllLEDS(0,0,0);
+    strip.setPixelColor(i, strip.Color(red/10, green/10, blue/10));
+    for(int j = 1; j <= EyeSize; j++) {
+      strip.setPixelColor(i+j, strip.Color(red, green, blue));
+    }
+    strip.setPixelColor(i+EyeSize+1, strip.Color(red/10, green/10, blue/10));
+    strip.show();
+    delay(SpeedDelay);
+  }
+  delay(ReturnDelay);
+}
+void RolandFill(byte red, byte green, byte blue, int start, int end, int SpeedDelay){
+	for(uint16_t j=end; j>start; j--) {
+		for(uint16_t i=start; i<end; i++) {
+			strip.setPixelColor(i, strip.Color(red, green, blue));
+			strip.show();
+			if (i < j){
+				strip.setPixelColor(i, 0);
+
+			}
+			if (!screenSaverMode){
+				return;
+			}
+		}
+		strip.setPixelColor(j, strip.Color(red, green, blue));
+		strip.show();
+	}
+	for(uint16_t j=end; j>start-1; j--) {
+		for(uint16_t i=start; i<end+1; i++) {
+			strip.setPixelColor(i, strip.Color(red, green, blue));
+			strip.show();
+			if (i > j){
+				strip.setPixelColor(i, 0);
+
+			}
+			if (!screenSaverMode){
+				return;
+			}
+		}
+		if (j != start){
+			strip.setPixelColor(j, strip.Color(red, green, blue));
+		}
+		strip.show();
+	}
 }
 
 // #### OLED STUFF

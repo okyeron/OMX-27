@@ -66,6 +66,7 @@ const auto BEIGE = 0xFFCC33;
 const auto WHITE = 0xFFFFFF;
 const auto HALFWHITE = 0x808080;
 const auto LOWWHITE = 0x202020;
+const auto VLOWWHITE = 0x101010;
 const auto LEDOFF = 0x000000;
 
 // sequencer pattern colors
@@ -74,7 +75,9 @@ const uint32_t muteColors[] = {DKORANGE,DKYELLOW,DKGREEN,DKMAGENTA,DKCYAN,DKBLUE
 const uint32_t sequencePageColors[] = {RED, ORANGE, YELLOW, LIME};
 
 
-const auto MIDINOTEON = HALFWHITE;
+const auto MIDINOTEON = WHITE;
+const auto MIDIBG = VLOWWHITE;
+
 const auto SEQCHASE = DKRED;
 const auto SEQMARKER = LOWWHITE;
 const auto SEQSTEP = ORANGE;
@@ -87,3 +90,4 @@ const auto FUNKTWO = MINT;
 
 const auto SEQ1C = HALFWHITE;
 const auto SEQ2C = DKBLUE;
+

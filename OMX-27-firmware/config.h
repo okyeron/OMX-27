@@ -6,13 +6,13 @@
 #include <stdint.h>
 // #include <cstdarg>
 
-//const int OMX_VERSION = 1.5.1;
+//const int OMX_VERSION = 1.6.0;
 
 /* * firmware metadata  */
 // OMX_VERSION = 1.5.1
 const int MAJOR_VERSION = 1;
-const int MINOR_VERSION = 5;
-const int POINT_VERSION = 1;
+const int MINOR_VERSION = 6;
+const int POINT_VERSION = 0;
 
 const int DEVICE_ID     = 2;
 
@@ -77,6 +77,8 @@ extern const int gridw;
 extern const int PPQ;
 
 extern const char* modes[];
+extern const char* macromodes[];
+extern const int nummacromodes;
 extern const char* infoDialogText[];
 
 enum multDiv
@@ -128,6 +130,7 @@ enum SubModes
 	SUBMODE_STEPREC,
 	SUBMODE_MIDI2,
 	SUBMODE_MIDI3,
+	SUBMODE_MIDI4,
 
 	SUBMODES_COUNT
 };

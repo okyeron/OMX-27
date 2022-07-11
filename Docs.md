@@ -8,7 +8,7 @@ Sequencer modes have 8 patterns (tracks). Sequencer modes currently send MIDI cl
 
 CV pitch output is limited to about 4.3 octaves.
 
-USBMIDI should be plug-and-play with any USBMIDI compatible host. iPad works great with the camera connection kit. Hardware MIDI TRS jack is switchable between Type-A and Type-B.
+USBMIDI should be plug-and-play with any USBMIDI compatible host. iPad works great with the camera connection kit. Hardware MIDI TRS output jack is switchable between Type-A and Type-B.
 
 
 ## Layout
@@ -65,15 +65,44 @@ MIDI Keyboard.
 
 Quick Keys - Hold AUX  
 - first 2 "white keys" are octave up/down  
-- first 2 "black keys" are move param selection on the display  
+- first 2 "black keys" cycle through the selected parameter on the display  
 
 Parameters:  
-- Octave  
-- MIDI Channel  
-- RoundRobin MIDI Channel distribution and RR offset value   
-- MIDI program change  
-- MIDI bank select  
-- Potentiometer bank select (CC assignments are still hard coded)  
+- `OCT`: current Octave  
+- `CH`: active MIDI Channel 
+
+- `RR`: RoundRobin MIDI Channel distribution
+- `RROF`: RR offset value   
+- `PGM`: MIDI program change  
+- `BNK`: MIDI bank select  
+
+- `PBNK`: Potentiometer bank select (CC assignments are still hard coded)  
+- `THRU`: when "On" incoming USBMIDI will be passed to TRS MIDI Out.
+- `MCRO`: MIDI Macro Mode Select (default is OFF)
+- `M-CH`: MIDI Macro Mode Channel
+
+#### MIDI Macro Modes
+
+__M8 Macro Mode__
+
+From MI Mode, be sure `M8` is selected from the `MCRO` parameter and then double click the AUX button to enter Macro Mode.
+
+`M-CH` should be set to the same value as the Control Map Channel in the M8 MIDI settings screen.  
+
+Double click the AUX button again to exit Macro Mode.
+
+The bottom row of keys correspond to mutes (orange) and solos (red). The top "black keys" are as follows:
+```
+Orange - release all mutes  
+Lime - go to mixer screen  
+Cyan - snapshot load/paste  
+Magenta - snapshot save/copy  
+Red - release all solos  
+Yellow - waveform display  
+Blue - play  
+```
+
+When M8 is selected from the `MCRO` parameter - potentiometers will send on the `M-CH` MIDI channel in both regular keyboard mode and in the macro mode. However, notes played on keys will send on the currently selected `CH` MIDI channel.
 
 
 ### S1 - Sequencer 1
@@ -93,6 +122,10 @@ Keys/Commands:
  - Long press a Pattern Key: Enter __Pattern Parameters__  
  - AUX-key exits sub-modes  
  - Hold F1 + F2: first 4 "white keys" select "page" of the current pattern (depending on pattern length)  
+
+Parameters:  
+(see below)  
+
 
 ### S2 - Sequencer 2
 
@@ -114,7 +147,20 @@ Keys/Commands:
  - AUX-key exits sub-modes  
  - Hold F1 + F2: first 4 "white keys" select "page" of the current pattern (depending on pattern length)  
 
+Parameters:  
+- `PTN`: selected pattern  
+- `TRSP`: transpose (by semitones)  
+- `SWNG`: swing  
+- `BPM`: tempo   
+
+- `SOLO`: set the current pattern to MIDI Solo  
+- `LEN`: pattern length  
+- `RATE`: default note length (1/64th to whole note)  
+- `CV`: enable to send CV from this pattern   
+
+
 In the sequencer modes, the default setup is a GM Drum Map with each pattern on a consecutive midi channel. So that's notes 36, 38, 37, 39, 42, 46, 49, 51 on channels 1-8.
+
 
 ### OM - Organelle Mother
 
@@ -124,15 +170,48 @@ Pretty much the same as MI, but with the following tweaks for Organelle Mother o
 - Encoder turn sends CC 28 (127 on CW, 0 on CCW)
 
 
+### Screensaver 
+After a default timeout (3 minutes), the display will be blanked and in MI Mode a "screensaver" animation will show on the LEDs. The rightmost pot (#5) can be turned to adjust the color. Touching any keys or any of the other pots will exit the screensaver.  
+
+In S1/S2 the screen will blank, but there is no LED animation.
+
+
 ## Sub-Modes
 
 AUX-key exits sub-modes
 
 ### Note Select / Step Parameters
 
-Long press a step key to enter this mode. Here you can change the note values (note number, velocity, note length and octave), set CC parameter values with the knobs, and set step parameters (step events, step probability, trig conditions).
+Long press a step key to enter this mode. Here you can change the note values (note number, velocity, note length and octave), set CC parameter-lock values with the knobs, and set step parameters (step events, step probability, trig conditions).
 
-Step Events (TYPE):
+While in Note Select, the rightmost and leftmost keys will blink (orange or blue)- these 2 keys will shift the current octave up or down.
+
+Press AUX to exit Note Select.  
+
+Parameters:  
+
+Page 1:  
+- `NOTE`: midi note number  
+- `OCT`: octave  
+- `VEL`: note velocity  
+- `LEN`: note length in steps (1-16)   
+
+Page 2:  
+- `TYPE`: step event type (see below)  
+- `PROB`: percentage of the step triggering  
+- `COND`: trig conditions (see below)  
+
+Page 3: (set CC parameter-locks)  
+- `L-1`: pot 1 p-lock value for this step  
+- `L-2`: pot 2 p-lock value for this step  
+- `L-3`: pot 3 p-lock value for this step  
+- `L-4`: pot 4 p-lock value for this step  
+
+Touching any potentiometer while in Note Select will set that p-lock value.
+
+To reset/erase a p-lock - Highlight the parameter and turn the encoder to the left.
+
+__Step Events (TYPE):__
 "-" mute
 "+" play
 "1" reset to first step
@@ -141,10 +220,7 @@ Step Events (TYPE):
 "#?" jump to random step number
 "?" set random event (of any of the previous events) for that one step
 
-Step Probability (PROB):  
-Percentage of the step triggering.
-
-Trig conditions - A/B Ratios (COND):
+__Trig conditions - A/B Ratios (COND):__
 Play that step on the A cycle of B total cycles (or bars) of the pattern. Default is 1:1 (every time).
 First number - play step on that cycle thru the pattern
 Second number - resets the counter after that pattern cycle.
@@ -164,7 +240,7 @@ If you want to skip steps while entering notes, use the encoder button to select
 
 There are two pages of parameters in Step Record. First is the current octave (OCT), step number (STEP), note-value (NOTE), and pattern number (PTN). Second shows the step event parameters TYPE, PROB and COND as described above.
 
-Use the AUX to exit this sub-mode.
+Press AUX to exit Step Record.
 
 Keys/Commands:  
 - Potentiometers 1-4 set a CC parameter lock  
@@ -180,11 +256,26 @@ Turning the encoder will show different pages of parameters.
 
 A short-press on the encoder will select the active parameter for editing. Press the encoder repeatedly until nothing is selected to change pages.
 
-Page 1: Pattern, pattern length, rotation, midi channel
+Press AUX to exit Pattern Parameters.
 
-Page 2 (see Sequence Reset Automation below): Start, end, frequency, probability
+Parameters:  
 
-Page 3: Rate (sixteenth notes, eight notes, etc.), MIDI solo.
+Page 1:  
+- `PTN`: selected pattern  
+- `LEN`: pattern length  
+- `ROT`: rotation  
+- `CH`: midi channel   
+
+Page 2 (see Sequence Reset Automation below):  
+- `START`: steart  
+- `END`: end  
+- `FREQ`: frequency  
+- `PROB`: probability   
+
+Page 3:  
+- `RATE`: default note length (1/64th to whole note)    
+- `SOLO`: MIDI solo   
+
 
 Keys/Commands: 
 - Step Keys set pattern length  
