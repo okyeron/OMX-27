@@ -13,7 +13,7 @@ USBMIDI should be plug-and-play with any USBMIDI compatible host. iPad works gre
 
 ## Layout
 
-<img src="omx27_layout4.png" alt="omx27_layout3" width="1045" height="425" />
+<img src="images/omx27_layout4.png" alt="omx27_layout3" width="1045" height="425" />
 
 Top left key = AUX Key.
 
@@ -87,11 +87,12 @@ __M8 Macro Mode__
 
 From MI Mode, be sure `M8` is selected from the `MCRO` parameter and then double click the AUX button to enter Macro Mode.
 
-`M-CH` should be set to the same value as the Control Map Channel in the M8 MIDI settings screen.  
+`M-CH` should be set to the same value as the Control Map Channel in the M8 MIDI settings screen. Default is set to channel 10.  
 
 Double click the AUX button again to exit Macro Mode.
 
-The bottom row of keys correspond to mutes (orange) and solos (red). The top "black keys" are as follows:
+The bottom row of keys correspond to mutes (orange) and solos (red). The top "black keys" are as follows:  
+
 ```
 Orange - release all mutes  
 Lime - go to mixer screen  
@@ -101,6 +102,8 @@ Red - release all solos
 Yellow - waveform display  
 Blue - play  
 ```
+<img src="images/omx27_m8macro.png" alt="omx27_m8_macro_mode" width="1045" height="425" />
+
 
 When M8 is selected from the `MCRO` parameter - potentiometers will send on the `M-CH` MIDI channel in both regular keyboard mode and in the macro mode. However, notes played on keys will send on the currently selected `CH` MIDI channel.
 
