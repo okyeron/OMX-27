@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef OMX_CONFIG_DONE
+#define OMX_CONFIG_DONE // prevent redifinition pragma once should handle though. 
+
 #include <Arduino.h>
 #include <stdio.h>
 #include <stdarg.h>
@@ -71,12 +74,12 @@ struct SysSettings {
 	int playingPattern;
 	bool refresh = false;
 	bool screenSaverMode = false;
-	Micros timeElasped;
+	unsigned long timeElasped;
 };
 
-SysSettings sysSettings;
+extern SysSettings sysSettings;
 
-const int potCount = NUM_CC_POTS;
+extern const int potCount;
 
 struct PotSettings
 {
@@ -93,7 +96,7 @@ struct PotSettings
 	int prevPlock[NUM_CC_POTS] = {0, 0, 0, 0, 0};
 };
 // Put in global struct to share across classes
-PotSettings potSettings;
+extern PotSettings potSettings;
 
 struct MidiConfig
 {
@@ -123,7 +126,7 @@ struct MidiConfig
 	bool midiAUX = false;
 };
 
-MidiConfig midiSettings;
+extern MidiConfig midiSettings;
 
 struct MidiMacroConfig {
 	int midiMacro = 0;
@@ -131,15 +134,15 @@ struct MidiMacroConfig {
 	int midiMacroChan = 10;
 };
 
-MidiMacroConfig midiMacroConfig;
+extern MidiMacroConfig midiMacroConfig;
 
-bool m8mutesolo[] = {false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false};
+extern bool m8mutesolo[];
 
 struct EncoderConfig {
 	bool enc_edit = false;
 };
 
-EncoderConfig encoderConfig;
+extern EncoderConfig encoderConfig;
 
 struct ClockConfig {
 	float clockbpm = 120;
@@ -149,7 +152,7 @@ struct ClockConfig {
 	float step_delay;
 };
 
-ClockConfig clockConfig;
+extern ClockConfig clockConfig;
 
 struct ColorConfig
 {
@@ -161,7 +164,7 @@ struct ColorConfig
 	uint8_t midiBg_Brightness = 255;
 };
 
-ColorConfig colorConfig;
+extern ColorConfig colorConfig;
 
 #define NUM_DISP_PARAMS 5
 
@@ -241,3 +244,5 @@ extern byte colPins[COLS]; // column pins for key switches
 extern const int notes[];
 extern const int steps[];
 extern const int midiKeyMap[];
+
+#endif

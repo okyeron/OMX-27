@@ -4,7 +4,7 @@
 #include <Adafruit_NeoPixel.h>
 
 // Declare NeoPixel strip object
-Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
+extern Adafruit_NeoPixel strip;
 
 class OmxLeds
 {

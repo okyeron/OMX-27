@@ -1,5 +1,8 @@
 #include "omx_leds.h"
 #include "consts.h"
+#include "colors.h"
+
+Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 
 //  OmxLeds::OmxLeds(){
 //     Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
@@ -44,12 +47,13 @@ void OmxLeds::updateLeds()
 }
 
 void OmxLeds::drawMidiLeds() {
-	blinkInterval = step_delay*2;
+    updateLeds();
+	// blinkInterval = clockConfig.step_delay*2;
 
-	if (blink_msec >= blinkInterval){
-		blinkState = !blinkState;
-		blink_msec = 0;
-	}
+	// if (blink_msec >= blinkInterval){
+	// 	blinkState = !blinkState;
+	// 	blink_msec = 0;
+	// }
 
 	if (midiSettings.midiAUX){
 		// Blink left/right keys for octave select indicators.
@@ -59,13 +63,13 @@ void OmxLeds::drawMidiLeds() {
 		auto color4 = blinkState ? RBLUE : LEDOFF;
 
 		for (int q = 1; q < LED_COUNT; q++){				
-			if (midiKeyState[q] == -1){
-				if (midiBg_Hue == 0){
+			if (midiSettings.midiKeyState[q] == -1){
+				if (colorConfig.midiBg_Hue == 0){
 					strip.setPixelColor(q, LEDOFF);
-				} else if (midiBg_Hue == 32){
+				} else if (colorConfig.midiBg_Hue == 32){
 					strip.setPixelColor(q, LOWWHITE);
 				} else {
-					strip.setPixelColor(q, strip.ColorHSV(midiBg_Hue, midiBg_Sat, midiBg_Brightness));
+					strip.setPixelColor(q, strip.ColorHSV(colorConfig.midiBg_Hue, colorConfig.midiBg_Sat, colorConfig.midiBg_Brightness));
 				}
 			}
 		}
@@ -116,13 +120,13 @@ void OmxLeds::drawMidiLeds() {
 		if (!sysSettings.screenSaverMode){
 			// clear not held leds
 			for (int q = 1; q < LED_COUNT; q++){				
-				if (midiKeyState[q] == -1){
-					if (midiBg_Hue == 0){
+				if (midiSettings.midiKeyState[q] == -1){
+					if (colorConfig.midiBg_Hue == 0){
 						strip.setPixelColor(q, LEDOFF);
-					} else if (midiBg_Hue == 32){
+					} else if (colorConfig.midiBg_Hue == 32){
 						strip.setPixelColor(q, LOWWHITE);
 					} else {
-						strip.setPixelColor(q, strip.ColorHSV(midiBg_Hue, midiBg_Sat, midiBg_Brightness));
+						strip.setPixelColor(q, strip.ColorHSV(colorConfig.midiBg_Hue, colorConfig.midiBg_Sat, colorConfig.midiBg_Brightness));
 					}
 				}
 			}
