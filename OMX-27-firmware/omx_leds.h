@@ -17,6 +17,8 @@ public:
 
     void updateLeds();
 
+    void drawMidiLeds();
+
     // clears dirty, transmits pixel data if dirty.
     void showLeds();
 

@@ -8,10 +8,10 @@ class OmxDisp
 {
 public:
     // Should make into function
-    const char* legends[4] = {"","","",""};
-	int legendVals[4] = {0,0,0,0};
-	int dispPage = 0;
-	const char* legendText[4] = {"","","",""};
+    const char *legends[4] = {"", "", "", ""};
+    int legendVals[4] = {0, 0, 0, 0};
+    int dispPage = 0;
+    const char *legendText[4] = {"", "", "", ""};
 
     OmxDisp();
     void setup();
@@ -24,7 +24,7 @@ public:
     void invertColor(bool flip);
     void dispValBox(int v, int16_t n, bool inv);
     void dispSymbBox(const char *v, int16_t n, bool inv);
-    void dispGenericMode(int submode, int selected);
+    void dispGenericMode(int selected);
     void dispPageIndicators(int page, bool selected);
     void dispMode();
 
@@ -32,6 +32,7 @@ public:
     void drawLoading();
 
     void setDirty();
+    bool isDirty() { return dirtyDisplay; }
 
     void showDisplay();
 
@@ -41,6 +42,7 @@ public:
     void setSubmode(int submode);
 
     void UpdateMessageTextTimer();
+
 private:
     int hline = 8;
     int messageTextTimer = 0;

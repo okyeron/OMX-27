@@ -64,6 +64,7 @@ void OmxModeSequencer::onEncoderChanged(Encoder::Update enc)
 
 void OmxModeSequencer::onEncoderChangedNorm(Encoder::Update enc)
 {
+    /*
     auto amt = enc.accel(5); // where 5 is the acceleration factor if you want it, 0 if you don't)
 
     // CHANGE PAGE
@@ -135,11 +136,13 @@ void OmxModeSequencer::onEncoderChangedNorm(Encoder::Update enc)
         sequencer.getCurrentPattern()->sendCV = constrain(sequencer.getCurrentPattern()->sendCV + amt, 0, 1);
     }
     omxDisp.setDirty();
+    */
 }
 
 // TODO: break this into separate functions
 void OmxModeSequencer::onEncoderChangedStep(Encoder::Update enc)
 {
+    /*
     auto amt = enc.accel(5); // where 5 is the acceleration factor if you want it, 0 if you don't)
 
     // should be no need to check enc_edit, function will only be called if enc_edit is false
@@ -343,10 +346,12 @@ void OmxModeSequencer::onEncoderChangedStep(Encoder::Update enc)
         }
     }
     dirtyDisplay = true;
+    */
 }
 
 void OmxModeSequencer::onEncoderButtonDown()
 {
+    /*
     if (noteSelect && noteSelection && !patternParams)
     {
         nsparam = (nsparam + 1) % 15;
@@ -403,6 +408,7 @@ void OmxModeSequencer::onEncoderButtonDown()
             sqpage = 0;
         }
     }
+    */
 }
 
 void OmxModeSequencer::onEncoderButtonDownLong()
@@ -421,6 +427,7 @@ bool OmxModeSequencer::shouldBlockEncEdit()
 
 void OmxModeSequencer::onKeyUpdate(OMXKeypadEvent e)
 {
+    /*
     int thisKey = e.key();
     int keyPos = thisKey - 11;
     int seqKey = keyPos + (sequencer.patternPage[sequencer.playingPattern] * NUM_STEPKEYS);
@@ -765,10 +772,12 @@ void OmxModeSequencer::onKeyUpdate(OMXKeypadEvent e)
     }
 
     //				strip.show();
+    */
 }
 
 void OmxModeSequencer::onKeyHeldUpdate(OMXKeypadEvent e)
 {
+    /*
     if (!sequencer.getCurrentPattern()->solo)
     {
         // TODO: access key state directly in omx_keypad.h
@@ -802,10 +811,12 @@ void OmxModeSequencer::onKeyHeldUpdate(OMXKeypadEvent e)
             }
         }
     }
+    */
 }
 
 void OmxModeSequencer::showCurrentStep(int patternNum)
 {
+    /*
 
     omxLeds.updateLeds();
 
@@ -1141,6 +1152,7 @@ void OmxModeSequencer::showCurrentStep(int patternNum)
         }
     }
     omxLeds.setDirty();
+    */
 }
 
 void OmxModeSequencer::updateLEDs()
@@ -1149,6 +1161,7 @@ void OmxModeSequencer::updateLEDs()
 
 void OmxModeSequencer::onDisplayUpdate()
 {
+    /*
     // MIDI SOLO
     if (sequencer.getCurrentPattern()->solo)
     {
@@ -1216,6 +1229,7 @@ void OmxModeSequencer::onDisplayUpdate()
             }
         }
     }
+    */
 }
 
 void OmxModeSequencer::initPatterns()

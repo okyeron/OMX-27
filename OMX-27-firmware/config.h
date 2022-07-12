@@ -120,18 +120,20 @@ struct MidiConfig
     bool midiInToCV = true;
     bool midiSoftThru = false;
 	int pitchCV;
+	bool midiAUX = false;
 };
 
 MidiConfig midiSettings;
 
 struct MidiMacroConfig {
-	bool midiAUX = false;
 	int midiMacro = 0;
 	bool m8AUX = false;
 	int midiMacroChan = 10;
 };
 
 MidiMacroConfig midiMacroConfig;
+
+bool m8mutesolo[] = {false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false};
 
 struct EncoderConfig {
 	bool enc_edit = false;

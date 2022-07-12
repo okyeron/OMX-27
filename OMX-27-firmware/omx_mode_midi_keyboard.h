@@ -32,4 +32,8 @@ public:
 
 private:
     bool organelleMotherMode = false; // TODO make separate class for this
+
+    int miparam = 0; // midi params item counter
+
+    int mmpage = 0;
 };

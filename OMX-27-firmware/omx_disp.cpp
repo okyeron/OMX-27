@@ -348,7 +348,7 @@ void OmxDisp::clearLegends()
     legendText[3] = "";
 }
 
-void OmxDisp::dispGenericMode(int submode, int selected)
+void OmxDisp::dispGenericMode(int selected)
 {
     // const char* legends[4] = {"","","",""};
     // int legendVals[4] = {0,0,0,0};

@@ -80,9 +80,9 @@ int nspage = 0;
 // int pppage = 0;
 // int sqpage = 0;
 // int srpage = 0;
-int mmpage = 0;
+// int mmpage = 0;
 
-int miparam = 0;	// midi params item counter
+// int miparam = 0;	// midi params item counter
 // int nsparam = 0;	// note select params
 // int ppparam = 0;	// pattern params
 // int sqparam = 0;	// seq params
