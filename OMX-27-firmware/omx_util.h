@@ -4,12 +4,19 @@
 class OmxUtil
 {
 public:
-    OmxUtil(){}
+    OmxUtil() {}
 
     void setup();
 
     void sendPots(int val, int channel);
 
+    // #### Outbound CV note on/off
+    void cvNoteOn(int notenum);
+    void cvNoteOff();
+
+    // #### Outbound MIDI note on/off
+    void midiNoteOn(int notenum, int velocity, int channel);
+    void midiNoteOff(int notenum, int channel);
 
 private:
     // int potbank = 0;

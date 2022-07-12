@@ -96,3 +96,10 @@ void OmxScreensaver::resetCounter()
 {
     screenSaverCounter = 0;
 }
+
+void OmxScreensaver::onDisplayUpdate()
+{
+    updateLEDs();
+	omxDisp.clearDisplay();
+}
+

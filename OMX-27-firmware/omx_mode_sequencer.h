@@ -8,6 +8,8 @@ public:
     OmxModeSequencer() {}
     ~OmxModeSequencer() {}
 
+    void InitSetup() override;
+
     void OnPotChanged(int potIndex, int potValue) override;
 
     // Should be part of LED update, intertangled with the sequencer class which is calling it in main FW code.
@@ -24,7 +26,15 @@ public:
     void onKeyUpdate(OMXKeypadEvent e) override;
     void onKeyHeldUpdate(OMXKeypadEvent e) override;
 
+    void onDisplayUpdate() override;
+
+    void setSeq2Mode()
+    {
+        seq2Mode = true;
+    }
+
 private:
+    bool seq2Mode = false;
     bool patternParams = false;
     bool seqPages = false;
 
@@ -53,4 +63,6 @@ private:
 
     void onEncoderChangedNorm(Encoder::Update enc);
     void onEncoderChangedStep(Encoder::Update enc);
+
+    void initPatterns();
 };

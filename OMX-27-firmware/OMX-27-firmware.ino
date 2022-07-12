@@ -103,7 +103,7 @@ int noteSelectPage = 0;
 bool dialogFlags[] = {false, false, false, false, false, false};
 unsigned dialogDuration = 1000;
 
-int pitchCV;
+
 uint8_t RES;
 uint16_t AMAX;
 int V_scale;
@@ -166,7 +166,7 @@ void resetClocks(){
 	step_micros = ppqInterval * (PPQ/4); 			// 16th note step in microseconds (quarter of quarter note)
 
 	// 16th note step length in milliseconds
-	step_delay = step_micros * 0.001; 	// ppqInterval * 0.006; // 60000 / clockbpm / 4;
+	clockConfig.step_delay = step_micros * 0.001; 	// ppqInterval * 0.006; // 60000 / clockbpm / 4;
 }
 
 void setGlobalSwing(int swng_amt){
@@ -304,6 +304,12 @@ void setup() {
 		lastMidiValue[i] = 0;
 	}
 
+	omxModeMidi.InitSetup();
+	omxModeOM.setOrganelleMode();
+	omxModeOM.InitSetup();
+	
+	omxScreensaver.InitSetup();
+
 	activeOmxMode = &omxModeMidi;
 
 	// HW MIDI
@@ -334,137 +340,32 @@ void setup() {
 		pots[0][2] = CC3;
 		pots[0][3] = CC4;
 		pots[0][4] = CC5;
-		initPatterns();
+
+		// Does initPatterns()
+		omxModeS1.InitSetup();
+		omxModeS2.setSeq2Mode();
+		omxModeS2.InitSetup();
+
+		// initPatterns();
 		saveToStorage();
 	}
 
 	// Init Display
-	omxidsp.setup();
+	omxDisp.setup();
 
 	// Startup screen
-	omxidsp.drawStartupScreen();
+	omxDisp.drawStartupScreen();
 
 	// Keypad
 //	customKeypad.begin();
 	keypad.begin();
 	
 	//LEDs
-	strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
-	strip.show();            // Turn OFF all pixels ASAP
-	strip.setBrightness(LED_BRIGHTNESS); // Set BRIGHTNESS to about 1/5 (max = 255)
-	for(int i=0; i<LED_COUNT; i++) { // For each pixel...
-		strip.setPixelColor(i, HALFWHITE);
-		strip.show();   // Send the updated pixel colors to the hardware.
-		delay(5); // Pause before next pass through loop
-	}
-	rainbow(5); // rainbow startup pattern
-	delay(500);
-
-	// clear LEDs
-	strip.fill(0, 0, LED_COUNT);
-	strip.show();
-
-	delay(100);
-
-	
+	omxLeds.initSetup();
 }
 
 // ####### END SETUP #######
 
-
-// ####### MIDI LEDS #######
-
-void midi_leds() {
-	blinkInterval = step_delay*2;
-
-	if (blink_msec >= blinkInterval){
-		blinkState = !blinkState;
-		blink_msec = 0;
-	}
-
-	if (midiAUX){
-		// Blink left/right keys for octave select indicators.
-		auto color1 = blinkState ? LIME : LEDOFF;
-		auto color2 = blinkState ? MAGENTA : LEDOFF;
-		auto color3 = blinkState ? ORANGE : LEDOFF;
-		auto color4 = blinkState ? RBLUE : LEDOFF;
-
-		for (int q = 1; q < LED_COUNT; q++){				
-			if (midiKeyState[q] == -1){
-				if (midiBg_Hue == 0){
-					strip.setPixelColor(q, LEDOFF);
-				} else if (midiBg_Hue == 32){
-					strip.setPixelColor(q, LOWWHITE);
-				} else {
-					strip.setPixelColor(q, strip.ColorHSV(midiBg_Hue, midiBg_Sat, midiBg_Brightness));
-				}
-			}
-		}
-		strip.setPixelColor(0, RED);
-		strip.setPixelColor(1, color1);
-		strip.setPixelColor(2, color2);
-		strip.setPixelColor(11, color3);
-		strip.setPixelColor(12, color4);
-
-
-	// Macros
-
-	} else if (m8AUX){
-		auto color5 = blinkState ? ORANGE : LEDOFF;
-		auto color6 = blinkState ? RED : LEDOFF;
-
-		strip.setPixelColor(0, BLUE);
-		strip.setPixelColor(1, ORANGE); // all mute
-		strip.setPixelColor(3, LIME); // MIXER
-		strip.setPixelColor(4, CYAN); // snap load
-		strip.setPixelColor(5, MAGENTA); // snap save
-
-		for(int m = 11; m < LED_COUNT-8; m++){
-			if (m8mutesolo[m-11]){
-				strip.setPixelColor(m, color5);
-			}else{
-				strip.setPixelColor(m, ORANGE);
-			}
-		}
-		
-		strip.setPixelColor(6, RED); // all solo
-		for(int m = 19; m < LED_COUNT; m++){
-			if (m8mutesolo[m-11]){
-				strip.setPixelColor(m, color6);
-			}else{
-				strip.setPixelColor(m, RED);
-			}
-		}
-		strip.setPixelColor(2, LEDOFF);
-		strip.setPixelColor(7, LEDOFF);
-		strip.setPixelColor(8, LEDOFF);
-
-		strip.setPixelColor(9, YELLOW); // WAVES
-		strip.setPixelColor(10, BLUE); // PLAY
-
-
-	} else {
-		// AUX key
-		strip.setPixelColor(0, LEDOFF);
-		
-		// Other keys
-		if (!sysSettings.screenSaverMode){
-			// clear not held leds
-			for (int q = 1; q < LED_COUNT; q++){				
-				if (midiKeyState[q] == -1){
-					if (midiBg_Hue == 0){
-						strip.setPixelColor(q, LEDOFF);
-					} else if (midiBg_Hue == 32){
-						strip.setPixelColor(q, LOWWHITE);
-					} else {
-						strip.setPixelColor(q, strip.ColorHSV(midiBg_Hue, midiBg_Sat, midiBg_Brightness));
-					}
-				}
-			}
-		}
-	}
-	dirtyPixels = true;
-}
 
 // ####### SEQUENCER LEDS #######
 
@@ -535,7 +436,7 @@ void loop() {
 		sysSettings.newmode = sysSettings.omxMode;
 		sequencer.playingPattern = sysSettings.playingPattern;
 		omxDisp.setDirty();
-		setAllLEDS(0,0,0);
+		omxLeds.setAllLEDS(0,0,0);
 		omxLeds.setDirty();
 		sysSettings.refresh = false;
 	}
@@ -655,105 +556,14 @@ void loop() {
 	}  // END KEYS WHILE
 
 	if (!sysSettings.screenSaverMode){
-
-		// ############### MODES DISPLAY  ##############
-		//
-
 		omxDisp.UpdateMessageTextTimer();
-	
-		switch(sysSettings.omxMode){
-			case MODE_OM: 						// ############## ORGANELLE MODE
-				// FALL THROUGH
-			case MODE_MIDI:							// ############## MIDI KEYBOARD
-				//playingPattern = 0; 		// DEFAULT MIDI MODE TO THE FIRST PATTERN SLOT
-				midi_leds();				// SHOW LEDS
-				if (dirtyDisplay){			// DISPLAY
-					if (!encoderConfig.enc_edit){
-						int pselected = miparam % NUM_DISP_PARAMS;
-						if (mmpage == 0){
-							dispGenericMode(SUBMODE_MIDI, pselected);
-						} else if (mmpage == 1){
-							dispGenericMode(SUBMODE_MIDI2, pselected);
-						} else if (mmpage == 2){
-							dispGenericMode(SUBMODE_MIDI3, pselected);
-						}
-					}
-				}
-				break;
-			case MODE_S1: 						// ############## SEQUENCER 1
-				// FALL THROUGH
-			case MODE_S2: 						// ############## SEQUENCER 2
-				// MIDI SOLO
-				if (sequencer.getCurrentPattern()->solo) {
-					midi_leds();
-				}
-				if (dirtyDisplay){			// DISPLAY
-					if (!encoderConfig.enc_edit && messageTextTimer == 0){	// show only if not encoder edit or dialog display
-						if (!noteSelect and !patternParams and !stepRecord){
-							int pselected = sqparam % NUM_DISP_PARAMS;
-							if (sqpage == 0){
-								dispGenericMode(SUBMODE_SEQ, pselected);
-							} else if (sqpage == 1){
-								dispGenericMode(SUBMODE_SEQ2, pselected);
-							}
-						}
-						if (noteSelect) {
-							int pselected = nsparam % NUM_DISP_PARAMS;
-							if (nspage == 0){
-								dispGenericMode(SUBMODE_NOTESEL, pselected);
-							} else if (nspage == 1){
-								dispGenericMode(SUBMODE_NOTESEL2, pselected);
-							} else if (nspage == 2){
-								dispGenericMode(SUBMODE_NOTESEL3, pselected);
-							}
-						}
-						if (patternParams) {
-							int pselected = ppparam % NUM_DISP_PARAMS;
-							if (pppage == 0){
-								dispGenericMode(SUBMODE_PATTPARAMS, pselected);
-							} else if (pppage == 1){
-								dispGenericMode(SUBMODE_PATTPARAMS2, pselected);
-							} else if (pppage == 2){
-								dispGenericMode(SUBMODE_PATTPARAMS3, pselected);
-							}
-
-						}
-						if (stepRecord) {
-							int pselected = srparam % NUM_DISP_PARAMS;
-							if (srpage == 0){
-								dispGenericMode(SUBMODE_STEPREC, pselected);
-							} else if (srpage == 1){
-								dispGenericMode(SUBMODE_NOTESEL2, pselected);
-							}
-						}
-					}
-				}
-				break;
-			default:
-				break;
-		} // END SWITCH
-
-	} else {	// if !screensaver
-		switch(sysSettings.omxMode){
-			case MODE_OM: 						// ############## ORGANELLE MODE
-				// FALL THROUGH
-			case MODE_MIDI:							// ############## MIDI KEYBOARD
-					// sleepModeOne();
-					omxScreensaver.updateLEDs();
-				break;
-			default:
-				break;
-		}
-		// clear display
-		display.clearDisplay();
-		omxDisp.setDirty();
+		activeOmxMode->onDisplayUpdate();
+	} else { // if screenSaverMode
+		omxScreensaver.onDisplayUpdate();
 	}
 
 	// DISPLAY at end of loop
-
 	omxDisp.showDisplay();
-
-	
 
 	omxLeds.showLeds();
 
@@ -766,213 +576,45 @@ void loop() {
 
 } // ######## END MAIN LOOP ########
 
-
-void cvNoteOn(int notenum){
-	if (notenum>=midiLowestNote && notenum <midiHightestNote){
-		pitchCV = static_cast<int>(roundf( (notenum - midiLowestNote) * stepsPerSemitone)); // map (adjnote, 36, 91, 0, 4080);
-		digitalWrite(CVGATE_PIN, HIGH);
-		analogWrite(CVPITCH_PIN, pitchCV);
-	}
-}
-void cvNoteOff(){
-	digitalWrite(CVGATE_PIN, LOW);
-//	analogWrite(CVPITCH_PIN, 0);
-}
-
 // #### Inbound MIDI callbacks
 void OnNoteOn(byte channel, byte note, byte velocity) {
-	if (midiSoftThru) {
+	if (midiSettings.midiSoftThru) {
 		MM::sendNoteOnHW(note, velocity, channel);
 	}
-	if (midiInToCV){
-		cvNoteOn(note);
+	if (midiSettings.midiInToCV){
+		omxUtil.cvNoteOn(note);
 	}
-	if (sysSettings.omxMode == MODE_MIDI){
-		midiLastNote = note;
-		int whatoct = (note / 12);
-		int thisKey;
-		uint32_t keyColor = MIDINOTEON;
 
-		if ( (whatoct % 2) == 0) {
-			thisKey = note - (12 * whatoct);
-		} else {
-			thisKey = note - (12 * whatoct) + 12;
-		}
-		if (whatoct == 0){ // ORANGE,YELLOW,GREEN,MAGENTA,CYAN,BLUE,LIME,LTPURPLE
-		} else if(whatoct == 1){ keyColor = ORANGE;
-		} else if(whatoct == 2){ keyColor = YELLOW;
-		} else if(whatoct == 3){ keyColor = GREEN;
-		} else if(whatoct == 4){ keyColor = MAGENTA;
-		} else if(whatoct == 5){ keyColor = CYAN;
-		} else if(whatoct == 6){ keyColor = LIME;
-		} else if(whatoct == 7){ keyColor = CYAN;
-		}
-		strip.setPixelColor(midiKeyMap[thisKey], keyColor);         //  Set pixel's color (in RAM)
-	//	dirtyPixels = true;
-		strip.show();
-		omxDisp.setDirty();
-	}
+	activeOmxMode->inMidiNoteOn(channel, note, velocity);
 }
 void OnNoteOff(byte channel, byte note, byte velocity) {
-	if (midiInToCV){
-		cvNoteOff();
-	}
-	if (sysSettings.omxMode == MODE_MIDI){
-		int whatoct = (note / 12);
-		int thisKey;
-		if ( (whatoct % 2) == 0) {
-			thisKey = note - (12 * whatoct);
-		} else {
-			thisKey = note - (12 * whatoct) + 12;
-		}
-		strip.setPixelColor(midiKeyMap[thisKey], LEDOFF);         //  Set pixel's color (in RAM)
-	//	dirtyPixels = true;
-		strip.show();
-		omxDisp.setDirty();
-	}
-	if (midiSoftThru) {
+	if (midiSettings.midiSoftThru) {
 		MM::sendNoteOffHW(note, velocity, channel);
 	}
+
+	if (midiSettings.midiInToCV){
+		omxUtil.cvNoteOff();
+	}
+
+	activeOmxMode->inMidiNoteOff(channel, note, velocity);
+
 }
 void OnControlChange(byte channel, byte control,  byte value) {
-	if (midiSoftThru) {
+	if (midiSettings.midiSoftThru) {
 		MM::sendControlChangeHW(control, value, channel);
 	}
+
+	activeOmxMode->inMidiControlChange(channel, control, value);
 }
 
 void OnSysEx(const uint8_t *data, uint16_t length, bool complete) {
 	sysEx->processIncomingSysex(data, length);
 }
 
-// #### Outbound MIDI Mode note on/off
-void midiNoteOn(int notenum, int velocity, int channel) {
-	int adjnote = notes[notenum] + (octave * 12); // adjust key for octave range
-	rrChannel = (rrChannel % midiRRChannelCount) + 1;
-	int adjchan = rrChannel;
-
-	if (adjnote>=0 && adjnote <128){
-		midiLastNote = adjnote;
-
-		// keep track of adjusted note when pressed so that when key is released we send
-		// the correct note off message
-		midiKeyState[notenum] = adjnote;
-
-		// RoundRobin Setting?
-		if (midiRoundRobin) {
-			adjchan = rrChannel + midiRRChannelOffset;
-		} else {
-			adjchan = channel;
-		}
-		midiChannelState[notenum] = adjchan;
-		MM::sendNoteOn(adjnote, velocity, adjchan);
-		// CV
-		cvNoteOn(adjnote);
-	}
-
-	strip.setPixelColor(notenum, MIDINOTEON);         //  Set pixel's color (in RAM)
-	dirtyPixels = true;
-	omxidsp.setDispDirty();
-}
-
-void midiNoteOff(int notenum, int channel) {
-	// we use the key state captured at the time we pressed the key to send the correct note off message
-	int adjnote = midiKeyState[notenum];
-	int adjchan = midiChannelState[notenum];
-	if (adjnote>=0 && adjnote <128){
-		MM::sendNoteOff(adjnote, 0, adjchan);
-		// CV off
-		cvNoteOff();
-		midiKeyState[notenum] = -1;
-	}
-	
-	strip.setPixelColor(notenum, LEDOFF);
-	dirtyPixels = true;
-	omxidsp.setDispDirty();
-}
 
 
 
-
-// #### LED STUFF
-// Rainbow cycle along whole strip. Pass delay time (in ms) between frames.
-void rainbow(int wait) {
-	// Hue of first pixel runs 5 complete loops through the color wheel.
-	// Color wheel has a range of 65536 but it's OK if we roll over, so
-	// just count from 0 to 5*65536. Adding 256 to firstPixelHue each time
-	// means we'll make 5*65536/256 = 1280 passes through this outer loop:
-	for(long firstPixelHue = 0; firstPixelHue < 1*65536; firstPixelHue += 256) {
-		for(int i=0; i<strip.numPixels(); i++) { // For each pixel in strip...
-			// Offset pixel hue by an amount to make one full revolution of the
-			// color wheel (range of 65536) along the length of the strip
-			// (strip.numPixels() steps):
-			int pixelHue = firstPixelHue + (i * 65536L / strip.numPixels());
-
-			// strip.ColorHSV() can take 1 or 3 arguments: a hue (0 to 65535) or
-			// optionally add saturation and value (brightness) (each 0 to 255).
-			// Here we're using just the single-argument hue variant. The result
-			// is passed through strip.gamma32() to provide 'truer' colors
-			// before assigning to each pixel:
-			strip.setPixelColor(i, strip.gamma32(strip.ColorHSV(pixelHue)));
-		}
-		strip.show(); // Update strip with new contents
-		delay(wait);  // Pause for a moment
-	}
-}
-
-
-
-
-
-// #### OLED STUFF
-
-
-
-
-// TODO: move to sequencer.h
-void initPatterns( void ) {
-	// default to GM Drum Map for now -- GET THIS FROM patternDefaultNoteMap instead
-//	uint8_t initNotes[NUM_PATTERNS] = {
-//		36,
-//		38,
-//		37,
-//		39,
-//		42,
-//		46,
-//		49,
-//		51 };
-
-	StepNote stepNote = { 0, 100, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1 }, 100, 0, STEPTYPE_NONE };
-					// {note, vel, len, TRIGTYPE, {params0, params1, params2, params3, params4}, prob, condition, STEPTYPE}
-
-	for ( int i=0; i<NUM_PATTERNS; i++ ) {
-		auto pattern = sequencer.getPattern(i);
-
-		stepNote.note = sequencer.patternDefaultNoteMap[i]; // Defined in sequencer.h
-
-		for ( int j=0; j<NUM_STEPS; j++ ) {
-			memcpy( &pattern->steps[j], &stepNote, sizeof(StepNote) );
-		}
-
-		// TODO: move to sequencer.h
-		pattern->len = 15;
-		pattern->channel = i;		// 0 - 15 becomes 1 - 16
-		pattern->startstep = 0;
-		pattern->autoresetstep = 0;
-		pattern->autoresetfreq = 0;
-		pattern->current_cycle = 1;
-		pattern->rndstep = 3;
-		pattern->clockDivMultP = 2;
-		pattern->autoresetprob = 0;
-		pattern->swing = 0;
-		pattern->reverse = false;
-		pattern->mute = false;
-		pattern->autoreset = false;
-		pattern->solo = false;
-		pattern->sendCV = false;
-	}
-}
-
-void saveHeader( void ) {
+void saveHeader() {
 	// 1 byte for EEPROM version
 	storage->write( EEPROM_HEADER_ADDRESS + 0, EEPROM_VERSION );
 

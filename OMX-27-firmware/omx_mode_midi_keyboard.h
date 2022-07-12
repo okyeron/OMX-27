@@ -5,8 +5,8 @@
 class OmxModeMidiKeyboard : public OmxModeInterface
 {
 public:
-    OmxModeMidiKeyboard(){}
-    ~OmxModeMidiKeyboard(){}
+    OmxModeMidiKeyboard() {}
+    ~OmxModeMidiKeyboard() {}
 
     void OnPotChanged(int potIndex, int potValue) override;
 
@@ -19,7 +19,16 @@ public:
     void onEncoderButtonDownLong() override;
 
     void onKeyUpdate(OMXKeypadEvent e) override;
-    void onKeyHeldUpdate(OMXKeypadEvent e) {};
+    void onKeyHeldUpdate(OMXKeypadEvent e){};
+
+    void onDisplayUpdate() override;
+    void inMidiNoteOn(byte channel, byte note, byte velocity) override;
+    void inMidiNoteOff(byte channel, byte note, byte velocity) override;
+
+    void setOrganelleMode()
+    {
+        organelleMotherMode = true;
+    }
 
 private:
     bool organelleMotherMode = false; // TODO make separate class for this

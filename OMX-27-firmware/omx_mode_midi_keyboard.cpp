@@ -1,5 +1,6 @@
 #include "omx_mode_midi_keyboard.h"
 #include "config.h"
+#include "colors.h"
 #include "omx_util.h"
 #include "omx_disp.h"
 #include "omx_leds.h"
@@ -425,4 +426,101 @@ void OmxModeMidiKeyboard::onKeyUpdate(OMXKeypadEvent e)
 
 void OmxModeMidiKeyboard::updateLEDs()
 {
+}
+
+void OmxModeMidiKeyboard::onDisplayUpdate()
+{
+    // playingPattern = 0; 		// DEFAULT MIDI MODE TO THE FIRST PATTERN SLOT
+    midi_leds(); // SHOW LEDS
+    if (dirtyDisplay)
+    { // DISPLAY
+        if (!encoderConfig.enc_edit)
+        {
+            int pselected = miparam % NUM_DISP_PARAMS;
+            if (mmpage == 0)
+            {
+                dispGenericMode(SUBMODE_MIDI, pselected);
+            }
+            else if (mmpage == 1)
+            {
+                dispGenericMode(SUBMODE_MIDI2, pselected);
+            }
+            else if (mmpage == 2)
+            {
+                dispGenericMode(SUBMODE_MIDI3, pselected);
+            }
+        }
+    }
+}
+
+// incoming midi note on
+void OmxModeMidiKeyboard::inMidiNoteOn(byte channel, byte note, byte velocity)
+{
+    if(organelleMotherMode) return;
+
+    midiSettings.midiLastNote = note;
+    int whatoct = (note / 12);
+    int thisKey;
+    uint32_t keyColor = MIDINOTEON;
+
+    if ((whatoct % 2) == 0)
+    {
+        thisKey = note - (12 * whatoct);
+    }
+    else
+    {
+        thisKey = note - (12 * whatoct) + 12;
+    }
+    if (whatoct == 0)
+    { // ORANGE,YELLOW,GREEN,MAGENTA,CYAN,BLUE,LIME,LTPURPLE
+    }
+    else if (whatoct == 1)
+    {
+        keyColor = ORANGE;
+    }
+    else if (whatoct == 2)
+    {
+        keyColor = YELLOW;
+    }
+    else if (whatoct == 3)
+    {
+        keyColor = GREEN;
+    }
+    else if (whatoct == 4)
+    {
+        keyColor = MAGENTA;
+    }
+    else if (whatoct == 5)
+    {
+        keyColor = CYAN;
+    }
+    else if (whatoct == 6)
+    {
+        keyColor = LIME;
+    }
+    else if (whatoct == 7)
+    {
+        keyColor = CYAN;
+    }
+    strip.setPixelColor(midiKeyMap[thisKey], keyColor); //  Set pixel's color (in RAM)
+                                                        //	dirtyPixels = true;
+    strip.show();
+    omxDisp.setDirty();
+}
+
+void OmxModeMidiKeyboard::inMidiNoteOff(byte channel, byte note, byte velocity) {
+    if(organelleMotherMode) return;
+
+    int whatoct = (note / 12);
+		int thisKey;
+		if ( (whatoct % 2) == 0) {
+			thisKey = note - (12 * whatoct);
+		} else {
+			thisKey = note - (12 * whatoct) + 12;
+		}
+		strip.setPixelColor(midiKeyMap[thisKey], LEDOFF);         //  Set pixel's color (in RAM)
+	//	dirtyPixels = true;
+		strip.show();
+		omxDisp.setDirty();
+    
 }

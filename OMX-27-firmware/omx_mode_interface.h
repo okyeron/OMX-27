@@ -8,6 +8,8 @@ public:
     OmxModeInterface() {}
     virtual ~OmxModeInterface() {}
 
+    virtual void InitSetup() {}
+
     virtual void OnPotChanged(int potIndex, int potValue) = 0;
     virtual void updateLEDs() = 0;
     virtual void onEncoderChanged(Encoder::Update enc) = 0;
@@ -23,4 +25,10 @@ public:
     virtual void onKeyHeldUpdate(OMXKeypadEvent e) {};
 
     virtual void onDisplayUpdate() {};
+
+    // #### Inbound MIDI callbacks
+    virtual void inMidiNoteOn(byte channel, byte note, byte velocity) {}
+    virtual void inMidiNoteOff(byte channel, byte note, byte velocity) {}
+    virtual void inMidiControlChange(byte channel, byte control,  byte value) {}
+
 };

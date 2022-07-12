@@ -119,6 +119,7 @@ struct MidiConfig
     int currbank = 0;
     bool midiInToCV = true;
     bool midiSoftThru = false;
+	int pitchCV;
 };
 
 MidiConfig midiSettings;

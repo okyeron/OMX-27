@@ -13,6 +13,8 @@ public:
 
     OmxLeds(){};
 
+    void initSetup();
+
     void updateLeds();
 
     // clears dirty, transmits pixel data if dirty.
@@ -26,6 +28,9 @@ public:
     void setAllLEDS(int R, int G, int B);
 
     void setDirty();
+
+    // Rainbow cycle along whole strip. Pass delay time (in ms) between frames.
+    void rainbow(int wait);
 
     // #### COLOR FUNCTIONS
     // Input a value 0 to 255 to get a color value.
@@ -46,9 +51,6 @@ private:
 
     elapsedMillis blink_msec = 0;
     elapsedMillis slow_blink_msec = 0;
-
-    elapsedMillis dirtyDisplayTimer = 0;
-    unsigned long displayRefreshRate = 60;
 };
 
 extern OmxLeds omxLeds;

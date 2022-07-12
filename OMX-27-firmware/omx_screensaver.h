@@ -24,6 +24,9 @@ public:
 
     void onKeyUpdate(OMXKeypadEvent e) override;
     void onKeyHeldUpdate(OMXKeypadEvent e) {};
+
+    void onDisplayUpdate() override;
+
 private:
     elapsedMillis screenSaverCounter = 0;
     unsigned long screensaverInterval = 1000 * 60 * 3; // 3 minutes default? // 10000;  15000; //

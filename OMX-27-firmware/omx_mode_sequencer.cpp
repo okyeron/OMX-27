@@ -6,6 +6,11 @@
 #include "sequencer.h"
 #include "omx_leds.h"
 
+void OmxModeSequencer::InitSetup()
+{
+    initPatterns();
+}
+
 void OmxModeSequencer::OnPotChanged(int potIndex, int potValue)
 {
     if (noteSelect && noteSelection)
@@ -1140,4 +1145,121 @@ void OmxModeSequencer::showCurrentStep(int patternNum)
 
 void OmxModeSequencer::updateLEDs()
 {
+}
+
+void OmxModeSequencer::onDisplayUpdate()
+{
+    // MIDI SOLO
+    if (sequencer.getCurrentPattern()->solo)
+    {
+        midi_leds();
+    }
+    if (dirtyDisplay)
+    { // DISPLAY
+        if (!encoderConfig.enc_edit && messageTextTimer == 0)
+        { // show only if not encoder edit or dialog display
+            if (!noteSelect and !patternParams and !stepRecord)
+            {
+                int pselected = sqparam % NUM_DISP_PARAMS;
+                if (sqpage == 0)
+                {
+                    dispGenericMode(SUBMODE_SEQ, pselected);
+                }
+                else if (sqpage == 1)
+                {
+                    dispGenericMode(SUBMODE_SEQ2, pselected);
+                }
+            }
+            if (noteSelect)
+            {
+                int pselected = nsparam % NUM_DISP_PARAMS;
+                if (nspage == 0)
+                {
+                    dispGenericMode(SUBMODE_NOTESEL, pselected);
+                }
+                else if (nspage == 1)
+                {
+                    dispGenericMode(SUBMODE_NOTESEL2, pselected);
+                }
+                else if (nspage == 2)
+                {
+                    dispGenericMode(SUBMODE_NOTESEL3, pselected);
+                }
+            }
+            if (patternParams)
+            {
+                int pselected = ppparam % NUM_DISP_PARAMS;
+                if (pppage == 0)
+                {
+                    dispGenericMode(SUBMODE_PATTPARAMS, pselected);
+                }
+                else if (pppage == 1)
+                {
+                    dispGenericMode(SUBMODE_PATTPARAMS2, pselected);
+                }
+                else if (pppage == 2)
+                {
+                    dispGenericMode(SUBMODE_PATTPARAMS3, pselected);
+                }
+            }
+            if (stepRecord)
+            {
+                int pselected = srparam % NUM_DISP_PARAMS;
+                if (srpage == 0)
+                {
+                    dispGenericMode(SUBMODE_STEPREC, pselected);
+                }
+                else if (srpage == 1)
+                {
+                    dispGenericMode(SUBMODE_NOTESEL2, pselected);
+                }
+            }
+        }
+    }
+}
+
+void OmxModeSequencer::initPatterns()
+{
+    // default to GM Drum Map for now -- GET THIS FROM patternDefaultNoteMap instead
+    //	uint8_t initNotes[NUM_PATTERNS] = {
+    //		36,
+    //		38,
+    //		37,
+    //		39,
+    //		42,
+    //		46,
+    //		49,
+    //		51 };
+
+    StepNote stepNote = {0, 100, 0, TRIGTYPE_MUTE, {-1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE};
+    // {note, vel, len, TRIGTYPE, {params0, params1, params2, params3, params4}, prob, condition, STEPTYPE}
+
+    for (int i = 0; i < NUM_PATTERNS; i++)
+    {
+        auto pattern = sequencer.getPattern(i);
+
+        stepNote.note = sequencer.patternDefaultNoteMap[i]; // Defined in sequencer.h
+
+        for (int j = 0; j < NUM_STEPS; j++)
+        {
+            memcpy(&pattern->steps[j], &stepNote, sizeof(StepNote));
+        }
+
+        // TODO: move to sequencer.h
+        pattern->len = 15;
+        pattern->channel = i; // 0 - 15 becomes 1 - 16
+        pattern->startstep = 0;
+        pattern->autoresetstep = 0;
+        pattern->autoresetfreq = 0;
+        pattern->current_cycle = 1;
+        pattern->rndstep = 3;
+        pattern->clockDivMultP = 2;
+        pattern->autoresetprob = 0;
+        pattern->swing = 0;
+        pattern->reverse = false;
+        pattern->mute = false;
+        pattern->autoreset = false;
+        pattern->solo = false;
+        pattern->sendCV = false;
+    }
 }

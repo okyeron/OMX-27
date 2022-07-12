@@ -21,7 +21,7 @@ void OmxDisp::clearDisplay()
 {
     // Clear display
     display.display();
-    dirtyDisplay = true;
+    setDirty();
 }
 
 void OmxDisp::drawStartupScreen()
