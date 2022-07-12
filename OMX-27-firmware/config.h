@@ -70,6 +70,60 @@ struct SysSettings {
 	bool refresh = false;
 };
 
+SysSettings sysSettings;
+
+struct PotSettings
+{
+	// ANALOGS
+	int potbank = 0;
+	int analogValues[5] = {0, 0, 0, 0, 0}; // default values
+	int potValues[5] = {0, 0, 0, 0, 0};
+	int potCC = pots[potbank][0];
+	int potVal = analogValues[0];
+	int potNum = 0;
+	bool plockDirty[5] = {false, false, false, false, false};
+	int prevPlock[5] = {0, 0, 0, 0, 0};
+};
+// Put in global struct to share across classes
+PotSettings potSettings;
+
+struct MidiConfig
+{
+    int defaultVelocity = 100;
+    int octave = 0; // default C4 is 0 - range is -4 to +5
+    int newoctave = octave;
+    int transpose = 0;
+    int rotationAmt = 0;
+
+    uint8_t swing = 0;
+    const int maxswing = 100;
+    // int swing_values[maxswing] = {0, 1, 3, 5, 52, 66, 70, 72, 80, 99 }; // 0 = off, <50 early swing , >50 late swing, 99=drunken swing
+
+    bool keyState[27] = {false};
+    int midiKeyState[27] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+    int midiChannelState[27] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+    int rrChannel = 0;
+    bool midiRoundRobin = false;
+    int midiRRChannelOffset = 0;
+    int midiRRChannelCount = 1;
+    uint8_t midiLastNote = 0;
+    int currpgm = 0;
+    int currbank = 0;
+    bool midiInToCV = true;
+    bool midiSoftThru = false;
+};
+
+MidiConfig midiSettings;
+
+struct MidiMacroConfig {
+	int midiMacro = 0;
+	bool m8AUX = false;
+	int midiMacroChan = 10;
+};
+
+MidiMacroConfig midiMacroConfig;
+
+
 #define NUM_DISP_PARAMS 5
 
 extern const int gridh;
