@@ -153,3 +153,6 @@ void resetPatternDefaults(int patternNum);
 void copyPattern(int patternNum);
 void pastePattern(int patternNum);
 void clearPattern(int patternNum);
+
+// global sequencer shared state
+extern SequencerState sequencer;

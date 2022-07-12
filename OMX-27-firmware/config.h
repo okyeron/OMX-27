@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdint.h>
+#include <ResponsiveAnalogRead.h>
+
 // #include <cstdarg>
 
 //const int OMX_VERSION = 1.6.0;
@@ -68,21 +70,27 @@ struct SysSettings {
 	uint8_t midiChannel = 0;
 	int playingPattern;
 	bool refresh = false;
+	bool screenSaverMode = false;
+	Micros timeElasped;
 };
 
 SysSettings sysSettings;
 
+const int potCount = NUM_CC_POTS;
+
 struct PotSettings
 {
+	ResponsiveAnalogRead *analog[NUM_CC_POTS];
+
 	// ANALOGS
 	int potbank = 0;
-	int analogValues[5] = {0, 0, 0, 0, 0}; // default values
-	int potValues[5] = {0, 0, 0, 0, 0};
+	int analogValues[NUM_CC_POTS] = {0, 0, 0, 0, 0}; // default values
+	int potValues[NUM_CC_POTS] = {0, 0, 0, 0, 0};
 	int potCC = pots[potbank][0];
 	int potVal = analogValues[0];
 	int potNum = 0;
-	bool plockDirty[5] = {false, false, false, false, false};
-	int prevPlock[5] = {0, 0, 0, 0, 0};
+	bool plockDirty[NUM_CC_POTS] = {false, false, false, false, false};
+	int prevPlock[NUM_CC_POTS] = {0, 0, 0, 0, 0};
 };
 // Put in global struct to share across classes
 PotSettings potSettings;
@@ -116,6 +124,7 @@ struct MidiConfig
 MidiConfig midiSettings;
 
 struct MidiMacroConfig {
+	bool midiAUX = false;
 	int midiMacro = 0;
 	bool m8AUX = false;
 	int midiMacroChan = 10;
@@ -123,6 +132,33 @@ struct MidiMacroConfig {
 
 MidiMacroConfig midiMacroConfig;
 
+struct EncoderConfig {
+	bool enc_edit = false;
+};
+
+EncoderConfig encoderConfig;
+
+struct ClockConfig {
+	float clockbpm = 120;
+	float newtempo = clockbpm;
+	unsigned long tempoStartTime;
+	unsigned long tempoEndTime;
+	float step_delay;
+};
+
+ClockConfig clockConfig;
+
+struct ColorConfig
+{
+	uint32_t screensaverColor = 0xFF0000;
+	uint32_t stepColor = 0x000000;
+	uint32_t muteColor = 0x000000;
+	uint16_t midiBg_Hue = 0;
+	uint8_t midiBg_Sat = 255;
+	uint8_t midiBg_Brightness = 255;
+};
+
+ColorConfig colorConfig;
 
 #define NUM_DISP_PARAMS 5
 

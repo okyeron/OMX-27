@@ -5,9 +5,6 @@
 #include "MM.h"
 
 
-U8G2_FOR_ADAFRUIT_GFX u8g2_display;
-
-
 void OmxUtil::setup() {
 
 }
@@ -15,10 +12,10 @@ void OmxUtil::setup() {
 
 // Pots
 void OmxUtil::sendPots(int val, int channel){
-    MM::sendControlChange(pots[potbank][val], analogValues[val], channel);
-    potCC = pots[potbank][val];
-    potVal = analogValues[val];
-    potValues[val] = potVal;
+    MM::sendControlChange(pots[potSettings.potbank][val], potSettings.analogValues[val], channel);
+    potSettings.potCC = pots[potSettings.potbank][val];
+    potSettings.potVal = potSettings.analogValues[val];
+    potSettings.potValues[val] = potSettings.potVal;
 }
 
-OmxUtil omxutil;
+OmxUtil omxUtil;

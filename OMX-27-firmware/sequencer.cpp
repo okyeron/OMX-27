@@ -719,3 +719,6 @@ void pastePattern(int patternNum){
 	auto pattern = sequencer.getPattern(patternNum);
 	memcpy(&pattern->steps, &copyPatternBuffer, NUM_STEPS * sizeof(StepNote));
 }
+
+// global sequencer shared state
+SequencerState sequencer = defaultSequencer();

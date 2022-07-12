@@ -7,34 +7,20 @@ class OmxModeMidiKeyboard : public OmxModeInterface
 public:
     OmxModeMidiKeyboard(){}
     ~OmxModeMidiKeyboard(){}
-    void method1();
-    void method2();
+
+    void OnPotChanged(int potIndex, int potValue) override;
+
+    void updateLEDs() override;
+
+    void onEncoderChanged(Encoder::Update enc) override;
+    void onEncoderButtonDown() override;
+    void onEncoderButtonUp() override;
+
+    void onEncoderButtonDownLong() override;
+
+    void onKeyUpdate(OMXKeypadEvent e) override;
+    void onKeyHeldUpdate(OMXKeypadEvent e) {};
 
 private:
-    int myMember;
-
+    bool organelleMotherMode = false; // TODO make separate class for this
 };
-
-// Provide implementation for the first method
-void Concrete::method1()
-{
-    // Your implementation
-}
-
-// Provide implementation for the second method
-void Concrete::method2()
-{
-    // Your implementation
-}
-
-int main(void)
-{
-    Interface *f = new Concrete();
-
-    f->method1();
-    f->method2();
-
-    delete f;
-
-    return 0;
-}
