@@ -96,16 +96,20 @@ The bottom row of keys correspond to mutes (orange) and solos (red). The top "bl
 ```
 Orange - release all mutes  
 Lime - go to mixer screen  
-Cyan - snapshot load/paste  
-Magenta - snapshot save/copy  
+Cyan - snapshot load/paste *   
+Magenta - snapshot save/enter selection mode *  
 Red - release all solos  
 Yellow - waveform display  
 Blue - play  
 ```
 <img src="images/omx27_m8macro.png" alt="omx27_m8_macro_mode" width="1045" height="425" />
 
-
 When M8 is selected from the `MCRO` parameter - potentiometers will send on the `M-CH` MIDI channel in both regular keyboard mode and in the macro mode. However, notes played on keys will send on the currently selected `CH` MIDI channel.
+
+* Notes: M8 must be on the Mixer view for snapshots.    
+Snapshot Load uses the M8 key combo [SHIFT]+[OPTION]. On any view with a grid (song, chain, phrase, table, etc.) this key enters selection mode.
+
+Snapshot Save uses the M8 key combo [SHIFT]+[EDIT]. On any view with a grid this key pastes the copied contents from selection mode.
 
 
 ### S1 - Sequencer 1
