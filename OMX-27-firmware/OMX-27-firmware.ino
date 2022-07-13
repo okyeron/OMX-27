@@ -701,7 +701,7 @@ void loadPatterns(void)
 // currently saves everything ( mode + patterns )
 void saveToStorage(void)
 {
-	//	Serial.println( "saving..." );
+	// Serial.println( "saving..." );
 	saveHeader();
 	savePatterns();
 }
@@ -712,7 +712,7 @@ bool loadFromStorage(void)
 	// This load can happen soon after Serial.begin - enable this 'wait for Serial' if you need to Serial.print during loading
 	// while( !Serial );
 
-	//	Serial.println( "read the header" );
+	// Serial.println( "read the header" );
 	bool bContainedData = loadHeader();
 
 	if (bContainedData)
@@ -721,6 +721,8 @@ bool loadFromStorage(void)
 		loadPatterns();
 		return true;
 	}
+
+	// Serial.println( "failed to load" );
 
 	return false;
 }
