@@ -8,9 +8,12 @@ public:
     OmxModeInterface() {}
     virtual ~OmxModeInterface() {}
 
-    virtual void InitSetup() {}
+    virtual void InitSetup() {} // Called once when mode is created
+
+    virtual void onModeActivated() {} // Called whenever entering mode
 
     virtual void OnPotChanged(int potIndex, int potValue) = 0;
+    virtual void loopUpdate() {}
     virtual void updateLEDs() = 0;
     virtual void onEncoderChanged(Encoder::Update enc) = 0;
     virtual void onEncoderButtonDown() = 0;

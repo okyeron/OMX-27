@@ -67,6 +67,8 @@ extern const int analogPins[];
 #define NUM_CC_POTS 5
 extern int pots[NUM_CC_BANKS][NUM_CC_POTS];         // the MIDI CC (continuous controller) for each analog input
 
+using Micros = unsigned long;    // for tracking time per pattern
+
 struct SysSettings {
 	OMXMode omxMode = DEFAULT_MODE;
 	OMXMode newmode = DEFAULT_MODE;
@@ -92,8 +94,7 @@ struct PotSettings
 	int potCC = pots[potbank][0];
 	int potVal = analogValues[0];
 	int potNum = 0;
-	bool plockDirty[NUM_CC_POTS] = {false, false, false, false, false};
-	int prevPlock[NUM_CC_POTS] = {0, 0, 0, 0, 0};
+	
 };
 // Put in global struct to share across classes
 extern PotSettings potSettings;
@@ -128,6 +129,12 @@ struct MidiConfig
 
 extern MidiConfig midiSettings;
 
+struct MidiPage {
+	int miparam = 0; // midi params item counter
+    int mmpage = 0;
+};
+extern MidiPage midiPageParams;
+
 struct MidiMacroConfig {
 	int midiMacro = 0;
 	bool m8AUX = false;
@@ -150,9 +157,47 @@ struct ClockConfig {
 	unsigned long tempoStartTime;
 	unsigned long tempoEndTime;
 	float step_delay;
+
+	volatile unsigned long step_micros;
+	volatile unsigned long ppqInterval;
 };
 
 extern ClockConfig clockConfig;
+
+struct SequencerConfig {
+	int selectedStep = 0;
+	bool plockDirty[NUM_CC_POTS] = {false, false, false, false, false};
+	int prevPlock[NUM_CC_POTS] = {0, 0, 0, 0, 0};
+
+	volatile unsigned long noteon_micros;
+	volatile unsigned long noteoff_micros;
+
+    bool noteSelect = false;
+    bool noteSelection = false;
+
+    int selectedNote = 0;
+    // int omxSeqSelectedStep = 0;
+    bool stepSelect = false;
+    bool stepRecord = false;
+    bool stepDirty = false;
+};
+extern SequencerConfig seqConfig;
+
+struct SequencerPage {
+	bool patternParams = false;
+    bool seqPages = false;
+
+	int nspage = 0;
+    int pppage = 0;
+    int sqpage = 0;
+    int srpage = 0;
+
+    int nsparam = 0; // note select params
+    int ppparam = 0; // pattern params
+    int sqparam = 0; // seq params
+    int srparam = 0; // step record params
+};
+extern SequencerPage seqPageParams;
 
 struct ColorConfig
 {

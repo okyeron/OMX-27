@@ -8,12 +8,19 @@
 
 void OmxModeSequencer::InitSetup()
 {
-    initPatterns();
+    initSetup = true;
+}
+
+void OmxModeSequencer::onModeActivated()
+{
+    if(!initSetup){
+        InitSetup();
+    }
 }
 
 void OmxModeSequencer::OnPotChanged(int potIndex, int potValue)
 {
-    if (noteSelect && noteSelection)
+    if (seqConfig.noteSelect && seqConfig.noteSelection)
     { // note selection - do P-Locks
         potSettings.potNum = potIndex;
         potSettings.potCC = pots[potSettings.potbank][potIndex];
@@ -27,7 +34,7 @@ void OmxModeSequencer::OnPotChanged(int potIndex, int potValue)
         omxUtil.sendPots(potIndex, sequencer.getPatternChannel(sequencer.playingPattern));
         omxDisp.setDirty();
     }
-    else if (stepRecord)
+    else if (seqConfig.stepRecord)
     {
         potSettings.potNum = potIndex;
         potSettings.potCC = pots[potSettings.potbank][potIndex];
@@ -44,15 +51,27 @@ void OmxModeSequencer::OnPotChanged(int potIndex, int potValue)
         }
         omxDisp.setDirty();
     }
-    else if (!noteSelect || !stepRecord)
+    else if (!seqConfig.noteSelect || !seqConfig.stepRecord)
     {
         omxUtil.sendPots(potIndex, sequencer.getPatternChannel(sequencer.playingPattern));
     }
 }
 
+void OmxModeSequencer::loopUpdate()
+{
+    if (!seq2Mode) // S1
+    {
+        doStepS1();
+    }
+    else
+    { // S2
+        doStepS2();
+    }
+}
+
 void OmxModeSequencer::onEncoderChanged(Encoder::Update enc)
 {
-    if (!noteSelect && !patternParams && !stepRecord)
+    if (!seqConfig.noteSelect && !seqPageParams.patternParams && !seqConfig.stepRecord)
     {
         onEncoderChangedNorm(enc);
     }
@@ -64,60 +83,59 @@ void OmxModeSequencer::onEncoderChanged(Encoder::Update enc)
 
 void OmxModeSequencer::onEncoderChangedNorm(Encoder::Update enc)
 {
-    /*
     auto amt = enc.accel(5); // where 5 is the acceleration factor if you want it, 0 if you don't)
 
     // CHANGE PAGE
-    if (sqparam == 0 || sqparam == 5)
+    if (seqPageParams.sqparam  == 0 || seqPageParams.sqparam  == 5)
     {
-        sqpage = constrain(sqpage + amt, 0, 1);
-        sqparam = sqpage * NUM_DISP_PARAMS;
+        seqPageParams.sqpage = constrain(seqPageParams.sqpage + amt, 0, 1);
+        seqPageParams.sqparam  = seqPageParams.sqpage * NUM_DISP_PARAMS;
     }
 
     // PAGE ONE
-    if (sqparam == 1)
+    if (seqPageParams.sqparam  == 1)
     {
         sequencer.playingPattern = constrain(sequencer.playingPattern + amt, 0, 7);
         if (sequencer.getCurrentPattern()->solo)
         {
-            setAllLEDS(0, 0, 0);
+            omxLeds.setAllLEDS(0, 0, 0);
         }
     }
-    else if (sqparam == 2)
+    else if (seqPageParams.sqparam  == 2)
     {                                                // SET TRANSPOSE
         transposeSeq(sequencer.playingPattern, amt); //
-        int newtransp = constrain(transpose + amt, -64, 63);
-        transpose = newtransp;
+        int newtransp = constrain(midiSettings.transpose + amt, -64, 63);
+        midiSettings.transpose = newtransp;
     }
-    else if (sqparam == 3)
-    {                                                                                          // SET SWING
-        int newswing = constrain(sequencer.getCurrentPattern()->swing + amt, 0, maxswing - 1); // -1 to deal with display values
-        swing = newswing;
+    else if (seqPageParams.sqparam  == 3)
+    {                                                                                                       // SET SWING
+        int newswing = constrain(sequencer.getCurrentPattern()->swing + amt, 0, midiSettings.maxswing - 1); // -1 to deal with display values
+        midiSettings.swing = newswing;
         sequencer.getCurrentPattern()->swing = newswing;
         //	setGlobalSwing(newswing);
     }
-    else if (sqparam == 4)
+    else if (seqPageParams.sqparam  == 4)
     { // SET TEMPO
-        newtempo = constrain(clockbpm + amt, 40, 300);
-        if (newtempo != clockbpm)
+        clockConfig.newtempo = constrain(clockConfig.clockbpm + amt, 40, 300);
+        if (clockConfig.newtempo != clockConfig.clockbpm)
         {
             // SET TEMPO HERE
-            clockbpm = newtempo;
-            resetClocks();
+            clockConfig.clockbpm = clockConfig.newtempo;
+            omxUtil.resetClocks();
         }
     }
 
     // PAGE TWO
-    if (sqparam == 6)
+    if (seqPageParams.sqparam  == 6)
     { //  MIDI SOLO
         //						playingPattern = constrain(playingPattern + amt, 0, 7);
         sequencer.getCurrentPattern()->solo = constrain(sequencer.getCurrentPattern()->solo + amt, 0, 1);
         if (sequencer.getCurrentPattern()->solo)
         {
-            setAllLEDS(0, 0, 0);
+            omxLeds.setAllLEDS(0, 0, 0);
         }
     }
-    else if (sqparam == 7)
+    else if (seqPageParams.sqparam  == 7)
     { // SET PATTERN LENGTH
         auto newPatternLen = constrain(sequencer.getPatternLength(sequencer.playingPattern) + amt, 1, NUM_STEPS);
         sequencer.setPatternLength(sequencer.playingPattern, newPatternLen);
@@ -127,40 +145,38 @@ void OmxModeSequencer::onEncoderChangedNorm(Encoder::Update enc)
             sequencer.patternPage[sequencer.playingPattern] = getPatternPage(sequencer.seqPos[sequencer.playingPattern]);
         }
     }
-    else if (sqparam == 8)
+    else if (seqPageParams.sqparam  == 8)
     { // SET CLOCK DIV/MULT
         sequencer.getCurrentPattern()->clockDivMultP = constrain(sequencer.getCurrentPattern()->clockDivMultP + amt, 0, NUM_MULTDIVS - 1);
     }
-    else if (sqparam == 9)
+    else if (seqPageParams.sqparam  == 9)
     { // SET CV ON/OFF
         sequencer.getCurrentPattern()->sendCV = constrain(sequencer.getCurrentPattern()->sendCV + amt, 0, 1);
     }
     omxDisp.setDirty();
-    */
 }
 
 // TODO: break this into separate functions
 void OmxModeSequencer::onEncoderChangedStep(Encoder::Update enc)
 {
-    /*
     auto amt = enc.accel(5); // where 5 is the acceleration factor if you want it, 0 if you don't)
 
     // should be no need to check enc_edit, function will only be called if enc_edit is false
-    if (patternParams && !encoderConfig.enc_edit)
+    if (seqPageParams.patternParams && !encoderConfig.enc_edit)
     { // SEQUENCE PATTERN PARAMS SUB MODE
         // CHANGE PAGE
-        if (ppparam == 0 || ppparam == 5 || ppparam == 10)
+        if (seqPageParams.ppparam == 0 || seqPageParams.ppparam == 5 || seqPageParams.ppparam == 10)
         {
-            pppage = constrain(pppage + amt, 0, 2); // HARDCODED - FIX WITH SIZE OF PAGES?
-            ppparam = pppage * NUM_DISP_PARAMS;
+            seqPageParams.pppage = constrain(seqPageParams.pppage + amt, 0, 2); // HARDCODED - FIX WITH SIZE OF PAGES?
+            seqPageParams.ppparam = seqPageParams.pppage * NUM_DISP_PARAMS;
         }
 
         // PAGE ONE
-        if (ppparam == 1)
+        if (seqPageParams.ppparam == 1)
         { // SET PLAYING PATTERN
             sequencer.playingPattern = constrain(sequencer.playingPattern + amt, 0, 7);
         }
-        if (ppparam == 2)
+        if (seqPageParams.ppparam == 2)
         { // SET LENGTH
             auto newPatternLen = constrain(sequencer.getPatternLength(sequencer.playingPattern) + amt, 1, NUM_STEPS);
             sequencer.setPatternLength(sequencer.playingPattern, newPatternLen);
@@ -170,106 +186,106 @@ void OmxModeSequencer::onEncoderChangedStep(Encoder::Update enc)
                 sequencer.patternPage[sequencer.playingPattern] = getPatternPage(sequencer.seqPos[sequencer.playingPattern]);
             }
         }
-        if (ppparam == 3)
+        if (seqPageParams.ppparam == 3)
         { // SET PATTERN ROTATION
             int rotator;
-            (u.dir() < 0 ? rotator = -1 : rotator = 1);
+            (enc.dir() < 0 ? rotator = -1 : rotator = 1);
             //							int rotator = constrain(rotcc, (sequencer.PatternLength(sequencer.playingPattern))*-1, sequencer.PatternLength(sequencer.playingPattern));
-            rotationAmt = rotationAmt + rotator;
-            if (rotationAmt < 16 && rotationAmt > -16)
+            midiSettings.rotationAmt = midiSettings.rotationAmt + rotator;
+            if (midiSettings.rotationAmt < 16 && midiSettings.rotationAmt > -16)
             { // NUM_STEPS??
                 rotatePattern(sequencer.playingPattern, rotator);
             }
-            rotationAmt = constrain(rotationAmt, (sequencer.getPatternLength(sequencer.playingPattern) - 1) * -1, sequencer.getPatternLength(sequencer.playingPattern) - 1);
+            midiSettings.rotationAmt = constrain(midiSettings.rotationAmt, (sequencer.getPatternLength(sequencer.playingPattern) - 1) * -1, sequencer.getPatternLength(sequencer.playingPattern) - 1);
         }
 
-        if (ppparam == 4)
+        if (seqPageParams.ppparam == 4)
         { // SET PATTERN CHANNEL
             sequencer.getCurrentPattern()->channel = constrain(sequencer.getCurrentPattern()->channel + amt, 0, 15);
         }
         // PATTERN PARAMS PAGE 2
         // TODO: convert to case statement ??
-        if (ppparam == 6)
+        if (seqPageParams.ppparam == 6)
         { // SET AUTO START STEP
             sequencer.getCurrentPattern()->startstep = constrain(sequencer.getCurrentPattern()->startstep + amt, 0, sequencer.getCurrentPattern()->len);
             // sequencer.getCurrentPattern()->startstep--;
         }
-        if (ppparam == 7)
+        if (seqPageParams.ppparam == 7)
         { // SET AUTO RESET STEP
             int tempresetstep = sequencer.getCurrentPattern()->autoresetstep + amt;
             sequencer.getCurrentPattern()->autoresetstep = constrain(tempresetstep, 0, sequencer.getCurrentPattern()->len + 1);
         }
-        if (ppparam == 8)
+        if (seqPageParams.ppparam == 8)
         {                                                                                                                        // SET AUTO RESET FREQUENCY
             sequencer.getCurrentPattern()->autoresetfreq = constrain(sequencer.getCurrentPattern()->autoresetfreq + amt, 0, 15); // max every 16 times
         }
-        if (ppparam == 9)
+        if (seqPageParams.ppparam == 9)
         {                                                                                                                         // SET AUTO RESET PROB
             sequencer.getCurrentPattern()->autoresetprob = constrain(sequencer.getCurrentPattern()->autoresetprob + amt, 0, 100); // never, 100% - 33%
         }
 
         // PAGE THREE
-        if (ppparam == 11)
+        if (seqPageParams.ppparam == 11)
         {                                                                                                                                      // SET CLOCK-DIV-MULT
             sequencer.getCurrentPattern()->clockDivMultP = constrain(sequencer.getCurrentPattern()->clockDivMultP + amt, 0, NUM_MULTDIVS - 1); // set clock div/mult
         }
-        if (ppparam == 12)
+        if (seqPageParams.ppparam == 12)
         { // SET MIDI SOLO
             sequencer.getCurrentPattern()->solo = constrain(sequencer.getCurrentPattern()->solo + amt, 0, 1);
         }
 
         // STEP RECORD SUB MODE
     }
-    else if (stepRecord && !enc_edit)
+    else if (seqConfig.stepRecord && !encoderConfig.enc_edit)
     {
         // CHANGE PAGE
-        if (srparam == 0 || srparam == 5)
+        if (seqPageParams.srparam == 0 || seqPageParams.srparam == 5)
         {
-            srpage = constrain(srpage + amt, 0, 1); // HARDCODED - FIX WITH SIZE OF PAGES?
-            srparam = srpage * NUM_DISP_PARAMS;
+            seqPageParams.srpage = constrain(seqPageParams.srpage + amt, 0, 1); // HARDCODED - FIX WITH SIZE OF PAGES?
+            seqPageParams.srparam = seqPageParams.srpage * NUM_DISP_PARAMS;
         }
 
         // PAGE ONE
-        if (srparam == 1)
+        if (seqPageParams.srparam == 1)
         { // OCTAVE SELECTION
-            newoctave = constrain(octave + amt, -5, 4);
-            if (newoctave != octave)
+            midiSettings.newoctave = constrain(midiSettings.octave + amt, -5, 4);
+            if (midiSettings.newoctave != midiSettings.octave)
             {
-                octave = newoctave;
+                midiSettings.octave = midiSettings.newoctave;
             }
         }
-        if (srparam == 2)
+        if (seqPageParams.srparam == 2)
         { // STEP SELECTION
-            if (u.dir() > 0)
+            if (enc.dir() > 0)
             {
                 step_ahead();
             }
-            else if (u.dir() < 0)
+            else if (enc.dir() < 0)
             {
                 step_back();
             }
-            selectedStep = sequencer.seqPos[sequencer.playingPattern];
+            seqConfig.selectedStep = sequencer.seqPos[sequencer.playingPattern];
         }
-        if (srparam == 3)
+        if (seqPageParams.srparam == 3)
         { // SET NOTE NUM
             int tempNote = getSelectedStep()->note;
             getSelectedStep()->note = constrain(tempNote + amt, 0, 127);
         }
-        if (srparam == 4)
+        if (seqPageParams.srparam == 4)
         {
             //							playingPattern = constrain(playingPattern + amt, 0, 7);
         }
         // PAGE TWO
-        if (srparam == 6)
+        if (seqPageParams.srparam == 6)
         { // STEP TYPE
             changeStepType(amt);
         }
-        if (srparam == 7)
+        if (seqPageParams.srparam == 7)
         { // STEP PROB
             int tempProb = getSelectedStep()->prob;
             getSelectedStep()->prob = constrain(tempProb + amt, 0, 100); // Note Len between 1-16
         }
-        if (srparam == 8)
+        if (seqPageParams.srparam == 8)
         { // STEP CONDITION
             int tempCondition = getSelectedStep()->condition;
             getSelectedStep()->condition = constrain(tempCondition + amt, 0, 35); // 0-32
@@ -277,59 +293,59 @@ void OmxModeSequencer::onEncoderChangedStep(Encoder::Update enc)
 
         // NOTE SELECT MODE
     }
-    else if (noteSelect && noteSelection && !enc_edit)
+    else if (seqConfig.noteSelect && seqConfig.noteSelection && !encoderConfig.enc_edit)
     {
         // CHANGE PAGE
-        if (nsparam == 0 || nsparam == 5 || nsparam == 10)
+        if (seqPageParams.nsparam == 0 || seqPageParams.nsparam == 5 || seqPageParams.nsparam == 10)
         {
-            nspage = constrain(nspage + amt, 0, 2); // HARDCODED - FIX WITH SIZE OF PAGES?
-            nsparam = nspage * NUM_DISP_PARAMS;
+            seqPageParams.nspage = constrain(seqPageParams.nspage + amt, 0, 2); // HARDCODED - FIX WITH SIZE OF PAGES?
+            seqPageParams.nsparam = seqPageParams.nspage * NUM_DISP_PARAMS;
         }
 
         // PAGE THREE
-        if (nsparam > 10 && nsparam < 14)
+        if (seqPageParams.nsparam > 10 && seqPageParams.nsparam < 14)
         {
-            if (u.dir() < 0)
+            if (enc.dir() < 0)
             { // RESET PLOCK IF TURN CCW
-                int tempmode = nsparam - 11;
+                int tempmode = seqPageParams.nsparam - 11;
                 getSelectedStep()->params[tempmode] = -1;
             }
         }
         // PAGE ONE
-        if (nsparam == 1)
+        if (seqPageParams.nsparam == 1)
         { // SET NOTE NUM
             int tempNote = getSelectedStep()->note;
             getSelectedStep()->note = constrain(tempNote + amt, 0, 127);
         }
-        if (nsparam == 2)
+        if (seqPageParams.nsparam == 2)
         { // SET OCTAVE
-            newoctave = constrain(octave + amt, -5, 4);
-            if (newoctave != octave)
+            midiSettings.newoctave = constrain(midiSettings.octave + amt, -5, 4);
+            if (midiSettings.newoctave != midiSettings.octave)
             {
-                octave = newoctave;
+                midiSettings.octave = midiSettings.newoctave;
             }
         }
-        if (nsparam == 3)
+        if (seqPageParams.nsparam == 3)
         { // SET VELOCITY
             int tempVel = getSelectedStep()->vel;
             getSelectedStep()->vel = constrain(tempVel + amt, 0, 127);
         }
-        if (nsparam == 4)
+        if (seqPageParams.nsparam == 4)
         { // SET NOTE LENGTH
             int tempLen = getSelectedStep()->len;
             getSelectedStep()->len = constrain(tempLen + amt, 0, 15); // Note Len between 1-16
         }
         // PAGE TWO
-        if (nsparam == 6)
+        if (seqPageParams.nsparam == 6)
         { // SET STEP TYPE
             changeStepType(amt);
         }
-        if (nsparam == 7)
+        if (seqPageParams.nsparam == 7)
         { // SET STEP PROB
             int tempProb = getSelectedStep()->prob;
             getSelectedStep()->prob = constrain(tempProb + amt, 0, 100); // Note Len between 1-16
         }
-        if (nsparam == 8)
+        if (seqPageParams.nsparam == 8)
         { // SET STEP TRIG CONDITION
             int tempCondition = getSelectedStep()->condition;
             getSelectedStep()->condition = constrain(tempCondition + amt, 0, 35); // 0-32
@@ -337,83 +353,80 @@ void OmxModeSequencer::onEncoderChangedStep(Encoder::Update enc)
     }
     else
     {
-        newtempo = constrain(clockbpm + amt, 40, 300);
-        if (newtempo != clockbpm)
+        clockConfig.newtempo = constrain(clockConfig.clockbpm + amt, 40, 300);
+        if (clockConfig.newtempo != clockConfig.clockbpm)
         {
             // SET TEMPO HERE
-            clockbpm = newtempo;
-            resetClocks();
+            clockConfig.clockbpm = clockConfig.newtempo;
+            omxUtil.resetClocks();
         }
     }
-    dirtyDisplay = true;
-    */
+    omxDisp.setDirty();
 }
 
 void OmxModeSequencer::onEncoderButtonDown()
 {
-    /*
-    if (noteSelect && noteSelection && !patternParams)
+    if (seqConfig.noteSelect && seqConfig.noteSelection && !seqPageParams.patternParams)
     {
-        nsparam = (nsparam + 1) % 15;
-        if (nsparam > 9)
+        seqPageParams.nsparam = (seqPageParams.nsparam + 1) % 15;
+        if (seqPageParams.nsparam > 9)
         {
-            nspage = 2;
+            seqPageParams.nspage = 2;
         }
-        else if (nsparam > 4)
+        else if (seqPageParams.nsparam > 4)
         {
-            nspage = 1;
+            seqPageParams.nspage = 1;
         }
         else
         {
-            nspage = 0;
+            seqPageParams.nspage = 0;
         }
     }
-    else if (patternParams)
+    else if (seqPageParams.patternParams)
     {
-        ppparam = (ppparam + 1) % 15;
-        if (ppparam > 9)
+        seqPageParams.ppparam = (seqPageParams.ppparam + 1) % 15;
+        if (seqPageParams.ppparam > 9)
         {
-            pppage = 2;
+            seqPageParams.pppage = 2;
         }
-        else if (ppparam > 4)
+        else if (seqPageParams.ppparam > 4)
         {
-            pppage = 1;
+            seqPageParams.pppage = 1;
         }
         else
         {
-            pppage = 0;
+            seqPageParams.pppage = 0;
         }
     }
-    else if (stepRecord)
+    else if (seqConfig.stepRecord)
     {
-        srparam = (srparam + 1) % 10;
-        if (srparam > 4)
+        seqPageParams.srparam = (seqPageParams.srparam + 1) % 10;
+        if (seqPageParams.srparam > 4)
         {
-            srpage = 1;
+            seqPageParams.srpage = 1;
         }
         else
         {
-            srpage = 0;
+            seqPageParams.srpage = 0;
         }
     }
     else
     {
-        sqparam = (sqparam + 1) % 10;
-        if (sqparam > 4)
+        seqPageParams.sqparam = (seqPageParams.sqparam  + 1) % 10;
+        if (seqPageParams.sqparam  > 4)
         {
-            sqpage = 1;
+            seqPageParams.sqpage = 1;
         }
         else
         {
-            sqpage = 0;
+            seqPageParams.sqpage = 0;
         }
     }
-    */
 }
 
 void OmxModeSequencer::onEncoderButtonDownLong()
 {
-    if (stepRecord)
+    if (seqConfig.stepRecord)
     {
         resetPatternDefaults(sequencer.playingPattern);
         clearedFlag = true;
@@ -422,12 +435,11 @@ void OmxModeSequencer::onEncoderButtonDownLong()
 
 bool OmxModeSequencer::shouldBlockEncEdit()
 {
-    return stepRecord;
+    return seqConfig.stepRecord;
 }
 
 void OmxModeSequencer::onKeyUpdate(OMXKeypadEvent e)
 {
-    /*
     int thisKey = e.key();
     int keyPos = thisKey - 11;
     int seqKey = keyPos + (sequencer.patternPage[sequencer.playingPattern] * NUM_STEPKEYS);
@@ -442,30 +454,30 @@ void OmxModeSequencer::onKeyUpdate(OMXKeypadEvent e)
         //					keyPressTime[thisKey] = 0;
 
         // NOTE SELECT
-        if (noteSelect)
+        if (seqConfig.noteSelect)
         {
-            if (noteSelection)
+            if (seqConfig.noteSelection)
             { // SET NOTE
                 // left and right keys change the octave
                 if (thisKey == 11 || thisKey == 26)
                 {
                     int amt = thisKey == 11 ? -1 : 1;
-                    newoctave = constrain(octave + amt, -5, 4);
-                    if (newoctave != octave)
+                    midiSettings.newoctave = constrain(midiSettings.octave + amt, -5, 4);
+                    if (midiSettings.newoctave != midiSettings.octave)
                     {
-                        octave = newoctave;
+                        midiSettings.octave = midiSettings.newoctave;
                     }
                     // otherwise select the note
                 }
                 else
                 {
-                    stepSelect = false;
-                    selectedNote = thisKey;
-                    int adjnote = notes[thisKey] + (octave * 12);
+                    seqConfig.stepSelect = false;
+                    seqConfig.selectedNote = thisKey;
+                    int adjnote = notes[thisKey] + (midiSettings.octave * 12);
                     getSelectedStep()->note = adjnote;
                     if (!sequencer.playing)
                     {
-                        seqNoteOn(thisKey, defaultVelocity, sequencer.playingPattern);
+                        seqNoteOn(thisKey, midiSettings.defaultVelocity, sequencer.playingPattern);
                     }
                 }
                 // see RELEASE events for more
@@ -484,15 +496,15 @@ void OmxModeSequencer::onKeyUpdate(OMXKeypadEvent e)
             }
             else if (thisKey > 10)
             {
-                selectedStep = seqKey; // was keyPos // set noteSelection to this step
-                stepSelect = true;
-                noteSelection = true;
+                seqConfig.selectedStep = seqKey; // was keyPos // set noteSelection to this step
+                seqConfig.stepSelect = true;
+                seqConfig.noteSelection = true;
                 omxDisp.setDirty();
             }
 
             // PATTERN PARAMS
         }
-        else if (patternParams)
+        else if (seqPageParams.patternParams)
         {
             if (thisKey == 1)
             { // F1
@@ -506,20 +518,20 @@ void OmxModeSequencer::onKeyUpdate(OMXKeypadEvent e)
                 sequencer.playingPattern = thisKey - 3;
 
                 // COPY / PASTE / CLEAR
-                if (keyState[1] && !keyState[2])
+                if (midiSettings.keyState[1] && !midiSettings.keyState[2])
                 {
                     copyPattern(sequencer.playingPattern);
-                    displayMessagef("COPIED P-%d", sequencer.playingPattern + 1);
+                    omxDisp.displayMessagef("COPIED P-%d", sequencer.playingPattern + 1);
                 }
-                else if (!keyState[1] && keyState[2])
+                else if (!midiSettings.keyState[1] && midiSettings.keyState[2])
                 {
                     pastePattern(sequencer.playingPattern);
-                    displayMessagef("PASTED P-%d", sequencer.playingPattern + 1);
+                    omxDisp.displayMessagef("PASTED P-%d", sequencer.playingPattern + 1);
                 }
-                else if (keyState[1] && keyState[2])
+                else if (midiSettings.keyState[1] && midiSettings.keyState[2])
                 {
                     clearPattern(sequencer.playingPattern);
-                    displayMessagef("CLEARED P-%d", sequencer.playingPattern + 1);
+                    omxDisp.displayMessagef("CLEARED P-%d", sequencer.playingPattern + 1);
                 }
 
                 omxDisp.setDirty();
@@ -539,34 +551,34 @@ void OmxModeSequencer::onKeyUpdate(OMXKeypadEvent e)
 
             // STEP RECORD
         }
-        else if (stepRecord)
+        else if (seqConfig.stepRecord)
         {
-            selectedNote = thisKey;
-            selectedStep = sequencer.seqPos[sequencer.playingPattern];
+            seqConfig.selectedNote = thisKey;
+            seqConfig.selectedStep = sequencer.seqPos[sequencer.playingPattern];
 
-            int adjnote = notes[thisKey] + (octave * 12);
+            int adjnote = notes[thisKey] + (midiSettings.octave * 12);
             getSelectedStep()->note = adjnote;
 
             if (!sequencer.playing)
             {
-                seqNoteOn(thisKey, defaultVelocity, sequencer.playingPattern);
+                seqNoteOn(thisKey, midiSettings.defaultVelocity, sequencer.playingPattern);
             } // see RELEASE events for more
-            stepDirty = true;
+            seqConfig.stepDirty = true;
             omxDisp.setDirty();
 
             // MIDI SOLO
         }
         else if (sequencer.getCurrentPattern()->solo)
         {
-            midiNoteOn(thisKey, defaultVelocity, sequencer.getCurrentPattern()->channel + 1);
+            omxUtil.midiNoteOn(thisKey, midiSettings.defaultVelocity, sequencer.getCurrentPattern()->channel + 1);
 
             // REGULAR SEQ MODE
         }
         else
         {
-            if (keyState[1] && keyState[2])
+            if (midiSettings.keyState[1] && midiSettings.keyState[2])
             {
-                seqPages = true;
+                seqPageParams.seqPages = true;
             }
             if (thisKey == 1)
             {
@@ -585,26 +597,26 @@ void OmxModeSequencer::onKeyUpdate(OMXKeypadEvent e)
                 // CHECK keyState[] FOR LONG PRESS THINGS
 
                 // If ONLY KEY 1 is down + pattern is not playing = STEP RECORD
-                if (keyState[1] && !keyState[2] && !sequencer.playing)
+                if (midiSettings.keyState[1] && !midiSettings.keyState[2] && !sequencer.playing)
                 {
                     sequencer.playingPattern = thisKey - 3;
                     sequencer.seqPos[sequencer.playingPattern] = 0;
                     sequencer.patternPage[sequencer.playingPattern] = 0; // Step Record always starts from first page
-                    stepRecord = true;
-                    displayMessagef("STEP RECORD");
+                    seqConfig.stepRecord = true;
+                    omxDisp.displayMessagef("STEP RECORD");
                     //								omxDisp.setDirty();;
 
                     // If KEY 2 is down + pattern = PATTERN MUTE
                 }
-                else if (keyState[2])
+                else if (midiSettings.keyState[2])
                 {
                     if (sequencer.getPattern(thisKey - 3)->mute)
                     {
-                        displayMessagef("UNMUTE P-%d", (thisKey - 3) + 1);
+                        omxDisp.displayMessagef("UNMUTE P-%d", (thisKey - 3) + 1);
                     }
                     else
                     {
-                        displayMessagef("MUTE P-%d", (thisKey - 3) + 1);
+                        omxDisp.displayMessagef("MUTE P-%d", (thisKey - 3) + 1);
                     }
                     sequencer.getPattern(thisKey - 3)->mute = !sequencer.getPattern(thisKey - 3)->mute;
                 }
@@ -619,34 +631,34 @@ void OmxModeSequencer::onKeyUpdate(OMXKeypadEvent e)
             else if (thisKey > 10)
             {
 
-                if (keyState[1] && keyState[2])
+                if (midiSettings.keyState[1] && midiSettings.keyState[2])
                 { // F1+F2 HOLD
-                    if (!stepRecord)
+                    if (!seqConfig.stepRecord)
                     { // IGNORE LONG PRESSES IN STEP RECORD
                         if (keyPos <= getPatternPage(sequencer.getCurrentPattern()->len))
                         {
                             sequencer.patternPage[sequencer.playingPattern] = keyPos;
                         }
-                        displayMessagef("PATT PAGE %d", keyPos + 1);
+                        omxDisp.displayMessagef("PATT PAGE %d", keyPos + 1);
                     }
                 }
-                else if (keyState[1])
+                else if (midiSettings.keyState[1])
                 { // F1 HOLD
-                    if (!stepRecord && !patternParams)
+                    if (!seqConfig.stepRecord && !seqPageParams.patternParams)
                     {                                // IGNORE LONG PRESSES IN STEP RECORD and Pattern Params
-                        selectedStep = thisKey - 11; // set noteSelection to this step
-                        noteSelect = true;
-                        stepSelect = true;
-                        noteSelection = true;
+                        seqConfig.selectedStep = thisKey - 11; // set noteSelection to this step
+                        seqConfig.noteSelect = true;
+                        seqConfig.stepSelect = true;
+                        seqConfig.noteSelection = true;
                         omxDisp.setDirty();
-                        displayMessagef("NOTE SELECT");
+                        omxDisp.displayMessagef("NOTE SELECT");
                         // re-toggle the key you just held
                         //										if (getSelectedStep()->trig == TRIGTYPE_PLAY || getSelectedStep()->trig == TRIGTYPE_MUTE ) {
                         //											getSelectedStep()->trig = (getSelectedStep()->trig == TRIGTYPE_PLAY ) ? TRIGTYPE_MUTE : TRIGTYPE_PLAY;
                         //										}
                     }
                 }
-                else if (keyState[2])
+                else if (midiSettings.keyState[2])
                 { // F2 HOLD
                 }
                 else
@@ -668,24 +680,24 @@ void OmxModeSequencer::onKeyUpdate(OMXKeypadEvent e)
         // MIDI SOLO
         if (sequencer.getCurrentPattern()->solo)
         {
-            midiNoteOff(thisKey, sequencer.getCurrentPattern()->channel + 1);
+            omxUtil.midiNoteOff(thisKey, sequencer.getCurrentPattern()->channel + 1);
         }
     }
 
-    if (!e.down() && thisKey != 0 && (noteSelection || stepRecord) && selectedNote > 0)
+    if (!e.down() && thisKey != 0 && (seqConfig.noteSelection || seqConfig.stepRecord) && seqConfig.selectedNote > 0)
     {
         if (!sequencer.playing)
         {
             seqNoteOff(thisKey, sequencer.playingPattern);
         }
-        if (stepRecord && stepDirty)
+        if (seqConfig.stepRecord && seqConfig.stepDirty)
         {
             step_ahead();
-            stepDirty = false;
+            seqConfig.stepDirty = false;
             // EXIT STEP RECORD AFTER THE LAST STEP IN PATTERN
             if (sequencer.seqPos[sequencer.playingPattern] == 0)
             {
-                stepRecord = false;
+                seqConfig.stepRecord = false;
             }
         }
     }
@@ -695,53 +707,53 @@ void OmxModeSequencer::onKeyUpdate(OMXKeypadEvent e)
     if (e.down() && thisKey == 0)
     {
 
-        if (noteSelect)
+        if (seqConfig.noteSelect)
         {
-            if (noteSelection)
+            if (seqConfig.noteSelection)
             {
-                selectedStep = 0;
-                selectedNote = 0;
+                seqConfig.selectedStep = 0;
+                seqConfig.selectedNote = 0;
             }
             else
             {
             }
-            noteSelection = false;
-            noteSelect = !noteSelect;
+            seqConfig.noteSelection = false;
+            seqConfig.noteSelect = !seqConfig.noteSelect;
             omxDisp.setDirty();
         }
-        else if (patternParams)
+        else if (seqPageParams.patternParams)
         {
-            patternParams = !patternParams;
+            seqPageParams.patternParams = !seqPageParams.patternParams;
             omxDisp.setDirty();
         }
-        else if (stepRecord)
+        else if (seqConfig.stepRecord)
         {
-            stepRecord = !stepRecord;
+            seqConfig.stepRecord = !seqConfig.stepRecord;
             omxDisp.setDirty();
         }
-        else if (seqPages)
+        else if (seqPageParams.seqPages)
         {
-            seqPages = false;
+            seqPageParams.seqPages = false;
         }
         else
         {
-            if (keyState[1] || keyState[2])
+            if (midiSettings.keyState[1] || midiSettings.keyState[2])
             { // CHECK keyState[] FOR LONG PRESS OF FUNC KEYS
-                if (keyState[1])
+                if (midiSettings.keyState[1])
                 {
                     sequencer.seqResetFlag = true; // RESET ALL SEQUENCES TO FIRST/LAST STEP
-                    displayMessagef("RESET");
+                    omxDisp.displayMessagef("RESET");
                 }
-                else if (keyState[2])
+                else if (midiSettings.keyState[2])
                 { // CHANGE PATTERN DIRECTION
                     sequencer.getCurrentPattern()->reverse = !sequencer.getCurrentPattern()->reverse;
                     if (sequencer.getCurrentPattern()->reverse)
                     {
-                        displayMessagef("<< REV");
+                        omxDisp.displayMessagef("<< REV");
                     }
                     else
                     {
-                        displayMessagef("FWD >>");
+                        omxDisp.displayMessagef("FWD >>");
                     }
                 }
                 omxDisp.setDirty();
@@ -772,37 +784,37 @@ void OmxModeSequencer::onKeyUpdate(OMXKeypadEvent e)
     }
 
     //				strip.show();
-    */
 }
 
 void OmxModeSequencer::onKeyHeldUpdate(OMXKeypadEvent e)
 {
-    /*
+    int thisKey = e.key();
+
     if (!sequencer.getCurrentPattern()->solo)
     {
         // TODO: access key state directly in omx_keypad.h
-        if (keyState[1] && keyState[2])
+        if (midiSettings.keyState[1] && midiSettings.keyState[2])
         {
-            seqPages = true;
+            seqPageParams.seqPages = true;
         }
-        else if (!keyState[1] && !keyState[2])
+        else if (!midiSettings.keyState[1] && !midiSettings.keyState[2])
         { // SKIP LONG PRESS IF FUNC KEYS ARE ALREDY HELD
             if (thisKey > 2 && thisKey < 11)
             { // skip AUX key, get pattern keys
-                patternParams = true;
+                seqPageParams.patternParams = true;
                 omxDisp.setDirty();
-                displayMessagef("PATT PARAMS");
+                omxDisp.displayMessagef("PATT PARAMS");
             }
             else if (thisKey > 10)
             {
-                if (!stepRecord && !patternParams)
+                if (!seqConfig.stepRecord && !seqPageParams.patternParams)
                 {                                                                                                     // IGNORE LONG PRESSES IN STEP RECORD and Pattern Params
-                    selectedStep = (thisKey - 11) + (sequencer.patternPage[sequencer.playingPattern] * NUM_STEPKEYS); // set noteSelection to this step
-                    noteSelect = true;
-                    stepSelect = true;
-                    noteSelection = true;
+                    seqConfig.selectedStep = (thisKey - 11) + (sequencer.patternPage[sequencer.playingPattern] * NUM_STEPKEYS); // set noteSelection to this step
+                    seqConfig.noteSelect = true;
+                    seqConfig.stepSelect = true;
+                    seqConfig.noteSelection = true;
                     omxDisp.setDirty();
-                    displayMessagef("NOTE SELECT");
+                    omxDisp.displayMessagef("NOTE SELECT");
                     // re-toggle the key you just held
                     //									if ( getSelectedStep()->trig == TRIGTYPE_PLAY || getSelectedStep()->trig == TRIGTYPE_MUTE ) {
                     //										getSelectedStep()->trig = ( getSelectedStep()->trig == TRIGTYPE_PLAY ) ? TRIGTYPE_MUTE : TRIGTYPE_PLAY;
@@ -811,12 +823,10 @@ void OmxModeSequencer::onKeyHeldUpdate(OMXKeypadEvent e)
             }
         }
     }
-    */
 }
 
 void OmxModeSequencer::showCurrentStep(int patternNum)
 {
-    /*
 
     omxLeds.updateLeds();
 
@@ -829,32 +839,30 @@ void OmxModeSequencer::showCurrentStep(int patternNum)
     {
         strip.setPixelColor(0, WHITE);
     }
-    else if (noteSelect && blinkState)
+    else if (seqConfig.noteSelect && blinkState)
     {
         strip.setPixelColor(0, NOTESEL);
     }
-    else if (patternParams && blinkState)
+    else if (seqPageParams.patternParams && blinkState)
     {
         strip.setPixelColor(0, seqColors[patternNum]);
     }
-    else if (stepRecord && blinkState)
+    else if (seqConfig.stepRecord && blinkState)
     {
         strip.setPixelColor(0, seqColors[patternNum]);
     }
     else
     {
-        switch (sysSettings.omxMode)
+        if (!seq2Mode) // S1
         {
-        case MODE_S1:
             strip.setPixelColor(0, SEQ1C);
-            break;
-        case MODE_S2:
-            strip.setPixelColor(0, SEQ2C);
-            break;
-        default:
-            strip.setPixelColor(0, LEDOFF);
-            break;
         }
+        else
+        { // S2
+            strip.setPixelColor(0, SEQ2C);
+        }
+
+        // Default was strip.setPixelColor(0, LEDOFF); should never happen
     }
 
     if (sequencer.getPattern(patternNum)->mute)
@@ -870,15 +878,15 @@ void OmxModeSequencer::showCurrentStep(int patternNum)
     auto currentpage = sequencer.patternPage[patternNum];
     auto pagestepstart = (currentpage * NUM_STEPKEYS);
 
-    if (noteSelect && noteSelection)
+    if (seqConfig.noteSelect && seqConfig.noteSelection)
     {
         // 27 LEDS so use LED_COUNT
         for (int j = 1; j < LED_COUNT; j++)
         {
             auto pixelpos = j;
-            auto selectedStepPixel = (selectedStep % NUM_STEPKEYS) + 11;
+            auto selectedStepPixel = (seqConfig.selectedStep % NUM_STEPKEYS) + 11;
 
-            if (pixelpos == selectedNote)
+            if (pixelpos == seqConfig.selectedNote)
             {
                 strip.setPixelColor(pixelpos, HALFWHITE);
             }
@@ -898,7 +906,7 @@ void OmxModeSequencer::showCurrentStep(int patternNum)
             strip.setPixelColor(26, color2);
         }
     }
-    else if (stepRecord)
+    else if (seqConfig.stepRecord)
     { // STEP RECORD
         //		int numPages = ceil(float(sequencer.getPatternLength(patternNum))/float(NUM_STEPKEYS));
 
@@ -917,7 +925,7 @@ void OmxModeSequencer::showCurrentStep(int patternNum)
             {
                 strip.setPixelColor(pixelpos, SEQCHASE);
             }
-            else if (pixelpos != selectedNote)
+            else if (pixelpos != seqConfig.selectedNote)
             {
                 strip.setPixelColor(pixelpos, LEDOFF);
             }
@@ -941,7 +949,7 @@ void OmxModeSequencer::showCurrentStep(int patternNum)
         //			}
         //		}
     }
-    else if (seqPages)
+    else if (seqPageParams.seqPages)
     {
         // BLINK F1+F2
         auto color1 = blinkState ? FUNKONE : LEDOFF;
@@ -1001,7 +1009,7 @@ void OmxModeSequencer::showCurrentStep(int patternNum)
                 else if (j == patternNum + 3)
                 { // PATTERN SELECT
                     strip.setPixelColor(j, colorConfig.stepColor);
-                    if (patternParams && blinkState)
+                    if (seqPageParams.patternParams && blinkState)
                     {
                         strip.setPixelColor(j, LEDOFF);
                     }
@@ -1113,11 +1121,11 @@ void OmxModeSequencer::showCurrentStep(int patternNum)
                             strip.setPixelColor(pixelpos, colorConfig.stepColor); // STEP ON COLOR
                         }
                     }
-                    else if (!patternParams && sequencer.patterns[patternNum].steps[i].trig == TRIGTYPE_MUTE)
+                    else if (!seqPageParams.patternParams && sequencer.patterns[patternNum].steps[i].trig == TRIGTYPE_MUTE)
                     {
                         strip.setPixelColor(pixelpos, LEDOFF); // DO WE NEED TO MARK PLAYHEAD WHEN STOPPED?
                     }
-                    else if (patternParams)
+                    else if (seqPageParams.patternParams)
                     {
                         strip.setPixelColor(pixelpos, SEQMARKER);
                     }
@@ -1140,11 +1148,11 @@ void OmxModeSequencer::showCurrentStep(int patternNum)
                         strip.setPixelColor(pixelpos, colorConfig.stepColor); // STEP ON COLOR
                     }
                 }
-                else if (!patternParams && steps[i].trig == TRIGTYPE_MUTE)
+                else if (!seqPageParams.patternParams && steps[i].trig == TRIGTYPE_MUTE)
                 {
                     strip.setPixelColor(pixelpos, LEDOFF);
                 }
-                else if (patternParams)
+                else if (seqPageParams.patternParams)
                 {
                     strip.setPixelColor(pixelpos, SEQMARKER);
                 }
@@ -1152,7 +1160,6 @@ void OmxModeSequencer::showCurrentStep(int patternNum)
         }
     }
     omxLeds.setDirty();
-    */
 }
 
 void OmxModeSequencer::updateLEDs()
@@ -1161,75 +1168,210 @@ void OmxModeSequencer::updateLEDs()
 
 void OmxModeSequencer::onDisplayUpdate()
 {
-    /*
     // MIDI SOLO
     if (sequencer.getCurrentPattern()->solo)
     {
-        midi_leds();
+        omxLeds.drawMidiLeds();
     }
-    if (dirtyDisplay)
+    if (omxDisp.isDirty())
     { // DISPLAY
-        if (!encoderConfig.enc_edit && messageTextTimer == 0)
+        if (!encoderConfig.enc_edit && omxDisp.isMessageActive() == false)
         { // show only if not encoder edit or dialog display
-            if (!noteSelect and !patternParams and !stepRecord)
+            if (!seqConfig.noteSelect and !seqPageParams.patternParams and !seqConfig.stepRecord)
             {
-                int pselected = sqparam % NUM_DISP_PARAMS;
-                if (sqpage == 0)
+                int pselected = seqPageParams.sqparam  % NUM_DISP_PARAMS;
+                if (seqPageParams.sqpage == 0) // SUBMODE_SEQ
                 {
-                    dispGenericMode(SUBMODE_SEQ, pselected);
+                    omxDisp.clearLegends();
+                    omxDisp.legends[0] = "PTN";
+                    omxDisp.legends[1] = "TRSP";
+                    omxDisp.legends[2] = "SWNG"; //"TRSP";
+                    omxDisp.legends[3] = "BPM";
+                    omxDisp.legendVals[0] = sequencer.playingPattern + 1;
+                    omxDisp.legendVals[1] = (int)midiSettings.transpose;
+                    omxDisp.legendVals[2] = (int)sequencer.getCurrentPattern()->swing; //(int)swing;
+                    // legendVals[2] =  swing_values[sequencer.getCurrentPattern()->swing];
+                    omxDisp.legendVals[3] = (int)clockConfig.clockbpm;
+                    omxDisp.dispPage = 1;
+
+                    omxDisp.dispGenericMode(pselected);
                 }
-                else if (sqpage == 1)
+                else if (seqPageParams.sqpage == 1) // SUBMODE_SEQ2
                 {
-                    dispGenericMode(SUBMODE_SEQ2, pselected);
+                    omxDisp.clearLegends();
+                    omxDisp.legends[0] = "SOLO";
+                    omxDisp.legends[1] = "LEN";
+                    omxDisp.legends[2] = "RATE";
+                    omxDisp.legends[3] = "CV";                                   // cvPattern
+                    omxDisp.legendVals[0] = sequencer.getCurrentPattern()->solo; // playingPattern+1;
+                    omxDisp.legendVals[1] = sequencer.getPatternLength(sequencer.playingPattern);
+                    // omxDisp.legendVals[2] = -127;
+                    omxDisp.legendText[2] = mdivs[sequencer.getCurrentPattern()->clockDivMultP];
+                    omxDisp.legendVals[3] = -127; // TODO is this right?
+                    if (sequencer.getCurrentPattern()->sendCV)
+                    {
+                        omxDisp.legendText[3] = "On";
+                    }
+                    else
+                    {
+                        omxDisp.legendText[3] = "Off";
+                    }
+                    omxDisp.dispPage = 2;
+
+                    omxDisp.dispGenericMode(pselected);
                 }
             }
-            if (noteSelect)
+            if (seqConfig.noteSelect)
             {
-                int pselected = nsparam % NUM_DISP_PARAMS;
-                if (nspage == 0)
+                int pselected = seqPageParams.nsparam % NUM_DISP_PARAMS;
+                if (seqPageParams.nspage == 0) // SUBMODE_NOTESEL
                 {
-                    dispGenericMode(SUBMODE_NOTESEL, pselected);
+                    omxDisp.clearLegends();
+                    omxDisp.legends[0] = "NOTE";
+                    omxDisp.legends[1] = "OCT";
+                    omxDisp.legends[2] = "VEL";
+                    omxDisp.legends[3] = "LEN";
+                    omxDisp.legendVals[0] = getSelectedStep()->note;
+                    omxDisp.legendVals[1] = (int)midiSettings.octave + 4;
+                    omxDisp.legendVals[2] = getSelectedStep()->vel;
+                    omxDisp.legendVals[3] = getSelectedStep()->len + 1;
+                    omxDisp.dispPage = 1;
+                    omxDisp.dispGenericMode(pselected);
                 }
-                else if (nspage == 1)
+                else if (seqPageParams.nspage == 1) // SUBMODE_NOTESEL2
                 {
-                    dispGenericMode(SUBMODE_NOTESEL2, pselected);
+                    omxDisp.clearLegends();
+                    omxDisp.legends[0] = "TYPE";
+                    omxDisp.legends[1] = "PROB";
+                    omxDisp.legends[2] = "COND";
+                    omxDisp.legends[3] = "";
+                    omxDisp.legendVals[0] = -127;
+                    omxDisp.legendText[0] = stepTypes[getSelectedStep()->stepType];
+                    omxDisp.legendVals[1] = getSelectedStep()->prob;
+                    //				String ac = String(trigConditionsAB[][0]);
+                    //				String bc = String(trigConditionsAB[getSelectedStep()->condition][1]);
+
+                    omxDisp.legendVals[2] = -127;
+                    omxDisp.legendText[2] = trigConditions[getSelectedStep()->condition]; // ac + bc; // trigConditions
+
+                    omxDisp.legendVals[3] = 0;
+                    omxDisp.dispPage = 2;
+                    omxDisp.dispGenericMode(pselected);
                 }
-                else if (nspage == 2)
+                else if (seqPageParams.nspage == 2) // SUBMODE_NOTESEL3
                 {
-                    dispGenericMode(SUBMODE_NOTESEL3, pselected);
+                    omxDisp.clearLegends();
+                    omxDisp.legends[0] = "L-1";
+                    omxDisp.legends[1] = "L-2";
+                    omxDisp.legends[2] = "L-3";
+                    omxDisp.legends[3] = "L-4";
+                    for (int j = 0; j < 4; j++)
+                    {
+                        int stepNoteParam = getSelectedStep()->params[j];
+                        if (stepNoteParam > -1)
+                        {
+                            omxDisp.legendVals[j] = stepNoteParam;
+                        }
+                        else
+                        {
+                            omxDisp.legendVals[j] = -127;
+                            omxDisp.legendText[j] = "---";
+                        }
+                    }
+                    omxDisp.dispPage = 3;
+                    omxDisp.dispGenericMode(pselected);
                 }
             }
-            if (patternParams)
+            if (seqPageParams.patternParams)
             {
-                int pselected = ppparam % NUM_DISP_PARAMS;
-                if (pppage == 0)
+                int pselected = seqPageParams.ppparam % NUM_DISP_PARAMS;
+                if (seqPageParams.pppage == 0) // SUBMODE_PATTPARAMS
                 {
-                    dispGenericMode(SUBMODE_PATTPARAMS, pselected);
+                    omxDisp.clearLegends();
+                    omxDisp.legends[0] = "PTN";
+                    omxDisp.legends[1] = "LEN";
+                    omxDisp.legends[2] = "ROT";
+                    omxDisp.legends[3] = "CHAN";
+                    omxDisp.legendVals[0] = sequencer.playingPattern + 1;
+                    omxDisp.legendVals[1] = sequencer.getPatternLength(sequencer.playingPattern);
+                    omxDisp.legendVals[2] = midiSettings.rotationAmt; //(int)transpose;
+                    omxDisp.legendVals[3] = sequencer.getPatternChannel(sequencer.playingPattern);
+                    omxDisp.dispPage = 1;
+                    omxDisp.dispGenericMode(pselected);
                 }
-                else if (pppage == 1)
+                else if (seqPageParams.pppage == 1) // SUBMODE_PATTPARAMS2
                 {
-                    dispGenericMode(SUBMODE_PATTPARAMS2, pselected);
+                    omxDisp.clearLegends();
+                    omxDisp.legends[0] = "START";
+                    omxDisp.legends[1] = "END";
+                    omxDisp.legends[2] = "FREQ";
+                    omxDisp.legends[3] = "PROB";
+                    omxDisp.legendVals[0] = sequencer.getCurrentPattern()->startstep + 1; // STRT step to autoreset on
+                    omxDisp.legendVals[1] = sequencer.getCurrentPattern()->autoresetstep; // STP step to autoreset on - 0 = no auto reset
+                    omxDisp.legendVals[2] = sequencer.getCurrentPattern()->autoresetfreq; // FRQ to autoreset on -- every x cycles
+                    omxDisp.legendVals[3] = sequencer.getCurrentPattern()->autoresetprob; // PRO probability of resetting 0=NEVER 1=Always 2=50%
+                    omxDisp.dispPage = 2;
+                    omxDisp.dispGenericMode(pselected);
                 }
-                else if (pppage == 2)
+                else if (seqPageParams.pppage == 2) // SUBMODE_PATTPARAMS3
                 {
-                    dispGenericMode(SUBMODE_PATTPARAMS3, pselected);
+                    omxDisp.clearLegends();
+                    omxDisp.legends[0] = "RATE";
+                    omxDisp.legends[1] = "SOLO";
+                    omxDisp.legends[2] = "---";
+                    omxDisp.legends[3] = "---";
+
+                    // RATE FOR CURR PATTERN
+                    omxDisp.legendVals[0] = -127;
+                    omxDisp.legendText[0] = mdivs[sequencer.getCurrentPattern()->clockDivMultP];
+
+                    omxDisp.legendVals[1] = sequencer.getCurrentPattern()->solo;
+                    omxDisp.legendVals[2] = 0; // TBD
+                    omxDisp.legendVals[3] = 0; // TBD
+                    omxDisp.dispPage = 3;
+                    omxDisp.dispGenericMode(pselected);
                 }
             }
-            if (stepRecord)
+            if (seqConfig.stepRecord)
             {
-                int pselected = srparam % NUM_DISP_PARAMS;
-                if (srpage == 0)
+                int pselected = seqPageParams.srparam % NUM_DISP_PARAMS;
+                if (seqPageParams.srpage == 0) // SUBMODE_STEPREC
                 {
-                    dispGenericMode(SUBMODE_STEPREC, pselected);
+                    omxDisp.clearLegends();
+                    omxDisp.legends[0] = "OCT";
+                    omxDisp.legends[1] = "STEP";
+                    omxDisp.legends[2] = "NOTE";
+                    omxDisp.legends[3] = "PTN";
+                    omxDisp.legendVals[0] = (int)midiSettings.octave + 4;
+                    omxDisp.legendVals[1] = sequencer.seqPos[sequencer.playingPattern] + 1;
+                    omxDisp.legendVals[2] = getSelectedStep()->note; //(int)transpose;
+                    omxDisp.legendVals[3] = sequencer.playingPattern + 1;
+                    omxDisp.dispPage = 1;
+                    omxDisp.dispGenericMode(pselected);
                 }
-                else if (srpage == 1)
+                else if (seqPageParams.srpage == 1) // SUBMODE_NOTESEL2
                 {
-                    dispGenericMode(SUBMODE_NOTESEL2, pselected);
+                    omxDisp.clearLegends();
+                    omxDisp.legends[0] = "TYPE";
+                    omxDisp.legends[1] = "PROB";
+                    omxDisp.legends[2] = "COND";
+                    omxDisp.legends[3] = "";
+                    omxDisp.legendVals[0] = -127;
+                    omxDisp.legendText[0] = stepTypes[getSelectedStep()->stepType];
+                    omxDisp.legendVals[1] = getSelectedStep()->prob;
+                    //				String ac = String(trigConditionsAB[][0]);
+                    //				String bc = String(trigConditionsAB[getSelectedStep()->condition][1]);
+
+                    omxDisp.legendVals[2] = -127;
+                    omxDisp.legendText[2] = trigConditions[getSelectedStep()->condition]; // ac + bc; // trigConditions
+
+                    omxDisp.legendVals[3] = 0;
+                    omxDisp.dispPage = 2;
+                    omxDisp.dispGenericMode(pselected);
                 }
             }
         }
     }
-    */
 }
 
 void OmxModeSequencer::initPatterns()

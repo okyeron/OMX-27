@@ -6,6 +6,8 @@
 #include "colors.h"
 #include "omx_leds.h"
 #include "omx_disp.h"
+#include "noteoffs.h"
+#include "sequencer.h"
 
 void OmxUtil::setup()
 {
@@ -17,6 +19,55 @@ void OmxUtil::sendPots(int val, int channel)
     potSettings.potCC = pots[potSettings.potbank][val];
     potSettings.potVal = potSettings.analogValues[val];
     potSettings.potValues[val] = potSettings.potVal;
+}
+
+void OmxUtil::advanceClock(Micros advance)
+{
+	static Micros timeToNextClock = 0;
+	while (advance >= timeToNextClock)
+	{
+		advance -= timeToNextClock;
+
+		MM::sendClock();
+		timeToNextClock = clockConfig.ppqInterval * (PPQ / 24);
+	}
+	timeToNextClock -= advance;
+}
+
+void OmxUtil::advanceSteps(Micros advance)
+{
+	static Micros timeToNextStep = 0;
+	//	static Micros stepnow = micros();
+	while (advance >= timeToNextStep)
+	{
+		advance -= timeToNextStep;
+		timeToNextStep = clockConfig.ppqInterval;
+
+		// turn off any expiring notes
+		pendingNoteOffs.play(micros());
+
+		// turn on any pending notes
+		pendingNoteOns.play(micros());
+	}
+	timeToNextStep -= advance;
+}
+
+void OmxUtil::setGlobalSwing(int swng_amt)
+{
+	for (int z = 0; z < NUM_PATTERNS; z++)
+	{
+		sequencer.getPattern(z)->swing = swng_amt;
+	}
+}
+
+void OmxUtil::resetClocks()
+{
+	// BPM tempo to step_delay calculation
+	clockConfig.ppqInterval = 60000000 / (PPQ * clockConfig.clockbpm); // ppq interval is in microseconds
+	clockConfig.step_micros = clockConfig.ppqInterval * (PPQ / 4);				   // 16th note step in microseconds (quarter of quarter note)
+
+	// 16th note step length in milliseconds
+	clockConfig.step_delay = clockConfig.step_micros * 0.001; // ppqInterval * 0.006; // 60000 / clockbpm / 4;
 }
 
 void OmxUtil::cvNoteOn(int notenum)

@@ -58,6 +58,10 @@ void OmxDisp::displayMessagef(const char *fmt, ...)
     displayMessage(buf);
 }
 
+bool OmxDisp::isMessageActive(){
+    return messageTextTimer > 0;
+}
+
 void OmxDisp::u8g2centerText(const char *s, int16_t x, int16_t y, uint16_t w, uint16_t h)
 {
     //  int16_t bx, by;

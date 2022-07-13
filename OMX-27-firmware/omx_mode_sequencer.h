@@ -10,7 +10,13 @@ public:
 
     void InitSetup() override;
 
+    void initPatterns(); // Initializes all patterns
+
+    void onModeActivated() override;
+
     void OnPotChanged(int potIndex, int potValue) override;
+
+    void loopUpdate() override;
 
     // Should be part of LED update, intertangled with the sequencer class which is calling it in main FW code.
     void showCurrentStep(int patternNum);
@@ -28,33 +34,44 @@ public:
 
     void onDisplayUpdate() override;
 
+    void setSeq1Mode()
+    {
+        seq2Mode = false;
+    }
+
     void setSeq2Mode()
     {
         seq2Mode = true;
     }
 
 private:
+    bool initSetup = false;
     bool seq2Mode = false;
-    bool patternParams = false;
-    bool seqPages = false;
 
-    bool noteSelect = false;
-    bool noteSelection = false;
+    // bool omxseqpatternParams = false;
+    // bool omxseqseqPages = false;
 
-    int selectedNote = 0;
-    int selectedStep = 0;
-    bool stepSelect = false;
-    bool stepRecord = false;
-    bool stepDirty = false;
+    // bool omxseqnoteSelect = false;
+    // bool omxseqnoteSelection = false;
 
-    int pppage = 0;
-    int sqpage = 0;
-    int srpage = 0;
+    // int omxseqselectedNote = 0;
+    // int omxSeqSelectedStep = 0;
+    // bool omxseqstepSelect = false;
+    // bool omxseqstepRecord = false;
+    // bool omxseqstepDirty = false;
 
-    int nsparam = 0; // note select params
-    int ppparam = 0; // pattern params
-    int sqparam = 0; // seq params
-    int srparam = 0; // step record params
+    // int omxSeqnspage = 0;
+    // int omxSeqpppage = 0;
+    // int omxSeqsqpage = 0;
+    // int omxSeqsrpage = 0;
+
+    // int omxSeqnsparam = 0; // note select params
+    // int omxSeqppparam = 0; // pattern params
+    // int omxSeqsqparam = 0; // seq params
+    // int omxSeqsrparam = 0; // step record params
+
+    // volatile unsigned long noteon_micros;
+    // volatile unsigned long noteoff_micros;
 
     // These do not appear to be used
     bool copiedFlag = false;
@@ -64,5 +81,4 @@ private:
     void onEncoderChangedNorm(Encoder::Update enc);
     void onEncoderChangedStep(Encoder::Update enc);
 
-    void initPatterns();
 };

@@ -33,9 +33,9 @@
 #include "omx_leds.h"
 
 OmxModeMidiKeyboard omxModeMidi;
-OmxModeMidiKeyboard omxModeOM;
-OmxModeSequencer omxModeS1;
-OmxModeSequencer omxModeS2;
+// OmxModeMidiKeyboard omxModeOM;
+OmxModeSequencer omxModeSeq;
+// OmxModeSequencer omxModeS2;
 
 OmxModeInterface *activeOmxMode;
 
@@ -49,27 +49,27 @@ int potMax = 8190;
 int temp;
 
 // TODO make sequencer.cpp not extern these
-int selectedStep = 0;
-int potbank = 0;
-int prevPlock[NUM_CC_POTS] = {0, 0, 0, 0, 0};
-int potValues[NUM_CC_POTS] = {0, 0, 0, 0, 0};
+// int selectedStep = 0;
+// int potbank = 0;
+// int prevPlock[NUM_CC_POTS] = {0, 0, 0, 0, 0};
+// int potValues[NUM_CC_POTS] = {0, 0, 0, 0, 0};
 
 // Timers and such
 // elapsedMillis blink_msec = 0;
 // elapsedMillis slow_blink_msec = 0;
-elapsedMillis pots_msec = 0;
+// elapsedMillis pots_msec = 0; // TODO - didn't see this used anywhere
 
-elapsedMicros clksTimer = 0; // is this still in use?
+// elapsedMicros clksTimer = 0; // TODO - didn't see this used anywhere
 
 // unsigned long clksDelay;
 // elapsedMillis keyPressTime[27] = {0};
 
-using Micros = unsigned long;
+// using Micros = unsigned long;
 Micros lastProcessTime;
-volatile unsigned long step_micros;
-volatile unsigned long noteon_micros;
-volatile unsigned long noteoff_micros;
-volatile unsigned long ppqInterval;
+// volatile unsigned long step_micros;
+// volatile unsigned long noteon_micros;
+// volatile unsigned long noteoff_micros;
+// volatile unsigned long ppqInterval;
 
 // bool screenSaverMode = false;
 
@@ -77,7 +77,7 @@ volatile unsigned long ppqInterval;
 
 // DEFAULT COLOR VARIABLES
 
-int nspage = 0;
+// int nspage = 0;
 // int pppage = 0;
 // int sqpage = 0;
 // int srpage = 0;
@@ -88,7 +88,7 @@ int nspage = 0;
 // int ppparam = 0;	// pattern params
 // int sqparam = 0;	// seq params
 // int srparam = 0;	// step record params
-int tmpmmode = 9;
+// int tmpmmode = 9; TODO - didn't see this used anywhere
 
 // VARIABLES / FLAGS
 // float step_delay;
@@ -99,10 +99,10 @@ int tmpmmode = 9;
 
 // bool patternParams = false;
 // bool seqPages = false;
-int noteSelectPage = 0;
+// int noteSelectPage = 0; TODO - didn't see this used anywhere
 
-bool dialogFlags[] = {false, false, false, false, false, false};
-unsigned dialogDuration = 1000;
+// bool dialogFlags[] = {false, false, false, false, false, false}; // TODO - didn't see this used anywhere
+// unsigned dialogDuration = 1000; // TODO - didn't see this used anywhere
 
 uint8_t RES;
 uint16_t AMAX;
@@ -131,98 +131,6 @@ OMXKeypad keypad(longPressInterval, clickWindow, makeKeymap(keys), rowPins, colP
 Storage *storage;
 SysEx *sysEx;
 
-// ####### CLOCK/TIMING #######
-
-void advanceClock(Micros advance)
-{
-	static Micros timeToNextClock = 0;
-	while (advance >= timeToNextClock)
-	{
-		advance -= timeToNextClock;
-
-		MM::sendClock();
-		timeToNextClock = ppqInterval * (PPQ / 24);
-	}
-	timeToNextClock -= advance;
-}
-
-void advanceSteps(Micros advance)
-{
-	static Micros timeToNextStep = 0;
-	//	static Micros stepnow = micros();
-	while (advance >= timeToNextStep)
-	{
-		advance -= timeToNextStep;
-		timeToNextStep = ppqInterval;
-
-		// turn off any expiring notes
-		pendingNoteOffs.play(micros());
-
-		// turn on any pending notes
-		pendingNoteOns.play(micros());
-	}
-	timeToNextStep -= advance;
-}
-
-void resetClocks()
-{
-	// BPM tempo to step_delay calculation
-	ppqInterval = 60000000 / (PPQ * clockConfig.clockbpm); // ppq interval is in microseconds
-	step_micros = ppqInterval * (PPQ / 4);				   // 16th note step in microseconds (quarter of quarter note)
-
-	// 16th note step length in milliseconds
-	clockConfig.step_delay = step_micros * 0.001; // ppqInterval * 0.006; // 60000 / clockbpm / 4;
-}
-
-void setGlobalSwing(int swng_amt)
-{
-	for (int z = 0; z < NUM_PATTERNS; z++)
-	{
-		sequencer.getPattern(z)->swing = swng_amt;
-	}
-}
-
-// ####### POTENTIOMETERS #######
-
-// void sendPots(int val, int channel){
-// 	MM::sendControlChange(pots[potbank][val], analogValues[val], channel);
-// 	potCC = pots[potbank][val];
-// 	potVal = analogValues[val];
-// 	potValues[val] = potVal;
-// }
-
-void readPotentimeters()
-{
-	for (int k = 0; k < potCount; k++)
-	{
-		temp = analogRead(analogPins[k]);
-		potSettings.analog[k]->update(temp);
-
-		// read from the smoother, constrain (to account for tolerances), and map it
-		temp = potSettings.analog[k]->getValue();
-		temp = constrain(temp, potMin, potMax);
-		temp = map(temp, potMin, potMax, 0, 16383);
-
-		// map and update the value
-		potSettings.analogValues[k] = temp >> 7;
-
-		if (potSettings.analog[k]->hasChanged())
-		{
-			// do stuff
-			if (sysSettings.screenSaverMode)
-			{
-				omxScreensaver.OnPotChanged(k, potSettings.analogValues[k]);
-			}
-			else
-			{ // don't send pots in screensaver
-				{
-					activeOmxMode->OnPotChanged(k, potSettings.analogValues[k]);
-				}
-			}
-		}
-	}
-}
-
 // ####### SETUP #######
 
 void setup()
@@ -239,12 +147,12 @@ void setup()
 	usbMIDI.setHandleControlChange(OnControlChange);
 	usbMIDI.setHandleSystemExclusive(OnSysEx);
 
-	clksTimer = 0;
+	// clksTimer = 0; // TODO - didn't see this used anywhere
 	omxScreensaver.resetCounter();
 	// ssstep = 0;
 
 	lastProcessTime = micros();
-	resetClocks();
+	omxUtil.resetClocks();
 
 	randomSeed(analogRead(13));
 	srand(analogRead(13));
@@ -267,13 +175,6 @@ void setup()
 		lastMidiValue[i] = 0;
 	}
 
-	omxModeMidi.InitSetup();
-	omxModeOM.setOrganelleMode();
-	omxModeOM.InitSetup();
-
-	omxScreensaver.InitSetup();
-
-	activeOmxMode = &omxModeMidi;
 
 	// HW MIDI
 	MM::begin();
@@ -294,7 +195,7 @@ void setup()
 	{
 		// Failed to load due to initialized EEPROM or version mismatch
 		// defaults
-		sysSettings.omxMode = DEFAULT_MODE;
+		// sysSettings.omxMode = DEFAULT_MODE;
 		sequencer.playingPattern = 0;
 		sysSettings.playingPattern = 0;
 		sysSettings.midiChannel = 1;
@@ -304,11 +205,9 @@ void setup()
 		pots[0][3] = CC4;
 		pots[0][4] = CC5;
 
-		// Does initPatterns()
-		omxModeS1.InitSetup();
-		omxModeS2.setSeq2Mode();
-		omxModeS2.InitSetup();
+		omxModeSeq.initPatterns();
 
+		changeOmxMode(DEFAULT_MODE);
 		// initPatterns();
 		saveToStorage();
 	}
@@ -325,6 +224,8 @@ void setup()
 
 	// LEDs
 	omxLeds.initSetup();
+
+	omxScreensaver.InitSetup();
 }
 
 // ####### END SETUP #######
@@ -335,7 +236,7 @@ void show_current_step(int patternNum)
 {
 	omxLeds.updateLeds();
 
-	omxModeS1.showCurrentStep(patternNum);
+	omxModeSeq.showCurrentStep(patternNum);
 
 	/*
 	blinkInterval = step_delay*2;
@@ -352,9 +253,37 @@ void show_current_step(int patternNum)
 	*/
 }
 
-// ####### END LEDS
+void changeOmxMode(OMXMode newOmxmode)
+{
+	sysSettings.omxMode = newOmxmode;
+	sysSettings.newmode = newOmxmode;
 
-// ####### DISPLAY FUNCTIONS #######
+	switch (newOmxmode)
+	{
+	case MODE_MIDI:
+		omxModeMidi.setMidiMode();
+		activeOmxMode = &omxModeMidi;
+		break;
+	case MODE_S1:
+		omxModeSeq.setSeq1Mode();
+		activeOmxMode = &omxModeSeq;
+		break;
+	case MODE_S2:
+		omxModeSeq.setSeq2Mode();
+		activeOmxMode = &omxModeSeq;
+		break;
+	case MODE_OM:
+		omxModeMidi.setOrganelleMode();
+		activeOmxMode = &omxModeMidi;
+		break;
+	default:
+		omxModeMidi.setMidiMode();
+		activeOmxMode = &omxModeMidi;
+		break;
+	}
+}
+
+// ####### END LEDS
 
 // ############## MAIN LOOP ##############
 
@@ -362,7 +291,7 @@ void loop()
 {
 	//	customKeypad.tick();
 	keypad.tick();
-	clksTimer = 0;
+	// clksTimer = 0; // TODO - didn't see this used anywhere
 
 	Micros now = micros();
 	Micros passed = now - lastProcessTime;
@@ -375,11 +304,12 @@ void loop()
 		if (sequencer.playing)
 		{
 			omxScreensaver.resetCounter(); // screenSaverCounter = 0;
-			advanceClock(passed);
-			advanceSteps(passed);
+			omxUtil.advanceClock(passed);
+			omxUtil.advanceSteps(passed);
 		}
 	}
-	doStep();
+
+	activeOmxMode->loopUpdate();
 
 	// DISPLAY SETUP
 	display.clearDisplay();
@@ -398,6 +328,8 @@ void loop()
 	if ((!encoderConfig.enc_edit && (sysSettings.omxMode != sysSettings.newmode)) || sysSettings.refresh)
 	{
 		sysSettings.newmode = sysSettings.omxMode;
+		changeOmxMode(sysSettings.omxMode);
+
 		sequencer.playingPattern = sysSettings.playingPattern;
 		omxDisp.setDirty();
 		omxLeds.setAllLEDS(0, 0, 0);
@@ -444,7 +376,7 @@ void loop()
 		// what page are we on?
 		if (sysSettings.newmode != sysSettings.omxMode && encoderConfig.enc_edit)
 		{
-			sysSettings.omxMode = sysSettings.newmode;
+			changeOmxMode(sysSettings.newmode);
 			seqStop();
 			omxLeds.setAllLEDS(0, 0, 0);
 			encoderConfig.enc_edit = false;
@@ -558,6 +490,49 @@ void loop()
 
 } // ######## END MAIN LOOP ########
 
+// ####### POTENTIOMETERS #######
+
+// void sendPots(int val, int channel){
+// 	MM::sendControlChange(pots[potbank][val], analogValues[val], channel);
+// 	potCC = pots[potbank][val];
+// 	potVal = analogValues[val];
+// 	potValues[val] = potVal;
+// }
+
+void readPotentimeters()
+{
+	for (int k = 0; k < potCount; k++)
+	{
+		temp = analogRead(analogPins[k]);
+		potSettings.analog[k]->update(temp);
+
+		// read from the smoother, constrain (to account for tolerances), and map it
+		temp = potSettings.analog[k]->getValue();
+		temp = constrain(temp, potMin, potMax);
+		temp = map(temp, potMin, potMax, 0, 16383);
+
+		// map and update the value
+		potSettings.analogValues[k] = temp >> 7;
+
+		if (potSettings.analog[k]->hasChanged())
+		{
+			// do stuff
+			if (sysSettings.screenSaverMode)
+			{
+				omxScreensaver.OnPotChanged(k, potSettings.analogValues[k]);
+			}
+			else
+			{ // don't send pots in screensaver
+				{
+					activeOmxMode->OnPotChanged(k, potSettings.analogValues[k]);
+				}
+			}
+		}
+	}
+}
+
+// ####### END POTENTIOMETERS #######
+
 void handleNoteOn(byte channel, byte note, byte velocity)
 {
 	if (midiSettings.midiSoftThru)
@@ -668,6 +643,8 @@ bool loadHeader(void)
 	}
 
 	sysSettings.omxMode = (OMXMode)storage->read(EEPROM_HEADER_ADDRESS + 1);
+	changeOmxMode(sysSettings.omxMode);
+
 	sequencer.playingPattern = storage->read(EEPROM_HEADER_ADDRESS + 2);
 	sysSettings.playingPattern = sequencer.playingPattern;
 

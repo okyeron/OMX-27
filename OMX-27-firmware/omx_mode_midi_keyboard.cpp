@@ -6,6 +6,19 @@
 #include "omx_leds.h"
 #include "MM.h"
 
+void OmxModeMidiKeyboard::InitSetup()
+{
+    initSetup = true;
+}
+
+void OmxModeMidiKeyboard::onModeActivated()
+{
+    // auto init when activated
+    if(!initSetup){
+        InitSetup();
+    }
+}
+
 void OmxModeMidiKeyboard::OnPotChanged(int potIndex, int potValue)
 {
     if (midiMacroConfig.midiMacro)
@@ -25,7 +38,7 @@ void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
     if (organelleMotherMode)
     {
         // CHANGE PAGE
-        if (miparam == 0)
+        if (midiPageParams.miparam  == 0)
         {
             if (enc.dir() < 0)
             { // if turn ccw
@@ -50,13 +63,13 @@ void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
     auto amt = enc.accel(5); // where 5 is the acceleration factor if you want it, 0 if you don't)
 
     // CHANGE PAGE
-    if (miparam == 0 || miparam == 5 || miparam == 10)
+    if (midiPageParams.miparam  == 0 || midiPageParams.miparam  == 5 || midiPageParams.miparam  == 10)
     {
-        mmpage = constrain(mmpage + amt, 0, 2);
-        miparam = mmpage * NUM_DISP_PARAMS;
+        midiPageParams.mmpage = constrain(midiPageParams.mmpage + amt, 0, 2);
+        midiPageParams.miparam  = midiPageParams.mmpage * NUM_DISP_PARAMS;
     }
     // PAGE ONE
-    if (miparam == 2)
+    if (midiPageParams.miparam  == 2)
     {
         int newchan = constrain(sysSettings.midiChannel + amt, 1, 16);
         if (newchan != sysSettings.midiChannel)
@@ -64,7 +77,7 @@ void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
             sysSettings.midiChannel = newchan;
         }
     }
-    else if (miparam == 1)
+    else if (midiPageParams.miparam  == 1)
     {
         // set octave
         midiSettings.newoctave = constrain(midiSettings.octave + amt, -5, 4);
@@ -74,7 +87,7 @@ void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
         }
     }
     // PAGE TWO
-    if (miparam == 6)
+    if (midiPageParams.miparam  == 6)
     {
         int newrrchan = constrain(midiSettings.midiRRChannelCount + amt, 1, 16);
         if (newrrchan != midiSettings.midiRRChannelCount)
@@ -90,11 +103,11 @@ void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
             }
         }
     }
-    else if (miparam == 7)
+    else if (midiPageParams.miparam  == 7)
     {
         midiSettings.midiRRChannelOffset = constrain(midiSettings.midiRRChannelOffset + amt, 0, 15);
     }
-    else if (miparam == 8)
+    else if (midiPageParams.miparam  == 8)
     {
         midiSettings.currpgm = constrain(midiSettings.currpgm + amt, 0, 127);
 
@@ -110,7 +123,7 @@ void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
             MM::sendProgramChange(midiSettings.currpgm, sysSettings.midiChannel);
         }
     }
-    else if (miparam == 9)
+    else if (midiPageParams.miparam  == 9)
     {
         midiSettings.currbank = constrain(midiSettings.currbank + amt, 0, 127);
         // Bank Select is 2 mesages
@@ -119,19 +132,19 @@ void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
         MM::sendProgramChange(midiSettings.currpgm, sysSettings.midiChannel);
     }
     // PAGE THREE
-    if (miparam == 11)
+    if (midiPageParams.miparam  == 11)
     {
         potSettings.potbank = constrain(potSettings.potbank + amt, 0, NUM_CC_BANKS - 1);
     }
-    if (miparam == 12)
+    if (midiPageParams.miparam  == 12)
     {
         midiSettings.midiSoftThru = constrain(midiSettings.midiSoftThru + amt, 0, 1);
     }
-    if (miparam == 13)
+    if (midiPageParams.miparam  == 13)
     {
         midiMacroConfig.midiMacro = constrain(midiMacroConfig.midiMacro + amt, 0, nummacromodes);
     }
-    if (miparam == 14)
+    if (midiPageParams.miparam  == 14)
     {
         midiMacroConfig.midiMacroChan = constrain(midiMacroConfig.midiMacroChan + amt, 1, 16);
     }
@@ -143,14 +156,14 @@ void OmxModeMidiKeyboard::onEncoderButtonDown()
 {
     if (organelleMotherMode)
     {
-        miparam = (miparam + 1) % NUM_DISP_PARAMS;
+        midiPageParams.miparam  = (midiPageParams.miparam  + 1) % NUM_DISP_PARAMS;
         // MM::sendControlChange(CC_OM1,100,sysSettings.midiChannel);
     }
     else
     {
         // switch midi oct/chan selection
-        miparam = (miparam + 1) % 15;
-        mmpage = miparam / NUM_DISP_PARAMS;
+        midiPageParams.miparam  = (midiPageParams.miparam  + 1) % 15;
+        midiPageParams.mmpage = midiPageParams.miparam  / NUM_DISP_PARAMS;
     }
 }
 
@@ -371,8 +384,8 @@ void OmxModeMidiKeyboard::onKeyUpdate(OMXKeypadEvent e)
                     else if (thisKey == 1 || thisKey == 2)
                     {
                         int chng = thisKey == 1 ? -1 : 1;
-                        miparam = constrain((miparam + chng) % 15, 0, 14);
-                        mmpage = miparam / NUM_DISP_PARAMS;
+                        midiPageParams.miparam  = constrain((midiPageParams.miparam  + chng) % 15, 0, 14);
+                        midiPageParams.mmpage = midiPageParams.miparam  / NUM_DISP_PARAMS;
                     }
                 }
                 else
@@ -442,8 +455,8 @@ void OmxModeMidiKeyboard::onDisplayUpdate()
     { // DISPLAY
         if (!encoderConfig.enc_edit)
         {
-            int pselected = miparam % NUM_DISP_PARAMS;
-            if (mmpage == 0) // SUBMODE_MIDI
+            int pselected = midiPageParams.miparam  % NUM_DISP_PARAMS;
+            if (midiPageParams.mmpage == 0) // SUBMODE_MIDI
             {
                 //			if (midiRoundRobin) {
                 //				displaychan = rrChannel;
@@ -460,7 +473,7 @@ void OmxModeMidiKeyboard::onDisplayUpdate()
 
                 omxDisp.dispGenericMode(pselected);
             }
-            else if (mmpage == 1) // SUBMODE_MIDI2
+            else if (midiPageParams.mmpage == 1) // SUBMODE_MIDI2
             {
                 omxDisp.legends[0] = "RR";
                 omxDisp.legends[1] = "RROF";
@@ -473,7 +486,7 @@ void OmxModeMidiKeyboard::onDisplayUpdate()
                 omxDisp.dispPage = 2;
                 omxDisp.dispGenericMode(pselected);
             }
-            else if (mmpage == 2) // SUBMODE_MIDI3
+            else if (midiPageParams.mmpage == 2) // SUBMODE_MIDI3
             {
                 omxDisp.legends[0] = "PBNK"; // Potentiometer Banks
                 omxDisp.legends[1] = "THRU"; // MIDI thru (usb to hardware)

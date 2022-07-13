@@ -20,6 +20,8 @@ public:
     void displayMessage(const char *msg);
     void displayMessagef(const char *fmt, ...);
 
+    bool isMessageActive();
+
     void dispGridBoxes();
     void invertColor(bool flip);
     void dispValBox(int v, int16_t n, bool inv);

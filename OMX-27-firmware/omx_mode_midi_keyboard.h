@@ -8,6 +8,19 @@ public:
     OmxModeMidiKeyboard() {}
     ~OmxModeMidiKeyboard() {}
 
+    void InitSetup() override;
+    void onModeActivated() override;
+
+    void setOrganelleMode()
+    {
+        organelleMotherMode = true;
+    }
+
+    void setMidiMode()
+    {
+        organelleMotherMode = false;
+    }
+
     void OnPotChanged(int potIndex, int potValue) override;
 
     void updateLEDs() override;
@@ -25,15 +38,13 @@ public:
     void inMidiNoteOn(byte channel, byte note, byte velocity) override;
     void inMidiNoteOff(byte channel, byte note, byte velocity) override;
 
-    void setOrganelleMode()
-    {
-        organelleMotherMode = true;
-    }
+    
 
 private:
+    bool initSetup = false;
     bool organelleMotherMode = false; // TODO make separate class for this
 
-    int miparam = 0; // midi params item counter
+    // int miparam = 0; // midi params item counter
 
-    int mmpage = 0;
+    // int mmpage = 0;
 };

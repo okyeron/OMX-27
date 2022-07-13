@@ -1,6 +1,8 @@
 #pragma once
 #include "config.h"
 
+
+
 class OmxUtil
 {
 public:
@@ -9,6 +11,12 @@ public:
     void setup();
 
     void sendPots(int val, int channel);
+
+    // #### Clocks, might want to put in own class
+    void advanceClock(Micros advance);
+    void advanceSteps(Micros advance);
+    void setGlobalSwing(int swng_amt);
+    void resetClocks();
 
     // #### Outbound CV note on/off
     void cvNoteOn(int notenum);

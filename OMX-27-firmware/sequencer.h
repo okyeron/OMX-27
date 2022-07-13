@@ -1,12 +1,11 @@
 #pragma once
 
 #include <Arduino.h>
+#include "config.h"
 
 #define NUM_PATTERNS 8
 #define NUM_STEPS 64
 #define NUM_STEPKEYS 16
-
-using Micros = unsigned long;    // for tracking time per pattern
 
 struct TimePerPattern {
 	Micros lastProcessTimeP : 32;
@@ -126,7 +125,9 @@ SequencerState defaultSequencer();
 int serializedPatternSize(bool eeprom);
 
 StepNote* getSelectedStep();
-void doStep();
+void doStepS1();
+void doStepS2();
+
 void transposeSeq(int patternNum, int amt);
 int getPatternPage(int position);
 void rotatePattern(int patternNum, int rot);
