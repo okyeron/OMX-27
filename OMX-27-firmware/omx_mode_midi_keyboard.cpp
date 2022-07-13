@@ -19,7 +19,7 @@ void OmxModeMidiKeyboard::onModeActivated()
     }
 }
 
-void OmxModeMidiKeyboard::OnPotChanged(int potIndex, int potValue)
+void OmxModeMidiKeyboard::onPotChanged(int potIndex, int potValue)
 {
     if (midiMacroConfig.midiMacro)
     {

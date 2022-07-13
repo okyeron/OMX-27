@@ -4,7 +4,7 @@
 #include "omx_disp.h"
 #include "omx_leds.h"
 
-void OmxScreensaver::OnPotChanged(int potIndex, int potValue)
+void OmxScreensaver::onPotChanged(int potIndex, int potValue)
 {
     colorConfig.screensaverColor = potSettings.analog[4]->getValue() * 4; // value is 0-32764 for strip.ColorHSV
 

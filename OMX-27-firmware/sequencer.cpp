@@ -36,9 +36,6 @@ extern SequencerState sequencer;
 
 // funcs in main ino
 extern void show_current_step(int patternNum);
-// extern void cvNoteOn(int notenum);
-// extern void cvNoteOff();
-
 
 // extern StepNote* getSelectedStep();
 

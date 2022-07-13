@@ -21,7 +21,7 @@ public:
         organelleMotherMode = false;
     }
 
-    void OnPotChanged(int potIndex, int potValue) override;
+    void onPotChanged(int potIndex, int potValue) override;
 
     void updateLEDs() override;
 
@@ -37,14 +37,7 @@ public:
     void onDisplayUpdate() override;
     void inMidiNoteOn(byte channel, byte note, byte velocity) override;
     void inMidiNoteOff(byte channel, byte note, byte velocity) override;
-
-    
-
 private:
     bool initSetup = false;
     bool organelleMotherMode = false; // TODO make separate class for this
-
-    // int miparam = 0; // midi params item counter
-
-    // int mmpage = 0;
 };

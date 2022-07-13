@@ -18,7 +18,7 @@ void OmxModeSequencer::onModeActivated()
     }
 }
 
-void OmxModeSequencer::OnPotChanged(int potIndex, int potValue)
+void OmxModeSequencer::onPotChanged(int potIndex, int potValue)
 {
     if (seqConfig.noteSelect && seqConfig.noteSelection)
     { // note selection - do P-Locks
@@ -429,7 +429,7 @@ void OmxModeSequencer::onEncoderButtonDownLong()
     if (seqConfig.stepRecord)
     {
         resetPatternDefaults(sequencer.playingPattern);
-        clearedFlag = true;
+        // clearedFlag = true;
     }
 }
 

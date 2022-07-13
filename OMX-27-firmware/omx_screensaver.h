@@ -8,7 +8,7 @@ public:
     OmxScreensaver(){}
     ~OmxScreensaver(){}
 
-    void OnPotChanged(int potIndex, int potValue) override;
+    void onPotChanged(int potIndex, int potValue) override;
 
     void updateLEDs() override;
 

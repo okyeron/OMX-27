@@ -11,7 +11,6 @@
 //  Additional code contributions: Matt Boone, Steven Zydek, Chris Atkins, Will Winder
 
 #include <functional>
-// #include <Adafruit_NeoPixel.h>
 #include <ResponsiveAnalogRead.h>
 
 #include "consts.h"
@@ -26,16 +25,13 @@
 #include "omx_keypad.h"
 #include "omx_util.h"
 #include "omx_disp.h"
-
 #include "omx_mode_midi_keyboard.h"
 #include "omx_mode_sequencer.h"
 #include "omx_screensaver.h"
 #include "omx_leds.h"
 
 OmxModeMidiKeyboard omxModeMidi;
-// OmxModeMidiKeyboard omxModeOM;
 OmxModeSequencer omxModeSeq;
-// OmxModeSequencer omxModeS2;
 
 OmxModeInterface *activeOmxMode;
 
@@ -48,69 +44,11 @@ int potMin = 0;
 int potMax = 8190;
 int temp;
 
-// TODO make sequencer.cpp not extern these
-// int selectedStep = 0;
-// int potbank = 0;
-// int prevPlock[NUM_CC_POTS] = {0, 0, 0, 0, 0};
-// int potValues[NUM_CC_POTS] = {0, 0, 0, 0, 0};
-
-// Timers and such
-// elapsedMillis blink_msec = 0;
-// elapsedMillis slow_blink_msec = 0;
-// elapsedMillis pots_msec = 0; // TODO - didn't see this used anywhere
-
-// elapsedMicros clksTimer = 0; // TODO - didn't see this used anywhere
-
-// unsigned long clksDelay;
-// elapsedMillis keyPressTime[27] = {0};
-
-// using Micros = unsigned long;
 Micros lastProcessTime;
-// volatile unsigned long step_micros;
-// volatile unsigned long noteon_micros;
-// volatile unsigned long noteoff_micros;
-// volatile unsigned long ppqInterval;
-
-// bool screenSaverMode = false;
-
-// int sleepTick = 80;
-
-// DEFAULT COLOR VARIABLES
-
-// int nspage = 0;
-// int pppage = 0;
-// int sqpage = 0;
-// int srpage = 0;
-// int mmpage = 0;
-
-// int miparam = 0;	// midi params item counter
-// int nsparam = 0;	// note select params
-// int ppparam = 0;	// pattern params
-// int sqparam = 0;	// seq params
-// int srparam = 0;	// step record params
-// int tmpmmode = 9; TODO - didn't see this used anywhere
-
-// VARIABLES / FLAGS
-// float step_delay;
-// bool dirtyPixels = false;
-
-// bool blinkState = false;
-// bool slowBlinkState = false;
-
-// bool patternParams = false;
-// bool seqPages = false;
-// int noteSelectPage = 0; TODO - didn't see this used anywhere
-
-// bool dialogFlags[] = {false, false, false, false, false, false}; // TODO - didn't see this used anywhere
-// unsigned dialogDuration = 1000; // TODO - didn't see this used anywhere
 
 uint8_t RES;
 uint16_t AMAX;
 int V_scale;
-
-// unsigned long blinkInterval = clockConfig.clockbpm * 2;
-
-// int midiChannel; // the MIDI channel number to send messages (MIDI/OM mode)
 
 // ENCODER
 Encoder myEncoder(12, 11); // encoder pins on hardware
@@ -123,9 +61,6 @@ Button encButton(0);	   // encoder button pin on hardware
 unsigned long longPressInterval = 800;
 unsigned long clickWindow = 200;
 OMXKeypad keypad(longPressInterval, clickWindow, makeKeymap(keys), rowPins, colPins, ROWS, COLS);
-
-// // Declare NeoPixel strip object
-// Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 
 // setup EEPROM/FRAM storage
 Storage *storage;
@@ -237,20 +172,6 @@ void show_current_step(int patternNum)
 	omxLeds.updateLeds();
 
 	omxModeSeq.showCurrentStep(patternNum);
-
-	/*
-	blinkInterval = step_delay*2;
-	unsigned long slowBlinkInterval = blinkInterval * 2;
-
-	if (blink_msec >= blinkInterval){
-		blinkState = !blinkState;
-		blink_msec = 0;
-	}
-	if (slow_blink_msec >= slowBlinkInterval){
-		slowBlinkState = !slowBlinkState;
-		slow_blink_msec = 0;
-	}
-	*/
 }
 
 void changeOmxMode(OMXMode newOmxmode)
@@ -491,14 +412,6 @@ void loop()
 } // ######## END MAIN LOOP ########
 
 // ####### POTENTIOMETERS #######
-
-// void sendPots(int val, int channel){
-// 	MM::sendControlChange(pots[potbank][val], analogValues[val], channel);
-// 	potCC = pots[potbank][val];
-// 	potVal = analogValues[val];
-// 	potValues[val] = potVal;
-// }
-
 void readPotentimeters()
 {
 	for (int k = 0; k < potCount; k++)
@@ -519,12 +432,12 @@ void readPotentimeters()
 			// do stuff
 			if (sysSettings.screenSaverMode)
 			{
-				omxScreensaver.OnPotChanged(k, potSettings.analogValues[k]);
+				omxScreensaver.onPotChanged(k, potSettings.analogValues[k]);
 			}
 			else
 			{ // don't send pots in screensaver
 				{
-					activeOmxMode->OnPotChanged(k, potSettings.analogValues[k]);
+					activeOmxMode->onPotChanged(k, potSettings.analogValues[k]);
 				}
 			}
 		}

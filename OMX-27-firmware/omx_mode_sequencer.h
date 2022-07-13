@@ -14,7 +14,7 @@ public:
 
     void onModeActivated() override;
 
-    void OnPotChanged(int potIndex, int potValue) override;
+    void onPotChanged(int potIndex, int potValue) override;
 
     void loopUpdate() override;
 
@@ -48,35 +48,10 @@ private:
     bool initSetup = false;
     bool seq2Mode = false;
 
-    // bool omxseqpatternParams = false;
-    // bool omxseqseqPages = false;
-
-    // bool omxseqnoteSelect = false;
-    // bool omxseqnoteSelection = false;
-
-    // int omxseqselectedNote = 0;
-    // int omxSeqSelectedStep = 0;
-    // bool omxseqstepSelect = false;
-    // bool omxseqstepRecord = false;
-    // bool omxseqstepDirty = false;
-
-    // int omxSeqnspage = 0;
-    // int omxSeqpppage = 0;
-    // int omxSeqsqpage = 0;
-    // int omxSeqsrpage = 0;
-
-    // int omxSeqnsparam = 0; // note select params
-    // int omxSeqppparam = 0; // pattern params
-    // int omxSeqsqparam = 0; // seq params
-    // int omxSeqsrparam = 0; // step record params
-
-    // volatile unsigned long noteon_micros;
-    // volatile unsigned long noteoff_micros;
-
     // These do not appear to be used
-    bool copiedFlag = false;
-    bool pastedFlag = false;
-    bool clearedFlag = false;
+    // bool copiedFlag = false;
+    // bool pastedFlag = false;
+    // bool clearedFlag = false;
 
     void onEncoderChangedNorm(Encoder::Update enc);
     void onEncoderChangedStep(Encoder::Update enc);
