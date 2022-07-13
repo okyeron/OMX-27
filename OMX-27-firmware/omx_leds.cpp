@@ -29,7 +29,7 @@ void OmxLeds::initSetup()
     delay(100);
 }
 
-void OmxLeds::updateLeds()
+void OmxLeds::updateBlinkStates()
 {
     blinkInterval = clockConfig.step_delay * 2;
     unsigned long slowBlinkInterval = blinkInterval * 2;
@@ -47,7 +47,7 @@ void OmxLeds::updateLeds()
 }
 
 void OmxLeds::drawMidiLeds() {
-    updateLeds();
+    updateBlinkStates();
 	// blinkInterval = clockConfig.step_delay*2;
 
 	// if (blink_msec >= blinkInterval){

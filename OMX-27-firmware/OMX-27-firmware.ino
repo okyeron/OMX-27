@@ -167,13 +167,6 @@ void setup()
 
 // ####### SEQUENCER LEDS #######
 
-void show_current_step(int patternNum)
-{
-	if(sysSettings.screenSaverMode && !sequencer.playing) return; // Screensaver active and not playing, don't update sequencer LEDs. 
-
-	omxModeSeq.showCurrentStep(patternNum);
-}
-
 void changeOmxMode(OMXMode newOmxmode)
 {
 	sysSettings.omxMode = newOmxmode;
@@ -611,6 +604,14 @@ void loadPatterns(void)
 
 		nLocalAddress += patternSize;
 	}
+
+	// Serial.println( "Pattern size" );
+	// Serial.println( patternSize );
+	// Pattern size = 715
+	// Total size of patterns = 5720
+	// Total storage size = 5749
+	// Fram = 32000 = 26251 available
+	// Eeprom = 2048
 }
 
 // currently saves everything ( mode + patterns )

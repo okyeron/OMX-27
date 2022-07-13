@@ -35,7 +35,7 @@ extern SequencerState sequencer;
 // extern int defaultVelocity;
 
 // funcs in main ino
-extern void show_current_step(int patternNum);
+// extern void show_current_step(int patternNum);
 
 // extern StepNote* getSelectedStep();
 
@@ -389,18 +389,20 @@ void doStepS1()
 						}
 					}
 				}
-				if (j == sequencer.playingPattern)
-				{ // only show selected pattern
-					show_current_step(sequencer.playingPattern);
-				}
+				// No need to have this function call in here. 
+				// Can put into omx_mode_sequencer and remove extern function
+				// if (j == sequencer.playingPattern)
+				// { // only show selected pattern
+				// 	show_current_step(sequencer.playingPattern);
+				// }
 				new_step_ahead(j);
 			}
 		}
 	}
-	else
-	{
-		show_current_step(sequencer.playingPattern);
-	}
+	// else
+	// {
+	// 	// show_current_step(sequencer.playingPattern);
+	// }
 }
 
 void doStepS2()
@@ -443,18 +445,18 @@ void doStepS2()
 					}
 				}
 				//						show_current_step(playingPattern);
-				if (j == sequencer.playingPattern)
-				{ // only show selected pattern
-					show_current_step(sequencer.playingPattern);
-				}
+				// if (j == sequencer.playingPattern)
+				// { // only show selected pattern
+				// 	show_current_step(sequencer.playingPattern);
+				// }
 				new_step_ahead(j);
 			}
 		}
 	}
-	else
-	{
-		show_current_step(sequencer.playingPattern);
-	}
+	// else
+	// {
+	// 	show_current_step(sequencer.playingPattern);
+	// }
 }
 
 // TODO: move up to other sequencer stuff

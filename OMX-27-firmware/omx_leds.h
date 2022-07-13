@@ -15,7 +15,7 @@ public:
 
     void initSetup();
 
-    void updateLeds();
+    void updateBlinkStates();
 
     void drawMidiLeds();
 

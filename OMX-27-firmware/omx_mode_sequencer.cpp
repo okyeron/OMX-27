@@ -67,6 +67,9 @@ void OmxModeSequencer::loopUpdate()
     { // S2
         doStepS2();
     }
+
+    // renders leds for the playing pattern
+    showCurrentStep(sequencer.playingPattern);
 }
 
 void OmxModeSequencer::onEncoderChanged(Encoder::Update enc)
@@ -827,8 +830,9 @@ void OmxModeSequencer::onKeyHeldUpdate(OMXKeypadEvent e)
 
 void OmxModeSequencer::showCurrentStep(int patternNum)
 {
+	if(sysSettings.screenSaverMode && !sequencer.playing) return; // Screensaver active and not playing, don't update sequencer LEDs. 
 
-    omxLeds.updateLeds();
+    omxLeds.updateBlinkStates();
 
     bool blinkState = omxLeds.getBlinkState();
     bool slowBlinkState = omxLeds.getSlowBlinkState();
