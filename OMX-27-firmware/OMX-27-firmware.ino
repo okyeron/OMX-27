@@ -169,7 +169,7 @@ void setup()
 
 void show_current_step(int patternNum)
 {
-	omxLeds.updateLeds();
+	if(sysSettings.screenSaverMode && !sequencer.playing) return; // Screensaver active and not playing, don't update sequencer LEDs. 
 
 	omxModeSeq.showCurrentStep(patternNum);
 }
@@ -527,6 +527,8 @@ void saveHeader()
 			storage->write(EEPROM_HEADER_ADDRESS + 4 + i + (5 * b), pots[b][i]);
 		}
 	}
+
+	// 29 bytes
 }
 
 // returns true if the header contained initialized data
