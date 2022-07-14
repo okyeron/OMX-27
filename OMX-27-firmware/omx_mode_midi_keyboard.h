@@ -40,4 +40,8 @@ public:
 private:
     bool initSetup = false;
     bool organelleMotherMode = false; // TODO make separate class for this
+
+    void changePage(int amt);
+    void setParam(int paramIndex);
+
 };

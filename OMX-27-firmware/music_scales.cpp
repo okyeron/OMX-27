@@ -161,6 +161,7 @@ void setScale(int scaleRoot, int scalePattern) {
 		for(int n = 0; n < 12; n++) {
 			int offset = -1;
 			int degree = -1;
+
 			for(int j = 0; j < 7; j++) {
 				int v = scalePatterns[scalePattern][j];
 				if(v == -1) {
@@ -177,7 +178,13 @@ void setScale(int scaleRoot, int scalePattern) {
 			if(degree == -1) {
 				scaleColors[n] = LEDOFF;
 			} else {
-				scaleColors[n] = strip.gamma32(strip.ColorHSV((65535 / 12) * offset, rainbowSaturation, scaleBrightness));
+                if(degree == 0){
+                    scaleColors[n] = WHITE;
+                }
+                else{
+                    scaleColors[n] = DKBLUE;
+                }
+				// scaleColors[n] = strip.gamma32(strip.ColorHSV((65535 / 12) * offset, rainbowSaturation, scaleBrightness));
 			}
 		}
 	}
