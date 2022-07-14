@@ -40,7 +40,7 @@ public:
     void inMidiNoteOff(byte channel, byte note, byte velocity) override;
 
     void SetScale(MusicScales* scale);
-    
+
 private:
     bool initSetup = false;
     bool organelleMotherMode = false; // TODO make separate class for this
@@ -49,5 +49,7 @@ private:
 
     void changePage(int amt);
     void setParam(int paramIndex);
+
+    void onKeyUpdateM8Macro(OMXKeypadEvent e);
 
 };

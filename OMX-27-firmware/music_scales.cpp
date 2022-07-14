@@ -2,10 +2,14 @@
 #include "music_scales.h"
 #include "colors.h"
 #include "logic_util.h"
+// #include "config.h"
 // #include "omx_leds.h"
 
 const uint8_t rainbowSaturation = 127;
 const uint8_t scaleBrightness = 200;
+
+const auto ROOTNOTECOLOR = 0xA2A2FF;
+const auto INSCALECOLOR = 0x000090;
 
 #include <Adafruit_NeoPixel.h>
 extern Adafruit_NeoPixel strip;
@@ -147,6 +151,9 @@ const char *noteNames[] = {
 
 void MusicScales::calculateScale(int scaleRoot, int scalePattern)
 {
+    rootNote = scaleRoot;
+    scaleIndex = scalePattern;
+
     if (scalePattern == -1)
     {
         // disabled
@@ -188,13 +195,39 @@ void MusicScales::calculateScale(int scaleRoot, int scalePattern)
             {
                 if (degree == 0)
                 {
-                    scaleColors[n] = WHITE;
+                    scaleColors[n] = ROOTNOTECOLOR;
                 }
                 else
                 {
-                    scaleColors[n] = DKBLUE;
+                    scaleColors[n] = INSCALECOLOR;
                 }
+
+                // Use for rainbow scale
                 // scaleColors[n] = strip.gamma32(strip.ColorHSV((65535 / 12) * offset, rainbowSaturation, scaleBrightness));
+            }
+        }
+
+        int k = 0;
+        int octave = 0;
+
+        // Populate offsets for group16 mode
+        for(int i = 0; i < 16; i++)
+        {
+            int offset = scalePatterns[scalePattern][k];
+
+            if(offset == -1)
+            {
+                k = 0;
+                offset = scalePatterns[scalePattern][k];
+                octave++;
+            }
+            k++;
+
+            group16Offsets[i] = offset + 12 * octave;
+
+            if(k >= 7){
+                k = 0;
+                octave++;
             }
         }
     }
@@ -216,11 +249,57 @@ int MusicScales::getNumScales()
     return ARRAYLEN(scalePatterns);
 }
 
-bool MusicScales::isNoteInScale(int noteIndex)
+bool MusicScales::isNoteInScale(int noteNum)
 {
-    if (!scaleCalculated)
+    // Serial.println((String)"isNoteInScale: " + noteNum );
+    if (!scaleCalculated || noteNum < 0 || noteNum > 127) 
+    {
         return false;
-    return scaleColors[noteIndex] != LEDOFF;
+    }
+
+    int noteIndex = noteNum % 12;
+    bool inScale =  scaleColors[noteIndex] != LEDOFF;
+
+    // Serial.println((String)"noteIndex: " + noteNum + " inScale: " + (inScale ? "true" : "false"));
+
+    return inScale;
+}
+
+int MusicScales::getGroup16Note(int keyNum, int octave)
+{
+    //     1,2,   3,4,5,   6,7,   8,9,10,
+    // 11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26
+
+    if(keyNum < 11 || keyNum > 26 || scaleIndex < 0) return -1;
+
+    int stepIndex = keyNum - 12; // C will be root note
+
+    int adjnote;
+
+    if(keyNum == 11)  // edge case to make line up with C note
+    {
+        int offset = -1;
+
+        for (int j = 0; j < 7; j++) // find last valid offset of scale
+        {
+            int o = scalePatterns[scaleIndex][j];
+            if (o != -1)
+            {
+                offset = o;
+            }
+        }
+
+        if(offset == -1) return -1;
+
+        int firstNote = group16Offsets[0] + rootNote + 60 + (octave * 12);
+        adjnote = firstNote + offset - 12; // lower by 1 octave
+    }
+    else
+    {
+        adjnote = group16Offsets[stepIndex] + rootNote + 60 + (octave * 12);
+    }
+
+    return adjnote;
 }
 
 int MusicScales::getScaleColor(int noteIndex)
@@ -228,6 +307,19 @@ int MusicScales::getScaleColor(int noteIndex)
     if (!scaleCalculated)
         return LEDOFF;
     return scaleColors[noteIndex];
+}
+
+int MusicScales::getGroup16Color(int keyNum)
+{
+    if(!scaleCalculated || keyNum < 11 || keyNum > 26 || scaleIndex < 0 ) return LEDOFF;
+
+    int note = getGroup16Note(keyNum, 4);
+
+    if(note < 0) return LEDOFF;
+
+    note = note % 12;
+
+    return scaleColors[note];
 }
 
 const char *MusicScales::getNoteName(int noteIndex)

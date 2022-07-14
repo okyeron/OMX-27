@@ -56,8 +56,14 @@ int OmxLeds::getKeyColor(MusicScales* scale, int pixel) {
 		// 		return LEDOFF;
 		// 	}
 		// }
-		int noteInOct = notes[pixel] % 12;
-        return scale->getScaleColor(noteInOct);
+
+        if(scaleConfig.group16){
+            return scale->getGroup16Color(pixel);
+        }
+        else{
+            int noteInOct = notes[pixel] % 12;
+            return scale->getScaleColor(noteInOct);
+        }
 	}
 }
 

@@ -15,7 +15,8 @@ void OmxModeMidiKeyboard::InitSetup()
 void OmxModeMidiKeyboard::onModeActivated()
 {
     // auto init when activated
-    if(!initSetup){
+    if (!initSetup)
+    {
         InitSetup();
     }
 }
@@ -28,17 +29,17 @@ void OmxModeMidiKeyboard::changePage(int amt)
 
 void OmxModeMidiKeyboard::setParam(int paramIndex)
 {
-    if(paramIndex >= 0)
+    if (paramIndex >= 0)
     {
-        midiPageParams.miparam  = paramIndex % midiPageParams.numParams;
+        midiPageParams.miparam = paramIndex % midiPageParams.numParams;
     }
     else
     {
-        midiPageParams.miparam  = (paramIndex + midiPageParams.numParams) % midiPageParams.numParams;
+        midiPageParams.miparam = (paramIndex + midiPageParams.numParams) % midiPageParams.numParams;
     }
 
     // midiPageParams.miparam  = (midiPageParams.miparam  + 1) % 15;
-    midiPageParams.mmpage = midiPageParams.miparam  / NUM_DISP_PARAMS;
+    midiPageParams.mmpage = midiPageParams.miparam / NUM_DISP_PARAMS;
 }
 
 void OmxModeMidiKeyboard::onPotChanged(int potIndex, int potValue)
@@ -60,7 +61,7 @@ void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
     if (organelleMotherMode)
     {
         // CHANGE PAGE
-        if (midiPageParams.miparam  == 0)
+        if (midiPageParams.miparam == 0)
         {
             if (enc.dir() < 0)
             { // if turn ccw
@@ -86,7 +87,7 @@ void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
 
     // CHANGE PAGE
     // if (midiPageParams.miparam  == 0 || midiPageParams.miparam  == 5 || midiPageParams.miparam  == 10)
-    if(midiPageParams.miparam % 5 == 0)
+    if (midiPageParams.miparam % 5 == 0)
     {
         changePage(amt);
         // midiPageParams.mmpage = constrain(midiPageParams.mmpage + amt, 0, 2);
@@ -95,7 +96,7 @@ void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
     int pageIndex = 0;
 
     // PAGE ONE
-    if (midiPageParams.miparam  == pageIndex + 1)
+    if (midiPageParams.miparam == pageIndex + 1)
     {
         // set octave
         midiSettings.newoctave = constrain(midiSettings.octave + amt, -5, 4);
@@ -104,7 +105,7 @@ void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
             midiSettings.octave = midiSettings.newoctave;
         }
     }
-    else if (midiPageParams.miparam  == pageIndex + 2)
+    else if (midiPageParams.miparam == pageIndex + 2)
     {
         int newchan = constrain(sysSettings.midiChannel + amt, 1, 16);
         if (newchan != sysSettings.midiChannel)
@@ -114,9 +115,9 @@ void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
     }
 
     pageIndex = 5;
-    
+
     // PAGE TWO
-    if (midiPageParams.miparam  == pageIndex + 1)
+    if (midiPageParams.miparam == pageIndex + 1)
     {
         int newrrchan = constrain(midiSettings.midiRRChannelCount + amt, 1, 16);
         if (newrrchan != midiSettings.midiRRChannelCount)
@@ -132,11 +133,11 @@ void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
             }
         }
     }
-    else if (midiPageParams.miparam  == pageIndex + 2)
+    else if (midiPageParams.miparam == pageIndex + 2)
     {
         midiSettings.midiRRChannelOffset = constrain(midiSettings.midiRRChannelOffset + amt, 0, 15);
     }
-    else if (midiPageParams.miparam  == pageIndex + 3)
+    else if (midiPageParams.miparam == pageIndex + 3)
     {
         midiSettings.currpgm = constrain(midiSettings.currpgm + amt, 0, 127);
 
@@ -152,7 +153,7 @@ void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
             MM::sendProgramChange(midiSettings.currpgm, sysSettings.midiChannel);
         }
     }
-    else if (midiPageParams.miparam  == pageIndex + 4)
+    else if (midiPageParams.miparam == pageIndex + 4)
     {
         midiSettings.currbank = constrain(midiSettings.currbank + amt, 0, 127);
         // Bank Select is 2 mesages
@@ -162,50 +163,50 @@ void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
     }
     pageIndex = 10;
     // PAGE THREE
-    if (midiPageParams.miparam  == pageIndex + 1)
+    if (midiPageParams.miparam == pageIndex + 1)
     {
         potSettings.potbank = constrain(potSettings.potbank + amt, 0, NUM_CC_BANKS - 1);
     }
-    if (midiPageParams.miparam  == pageIndex + 2)
+    if (midiPageParams.miparam == pageIndex + 2)
     {
         midiSettings.midiSoftThru = constrain(midiSettings.midiSoftThru + amt, 0, 1);
     }
-    if (midiPageParams.miparam  == pageIndex + 3)
+    if (midiPageParams.miparam == pageIndex + 3)
     {
         midiMacroConfig.midiMacro = constrain(midiMacroConfig.midiMacro + amt, 0, nummacromodes);
     }
-    if (midiPageParams.miparam  == pageIndex + 4)
+    if (midiPageParams.miparam == pageIndex + 4)
     {
         midiMacroConfig.midiMacroChan = constrain(midiMacroConfig.midiMacroChan + amt, 1, 16);
     }
     pageIndex = 15;
     // PAGE FOUR - SCALES
-    if (midiPageParams.miparam  == pageIndex + 1)
+    if (midiPageParams.miparam == pageIndex + 1)
     {
         int prevRoot = scaleConfig.scaleRoot;
-        scaleConfig.scaleRoot = constrain(scaleConfig.scaleRoot  + amt, 0, 12 - 1);
-        if(prevRoot != scaleConfig.scaleRoot) 
+        scaleConfig.scaleRoot = constrain(scaleConfig.scaleRoot + amt, 0, 12 - 1);
+        if (prevRoot != scaleConfig.scaleRoot)
         {
             musicScale->calculateScale(scaleConfig.scaleRoot, scaleConfig.scalePattern);
         }
     }
-    if (midiPageParams.miparam  == pageIndex + 2)
+    if (midiPageParams.miparam == pageIndex + 2)
     {
         int prevPat = scaleConfig.scalePattern;
-        scaleConfig.scalePattern = constrain(scaleConfig.scalePattern  + amt, -1, musicScale->getNumScales() - 1);
-        if(prevPat != scaleConfig.scalePattern) 
+        scaleConfig.scalePattern = constrain(scaleConfig.scalePattern + amt, -1, musicScale->getNumScales() - 1);
+        if (prevPat != scaleConfig.scalePattern)
         {
             omxDisp.displayMessage(musicScale->getScaleName(scaleConfig.scalePattern));
             musicScale->calculateScale(scaleConfig.scaleRoot, scaleConfig.scalePattern);
         }
     }
-    if (midiPageParams.miparam  == pageIndex + 3)
+    if (midiPageParams.miparam == pageIndex + 3)
     {
-        // midiMacroConfig.midiMacro = constrain(midiMacroConfig.midiMacro + amt, 0, nummacromodes);
+        scaleConfig.lockScale = constrain(scaleConfig.lockScale + amt, 0, 1);
     }
-    if (midiPageParams.miparam  == pageIndex + 4)
+    if (midiPageParams.miparam == pageIndex + 4)
     {
-        // midiMacroConfig.midiMacroChan = constrain(midiMacroConfig.midiMacroChan + amt, 1, 16);
+        scaleConfig.group16 = constrain(scaleConfig.group16 + amt, 0, 1);
     }
 
     omxDisp.setDirty();
@@ -244,7 +245,7 @@ void OmxModeMidiKeyboard::onEncoderButtonDownLong()
 void OmxModeMidiKeyboard::onKeyUpdate(OMXKeypadEvent e)
 {
     int thisKey = e.key();
-    int keyPos = thisKey - 11;
+    // int keyPos = thisKey - 11;
 
     // ### KEY PRESS EVENTS
     if (midiMacroConfig.midiMacro)
@@ -260,168 +261,7 @@ void OmxModeMidiKeyboard::onKeyUpdate(OMXKeypadEvent e)
                 }
             }
         }
-        if (midiMacroConfig.m8AUX)
-        {
-            if (!e.held())
-            {
-                if (e.down() && (thisKey > 10 && thisKey < 27))
-                {
-                    // Mutes / Solos
-                    m8mutesolo[keyPos] = !m8mutesolo[keyPos];
-                    int mutePos = keyPos + 12;
-                    if (m8mutesolo[keyPos])
-                    {
-                        MM::sendNoteOn(mutePos, 1, midiMacroConfig.midiMacroChan);
-                    }
-                    else
-                    {
-                        MM::sendNoteOff(mutePos, 0, midiMacroConfig.midiMacroChan);
-                    }
-                    return; // break;
-                }
-                else if (e.down() && (thisKey == 1))
-                {
-                    // release all mutes
-                    for (int z = 0; z < 8; z++)
-                    {
-                        int mutePos = z + 12;
-                        if (m8mutesolo[z])
-                        {
-                            m8mutesolo[z] = false;
-                            MM::sendNoteOff(mutePos, 0, midiMacroConfig.midiMacroChan);
-                        }
-                    }
-                    return; // break;
-                }
-                else if (e.down() && (thisKey == 2))
-                {
-                    // ?
-                    return; // break;
-                }
-                else if (e.down() && (thisKey == 3))
-                {
-                    // return to mixer
-                    // hold shift 4 left 1 down, release shift
-                    MM::sendNoteOn(1, 1, midiMacroConfig.midiMacroChan); // Shift
-                    delay(40);
-                    MM::sendNoteOn(6, 1, midiMacroConfig.midiMacroChan); // Up
-                    delay(20);
-                    MM::sendNoteOff(6, 0, midiMacroConfig.midiMacroChan);
-                    delay(40);
-                    MM::sendNoteOn(4, 1, midiMacroConfig.midiMacroChan); // Left
-                    delay(20);
-                    MM::sendNoteOff(4, 0, midiMacroConfig.midiMacroChan);
-                    delay(40);
-                    MM::sendNoteOn(4, 1, midiMacroConfig.midiMacroChan); // Left
-                    delay(20);
-                    MM::sendNoteOff(4, 0, midiMacroConfig.midiMacroChan);
-                    delay(40);
-                    MM::sendNoteOn(4, 1, midiMacroConfig.midiMacroChan); // Left
-                    delay(20);
-                    MM::sendNoteOff(4, 0, midiMacroConfig.midiMacroChan);
-                    delay(40);
-                    MM::sendNoteOn(4, 1, midiMacroConfig.midiMacroChan); // Left
-                    delay(20);
-                    MM::sendNoteOff(4, 0, midiMacroConfig.midiMacroChan);
-                    delay(40);
-                    MM::sendNoteOn(7, 1, midiMacroConfig.midiMacroChan); // Down
-                    delay(20);
-                    MM::sendNoteOff(7, 0, midiMacroConfig.midiMacroChan);
-                    MM::sendNoteOff(1, 0, midiMacroConfig.midiMacroChan);
-
-                    return; // break;
-                }
-                else if (e.down() && (thisKey == 4))
-                {
-                    // snap save
-                    MM::sendNoteOn(1, 1, midiMacroConfig.midiMacroChan); // Shift
-                    delay(40);
-                    MM::sendNoteOn(3, 1, midiMacroConfig.midiMacroChan); // Option
-                    delay(40);
-                    MM::sendNoteOff(3, 0, midiMacroConfig.midiMacroChan);
-                    MM::sendNoteOff(1, 0, midiMacroConfig.midiMacroChan);
-
-                    return; // break;
-                }
-                else if (e.down() && (thisKey == 5))
-                {
-                    // snap load
-                    MM::sendNoteOn(1, 1, midiMacroConfig.midiMacroChan); // Shift
-                    delay(40);
-                    MM::sendNoteOn(2, 1, midiMacroConfig.midiMacroChan); // Edit
-                    delay(40);
-                    MM::sendNoteOff(2, 0, midiMacroConfig.midiMacroChan);
-                    MM::sendNoteOff(1, 0, midiMacroConfig.midiMacroChan);
-
-                    // then reset mutes/solos
-                    for (int z = 0; z < 16; z++)
-                    {
-                        if (m8mutesolo[z])
-                        {
-                            m8mutesolo[z] = false;
-                        }
-                    }
-
-                    return; // break;
-                }
-                else if (e.down() && (thisKey == 6))
-                {
-                    // release all solos
-                    for (int z = 8; z < 16; z++)
-                    {
-                        int mutePos = z + 12;
-                        if (m8mutesolo[z])
-                        {
-                            m8mutesolo[z] = false;
-                            MM::sendNoteOff(mutePos, 0, midiMacroConfig.midiMacroChan);
-                        }
-                    }
-                    return; // break;
-                }
-                else if (e.down() && (thisKey == 7))
-                {
-                    // ??
-                    return; // break;
-                }
-                else if (e.down() && (thisKey == 8))
-                {
-                    // ??
-                    return; // break;
-                }
-                else if (e.down() && (thisKey == 9))
-                {
-                    // waveform
-                    MM::sendNoteOn(6, 1, midiMacroConfig.midiMacroChan); // Up
-                    MM::sendNoteOn(7, 1, midiMacroConfig.midiMacroChan); // Down
-                    MM::sendNoteOn(5, 1, midiMacroConfig.midiMacroChan); // Right
-                    MM::sendNoteOn(4, 1, midiMacroConfig.midiMacroChan); // Left
-                    delay(40);
-
-                    MM::sendNoteOff(6, 0, midiMacroConfig.midiMacroChan); // Up
-                    MM::sendNoteOff(7, 0, midiMacroConfig.midiMacroChan); // Down
-                    MM::sendNoteOff(5, 0, midiMacroConfig.midiMacroChan); // Right
-                    MM::sendNoteOff(4, 0, midiMacroConfig.midiMacroChan); // Left
-
-                    return; // break;
-                }
-                else if (e.down() && (thisKey == 10))
-                {
-                    // play
-                    MM::sendNoteOn(0, 1, midiMacroConfig.midiMacroChan); // Play
-                    delay(40);
-                    MM::sendNoteOff(0, 0, midiMacroConfig.midiMacroChan); // Play
-
-                    //								MM::sendNoteOn(1, 1, midiMacroChan); // Shift
-                    //								MM::sendNoteOn(3, 1, midiMacroChan); // Option
-                    //								MM::sendNoteOn(2, 1, midiMacroChan); // Edit
-                    //								MM::sendNoteOn(6, 1, midiMacroChan); // Up
-                    //								MM::sendNoteOn(7, 1, midiMacroChan); // Down
-                    //								MM::sendNoteOn(4, 1, midiMacroChan); // Left
-                    //								MM::sendNoteOn(5, 1, midiMacroChan); // Right
-                    return; // break;
-                }
-            }
-        }
+        onKeyUpdateM8Macro(e);
     }
 
     // REGULAR KEY PRESSES
@@ -429,37 +269,32 @@ void OmxModeMidiKeyboard::onKeyUpdate(OMXKeypadEvent e)
     { // IGNORE LONG PRESS EVENTS
         if (e.down() && thisKey != 0)
         {
-            // Serial.println(" pressed");
-            if (thisKey == 11 || thisKey == 12 || thisKey == 1 || thisKey == 2)
-            {
-                if (midiSettings.midiAUX)
-                {
-                    if (thisKey == 11 || thisKey == 12)
-                    {
-                        int amt = thisKey == 11 ? -1 : 1;
-                        midiSettings.newoctave = constrain(midiSettings.octave + amt, -5, 4);
-                        if (midiSettings.newoctave != midiSettings.octave)
-                        {
-                            midiSettings.octave = midiSettings.newoctave;
-                        }
-                    }
-                    else if (thisKey == 1 || thisKey == 2)
-                    {
-                        int chng = thisKey == 1 ? -1 : 1;
+            bool keyConsumed = false; // If used for aux, key will be consumed and not send notes.
 
-                        setParam(constrain((midiPageParams.miparam  + chng) % midiPageParams.numParams, 0, midiPageParams.numParams - 1));
-                        // midiPageParams.miparam  = constrain((midiPageParams.miparam  + chng) % 15, 0, 14);
-                        // midiPageParams.mmpage = midiPageParams.miparam  / NUM_DISP_PARAMS;
-                    }
-                }
-                else
+            if (midiSettings.midiAUX) // Aux mode
+            {
+                if (thisKey == 11 || thisKey == 12) // Change Octave
                 {
-                    omxUtil.midiNoteOn(thisKey, midiSettings.defaultVelocity, sysSettings.midiChannel);
+                    int amt = thisKey == 11 ? -1 : 1;
+                    midiSettings.newoctave = constrain(midiSettings.octave + amt, -5, 4);
+                    if (midiSettings.newoctave != midiSettings.octave)
+                    {
+                        midiSettings.octave = midiSettings.newoctave;
+                    }
+                    keyConsumed = true;
+                }
+                else if (thisKey == 1 || thisKey == 2) // Change Param selection
+                {
+                    int chng = thisKey == 1 ? -1 : 1;
+
+                    setParam(constrain((midiPageParams.miparam + chng) % midiPageParams.numParams, 0, midiPageParams.numParams - 1));
+                    keyConsumed = true;
                 }
             }
-            else
+
+            if(!keyConsumed)
             {
-                omxUtil.midiNoteOn(thisKey, midiSettings.defaultVelocity, sysSettings.midiChannel);
+                omxUtil.midiNoteOn(musicScale, thisKey, midiSettings.defaultVelocity, sysSettings.midiChannel);
             }
         }
         else if (!e.down() && thisKey != 0)
@@ -506,6 +341,175 @@ void OmxModeMidiKeyboard::onKeyUpdate(OMXKeypadEvent e)
     }
 }
 
+void OmxModeMidiKeyboard::onKeyUpdateM8Macro(OMXKeypadEvent e)
+{
+    if (!midiMacroConfig.m8AUX)
+        return;
+
+    int thisKey = e.key();
+    int keyPos = thisKey - 11;
+
+    if (!e.held())
+    {
+        if (e.down() && (thisKey > 10 && thisKey < 27))
+        {
+            // Mutes / Solos
+            m8mutesolo[keyPos] = !m8mutesolo[keyPos];
+            int mutePos = keyPos + 12;
+            if (m8mutesolo[keyPos])
+            {
+                MM::sendNoteOn(mutePos, 1, midiMacroConfig.midiMacroChan);
+            }
+            else
+            {
+                MM::sendNoteOff(mutePos, 0, midiMacroConfig.midiMacroChan);
+            }
+            return; // break;
+        }
+        else if (e.down() && (thisKey == 1))
+        {
+            // release all mutes
+            for (int z = 0; z < 8; z++)
+            {
+                int mutePos = z + 12;
+                if (m8mutesolo[z])
+                {
+                    m8mutesolo[z] = false;
+                    MM::sendNoteOff(mutePos, 0, midiMacroConfig.midiMacroChan);
+                }
+            }
+            return; // break;
+        }
+        else if (e.down() && (thisKey == 2))
+        {
+            // ?
+            return; // break;
+        }
+        else if (e.down() && (thisKey == 3))
+        {
+            // return to mixer
+            // hold shift 4 left 1 down, release shift
+            MM::sendNoteOn(1, 1, midiMacroConfig.midiMacroChan); // Shift
+            delay(40);
+            MM::sendNoteOn(6, 1, midiMacroConfig.midiMacroChan); // Up
+            delay(20);
+            MM::sendNoteOff(6, 0, midiMacroConfig.midiMacroChan);
+            delay(40);
+            MM::sendNoteOn(4, 1, midiMacroConfig.midiMacroChan); // Left
+            delay(20);
+            MM::sendNoteOff(4, 0, midiMacroConfig.midiMacroChan);
+            delay(40);
+            MM::sendNoteOn(4, 1, midiMacroConfig.midiMacroChan); // Left
+            delay(20);
+            MM::sendNoteOff(4, 0, midiMacroConfig.midiMacroChan);
+            delay(40);
+            MM::sendNoteOn(4, 1, midiMacroConfig.midiMacroChan); // Left
+            delay(20);
+            MM::sendNoteOff(4, 0, midiMacroConfig.midiMacroChan);
+            delay(40);
+            MM::sendNoteOn(4, 1, midiMacroConfig.midiMacroChan); // Left
+            delay(20);
+            MM::sendNoteOff(4, 0, midiMacroConfig.midiMacroChan);
+            delay(40);
+            MM::sendNoteOn(7, 1, midiMacroConfig.midiMacroChan); // Down
+            delay(20);
+            MM::sendNoteOff(7, 0, midiMacroConfig.midiMacroChan);
+            MM::sendNoteOff(1, 0, midiMacroConfig.midiMacroChan);
+
+            return; // break;
+        }
+        else if (e.down() && (thisKey == 4))
+        {
+            // snap save
+            MM::sendNoteOn(1, 1, midiMacroConfig.midiMacroChan); // Shift
+            delay(40);
+            MM::sendNoteOn(3, 1, midiMacroConfig.midiMacroChan); // Option
+            delay(40);
+            MM::sendNoteOff(3, 0, midiMacroConfig.midiMacroChan);
+            MM::sendNoteOff(1, 0, midiMacroConfig.midiMacroChan);
+
+            return; // break;
+        }
+        else if (e.down() && (thisKey == 5))
+        {
+            // snap load
+            MM::sendNoteOn(1, 1, midiMacroConfig.midiMacroChan); // Shift
+            delay(40);
+            MM::sendNoteOn(2, 1, midiMacroConfig.midiMacroChan); // Edit
+            delay(40);
+            MM::sendNoteOff(2, 0, midiMacroConfig.midiMacroChan);
+            MM::sendNoteOff(1, 0, midiMacroConfig.midiMacroChan);
+
+            // then reset mutes/solos
+            for (int z = 0; z < 16; z++)
+            {
+                if (m8mutesolo[z])
+                {
+                    m8mutesolo[z] = false;
+                }
+            }
+
+            return; // break;
+        }
+        else if (e.down() && (thisKey == 6))
+        {
+            // release all solos
+            for (int z = 8; z < 16; z++)
+            {
+                int mutePos = z + 12;
+                if (m8mutesolo[z])
+                {
+                    m8mutesolo[z] = false;
+                    MM::sendNoteOff(mutePos, 0, midiMacroConfig.midiMacroChan);
+                }
+            }
+            return; // break;
+        }
+        else if (e.down() && (thisKey == 7))
+        {
+            // ??
+            return; // break;
+        }
+        else if (e.down() && (thisKey == 8))
+        {
+            // ??
+            return; // break;
+        }
+        else if (e.down() && (thisKey == 9))
+        {
+            // waveform
+            MM::sendNoteOn(6, 1, midiMacroConfig.midiMacroChan); // Up
+            MM::sendNoteOn(7, 1, midiMacroConfig.midiMacroChan); // Down
+            MM::sendNoteOn(5, 1, midiMacroConfig.midiMacroChan); // Right
+            MM::sendNoteOn(4, 1, midiMacroConfig.midiMacroChan); // Left
+            delay(40);
+
+            MM::sendNoteOff(6, 0, midiMacroConfig.midiMacroChan); // Up
+            MM::sendNoteOff(7, 0, midiMacroConfig.midiMacroChan); // Down
+            MM::sendNoteOff(5, 0, midiMacroConfig.midiMacroChan); // Right
+            MM::sendNoteOff(4, 0, midiMacroConfig.midiMacroChan); // Left
+
+            return; // break;
+        }
+        else if (e.down() && (thisKey == 10))
+        {
+            // play
+            MM::sendNoteOn(0, 1, midiMacroConfig.midiMacroChan); // Play
+            delay(40);
+            MM::sendNoteOff(0, 0, midiMacroConfig.midiMacroChan); // Play
+
+            //								MM::sendNoteOn(1, 1, midiMacroChan); // Shift
+            //								MM::sendNoteOn(3, 1, midiMacroChan); // Option
+            //								MM::sendNoteOn(2, 1, midiMacroChan); // Edit
+            //								MM::sendNoteOn(6, 1, midiMacroChan); // Up
+            //								MM::sendNoteOn(7, 1, midiMacroChan); // Down
+            //								MM::sendNoteOn(4, 1, midiMacroChan); // Left
+            //								MM::sendNoteOn(5, 1, midiMacroChan); // Right
+            return; // break;
+        }
+    }
+}
+
 void OmxModeMidiKeyboard::updateLEDs()
 {
 }
@@ -519,7 +523,7 @@ void OmxModeMidiKeyboard::onDisplayUpdate()
     { // DISPLAY
         if (!encoderConfig.enc_edit)
         {
-            int pselected = midiPageParams.miparam  % NUM_DISP_PARAMS;
+            int pselected = midiPageParams.miparam % NUM_DISP_PARAMS;
             if (midiPageParams.mmpage == 0) // SUBMODE_MIDI
             {
                 omxDisp.clearLegends();
@@ -581,16 +585,17 @@ void OmxModeMidiKeyboard::onDisplayUpdate()
             else if (midiPageParams.mmpage == 3) // SCALES
             {
                 omxDisp.clearLegends();
-                omxDisp.legends[0] = "ROOT"; 
-                omxDisp.legends[1] = "SCALE"; 
-                omxDisp.legends[2] = ""; 
-                omxDisp.legends[3] = "";
+                omxDisp.legends[0] = "ROOT";
+                omxDisp.legends[1] = "SCALE";
+                omxDisp.legends[2] = "LOCK";
+                omxDisp.legends[3] = "GROUP";
                 omxDisp.legendVals[0] = -127;
-                if(scaleConfig.scalePattern < 0){
+                if (scaleConfig.scalePattern < 0)
+                {
                     omxDisp.legendVals[1] = -127;
                     omxDisp.legendText[1] = "Off";
                 }
-                else 
+                else
                 {
                     omxDisp.legendVals[1] = scaleConfig.scalePattern;
                 }
@@ -599,8 +604,8 @@ void OmxModeMidiKeyboard::onDisplayUpdate()
                 omxDisp.legendVals[3] = -127;
 
                 omxDisp.legendText[0] = musicScale->getNoteName(scaleConfig.scaleRoot);
-                omxDisp.legendText[2] = "";
-                omxDisp.legendText[3] = "";
+                omxDisp.legendText[2] = scaleConfig.lockScale ? "On" : "Off";
+                omxDisp.legendText[3] = scaleConfig.group16 ? "On" : "Off";
                 omxDisp.dispPage = 4;
                 omxDisp.dispGenericMode(pselected);
             }
@@ -685,6 +690,7 @@ void OmxModeMidiKeyboard::inMidiNoteOff(byte channel, byte note, byte velocity)
     omxDisp.setDirty();
 }
 
-void OmxModeMidiKeyboard::SetScale(MusicScales* scale){
+void OmxModeMidiKeyboard::SetScale(MusicScales *scale)
+{
     this->musicScale = scale;
 }

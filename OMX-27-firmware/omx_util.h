@@ -1,7 +1,6 @@
 #pragma once
 #include "config.h"
-
-
+#include "music_scales.h"
 
 class OmxUtil
 {
@@ -24,6 +23,7 @@ public:
 
     // #### Outbound MIDI note on/off
     void midiNoteOn(int notenum, int velocity, int channel);
+    void midiNoteOn(MusicScales* scale, int notenum, int velocity, int channel);
     void midiNoteOff(int notenum, int channel);
 
 private:
