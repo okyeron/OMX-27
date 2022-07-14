@@ -211,6 +211,16 @@ struct ColorConfig
 
 extern ColorConfig colorConfig;
 
+struct ScaleConfig
+{
+	int scaleRoot = 0;
+	int scalePattern = 5;
+	bool scaleSelectHold;
+	bool showScaleInSeq = false;
+}; 
+
+extern ScaleConfig scaleConfig;
+
 #define NUM_DISP_PARAMS 5
 
 extern const int gridh;

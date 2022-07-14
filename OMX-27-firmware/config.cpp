@@ -88,4 +88,5 @@ ClockConfig clockConfig;
 SequencerConfig seqConfig;
 SequencerPage seqPageParams;
 ColorConfig colorConfig;
+ScaleConfig scaleConfig;
 

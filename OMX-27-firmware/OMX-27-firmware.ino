@@ -29,6 +29,7 @@
 #include "omx_mode_sequencer.h"
 #include "omx_screensaver.h"
 #include "omx_leds.h"
+#include "music_scales.h"
 
 OmxModeMidiKeyboard omxModeMidi;
 OmxModeSequencer omxModeSeq;
@@ -123,6 +124,8 @@ void setup()
 	AMAX = pow(2, RES);
 	V_scale = 64; // pow(2,(RES-7)); 4095 max
 	analogWrite(CVPITCH_PIN, 0);
+
+	setScale(scaleConfig.scaleRoot, scaleConfig.scalePattern);
 
 	// Load from EEPROM
 	bool bLoaded = loadFromStorage();

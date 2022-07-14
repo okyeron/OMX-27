@@ -1,6 +1,7 @@
 #include "omx_leds.h"
 #include "consts.h"
 #include "colors.h"
+#include "music_scales.h"
 
 Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 
@@ -44,6 +45,20 @@ void OmxLeds::updateBlinkStates()
         slowBlinkState = !slowBlinkState;
         slow_blink_msec = 0;
     }
+}
+
+int OmxLeds::getKeyColor(int pixel) {
+	if(scaleConfig.scalePattern == -1) {
+		return LEDOFF;
+	} else {
+		// if(sysSettings.omxMode == MODE_MIDI && AUX_HELD) {
+		// 	if(pixel == 1 || pixel == 2 || pixel == 3 || pixel == 4 || pixel == 11 || pixel == 12) {
+		// 		return LEDOFF;
+		// 	}
+		// }
+		int noteInOct = notes[pixel] % 12;
+		return scaleColors[noteInOct];
+	}
 }
 
 void OmxLeds::drawMidiLeds() {
@@ -122,7 +137,7 @@ void OmxLeds::drawMidiLeds() {
 			for (int q = 1; q < LED_COUNT; q++){				
 				if (midiSettings.midiKeyState[q] == -1){
 					if (colorConfig.midiBg_Hue == 0){
-						strip.setPixelColor(q, LEDOFF);
+						strip.setPixelColor(q, getKeyColor(q)); // set off or in scale
 					} else if (colorConfig.midiBg_Hue == 32){
 						strip.setPixelColor(q, LOWWHITE);
 					} else {

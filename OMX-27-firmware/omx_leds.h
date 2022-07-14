@@ -17,6 +17,7 @@ public:
 
     void updateBlinkStates();
 
+    int getKeyColor(int pixel);
     void drawMidiLeds();
 
     // clears dirty, transmits pixel data if dirty.
