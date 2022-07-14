@@ -78,6 +78,17 @@ void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
 
     if (midiSettings.midiAUX)
     {
+        if (enc.dir() < 0)
+        { // if turn ccw
+            setParam(midiPageParams.miparam - 1);
+            omxDisp.setDirty();
+        }
+        else if (enc.dir() > 0)
+        { // if turn cw
+            setParam(midiPageParams.miparam + 1);
+            omxDisp.setDirty();
+        }
+
         // change MIDI Background Color
         // midiBg_Hue = constrain(midiBg_Hue + (amt * 32), 0, 65534); // 65535
         return; // break;
