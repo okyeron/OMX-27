@@ -184,16 +184,19 @@ void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
     {
         int prevRoot = scaleConfig.scaleRoot;
         scaleConfig.scaleRoot = constrain(scaleConfig.scaleRoot  + amt, 0, 12 - 1);
-        if(prevRoot != scaleConfig.scaleRoot) setScale(scaleConfig.scaleRoot, scaleConfig.scalePattern);
+        if(prevRoot != scaleConfig.scaleRoot) 
+        {
+            musicScale->calculateScale(scaleConfig.scaleRoot, scaleConfig.scalePattern);
+        }
     }
     if (midiPageParams.miparam  == pageIndex + 2)
     {
         int prevPat = scaleConfig.scalePattern;
-        scaleConfig.scalePattern = constrain(scaleConfig.scalePattern  + amt, -1, getNumScales() - 1);
+        scaleConfig.scalePattern = constrain(scaleConfig.scalePattern  + amt, -1, musicScale->getNumScales() - 1);
         if(prevPat != scaleConfig.scalePattern) 
         {
-            omxDisp.displayMessage(scaleNames[scaleConfig.scalePattern]);
-            setScale(scaleConfig.scaleRoot, scaleConfig.scalePattern);
+            omxDisp.displayMessage(musicScale->getScaleName(scaleConfig.scalePattern));
+            musicScale->calculateScale(scaleConfig.scaleRoot, scaleConfig.scalePattern);
         }
     }
     if (midiPageParams.miparam  == pageIndex + 3)
@@ -510,7 +513,7 @@ void OmxModeMidiKeyboard::updateLEDs()
 void OmxModeMidiKeyboard::onDisplayUpdate()
 {
     // playingPattern = 0; 		// DEFAULT MIDI MODE TO THE FIRST PATTERN SLOT
-    omxLeds.drawMidiLeds(); // SHOW LEDS
+    omxLeds.drawMidiLeds(musicScale); // SHOW LEDS
 
     if (omxDisp.isDirty())
     { // DISPLAY
@@ -595,7 +598,7 @@ void OmxModeMidiKeyboard::onDisplayUpdate()
                 omxDisp.legendVals[2] = -127;
                 omxDisp.legendVals[3] = -127;
 
-                omxDisp.legendText[0] = noteNames[scaleConfig.scaleRoot];
+                omxDisp.legendText[0] = musicScale->getNoteName(scaleConfig.scaleRoot);
                 omxDisp.legendText[2] = "";
                 omxDisp.legendText[3] = "";
                 omxDisp.dispPage = 4;
@@ -680,4 +683,8 @@ void OmxModeMidiKeyboard::inMidiNoteOff(byte channel, byte note, byte velocity)
                                                       //	dirtyPixels = true;
     strip.show();
     omxDisp.setDirty();
+}
+
+void OmxModeMidiKeyboard::SetScale(MusicScales* scale){
+    this->musicScale = scale;
 }

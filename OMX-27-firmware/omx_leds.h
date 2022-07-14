@@ -1,5 +1,6 @@
 #pragma once
 #include "config.h"
+#include "music_scales.h"
 
 #include <Adafruit_NeoPixel.h>
 
@@ -17,8 +18,8 @@ public:
 
     void updateBlinkStates();
 
-    int getKeyColor(int pixel);
-    void drawMidiLeds();
+    int getKeyColor(MusicScales* scale, int pixel);
+    void drawMidiLeds(MusicScales* scale);
 
     // clears dirty, transmits pixel data if dirty.
     void showLeds();

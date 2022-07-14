@@ -1175,7 +1175,7 @@ void OmxModeSequencer::onDisplayUpdate()
     // MIDI SOLO
     if (sequencer.getCurrentPattern()->solo)
     {
-        omxLeds.drawMidiLeds();
+        omxLeds.drawMidiLeds(musicScale);
     }
     if (omxDisp.isDirty())
     { // DISPLAY
@@ -1422,4 +1422,8 @@ void OmxModeSequencer::initPatterns()
         pattern->solo = false;
         pattern->sendCV = false;
     }
+}
+
+void OmxModeSequencer::SetScale(MusicScales* scale){
+    this->musicScale = scale;
 }

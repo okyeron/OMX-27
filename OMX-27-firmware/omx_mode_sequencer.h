@@ -1,6 +1,7 @@
 #pragma once
 
 #include "omx_mode_interface.h"
+#include "music_scales.h"
 
 class OmxModeSequencer : public OmxModeInterface
 {
@@ -44,9 +45,13 @@ public:
         seq2Mode = true;
     }
 
+    void SetScale(MusicScales* scale);
+
 private:
     bool initSetup = false;
     bool seq2Mode = false;
+
+    MusicScales* musicScale;
 
     // These do not appear to be used
     // bool copiedFlag = false;

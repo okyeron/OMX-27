@@ -217,6 +217,8 @@ struct ScaleConfig
 {
 	int scaleRoot = 0;
 	int scalePattern = -1;
+	bool lockScale = false; // If Scale is locked you will be unable to play notes out of the scale. 
+	bool group16 = false; // If group16 is active, all notes in scale will be grouped into lower 16 notes. 
 	bool scaleSelectHold;
 	bool showScaleInSeq = false;
 }; 

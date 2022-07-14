@@ -38,6 +38,8 @@ OmxModeInterface *activeOmxMode;
 
 OmxScreensaver omxScreensaver;
 
+MusicScales globalScale;
+
 // storage of pot values; current is in the main loop; last value is for midi output
 int volatile currentValue[NUM_CC_POTS];
 int lastMidiValue[NUM_CC_POTS];
@@ -125,7 +127,9 @@ void setup()
 	V_scale = 64; // pow(2,(RES-7)); 4095 max
 	analogWrite(CVPITCH_PIN, 0);
 
-	setScale(scaleConfig.scaleRoot, scaleConfig.scalePattern);
+	globalScale.calculateScale(scaleConfig.scaleRoot, scaleConfig.scalePattern);
+	omxModeMidi.SetScale(&globalScale);
+	omxModeSeq.SetScale(&globalScale);
 
 	// Load from EEPROM
 	bool bLoaded = loadFromStorage();
