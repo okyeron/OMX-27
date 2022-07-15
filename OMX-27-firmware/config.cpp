@@ -44,7 +44,7 @@ const int gridh = 32;
 const int gridw = 128;
 const int PPQ = 96;
 
-const char* modes[] = {"MI","S1","S2","OM","GRIDS"};
+const char* modes[] = {"MI","S1","S2","OM","GR"};
 const char* macromodes[] = {"Off", "M8"};
 const int nummacromodes = 1;
 

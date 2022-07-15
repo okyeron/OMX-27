@@ -3,6 +3,8 @@
 #include "omx_mode_interface.h"
 #include "music_scales.h"
 #include "retro_grids.h"
+#include "colors.h"
+#include "config.h"
 
 class OmxModeGrids : public OmxModeInterface
 {
@@ -35,14 +37,26 @@ public:
     void SetScale(MusicScales* scale);
 
 private:
+    void setParam(int pageIndex, int paramPosition);
+    void setParam(int paramIndex);
     void setupPageLegends();
+
+    void updateLEDsFNone();
+    void updateLEDsF1();
+    void updateLEDsPatterns();
 
 
     bool initSetup = false;
     grids::GridsWrapper grids_;
 
-    const int kNumPages = 2;
-    const int kNumParams = 10;
+    static const int kNumPages = 3;
+    static const int kNumParams = kNumPages * NUM_DISP_PARAMS;
+    static const int kNumGrids = 4;
+
+    // static const int kParamGridX = 2;
+    // static const int kParamGridY = 3;
+
+    uint32_t paramSelColors[4] = {MAGENTA, ORANGE, RED, RBLUE};
 
     int page = 0;
     int param = 0;
@@ -55,4 +69,10 @@ private:
     bool gridsSelected[4] = {false,false,false,false};
 
     bool gridsAUX = false;
+
+    bool f1_;
+    bool f2_;
+    bool f3_;
+    bool fNone_;
+
 };

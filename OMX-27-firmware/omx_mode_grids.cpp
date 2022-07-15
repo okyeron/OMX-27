@@ -1,6 +1,5 @@
 #include "omx_mode_grids.h"
 #include "config.h"
-#include "colors.h"
 #include "omx_util.h"
 #include "omx_disp.h"
 #include "omx_leds.h"
@@ -9,6 +8,7 @@
 using namespace grids;
 
 enum GridModePage {
+    GRIDS_DENSITY,
     GRIDS_XY,
     GRIDS_NOTES
 };
@@ -43,20 +43,65 @@ void OmxModeGrids::onPotChanged(int potIndex, int potValue)
     if (potIndex < 4)
     {
         grids_.setDensity(potIndex, potSettings.analogValues[potIndex] * 2);
+        setParam(GRIDS_DENSITY, potIndex + 1);
+        omxDisp.setDirty();
     }
     else if (potIndex == 4)
     {
         int newres = (float(potSettings.analogValues[potIndex]) / 128.f) * 3;
         grids_.setResolution(newres);
+        omxDisp.displayMessage((String)"Step Res " + newres);
     }
 }
 
 void OmxModeGrids::loopUpdate()
 {
+    auto keyState = midiSettings.keyState;
+
+    f1_ = keyState[1] && !keyState[2];
+    f2_ = !keyState[1] && keyState[2];
+    f3_ = keyState[1] && keyState[2];
+    fNone_ = !keyState[1] && !keyState[2];
+}
+
+void OmxModeGrids::setParam(int pageIndex, int paramPosition)
+{
+    int p = pageIndex * NUM_DISP_PARAMS + paramPosition;
+    setParam(p);
+}
+
+void OmxModeGrids::setParam(int paramIndex)
+{
+    if (paramIndex >= 0)
+    {
+        param = paramIndex % kNumParams;
+    }
+    else
+    {
+        param = (paramIndex + kNumParams) % kNumParams;
+    }
+    page = param / NUM_DISP_PARAMS;
 }
 
 void OmxModeGrids::onEncoderChanged(Encoder::Update enc)
 {
+    if (f1_)
+    {
+        // Change selected param while holding F1
+        if (enc.dir() < 0) // if turn CCW
+        { 
+            setParam(param - 1);
+            omxDisp.setDirty();
+        }
+        else if (enc.dir() > 0) // if turn CW
+        { 
+            setParam(param + 1);
+            omxDisp.setDirty();
+        }
+
+        return; // break;
+    }
+
     auto amt = enc.accel(5); // where 5 is the acceleration factor if you want it, 0 if you don't)
 
     int paramStep = param % 5;
@@ -65,7 +110,14 @@ void OmxModeGrids::onEncoderChanged(Encoder::Update enc)
     {
         switch (page)
         {
+        case GRIDS_DENSITY:
+        {
+            int newDensity = constrain(grids_.getDensity(paramStep - 1) + amt, 0, 255);
+            grids_.setDensity(paramStep - 1, newDensity);
+        }
+        break;
         case GRIDS_XY:
+        {
             if (paramStep == 1) // Accent
             {
                 int newAccent = constrain(grids_.accent + amt, 0, 255);
@@ -73,10 +125,20 @@ void OmxModeGrids::onEncoderChanged(Encoder::Update enc)
             }
             else if (paramStep == 2) // GridX
             {
-                int numGrids = sizeof(gridsSelected);
-                for (int g = 0; g < numGrids; g++)
+                bool gridSel = false;
+                for (int g = 0; g < kNumGrids; g++)
                 {
                     if (gridsSelected[g])
+                    {
+                        int newX = constrain(grids_.getX(g) + amt, 0, 255);
+                        gridsXY[g][0] = newX;
+                        grids_.setX(g, newX);
+                        gridSel = true;
+                    }
+                }
+                if (!gridSel) // No grids selected, modify all
+                {
+                    for (int g = 0; g < kNumGrids; g++)
                     {
                         int newX = constrain(grids_.getX(g) + amt, 0, 255);
                         gridsXY[g][0] = newX;
@@ -86,10 +148,20 @@ void OmxModeGrids::onEncoderChanged(Encoder::Update enc)
             }
             else if (paramStep == 3) // GridY
             {
-                int numGrids = sizeof(gridsSelected);
-                for (int g = 0; g < numGrids; g++)
+                bool gridSel = false;
+                for (int g = 0; g < kNumGrids; g++)
                 {
                     if (gridsSelected[g])
+                    {
+                        int newY = constrain(grids_.getY(g) + amt, 0, 255);
+                        gridsXY[g][1] = newY;
+                        grids_.setY(g, newY);
+                        gridSel = true;
+                    }
+                }
+                if (!gridSel) // No grids selected, modify all
+                {
+                    for (int g = 0; g < kNumGrids; g++)
                     {
                         int newY = constrain(grids_.getY(g) + amt, 0, 255);
                         gridsXY[g][1] = newY;
@@ -102,8 +174,10 @@ void OmxModeGrids::onEncoderChanged(Encoder::Update enc)
                 int newChaos = constrain(grids_.chaos + amt, 0, 255);
                 grids_.chaos = newChaos;
             }
-            break;
+        }
+        break;
         case GRIDS_NOTES:
+        {
             if (paramStep == 1)
             {
                 grids_.grids_notes[0] = constrain(grids_.grids_notes[0] + amt, 0, 127);
@@ -120,7 +194,8 @@ void OmxModeGrids::onEncoderChanged(Encoder::Update enc)
             {
                 grids_.grids_notes[3] = constrain(grids_.grids_notes[3] + amt, 0, 127);
             }
-            break;
+        }
+        break;
         default:
             break;
         }
@@ -131,7 +206,7 @@ void OmxModeGrids::onEncoderChanged(Encoder::Update enc)
 void OmxModeGrids::onEncoderButtonDown()
 {
     param = (param + 1 ) % kNumParams;
-    page = param / NUM_DISP_PARAMS;
+    setParam(param);
 }
 
 void OmxModeGrids::onEncoderButtonDownLong()
@@ -148,7 +223,7 @@ void OmxModeGrids::onKeyUpdate(OMXKeypadEvent e)
 {
     int thisKey = e.key();
 
-    auto keyState = midiSettings.keyState;
+    // auto keyState = midiSettings.keyState;
 
     if (!e.held())
     {
@@ -172,7 +247,8 @@ void OmxModeGrids::onKeyUpdate(OMXKeypadEvent e)
         {
             int patt = thisKey - 3;
             // SAVE
-            if (!keyState[1] && keyState[2])
+            // if (!keyState[1] && keyState[2])
+            if (f2_)
             { 
                 // F2 + PATTERN TO SAVE
                 for (int k = 0; k < 4; k++)
@@ -190,7 +266,7 @@ void OmxModeGrids::onKeyUpdate(OMXKeypadEvent e)
 
                 omxDisp.displayMessage((String)"Saved " + (patt + 1));
             }
-            else
+            else if(fNone_)
             {
                 // SELECT
                 grids_.playingPattern = patt;
@@ -213,30 +289,56 @@ void OmxModeGrids::onKeyUpdate(OMXKeypadEvent e)
         }
     }
 
-    if (e.down() && (thisKey > 10 && thisKey < 15))
+    if (fNone_)
     {
-        gridsSelected[thisKey - 11] = true;
-        omxDisp.setDirty();
-        page = GRIDS_XY;
-        param = 2;
-    }
-    else if (!e.down() && (thisKey > 10 && thisKey < 15))
-    {
-        gridsSelected[thisKey - 11] = false;
-        omxDisp.setDirty();
-    }
+        // Select Grid X param
+        if (e.down() && (thisKey > 10 && thisKey < 15))
+        {
+            gridsSelected[thisKey - 11] = true;
+            setParam(GRIDS_XY, 2);
+            omxDisp.setDirty();
+        }
+        else if (!e.down() && (thisKey > 10 && thisKey < 15))
+        {
+            gridsSelected[thisKey - 11] = false;
+            omxDisp.setDirty();
+        }
 
-    if (e.down() && (thisKey > 14 && thisKey < 19))
-    {
-        gridsSelected[thisKey - 15] = true;
-        omxDisp.setDirty();
-        page = GRIDS_XY;
-        param = 3;
+        // Select Grid Y param
+        if (e.down() && (thisKey > 14 && thisKey < 19))
+        {
+            gridsSelected[thisKey - 15] = true;
+            setParam(GRIDS_XY, 3);
+            omxDisp.setDirty();
+        }
+        else if (!e.down() && (thisKey > 14 && thisKey < 19))
+        {
+            gridsSelected[thisKey - 15] = false;
+            omxDisp.setDirty();
+        }
     }
-    else if (!e.down() && (thisKey > 14 && thisKey < 19))
+    if(f1_)
     {
-        gridsSelected[thisKey - 15] = false;
-        omxDisp.setDirty();
+        // Quick Select Note
+        if (e.down() && (thisKey > 10 && thisKey < 15))
+        {
+            setParam(GRIDS_NOTES, thisKey - 10);
+            omxDisp.setDirty();
+        }
+        // else if (!e.down() && (thisKey > 10 && thisKey < 15))
+        // {
+        // }
+
+        // Select Grid Y param
+        // if (e.down() && (thisKey > 14 && thisKey < 19))
+        // {
+        //     setParam(GRIDS_NOTES * NUM_DISP_PARAMS + (thisKey - 14));
+        //     omxDisp.setDirty();
+        // }
+        // else if (!e.down() && (thisKey > 14 && thisKey < 19))
+        // {
+            
+        // }
     }
 }
 
@@ -250,7 +352,6 @@ void OmxModeGrids::updateLEDs()
 
     bool blinkState = omxLeds.getBlinkState();
 
-    int patternNum = grids_.playingPattern;
     if (gridsAUX)
     {
         // Blink left/right keys for octave select indicators.
@@ -261,91 +362,90 @@ void OmxModeGrids::updateLEDs()
     {
         strip.setPixelColor(0, LEDOFF);
     }
-    uint32_t colors[8] = {};
-    colors[0] = blinkState ? MAGENTA : LEDOFF;
-    colors[1] = blinkState ? ORANGE : LEDOFF;
-    colors[2] = blinkState ? RED : LEDOFF;
-    colors[3] = blinkState ? RBLUE : LEDOFF;
-    colors[4] = blinkState ? MAGENTA : LEDOFF;
-    colors[5] = blinkState ? ORANGE : LEDOFF;
-    colors[6] = blinkState ? RED : LEDOFF;
-    colors[7] = blinkState ? RBLUE : LEDOFF;
 
-    // FIX THIS
+    // Function Keys
+    if (f3_)
+    {
+        auto f3Color = blinkState ? LEDOFF : FUNKTHREE;
+        strip.setPixelColor(1, f3Color);
+        strip.setPixelColor(2, f3Color);
+    }
+    else
+    {
+        auto f1Color = (f1_ && blinkState) ? LEDOFF : FUNKONE;
+        strip.setPixelColor(1, f1Color);
+
+        auto f2Color = (f2_ && blinkState) ? LEDOFF : FUNKTWO;
+        strip.setPixelColor(2, f2Color);
+    }
+
+    updateLEDsPatterns();
+
+    if(fNone_ || f2_) updateLEDsFNone();
+    else if(f1_) updateLEDsF1();
+
+    omxLeds.setDirty();
+}
+
+void OmxModeGrids::updateLEDsFNone()
+{
+    bool blinkState = omxLeds.getBlinkState();
+
+    // uint32_t colors[8] = {};
+    // colors[0] = blinkState ? MAGENTA : LEDOFF;
+    // colors[1] = blinkState ? ORANGE : LEDOFF;
+    // colors[2] = blinkState ? RED : LEDOFF;
+    // colors[3] = blinkState ? RBLUE : LEDOFF;
+    // colors[4] = blinkState ? MAGENTA : LEDOFF;
+    // colors[5] = blinkState ? ORANGE : LEDOFF;
+    // colors[6] = blinkState ? RED : LEDOFF;
+    // colors[7] = blinkState ? RBLUE : LEDOFF;
 
     auto keyState = midiSettings.keyState;
 
     for (int k = 0; k < 4; k++)
     {
         // Change color of 4 GridX keys when pushed
-        if (keyState[k + 11])
-        {
-            strip.setPixelColor(k + 11, colors[k]);
-        }
-        else
-        {
-            strip.setPixelColor(k + 11, PINK);
-        }
+        auto kColor = keyState[k + 11] ? (blinkState ? paramSelColors[k] : LEDOFF) : PINK;
+        strip.setPixelColor(k + 11, kColor);
     }
 
     for (int k = 4; k < 8; k++)
     {
         // Change color of 4 GridY keys when pushed
-        if (keyState[k + 11])
-        {
-            strip.setPixelColor(k + 11, colors[k]);
-        }
-        else
-        {
-            strip.setPixelColor(k + 11, LTCYAN);
-        }
+        auto kColor = keyState[k + 11] ? (blinkState ? paramSelColors[k % 4] : LEDOFF) : LTCYAN;
+        strip.setPixelColor(k + 11, kColor);
     }
+}
+
+void OmxModeGrids::updateLEDsF1()
+{
+    bool blinkState = omxLeds.getBlinkState();
+    auto keyState = midiSettings.keyState;
+
+    for (int k = 0; k < 4; k++)
+    {
+        // Change color of 4 GridX keys when pushed
+        auto kColor = keyState[k + 11] ? (blinkState ? paramSelColors[k] : LEDOFF) : ORANGE;
+        strip.setPixelColor(k + 11, kColor);
+    }
+
+    for (int k = 4; k < 8; k++)
+    {
+        strip.setPixelColor(k + 11, LEDOFF);
+    }
+}
+
+void OmxModeGrids::updateLEDsPatterns()
+{
+    int patternNum = grids_.playingPattern;
 
     // LEDS for top row
-    for (int j = 1; j < LED_COUNT - 16; j++)
+    for (int j = 3; j < LED_COUNT - 16; j++)
     {
-        if (j == 1)
-        {
-            // F1
-            if (keyState[j] && blinkState)
-            {
-                strip.setPixelColor(j, LEDOFF);
-            }
-            else
-            {
-                strip.setPixelColor(j, FUNKONE);
-            }
-        }
-        else if (j == 2)
-        {
-            // F2
-            if (keyState[j] && blinkState)
-            {
-                strip.setPixelColor(j, LEDOFF);
-            }
-            else
-            {
-                strip.setPixelColor(j, FUNKTWO);
-            }
-        }
-        else if (j == patternNum + 3)
-        { 
-            // PATTERN SELECT
-            strip.setPixelColor(j, seqColors[patternNum]);
-
-            // Not needed here
-            // if (patternParams && blinkState)
-            // {
-            //     strip.setPixelColor(j, LEDOFF);
-            // }
-        }
-        else
-        {
-            strip.setPixelColor(j, LEDOFF);
-        }
+        auto pColor = (j == patternNum + 3) ? seqColors[patternNum] : LEDOFF;
+        strip.setPixelColor(j, pColor);
     }
-
-    omxLeds.setDirty();
 }
 
 void OmxModeGrids::setupPageLegends()
@@ -370,8 +470,22 @@ void OmxModeGrids::setupPageLegends()
 
     omxDisp.clearLegends();
 
+    omxDisp.dispPage = page + 1;
+
     switch (page)
     {
+    case GRIDS_DENSITY:
+    {
+        omxDisp.legends[0] = "DS 1";
+        omxDisp.legends[1] = "DS 2";
+        omxDisp.legends[2] = "DS 3";
+        omxDisp.legends[3] = "DS 4";
+        omxDisp.legendVals[0] = grids_.getDensity(0);
+        omxDisp.legendVals[1] = grids_.getDensity(1);
+        omxDisp.legendVals[2] = grids_.getDensity(2);
+        omxDisp.legendVals[3] = grids_.getDensity(3);
+    }
+    break;
     case GRIDS_XY:
     {
         int numGrids = sizeof(gridsSelected);
@@ -389,14 +503,41 @@ void OmxModeGrids::setupPageLegends()
 
         if (selGridsCount == 0)
         {
-            omxDisp.legends[1] = "X";
-            omxDisp.legends[2] = "Y";
-            thisGrid = -1;
+            omxDisp.legends[1] = "X All";
+            omxDisp.legends[2] = "Y All";
+            thisGrid = 0;
         }
         else if (selGridsCount == 1)
         {
-            omxDisp.legends[1] = String("X " + (thisGrid + 1)).c_str();
-            omxDisp.legends[2] = String("Y " + (thisGrid + 1)).c_str();
+            // Not sure why string.c_str doesn't work
+            // String l1 = "X " + (thisGrid + 1);
+            // String l2 = "Y " + (thisGrid + 1);
+
+            // char bufx[4];
+            // char bufy[4];
+            // snprintf(bufx, sizeof(bufx), "X %d", thisGrid + 1);
+            // snprintf(bufy, sizeof(bufy), "Y %d", thisGrid + 1);
+
+            // omxDisp.legends[1] = bufx;
+            // omxDisp.legends[2] = bufy;
+
+            // Above string code not working at all? This is ugly
+            if(thisGrid == 0){
+                omxDisp.legends[1] = "X 1";
+                omxDisp.legends[2] = "Y 1";
+            }
+            else if(thisGrid == 1){
+                omxDisp.legends[1] = "X 2";
+                omxDisp.legends[2] = "Y 2";
+            }
+            else if(thisGrid == 2){
+                omxDisp.legends[1] = "X 3";
+                omxDisp.legends[2] = "Y 3";
+            }
+            else if(thisGrid == 3){
+                omxDisp.legends[1] = "X 4";
+                omxDisp.legends[2] = "Y 4";
+            }
         }
         else
         {
@@ -404,13 +545,7 @@ void OmxModeGrids::setupPageLegends()
             omxDisp.legends[2] = "Y *";
         }
 
-        // char bufx[4];
-        // char bufy[4];
-        // snprintf(bufx, sizeof(bufx), "X %d", gridXKeyChannel + 1);
-        // snprintf(bufy, sizeof(bufy), "Y %d", gridYKeyChannel + 1);
         omxDisp.legends[0] = "ACNT"; // "BPM";
-        // omxDisp.legends[1] = bufx;
-        // omxDisp.legends[2] = bufy;
         omxDisp.legends[3] = "XAOS";
         omxDisp.legendVals[0] = grids_.accent; // (int)clockbpm;
         if (thisGrid != -1)
@@ -419,20 +554,20 @@ void OmxModeGrids::setupPageLegends()
             omxDisp.legendVals[2] = gridsXY[thisGrid][1];
         }
         omxDisp.legendVals[3] = grids_.chaos;
-        omxDisp.dispPage = 1;
     }
     break;
     case GRIDS_NOTES:
-        omxDisp.legends[0] = "1";
-        omxDisp.legends[1] = "2";
-        omxDisp.legends[2] = "3";
-        omxDisp.legends[3] = "4";
+    {
+        omxDisp.legends[0] = "NT 1";
+        omxDisp.legends[1] = "NT 2";
+        omxDisp.legends[2] = "NT 3";
+        omxDisp.legends[3] = "NT 4";
         omxDisp.legendVals[0] = grids_.grids_notes[0];
         omxDisp.legendVals[1] = grids_.grids_notes[1];
         omxDisp.legendVals[2] = grids_.grids_notes[2];
         omxDisp.legendVals[3] = grids_.grids_notes[3];
-        omxDisp.dispPage = 2;
-        break;
+    }
+    break;
     default:
         break;
     }
