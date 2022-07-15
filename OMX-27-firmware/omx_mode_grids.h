@@ -46,6 +46,11 @@ private:
     void updateLEDsPatterns();
 
     void updateLEDsChannelView();
+    void onKeyUpdateChanLock(OMXKeypadEvent e);
+
+    void saveActivePattern(int pattIndex);
+    void loadActivePattern(int pattIndex);
+
 
 
     bool initSetup = false;
@@ -77,4 +82,6 @@ private:
     bool f3_;
     bool fNone_;
 
+    bool channelLockView_ = false;
+    int lockedChannel_ = 0;
 };
