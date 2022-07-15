@@ -17,6 +17,7 @@ public:
     void setup();
     void clearDisplay();
     void drawStartupScreen();
+    void displayMessage(String msg);
     void displayMessage(const char *msg);
     void displayMessagef(const char *fmt, ...);
 

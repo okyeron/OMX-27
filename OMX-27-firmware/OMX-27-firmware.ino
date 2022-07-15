@@ -27,12 +27,14 @@
 #include "omx_disp.h"
 #include "omx_mode_midi_keyboard.h"
 #include "omx_mode_sequencer.h"
+#include "omx_mode_grids.h"
 #include "omx_screensaver.h"
 #include "omx_leds.h"
 #include "music_scales.h"
 
 OmxModeMidiKeyboard omxModeMidi;
 OmxModeSequencer omxModeSeq;
+OmxModeGrids omxModeGrids;
 
 OmxModeInterface *activeOmxMode;
 
@@ -176,6 +178,7 @@ void setup()
 
 void changeOmxMode(OMXMode newOmxmode)
 {
+	Serial.println((String)"NewMode: " + newOmxmode);
 	sysSettings.omxMode = newOmxmode;
 	sysSettings.newmode = newOmxmode;
 
@@ -197,11 +200,16 @@ void changeOmxMode(OMXMode newOmxmode)
 		omxModeMidi.setOrganelleMode();
 		activeOmxMode = &omxModeMidi;
 		break;
+	case MODE_GRIDS:
+		activeOmxMode = &omxModeGrids;
+		break;
 	default:
 		omxModeMidi.setMidiMode();
 		activeOmxMode = &omxModeMidi;
 		break;
 	}
+
+	activeOmxMode->onModeActivated();
 }
 
 // ####### END LEDS

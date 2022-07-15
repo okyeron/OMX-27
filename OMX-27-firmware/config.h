@@ -27,6 +27,7 @@ enum OMXMode
 	MODE_S1,
 	MODE_S2,
 	MODE_OM,
+	MODE_GRIDS,
 
 	NUM_OMX_MODES
 };

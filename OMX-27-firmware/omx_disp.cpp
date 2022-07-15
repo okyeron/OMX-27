@@ -35,6 +35,11 @@ void OmxDisp::drawStartupScreen()
     drawLoading();
 }
 
+void OmxDisp::displayMessage(String msg)
+{
+    displayMessage(msg.c_str());
+}
+
 void OmxDisp::displayMessage(const char *msg)
 {
     display.fillRect(0, 0, 128, 32, BLACK);
@@ -169,7 +174,7 @@ void OmxDisp::clearLegends()
 void OmxDisp::dispGenericMode(int selected)
 {
     if(isMessageActive()) return;
-    
+
     // const char* legends[4] = {"","","",""};
     // int legendVals[4] = {0,0,0,0};
     // int dispPage = 0;

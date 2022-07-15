@@ -423,6 +423,18 @@ namespace grids
       running_ = false;
   }
 
+  uint32_t GridsWrapper::randomValue(uint32_t init)
+  {
+      uint32_t val = 0x12345;
+      if (init)
+      {
+          val = init;
+          return 0;
+      }
+      val = val * 214013 + 2531011;
+      return val;
+  }
+
   void GridsWrapper::start()
   {
       tickCount_ = 0;
