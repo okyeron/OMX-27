@@ -42,7 +42,7 @@ void OmxModeMidiKeyboard::setParam(int paramIndex)
     midiPageParams.mmpage = midiPageParams.miparam / NUM_DISP_PARAMS;
 }
 
-void OmxModeMidiKeyboard::onPotChanged(int potIndex, int prevValue, int newValue)
+void OmxModeMidiKeyboard::onPotChanged(int potIndex, int prevValue, int newValue, int analogDelta)
 {
     if (midiMacroConfig.midiMacro)
     {

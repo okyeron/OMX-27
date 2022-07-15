@@ -38,10 +38,12 @@ void OmxModeGrids::onClockTick() {
     grids_.gridsTick();
 }
 
-void OmxModeGrids::onPotChanged(int potIndex, int prevValue, int newValue)
+void OmxModeGrids::onPotChanged(int potIndex, int prevValue, int newValue, int analogDelta)
 {
+    // Serial.println((String)"AnalogDelta: " + analogDelta);
+
     // Only change page for significant difference
-    bool autoSelectParam = abs(newValue - prevValue) > 1;
+    bool autoSelectParam = analogDelta >= 5;
 
     if (potIndex < 4)
     {

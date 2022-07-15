@@ -14,7 +14,7 @@ public:
 
     virtual void onClockTick() {}
 
-    virtual void onPotChanged(int potIndex, int prevValue, int newValue) = 0;
+    virtual void onPotChanged(int potIndex, int prevValue, int newValue, int analogDelta) = 0;
     virtual void loopUpdate() {}
     virtual void updateLEDs() = 0;
     virtual void onEncoderChanged(Encoder::Update enc) = 0;

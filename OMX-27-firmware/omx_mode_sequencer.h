@@ -15,7 +15,7 @@ public:
 
     void onModeActivated() override;
 
-    void onPotChanged(int potIndex, int prevValue, int newValue) override;
+    void onPotChanged(int potIndex, int prevValue, int newValue, int analogDelta) override;
 
     void loopUpdate() override;
 
