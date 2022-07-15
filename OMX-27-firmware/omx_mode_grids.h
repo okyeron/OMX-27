@@ -66,7 +66,7 @@ private:
     // int gridXKeyChannel = 0; // Gets set by holding first 0-3 keys on bottom
     // int gridYKeyChannel = 0; // Gets set by holding keys 4-7 on bottom
 
-    int gridsXY[4][2];
+    // int gridsXY[4][2];
 
     bool gridsSelected[4] = {false,false,false,false};
 

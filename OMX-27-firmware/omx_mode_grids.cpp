@@ -15,11 +15,11 @@ enum GridModePage {
 
 OmxModeGrids::OmxModeGrids()
 {
-    for (int i = 0; i < 4; i++)
-    {
-        gridsXY[i][0] = grids_.getX(i);
-        gridsXY[i][1] = grids_.getY(i);
-    }
+    // for (int i = 0; i < 4; i++)
+    // {
+    //     gridsXY[i][0] = grids_.getX(i);
+    //     gridsXY[i][1] = grids_.getY(i);
+    // }
 }
 
 void OmxModeGrids::InitSetup()
@@ -131,7 +131,7 @@ void OmxModeGrids::onEncoderChanged(Encoder::Update enc)
                     if (gridsSelected[g])
                     {
                         int newX = constrain(grids_.getX(g) + amt, 0, 255);
-                        gridsXY[g][0] = newX;
+                        // gridsXY[g][0] = newX;
                         grids_.setX(g, newX);
                         gridSel = true;
                     }
@@ -141,7 +141,7 @@ void OmxModeGrids::onEncoderChanged(Encoder::Update enc)
                     for (int g = 0; g < kNumGrids; g++)
                     {
                         int newX = constrain(grids_.getX(g) + amt, 0, 255);
-                        gridsXY[g][0] = newX;
+                        // gridsXY[g][0] = newX;
                         grids_.setX(g, newX);
                     }
                 }
@@ -154,7 +154,7 @@ void OmxModeGrids::onEncoderChanged(Encoder::Update enc)
                     if (gridsSelected[g])
                     {
                         int newY = constrain(grids_.getY(g) + amt, 0, 255);
-                        gridsXY[g][1] = newY;
+                        // gridsXY[g][1] = newY;
                         grids_.setY(g, newY);
                         gridSel = true;
                     }
@@ -164,7 +164,7 @@ void OmxModeGrids::onEncoderChanged(Encoder::Update enc)
                     for (int g = 0; g < kNumGrids; g++)
                     {
                         int newY = constrain(grids_.getY(g) + amt, 0, 255);
-                        gridsXY[g][1] = newY;
+                        // gridsXY[g][1] = newY;
                         grids_.setY(g, newY);
                     }
                 }
@@ -565,8 +565,8 @@ void OmxModeGrids::setupPageLegends()
         omxDisp.legendVals[0] = grids_.accent; // (int)clockbpm;
         if (thisGrid != -1)
         {
-            omxDisp.legendVals[1] = gridsXY[thisGrid][0];
-            omxDisp.legendVals[2] = gridsXY[thisGrid][1];
+            omxDisp.legendVals[1] = grids_.getX(thisGrid);
+            omxDisp.legendVals[2] = grids_.getY(thisGrid);
         }
         omxDisp.legendVals[3] = grids_.chaos;
     }
