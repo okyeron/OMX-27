@@ -84,4 +84,6 @@ private:
 
     bool channelLockView_ = false;
     int lockedChannel_ = 0;
+
+    int prevResolution_ = 0;
 };

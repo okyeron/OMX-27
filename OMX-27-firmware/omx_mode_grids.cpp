@@ -57,10 +57,11 @@ void OmxModeGrids::onPotChanged(int potIndex, int prevValue, int newValue)
     {
         int newres = (float(newValue) / 128.f) * 3;
         grids_.setResolution(newres);
-        if (autoSelectParam)
+        if (newres != prevResolution_)
         {
             omxDisp.displayMessage((String) "Step Res " + newres);
         }
+        prevResolution_ = newres;
     }
 }
 
