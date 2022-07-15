@@ -45,6 +45,8 @@ private:
     void updateLEDsF1();
     void updateLEDsPatterns();
 
+    void updateLEDsChannelView();
+
 
     bool initSetup = false;
     grids::GridsWrapper grids_;

@@ -502,6 +502,52 @@ namespace grids
       tickCount_++;
   }
 
+  ChannelPatternLEDs GridsWrapper::getChannelLEDS(uint8_t channel)
+  {
+      ChannelPatternLEDs channelLeds;
+
+      // uint8_t perturbs;
+
+      for (int i = 0; i < 32; i++)
+      {
+          // const auto step = (i / ticksPerClock * multiplier_) % grids::kStepsPerPattern;
+          const auto step = i;
+          channel_.setStep(step);
+
+          if (channel < num_notes)
+          {
+
+              // if (step == 0)
+              // {
+              //     uint32_t r = randomValue();
+              //     perturbations_[channel] = ((r & 0xFF) * (chaos >> 2)) >> 8;
+              // }
+
+              const uint8_t threshold = ~density_[channel];
+              auto level = channel_.level(channel, x_[channel], y_[channel]);
+              if (level < 255 - perturbations_[channel])
+              {
+                  level += perturbations_[channel];
+              }
+
+              if (level > threshold)
+              {
+                  uint8_t targetLevel = uint8_t(127.f * float(level - threshold) / float(256 - threshold));
+                  uint8_t noteLevel = GridsChannel::U8Mix(127, targetLevel, accent);
+                  channelLeds.levels[i] = noteLevel;
+                  // MM::sendNoteOn(grids_notes[channel], noteLevel, midiChannel_);
+                  // channelTriggered_[channel] = true;
+              }
+              else
+              {
+                  channelLeds.levels[i] = 0;
+              }
+          }
+      }
+
+      return channelLeds;
+  }
+
   void GridsWrapper::setDensity(uint8_t channel, uint8_t density)
   {
       density_[channel] = density;

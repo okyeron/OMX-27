@@ -22,6 +22,11 @@ namespace grids
 
     constexpr uint8_t kStepsPerPattern = 32;
 
+    struct ChannelPatternLEDs
+    {
+        uint8_t levels[kStepsPerPattern];
+    };
+
     class GridsChannel
     {
     public:
@@ -94,6 +99,8 @@ namespace grids
         uint8_t getAccent();
 
         static uint32_t randomValue(uint32_t init = 0);
+
+        ChannelPatternLEDs getChannelLEDS(uint8_t channel);
 
     private:
         GridsChannel channel_;

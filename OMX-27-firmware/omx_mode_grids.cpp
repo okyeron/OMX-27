@@ -423,6 +423,8 @@ void OmxModeGrids::updateLEDsF1()
     bool blinkState = omxLeds.getBlinkState();
     auto keyState = midiSettings.keyState;
 
+    // updateLEDsChannelView();
+
     for (int k = 0; k < 4; k++)
     {
         // Change color of 4 GridX keys when pushed
@@ -433,6 +435,19 @@ void OmxModeGrids::updateLEDsF1()
     for (int k = 4; k < 8; k++)
     {
         strip.setPixelColor(k + 11, LEDOFF);
+    }
+}
+
+void OmxModeGrids::updateLEDsChannelView()
+{
+    auto channelLeds = grids_.getChannelLEDS(0);
+
+    for (int k = 0; k < 16; k++)
+    {
+        // Change color of 4 GridX keys when pushed
+        auto level = channelLeds.levels[k] * 2; 
+        auto kColor = strip.ColorHSV(0,255,level * level);
+        strip.setPixelColor(k + 11, kColor);
     }
 }
 
