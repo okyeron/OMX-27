@@ -21,7 +21,7 @@ void OmxUtil::sendPots(int val, int channel)
     potSettings.potValues[val] = potSettings.potVal;
 }
 
-void OmxUtil::advanceClock(Micros advance)
+void OmxUtil::advanceClock(OmxModeInterface* activeOmxMode, Micros advance)
 {
 	static Micros timeToNextClock = 0;
 	while (advance >= timeToNextClock)
@@ -29,7 +29,13 @@ void OmxUtil::advanceClock(Micros advance)
 		advance -= timeToNextClock;
 
 		MM::sendClock();
-		timeToNextClock = clockConfig.ppqInterval * (PPQ / 24);
+
+        if (activeOmxMode != nullptr)
+        {
+            activeOmxMode->onClockTick();
+        }
+
+        timeToNextClock = clockConfig.ppqInterval * (PPQ / 24);
 	}
 	timeToNextClock -= advance;
 }

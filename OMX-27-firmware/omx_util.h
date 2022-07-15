@@ -1,6 +1,7 @@
 #pragma once
 #include "config.h"
 #include "music_scales.h"
+#include "omx_mode_interface.h"
 
 class OmxUtil
 {
@@ -12,7 +13,7 @@ public:
     void sendPots(int val, int channel);
 
     // #### Clocks, might want to put in own class
-    void advanceClock(Micros advance);
+    void advanceClock(OmxModeInterface* activeOmxMode, Micros advance);
     void advanceSteps(Micros advance);
     void setGlobalSwing(int swng_amt);
     void resetClocks();

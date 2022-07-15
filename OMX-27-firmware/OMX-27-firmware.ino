@@ -225,7 +225,7 @@ void loop()
 		if (sequencer.playing)
 		{
 			omxScreensaver.resetCounter(); // screenSaverCounter = 0;
-			omxUtil.advanceClock(passed);
+			omxUtil.advanceClock(activeOmxMode, passed);
 			omxUtil.advanceSteps(passed);
 		}
 	}

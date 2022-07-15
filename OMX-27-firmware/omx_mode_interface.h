@@ -12,6 +12,8 @@ public:
 
     virtual void onModeActivated() {} // Called whenever entering mode
 
+    virtual void onClockTick() {}
+
     virtual void onPotChanged(int potIndex, int potValue) = 0;
     virtual void loopUpdate() {}
     virtual void updateLEDs() = 0;
