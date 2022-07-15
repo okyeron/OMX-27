@@ -38,19 +38,28 @@ void OmxModeGrids::onClockTick() {
     grids_.gridsTick();
 }
 
-void OmxModeGrids::onPotChanged(int potIndex, int potValue)
+void OmxModeGrids::onPotChanged(int potIndex, int prevValue, int newValue)
 {
+    // Only change page for significant difference
+    bool autoSelectParam = abs(newValue - prevValue) > 2;
+
     if (potIndex < 4)
     {
-        grids_.setDensity(potIndex, potSettings.analogValues[potIndex] * 2);
-        setParam(GRIDS_DENSITY, potIndex + 1);
-        omxDisp.setDirty();
+        grids_.setDensity(potIndex, newValue * 2);
+        if (autoSelectParam)
+        {
+            setParam(GRIDS_DENSITY, potIndex + 1);
+            omxDisp.setDirty();
+        }
     }
     else if (potIndex == 4)
     {
-        int newres = (float(potSettings.analogValues[potIndex]) / 128.f) * 3;
+        int newres = (float(newValue) / 128.f) * 3;
         grids_.setResolution(newres);
-        omxDisp.displayMessage((String)"Step Res " + newres);
+        if (autoSelectParam)
+        {
+            omxDisp.displayMessage((String) "Step Res " + newres);
+        }
     }
 }
 

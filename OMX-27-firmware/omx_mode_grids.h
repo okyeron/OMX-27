@@ -18,7 +18,7 @@ public:
 
     void onClockTick() override;
 
-    void onPotChanged(int potIndex, int potValue) override;
+    void onPotChanged(int potIndex, int prevValue, int newValue) override;
 
     void loopUpdate() override;
 

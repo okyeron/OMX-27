@@ -424,6 +424,7 @@ void readPotentimeters()
 {
 	for (int k = 0; k < potCount; k++)
 	{
+		int prevValue = potSettings.analogValues[k];
 		temp = analogRead(analogPins[k]);
 		potSettings.analog[k]->update(temp);
 
@@ -440,12 +441,12 @@ void readPotentimeters()
 			// do stuff
 			if (sysSettings.screenSaverMode)
 			{
-				omxScreensaver.onPotChanged(k, potSettings.analogValues[k]);
+				omxScreensaver.onPotChanged(k, prevValue, potSettings.analogValues[k]);
 			}
 			else
 			{ // don't send pots in screensaver
 				{
-					activeOmxMode->onPotChanged(k, potSettings.analogValues[k]);
+					activeOmxMode->onPotChanged(k, prevValue, potSettings.analogValues[k]);
 				}
 			}
 		}

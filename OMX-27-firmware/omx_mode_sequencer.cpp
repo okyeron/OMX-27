@@ -18,7 +18,7 @@ void OmxModeSequencer::onModeActivated()
     }
 }
 
-void OmxModeSequencer::onPotChanged(int potIndex, int potValue)
+void OmxModeSequencer::onPotChanged(int potIndex, int prevValue, int newValue)
 {
     if (seqConfig.noteSelect && seqConfig.noteSelection)
     { // note selection - do P-Locks
