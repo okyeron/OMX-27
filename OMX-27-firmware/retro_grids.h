@@ -104,6 +104,9 @@ namespace grids
 
         uint8_t getSeqPos();
 
+        bool getChannelTriggered(int chanIndex);
+
+
     private:
         GridsChannel channel_;
         uint32_t divider_;

@@ -555,6 +555,12 @@ namespace grids
       return step;
   }
 
+  bool GridsWrapper::getChannelTriggered(int chanIndex)
+  {
+    if(chanIndex < 0 || chanIndex >= num_notes) return false;
+    return channelTriggered_[chanIndex];
+  }
+
   void GridsWrapper::setDensity(uint8_t channel, uint8_t density)
   {
       density_[channel] = density;

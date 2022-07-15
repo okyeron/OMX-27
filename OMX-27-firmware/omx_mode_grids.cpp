@@ -372,6 +372,16 @@ void OmxModeGrids::onKeyUpdate(OMXKeypadEvent e)
             gridsSelected[thisKey - 15] = false;
             omxDisp.setDirty();
         }
+
+        // Select Grid X param
+        if (e.down() && thisKey == 23) // Accent
+        {
+            setParam(GRIDS_XY, 1);
+        }
+        else if (e.down() && thisKey == 24) // Xaos
+        {
+            setParam(GRIDS_XY, 4);
+        }
     }
     if(f1_)
     {
@@ -571,16 +581,30 @@ void OmxModeGrids::updateLEDsFNone()
     for (int k = 0; k < 4; k++)
     {
         // Change color of 4 GridX keys when pushed
-        auto kColor = keyState[k + 11] ? (blinkState ? paramSelColors[k] : LEDOFF) : PINK;
+        // auto kColor = keyState[k + 11] ? (blinkState ? paramSelColors[k] : LEDOFF) : PINK;
+        auto kColor = keyState[k + 11] ? (blinkState ? paramSelColors[k] : LEDOFF) : RED;
+
         strip.setPixelColor(k + 11, kColor);
     }
 
     for (int k = 4; k < 8; k++)
     {
         // Change color of 4 GridY keys when pushed
-        auto kColor = keyState[k + 11] ? (blinkState ? paramSelColors[k % 4] : LEDOFF) : LTCYAN;
+        auto kColor = keyState[k + 11] ? (blinkState ? paramSelColors[k % 4] : LEDOFF) : GREEN;
+        // auto kColor = keyState[k + 11] ? (blinkState ? paramSelColors[k % 4] : LEDOFF) : LTCYAN;
         strip.setPixelColor(k + 11, kColor);
     }
+
+    for (int k = 0; k < 4; k++)
+    {
+        bool triggered = grids_.getChannelTriggered(k);
+        // Change color of 4 GridY keys when pushed
+        auto kColor = triggered ? paramSelColors[k] : LEDOFF;
+        strip.setPixelColor(k + 19, kColor);
+    }
+
+    strip.setPixelColor(23, (keyState[23] ? LBLUE : BLUE)); // Accent
+    strip.setPixelColor(24, (keyState[24] ? WHITE : ORANGE)); // Xaos
 }
 
 void OmxModeGrids::updateLEDsF1()
