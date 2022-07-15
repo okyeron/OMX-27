@@ -95,6 +95,14 @@ void OmxModeGrids::setParam(int paramIndex)
         param = (paramIndex + kNumParams) % kNumParams;
     }
     page = param / NUM_DISP_PARAMS;
+
+    if(instLockView_ && page == GRIDS_DENSITY)
+    {
+        int pIndex = param % NUM_DISP_PARAMS;
+        if(pIndex > 0){
+            lockedInst_ = pIndex - 1;
+        }
+    }
 }
 
 void OmxModeGrids::onEncoderChanged(Encoder::Update enc)
@@ -139,10 +147,10 @@ void OmxModeGrids::onEncoderChanged(Encoder::Update enc)
             }
             else if (paramStep == 2) // GridX
             {
-                if(channelLockView_)
+                if(instLockView_)
                 {
-                    int newX = constrain(grids_.getX(lockedChannel_) + amt, 0, 255);
-                    grids_.setX(lockedChannel_, newX);
+                    int newX = constrain(grids_.getX(lockedInst_) + amt, 0, 255);
+                    grids_.setX(lockedInst_, newX);
                 }
                 else{ 
                     bool gridSel = false;
@@ -152,28 +160,30 @@ void OmxModeGrids::onEncoderChanged(Encoder::Update enc)
                         if (gridsSelected[g])
                         {
                             int newX = constrain(grids_.getX(g) + amt, 0, 255);
-                            // gridsXY[g][0] = newX;
                             grids_.setX(g, newX);
                             gridSel = true;
                         }
                     }
-                    if (!gridSel) // No grids selected, modify all
+                    if (!gridSel) // No grids selected, modify 0
                     {
-                        for (int g = 0; g < kNumGrids; g++)
-                        {
-                            int newX = constrain(grids_.getX(g) + amt, 0, 255);
-                            // gridsXY[g][0] = newX;
-                            grids_.setX(g, newX);
-                        }
+                        int newX = constrain(grids_.getX(0) + amt, 0, 255);
+                        grids_.setX(0, newX);
+
+                        // for (int g = 0; g < kNumGrids; g++)
+                        // {
+                        //     int newX = constrain(grids_.getX(g) + amt, 0, 255);
+                        //     // gridsXY[g][0] = newX;
+                        //     grids_.setX(g, newX);
+                        // }
                     }
                 }
             }
             else if (paramStep == 3) // GridY
             {
-                if (channelLockView_)
+                if (instLockView_)
                 {
-                    int newY = constrain(grids_.getY(lockedChannel_) + amt, 0, 255);
-                    grids_.setY(lockedChannel_, newY);
+                    int newY = constrain(grids_.getY(lockedInst_) + amt, 0, 255);
+                    grids_.setY(lockedInst_, newY);
                 }
                 else
                 {
@@ -183,19 +193,20 @@ void OmxModeGrids::onEncoderChanged(Encoder::Update enc)
                         if (gridsSelected[g])
                         {
                             int newY = constrain(grids_.getY(g) + amt, 0, 255);
-                            // gridsXY[g][1] = newY;
                             grids_.setY(g, newY);
                             gridSel = true;
                         }
                     }
-                    if (!gridSel) // No grids selected, modify all
+                    if (!gridSel) // No grids selected, modify 0
                     {
-                        for (int g = 0; g < kNumGrids; g++)
-                        {
-                            int newY = constrain(grids_.getY(g) + amt, 0, 255);
-                            // gridsXY[g][1] = newY;
-                            grids_.setY(g, newY);
-                        }
+                        int newY = constrain(grids_.getY(0) + amt, 0, 255);
+                        grids_.setY(0, newY);
+
+                        // for (int g = 0; g < kNumGrids; g++)
+                        // {
+                        //     int newY = constrain(grids_.getY(g) + amt, 0, 255);
+                        //     grids_.setY(g, newY);
+                        // }
                     }
                 }
             }
@@ -290,7 +301,7 @@ void OmxModeGrids::loadActivePattern(int pattIndex)
 
 void OmxModeGrids::onKeyUpdate(OMXKeypadEvent e)
 {
-    if (channelLockView_)
+    if (instLockView_)
     {
         onKeyUpdateChanLock(e);
         return;
@@ -367,12 +378,7 @@ void OmxModeGrids::onKeyUpdate(OMXKeypadEvent e)
         // Quick Select Note
         if (e.down() && (thisKey > 10 && thisKey < 15))
         {
-            channelLockView_ = true;
-            lockedChannel_ = thisKey - 11;
-            // justLocked_ = true; // Uncomment to immediately switch to channel view
-            setParam(GRIDS_DENSITY, lockedChannel_ + 1);
-            omxDisp.displayMessage((String)"Chan " + (lockedChannel_ + 1));
-            omxDisp.setDirty();
+            quickSelectInst(thisKey - 11);
         }
         // else if (!e.down() && (thisKey > 10 && thisKey < 15))
         // {
@@ -401,7 +407,7 @@ void OmxModeGrids::onKeyUpdateChanLock(OMXKeypadEvent e)
     {
         if (e.down() && thisKey == 0) // Aux key down
         {
-            channelLockView_ = false; // Exit out of channel lock
+            instLockView_ = false; // Exit out of channel lock
         }
         // else if (e.down() && e.clicks() == 0 && (thisKey > 2 && thisKey < 11))
         // {
@@ -448,14 +454,19 @@ void OmxModeGrids::onKeyUpdateChanLock(OMXKeypadEvent e)
         // Quick Select Note
         if (e.down() && (thisKey > 10 && thisKey < 15))
         {
-            channelLockView_ = true;
-            // justLocked_ = true; // Uncomment to immediately switch to channel view
-            lockedChannel_ = thisKey - 11;
-            setParam(GRIDS_DENSITY, lockedChannel_ + 1);
-            omxDisp.displayMessage((String)"Chan " + (lockedChannel_ + 1));
-            omxDisp.setDirty();
+            quickSelectInst(thisKey - 11);
         }
     }
+}
+
+void OmxModeGrids::quickSelectInst(int instIndex)
+{
+    instLockView_ = true;
+    // justLocked_ = true; // Uncomment to immediately switch to channel view
+    lockedInst_ = instIndex;
+    setParam(GRIDS_DENSITY, lockedInst_ + 1);
+    omxDisp.displayMessage((String) "Inst " + (lockedInst_ + 1));
+    omxDisp.setDirty();
 }
 
 void OmxModeGrids::onKeyHeldUpdate(OMXKeypadEvent e)
@@ -468,15 +479,37 @@ void OmxModeGrids::updateLEDs()
 
     bool blinkState = omxLeds.getBlinkState();
 
-    if (gridsAUX)
+    if (instLockView_)
     {
-        // Blink left/right keys for octave select indicators.
-        auto color1 = blinkState ? LIME : LEDOFF;
+        int64_t instLockColor =  paramSelColors[lockedInst_];
+
+        // Always blink to show you're in mode, don't need differation between playing or not since the playhead makes this obvious
+        auto color1 = blinkState ? instLockColor : LEDOFF;
         strip.setPixelColor(0, color1);
+
+        // if (sequencer.playing)
+        // {
+        //     // Blink left/right keys for octave select indicators.
+        //     auto color1 = blinkState ? instLockColor : LEDOFF;
+        //     strip.setPixelColor(0, color1);
+        // }
+        // else
+        // {
+        //     strip.setPixelColor(0, instLockColor);
+        // }
     }
     else
     {
-        strip.setPixelColor(0, LEDOFF);
+        if (sequencer.playing)
+        {
+            // Blink left/right keys for octave select indicators.
+            auto color1 = blinkState ? LIME : LEDOFF;
+            strip.setPixelColor(0, color1);
+        }
+        else
+        {
+            strip.setPixelColor(0, LEDOFF);
+        }
     }
 
     // Function Keys
@@ -496,7 +529,7 @@ void OmxModeGrids::updateLEDs()
     }
 
 
-    if (channelLockView_)
+    if (instLockView_)
     {
         updateLEDsChannelView();
     }
@@ -575,6 +608,13 @@ void OmxModeGrids::updateLEDsChannelView()
     // bool blinkState = omxLeds.getBlinkState();
     auto keyState = midiSettings.keyState;
 
+    int seqPos = 0;
+
+    if (sequencer.playing)
+    {
+        seqPos = grids_.getSeqPos();
+    }
+
     if (f1_ && !justLocked_)
     {
         updateLEDsF1();
@@ -610,23 +650,24 @@ void OmxModeGrids::updateLEDsChannelView()
             }
         }
 
-        auto channelLeds = grids_.getChannelLEDS(lockedChannel_);
+        auto channelLeds = grids_.getChannelLEDS(lockedInst_);
 
-        auto channelHue = chanLockHues_[lockedChannel_];
+        auto channelHue = instLockHues_[lockedInst_];
+
+        auto seqStart = seqPos >= 16 ? 16 : 0;
 
         for (int k = 0; k < 16; k++)
         {
             // Change color of 4 GridX keys when pushed
-            auto level = channelLeds.levels[k] * 2;
+            auto level = channelLeds.levels[seqStart + k] * 2;
             auto kColor = strip.ColorHSV(channelHue, 255, level);
             strip.setPixelColor(k + 11, kColor);
         }
 
         if(sequencer.playing)
         {
-            auto seqPos = grids_.getSeqPos() % 16;
-
-            strip.setPixelColor(seqPos + 11, LTYELLOW);
+            auto seq16 = seqPos % 16;
+            strip.setPixelColor(seq16 + 11, LTYELLOW);
         }
     }
 }
@@ -686,9 +727,9 @@ void OmxModeGrids::setupPageLegends()
         int targetChannel = 0;
         bool setLegendsToChannel = false;
 
-        if (channelLockView_)
+        if (instLockView_)
         {
-            targetChannel = lockedChannel_;
+            targetChannel = lockedInst_;
             setLegendsToChannel = true;
         }
         else
@@ -708,13 +749,17 @@ void OmxModeGrids::setupPageLegends()
 
             if (selGridsCount == 0)
             {
-                omxDisp.legends[1] = "X All";
-                omxDisp.legends[2] = "Y All";
                 targetChannel = 0;
+                setLegendsToChannel = true;
             }
             else if (selGridsCount == 1)
             {
                 setLegendsToChannel = true;
+            }
+            else if (selGridsCount == 4)
+            {
+                omxDisp.legends[1] = "X All";
+                omxDisp.legends[2] = "Y All";
             }
             else
             {

@@ -51,6 +51,7 @@ private:
     void saveActivePattern(int pattIndex);
     void loadActivePattern(int pattIndex);
 
+    void quickSelectInst(int instIndex);
 
 
     bool initSetup = false;
@@ -85,10 +86,10 @@ private:
     bool f3_;
     bool fNone_;
 
-    bool channelLockView_ = false;
+    bool instLockView_ = false;
     bool justLocked_ = false;
-    int lockedChannel_ = 0;
-    uint16_t chanLockHues_[4] = {300, 30, 0, 210};
+    int lockedInst_ = 0;
+    uint16_t instLockHues_[4] = {300, 30, 0, 210};
 
 
     int prevResolution_ = 0;
