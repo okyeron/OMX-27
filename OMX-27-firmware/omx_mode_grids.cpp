@@ -658,15 +658,15 @@ void OmxModeGrids::updateLEDsChannelView()
             }
             else if (j == 6) // ChanX
             {
-                strip.setPixelColor(j, (keyState[5] ? LBLUE : RED));
+                strip.setPixelColor(j, (keyState[6] ? LBLUE : RED));
             }
             else if (j == 7) // Chan Y
             {
-                strip.setPixelColor(j, (keyState[5] ? WHITE : GREEN));
+                strip.setPixelColor(j, (keyState[7] ? WHITE : GREEN));
             }
             else if (j == 8) // Chaos
             {
-                strip.setPixelColor(j,  (keyState[5] ? WHITE : ORANGE));
+                strip.setPixelColor(j,  (keyState[8] ? WHITE : ORANGE));
             }
             else
             {
