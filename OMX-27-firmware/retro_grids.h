@@ -102,6 +102,8 @@ namespace grids
 
         ChannelPatternLEDs getChannelLEDS(uint8_t channel);
 
+        uint8_t getSeqPos();
+
     private:
         GridsChannel channel_;
         uint32_t divider_;

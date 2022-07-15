@@ -81,6 +81,7 @@ void OmxModeGrids::setParam(int pageIndex, int paramPosition)
 {
     int p = pageIndex * NUM_DISP_PARAMS + paramPosition;
     setParam(p);
+    omxDisp.setDirty();
 }
 
 void OmxModeGrids::setParam(int paramIndex)
@@ -368,8 +369,9 @@ void OmxModeGrids::onKeyUpdate(OMXKeypadEvent e)
         {
             channelLockView_ = true;
             lockedChannel_ = thisKey - 11;
+            // justLocked_ = true; // Uncomment to immediately switch to channel view
+            setParam(GRIDS_DENSITY, lockedChannel_ + 1);
             omxDisp.displayMessage((String)"Chan " + (lockedChannel_ + 1));
-            // setParam(GRIDS_NOTES, thisKey - 10);
             omxDisp.setDirty();
         }
         // else if (!e.down() && (thisKey > 10 && thisKey < 15))
@@ -401,74 +403,58 @@ void OmxModeGrids::onKeyUpdateChanLock(OMXKeypadEvent e)
         {
             channelLockView_ = false; // Exit out of channel lock
         }
-        else if (e.down() && e.clicks() == 0 && (thisKey > 2 && thisKey < 11))
-        {
-            int patt = thisKey - 3;
+        // else if (e.down() && e.clicks() == 0 && (thisKey > 2 && thisKey < 11))
+        // {
+        //     int patt = thisKey - 3;
             
-            if (f2_)
-            { 
-                saveActivePattern(patt);
-            }
-            else if(fNone_)
-            {
-                loadActivePattern(patt);
-            }
-        }
+        //     if (f2_)
+        //     { 
+        //         saveActivePattern(patt);
+        //     }
+        //     else if(fNone_)
+        //     {
+        //         loadActivePattern(patt);
+        //     }
+        // }
+    }
+
+    if (!f1_)
+    {
+        justLocked_ = false; // False once F1 released
     }
 
     if (fNone_)
     {
-        // // Select Grid X param
-        // if (e.down() && (thisKey > 10 && thisKey < 15))
-        // {
-        //     gridsSelected[thisKey - 11] = true;
-        //     setParam(GRIDS_XY, 2);
-        //     omxDisp.setDirty();
-        // }
-        // else if (!e.down() && (thisKey > 10 && thisKey < 15))
-        // {
-        //     gridsSelected[thisKey - 11] = false;
-        //     omxDisp.setDirty();
-        // }
-
-        // // Select Grid Y param
-        // if (e.down() && (thisKey > 14 && thisKey < 19))
-        // {
-        //     gridsSelected[thisKey - 15] = true;
-        //     setParam(GRIDS_XY, 3);
-        //     omxDisp.setDirty();
-        // }
-        // else if (!e.down() && (thisKey > 14 && thisKey < 19))
-        // {
-        //     gridsSelected[thisKey - 15] = false;
-        //     omxDisp.setDirty();
-        // }
+        // Select Grid X param
+        if (e.down() && thisKey == 5) // Accent
+        {
+            setParam(GRIDS_XY, 1);
+        }
+        if (e.down() && thisKey == 6) // Chan X
+        {
+            setParam(GRIDS_XY, 2);
+        }
+        if (e.down() && thisKey == 7) // Chan Y
+        {
+            setParam(GRIDS_XY, 3);
+        }
+        if (e.down() && thisKey == 8) // Xaos
+        {
+            setParam(GRIDS_XY, 4);
+        }
     }
-    if(f1_)
+    if(f1_ && !justLocked_)
     {
-        // // Quick Select Note
-        // if (e.down() && (thisKey > 10 && thisKey < 15))
-        // {
-        //     channelLockView_ = true;
-        //     lockedChannel = thisKey - 11;
-        //     omxDisp.displayMessage((String)"Chan " + (lockedChannel + 1));
-        //     // setParam(GRIDS_NOTES, thisKey - 10);
-        //     omxDisp.setDirty();
-        // }
-        // else if (!e.down() && (thisKey > 10 && thisKey < 15))
-        // {
-        // }
-
-        // Select Grid Y param
-        // if (e.down() && (thisKey > 14 && thisKey < 19))
-        // {
-        //     setParam(GRIDS_NOTES * NUM_DISP_PARAMS + (thisKey - 14));
-        //     omxDisp.setDirty();
-        // }
-        // else if (!e.down() && (thisKey > 14 && thisKey < 19))
-        // {
-            
-        // }
+        // Quick Select Note
+        if (e.down() && (thisKey > 10 && thisKey < 15))
+        {
+            channelLockView_ = true;
+            // justLocked_ = true; // Uncomment to immediately switch to channel view
+            lockedChannel_ = thisKey - 11;
+            setParam(GRIDS_DENSITY, lockedChannel_ + 1);
+            omxDisp.displayMessage((String)"Chan " + (lockedChannel_ + 1));
+            omxDisp.setDirty();
+        }
     }
 }
 
@@ -509,13 +495,6 @@ void OmxModeGrids::updateLEDs()
         strip.setPixelColor(2, f2Color);
     }
 
-    updateLEDsPatterns();
-
-    // Set 16 key leds to off to prevent them from sticking on after screensaver. 
-    for (int k = 0; k < 16; k++)
-    {
-        strip.setPixelColor(k + 11, LEDOFF);
-    }
 
     if (channelLockView_)
     {
@@ -523,6 +502,14 @@ void OmxModeGrids::updateLEDs()
     }
     else
     {
+        updateLEDsPatterns();
+
+        // Set 16 key leds to off to prevent them from sticking on after screensaver. 
+        for (int k = 0; k < 16; k++)
+        {
+            strip.setPixelColor(k + 11, LEDOFF);
+        }
+
         if (fNone_ || f2_)
             updateLEDsFNone();
         else if (f1_)
@@ -585,16 +572,62 @@ void OmxModeGrids::updateLEDsF1()
 
 void OmxModeGrids::updateLEDsChannelView()
 {
-    auto channelLeds = grids_.getChannelLEDS(lockedChannel_);
+    // bool blinkState = omxLeds.getBlinkState();
+    auto keyState = midiSettings.keyState;
 
-    auto channelHue = chanLockHues_[lockedChannel_];
-
-    for (int k = 0; k < 16; k++)
+    if (f1_ && !justLocked_)
     {
-        // Change color of 4 GridX keys when pushed
-        auto level = channelLeds.levels[k] * 2; 
-        auto kColor = strip.ColorHSV(channelHue, 255, level);
-        strip.setPixelColor(k + 11, kColor);
+        updateLEDsF1();
+        for (int j = 3; j < LED_COUNT - 16; j++)
+        {
+            strip.setPixelColor(j, LEDOFF);
+        }
+    }
+    else
+    {
+        // Shortcut LEDS for top row
+        for (int j = 3; j < LED_COUNT - 16; j++)
+        {
+            if (j == 5) // Accent
+            {
+                strip.setPixelColor(j, (keyState[5] ? LBLUE : BLUE));
+            }
+            else if (j == 6) // ChanX
+            {
+                strip.setPixelColor(j, (keyState[5] ? LBLUE : RED));
+            }
+            else if (j == 7) // Chan Y
+            {
+                strip.setPixelColor(j, (keyState[5] ? WHITE : GREEN));
+            }
+            else if (j == 8) // Chaos
+            {
+                strip.setPixelColor(j,  (keyState[5] ? WHITE : ORANGE));
+            }
+            else
+            {
+                strip.setPixelColor(j, LEDOFF);
+            }
+        }
+
+        auto channelLeds = grids_.getChannelLEDS(lockedChannel_);
+
+        auto channelHue = chanLockHues_[lockedChannel_];
+
+        for (int k = 0; k < 16; k++)
+        {
+            // Change color of 4 GridX keys when pushed
+            auto level = channelLeds.levels[k] * 2;
+            auto kColor = strip.ColorHSV(channelHue, 255, level);
+            strip.setPixelColor(k + 11, kColor);
+        }
+
+        if(sequencer.playing)
+        {
+            auto seqPos = grids_.getSeqPos() % 16;
+
+            strip.setPixelColor(seqPos + 11, LTYELLOW);
+        }
     }
 }
 

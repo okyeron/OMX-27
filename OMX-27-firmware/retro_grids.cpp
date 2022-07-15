@@ -548,6 +548,13 @@ namespace grids
       return channelLeds;
   }
 
+  uint8_t GridsWrapper::getSeqPos()
+  {
+      uint32_t ticksPerClock = 3 << divider_;
+      uint8_t step = (tickCount_ / ticksPerClock * multiplier_) % grids::kStepsPerPattern;
+      return step;
+  }
+
   void GridsWrapper::setDensity(uint8_t channel, uint8_t density)
   {
       density_[channel] = density;

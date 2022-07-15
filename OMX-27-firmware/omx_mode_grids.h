@@ -86,6 +86,7 @@ private:
     bool fNone_;
 
     bool channelLockView_ = false;
+    bool justLocked_ = false;
     int lockedChannel_ = 0;
     uint16_t chanLockHues_[4] = {300, 30, 0, 210};
 
