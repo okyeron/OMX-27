@@ -1,5 +1,5 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
-// v 1.6.0
+// v 1.7.0beta
 //
 // Steven Noreyko, Last update: July 2022
 //
@@ -8,7 +8,7 @@
 //	John Park and Gerald Stevens for initial testing and feature ideas
 //	mzero for immense amounts of code coaching/assistance
 //	drjohn for support
-//  Additional code contributions: Matt Boone, Steven Zydek, Chris Atkins, Will Winder
+//  Additional code contributions: Matt Boone, Steven Zydek, Chris Atkins, Will Winder, Michael P Jones
 
 #include <functional>
 #include <ResponsiveAnalogRead.h>
