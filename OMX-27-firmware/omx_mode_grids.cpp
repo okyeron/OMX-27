@@ -41,7 +41,7 @@ void OmxModeGrids::onClockTick() {
 void OmxModeGrids::onPotChanged(int potIndex, int prevValue, int newValue)
 {
     // Only change page for significant difference
-    bool autoSelectParam = abs(newValue - prevValue) > 2;
+    bool autoSelectParam = abs(newValue - prevValue) > 1;
 
     if (potIndex < 4)
     {
@@ -49,8 +49,9 @@ void OmxModeGrids::onPotChanged(int potIndex, int prevValue, int newValue)
         if (autoSelectParam)
         {
             setParam(GRIDS_DENSITY, potIndex + 1);
-            omxDisp.setDirty();
         }
+
+        omxDisp.setDirty();
     }
     else if (potIndex == 4)
     {
