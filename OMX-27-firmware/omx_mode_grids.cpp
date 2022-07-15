@@ -587,11 +587,13 @@ void OmxModeGrids::updateLEDsChannelView()
 {
     auto channelLeds = grids_.getChannelLEDS(lockedChannel_);
 
+    auto channelHue = chanLockHues_[lockedChannel_];
+
     for (int k = 0; k < 16; k++)
     {
         // Change color of 4 GridX keys when pushed
         auto level = channelLeds.levels[k] * 2; 
-        auto kColor = strip.ColorHSV(0,255,level * level);
+        auto kColor = strip.ColorHSV(channelHue, 255, level);
         strip.setPixelColor(k + 11, kColor);
     }
 }

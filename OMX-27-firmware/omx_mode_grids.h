@@ -65,6 +65,9 @@ private:
 
     uint32_t paramSelColors[4] = {MAGENTA, ORANGE, RED, RBLUE};
 
+
+
+
     int page = 0;
     int param = 0;
 
@@ -84,6 +87,8 @@ private:
 
     bool channelLockView_ = false;
     int lockedChannel_ = 0;
+    uint16_t chanLockHues_[4] = {300, 30, 0, 210};
+
 
     int prevResolution_ = 0;
 };
