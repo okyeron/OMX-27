@@ -381,6 +381,12 @@ void OmxModeGrids::updateLEDs()
 
     updateLEDsPatterns();
 
+    // Set 16 key leds to off to prevent them from sticking on after screensaver. 
+    for (int k = 0; k < 16; k++)
+    {
+        strip.setPixelColor(k + 11, LEDOFF);
+    }
+
     if(fNone_ || f2_) updateLEDsFNone();
     else if(f1_) updateLEDsF1();
 
