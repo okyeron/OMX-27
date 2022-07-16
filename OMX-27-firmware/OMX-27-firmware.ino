@@ -596,7 +596,7 @@ void savePatterns(void)
 	int patternSize = serializedPatternSize(storage->isEeprom());
 	int nLocalAddress = EEPROM_PATTERN_ADDRESS;
 
-	Serial.println((String)"Seq patternSize: " + patternSize);
+	// Serial.println((String)"Seq patternSize: " + patternSize);
 
 	for (int i = 0; i < NUM_PATTERNS; i++)
 	{
@@ -609,14 +609,14 @@ void savePatterns(void)
 		nLocalAddress += patternSize;
 	}
 
-	Serial.println((String)"nLocalAddress: " + nLocalAddress);
+	// Serial.println((String)"nLocalAddress: " + nLocalAddress);
 
 	// Grids patterns
 	patternSize = OmxModeGrids::serializedPatternSize(storage->isEeprom());
 	int numPatterns = OmxModeGrids::getNumPatterns();
 
-	Serial.println((String)"OmxModeGrids patternSize: " + patternSize);
-	Serial.println((String)"numPatterns: " + numPatterns);
+	// Serial.println((String)"OmxModeGrids patternSize: " + patternSize);
+	// Serial.println((String)"numPatterns: " + numPatterns);
 
 	for (int i = 0; i < numPatterns; i++)
 	{
@@ -629,13 +629,15 @@ void savePatterns(void)
 		nLocalAddress += patternSize;
 	}
 
-	Serial.println((String)"nLocalAddress: " + nLocalAddress);
+	// Serial.println((String)"nLocalAddress: " + nLocalAddress);
 
 	// Seq patternSize: 715
 	// nLocalAddress: 5752
+	// size of patterns: 5720
 	// OmxModeGrids patternSize: 23
 	// numPatterns: 8
 	// nLocalAddress: 5936
+	// size of grids: 184
 }
 
 void loadPatterns(void)
@@ -656,6 +658,9 @@ void loadPatterns(void)
 
 		nLocalAddress += patternSize;
 	}
+
+	// 332 - eeprom size
+	// 332 * 8 = 2656
 
 	// Grids patterns
 	patternSize = OmxModeGrids::serializedPatternSize(storage->isEeprom());
