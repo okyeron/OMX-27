@@ -662,7 +662,7 @@ void OmxModeGrids::updateLEDsFNone()
 
     strip.setPixelColor(23, (keyState[23] ? LBLUE : BLUE)); // Accent
     strip.setPixelColor(24, (keyState[24] ? WHITE : ORANGE)); // Xaos
-    strip.setPixelColor(26, (keyState[26] ? LTYELLOW : YELLOW)); // BPM
+    strip.setPixelColor(26, (keyState[26] ? WHITE : MAGENTA)); // BPM
 
 }
 
