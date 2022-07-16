@@ -1209,7 +1209,7 @@ void OmxModeSequencer::onDisplayUpdate()
                     omxDisp.legends[3] = "CV";                                   // cvPattern
                     omxDisp.legendVals[0] = sequencer.getCurrentPattern()->solo; // playingPattern+1;
                     omxDisp.legendVals[1] = sequencer.getPatternLength(sequencer.playingPattern);
-                    // omxDisp.legendVals[2] = -127;
+                    omxDisp.legendVals[2] = -127;
                     omxDisp.legendText[2] = mdivs[sequencer.getCurrentPattern()->clockDivMultP];
                     omxDisp.legendVals[3] = -127; // TODO is this right?
                     if (sequencer.getCurrentPattern()->sendCV)
