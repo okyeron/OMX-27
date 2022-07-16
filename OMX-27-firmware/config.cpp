@@ -30,6 +30,8 @@ const int LED_COUNT = 27;
 	const int analogPins[] = {A10,22,21,20,16}; // on 1.0
 #endif
 
+const int potCount = NUM_CC_POTS;
+
 int pots[NUM_CC_BANKS][NUM_CC_POTS] = {
 	{CC1,CC2,CC3,CC4,CC5},
 	{29,30,31,32,33},
@@ -73,3 +75,17 @@ const int steps[] = {0,
 11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26};
 
 const int midiKeyMap[] = {12,1,13,2,14,15,3,16,4,17,5,18,19,6,20,7,21,22,8,23,9,24,10,25,26};
+
+bool m8mutesolo[] = {false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false};
+
+SysSettings sysSettings;
+PotSettings potSettings;
+MidiConfig midiSettings;
+MidiPage midiPageParams;
+MidiMacroConfig midiMacroConfig;
+EncoderConfig encoderConfig;
+ClockConfig clockConfig;
+SequencerConfig seqConfig;
+SequencerPage seqPageParams;
+ColorConfig colorConfig;
+

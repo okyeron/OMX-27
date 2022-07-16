@@ -6,36 +6,38 @@
 #include "colors.h"
 #include "MM.h"
 #include "noteoffs.h"
+#include "omx_disp.h"
+#include "omx_leds.h"
+#include "omx_util.h"
 
 // globals in main ino
 extern SequencerState sequencer;
-extern SysSettings sysSettings;
+// extern SysSettings sysSettings;
 
 // extern int midiChannel;
-extern int selectedStep;
+// extern int omxSeqselectedStep;
 
-extern Adafruit_NeoPixel strip;
+// extern Adafruit_NeoPixel strip;
 
-extern volatile unsigned long step_micros;
-extern volatile unsigned long noteon_micros;
-extern volatile unsigned long noteoff_micros;
-extern volatile unsigned long ppqInterval;
+// extern volatile unsigned long omxseqstep_micros;
+// extern volatile unsigned long seqConfig.noteon_micros;
+// extern volatile unsigned long noteoff_micros;
+// extern volatile unsigned long ppqInterval;
 
-extern int octave;			// default C4 is 0 - range is -4 to +5
-extern int midiKeyState[27];
-extern bool dirtyPixels;
-extern bool dirtyDisplay;
-extern PendingNoteOffs pendingNoteOffs;
-extern int potbank;
-extern int potValues[];
-extern int prevPlock[];
-extern int defaultVelocity;
+// extern int octave;			// default C4 is 0 - range is -4 to +5
+// extern int midiKeyState[27];
+// extern bool dirtyPixels;
+// extern bool dirtyDisplay;
+// extern PendingNoteOffs pendingNoteOffs; // in noteoffs.h
+// extern int potbank;
+// extern int potValues[];
+// extern int prevPlock[];
+// extern int defaultVelocity;
 
 // funcs in main ino
-extern void show_current_step(int patternNum);
-extern void cvNoteOn(int notenum);
-extern void cvNoteOff();
-extern StepNote* getSelectedStep();
+// extern void show_current_step(int patternNum);
+
+// extern StepNote* getSelectedStep();
 
 // globals from sequencer.h
 uint8_t lastNote[NUM_PATTERNS][NUM_STEPS] = {
@@ -156,7 +158,7 @@ int serializedPatternSize(bool eeprom) {
 }
 
 StepNote* getSelectedStep() {
-	return &sequencer.getCurrentPattern()->steps[selectedStep];
+	return &sequencer.getCurrentPattern()->steps[seqConfig.selectedStep];
 }
 
 void step_ahead() {
@@ -349,134 +351,152 @@ void step_off(int patternNum, int position){
 //	digitalWrite(CVGATE_PIN, LOW);
 }
 
-void doStep() {
-// // probability test
+void doStepS1()
+{
+	// // probability test
 	bool testProb = probResult(sequencer.getCurrentPattern()->steps[sequencer.seqPos[sequencer.playingPattern]].prob);
 
-	switch(sysSettings.omxMode){
-		case MODE_S1:
-			if(sequencer.playing) {
-				unsigned long playstepmicros = micros();
+	if (sequencer.playing)
+	{
+		unsigned long playstepmicros = micros();
 
-				for (int j=0; j<NUM_PATTERNS; j++){  // check all patterns for notes to play in time
-					// CLOCK PER PATTERN BASED APPROACH
-					auto pattern = sequencer.getPattern(j);
+		for (int j = 0; j < NUM_PATTERNS; j++)
+		{ // check all patterns for notes to play in time
+			// CLOCK PER PATTERN BASED APPROACH
+			auto pattern = sequencer.getPattern(j);
 
-					// TODO: refactor timePerPattern stuff into sequencer.h
+			// TODO: refactor timePerPattern stuff into sequencer.h
 
-					if (playstepmicros >= sequencer.timePerPattern[j].nextStepTimeP) {
+			if (playstepmicros >= sequencer.timePerPattern[j].nextStepTimeP)
+			{
 
-						seqReset(); // check for seqReset
-						sequencer.timePerPattern[j].lastStepTimeP = sequencer.timePerPattern[j].nextStepTimeP;
-						sequencer.timePerPattern[j].nextStepTimeP += (step_micros)*( multValues[sequencer.getPattern(j)->clockDivMultP] ); // calc step based on rate
+				seqReset(); // check for seqReset
+				sequencer.timePerPattern[j].lastStepTimeP = sequencer.timePerPattern[j].nextStepTimeP;
+				sequencer.timePerPattern[j].nextStepTimeP += (clockConfig.step_micros) * (multValues[sequencer.getPattern(j)->clockDivMultP]); // calc step based on rate
 
-						sequencer.timePerPattern[j].lastPosP = (sequencer.seqPos[j] + 15) % 16;
-						if (lastNote[j][sequencer.timePerPattern[j].lastPosP] > 0) {
-							step_off(j, sequencer.timePerPattern[j].lastPosP);
+				sequencer.timePerPattern[j].lastPosP = (sequencer.seqPos[j] + 15) % 16;
+				if (lastNote[j][sequencer.timePerPattern[j].lastPosP] > 0)
+				{
+					step_off(j, sequencer.timePerPattern[j].lastPosP);
+				}
+				if (testProb)
+				{
+					if (evaluate_AB(pattern->steps[sequencer.seqPos[j]].condition, j))
+					{
+						if (j == sequencer.playingPattern)
+						{
+							playNote(j);
 						}
-						if (testProb){
-							if (evaluate_AB(pattern->steps[sequencer.seqPos[j]].condition, j)){
-								if (j == sequencer.playingPattern){
-									playNote(j);
-								}
-							}
-						}
-						if (j == sequencer.playingPattern){ // only show selected pattern
-							show_current_step(sequencer.playingPattern);
-						}
-						new_step_ahead(j);
 					}
 				}
-			} else {
-				show_current_step(sequencer.playingPattern);
+				// No need to have this function call in here. 
+				// Can put into omx_mode_sequencer and remove extern function
+				// if (j == sequencer.playingPattern)
+				// { // only show selected pattern
+				// 	show_current_step(sequencer.playingPattern);
+				// }
+				new_step_ahead(j);
 			}
-			break;
-
-		case MODE_S2:
-			if(sequencer.playing) {
-				unsigned long playstepmicros = micros();
-
-				for (int j=0; j<NUM_PATTERNS; j++){  // check all patterns for notes to play in time
-					// CLOCK PER PATTERN BASED APPROACH
-					auto pattern = sequencer.getPattern(j);
-
-					// TODO: refactor timePerPattern stuff into sequencer.h
-
-					if (playstepmicros >= sequencer.timePerPattern[j].nextStepTimeP) {
-
-						seqReset(); // check for seqReset
-						sequencer.timePerPattern[j].lastStepTimeP = sequencer.timePerPattern[j].nextStepTimeP;
-						sequencer.timePerPattern[j].nextStepTimeP += (step_micros)*( multValues[sequencer.getPattern(j)->clockDivMultP] ); // calc step based on rate
-
-						// only play if not muted
-						if (!sequencer.getPattern(j)->mute) {
-							sequencer.timePerPattern[j].lastPosP = (sequencer.seqPos[j] + 15) % 16;
-							if (lastNote[j][sequencer.timePerPattern[j].lastPosP] > 0) {
-								step_off(j, sequencer.timePerPattern[j].lastPosP);
-							}
-							if (testProb){
-								if (evaluate_AB(pattern->steps[sequencer.seqPos[j]].condition, j)){
-									playNote(j);
-								}
-							}
-						}
-//						show_current_step(playingPattern);
-						if(j == sequencer.playingPattern){ // only show selected pattern
-							show_current_step(sequencer.playingPattern);
-						}
-						new_step_ahead(j);
-					}
-				}
-
-
-			} else {
-				show_current_step(sequencer.playingPattern);
-			}
-			break;
-
-		default:
-			break;
+		}
 	}
+	// else
+	// {
+	// 	// show_current_step(sequencer.playingPattern);
+	// }
+}
+
+void doStepS2()
+{
+	// // probability test
+	bool testProb = probResult(sequencer.getCurrentPattern()->steps[sequencer.seqPos[sequencer.playingPattern]].prob);
+
+	if (sequencer.playing)
+	{
+		unsigned long playstepmicros = micros();
+
+		for (int j = 0; j < NUM_PATTERNS; j++)
+		{ // check all patterns for notes to play in time
+			// CLOCK PER PATTERN BASED APPROACH
+			auto pattern = sequencer.getPattern(j);
+
+			// TODO: refactor timePerPattern stuff into sequencer.h
+
+			if (playstepmicros >= sequencer.timePerPattern[j].nextStepTimeP)
+			{
+
+				seqReset(); // check for seqReset
+				sequencer.timePerPattern[j].lastStepTimeP = sequencer.timePerPattern[j].nextStepTimeP;
+				sequencer.timePerPattern[j].nextStepTimeP += (clockConfig.step_micros) * (multValues[sequencer.getPattern(j)->clockDivMultP]); // calc step based on rate
+
+				// only play if not muted
+				if (!sequencer.getPattern(j)->mute)
+				{
+					sequencer.timePerPattern[j].lastPosP = (sequencer.seqPos[j] + 15) % 16;
+					if (lastNote[j][sequencer.timePerPattern[j].lastPosP] > 0)
+					{
+						step_off(j, sequencer.timePerPattern[j].lastPosP);
+					}
+					if (testProb)
+					{
+						if (evaluate_AB(pattern->steps[sequencer.seqPos[j]].condition, j))
+						{
+							playNote(j);
+						}
+					}
+				}
+				//						show_current_step(playingPattern);
+				// if (j == sequencer.playingPattern)
+				// { // only show selected pattern
+				// 	show_current_step(sequencer.playingPattern);
+				// }
+				new_step_ahead(j);
+			}
+		}
+	}
+	// else
+	// {
+	// 	show_current_step(sequencer.playingPattern);
+	// }
 }
 
 // TODO: move up to other sequencer stuff
 
 // #### SEQ Mode note on/off
 void seqNoteOn(int notenum, int velocity, int patternNum) {
-	int adjnote = notes[notenum] + (octave * 12); // adjust key for octave range
+	int adjnote = notes[notenum] + (midiSettings.octave * 12); // adjust key for octave range
 	if (adjnote>=0 && adjnote <128){
 		lastNote[patternNum][sequencer.seqPos[patternNum]] = adjnote;
 		MM::sendNoteOn(adjnote, velocity, sequencer.getPatternChannel(sequencer.playingPattern));
 
 		// keep track of adjusted note when pressed so that when key is released we send
 		// the correct note off message
-		midiKeyState[notenum] = adjnote;
+		midiSettings.midiKeyState[notenum] = adjnote;
 
 		// CV
 		if (sequencer.getCurrentPattern()->sendCV) {
-			cvNoteOn(adjnote);
+			omxUtil.cvNoteOn(adjnote);
 		}
 	}
 
 	strip.setPixelColor(notenum, MIDINOTEON);         //  Set pixel's color (in RAM)
-	dirtyPixels = true;
-	dirtyDisplay = true;
+	omxDisp.setDirty();
+	omxLeds.setDirty();
 }
 
 void seqNoteOff(int notenum, int patternNum){
 	// we use the key state captured at the time we pressed the key to send the correct note off message
-	int adjnote = midiKeyState[notenum];
+	int adjnote = midiSettings.midiKeyState[notenum];
 	if (adjnote>=0 && adjnote <128){
 		MM::sendNoteOff(adjnote, 0, sequencer.getPatternChannel(sequencer.playingPattern));
 		// CV off
 		if (sequencer.getCurrentPattern()->sendCV){
-			cvNoteOff();
+			omxUtil.cvNoteOff();
 		}
 	}
 
 	strip.setPixelColor(notenum, LEDOFF);
-	dirtyPixels = true;
-	dirtyDisplay = true;
+	omxDisp.setDirty();
+	omxLeds.setDirty();
 }
 
 
@@ -549,40 +569,40 @@ void playNote(int patternNum) {
 	if (steps[sequencer.seqPos[patternNum]].trig == TRIGTYPE_PLAY) {
 		sequencer.seq_velocity = steps[sequencer.seqPos[patternNum]].vel;
 
-		noteoff_micros = micros() + (steps[sequencer.seqPos[patternNum]].len + 1) * step_micros;
-		pendingNoteOffs.insert(steps[sequencer.seqPos[patternNum]].note, sequencer.getPatternChannel(patternNum), noteoff_micros, sendnoteCV);
+		seqConfig.noteoff_micros = micros() + (steps[sequencer.seqPos[patternNum]].len + 1) * clockConfig.step_micros;
+		pendingNoteOffs.insert(steps[sequencer.seqPos[patternNum]].note, sequencer.getPatternChannel(patternNum), seqConfig.noteoff_micros, sendnoteCV);
 
 		if (sequencer.seqPos[patternNum] % 2 == 0){
 
 			if (pattern->swing < 99){
-				noteon_micros = micros() + ((ppqInterval * multValues[pattern->clockDivMultP])/(PPQ / 24) * pattern->swing); // full range swing
-			// 	Serial.println((ppqInterval * multValues[settings->clockDivMultP])/(PPQ / 24) * settings->swing);
+				seqConfig.noteon_micros = micros() + ((clockConfig.ppqInterval * multValues[pattern->clockDivMultP])/(PPQ / 24) * pattern->swing); // full range swing
+			// 	Serial.println((clockConfig.ppqInterval * multValues[settings->clockDivMultP])/(PPQ / 24) * settings->swing);
 			// } else if ((settings->swing > 50) && (settings->swing < 99)){
 			//    noteon_micros = micros() + ((step_micros * multValues[settings->clockDivMultP]) * ((settings->swing - 50)* .01) ); // late swing
 			//    Serial.println(((step_micros * multValues[settings->clockDivMultP]) * ((settings->swing - 50)* .01) ));
 			} else if (pattern->swing == 99){ // random drunken swing
 				rnd_swing = rand() % 95 + 1; // rand 1 - 95 // randomly apply swing value
-				noteon_micros = micros() + ((ppqInterval * multValues[pattern->clockDivMultP])/(PPQ / 24) * rnd_swing);
+				seqConfig.noteon_micros = micros() + ((clockConfig.ppqInterval * multValues[pattern->clockDivMultP])/(PPQ / 24) * rnd_swing);
 			}
 
 		} else {
-			noteon_micros = micros();
+			seqConfig.noteon_micros = micros();
 		}
 
 		// Queue note-on
-		pendingNoteOns.insert(steps[sequencer.seqPos[patternNum]].note, sequencer.seq_velocity, sequencer.getPatternChannel(patternNum), noteon_micros, sendnoteCV);
+		pendingNoteOns.insert(steps[sequencer.seqPos[patternNum]].note, sequencer.seq_velocity, sequencer.getPatternChannel(patternNum), seqConfig.noteon_micros, sendnoteCV);
 
 		// {notenum, vel, notelen, step_type, {p1,p2,p3,p4}, prob}
 		// send param locks
 		for (int q=0; q<4; q++){
 			int tempCC = steps[sequencer.seqPos[patternNum]].params[q];
 			if (tempCC > -1) {
-				MM::sendControlChange(pots[potbank][q],tempCC,sequencer.getPatternChannel(patternNum));
-				prevPlock[q] = tempCC;
-			} else if (prevPlock[q] != potValues[q]) {
-				//if (tempCC != prevPlock[q]) {
-				MM::sendControlChange(pots[potbank][q],potValues[q],sequencer.getPatternChannel(patternNum));
-				prevPlock[q] = potValues[q];
+				MM::sendControlChange(pots[potSettings.potbank][q],tempCC,sequencer.getPatternChannel(patternNum));
+				seqConfig.prevPlock[q] = tempCC;
+			} else if (seqConfig.prevPlock[q] != potSettings.potValues[q]) {
+				//if (tempCC != seqConfig.prevPlock[q]) {
+				MM::sendControlChange(pots[potSettings.potbank][q],potSettings.potValues[q],sequencer.getPatternChannel(patternNum));
+				seqConfig.prevPlock[q] = potSettings.potValues[q];
 			}
 		}
 		lastNote[patternNum][sequencer.seqPos[patternNum]] = steps[sequencer.seqPos[patternNum]].note;
@@ -691,7 +711,7 @@ void clearPattern(int patternNum){
 	for (int i = 0; i < NUM_STEPS; i++){
 		// {notenum,vel,len,stepType,{p1,p2,p3,p4,p5}}
 		steps[i].note = sequencer.patternDefaultNoteMap[patternNum];
-		steps[i].vel = defaultVelocity;
+		steps[i].vel = midiSettings.defaultVelocity;
 		steps[i].len = 0;
 		steps[i].stepType = STEPTYPE_NONE;
 		steps[i].params[0] = -1;
@@ -719,3 +739,6 @@ void pastePattern(int patternNum){
 	auto pattern = sequencer.getPattern(patternNum);
 	memcpy(&pattern->steps, &copyPatternBuffer, NUM_STEPS * sizeof(StepNote));
 }
+
+// global sequencer shared state
+SequencerState sequencer = defaultSequencer();
