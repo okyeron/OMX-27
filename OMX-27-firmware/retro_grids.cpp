@@ -409,6 +409,7 @@ namespace grids
       tickCount_ = 0;
       for (auto i = 0; i < num_notes; i++)
       {
+          midiChannels_[i] = defaultMidiChannel_;
           channelTriggered_[i] = false;
           density_[i] = i == 0 ? 128 : 64;
           perturbations_[i] = 0;
@@ -421,6 +422,7 @@ namespace grids
       divider_ = 0;
       multiplier_ = 1;
       running_ = false;
+
   }
 
   uint32_t GridsWrapper::randomValue(uint32_t init)
@@ -483,7 +485,7 @@ namespace grids
               {
                   uint8_t targetLevel = uint8_t(127.f * float(level - threshold) / float(256 - threshold));
                   uint8_t noteLevel = GridsChannel::U8Mix(127, targetLevel, accent);
-                  MM::sendNoteOn(grids_notes[channel], noteLevel, midiChannel_);
+                  MM::sendNoteOn(grids_notes[channel], noteLevel, midiChannels_[channel]);
                   channelTriggered_[channel] = true;
               }
           }
@@ -494,7 +496,7 @@ namespace grids
           {
               if (channelTriggered_[channel])
               {
-                  MM::sendNoteOff(grids_notes[channel], 0, midiChannel_);
+                  MM::sendNoteOff(grids_notes[channel], 0, midiChannels_[channel]);
                   channelTriggered_[channel] = false;
               }
           }
@@ -535,7 +537,7 @@ namespace grids
                   uint8_t targetLevel = uint8_t(127.f * float(level - threshold) / float(256 - threshold));
                   uint8_t noteLevel = GridsChannel::U8Mix(127, targetLevel, accent);
                   channelLeds.levels[i] = noteLevel;
-                  // MM::sendNoteOn(grids_notes[channel], noteLevel, midiChannel_);
+                  // MM::sendNoteOn(grids_notes[channel], noteLevel, midiChannels_[channel]);
                   // channelTriggered_[channel] = true;
               }
               else
@@ -559,6 +561,21 @@ namespace grids
   {
     if(chanIndex < 0 || chanIndex >= num_notes) return false;
     return channelTriggered_[chanIndex];
+  }
+
+  void GridsWrapper::setMidiChan(uint8_t chanIndex, uint8_t channel)
+  {
+    if (chanIndex < 0 || chanIndex >= num_notes)
+      return;
+
+    midiChannels_[chanIndex] = channel;
+  }
+
+  uint8_t GridsWrapper::getMidiChan(uint8_t chanIndex)
+  {
+    if (chanIndex < 0 || chanIndex >= num_notes)
+      return 1;
+    return midiChannels_[chanIndex];
   }
 
   void GridsWrapper::setDensity(uint8_t channel, uint8_t density)

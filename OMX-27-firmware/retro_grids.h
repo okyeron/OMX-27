@@ -106,6 +106,8 @@ namespace grids
 
         bool getChannelTriggered(int chanIndex);
 
+        void setMidiChan(uint8_t chanIndex, uint8_t channel);
+        uint8_t getMidiChan(uint8_t chanIndex);
 
     private:
         GridsChannel channel_;
@@ -116,10 +118,11 @@ namespace grids
         uint8_t perturbations_[num_notes];
         uint8_t x_[num_notes];
         uint8_t y_[num_notes];
+        uint8_t midiChannels_[num_notes];
         bool channelTriggered_[num_notes];
         bool running_;
 
-        uint8_t midiChannel_ = 1;
+        uint8_t defaultMidiChannel_ = 1;
     };
 
 }

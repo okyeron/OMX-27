@@ -57,7 +57,7 @@ private:
     bool initSetup = false;
     grids::GridsWrapper grids_;
 
-    static const int kNumPages = 3;
+    static const int kNumPages = 4;
     static const int kNumParams = kNumPages * NUM_DISP_PARAMS;
     static const int kNumGrids = 4;
 
@@ -66,6 +66,7 @@ private:
 
     uint32_t paramSelColors[4] = {MAGENTA, ORANGE, RED, RBLUE};
 
+    const char * rateNames[3] = {"1/2", "1", "2"};
 
 
 

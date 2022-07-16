@@ -10,7 +10,8 @@ using namespace grids;
 enum GridModePage {
     GRIDS_DENSITY,
     GRIDS_XY,
-    GRIDS_NOTES
+    GRIDS_NOTES,
+    GRIDS_CONFIG
 };
 
 OmxModeGrids::OmxModeGrids()
@@ -61,7 +62,7 @@ void OmxModeGrids::onPotChanged(int potIndex, int prevValue, int newValue, int a
         grids_.setResolution(newres);
         if (newres != prevResolution_)
         {
-            omxDisp.displayMessage((String) "Step Res " + newres);
+            omxDisp.displayMessage(rateNames[newres]);
         }
         prevResolution_ = newres;
     }
@@ -237,6 +238,37 @@ void OmxModeGrids::onEncoderChanged(Encoder::Update enc)
             }
         }
         break;
+        case GRIDS_CONFIG:
+        {
+            if (instLockView_)
+            {
+                if (paramStep == 1) // Note
+                {
+                    grids_.grids_notes[lockedInst_] = constrain(grids_.grids_notes[lockedInst_] + amt, 0, 127);
+                }
+                else if (paramStep == 2) // Midi Channel
+                {
+                    auto chan = grids_.getMidiChan(lockedInst_);
+                    chan = constrain(chan + amt, 1, 16);
+                    grids_.setMidiChan(lockedInst_, chan);
+                }
+                else if (paramStep == 3)
+                {
+                }
+            }
+
+            if (paramStep == 4) // Tempo
+            {
+                clockConfig.newtempo = constrain(clockConfig.clockbpm + amt, 40, 300);
+                if (clockConfig.newtempo != clockConfig.clockbpm)
+                {
+                    // SET TEMPO HERE
+                    clockConfig.clockbpm = clockConfig.newtempo;
+                    omxUtil.resetClocks();
+                }
+            }
+        }
+        break;
         default:
             break;
         }
@@ -382,6 +414,10 @@ void OmxModeGrids::onKeyUpdate(OMXKeypadEvent e)
         {
             setParam(GRIDS_XY, 4);
         }
+        else if (e.down() && thisKey == 26) // BPM
+        {
+            setParam(GRIDS_CONFIG, 4);
+        }
     }
     if(f1_)
     {
@@ -411,13 +447,14 @@ void OmxModeGrids::onKeyUpdateChanLock(OMXKeypadEvent e)
 {
     int thisKey = e.key();
 
-    // auto keyState = midiSettings.keyState;
+    auto keyState = midiSettings.keyState;
 
     if (!e.held())
     {
         if (e.down() && thisKey == 0) // Aux key down
         {
             instLockView_ = false; // Exit out of channel lock
+            return;
         }
         // else if (e.down() && e.clicks() == 0 && (thisKey > 2 && thisKey < 11))
         // {
@@ -433,6 +470,24 @@ void OmxModeGrids::onKeyUpdateChanLock(OMXKeypadEvent e)
         //     }
         // }
     }
+
+    if (!f2_ && e.down() && thisKey == 2 && !keyState[1])
+    {
+        setParam(GRIDS_CONFIG, 1);
+    }
+    if (!f3_ && e.down() && ((thisKey == 1 && keyState[2]) || (thisKey == 2 && keyState[1])))
+    {
+        setParam(GRIDS_CONFIG, 2);
+    }
+
+    // if (f2_)
+    // {
+    //     setParam(GRIDS_CONFIG, 1);
+    // }
+    // else if (f3_)
+    // {
+    //     setParam(GRIDS_CONFIG, 2);
+    // }
 
     if (!f1_)
     {
@@ -471,6 +526,8 @@ void OmxModeGrids::onKeyUpdateChanLock(OMXKeypadEvent e)
 
 void OmxModeGrids::quickSelectInst(int instIndex)
 {
+    if(instLockView_ && lockedInst_ == instIndex) return;
+
     instLockView_ = true;
     // justLocked_ = true; // Uncomment to immediately switch to channel view
     lockedInst_ = instIndex;
@@ -494,19 +551,19 @@ void OmxModeGrids::updateLEDs()
         int64_t instLockColor =  paramSelColors[lockedInst_];
 
         // Always blink to show you're in mode, don't need differation between playing or not since the playhead makes this obvious
-        auto color1 = blinkState ? instLockColor : LEDOFF;
-        strip.setPixelColor(0, color1);
+        // auto color1 = blinkState ? instLockColor : LEDOFF;
+        // strip.setPixelColor(0, color1);
 
-        // if (sequencer.playing)
-        // {
-        //     // Blink left/right keys for octave select indicators.
-        //     auto color1 = blinkState ? instLockColor : LEDOFF;
-        //     strip.setPixelColor(0, color1);
-        // }
-        // else
-        // {
-        //     strip.setPixelColor(0, instLockColor);
-        // }
+        if (sequencer.playing)
+        {
+            // Blink left/right keys for octave select indicators.
+            auto color1 = blinkState ? instLockColor : LEDOFF;
+            strip.setPixelColor(0, color1);
+        }
+        else
+        {
+            strip.setPixelColor(0, instLockColor);
+        }
     }
     else
     {
@@ -582,7 +639,7 @@ void OmxModeGrids::updateLEDsFNone()
     {
         // Change color of 4 GridX keys when pushed
         // auto kColor = keyState[k + 11] ? (blinkState ? paramSelColors[k] : LEDOFF) : PINK;
-        auto kColor = keyState[k + 11] ? (blinkState ? paramSelColors[k] : LEDOFF) : RED;
+        auto kColor = keyState[k + 11] ? (blinkState ? paramSelColors[k] : LEDOFF) : BLUE;
 
         strip.setPixelColor(k + 11, kColor);
     }
@@ -590,8 +647,8 @@ void OmxModeGrids::updateLEDsFNone()
     for (int k = 4; k < 8; k++)
     {
         // Change color of 4 GridY keys when pushed
-        auto kColor = keyState[k + 11] ? (blinkState ? paramSelColors[k % 4] : LEDOFF) : GREEN;
-        // auto kColor = keyState[k + 11] ? (blinkState ? paramSelColors[k % 4] : LEDOFF) : LTCYAN;
+        // auto kColor = keyState[k + 11] ? (blinkState ? paramSelColors[k % 4] : LEDOFF) : GREEN;
+        auto kColor = keyState[k + 11] ? (blinkState ? paramSelColors[k % 4] : LEDOFF) : LTCYAN;
         strip.setPixelColor(k + 11, kColor);
     }
 
@@ -605,6 +662,8 @@ void OmxModeGrids::updateLEDsFNone()
 
     strip.setPixelColor(23, (keyState[23] ? LBLUE : BLUE)); // Accent
     strip.setPixelColor(24, (keyState[24] ? WHITE : ORANGE)); // Xaos
+    strip.setPixelColor(26, (keyState[26] ? LTYELLOW : YELLOW)); // BPM
+
 }
 
 void OmxModeGrids::updateLEDsF1()
@@ -691,7 +750,7 @@ void OmxModeGrids::updateLEDsChannelView()
         if(sequencer.playing)
         {
             auto seq16 = seqPos % 16;
-            strip.setPixelColor(seq16 + 11, LTYELLOW);
+            strip.setPixelColor(seq16 + 11, HALFWHITE);
         }
     }
 }
@@ -850,6 +909,38 @@ void OmxModeGrids::setupPageLegends()
         omxDisp.legendVals[1] = grids_.grids_notes[1];
         omxDisp.legendVals[2] = grids_.grids_notes[2];
         omxDisp.legendVals[3] = grids_.grids_notes[3];
+    }
+    break;
+    case GRIDS_CONFIG:
+    {
+        if (instLockView_)
+        {
+            String noteLegend = "NT " + String(instLockView_ + 1);
+
+            omxDisp.legends[0] = noteLegend.c_str();
+            omxDisp.legends[1] = "M-CHAN";
+            omxDisp.legends[2] = "";
+            omxDisp.legends[3] = "BPM";
+            omxDisp.legendVals[0] = grids_.grids_notes[lockedInst_];
+            omxDisp.legendVals[1] = grids_.getMidiChan(lockedInst_);
+            omxDisp.legendVals[2] = -127;
+            omxDisp.legendText[2] = "";
+            omxDisp.legendVals[3] = (int)clockConfig.clockbpm;
+        }
+        else
+        {
+            omxDisp.legends[0] = "";
+            omxDisp.legends[1] = "";
+            omxDisp.legends[2] = "";
+            omxDisp.legends[3] = "BPM";
+            omxDisp.legendVals[0] = -127;
+            omxDisp.legendVals[1] = -127;
+            omxDisp.legendVals[2] = -127;
+            omxDisp.legendVals[3] = (int)clockConfig.clockbpm;
+            omxDisp.legendText[0] = "";
+            omxDisp.legendText[1] = "";
+            omxDisp.legendText[2] = "";
+        }
     }
     break;
     default:
