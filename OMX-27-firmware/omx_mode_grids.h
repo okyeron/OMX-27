@@ -66,7 +66,7 @@ private:
 
     uint32_t paramSelColors[4] = {MAGENTA, ORANGE, RED, RBLUE};
 
-    const char * rateNames[3] = {"1/2", "1", "2"};
+    const char * rateNames[3] = {"1 / 2", "1", "2"};
 
 
 
