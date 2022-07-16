@@ -531,7 +531,15 @@ void OmxModeGrids::quickSelectInst(int instIndex)
     instLockView_ = true;
     // justLocked_ = true; // Uncomment to immediately switch to channel view
     lockedInst_ = instIndex;
-    setParam(GRIDS_DENSITY, lockedInst_ + 1);
+
+    if (page == GRIDS_DENSITY)
+    {
+        setParam(GRIDS_DENSITY, lockedInst_ + 1);
+    }
+    else if (page == GRIDS_NOTES)
+    {
+        setParam(GRIDS_NOTES, lockedInst_ + 1);
+    }
     omxDisp.displayMessage((String) "Inst " + (lockedInst_ + 1));
     omxDisp.setDirty();
 }
