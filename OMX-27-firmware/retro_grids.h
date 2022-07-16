@@ -13,11 +13,21 @@ namespace grids
         COUNT
     };
 
-    struct GridPatterns
+    struct InstSettings
     {
+        uint8_t note = 60;
+        uint8_t midiChan = 1;
         uint8_t density = 0;
         uint8_t x = 128;
         uint8_t y = 128;
+    };
+
+    struct SnapShotSettings
+    {
+        InstSettings instruments[4];
+        uint8_t chaos = 0;
+        uint8_t accent = 128;
+        uint8_t resolution = 1;
     };
 
     constexpr uint8_t kStepsPerPattern = 32;
@@ -53,16 +63,18 @@ namespace grids
         static const uint8_t num_notes = sizeof(grids_notes);
         int playingPattern = 0;
 
-        GridPatterns gridSaves[8][4] = {
-            {GridPatterns(), GridPatterns(), GridPatterns(), GridPatterns()},
-            {GridPatterns(), GridPatterns(), GridPatterns(), GridPatterns()},
-            {GridPatterns(), GridPatterns(), GridPatterns(), GridPatterns()},
-            {GridPatterns(), GridPatterns(), GridPatterns(), GridPatterns()},
-            {GridPatterns(), GridPatterns(), GridPatterns(), GridPatterns()},
-            {GridPatterns(), GridPatterns(), GridPatterns(), GridPatterns()},
-            {GridPatterns(), GridPatterns(), GridPatterns(), GridPatterns()},
-            {GridPatterns(), GridPatterns(), GridPatterns(), GridPatterns()},
-        };
+        SnapShotSettings snapshots[8];
+
+        // GridPatterns gridSaves[8][4] = {
+        //     {GridPatterns(), GridPatterns(), GridPatterns(), GridPatterns()},
+        //     {GridPatterns(), GridPatterns(), GridPatterns(), GridPatterns()},
+        //     {GridPatterns(), GridPatterns(), GridPatterns(), GridPatterns()},
+        //     {GridPatterns(), GridPatterns(), GridPatterns(), GridPatterns()},
+        //     {GridPatterns(), GridPatterns(), GridPatterns(), GridPatterns()},
+        //     {GridPatterns(), GridPatterns(), GridPatterns(), GridPatterns()},
+        //     {GridPatterns(), GridPatterns(), GridPatterns(), GridPatterns()},
+        //     {GridPatterns(), GridPatterns(), GridPatterns(), GridPatterns()},
+        // };
 
         // GridPatterns gridSaves[8][4] = {
         //     {{.density = 0, .x = 128, .y = 128}, {.density = 0, .x = 128, .y = 128}, {.density = 0, .x = 128, .y = 128}, {.density = 0, .x = 128, .y = 128}},
@@ -80,6 +92,9 @@ namespace grids
         void stop();
         void proceed();
         void gridsTick();
+
+        void saveSnapShot(int snapShotIndex);
+        void loadSnapShot(int snapShotIndex);
 
         void setDensity(uint8_t channel, uint8_t density);
         uint8_t getDensity(uint8_t channel);
@@ -120,6 +135,8 @@ namespace grids
         uint8_t y_[num_notes];
         uint8_t midiChannels_[num_notes];
         bool channelTriggered_[num_notes];
+        uint8_t triggeredNotes_[num_notes]; // Keep track of triggered notes to avoid stuck notes
+        uint8_t resolution_;
         bool running_;
 
         uint8_t defaultMidiChannel_ = 1;

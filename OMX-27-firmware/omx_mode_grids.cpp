@@ -294,39 +294,43 @@ bool OmxModeGrids::shouldBlockEncEdit()
 
 void OmxModeGrids::saveActivePattern(int pattIndex)
 {
-    // F2 + PATTERN TO SAVE
-    for (int k = 0; k < 4; k++)
-    {
-        grids_.gridSaves[pattIndex][k].density = grids_.getDensity(k);
-        grids_.gridSaves[pattIndex][k].x = grids_.getX(k);
-        grids_.gridSaves[pattIndex][k].y = grids_.getY(k);
-        // Serial.print("saved:");
-        // Serial.print(grids_wrapper.gridSaves[patt][k].density);
-        // Serial.print(":");
-        // Serial.print(grids_wrapper.gridSaves[patt][k].x);
-        // Serial.print(":");
-        // Serial.println(grids_wrapper.gridSaves[patt][k].y);
-    }
+    grids_.saveSnapShot(pattIndex);
+
+    // // F2 + PATTERN TO SAVE
+    // for (int k = 0; k < 4; k++)
+    // {
+    //     grids_.gridSaves[pattIndex][k].density = grids_.getDensity(k);
+    //     grids_.gridSaves[pattIndex][k].x = grids_.getX(k);
+    //     grids_.gridSaves[pattIndex][k].y = grids_.getY(k);
+    //     // Serial.print("saved:");
+    //     // Serial.print(grids_wrapper.gridSaves[patt][k].density);
+    //     // Serial.print(":");
+    //     // Serial.print(grids_wrapper.gridSaves[patt][k].x);
+    //     // Serial.print(":");
+    //     // Serial.println(grids_wrapper.gridSaves[patt][k].y);
+    // }
 
     omxDisp.displayMessage((String) "Saved " + (pattIndex + 1));
 }
 
 void OmxModeGrids::loadActivePattern(int pattIndex)
 {
-    // SELECT
-    grids_.playingPattern = pattIndex;
-    for (int k = 0; k < 4; k++)
-    {
-        grids_.setDensity(k, grids_.gridSaves[pattIndex][k].density);
-        grids_.setX(k, grids_.gridSaves[pattIndex][k].x);
-        grids_.setY(k, grids_.gridSaves[pattIndex][k].y);
-        // Serial.print("state:");
-        // Serial.print(grids_wrapper.gridSaves[patt][k].density);
-        // Serial.print(":");
-        // Serial.print(grids_wrapper.gridSaves[patt][k].x);
-        // Serial.print(":");
-        // Serial.println(grids_wrapper.gridSaves[patt][k].y);
-    }
+    grids_.loadSnapShot(pattIndex);
+
+    // // SELECT
+    // grids_.playingPattern = pattIndex;
+    // for (int k = 0; k < 4; k++)
+    // {
+    //     grids_.setDensity(k, grids_.gridSaves[pattIndex][k].density);
+    //     grids_.setX(k, grids_.gridSaves[pattIndex][k].x);
+    //     grids_.setY(k, grids_.gridSaves[pattIndex][k].y);
+    //     // Serial.print("state:");
+    //     // Serial.print(grids_wrapper.gridSaves[patt][k].density);
+    //     // Serial.print(":");
+    //     // Serial.print(grids_wrapper.gridSaves[patt][k].x);
+    //     // Serial.print(":");
+    //     // Serial.println(grids_wrapper.gridSaves[patt][k].y);
+    // }
 
     omxDisp.displayMessage((String) "Load " + (pattIndex + 1));
 }
@@ -453,6 +457,7 @@ void OmxModeGrids::onKeyUpdateChanLock(OMXKeypadEvent e)
     {
         if (e.down() && thisKey == 0) // Aux key down
         {
+            // Serial.println("Exit aux");
             instLockView_ = false; // Exit out of channel lock
             omxDisp.setDirty();
             return;
@@ -472,14 +477,15 @@ void OmxModeGrids::onKeyUpdateChanLock(OMXKeypadEvent e)
         // }
     }
 
+    // Function quick keys
     if (!f2_ && e.down() && thisKey == 2 && !keyState[1])
     {
         setParam(GRIDS_CONFIG, 1);
     }
-    if (!f3_ && e.down() && ((thisKey == 1 && keyState[2]) || (thisKey == 2 && keyState[1])))
-    {
-        setParam(GRIDS_CONFIG, 2);
-    }
+    // if (!f3_ && e.down() && ((thisKey == 1 && keyState[2]) || (thisKey == 2 && keyState[1])))
+    // {
+    //     setParam(GRIDS_CONFIG, 2);
+    // }
 
     // if (f2_)
     // {
@@ -497,6 +503,12 @@ void OmxModeGrids::onKeyUpdateChanLock(OMXKeypadEvent e)
 
     if (fNone_)
     {
+        // Midi channel
+        if (e.down() && thisKey == 3)
+        {
+            setParam(GRIDS_CONFIG, 2);
+        }
+
         // Select Grid X param
         if (e.down() && thisKey == 5) // Accent
         {
@@ -514,10 +526,21 @@ void OmxModeGrids::onKeyUpdateChanLock(OMXKeypadEvent e)
         {
             setParam(GRIDS_XY, 4);
         }
+
+        // Quick Select inst
+        // These LEDs are not lit since pattern is rendered
+        if (e.down() && (thisKey > 10 && thisKey < 15))
+        {
+            quickSelectInst(thisKey - 11);
+        }
+        else if (e.down() && thisKey == 26) // BPM
+        {
+            setParam(GRIDS_CONFIG, 4);
+        }
     }
     if(f1_ && !justLocked_)
     {
-        // Quick Select Note
+        // Quick Select Inst
         if (e.down() && (thisKey > 10 && thisKey < 15))
         {
             quickSelectInst(thisKey - 11);
@@ -717,7 +740,11 @@ void OmxModeGrids::updateLEDsChannelView()
         // Shortcut LEDS for top row
         for (int j = 3; j < LED_COUNT - 16; j++)
         {
-            if (j == 5) // Accent
+            if (j == 3) // Midi Chan
+            {
+                strip.setPixelColor(j, (keyState[5] ? LBLUE : DKBLUE));
+            }
+            else if (j == 5) // Accent
             {
                 strip.setPixelColor(j, (keyState[5] ? LBLUE : BLUE));
             }
@@ -733,6 +760,10 @@ void OmxModeGrids::updateLEDsChannelView()
             {
                 strip.setPixelColor(j,  (keyState[8] ? WHITE : ORANGE));
             }
+            // else if (j == 10) // Tempo
+            // {
+            //     strip.setPixelColor(j,  (keyState[8] ? WHITE : MAGENTA));
+            // }
             else
             {
                 strip.setPixelColor(j, LEDOFF);
@@ -775,7 +806,6 @@ void OmxModeGrids::updateLEDsPatterns()
 
 void OmxModeGrids::setupPageLegends()
 {
-
     // if (midiSettings.keyState[11] || midiSettings.keyState[15])
     //     {
     //         thisGrid = 0;
@@ -963,6 +993,8 @@ void OmxModeGrids::onDisplayUpdate()
 
     if (omxDisp.isDirty())
     { // DISPLAY
+        // Serial.println("Disp dirty");
+
         if (!encoderConfig.enc_edit)
         {
             int pselected = param % NUM_DISP_PARAMS;

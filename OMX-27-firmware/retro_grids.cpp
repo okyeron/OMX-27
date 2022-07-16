@@ -423,6 +423,14 @@ namespace grids
       multiplier_ = 1;
       running_ = false;
 
+      // Init default snapshot notes
+      for(int8_t s = 0; s < 8; s++)
+      {
+        for(int8_t i = 0; i < 4; i++)
+        {
+          snapshots[s].instruments[i].note = grids_notes[i];
+        }
+      }
   }
 
   uint32_t GridsWrapper::randomValue(uint32_t init)
@@ -486,6 +494,7 @@ namespace grids
                   uint8_t targetLevel = uint8_t(127.f * float(level - threshold) / float(256 - threshold));
                   uint8_t noteLevel = GridsChannel::U8Mix(127, targetLevel, accent);
                   MM::sendNoteOn(grids_notes[channel], noteLevel, midiChannels_[channel]);
+                  triggeredNotes_[channel] = grids_notes[channel];
                   channelTriggered_[channel] = true;
               }
           }
@@ -496,7 +505,8 @@ namespace grids
           {
               if (channelTriggered_[channel])
               {
-                  MM::sendNoteOff(grids_notes[channel], 0, midiChannels_[channel]);
+                  MM::sendNoteOff(triggeredNotes_[channel], 0, midiChannels_[channel]);
+                  // MM::sendNoteOff(grids_notes[channel], 0, midiChannels_[channel]);
                   channelTriggered_[channel] = false;
               }
           }
@@ -548,6 +558,42 @@ namespace grids
       }
 
       return channelLeds;
+  }
+
+  void GridsWrapper::saveSnapShot(int snapShotIndex)
+  {
+    for (uint8_t i = 0; i < 4; i++)
+    {
+      snapshots[snapShotIndex].instruments[i].note = grids_notes[i];
+      snapshots[snapShotIndex].instruments[i].midiChan = midiChannels_[i];
+      snapshots[snapShotIndex].instruments[i].density = getDensity(i);
+      snapshots[snapShotIndex].instruments[i].x = getX(i);
+      snapshots[snapShotIndex].instruments[i].y = getY(i);
+    }
+
+    snapshots[snapShotIndex].accent = getAccent();
+    snapshots[snapShotIndex].resolution = resolution_;
+    snapshots[snapShotIndex].chaos = getChaos();
+
+    playingPattern = snapShotIndex;
+  }
+
+  void GridsWrapper::loadSnapShot(int snapShotIndex)
+  {
+    for (uint8_t i = 0; i < 4; i++)
+    {
+      grids_notes[i] = snapshots[snapShotIndex].instruments[i].note;
+      midiChannels_[i] = snapshots[snapShotIndex].instruments[i].midiChan;
+      setDensity(i, snapshots[snapShotIndex].instruments[i].density);
+      setX(i, snapshots[snapShotIndex].instruments[i].x);
+      setY(i, snapshots[snapShotIndex].instruments[i].y);
+    }
+
+    setAccent(snapshots[snapShotIndex].accent);
+    setResolution(snapshots[snapShotIndex].resolution);
+    setChaos(snapshots[snapShotIndex].chaos);
+
+    playingPattern = snapShotIndex;
   }
 
   uint8_t GridsWrapper::getSeqPos()
@@ -624,6 +670,7 @@ namespace grids
 
   void GridsWrapper::setResolution(uint8_t r)
   {
+      resolution_ = r;
       divider_ = 0;
       if (r == 0)
       {
