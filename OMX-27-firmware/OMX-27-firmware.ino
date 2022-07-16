@@ -574,7 +574,6 @@ bool loadHeader(void)
 	}
 
 	sysSettings.omxMode = (OMXMode)storage->read(EEPROM_HEADER_ADDRESS + 1);
-	changeOmxMode(sysSettings.omxMode);
 
 	sequencer.playingPattern = storage->read(EEPROM_HEADER_ADDRESS + 2);
 	sysSettings.playingPattern = sequencer.playingPattern;
@@ -705,6 +704,7 @@ bool loadFromStorage(void)
 	{
 		// Serial.println( "loading patterns" );
 		loadPatterns();
+		changeOmxMode(sysSettings.omxMode);
 		return true;
 	}
 
