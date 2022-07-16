@@ -190,9 +190,8 @@ Keys/Commands:
  - AUX is sequencer Start/Stop  
  - Pots 1-4 control "event density" (probability) of 4 instruments - values will show on display.
  - Pot 5 sets resolution (1/2, 1, 2)
-
-- Bottom row keys 1-8 are quick-keys for X/Y values - hold a key and turn encoder to change that instrument's X or Y value. You can hold multiple keys to change X/Y on multiple instruments at the same time.
- - Keys 9-12 show activity of the playing patterns
+ - Bottom row keys 1-8 are quick-keys for X/Y values - hold a key and turn encoder to change that instrument's X or Y value. You can hold multiple keys to change X/Y on multiple instruments at the same time.
+ - LEDs on Keys 9-12 show trigger activity of the playing pattern  
  - Lighted Keys 13,14,16 are quick keys for ACNT/XAOS/BPM
  - Pattern keys (black keys) can load "snapshots" of density/x/y settings
  - F2 + Pattern saves a "snapshot" current state of that pattern
