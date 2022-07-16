@@ -177,6 +177,50 @@ Pretty much the same as MI, but with the following tweaks for Organelle Mother o
 - Encoder turn sends CC 28 (127 on CW, 0 on CCW)
 
 
+### GR - Grids Sequencer
+
+An adaptation of the Mutable Instruments "Topographic drum sequencer" module.
+
+See the original [Grids Manual](https://mutable-instruments.net/modules/grids/manual/) [or a video here] for general concepts.
+
+Grids on OMX is a 4-channel/instrument trigger generator specialized in the creation and sculpting of rhythmic patterns. Typical drum use would be Bass Drum, Snare, Closed HiHat, Open HiHat (The default note numbers are mapped to these in the GM drum map).
+
+
+Keys/Commands:   
+ - AUX is sequencer Start/Stop  
+ - Pots 1-4 control "event density" (probability) of 4 instruments - values will show on display.
+ - Pot 5 sets resolution (1/2, 1, 2)
+
+- Bottom row keys 1-8 are quick-keys for X/Y values - hold a key and turn encoder to change that instrument's X or Y value. You can hold multiple keys to change X/Y on multiple instruments at the same time.
+ - Keys 9-12 show activity of the playing patterns
+ - Lighted Keys 13,14,16 are quick keys for ACNT/XAOS/BPM
+ - Pattern keys (black keys) can load "snapshots" of density/x/y settings
+ - F2 + Pattern saves a "snapshot" current state of that pattern
+ - F1 + Keys 1-4 jump to Instrument View. This shows the current pattern on that instrument (over 2 pages since patterns are 32 steps) and playhead. Top row lighted keys are quick-keys for ACNT/X/Y/XAOS
+ - AUX-key exits Instrument View    
+ - F2 in Instrument View is a quick key to jump to params page to set Note Number, MIDI Channel and BPM.
+
+Parameters:  
+- `DN 1`: event density - instrument 1  
+- `DN 2`: event density - instrument 2  
+- `DN 3`: event density - instrument 3  
+- `DN 4`: event density - instrument 4     
+
+- `NT 1`: note number - instrument 1  
+- `NT 2`: note numbery - instrument 2  
+- `NT 3`: note number - instrument 3  
+- `NT 4`: note number - instrument 4  
+
+- `ACNT`: accent amount (larger number is more variation) - applies to all instruments   
+- `X `: X amount for selected instrument  
+- `Y `: Y amount for selected instrument  
+- `XAOS`: chaos amount - applies to all instruments
+
+
+
+
+
+
 ### Screensaver 
 After a default timeout (3 minutes), the display will be blanked and in MI Mode a "screensaver" animation will show on the LEDs. The rightmost pot (#5) can be turned to adjust the color. Touching any keys or any of the other pots will exit the screensaver.  
 
