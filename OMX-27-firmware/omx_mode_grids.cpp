@@ -379,6 +379,7 @@ void OmxModeGrids::onKeyUpdate(OMXKeypadEvent e)
         if (midiSettings.keyState[0] && e.down() && thisKey == 26)
         {
             midiModeception = false;
+            midiSettings.midiAUX = false;
             omxDisp.setDirty();
             omxLeds.setDirty();
         }
@@ -631,13 +632,6 @@ void OmxModeGrids::updateLEDs()
 {
     if (midiModeception)
     {
-        midiKeyboard.updateLEDs();
-
-        if (midiSettings.midiAUX)
-        {
-            strip.setPixelColor(26, RED);
-        }
-
         return;
     }
 
@@ -1064,6 +1058,12 @@ void OmxModeGrids::onDisplayUpdate()
     if (midiModeception)
     {
         midiKeyboard.onDisplayUpdate();
+
+        if (midiSettings.midiAUX)
+        {
+            strip.setPixelColor(26, RED); // Highlight aux exit key
+        }
+
         return;
     }
 

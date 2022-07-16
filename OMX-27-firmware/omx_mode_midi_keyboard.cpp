@@ -527,7 +527,6 @@ void OmxModeMidiKeyboard::updateLEDs()
 
 void OmxModeMidiKeyboard::onDisplayUpdate()
 {
-    // playingPattern = 0; 		// DEFAULT MIDI MODE TO THE FIRST PATTERN SLOT
     omxLeds.drawMidiLeds(musicScale); // SHOW LEDS
 
     if (omxDisp.isDirty())
