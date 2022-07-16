@@ -37,9 +37,13 @@ public:
     void onDisplayUpdate() override;
     void SetScale(MusicScales* scale);
 
+    static int serializedPatternSize(bool eeprom);
+    static inline int getNumPatterns() { return 8; }
+    grids::SnapShotSettings* getPattern(uint8_t patternIndex);
+    void setPattern(uint8_t patternIndex, grids::SnapShotSettings snapShot);
 private:
-    void setParam(int pageIndex, int paramPosition);
-    void setParam(int paramIndex);
+    void setParam(uint8_t pageIndex, uint8_t paramPosition);
+    void setParam(uint8_t paramIndex);
     void setupPageLegends();
 
     void updateLEDsFNone();
@@ -49,18 +53,18 @@ private:
     void updateLEDsChannelView();
     void onKeyUpdateChanLock(OMXKeypadEvent e);
 
-    void saveActivePattern(int pattIndex);
-    void loadActivePattern(int pattIndex);
+    void saveActivePattern(uint8_t pattIndex);
+    void loadActivePattern(uint8_t pattIndex);
 
-    void quickSelectInst(int instIndex);
+    void quickSelectInst(uint8_t instIndex);
 
 
     bool initSetup = false;
     grids::GridsWrapper grids_;
 
-    static const int kNumPages = 4;
-    static const int kNumParams = kNumPages * NUM_DISP_PARAMS;
-    static const int kNumGrids = 4;
+    static const uint8_t kNumPages = 4;
+    static const uint8_t kNumParams = kNumPages * NUM_DISP_PARAMS;
+    static const uint8_t kNumGrids = 4;
 
     // static const int kParamGridX = 2;
     // static const int kParamGridY = 3;

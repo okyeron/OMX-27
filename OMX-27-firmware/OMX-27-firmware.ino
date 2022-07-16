@@ -368,6 +368,7 @@ void loop()
 			// temp - save whenever the 0 key is pressed in encoder edit mode
 			saveToStorage();
 			//	Serial.println("EEPROM saved");
+			omxDisp.displayMessage("Saved State");
 		}
 
 		activeOmxMode->onKeyUpdate(e);
@@ -596,6 +597,8 @@ void savePatterns(void)
 	int patternSize = serializedPatternSize(storage->isEeprom());
 	int nLocalAddress = EEPROM_PATTERN_ADDRESS;
 
+	Serial.println((String)"Seq patternSize: " + patternSize);
+
 	for (int i = 0; i < NUM_PATTERNS; i++)
 	{
 		auto pattern = (byte *)sequencer.getPattern(i);
@@ -606,6 +609,34 @@ void savePatterns(void)
 
 		nLocalAddress += patternSize;
 	}
+
+	Serial.println((String)"nLocalAddress: " + nLocalAddress);
+
+	// Grids patterns
+	patternSize = OmxModeGrids::serializedPatternSize(storage->isEeprom());
+	int numPatterns = OmxModeGrids::getNumPatterns();
+
+	Serial.println((String)"OmxModeGrids patternSize: " + patternSize);
+	Serial.println((String)"numPatterns: " + numPatterns);
+
+	for (int i = 0; i < numPatterns; i++)
+	{
+		auto pattern = (byte *)omxModeGrids.getPattern(i);
+		for (int j = 0; j < patternSize; j++)
+		{
+			storage->write(nLocalAddress + j, *pattern++);
+		}
+
+		nLocalAddress += patternSize;
+	}
+
+	Serial.println((String)"nLocalAddress: " + nLocalAddress);
+
+	// Seq patternSize: 715
+	// nLocalAddress: 5752
+	// OmxModeGrids patternSize: 23
+	// numPatterns: 8
+	// nLocalAddress: 5936
 }
 
 void loadPatterns(void)
@@ -624,6 +655,23 @@ void loadPatterns(void)
 		}
 		sequencer.patterns[i] = pattern;
 
+		nLocalAddress += patternSize;
+	}
+
+	// Grids patterns
+	patternSize = OmxModeGrids::serializedPatternSize(storage->isEeprom());
+	int numPatterns = OmxModeGrids::getNumPatterns();
+
+	for (int i = 0; i < numPatterns; i++)
+	{
+		auto pattern = grids::SnapShotSettings{};
+		auto current = (byte *)&pattern;
+		for (int j = 0; j < patternSize; j++)
+		{
+			*current = storage->read(nLocalAddress + j);
+			current++;
+		}
+		omxModeGrids.setPattern(i, pattern);
 		nLocalAddress += patternSize;
 	}
 

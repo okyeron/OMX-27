@@ -61,7 +61,7 @@ namespace grids
 
         uint8_t grids_notes[4] = {36, 38, 42, 46};
         static const uint8_t num_notes = sizeof(grids_notes);
-        int playingPattern = 0;
+        uint8_t playingPattern = 0;
 
         SnapShotSettings snapshots[8];
 
@@ -93,8 +93,10 @@ namespace grids
         void proceed();
         void gridsTick();
 
-        void saveSnapShot(int snapShotIndex);
-        void loadSnapShot(int snapShotIndex);
+        void saveSnapShot(uint8_t snapShotIndex);
+        void loadSnapShot(uint8_t snapShotIndex);
+        SnapShotSettings* getSnapShot(uint8_t snapShotIndex);
+        void setSnapShot(uint8_t snapShotIndex, SnapShotSettings snapShot);
 
         void setDensity(uint8_t channel, uint8_t density);
         uint8_t getDensity(uint8_t channel);
@@ -119,7 +121,7 @@ namespace grids
 
         uint8_t getSeqPos();
 
-        bool getChannelTriggered(int chanIndex);
+        bool getChannelTriggered(uint8_t chanIndex);
 
         void setMidiChan(uint8_t chanIndex, uint8_t channel);
         uint8_t getMidiChan(uint8_t chanIndex);

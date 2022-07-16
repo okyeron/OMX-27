@@ -560,7 +560,17 @@ namespace grids
       return channelLeds;
   }
 
-  void GridsWrapper::saveSnapShot(int snapShotIndex)
+  SnapShotSettings* GridsWrapper::getSnapShot(uint8_t snapShotIndex)
+  {
+    return &snapshots[snapShotIndex];
+  }
+
+  void GridsWrapper::setSnapShot(uint8_t snapShotIndex, SnapShotSettings snapShot)
+  {
+    snapshots[snapShotIndex] = snapShot;
+  }
+
+  void GridsWrapper::saveSnapShot(uint8_t snapShotIndex)
   {
     for (uint8_t i = 0; i < 4; i++)
     {
@@ -578,7 +588,7 @@ namespace grids
     playingPattern = snapShotIndex;
   }
 
-  void GridsWrapper::loadSnapShot(int snapShotIndex)
+  void GridsWrapper::loadSnapShot(uint8_t snapShotIndex)
   {
     for (uint8_t i = 0; i < 4; i++)
     {
@@ -603,7 +613,7 @@ namespace grids
       return step;
   }
 
-  bool GridsWrapper::getChannelTriggered(int chanIndex)
+  bool GridsWrapper::getChannelTriggered(uint8_t chanIndex)
   {
     if(chanIndex < 0 || chanIndex >= num_notes) return false;
     return channelTriggered_[chanIndex];

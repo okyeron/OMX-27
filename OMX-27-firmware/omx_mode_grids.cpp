@@ -31,9 +31,15 @@ void OmxModeGrids::InitSetup()
 
 void OmxModeGrids::onModeActivated()
 {
-    if(!initSetup){
+    if (!initSetup)
+    {
         InitSetup();
     }
+
+    sequencer.playing = false;
+    grids_.stop();
+    grids_.loadSnapShot(grids_.playingPattern);
+    gridsAUX = false;
 }
 
 void OmxModeGrids::onClockTick() {
@@ -53,9 +59,9 @@ void OmxModeGrids::onPotChanged(int potIndex, int prevValue, int newValue, int a
 
     if (potIndex < 4)
     {
-        grids_.setDensity(potIndex, newValue * 2);
         if (autoSelectParam)
         {
+            grids_.setDensity(potIndex, newValue * 2);
             setParam(GRIDS_DENSITY, potIndex + 1);
         }
 
@@ -89,14 +95,14 @@ void OmxModeGrids::loopUpdate()
     fNone_ = !keyState[1] && !keyState[2];
 }
 
-void OmxModeGrids::setParam(int pageIndex, int paramPosition)
+void OmxModeGrids::setParam(uint8_t pageIndex, uint8_t paramPosition)
 {
     int p = pageIndex * NUM_DISP_PARAMS + paramPosition;
     setParam(p);
     omxDisp.setDirty();
 }
 
-void OmxModeGrids::setParam(int paramIndex)
+void OmxModeGrids::setParam(uint8_t paramIndex)
 {
     if (paramIndex >= 0)
     {
@@ -325,7 +331,7 @@ bool OmxModeGrids::shouldBlockEncEdit()
     return false;
 }
 
-void OmxModeGrids::saveActivePattern(int pattIndex)
+void OmxModeGrids::saveActivePattern(uint8_t pattIndex)
 {
     grids_.saveSnapShot(pattIndex);
 
@@ -346,7 +352,7 @@ void OmxModeGrids::saveActivePattern(int pattIndex)
     omxDisp.displayMessage((String) "Saved " + (pattIndex + 1));
 }
 
-void OmxModeGrids::loadActivePattern(int pattIndex)
+void OmxModeGrids::loadActivePattern(uint8_t pattIndex)
 {
     grids_.loadSnapShot(pattIndex);
 
@@ -602,7 +608,7 @@ void OmxModeGrids::onKeyUpdateChanLock(OMXKeypadEvent e)
     }
 }
 
-void OmxModeGrids::quickSelectInst(int instIndex)
+void OmxModeGrids::quickSelectInst(uint8_t instIndex)
 {
     if(instLockView_ && lockedInst_ == instIndex) return;
 
@@ -1085,4 +1091,19 @@ void OmxModeGrids::onDisplayUpdate()
 void OmxModeGrids::SetScale(MusicScales *scale)
 {
     midiKeyboard.SetScale(scale);
+}
+
+int OmxModeGrids::serializedPatternSize(bool eeprom)
+{
+    return sizeof(grids::SnapShotSettings);
+}
+
+grids::SnapShotSettings* OmxModeGrids::getPattern(uint8_t patternIndex)
+{
+    return grids_.getSnapShot(patternIndex);
+}
+
+void OmxModeGrids::setPattern(uint8_t patternIndex, grids::SnapShotSettings snapShot)
+{
+    grids_.setSnapShot(patternIndex, snapShot);
 }
