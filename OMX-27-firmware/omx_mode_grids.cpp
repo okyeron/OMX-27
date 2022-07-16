@@ -454,6 +454,7 @@ void OmxModeGrids::onKeyUpdateChanLock(OMXKeypadEvent e)
         if (e.down() && thisKey == 0) // Aux key down
         {
             instLockView_ = false; // Exit out of channel lock
+            omxDisp.setDirty();
             return;
         }
         // else if (e.down() && e.clicks() == 0 && (thisKey > 2 && thisKey < 11))
@@ -536,7 +537,7 @@ void OmxModeGrids::quickSelectInst(int instIndex)
     {
         setParam(page, lockedInst_ + 1);
     }
-    
+
     omxDisp.displayMessage((String) "Inst " + (lockedInst_ + 1));
     omxDisp.setDirty();
 }
