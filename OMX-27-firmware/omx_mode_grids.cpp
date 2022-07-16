@@ -44,7 +44,7 @@ void OmxModeGrids::onPotChanged(int potIndex, int prevValue, int newValue, int a
     // Serial.println((String)"AnalogDelta: " + analogDelta);
 
     // Only change page for significant difference
-    bool autoSelectParam = analogDelta >= 10;
+    bool autoSelectParam = analogDelta >= 10 && page == GRIDS_CONFIG;
 
     if (potIndex < 4)
     {
