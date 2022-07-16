@@ -854,8 +854,11 @@ void OmxModeGrids::setupPageLegends()
         if (setLegendsToChannel)
         {
             // Not sure why string.c_str doesn't work
-            // String l1 = "X " + (thisGrid + 1);
-            // String l2 = "Y " + (thisGrid + 1);
+            String l1 = "X " + String(targetChannel + 1);
+            String l2 = "Y " + String(targetChannel + 1);
+
+            omxDisp.legends[1] = l1.c_str();
+            omxDisp.legends[2] = l2.c_str();
 
             // char bufx[4];
             // char bufy[4];
@@ -866,26 +869,26 @@ void OmxModeGrids::setupPageLegends()
             // omxDisp.legends[2] = bufy;
 
             // Above string code not working at all? This is ugly
-            if (targetChannel == 0)
-            {
-                omxDisp.legends[1] = "X 1";
-                omxDisp.legends[2] = "Y 1";
-            }
-            else if (targetChannel == 1)
-            {
-                omxDisp.legends[1] = "X 2";
-                omxDisp.legends[2] = "Y 2";
-            }
-            else if (targetChannel == 2)
-            {
-                omxDisp.legends[1] = "X 3";
-                omxDisp.legends[2] = "Y 3";
-            }
-            else if (targetChannel == 3)
-            {
-                omxDisp.legends[1] = "X 4";
-                omxDisp.legends[2] = "Y 4";
-            }
+            // if (targetChannel == 0)
+            // {
+            //     omxDisp.legends[1] = "X 1";
+            //     omxDisp.legends[2] = "Y 1";
+            // }
+            // else if (targetChannel == 1)
+            // {
+            //     omxDisp.legends[1] = "X 2";
+            //     omxDisp.legends[2] = "Y 2";
+            // }
+            // else if (targetChannel == 2)
+            // {
+            //     omxDisp.legends[1] = "X 3";
+            //     omxDisp.legends[2] = "Y 3";
+            // }
+            // else if (targetChannel == 3)
+            // {
+            //     omxDisp.legends[1] = "X 4";
+            //     omxDisp.legends[2] = "Y 4";
+            // }
         }
 
         omxDisp.legends[0] = "ACNT"; // "BPM";
@@ -915,7 +918,7 @@ void OmxModeGrids::setupPageLegends()
     {
         if (instLockView_)
         {
-            String noteLegend = "NT " + String(instLockView_ + 1);
+            String noteLegend = "NT " + String(lockedInst_ + 1);
 
             omxDisp.legends[0] = noteLegend.c_str();
             omxDisp.legends[1] = "M-CHAN";
