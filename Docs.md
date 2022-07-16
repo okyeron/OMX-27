@@ -181,9 +181,11 @@ Pretty much the same as MI, but with the following tweaks for Organelle Mother o
 
 An adaptation of the Mutable Instruments "Topographic drum sequencer" module.
 
-See the original [Grids Manual](https://mutable-instruments.net/modules/grids/manual/) [or a video here] for general concepts.
+See the original [Grids Manual](https://mutable-instruments.net/modules/grids/manual/) [or a video ?] for more.
 
-Grids on OMX is a 4-channel/instrument trigger generator specialized in the creation and sculpting of rhythmic patterns. Typical drum use would be Bass Drum, Snare, Closed HiHat, Open HiHat (The default note numbers are mapped to these in the GM drum map).
+Grids on OMX is a 4-channel/instrument MIDI trigger generator specialized in the creation and sculpting of rhythmic patterns. The "grid" refers to a map or library of preset drum patterns arranged in a 5x5 grid - which you can steer using X/Y controls.
+
+Typical drum use would be Bass Drum, Snare, Closed HiHat, Open HiHat (The default note numbers are mapped to these in the GM drum map).
 
 
 Keys/Commands:   
