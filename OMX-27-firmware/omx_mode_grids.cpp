@@ -21,6 +21,7 @@ OmxModeGrids::OmxModeGrids()
     //     gridsXY[i][0] = grids_.getX(i);
     //     gridsXY[i][1] = grids_.getY(i);
     // }
+    midiKeyboard.setMidiMode();
 }
 
 void OmxModeGrids::InitSetup()
@@ -41,6 +42,10 @@ void OmxModeGrids::onClockTick() {
 
 void OmxModeGrids::onPotChanged(int potIndex, int prevValue, int newValue, int analogDelta)
 {
+    if(midiModeception){
+        midiKeyboard.onPotChanged(potIndex, prevValue, newValue, analogDelta);
+        return;
+    }
     // Serial.println((String)"AnalogDelta: " + analogDelta);
 
     // Only change page for significant difference
@@ -70,6 +75,12 @@ void OmxModeGrids::onPotChanged(int potIndex, int prevValue, int newValue, int a
 
 void OmxModeGrids::loopUpdate()
 {
+    if (midiModeception)
+    {
+        midiKeyboard.loopUpdate();
+        return;
+    }
+
     auto keyState = midiSettings.keyState;
 
     f1_ = keyState[1] && !keyState[2];
@@ -108,6 +119,12 @@ void OmxModeGrids::setParam(int paramIndex)
 
 void OmxModeGrids::onEncoderChanged(Encoder::Update enc)
 {
+    if (midiModeception)
+    {
+        midiKeyboard.onEncoderChanged(enc);
+        return;
+    }
+
     if (f1_)
     {
         // Change selected param while holding F1
@@ -278,17 +295,33 @@ void OmxModeGrids::onEncoderChanged(Encoder::Update enc)
 
 void OmxModeGrids::onEncoderButtonDown()
 {
+    if (midiModeception)
+    {
+        midiKeyboard.onEncoderButtonDown();
+        return;
+    }
+
     param = (param + 1 ) % kNumParams;
     setParam(param);
 }
 
 void OmxModeGrids::onEncoderButtonDownLong()
 {
+    if (midiModeception)
+    {
+        midiKeyboard.onEncoderButtonDownLong();
+        return;
+    }
     
 }
 
 bool OmxModeGrids::shouldBlockEncEdit()
 {
+    if (midiModeception)
+    {
+        return midiKeyboard.shouldBlockEncEdit();
+    }
+
     return false;
 }
 
@@ -337,17 +370,28 @@ void OmxModeGrids::loadActivePattern(int pattIndex)
 
 void OmxModeGrids::onKeyUpdate(OMXKeypadEvent e)
 {
+    int thisKey = e.key();
+
+    if (midiModeception)
+    {
+        midiKeyboard.onKeyUpdate(e);
+
+        if (midiSettings.keyState[0] && e.down() && thisKey == 26)
+        {
+            midiModeception = false;
+            omxDisp.setDirty();
+            omxLeds.setDirty();
+        }
+
+        return;
+    }
+
     if (instLockView_)
     {
         onKeyUpdateChanLock(e);
         return;
     }
-
-    int thisKey = e.key();
-
     // auto keyState = midiSettings.keyState;
-
-
     if (!e.held())
     {
         if (e.down() && thisKey == 0) // Aux key down
@@ -430,6 +474,15 @@ void OmxModeGrids::onKeyUpdate(OMXKeypadEvent e)
         {
             quickSelectInst(thisKey - 11);
         }
+
+        if (e.down() && thisKey == 26)
+        {
+            midiKeyboard.onModeActivated();
+            midiModeception = true;
+            omxDisp.setDirty();
+            omxLeds.setDirty();
+        }
+
         // else if (!e.down() && (thisKey > 10 && thisKey < 15))
         // {
         // }
@@ -567,10 +620,27 @@ void OmxModeGrids::quickSelectInst(int instIndex)
 
 void OmxModeGrids::onKeyHeldUpdate(OMXKeypadEvent e)
 {
+    if (midiModeception)
+    {
+        midiKeyboard.onKeyHeldUpdate(e);
+        return;
+    }
 }
 
 void OmxModeGrids::updateLEDs()
 {
+    if (midiModeception)
+    {
+        midiKeyboard.updateLEDs();
+
+        if (midiSettings.midiAUX)
+        {
+            strip.setPixelColor(26, RED);
+        }
+
+        return;
+    }
+
     omxLeds.updateBlinkStates();
 
     bool blinkState = omxLeds.getBlinkState();
@@ -713,6 +783,8 @@ void OmxModeGrids::updateLEDsF1()
     {
         strip.setPixelColor(k + 11, LEDOFF);
     }
+
+    strip.setPixelColor(26, ORANGE);
 }
 
 void OmxModeGrids::updateLEDsChannelView()
@@ -989,6 +1061,12 @@ void OmxModeGrids::setupPageLegends()
 
 void OmxModeGrids::onDisplayUpdate()
 {
+    if (midiModeception)
+    {
+        midiKeyboard.onDisplayUpdate();
+        return;
+    }
+
     updateLEDs();
 
     if (omxDisp.isDirty())
@@ -1002,4 +1080,9 @@ void OmxModeGrids::onDisplayUpdate()
             omxDisp.dispGenericMode(pselected);
         }
     }
+}
+
+void OmxModeGrids::SetScale(MusicScales *scale)
+{
+    midiKeyboard.SetScale(scale);
 }

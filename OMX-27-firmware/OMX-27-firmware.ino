@@ -132,6 +132,7 @@ void setup()
 	globalScale.calculateScale(scaleConfig.scaleRoot, scaleConfig.scalePattern);
 	omxModeMidi.SetScale(&globalScale);
 	omxModeSeq.SetScale(&globalScale);
+	omxModeGrids.SetScale(&globalScale);
 
 	// Load from EEPROM
 	bool bLoaded = loadFromStorage();

@@ -5,6 +5,7 @@
 #include "retro_grids.h"
 #include "colors.h"
 #include "config.h"
+#include "omx_mode_midi_keyboard.h"
 
 class OmxModeGrids : public OmxModeInterface
 {
@@ -94,4 +95,7 @@ private:
 
 
     int prevResolution_ = 0;
+
+    bool midiModeception = false;
+    OmxModeMidiKeyboard midiKeyboard; // Mode inside a mode. For science!
 };
