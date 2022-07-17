@@ -30,6 +30,7 @@
 #include "omx_mode_midi_keyboard.h"
 #include "omx_mode_sequencer.h"
 #include "omx_mode_grids.h"
+#include "omx_mode_euclidean.h"
 #include "omx_screensaver.h"
 #include "omx_leds.h"
 #include "music_scales.h"
@@ -37,6 +38,7 @@
 OmxModeMidiKeyboard omxModeMidi;
 OmxModeSequencer omxModeSeq;
 OmxModeGrids omxModeGrids;
+OmxModeEuclidean omxModeEuclid;
 
 OmxModeInterface *activeOmxMode;
 
@@ -135,6 +137,7 @@ void setup()
 	omxModeMidi.SetScale(&globalScale);
 	omxModeSeq.SetScale(&globalScale);
 	omxModeGrids.SetScale(&globalScale);
+	omxModeEuclid.SetScale(&globalScale);
 
 	// Load from EEPROM
 	bool bLoaded = loadFromStorage();
@@ -158,6 +161,8 @@ void setup()
 		// initPatterns();
 		saveToStorage();
 	}
+
+	changeOmxMode(MODE_EUCLID);
 
 	// Init Display
 	omxDisp.setup();
@@ -205,6 +210,9 @@ void changeOmxMode(OMXMode newOmxmode)
 		break;
 	case MODE_GRIDS:
 		activeOmxMode = &omxModeGrids;
+		break;
+	case MODE_EUCLID:
+		activeOmxMode = &omxModeEuclid;
 		break;
 	default:
 		omxModeMidi.setMidiMode();
