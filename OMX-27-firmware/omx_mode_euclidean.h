@@ -89,6 +89,8 @@ private:
     u_int8_t events;
     u_int8_t steps;
 
+    void drawEuclidPattern(bool* pattern, uint8_t steps);
+
     void printEuclidPattern(bool* pattern, uint8_t steps);
 
 };

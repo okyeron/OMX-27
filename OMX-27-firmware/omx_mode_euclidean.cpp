@@ -5,6 +5,7 @@
 #include "omx_leds.h"
 #include "sequencer.h"
 #include "euclidean_sequencer.h"
+#include "ClearUI.h"
 
 using namespace euclidean;
 
@@ -40,6 +41,39 @@ void OmxModeEuclidean::onModeActivated()
 
 void OmxModeEuclidean::onClockTick() {
     // grids_.gridsTick();
+}
+
+void OmxModeEuclidean::drawEuclidPattern(bool *pattern, uint8_t steps)
+{
+    if(steps == 0 || steps == 1) return;
+
+    int16_t steponHeight = 3;
+    int16_t stepoffHeight = 1;
+    int16_t stepWidth = 2;
+    int16_t halfh = gridh / 2;
+    int16_t halfw = gridw / 2;
+
+    int16_t stepint = gridw / steps - 1;
+
+    display.drawLine(0, halfh, gridw, halfh, HALFWHITE);
+
+    for (int i = 0; i < steps; i++)
+    {
+        int16_t xPos = stepint * i;
+        int16_t yPos = gridw;
+
+        if (pattern[i])
+        {
+            display.fillRect(xPos, yPos, stepWidth, steponHeight, WHITE);
+
+        }
+        else
+        {
+            display.fillRect(xPos, yPos, stepWidth, stepoffHeight, WHITE);
+        }
+    }
+
+    omxDisp.setDirty();
 }
 
 void OmxModeEuclidean::printEuclidPattern(bool *pattern, uint8_t steps)
@@ -83,6 +117,9 @@ void OmxModeEuclidean::onPotChanged(int potIndex, int prevValue, int newValue, i
 
         EuclideanMath::generateEuclidPattern(euclidPattern, rotation, events, steps);
         printEuclidPattern(euclidPattern, steps);
+        // drawEuclidPattern(euclidPattern, steps);
+
+        omxDisp.setDirty();
     }
 
     // Serial.println((String)"AnalogDelta: " + analogDelta);
@@ -158,36 +195,36 @@ void OmxModeEuclidean::onEncoderChanged(Encoder::Update enc)
         return;
     }
 
-    if (f1_)
-    {
-        // Change selected param while holding F1
-        if (enc.dir() < 0) // if turn CCW
-        { 
-            setParam(param - 1);
-            omxDisp.setDirty();
-        }
-        else if (enc.dir() > 0) // if turn CW
-        { 
-            setParam(param + 1);
-            omxDisp.setDirty();
-        }
+    // if (f1_)
+    // {
+    //     // Change selected param while holding F1
+    //     if (enc.dir() < 0) // if turn CCW
+    //     { 
+    //         setParam(param - 1);
+    //         omxDisp.setDirty();
+    //     }
+    //     else if (enc.dir() > 0) // if turn CW
+    //     { 
+    //         setParam(param + 1);
+    //         omxDisp.setDirty();
+    //     }
 
-        return; // break;
-    }
+    //     return; // break;
+    // }
 
-    auto amt = enc.accel(5); // where 5 is the acceleration factor if you want it, 0 if you don't)
+    // auto amt = enc.accel(5); // where 5 is the acceleration factor if you want it, 0 if you don't)
 
-    int paramStep = param % 5;
+    // int paramStep = param % 5;
 
-    if (paramStep != 0) // Page select mode if 0
-    {
-        switch (page)
-        {
-        default:
-            break;
-        }
-    }
-    omxDisp.setDirty();
+    // if (paramStep != 0) // Page select mode if 0
+    // {
+    //     switch (page)
+    //     {
+    //     default:
+    //         break;
+    //     }
+    // }
+    // omxDisp.setDirty();
 }
 
 void OmxModeEuclidean::onEncoderButtonDown()
@@ -198,8 +235,8 @@ void OmxModeEuclidean::onEncoderButtonDown()
         return;
     }
 
-    param = (param + 1 ) % kNumParams;
-    setParam(param);
+    // param = (param + 1 ) % kNumParams;
+    // setParam(param);
 }
 
 void OmxModeEuclidean::onEncoderButtonDownLong()
@@ -549,27 +586,27 @@ void OmxModeEuclidean::updateLEDsPatterns()
 
 void OmxModeEuclidean::setupPageLegends()
 {
-    omxDisp.clearLegends();
+    // omxDisp.clearLegends();
 
-    omxDisp.dispPage = page + 1;
+    // omxDisp.dispPage = page + 1;
 
-    switch (page)
-    {
-    case EUCLID_CONFIG:
-    {
-        // omxDisp.legends[0] = "DS 1";
-        // omxDisp.legends[1] = "DS 2";
-        // omxDisp.legends[2] = "DS 3";
-        // omxDisp.legends[3] = "DS 4";
-        // omxDisp.legendVals[0] = grids_.getDensity(0);
-        // omxDisp.legendVals[1] = grids_.getDensity(1);
-        // omxDisp.legendVals[2] = grids_.getDensity(2);
-        // omxDisp.legendVals[3] = grids_.getDensity(3);
-    }
-    break;
-    default:
-        break;
-    }
+    // switch (page)
+    // {
+    // case EUCLID_CONFIG:
+    // {
+    //     // omxDisp.legends[0] = "DS 1";
+    //     // omxDisp.legends[1] = "DS 2";
+    //     // omxDisp.legends[2] = "DS 3";
+    //     // omxDisp.legends[3] = "DS 4";
+    //     // omxDisp.legendVals[0] = grids_.getDensity(0);
+    //     // omxDisp.legendVals[1] = grids_.getDensity(1);
+    //     // omxDisp.legendVals[2] = grids_.getDensity(2);
+    //     // omxDisp.legendVals[3] = grids_.getDensity(3);
+    // }
+    // break;
+    // default:
+    //     break;
+    // }
 }
 
 void OmxModeEuclidean::onDisplayUpdate()
@@ -586,15 +623,16 @@ void OmxModeEuclidean::onDisplayUpdate()
         return;
     }
 
-    updateLEDs();
+    // updateLEDs();
 
     if (omxDisp.isDirty())
     { 
         if (!encoderConfig.enc_edit)
         {
-            int pselected = param % NUM_DISP_PARAMS;
-            setupPageLegends();
-            omxDisp.dispGenericMode(pselected);
+            omxDisp.drawEuclidPattern(euclidPattern, steps);
+            // int pselected = param % NUM_DISP_PARAMS;
+            // setupPageLegends();
+            // omxDisp.dispGenericMode(pselected);
         }
     }
 }

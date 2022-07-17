@@ -327,4 +327,38 @@ void OmxDisp::bumpDisplayTimer()
     dirtyDisplayTimer = displayRefreshRate + 1;
 }
 
+void OmxDisp::drawEuclidPattern(bool *pattern, uint8_t steps)
+{
+    if(steps == 0) return;
+
+    int16_t steponHeight = 6;
+    int16_t steponWidth = 2;
+    int16_t stepoffHeight = 2;
+    int16_t stepoffWidth = 2;
+    int16_t halfh = gridh / 2;
+    int16_t halfw = gridw / 2;
+
+    float stepint = (float)gridw / (float)steps;
+
+    // display.drawLine(0, halfh, gridw, halfh, WHITE);
+
+    for (int i = 0; i < steps; i++)
+    {
+        int16_t xPos = stepint * i;
+        int16_t yPos = halfh;
+
+        if (pattern[i])
+        {
+            display.fillRect(xPos, yPos - steponHeight, steponWidth, steponHeight, WHITE);
+
+        }
+        else
+        {
+            display.fillRect(xPos, yPos- stepoffHeight, stepoffWidth, stepoffHeight, WHITE);
+        }
+    }
+
+    omxDisp.setDirty();
+}
+
 OmxDisp omxDisp;

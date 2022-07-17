@@ -46,6 +46,8 @@ public:
 
     void UpdateMessageTextTimer();
 
+    void drawEuclidPattern(bool *pattern, uint8_t steps);
+
 private:
     int hline = 8;
     int messageTextTimer = 0;
