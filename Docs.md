@@ -67,26 +67,31 @@ Quick Keys - Hold AUX
 - first 2 "white keys" are octave up/down  
 - first 2 "black keys" cycle through the selected parameter on the display  
 
-Parameters:  
+#### Parameters:
+
+**Page 1**
 - `OCT`: current Octave  
 - `CH`: active MIDI Channel 
-- 'CC': displays CC being sent when turning a potentiometer
-- 'NOTE': displays the last note number that was sent
+- `CC`: displays CC being sent when turning a potentiometer
+- `NOTE`: displays the last note number that was sent
 
+**Page 2**
 - `RR`: RoundRobin MIDI Channel distribution
 - `RROF`: RR offset value   
 - `PGM`: MIDI program change  
 - `BNK`: MIDI bank select.
 
+**Page 3**
 - `PBNK`: Potentiometer bank select (CC assignments are still hard coded)  
 - `THRU`: when "On" incoming USBMIDI will be passed to TRS MIDI Out.
 - `MCRO`: MIDI Macro Mode Select (default is OFF)
 - `M-CH`: MIDI Macro Mode Channel
 
-- 'ROOT' : select the root note for scale mode
-- 'SCALE' : select a scale or turn off scale mode
-- 'LOCK' : locks to the active scale. If this is enabled, you will only be able to play notes in the scale
-- 'GROUP' : groups all the notes of the scale across the lower row of 16 keys. 
+**Page 4**
+- `ROOT` : select the root note for scale mode
+- `SCALE` : select a scale or turn off scale mode
+- `LOCK` : locks to the active scale. If this is enabled, you will only be able to play notes in the scale
+- `GROUP` : groups all the notes of the scale across the lower row of 16 keys. 
 
 #### Musical Scales
 
