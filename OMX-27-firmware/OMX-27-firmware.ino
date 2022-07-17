@@ -181,7 +181,7 @@ void setup()
 
 void changeOmxMode(OMXMode newOmxmode)
 {
-	Serial.println((String)"NewMode: " + newOmxmode);
+//	Serial.println((String)"NewMode: " + newOmxmode);
 	sysSettings.omxMode = newOmxmode;
 	sysSettings.newmode = newOmxmode;
 

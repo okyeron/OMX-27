@@ -377,7 +377,8 @@ void OmxModeGrids::loadActivePattern(uint8_t pattIndex)
 void OmxModeGrids::onKeyUpdate(OMXKeypadEvent e)
 {
     int thisKey = e.key();
-
+	auto keyState = midiSettings.keyState;
+	
     if (midiModeception)
     {
         midiKeyboard.onKeyUpdate(e);
@@ -398,7 +399,7 @@ void OmxModeGrids::onKeyUpdate(OMXKeypadEvent e)
         onKeyUpdateChanLock(e);
         return;
     }
-    // auto keyState = midiSettings.keyState;
+   
     if (!e.held())
     {
         if (e.down() && thisKey == 0) // Aux key down
@@ -505,6 +506,32 @@ void OmxModeGrids::onKeyUpdate(OMXKeypadEvent e)
             
         // }
     }
+    // RANDOM X or Y with bottom key + F2
+    for (int j = 11; j < 19; j++)
+    {
+    	if(keyState[j])
+    	{
+			if (e.down() && (thisKey == 2))
+			{
+				if (j < 15) 
+				{
+					int whichX = j - 11;
+					int newX = random(0, 255);
+					grids_.setX(whichX, newX);
+					setParam(GRIDS_XY, 2);
+				}
+				else
+				{
+					int whichY = j - 15;
+					int newY = random(0, 255);
+					grids_.setY(whichY, newY);
+					setParam(GRIDS_XY, 3);
+				}
+				omxDisp.setDirty();
+			}
+    	}
+    }
+    
 }
 
 void OmxModeGrids::onKeyUpdateChanLock(OMXKeypadEvent e)
