@@ -67,27 +67,27 @@ Quick Keys - Hold AUX
 - first 2 "white keys" are octave up/down  
 - first 2 "black keys" cycle through the selected parameter on the display  
 
-#### Parameters:
+Parameters:
 
-**Page 1**
+Page 1:
 - `OCT`: current Octave  
 - `CH`: active MIDI Channel 
 - `CC`: displays CC being sent when turning a potentiometer
 - `NOTE`: displays the last note number that was sent
 
-**Page 2**
+Page 2:
 - `RR`: RoundRobin MIDI Channel distribution
 - `RROF`: RR offset value   
 - `PGM`: MIDI program change  
 - `BNK`: MIDI bank select.
 
-**Page 3**
+Page 3:
 - `PBNK`: Potentiometer bank select (CC assignments are still hard coded)  
 - `THRU`: when "On" incoming USBMIDI will be passed to TRS MIDI Out.
 - `MCRO`: MIDI Macro Mode Select (default is OFF)
 - `M-CH`: MIDI Macro Mode Channel
 
-**Page 4**
+Page 4:
 - `ROOT` : select the root note for scale mode
 - `SCALE` : select a scale or turn off scale mode
 - `LOCK` : locks to the active scale. If this is enabled, you will only be able to play notes in the scale
@@ -203,6 +203,8 @@ Grids on OMX is a 4-channel/instrument MIDI trigger generator specialized in the
 
 Typical drum use would be Bass Drum, Snare, Closed HiHat, Open HiHat (The default note numbers are mapped to these in the GM drum map).
 
+**Quick Keys**
+Grids has many quick keys. Pressing these keys will quickly jump the display to select a specific parameter which can be adjusted with the encoder.
 
 Keys/Commands:   
  - AUX is sequencer Start/Stop  
@@ -212,31 +214,46 @@ Keys/Commands:
  - LEDs on Keys 9-12 show trigger activity of the playing pattern  
  - Lighted Keys 13,14,16 are quick keys for ACNT/XAOS/BPM
  - Pattern keys (black keys) can load "snapshots" of density/x/y settings
- - F2 + Pattern saves a "snapshot" current state of that pattern
- - F1 + Keys 1-4 jump to Instrument View. This shows the current pattern on that instrument (over 2 pages since patterns are 32 steps) and playhead. Top row lighted keys are quick-keys for ACNT/X/Y/XAOS
- - AUX-key exits Instrument View    
- - F2 in Instrument View is a quick key to jump to params page to set Note Number, MIDI Channel and BPM.
+ - F2 + Pattern saves a "snapshot" current state of that pattern. Patterns do not automatically save, this is a performance feature, allowing you to load a pattern, tweak it, then quickly load back to it's original state. 
+
+  Instrument View Mode:
+  - F1 + Keys 1-4 jump to Instrument View. This shows the current pattern on that instrument (over 2 pages since patterns are 32 steps) and playhead. Then render of the pattern will update to show each page while playing. 
+  - Top row lighted keys(A#1, C#2, D#2, F#2) are quick-keys for ACNT/X/Y/XAOS
+  - First 4 keys of bottom row will not be specially lit since they are rendering the pattern, but will allow you to quickly select a different instrument.
+  - F2 is a quick key to jump to params page to set Note Number, MIDI Channel and BPM.
+  - Key 3(F#1) in Instrument View is a quick key for Midi Channel for the instrument. 
+  - AUX-key exits Instrument View 
+
+  Midi Keyboard Mode:
+   - F1 plus bottom key 16 enters into the Midi Keyboard for sending CCs or playing over the top of the sequencer. Everything works the same as mode MI.
+   - Hold Aux and bottom key 16 to exit out of the Midi Keyboard mode. 
 
 Parameters:  
+Page 1 Event Densities:
 - `DN 1`: event density - instrument 1  
 - `DN 2`: event density - instrument 2  
 - `DN 3`: event density - instrument 3  
 - `DN 4`: event density - instrument 4     
 
+Page 2:
 - `NT 1`: note number - instrument 1  
-- `NT 2`: note numbery - instrument 2  
+- `NT 2`: note number - instrument 2  
 - `NT 3`: note number - instrument 3  
 - `NT 4`: note number - instrument 4  
 
+Page 3:
 - `ACNT`: accent amount (larger number is more variation) - applies to all instruments   
 - `X `: X amount for selected instrument  
 - `Y `: Y amount for selected instrument  
 - `XAOS`: chaos amount - applies to all instruments
 
+Page 4 - Main Mode:
+- `BPM`: tempo
 
-
-
-
+Page 4 - Instrument View Active:
+- `NT`: note number for active instrument
+- `M-CHAN`: midi chanel for active instrument. 
+- `BPM`: tempo
 
 ### Screensaver 
 After a default timeout (3 minutes), the display will be blanked and in MI Mode a "screensaver" animation will show on the LEDs. The rightmost pot (#5) can be turned to adjust the color. Touching any keys or any of the other pots will exit the screensaver.  
