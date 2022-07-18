@@ -58,6 +58,8 @@ private:
 
     void quickSelectInst(uint8_t instIndex);
 
+    void startPlayback();
+    void stopPlayback();
 
     bool initSetup = false;
     grids::GridsWrapper grids_;

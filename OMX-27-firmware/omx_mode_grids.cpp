@@ -374,6 +374,19 @@ void OmxModeGrids::loadActivePattern(uint8_t pattIndex)
     omxDisp.displayMessage((String) "Load " + (pattIndex + 1));
 }
 
+void OmxModeGrids::startPlayback()
+{
+    gridsAUX = true;
+    grids_.start();
+    sequencer.playing = true;
+}
+void OmxModeGrids::stopPlayback()
+{
+    gridsAUX = false;
+    grids_.stop();
+    sequencer.playing = false;
+}
+
 void OmxModeGrids::onKeyUpdate(OMXKeypadEvent e)
 {
     int thisKey = e.key();
@@ -407,15 +420,11 @@ void OmxModeGrids::onKeyUpdate(OMXKeypadEvent e)
             // Sequencer shouldn't be a dependancy here but current is used to advance clocks. 
             if (sequencer.playing && gridsAUX)
             {
-                gridsAUX = false;
-                grids_.stop();
-                sequencer.playing = false;
+                stopPlayback();
             }
             else
             {
-                gridsAUX = true;
-                grids_.start();
-                sequencer.playing = true;
+                startPlayback();
             }
         }
         else if (e.down() && e.clicks() == 0 && (thisKey > 2 && thisKey < 11))
