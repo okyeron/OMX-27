@@ -181,7 +181,17 @@ void OmxModeEuclidean::onPotChanged(int potIndex, int prevValue, int newValue, i
     {
         uint8_t prevRes = activeEuclid->getClockDivMult();
         uint8_t newres = map(newValue, 0, 127, 0, 6);
-        activeEuclid->setClockDivMult(newres);
+        if (polyRhythmMode)
+        {
+            for (u_int8_t i = 0; i < kNumEuclids; i++)
+            {
+                euclids[i].setPolyRClockDivMult(newres);
+            }
+        }
+        else
+        {
+            activeEuclid->setClockDivMult(newres);
+        }
 
         // omxDisp.displayMessage(newres);
 
@@ -331,6 +341,22 @@ void OmxModeEuclidean::onEncoderButtonDown()
     {
         midiKeyboard.onEncoderButtonDown();
         return;
+    }
+
+    polyRhythmMode = !polyRhythmMode;
+
+    for (u_int8_t i = 0; i < kNumEuclids; i++)
+    {
+        euclids[i].setPolyRhythmMode(polyRhythmMode);
+    }
+
+    if (polyRhythmMode)
+    {
+        omxDisp.displayMessage("pRhythm on");
+    }
+    else
+    {
+        omxDisp.displayMessage("pRhythm off");
     }
 
     // param = (param + 1 ) % kNumParams;

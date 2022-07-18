@@ -89,6 +89,7 @@ private:
 
 
     bool euclidPattern[32];
+    bool polyRhythmMode = false;
 
     // u_int8_t rotation;
     // u_int8_t events;

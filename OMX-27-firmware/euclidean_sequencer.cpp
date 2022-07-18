@@ -175,7 +175,7 @@ namespace euclidean
       multiplier_ = multValues[m];
 
       if(clockDivMultP_ != prevDiv){
-        Serial.println((String)"clockDivMultP_: " + clockDivMultP_);
+        // Serial.println((String)"clockDivMultP_: " + clockDivMultP_);
         patternDirty_ = true;
       }
   }
@@ -183,6 +183,23 @@ namespace euclidean
   uint8_t EuclideanSequencer::getClockDivMult()
   {
       return clockDivMultP_;
+  }
+
+  void EuclideanSequencer::setPolyRClockDivMult(uint8_t m)
+  {
+      uint8_t prevDiv = polyRClockDivMultP_;
+
+      polyRClockDivMultP_ = m;
+      multiplierPR_ = multValues[m];
+
+      if (polyRClockDivMultP_ != prevDiv)
+      {
+          patternDirty_ = true;
+      }
+  }
+  uint8_t EuclideanSequencer::getPolyRClockDivMult()
+  {
+      return polyRClockDivMultP_;
   }
 
   void EuclideanSequencer::setRotation(uint8_t newRotation)
@@ -233,6 +250,15 @@ namespace euclidean
       return noteLength_;
   }
 
+  void EuclideanSequencer::setPolyRhythmMode(bool enable)
+  {
+      polyRhythmMode_ = enable;
+  }
+  bool EuclideanSequencer::getPolyRhythmMode()
+  {
+      return polyRhythmMode_;
+  }
+
   bool *EuclideanSequencer::getPattern()
   {
       return pattern_;
@@ -256,13 +282,28 @@ namespace euclidean
           patternDirty_ = false;
       }
 
-      if (!running_)
+      if (!running_ || steps_ == 0)
           return;
 
       if (stepmicros >= nextStepTimeP_)
       {
           lastStepTimeP_ = nextStepTimeP_;
-          nextStepTimeP_ += microsperstep * multiplier_; // calc step based on rate
+
+          if (polyRhythmMode_)
+          {
+            //   uint8_t stepCount = max(steps_, 1);
+
+              uint32_t timeDelta = ((microsperstep * 16) / steps_) * multiplierPR_;
+              nextStepTimeP_ += timeDelta; // Space all triggers across a bar
+
+              Serial.println((String) "microsperstep " + microsperstep);
+              Serial.println((String) "timeDelta " + timeDelta);
+
+          }
+          else
+          {
+              nextStepTimeP_ += microsperstep * multiplier_; // calc step based on rate
+          }
 
           bool trigger = pattern_[seqPos_];
 

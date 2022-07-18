@@ -101,6 +101,9 @@ namespace euclidean
         void setClockDivMult(uint8_t m);
         uint8_t getClockDivMult();
 
+        void setPolyRClockDivMult(uint8_t m);
+        uint8_t getPolyRClockDivMult();
+
         void setRotation(uint8_t newRotation);
         uint8_t getRotation();
 
@@ -116,6 +119,10 @@ namespace euclidean
         void setNoteLength(uint8_t newNoteLength);
         uint8_t getNoteLength();
 
+        void setPolyRhythmMode(bool enable);
+        bool getPolyRhythmMode();
+
+
         bool *getPattern();
 
         void printEuclidPattern();
@@ -123,7 +130,8 @@ namespace euclidean
     private:
         // GridsChannel channel_;
         uint32_t divider_;
-        float multiplier_;
+        float multiplier_ = 1;
+        float multiplierPR_ = 1;
         uint32_t tickCount_;
         // uint8_t density_[num_notes];
         // uint8_t perturbations_[num_notes];
@@ -145,6 +153,8 @@ namespace euclidean
 
         uint8_t noteLength_ = 1;
 
+        bool polyRhythmMode_ = true;
+
         bool patternDirty_ = false;
 
         // Clock timings
@@ -153,6 +163,8 @@ namespace euclidean
         Micros lastStepTimeP_ = 32;
         int lastPosP_ = 16;
         uint8_t clockDivMultP_ = 4;
+        uint8_t polyRClockDivMultP_ = 4;
+
 
         int seqPos_ = 0;
 
