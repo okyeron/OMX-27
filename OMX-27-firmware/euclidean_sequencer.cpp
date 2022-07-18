@@ -1,5 +1,6 @@
 #include "euclidean_sequencer.h"
 #include "MM.h"
+#include "noteoffs.h"
 
 namespace euclidean
 {
@@ -249,6 +250,8 @@ namespace euclidean
 
           if (trigger)
           {
+            playNote();
+            // pendingNoteOns.insert(60, 100, 1, stepmicros, false);
             //   Serial.print((String) "X  ");
           }
           else
@@ -412,6 +415,66 @@ void EuclideanSequencer::autoReset() {
 	// sequencer.patternPage[p] = getPatternPage(sequencer.seqPos[p]); // FOLLOW MODE FOR SEQ PAGE
 
 // return ()
+}
+
+void EuclideanSequencer::playNote() {
+	bool sendnoteCV = false;
+	// if (sequencer.getPattern(patternNum)->sendCV) {
+	// 	sendnoteCV = true;
+	// }
+
+    // regular note on trigger
+    uint8_t note = 60;
+    uint8_t channel = 1;
+    uint8_t vel = 100;
+    uint8_t stepLength = 1;
+    uint8_t swing = 0;
+
+    uint32_t noteoff_micros = micros() + (stepLength + 1) * clockConfig.step_micros;
+    pendingNoteOffs.insert(note, channel, noteoff_micros, sendnoteCV);
+
+    uint32_t noteon_micros;
+
+    if (swing > 0 && seqPos_ % 2 == 0)
+    {
+        if (swing < 99)
+        {
+            noteon_micros = micros() + ((clockConfig.ppqInterval * multiplier_) / (PPQ / 24) * swing); // full range swing
+        }
+        else if (swing == 99)
+        {                                // random drunken swing
+            uint8_t rnd_swing = rand() % 95 + 1; // rand 1 - 95 // randomly apply swing value
+            noteon_micros = micros() + ((clockConfig.ppqInterval * multiplier_) / (PPQ / 24) * rnd_swing);
+        }
+    }
+    else
+    {
+        noteon_micros = micros();
+    }
+
+    // Queue note-on
+    pendingNoteOns.insert(note, vel, 1, noteon_micros, sendnoteCV);
+
+    // {notenum, vel, notelen, step_type, {p1,p2,p3,p4}, prob}
+    // send param locks
+    // for (int q = 0; q < 4; q++)
+    // {
+    //     int tempCC = steps[sequencer.seqPos[patternNum]].params[q];
+    //     if (tempCC > -1)
+    //     {
+    //         MM::sendControlChange(pots[potSettings.potbank][q], tempCC, sequencer.getPatternChannel(patternNum));
+    //         seqConfig.prevPlock[q] = tempCC;
+    //     }
+    //     else if (seqConfig.prevPlock[q] != potSettings.potValues[q])
+    //     {
+    //         // if (tempCC != seqConfig.prevPlock[q]) {
+    //         MM::sendControlChange(pots[potSettings.potbank][q], potSettings.potValues[q], sequencer.getPatternChannel(patternNum));
+    //         seqConfig.prevPlock[q] = potSettings.potValues[q];
+    //     }
+    // }
+    // lastNote[patternNum][sequencer.seqPos[patternNum]] = steps[sequencer.seqPos[patternNum]].note;
+
+    // CV is sent from pendingNoteOns/pendingNoteOffs
 }
 
 //   uint8_t EuclideanSequencer::getSeqPos()

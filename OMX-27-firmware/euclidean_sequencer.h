@@ -147,6 +147,7 @@ namespace euclidean
 
         void advanceStep();
         void autoReset();
+        void playNote();
     };
 
 }
