@@ -4,6 +4,8 @@
 
 namespace euclidean
 {
+    const float kEuclidNoteLengths[] = {0.1, 0.25, 0.5, 0.75, 1, 1.5, 2, 4, 8, 16};
+    const uint8_t kNumEuclidNoteLengths = 10;
   
   EuclideanMath::EuclideanMath()
   {
@@ -183,36 +185,44 @@ namespace euclidean
       return clockDivMultP_;
   }
 
-  void EuclideanSequencer::setRotation(u_int8_t newRotation)
+  void EuclideanSequencer::setRotation(uint8_t newRotation)
   {
       if (newRotation != rotation_)
           patternDirty_ = true;
       rotation_ = newRotation;
   }
-  u_int8_t EuclideanSequencer::getRotation()
+  uint8_t EuclideanSequencer::getRotation()
   {
       return rotation_;
   }
-  void EuclideanSequencer::setEvents(u_int8_t newEvents)
+  void EuclideanSequencer::setEvents(uint8_t newEvents)
   {
       if (newEvents != events_)
           patternDirty_ = true;
       events_ = newEvents;
   }
-  u_int8_t EuclideanSequencer::getEvents()
+  uint8_t EuclideanSequencer::getEvents()
   {
       return events_;
   }
 
-  void EuclideanSequencer::setSteps(u_int8_t newSteps)
+  void EuclideanSequencer::setSteps(uint8_t newSteps)
   {
       if (newSteps != steps_)
           patternDirty_ = true;
       steps_ = newSteps;
   }
-  u_int8_t EuclideanSequencer::getSteps()
+  uint8_t EuclideanSequencer::getSteps()
   {
       return steps_;
+  }
+  void EuclideanSequencer::setNoteLength(uint8_t newNoteLength)
+  {
+      noteLength_ = newNoteLength;
+  }
+  uint8_t EuclideanSequencer::getNoteLength()
+  {
+      return noteLength_;
   }
 
   bool *EuclideanSequencer::getPattern()
@@ -427,10 +437,10 @@ void EuclideanSequencer::playNote() {
     uint8_t note = 60;
     uint8_t channel = 1;
     uint8_t vel = 100;
-    uint8_t stepLength = 1;
+    float stepLength = kEuclidNoteLengths[noteLength_];
     uint8_t swing = 0;
 
-    uint32_t noteoff_micros = micros() + (stepLength + 1) * clockConfig.step_micros;
+    uint32_t noteoff_micros = micros() + (stepLength) * clockConfig.step_micros;
     pendingNoteOffs.insert(note, channel, noteoff_micros, sendnoteCV);
 
     uint32_t noteon_micros;

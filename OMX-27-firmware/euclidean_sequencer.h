@@ -6,6 +6,9 @@
 
 namespace euclidean
 {
+    extern const float kEuclidNoteLengths[10];
+    extern const uint8_t kNumEuclidNoteLengths;
+
     // #define EUCLID_PAT_SIZE = 32
     // enum Grid_Resolutions
     // {
@@ -59,6 +62,8 @@ namespace euclidean
     class EuclideanSequencer
     {
     public:
+        
+
         uint8_t grids_notes[4] = {36, 38, 42, 46};
         static const uint8_t num_notes = sizeof(grids_notes);
         uint8_t playingPattern = 0;
@@ -96,14 +101,17 @@ namespace euclidean
         void setClockDivMult(uint8_t m);
         uint8_t getClockDivMult();
 
-        void setRotation(u_int8_t newRotation);
-        u_int8_t getRotation();
+        void setRotation(uint8_t newRotation);
+        uint8_t getRotation();
 
-        void setEvents(u_int8_t newEvents);
-        u_int8_t getEvents();
+        void setEvents(uint8_t newEvents);
+        uint8_t getEvents();
 
-        void setSteps(u_int8_t newSteps);
-        u_int8_t getSteps();
+        void setSteps(uint8_t newSteps);
+        uint8_t getSteps();
+
+         void setNoteLength(uint8_t newNoteLength);
+        uint8_t getNoteLength();
 
         bool* getPattern();
 
@@ -113,7 +121,7 @@ namespace euclidean
     private:
         // GridsChannel channel_;
         uint32_t divider_;
-        uint8_t multiplier_;
+        float multiplier_;
         uint32_t tickCount_;
         // uint8_t density_[num_notes];
         // uint8_t perturbations_[num_notes];
@@ -127,9 +135,11 @@ namespace euclidean
 
         // uint8_t defaultMidiChannel_ = 1;
 
-        u_int8_t rotation_ = 0;
-        u_int8_t events_ = 0;
-        u_int8_t steps_ = 16;
+        uint8_t rotation_ = 0;
+        uint8_t events_ = 0;
+        uint8_t steps_ = 16;
+
+        uint8_t noteLength_ = 1;
 
         bool patternDirty_ = false;
 

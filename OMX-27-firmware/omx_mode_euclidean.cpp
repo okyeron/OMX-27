@@ -54,6 +54,8 @@ void OmxModeEuclidean::startSequencers()
     {
         euclids[i].start();
     }
+
+    MM::startClock();
 }
 void OmxModeEuclidean::stopSequencers()
 {
@@ -149,6 +151,21 @@ void OmxModeEuclidean::onPotChanged(int potIndex, int prevValue, int newValue, i
         // valuesChanged = steps != prevSteps;
 
         activeEuclid->setSteps(map(newValue, 0, 127, 0, 32));
+    }
+    else if(potIndex == 3){
+        // uint8_t prevSteps = steps;
+        // steps = map(newValue, 0, 127, 0, 32);
+        // valuesChanged = steps != prevSteps;
+
+        uint8_t prevLength = activeEuclid->getNoteLength();
+        uint8_t newLength = map(newValue, 0, 127, 0, euclidean::kNumEuclidNoteLengths - 1);
+
+        activeEuclid->setNoteLength(newLength);
+
+        if (prevLength != newLength)
+        {
+            omxDisp.displayMessageTimed(String(euclidean::kEuclidNoteLengths[newLength]), 10);
+        }
     }
 
     else if (potIndex == 4)
