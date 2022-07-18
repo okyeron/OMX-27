@@ -293,11 +293,11 @@ namespace euclidean
           {
             //   uint8_t stepCount = max(steps_, 1);
 
-              uint32_t timeDelta = ((microsperstep * 16) / steps_) * multiplierPR_;
+              uint32_t timeDelta = ((microsperstep * (16 * multiplierPR_)) / steps_) * multiplier_;
               nextStepTimeP_ += timeDelta; // Space all triggers across a bar
 
-              Serial.println((String) "microsperstep " + microsperstep);
-              Serial.println((String) "timeDelta " + timeDelta);
+            //   Serial.println((String) "microsperstep " + microsperstep);
+            //   Serial.println((String) "timeDelta " + timeDelta);
 
           }
           else
