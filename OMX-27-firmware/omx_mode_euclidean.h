@@ -5,6 +5,7 @@
 #include "colors.h"
 #include "config.h"
 #include "omx_mode_midi_keyboard.h"
+#include "euclidean_sequencer.h"
 
 class OmxModeEuclidean : public OmxModeInterface
 {
@@ -35,6 +36,8 @@ public:
 
     void onDisplayUpdate() override;
     void SetScale(MusicScales* scale);
+
+    static const u_int8_t kNumEuclids = 4;
 
     // static int serializedPatternSize(bool eeprom);
     // static inline int getNumPatterns() { return 8; }
@@ -85,12 +88,17 @@ private:
 
     bool euclidPattern[32];
 
-    u_int8_t rotation;
-    u_int8_t events;
-    u_int8_t steps;
+    // u_int8_t rotation;
+    // u_int8_t events;
+    // u_int8_t steps;
 
-    void drawEuclidPattern(bool* pattern, uint8_t steps);
+    // void drawEuclidPattern(bool* pattern, uint8_t steps);
 
-    void printEuclidPattern(bool* pattern, uint8_t steps);
+    // void printEuclidPattern(bool* pattern, uint8_t steps);
+
+    void startSequencers();
+    void stopSequencers();
+
+    euclidean::EuclideanSequencer euclids[4];
 
 };

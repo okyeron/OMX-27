@@ -42,6 +42,8 @@ void OmxDisp::displayMessage(String msg)
 
 void OmxDisp::displayMessage(const char *msg)
 {
+    currentMsg = msg;
+
     display.fillRect(0, 0, 128, 32, BLACK);
     u8g2_display.setFontMode(1);
     u8g2_display.setFont(FONT_TENFAT);
@@ -61,6 +63,27 @@ void OmxDisp::displayMessagef(const char *fmt, ...)
     vsnprintf(buf, sizeof(buf), fmt, args);
     va_end(args);
     displayMessage(buf);
+}
+
+void OmxDisp::displayMessageTimed(String msg, uint8_t secs)
+{
+    currentMsg = msg.c_str();
+
+    renderMessage();
+
+    messageTextTimer = secs * 100000;
+    dirtyDisplay = true;
+}
+
+void OmxDisp::renderMessage()
+{
+    display.fillRect(0, 0, 128, 32, BLACK);
+    u8g2_display.setFontMode(1);
+    u8g2_display.setFont(FONT_TENFAT);
+    u8g2_display.setForegroundColor(WHITE);
+    u8g2_display.setBackgroundColor(BLACK);
+    u8g2centerText(currentMsg, 0, 10, 128, 32);
+    // dirtyDisplay = true;
 }
 
 bool OmxDisp::isMessageActive(){
@@ -173,7 +196,11 @@ void OmxDisp::clearLegends()
 
 void OmxDisp::dispGenericMode(int selected)
 {
-    if(isMessageActive()) return;
+    if (isMessageActive())
+    {
+        renderMessage();
+        return;
+    }
 
     // const char* legends[4] = {"","","",""};
     // int legendVals[4] = {0,0,0,0};
@@ -329,6 +356,12 @@ void OmxDisp::bumpDisplayTimer()
 
 void OmxDisp::drawEuclidPattern(bool *pattern, uint8_t steps)
 {
+    if (isMessageActive())
+    {
+        renderMessage();
+        return;
+    }
+
     if(steps == 0) return;
 
     int16_t steponHeight = 6;
@@ -358,7 +391,7 @@ void OmxDisp::drawEuclidPattern(bool *pattern, uint8_t steps)
         }
     }
 
-    omxDisp.setDirty();
+    // omxDisp.setDirty();
 }
 
 OmxDisp omxDisp;

@@ -1,8 +1,12 @@
+#pragma once
+
 #include <Arduino.h>
+#include "config.h"
 // #define NUM_GRIDS 8
 
 namespace euclidean
 {
+    // #define EUCLID_PAT_SIZE = 32
     // enum Grid_Resolutions
     // {
     //     HALF = 0,
@@ -43,7 +47,7 @@ namespace euclidean
         EuclideanMath();
 
         // bool array should be of length kPatternSize
-        static void generateEuclidPattern(bool* pattern, uint8_t rotation, uint8_t events, uint8_t steps);
+        static void generateEuclidPattern(bool* pattern, uint8_t events, uint8_t steps);
         // bool array should be of length kPatternSize
         static void clearPattern(bool* pattern);
         // bool array should be of length kPatternSize
@@ -59,6 +63,9 @@ namespace euclidean
         static const uint8_t num_notes = sizeof(grids_notes);
         uint8_t playingPattern = 0;
 
+        static const uint8_t kStepsPerPattern = 16;
+
+
         // SnapShotSettings snapshots[8];
      
         EuclideanSequencer();
@@ -66,7 +73,7 @@ namespace euclidean
         void start();
         void stop();
         void proceed();
-        void gridsTick();
+        void clockTick(uint32_t stepmicros, uint32_t microsperstep);
 
         // void saveSnapShot(uint8_t snapShotIndex);
         // void loadSnapShot(uint8_t snapShotIndex);
@@ -84,6 +91,25 @@ namespace euclidean
         // void setMidiChan(uint8_t chanIndex, uint8_t channel);
         // uint8_t getMidiChan(uint8_t chanIndex);
 
+        bool isDirty();
+
+        void setClockDivMult(uint8_t m);
+        uint8_t getClockDivMult();
+
+        void setRotation(u_int8_t newRotation);
+        u_int8_t getRotation();
+
+        void setEvents(u_int8_t newEvents);
+        u_int8_t getEvents();
+
+        void setSteps(u_int8_t newSteps);
+        u_int8_t getSteps();
+
+        bool* getPattern();
+
+        void printEuclidPattern();
+
+
     private:
         // GridsChannel channel_;
         uint32_t divider_;
@@ -100,6 +126,27 @@ namespace euclidean
         bool running_;
 
         // uint8_t defaultMidiChannel_ = 1;
+
+        u_int8_t rotation_ = 0;
+        u_int8_t events_ = 0;
+        u_int8_t steps_ = 16;
+
+        bool patternDirty_ = false;
+
+        // Clock timings
+        Micros lastProcessTimeP_ = 32;
+        Micros nextStepTimeP_ = 32;
+        Micros lastStepTimeP_ = 32;
+        int lastPosP_ = 16;
+        uint8_t clockDivMultP_ = 4;
+
+        int seqPos_ = 0;
+
+        bool pattern_[EuclideanMath::kPatternSize];
+        void regeneratePattern();
+
+        void advanceStep();
+        void autoReset();
     };
 
 }

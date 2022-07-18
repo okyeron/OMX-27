@@ -6,6 +6,9 @@
 #include "sequencer.h"
 #include "euclidean_sequencer.h"
 #include "ClearUI.h"
+#include "noteoffs.h"
+#include "MM.h"
+#include "logic_util.h"
 
 using namespace euclidean;
 
@@ -34,57 +37,86 @@ void OmxModeEuclidean::onModeActivated()
     }
 
     sequencer.playing = false;
+    stopSequencers();
+    aux_ = false;
+    f1_ = false;
+    f2_ = false;
+    f3_ = false;
+    fNone_ = true;
     // grids_.stop();
     // grids_.loadSnapShot(grids_.playingPattern);
     // gridsAUX = false;
 }
 
-void OmxModeEuclidean::onClockTick() {
-    // grids_.gridsTick();
-}
-
-void OmxModeEuclidean::drawEuclidPattern(bool *pattern, uint8_t steps)
+void OmxModeEuclidean::startSequencers()
 {
-    if(steps == 0 || steps == 1) return;
-
-    int16_t steponHeight = 3;
-    int16_t stepoffHeight = 1;
-    int16_t stepWidth = 2;
-    int16_t halfh = gridh / 2;
-    int16_t halfw = gridw / 2;
-
-    int16_t stepint = gridw / steps - 1;
-
-    display.drawLine(0, halfh, gridw, halfh, HALFWHITE);
-
-    for (int i = 0; i < steps; i++)
+    for (u_int8_t i = 0; i < kNumEuclids; i++)
     {
-        int16_t xPos = stepint * i;
-        int16_t yPos = gridw;
-
-        if (pattern[i])
-        {
-            display.fillRect(xPos, yPos, stepWidth, steponHeight, WHITE);
-
-        }
-        else
-        {
-            display.fillRect(xPos, yPos, stepWidth, stepoffHeight, WHITE);
-        }
+        euclids[i].start();
     }
-
-    omxDisp.setDirty();
 }
-
-void OmxModeEuclidean::printEuclidPattern(bool *pattern, uint8_t steps)
+void OmxModeEuclidean::stopSequencers()
 {
-    String sOut = "";
-    for (uint8_t i = 0; i < steps; i++)
+    for (u_int8_t i = 0; i < kNumEuclids; i++)
     {
-        sOut += (pattern[i] ? "X" : "-");
+        euclids[i].stop();
     }
-    Serial.println(sOut.c_str());
+	MM::stopClock();
+    pendingNoteOffs.allOff();
 }
+
+void OmxModeEuclidean::onClockTick()
+{
+    // euclids[0].clockTick();
+
+    // for (u_int8_t i = 0; i < kNumEuclids; i++)
+    // {
+    //     euclids[i].clockTick();
+    // }
+}
+
+// void OmxModeEuclidean::drawEuclidPattern(bool *pattern, uint8_t steps)
+// {
+//     if(steps == 0 || steps == 1) return;
+
+//     int16_t steponHeight = 3;
+//     int16_t stepoffHeight = 1;
+//     int16_t stepWidth = 2;
+//     int16_t halfh = gridh / 2;
+//     int16_t halfw = gridw / 2;
+
+//     int16_t stepint = gridw / steps - 1;
+
+//     display.drawLine(0, halfh, gridw, halfh, HALFWHITE);
+
+//     for (int i = 0; i < steps; i++)
+//     {
+//         int16_t xPos = stepint * i;
+//         int16_t yPos = gridw;
+
+//         if (pattern[i])
+//         {
+//             display.fillRect(xPos, yPos, stepWidth, steponHeight, WHITE);
+
+//         }
+//         else
+//         {
+//             display.fillRect(xPos, yPos, stepWidth, stepoffHeight, WHITE);
+//         }
+//     }
+
+//     omxDisp.setDirty();
+// }
+
+// void OmxModeEuclidean::printEuclidPattern(bool *pattern, uint8_t steps)
+// {
+//     String sOut = "";
+//     for (uint8_t i = 0; i < steps; i++)
+//     {
+//         sOut += (pattern[i] ? "X" : "-");
+//     }
+//     Serial.println(sOut.c_str());
+// }
 
 void OmxModeEuclidean::onPotChanged(int potIndex, int prevValue, int newValue, int analogDelta)
 {
@@ -95,32 +127,54 @@ void OmxModeEuclidean::onPotChanged(int potIndex, int prevValue, int newValue, i
 
     bool valuesChanged = false;
 
+    EuclideanSequencer* activeEuclid = &euclids[0];
+
     if(potIndex == 0){
-        uint8_t prevRotation = rotation;
-        rotation = map(newValue, 0, 127, 0, 32);
-        valuesChanged = rotation != prevRotation;
+        // uint8_t prevRotation = activeEuclid->getRotation();
+        // uint8_t rotation = map(newValue, 0, 127, 0, 32);
+        // valuesChanged = rotation != prevRotation;
+
+        activeEuclid->setRotation(map(newValue, 0, 127, 0, 32));
     }
     else if(potIndex == 1){
-        uint8_t prevEvents = events;
-        events = map(newValue, 0, 127, 0, 32);
-        valuesChanged = events != prevEvents;
+        // uint8_t prevEvents = activeEuclid->getEvents();
+        // events = map(newValue, 0, 127, 0, 32);
+        // valuesChanged = events != prevEvents;
 
+        activeEuclid->setEvents(map(newValue, 0, 127, 0, 32));
     }
     else if(potIndex == 2){
-        uint8_t prevSteps = steps;
-        steps = map(newValue, 0, 127, 0, 32);
-        valuesChanged = steps != prevSteps;
+        // uint8_t prevSteps = steps;
+        // steps = map(newValue, 0, 127, 0, 32);
+        // valuesChanged = steps != prevSteps;
+
+        activeEuclid->setSteps(map(newValue, 0, 127, 0, 32));
     }
 
-    if(valuesChanged){
-        Serial.println((String)"rotation: " + rotation + " events: " + events + " steps: " + steps);
+    else if (potIndex == 4)
+    {
+        uint8_t prevRes = euclids[0].getClockDivMult();
+        uint8_t newres = map(newValue, 0, 127, 0, 6);
+        euclids[0].setClockDivMult(newres);
 
-        EuclideanMath::generateEuclidPattern(euclidPattern, rotation, events, steps);
-        printEuclidPattern(euclidPattern, steps);
-        // drawEuclidPattern(euclidPattern, steps);
+        // omxDisp.displayMessage(newres);
 
-        omxDisp.setDirty();
+        if (newres != prevRes)
+        {
+            omxDisp.displayMessageTimed(String(multValues[newres]), 10);
+        }
     }
+
+    // if(activeEuclid->isDirty()){
+    //     // Serial.println((String)"rotation: " + rotation + " events: " + events + " steps: " + steps);
+
+    //     // EuclideanMath::generateEuclidPattern(euclidPattern, rotation, events, steps);
+    //     // printEuclidPattern(euclidPattern, steps);
+    //     // drawEuclidPattern(euclidPattern, steps);
+
+    // }
+
+    omxDisp.setDirty();
 
     // Serial.println((String)"AnalogDelta: " + analogDelta);
 
@@ -157,6 +211,17 @@ void OmxModeEuclidean::loopUpdate()
     f2_ = !keyState[1] && keyState[2];
     f3_ = keyState[1] && keyState[2];
     fNone_ = !keyState[1] && !keyState[2];
+
+
+
+    // bool testProb = probResult(sequencer.getCurrentPattern()->steps[sequencer.seqPos[sequencer.playingPattern]].prob);
+
+	if (sequencer.playing)
+	{
+		uint32_t playstepmicros = micros();
+
+        euclids[0].clockTick(playstepmicros, clockConfig.step_micros);
+	}
 }
 
 void OmxModeEuclidean::setParam(uint8_t pageIndex, uint8_t paramPosition)
@@ -295,38 +360,38 @@ void OmxModeEuclidean::onKeyUpdate(OMXKeypadEvent e)
     //     return;
     // }
     // // auto keyState = midiSettings.keyState;
-    // if (!e.held())
-    // {
-    //     if (e.down() && thisKey == 0) // Aux key down
-    //     {
-    //         // Sequencer shouldn't be a dependancy here but current is used to advance clocks. 
-    //         if (sequencer.playing && gridsAUX)
-    //         {
-    //             gridsAUX = false;
-    //             grids_.stop();
-    //             sequencer.playing = false;
-    //         }
-    //         else
-    //         {
-    //             gridsAUX = true;
-    //             grids_.start();
-    //             sequencer.playing = true;
-    //         }
-    //     }
-    //     else if (e.down() && e.clicks() == 0 && (thisKey > 2 && thisKey < 11))
-    //     {
-    //         int patt = thisKey - 3;
+    if (!e.held())
+    {
+        if (e.down() && thisKey == 0) // Aux key down
+        {
+            // Sequencer shouldn't be a dependancy here but current is used to advance clocks. 
+            if (sequencer.playing && aux_)
+            {
+                aux_ = false;
+                stopSequencers();
+                sequencer.playing = false;
+            }
+            else
+            {
+                aux_ = true;
+                startSequencers();
+                sequencer.playing = true;
+            }
+        }
+        // else if (e.down() && e.clicks() == 0 && (thisKey > 2 && thisKey < 11))
+        // {
+        //     int patt = thisKey - 3;
             
-    //         if (f2_)
-    //         { 
-    //             saveActivePattern(patt);
-    //         }
-    //         else if(fNone_)
-    //         {
-    //             loadActivePattern(patt);
-    //         }
-    //     }
-    // }
+        //     if (f2_)
+        //     { 
+        //         saveActivePattern(patt);
+        //     }
+        //     else if(fNone_)
+        //     {
+        //         loadActivePattern(patt);
+        //     }
+        // }
+    }
 
     // if (fNone_)
     // {
@@ -629,13 +694,32 @@ void OmxModeEuclidean::onDisplayUpdate()
     { 
         if (!encoderConfig.enc_edit)
         {
-            omxDisp.drawEuclidPattern(euclidPattern, steps);
+            omxDisp.drawEuclidPattern(euclids[0].getPattern() , euclids[0].getSteps());
             // int pselected = param % NUM_DISP_PARAMS;
             // setupPageLegends();
             // omxDisp.dispGenericMode(pselected);
         }
     }
+
+    // if (!encoderConfig.enc_edit)
+    // {
+    //     omxDisp.drawEuclidPattern(euclids[0].getPattern(), euclids[0].getSteps());
+    //     // int pselected = param % NUM_DISP_PARAMS;
+    //     // setupPageLegends();
+    //     // omxDisp.dispGenericMode(pselected);
+    // }
+
+    // if (!encoderConfig.enc_edit)
+    //     {
+    //         omxDisp.drawEuclidPattern(euclids[0].getPattern() , euclids[0].getSteps());
+    //         // int pselected = param % NUM_DISP_PARAMS;
+    //         // setupPageLegends();
+    //         // omxDisp.dispGenericMode(pselected);
+    //     }
 }
+
+        
+
 
 void OmxModeEuclidean::SetScale(MusicScales *scale)
 {

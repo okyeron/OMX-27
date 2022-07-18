@@ -20,6 +20,7 @@ public:
     void displayMessage(String msg);
     void displayMessage(const char *msg);
     void displayMessagef(const char *fmt, ...);
+    void displayMessageTimed(String msg, uint8_t secs);
 
     bool isMessageActive();
 
@@ -53,11 +54,14 @@ private:
     int messageTextTimer = 0;
     bool dirtyDisplay = false;
 
+    const char * currentMsg;
+
     elapsedMillis dirtyDisplayTimer = 0;
     unsigned long displayRefreshRate = 60;
 
     void u8g2centerText(const char *s, int16_t x, int16_t y, uint16_t w, uint16_t h);
     void u8g2centerNumber(int n, uint16_t x, uint16_t y, uint16_t w, uint16_t h);
+    void renderMessage();
 };
 
 extern OmxDisp omxDisp;
