@@ -110,13 +110,15 @@ namespace euclidean
         void setSteps(uint8_t newSteps);
         uint8_t getSteps();
 
-         void setNoteLength(uint8_t newNoteLength);
+        void setNoteNumber(uint8_t newNoteNumber);
+        uint8_t getNoteNumber();
+
+        void setNoteLength(uint8_t newNoteLength);
         uint8_t getNoteLength();
 
-        bool* getPattern();
+        bool *getPattern();
 
         void printEuclidPattern();
-
 
     private:
         // GridsChannel channel_;
@@ -138,6 +140,8 @@ namespace euclidean
         uint8_t rotation_ = 0;
         uint8_t events_ = 0;
         uint8_t steps_ = 16;
+
+        uint8_t noteNumber_ = 16;
 
         uint8_t noteLength_ = 1;
 

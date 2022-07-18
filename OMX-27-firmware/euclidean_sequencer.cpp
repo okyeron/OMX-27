@@ -216,6 +216,14 @@ namespace euclidean
   {
       return steps_;
   }
+  void EuclideanSequencer::setNoteNumber(uint8_t newNoteNumber)
+  {
+      noteNumber_ = newNoteNumber;
+  }
+  uint8_t EuclideanSequencer::getNoteNumber()
+  {
+      return noteNumber_;
+  }
   void EuclideanSequencer::setNoteLength(uint8_t newNoteLength)
   {
       noteLength_ = newNoteLength;
@@ -434,14 +442,14 @@ void EuclideanSequencer::playNote() {
 	// }
 
     // regular note on trigger
-    uint8_t note = 60;
+    // uint8_t note = 60;
     uint8_t channel = 1;
     uint8_t vel = 100;
     float stepLength = kEuclidNoteLengths[noteLength_];
     uint8_t swing = 0;
 
     uint32_t noteoff_micros = micros() + (stepLength) * clockConfig.step_micros;
-    pendingNoteOffs.insert(note, channel, noteoff_micros, sendnoteCV);
+    pendingNoteOffs.insert(noteNumber_, channel, noteoff_micros, sendnoteCV);
 
     uint32_t noteon_micros;
 
@@ -463,7 +471,7 @@ void EuclideanSequencer::playNote() {
     }
 
     // Queue note-on
-    pendingNoteOns.insert(note, vel, 1, noteon_micros, sendnoteCV);
+    pendingNoteOns.insert(noteNumber_, vel, 1, noteon_micros, sendnoteCV);
 
     // {notenum, vel, notelen, step_type, {p1,p2,p3,p4}, prob}
     // send param locks

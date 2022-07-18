@@ -58,7 +58,7 @@ private:
     void saveActivePattern(uint8_t pattIndex);
     void loadActivePattern(uint8_t pattIndex);
 
-    void quickSelectInst(uint8_t instIndex);
+    void selectEuclid(uint8_t euclidIndex);
 
     bool initSetup = false;
 
@@ -72,6 +72,8 @@ private:
 
     int page = 0;
     int param = 0;
+
+    uint8_t selectedEuclid_ = 0;
 
     bool gridsSelected[4] = {false,false,false,false};
 
