@@ -12,7 +12,7 @@
 // #include <cstdarg>
 
 
-//const int OMX_VERSION = 1.7.3b;
+//const int OMX_VERSION = 1.7.3b3;
 
 /* * firmware metadata  */
 // OMX_VERSION = 1.7.2
