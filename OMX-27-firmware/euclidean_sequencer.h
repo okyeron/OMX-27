@@ -98,6 +98,8 @@ namespace euclidean
 
         bool isDirty();
 
+        bool isRunning();
+
         void setClockDivMult(uint8_t m);
         uint8_t getClockDivMult();
 
@@ -121,6 +123,11 @@ namespace euclidean
 
         void setPolyRhythmMode(bool enable);
         bool getPolyRhythmMode();
+
+        uint8_t getSeqPos();
+        uint8_t getLastSeqPos();
+
+        float getSeqPerc();
 
 
         bool *getPattern();
@@ -147,7 +154,7 @@ namespace euclidean
 
         uint8_t rotation_ = 0;
         uint8_t events_ = 0;
-        uint8_t steps_ = 16;
+        uint8_t steps_ = 0;
 
         uint8_t noteNumber_ = 16;
 
@@ -161,17 +168,24 @@ namespace euclidean
         Micros lastProcessTimeP_ = 32;
         Micros nextStepTimeP_ = 32;
         Micros lastStepTimeP_ = 32;
-        int lastPosP_ = 16;
+        uint8_t lastPosP_ = 16;
         uint8_t clockDivMultP_ = 4;
         uint8_t polyRClockDivMultP_ = 4;
 
 
-        int seqPos_ = 0;
+        uint8_t seqPos_ = 0;
+        uint8_t lastSeqPos_ = 0;
+
+
+        float seqPerc_ = 0;
+        uint32_t stepMicroDelta_ = 0;
+        uint32_t startMicros = 0;
+
 
         bool pattern_[EuclideanMath::kPatternSize];
         void regeneratePattern();
 
-        void advanceStep();
+        void advanceStep(uint32_t stepmicros);
         void autoReset();
         void playNote();
     };

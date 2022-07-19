@@ -551,7 +551,7 @@ void OmxModeEuclidean::selectEuclid(uint8_t euclidIndex)
 
     selectedEuclid_ = euclidIndex;
 
-    omxDisp.displayMessage((String) "Euclid " + (euclidIndex + 1));
+    // omxDisp.displayMessage((String) "Euclid " + (euclidIndex + 1));
     omxDisp.setDirty();
 }
 
@@ -760,11 +760,30 @@ void OmxModeEuclidean::onDisplayUpdate()
 
     // updateLEDs();
 
-    if (omxDisp.isDirty())
+    if (omxDisp.isDirty() || sequencer.playing)
     { 
         if (!encoderConfig.enc_edit)
         {
-            omxDisp.drawEuclidPattern(euclids[selectedEuclid_].getPattern() , euclids[selectedEuclid_].getSteps());
+            if (sequencer.playing)
+            {
+                omxDisp.setDirty();
+            }
+            for(uint8_t i = 0; i < 4; i++)
+            {
+                uint8_t ypos = 7 * (i+1);
+                bool selected = i == selectedEuclid_;
+                omxDisp.drawEuclidPattern(euclids[i].getPattern(), euclids[i].getSteps(), ypos, selected, euclids[i].isRunning(), euclids[i].getLastSeqPos());
+            }
+
+            omxDisp.dispPageIndicators2(5, 0);
+
+            // for(int i = 0; i < 4; i++){
+
+            //     bool selected = i == 0;
+
+            //     omxDisp.dispPageIndicators(i, selected);
+            // }
+
             // int pselected = param % NUM_DISP_PARAMS;
             // setupPageLegends();
             // omxDisp.dispGenericMode(pselected);

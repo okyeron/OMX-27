@@ -30,6 +30,7 @@ public:
     void dispSymbBox(const char *v, int16_t n, bool inv);
     void dispGenericMode(int selected);
     void dispPageIndicators(int page, bool selected);
+    void dispPageIndicators2(uint8_t numPages, int8_t selected);
     void dispMode();
 
     void testdrawrect();
@@ -47,7 +48,7 @@ public:
 
     void UpdateMessageTextTimer();
 
-    void drawEuclidPattern(bool *pattern, uint8_t steps);
+    void drawEuclidPattern(bool *pattern, uint8_t steps, uint8_t yPos, bool selected, bool isPlaying, uint8_t seqPos);
 
 private:
     int hline = 8;

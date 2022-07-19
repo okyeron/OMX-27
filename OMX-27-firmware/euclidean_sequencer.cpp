@@ -124,6 +124,7 @@ namespace euclidean
 
       nextStepTimeP_ = micros();
       lastStepTimeP_ = micros();
+      startMicros = micros();
   }
 
   void EuclideanSequencer::stop()
@@ -139,6 +140,11 @@ namespace euclidean
   bool EuclideanSequencer::isDirty()
   {
       return patternDirty_;
+  }
+
+  bool EuclideanSequencer::isRunning()
+  {
+      return running_;
   }
 
 //   void EuclideanSequencer::setResolution(uint8_t r)
@@ -259,6 +265,20 @@ namespace euclidean
       return polyRhythmMode_;
   }
 
+  uint8_t EuclideanSequencer::getSeqPos()
+  {
+    return seqPos_;
+  }
+  uint8_t EuclideanSequencer::getLastSeqPos()
+  {
+    return lastSeqPos_;
+  }
+
+  float EuclideanSequencer::getSeqPerc()
+  {
+    return seqPerc_;
+  }
+
   bool *EuclideanSequencer::getPattern()
   {
       return pattern_;
@@ -282,28 +302,38 @@ namespace euclidean
           patternDirty_ = false;
       }
 
-      if (!running_ || steps_ == 0)
+      if (!running_)
           return;
+
+    //   seqPerc_ = (stepmicros - startMicros) / ((float)max(stepMicroDelta_, 1) * (steps_ + 1));
+
+      if (steps_ == 0)
+      {
+          seqPerc_ = 0;
+
+          return;
+      }
+
+    //   uint32_t nextBarMicros = stepMicroDelta_ * (steps_ + 1);
+
+
 
       if (stepmicros >= nextStepTimeP_)
       {
           lastStepTimeP_ = nextStepTimeP_;
 
-          if (polyRhythmMode_)
+          if (polyRhythmMode_) // Space all triggers across a bar
           {
-            //   uint8_t stepCount = max(steps_, 1);
-
-              uint32_t timeDelta = ((microsperstep * (16 * multiplierPR_)) / steps_) * multiplier_;
-              nextStepTimeP_ += timeDelta; // Space all triggers across a bar
-
-            //   Serial.println((String) "microsperstep " + microsperstep);
-            //   Serial.println((String) "timeDelta " + timeDelta);
-
+              //   stepMicroDelta_ = ((microsperstep * (16 * multiplierPR_)) / steps_) * multiplier_;
+              stepMicroDelta_ = ((microsperstep * 16) / steps_) * multiplierPR_;
+            //   stepMicroDelta_ = ((microsperstep * (16 * multiplierPR_)) / steps_) * multiplier_;
           }
           else
           {
-              nextStepTimeP_ += microsperstep * multiplier_; // calc step based on rate
+              stepMicroDelta_ = microsperstep * multiplier_;
           }
+
+          nextStepTimeP_ += stepMicroDelta_; // calc step based on rate
 
           bool trigger = pattern_[seqPos_];
 
@@ -320,7 +350,7 @@ namespace euclidean
 
           //   lastPosP_ = (seqPos_ + 15) % 16;
 
-          advanceStep();
+          advanceStep(stepmicros);
 
           if (seqPos_ == 0)
           {
@@ -412,17 +442,26 @@ namespace euclidean
   }
 
 
-void EuclideanSequencer::advanceStep() {
+void EuclideanSequencer::advanceStep(uint32_t stepmicros) {
 
-    if(steps_ == 0){
+    if (steps_ == 0)
+    {
         seqPos_ = 0;
+        lastSeqPos_ = seqPos_;
+
         return;
     }
+    lastSeqPos_ = seqPos_;
 
     seqPos_ = (seqPos_ + 1) % steps_;
+
+    if (seqPos_ == 0)
+    {
+        startMicros = stepmicros;
+    }
     // autoReset();
 
-	// step ONE pattern ahead one place
+    // step ONE pattern ahead one place
 		// if (sequencer.getPattern(patternNum)->reverse) {
 		// 	sequencer.seqPos[patternNum]--;
 		// 	auto_reset(patternNum); // determine whether to reset or not based on param settings

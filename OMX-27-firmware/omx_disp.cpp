@@ -284,6 +284,24 @@ void OmxDisp::dispGenericMode(int selected)
     }
 }
 
+void OmxDisp::dispPageIndicators2(uint8_t numPages, int8_t selected)
+{
+    int16_t indicatorWidth = 6;
+    int16_t indicatorYPos = 32;
+    int16_t segment = (6 + 6);
+
+    int16_t start = (128 - (segment * numPages)) / 2.0;
+
+    // Serial.println((String)"start: " + start + " indicatorYPos: " + indicatorYPos + " segment: " + segment);
+
+    for(uint8_t i = 0; i < numPages; i++)
+    {
+        int16_t h = ((i == selected) ? 2 : 1);
+
+        display.fillRect(start + (i * segment), indicatorYPos - h, indicatorWidth, h, WHITE);
+    }
+}
+
 void OmxDisp::dispPageIndicators(int page, bool selected)
 {
     if (selected)
@@ -354,7 +372,7 @@ void OmxDisp::bumpDisplayTimer()
     dirtyDisplayTimer = displayRefreshRate + 1;
 }
 
-void OmxDisp::drawEuclidPattern(bool *pattern, uint8_t steps)
+void OmxDisp::drawEuclidPattern(bool *pattern, uint8_t steps, uint8_t yPos, bool selected, bool isPlaying, uint8_t seqPos)
 {
     if (isMessageActive())
     {
@@ -362,34 +380,67 @@ void OmxDisp::drawEuclidPattern(bool *pattern, uint8_t steps)
         return;
     }
 
-    if(steps == 0) return;
+    int16_t startSpacing = 6;
+    int16_t patWidth = gridw - startSpacing;
+    
+    if (selected)
+    {
+        display.fillRect(0, yPos - 3, 3, 3, WHITE);
+        display.drawPixel(1, yPos - 2, BLACK);
+        // display.fillRect(1, yPos - 4, 1, 2, BLACK);
 
-    int16_t steponHeight = 6;
-    int16_t steponWidth = 2;
+        // display.drawLine(0, yPos, gridw, yPos, WHITE);
+    }
+
+    if (steps == 0)
+    {
+        return;
+    }
+
+    int16_t steponHeight = 5;
+    // int16_t steponWidth = 2;
     int16_t stepoffHeight = 2;
-    int16_t stepoffWidth = 2;
-    int16_t halfh = gridh / 2;
-    int16_t halfw = gridw / 2;
+    // int16_t stepoffWidth = 2;
+    // int16_t halfh = gridh / 2;
+    // int16_t halfw = gridw / 2;
 
-    float stepint = (float)gridw / (float)steps;
-
-    // display.drawLine(0, halfh, gridw, halfh, WHITE);
+    float stepint = (float)patWidth / (float)steps;
 
     for (int i = 0; i < steps; i++)
     {
-        int16_t xPos = stepint * i;
-        int16_t yPos = halfh;
+        int16_t xPos = startSpacing + (stepint * i);
+        // int16_t yPos = halfh;
+
+        uint8_t w = 2;
+        if(isPlaying && i == seqPos){
+            w = 4;
+            xPos -= 1;
+        }
 
         if (pattern[i])
         {
-            display.fillRect(xPos, yPos - steponHeight, steponWidth, steponHeight, WHITE);
-
+            display.fillRect(xPos, yPos - steponHeight, w, steponHeight, WHITE);
         }
         else
         {
-            display.fillRect(xPos, yPos- stepoffHeight, stepoffWidth, stepoffHeight, WHITE);
+            display.fillRect(xPos, yPos - stepoffHeight, w, stepoffHeight, WHITE);
         }
+
+        // if(i == seqPos)
+        // {
+        //     display.fillRect(xPos, yPos, stepoffWidth, stepoffWidth, WHITE);
+
+        //     // display.drawPixel(xPos, yPos, WHITE);
+        // }
     }
+
+    // if (isPlaying)
+    // {
+    //     uint8_t seqPos
+    //     int16_t xPos = (gridw - startSpacing) * playheadPerc + startSpacing;
+
+    //     display.drawPixel(xPos, yPos, WHITE);
+    // }
 
     // omxDisp.setDirty();
 }
