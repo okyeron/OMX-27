@@ -380,16 +380,24 @@ void OmxDisp::drawEuclidPattern(bool *pattern, uint8_t steps, uint8_t yPos, bool
         return;
     }
 
+    const bool selectAsLine = true;
+
     int16_t startSpacing = 6;
     int16_t patWidth = gridw - startSpacing;
     
     if (selected)
     {
-        display.fillRect(0, yPos - 3, 3, 3, WHITE);
-        display.drawPixel(1, yPos - 2, BLACK);
-        // display.fillRect(1, yPos - 4, 1, 2, BLACK);
-
-        // display.drawLine(0, yPos, gridw, yPos, WHITE);
+        if (selectAsLine)
+        {
+            display.drawLine(0, yPos, gridw, yPos, WHITE);
+            patWidth = gridw;
+            startSpacing = 0;
+        }
+        else
+        {
+            display.fillRect(0, yPos - 3, 3, 3, WHITE);
+            display.drawPixel(1, yPos - 2, BLACK);
+        }
     }
 
     if (steps == 0)
