@@ -759,6 +759,7 @@ void OmxModeSequencer::onKeyUpdate(OMXKeypadEvent e)
                         omxDisp.displayMessagef("FWD >>");
                     }
                 }
+                omxLeds.setDirty();
                 omxDisp.setDirty();
             }
             else
@@ -939,7 +940,7 @@ void OmxModeSequencer::showCurrentStep(int patternNum)
             auto pixelpos = j - pagestepstart + 11;
             //			if (j < sequencer.getPatternLength(patternNum)){
             // ONLY DO LEDS FOR THE CURRENT PAGE
-            if (j == sequencer.seqPos[sequencer.playingPattern])
+            if (j == sequencer.lastSeqPos[sequencer.playingPattern])
             {
                 strip.setPixelColor(pixelpos, SEQCHASE);
             }
@@ -1063,7 +1064,7 @@ void OmxModeSequencer::showCurrentStep(int patternNum)
 
                 if (i % 4 == 0)
                 { // MARK GROUPS OF 4
-                    if (i == sequencer.seqPos[patternNum])
+                    if (i == sequencer.lastSeqPos[patternNum])
                     {
                         if (sequencer.playing)
                         {
@@ -1115,7 +1116,7 @@ void OmxModeSequencer::showCurrentStep(int patternNum)
                         strip.setPixelColor(pixelpos, SEQMARKER);
                     }
                 }
-                else if (i == sequencer.seqPos[patternNum])
+                else if (i == sequencer.lastSeqPos[patternNum])
                 { // STEP CHASE
                     if (sequencer.playing)
                     {
