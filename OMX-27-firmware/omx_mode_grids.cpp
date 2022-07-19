@@ -54,15 +54,16 @@ void OmxModeGrids::onPotChanged(int potIndex, int prevValue, int newValue, int a
     }
     // Serial.println((String)"AnalogDelta: " + analogDelta);
 
-    // Only change page for significant difference
-    bool autoSelectParam = analogDelta >= 10 && page == GRIDS_DENSITY;
-
     if (potIndex < 4)
     {
-        if (autoSelectParam)
+        if (analogDelta >= 10)
         {
             grids_.setDensity(potIndex, newValue * 2);
-            setParam(GRIDS_DENSITY, potIndex + 1);
+
+            if (page == GRIDS_DENSITY)
+            {
+                setParam(GRIDS_DENSITY, potIndex + 1);
+            }
         }
 
         omxDisp.setDirty();
