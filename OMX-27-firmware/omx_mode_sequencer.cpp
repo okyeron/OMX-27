@@ -940,7 +940,7 @@ void OmxModeSequencer::showCurrentStep(int patternNum)
             auto pixelpos = j - pagestepstart + 11;
             //			if (j < sequencer.getPatternLength(patternNum)){
             // ONLY DO LEDS FOR THE CURRENT PAGE
-            if (j == sequencer.lastSeqPos[sequencer.playingPattern])
+            if (j == sequencer.seqPos[sequencer.playingPattern])
             {
                 strip.setPixelColor(pixelpos, SEQCHASE);
             }
