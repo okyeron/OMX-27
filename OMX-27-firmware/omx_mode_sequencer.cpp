@@ -786,6 +786,20 @@ void OmxModeSequencer::onKeyUpdate(OMXKeypadEvent e)
     {
     }
 
+    if (!e.down() && (thisKey == 1 || thisKey == 2))
+    {
+        if (!midiSettings.keyState[1] || !midiSettings.keyState[2])
+        {
+            // Release page selection whenever F1 && F2 are released
+            seqPageParams.seqPages = false;
+        }
+    }
+
+    // if (!midiSettings.keyState[1] && !midiSettings.keyState[2])
+    // {
+    //     seqPageParams.seqPages = false;
+    // }
+
     //				strip.show();
 }
 

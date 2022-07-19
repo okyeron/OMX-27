@@ -382,12 +382,6 @@ void loop()
 			midiSettings.keyState[thisKey] = false;
 		}
 
-		// TODO I believe this is handled in omx_mode_sequencer.onKeyUpdate()
-		// need to test and make sure this works
-		// if (!midiSettings.keyState[1] && !midiSettings.keyState[2]) {
-		// 	seqPages = false;
-		// }
-
 		// ### LONG KEY SWITCH PRESS
 		if (e.held())
 		{
