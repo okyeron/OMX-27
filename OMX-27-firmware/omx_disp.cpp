@@ -42,6 +42,8 @@ void OmxDisp::displayMessage(String msg)
 
 void OmxDisp::displayMessage(const char *msg)
 {
+    currentMsg = msg;
+
     display.fillRect(0, 0, 128, 32, BLACK);
     u8g2_display.setFontMode(1);
     u8g2_display.setFont(FONT_TENFAT);
@@ -61,6 +63,27 @@ void OmxDisp::displayMessagef(const char *fmt, ...)
     vsnprintf(buf, sizeof(buf), fmt, args);
     va_end(args);
     displayMessage(buf);
+}
+
+void OmxDisp::displayMessageTimed(String msg, uint8_t secs)
+{
+    currentMsg = msg.c_str();
+
+    renderMessage();
+
+    messageTextTimer = secs * 100000;
+    dirtyDisplay = true;
+}
+
+void OmxDisp::renderMessage()
+{
+    display.fillRect(0, 0, 128, 32, BLACK);
+    u8g2_display.setFontMode(1);
+    u8g2_display.setFont(FONT_TENFAT);
+    u8g2_display.setForegroundColor(WHITE);
+    u8g2_display.setBackgroundColor(BLACK);
+    u8g2centerText(currentMsg, 0, 10, 128, 32);
+    // dirtyDisplay = true;
 }
 
 bool OmxDisp::isMessageActive(){
@@ -173,7 +196,11 @@ void OmxDisp::clearLegends()
 
 void OmxDisp::dispGenericMode(int selected)
 {
-    if(isMessageActive()) return;
+    if (isMessageActive())
+    {
+        renderMessage();
+        return;
+    }
 
     // const char* legends[4] = {"","","",""};
     // int legendVals[4] = {0,0,0,0};
@@ -257,6 +284,24 @@ void OmxDisp::dispGenericMode(int selected)
     }
 }
 
+void OmxDisp::dispPageIndicators2(uint8_t numPages, int8_t selected)
+{
+    int16_t indicatorWidth = 6;
+    int16_t indicatorYPos = 32;
+    int16_t segment = (6 + 6);
+
+    int16_t start = (128 - (segment * numPages)) / 2.0;
+
+    // Serial.println((String)"start: " + start + " indicatorYPos: " + indicatorYPos + " segment: " + segment);
+
+    for(uint8_t i = 0; i < numPages; i++)
+    {
+        int16_t h = ((i == selected) ? 2 : 1);
+
+        display.fillRect(start + (i * segment), indicatorYPos - h, indicatorWidth, h, WHITE);
+    }
+}
+
 void OmxDisp::dispPageIndicators(int page, bool selected)
 {
     if (selected)
@@ -325,6 +370,87 @@ void OmxDisp::showDisplay()
 void OmxDisp::bumpDisplayTimer()
 {
     dirtyDisplayTimer = displayRefreshRate + 1;
+}
+
+void OmxDisp::drawEuclidPattern(bool *pattern, uint8_t steps, uint8_t yPos, bool selected, bool isPlaying, uint8_t seqPos)
+{
+    if (isMessageActive())
+    {
+        renderMessage();
+        return;
+    }
+
+    const bool selectAsLine = true;
+
+    int16_t startSpacing = 6;
+    int16_t patWidth = gridw - startSpacing;
+    
+    if (selected)
+    {
+        if (selectAsLine)
+        {
+            display.drawLine(0, yPos, gridw, yPos, WHITE);
+            patWidth = gridw;
+            startSpacing = 0;
+        }
+        else
+        {
+            display.fillRect(0, yPos - 3, 3, 3, WHITE);
+            display.drawPixel(1, yPos - 2, BLACK);
+        }
+    }
+
+    if (steps == 0)
+    {
+        return;
+    }
+
+    int16_t steponHeight = 5;
+    // int16_t steponWidth = 2;
+    int16_t stepoffHeight = 2;
+    // int16_t stepoffWidth = 2;
+    // int16_t halfh = gridh / 2;
+    // int16_t halfw = gridw / 2;
+
+    float stepint = (float)patWidth / (float)steps;
+
+    for (int i = 0; i < steps; i++)
+    {
+        int16_t xPos = startSpacing + (stepint * i);
+        // int16_t yPos = halfh;
+
+        uint8_t w = 2;
+        if(isPlaying && i == seqPos){
+            w = 4;
+            xPos -= 1;
+        }
+
+        if (pattern[i])
+        {
+            display.fillRect(xPos, yPos - steponHeight, w, steponHeight, WHITE);
+        }
+        else
+        {
+            display.fillRect(xPos, yPos - stepoffHeight, w, stepoffHeight, WHITE);
+        }
+
+        // if(i == seqPos)
+        // {
+        //     display.fillRect(xPos, yPos, stepoffWidth, stepoffWidth, WHITE);
+
+        //     // display.drawPixel(xPos, yPos, WHITE);
+        // }
+    }
+
+    // if (isPlaying)
+    // {
+    //     uint8_t seqPos
+    //     int16_t xPos = (gridw - startSpacing) * playheadPerc + startSpacing;
+
+    //     display.drawPixel(xPos, yPos, WHITE);
+    // }
+
+    // omxDisp.setDirty();
 }
 
 OmxDisp omxDisp;
