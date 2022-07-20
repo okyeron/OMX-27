@@ -615,6 +615,8 @@ void OmxModeSequencer::onKeyUpdate(OMXKeypadEvent e)
                     sequencer.seqPos[sequencer.playingPattern] = 0;
                     sequencer.patternPage[sequencer.playingPattern] = 0; // Step Record always starts from first page
                     seqConfig.stepRecord = true;
+                    seqPageParams.srpage = 0;
+                    seqPageParams.srparam = 2;
                     omxDisp.displayMessagef("STEP RECORD");
                     //								omxDisp.setDirty();;
 
@@ -743,7 +745,9 @@ void OmxModeSequencer::onKeyUpdate(OMXKeypadEvent e)
         }
         else if (seqConfig.stepRecord)
         {
-            seqConfig.stepRecord = !seqConfig.stepRecord;
+            // seqConfig.stepRecord = !seqConfig.stepRecord;
+            seqConfig.stepRecord = false;
+
             omxDisp.setDirty();
         }
         else if (seqPageParams.seqPages)
