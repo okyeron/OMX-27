@@ -1374,8 +1374,6 @@ void OmxModeSequencer::onDisplayUpdate()
         { // show only if not encoder edit or dialog display
             if (!seqConfig.noteSelect and !patternParams and !seqConfig.stepRecord)
             {
-                int8_t pselected = seqParams.getSelParam() + 1;
-                // int pselected = seqPageParams.sqparam  % NUM_DISP_PARAMS;
                 if (seqParams.getSelPage() == 0) // SUBMODE_SEQ
                 {
                     omxDisp.clearLegends();
@@ -1388,9 +1386,6 @@ void OmxModeSequencer::onDisplayUpdate()
                     omxDisp.legendVals[2] = (int)sequencer.getCurrentPattern()->swing; //(int)swing;
                     // legendVals[2] =  swing_values[sequencer.getCurrentPattern()->swing];
                     omxDisp.legendVals[3] = (int)clockConfig.clockbpm;
-                    omxDisp.dispPage = 1;
-
-                    omxDisp.dispGenericMode(pselected);
                 }
                 else if (seqParams.getSelPage() == 1) // SUBMODE_SEQ2
                 {
@@ -1412,16 +1407,11 @@ void OmxModeSequencer::onDisplayUpdate()
                     {
                         omxDisp.legendText[3] = "Off";
                     }
-                    omxDisp.dispPage = 2;
-
-                    omxDisp.dispGenericMode(pselected);
                 }
+                omxDisp.dispGenericMode2(2, seqParams.getSelPage(), seqParams.getSelParam(), encoderSelect);
             }
             if (seqConfig.noteSelect)
             {
-                int8_t pselected = noteSelParams.getSelParam() + 1;
-
-                // int pselected = seqPageParams.nsparam % NUM_DISP_PARAMS;
                 if (noteSelParams.getSelPage() == 0) // SUBMODE_NOTESEL
                 {
                     omxDisp.clearLegends();
@@ -1433,8 +1423,6 @@ void OmxModeSequencer::onDisplayUpdate()
                     omxDisp.legendVals[1] = (int)midiSettings.octave + 4;
                     omxDisp.legendVals[2] = getSelectedStep()->vel;
                     omxDisp.legendVals[3] = getSelectedStep()->len + 1;
-                    omxDisp.dispPage = 1;
-                    omxDisp.dispGenericMode(pselected);
                 }
                 else if (noteSelParams.getSelPage() == 1) // SUBMODE_NOTESEL2
                 {
@@ -1453,8 +1441,6 @@ void OmxModeSequencer::onDisplayUpdate()
                     omxDisp.legendText[2] = trigConditions[getSelectedStep()->condition]; // ac + bc; // trigConditions
 
                     omxDisp.legendVals[3] = 0;
-                    omxDisp.dispPage = 2;
-                    omxDisp.dispGenericMode(pselected);
                 }
                 else if (noteSelParams.getSelPage() == 2) // SUBMODE_NOTESEL3
                 {
@@ -1476,15 +1462,11 @@ void OmxModeSequencer::onDisplayUpdate()
                             omxDisp.legendText[j] = "---";
                         }
                     }
-                    omxDisp.dispPage = 3;
-                    omxDisp.dispGenericMode(pselected);
                 }
+                omxDisp.dispGenericMode2(3, noteSelParams.getSelPage(), noteSelParams.getSelParam(), encoderSelect);
             }
             if (patternParams)
             {
-                int8_t pselected =  patParams.getSelParam() + 1;
-
-                // int pselected = seqPageParams.ppparam % NUM_DISP_PARAMS;
                 if (patParams.getSelPage() == 0) // SUBMODE_PATTPARAMS
                 {
                     omxDisp.clearLegends();
@@ -1496,8 +1478,6 @@ void OmxModeSequencer::onDisplayUpdate()
                     omxDisp.legendVals[1] = sequencer.getPatternLength(sequencer.playingPattern);
                     omxDisp.legendVals[2] = midiSettings.rotationAmt; //(int)transpose;
                     omxDisp.legendVals[3] = sequencer.getPatternChannel(sequencer.playingPattern);
-                    omxDisp.dispPage = 1;
-                    omxDisp.dispGenericMode(pselected);
                 }
                 else if (patParams.getSelPage() == 1) // SUBMODE_PATTPARAMS2
                 {
@@ -1510,8 +1490,6 @@ void OmxModeSequencer::onDisplayUpdate()
                     omxDisp.legendVals[1] = sequencer.getCurrentPattern()->autoresetstep; // STP step to autoreset on - 0 = no auto reset
                     omxDisp.legendVals[2] = sequencer.getCurrentPattern()->autoresetfreq; // FRQ to autoreset on -- every x cycles
                     omxDisp.legendVals[3] = sequencer.getCurrentPattern()->autoresetprob; // PRO probability of resetting 0=NEVER 1=Always 2=50%
-                    omxDisp.dispPage = 2;
-                    omxDisp.dispGenericMode(pselected);
                 }
                 else if (patParams.getSelPage() == 2) // SUBMODE_PATTPARAMS3
                 {
@@ -1528,15 +1506,11 @@ void OmxModeSequencer::onDisplayUpdate()
                     omxDisp.legendVals[1] = sequencer.getCurrentPattern()->solo;
                     omxDisp.legendVals[2] = 0; // TBD
                     omxDisp.legendVals[3] = 0; // TBD
-                    omxDisp.dispPage = 3;
-                    omxDisp.dispGenericMode(pselected);
                 }
+                omxDisp.dispGenericMode2(3, patParams.getSelPage(), patParams.getSelParam(), encoderSelect);
             }
             if (seqConfig.stepRecord)
             {
-                int8_t pselected =  sRecParams.getSelParam() + 1;
-
-                // int pselected = seqPageParams.srparam % NUM_DISP_PARAMS;
                 if (sRecParams.getSelPage() == 0) // SUBMODE_STEPREC
                 {
                     omxDisp.clearLegends();
@@ -1548,8 +1522,6 @@ void OmxModeSequencer::onDisplayUpdate()
                     omxDisp.legendVals[1] = sequencer.seqPos[sequencer.playingPattern] + 1;
                     omxDisp.legendVals[2] = getSelectedStep()->note; //(int)transpose;
                     omxDisp.legendVals[3] = sequencer.playingPattern + 1;
-                    omxDisp.dispPage = 1;
-                    omxDisp.dispGenericMode(pselected);
                 }
                 else if (sRecParams.getSelPage() == 1) // SUBMODE_NOTESEL2
                 {
@@ -1568,9 +1540,8 @@ void OmxModeSequencer::onDisplayUpdate()
                     omxDisp.legendText[2] = trigConditions[getSelectedStep()->condition]; // ac + bc; // trigConditions
 
                     omxDisp.legendVals[3] = 0;
-                    omxDisp.dispPage = 2;
-                    omxDisp.dispGenericMode(pselected);
                 }
+                omxDisp.dispGenericMode2(3, sRecParams.getSelPage(), sRecParams.getSelParam(), encoderSelect);
             }
         }
     }

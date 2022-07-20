@@ -29,6 +29,8 @@ public:
     void dispValBox(int v, int16_t n, bool inv);
     void dispSymbBox(const char *v, int16_t n, bool inv);
     void dispGenericMode(int selected);
+
+    void dispGenericMode2(uint8_t numPages, int8_t selectedPage, int8_t selectedParam, bool encSelActive);
     void dispPageIndicators(int page, bool selected);
     void dispPageIndicators2(uint8_t numPages, int8_t selected);
     void dispMode();

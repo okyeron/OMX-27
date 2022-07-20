@@ -284,6 +284,70 @@ void OmxDisp::dispGenericMode(int selected)
     }
 }
 
+void OmxDisp::dispGenericMode2(uint8_t numPages, int8_t selectedPage, int8_t selectedParam, bool encSelActive)
+{
+    if (isMessageActive())
+    {
+        renderMessage();
+        return;
+    }
+
+    u8g2_display.setFontMode(1);
+    u8g2_display.setFont(FONT_LABELS);
+    u8g2_display.setCursor(0, 0);
+    dispGridBoxes();
+
+    // labels
+    u8g2_display.setForegroundColor(BLACK);
+    u8g2_display.setBackgroundColor(WHITE);
+
+    for (int j = 0; j < 4; j++)
+    {
+        u8g2centerText(legends[j], (j * 32) + 1, hline - 2, 32, 10);
+    }
+
+    // value text formatting
+    u8g2_display.setFontMode(1);
+    u8g2_display.setFont(FONT_VALUES);
+    u8g2_display.setForegroundColor(WHITE);
+    u8g2_display.setBackgroundColor(BLACK);
+
+    if (selectedParam >= 0 && selectedParam < 4)
+    {
+        if (encSelActive)
+        {
+            const int8_t bWidth = 1;
+            display.fillRect(selectedParam * 32 + 2, 9, 29, 21, WHITE);
+            display.fillRect(selectedParam * 32 + 2 + bWidth, 9 + bWidth, 29 - (bWidth * 2), 21 - (bWidth * 2), BLACK);
+        }
+        else
+        {
+            display.fillRect(selectedParam * 32 + 2, 9, 29, 21, WHITE);
+        }
+
+            // display.fillRect(selectedParam * 32 + 2, 9, 29, 21, WHITE);
+
+    }
+
+    // ValueBoxes
+    bool highlight = false;
+    for (int j = 0; j < 4; j++)
+    { 
+        highlight = (j == selectedParam && !encSelActive);
+       
+        if (legendVals[j] == -127)
+        {
+            dispSymbBox(legendText[j], j, highlight);
+        }
+        else
+        {
+            dispValBox(legendVals[j], j, highlight);
+        }
+    }
+
+    dispPageIndicators2(numPages, selectedPage);
+}
+
 void OmxDisp::dispPageIndicators2(uint8_t numPages, int8_t selected)
 {
     int16_t indicatorWidth = 6;
