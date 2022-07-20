@@ -963,6 +963,8 @@ void OmxModeSequencer::showCurrentStep(int patternNum)
             auto pixelpos = j;
             auto adjNote = getAdjustedNote(j);
 
+            Serial.println((String)"seqPos: " + seqPos + " currentNote: " + currentNote + " pixelPos: " + pixelpos + " adjNote: " + adjNote);
+
             if (adjNote == currentNote)
             {
                 strip.setPixelColor(pixelpos, HALFWHITE);
@@ -988,10 +990,10 @@ void OmxModeSequencer::showCurrentStep(int patternNum)
             {
                 strip.setPixelColor(pixelpos, slowBlinkState ? SEQCHASE : seqPosNoteColor);
             }
-            else if (pixelpos != seqConfig.selectedNote)
-            {
-                strip.setPixelColor(pixelpos, LEDOFF);
-            }
+            // else if (pixelpos != seqConfig.selectedNote)
+            // {
+            //     strip.setPixelColor(pixelpos, LEDOFF);
+            // }
             //			} else  {
             //				strip.setPixelColor(pixelpos, LEDOFF);
             //			}
