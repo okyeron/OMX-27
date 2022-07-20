@@ -952,6 +952,8 @@ void OmxModeSequencer::showCurrentStep(int patternNum)
         uint8_t seqPos = sequencer.seqPos[sequencer.playingPattern];
         uint8_t currentNote = sequencer.patterns[sequencer.playingPattern].steps[seqPos].note;
 
+        int seqPosNoteColor = LEDOFF;
+
         // 27 LEDS so use LED_COUNT
         for (int j = 1; j < LED_COUNT; j++)
         {
@@ -961,6 +963,12 @@ void OmxModeSequencer::showCurrentStep(int patternNum)
             if (adjNote == currentNote)
             {
                 strip.setPixelColor(pixelpos, HALFWHITE);
+
+                // will be overwritten by step indicator
+                if(j - 11 == seqPos % 16)
+                {
+                    seqPosNoteColor = HALFWHITE;
+                }
             }
             else
             {
@@ -975,7 +983,7 @@ void OmxModeSequencer::showCurrentStep(int patternNum)
             // ONLY DO LEDS FOR THE CURRENT PAGE
             if (j == seqPos)
             {
-                strip.setPixelColor(pixelpos, slowBlinkState ? SEQCHASE : LEDOFF);
+                strip.setPixelColor(pixelpos, slowBlinkState ? SEQCHASE : seqPosNoteColor);
             }
             else if (pixelpos != seqConfig.selectedNote)
             {
