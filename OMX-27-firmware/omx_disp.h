@@ -57,7 +57,7 @@ private:
     int messageTextTimer = 0;
     bool dirtyDisplay = false;
 
-    const char * currentMsg;
+    String currentMsg;
 
     elapsedMillis dirtyDisplayTimer = 0;
     unsigned long displayRefreshRate = 60;

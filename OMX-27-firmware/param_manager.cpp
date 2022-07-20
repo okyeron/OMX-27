@@ -107,6 +107,12 @@ void ParamManager::setSelPage(int8_t newPage)
     selectedPage = newPage;
 }
 
+void ParamManager::setSelPageAndParam(int8_t newPage, int8_t newParam)
+{
+    setSelPage(newPage);
+    setSelParam(newParam);
+}
+
 int8_t ParamManager::getSelParam()
 {
     return selectedParam;

@@ -7,6 +7,15 @@
 #include "MM.h"
 #include "music_scales.h"
 
+OmxModeMidiKeyboard::OmxModeMidiKeyboard()
+{
+    // Add 4 pages
+    params.addPage(4);
+    params.addPage(4);
+    params.addPage(4);
+    params.addPage(4);
+}
+
 void OmxModeMidiKeyboard::InitSetup()
 {
     initSetup = true;
@@ -21,26 +30,26 @@ void OmxModeMidiKeyboard::onModeActivated()
     }
 }
 
-void OmxModeMidiKeyboard::changePage(int amt)
-{
-    midiPageParams.mmpage = constrain(midiPageParams.mmpage + amt, 0, midiPageParams.numPages - 1);
-    midiPageParams.miparam = midiPageParams.mmpage * NUM_DISP_PARAMS;
-}
+// void OmxModeMidiKeyboard::changePage(int amt)
+// {
+//     midiPageParams.mmpage = constrain(midiPageParams.mmpage + amt, 0, midiPageParams.numPages - 1);
+//     midiPageParams.miparam = midiPageParams.mmpage * NUM_DISP_PARAMS;
+// }
 
-void OmxModeMidiKeyboard::setParam(int paramIndex)
-{
-    if (paramIndex >= 0)
-    {
-        midiPageParams.miparam = paramIndex % midiPageParams.numParams;
-    }
-    else
-    {
-        midiPageParams.miparam = (paramIndex + midiPageParams.numParams) % midiPageParams.numParams;
-    }
+// void OmxModeMidiKeyboard::setParam(int paramIndex)
+// {
+//     if (paramIndex >= 0)
+//     {
+//         midiPageParams.miparam = paramIndex % midiPageParams.numParams;
+//     }
+//     else
+//     {
+//         midiPageParams.miparam = (paramIndex + midiPageParams.numParams) % midiPageParams.numParams;
+//     }
 
-    // midiPageParams.miparam  = (midiPageParams.miparam  + 1) % 15;
-    midiPageParams.mmpage = midiPageParams.miparam / NUM_DISP_PARAMS;
-}
+//     // midiPageParams.miparam  = (midiPageParams.miparam  + 1) % 15;
+//     midiPageParams.mmpage = midiPageParams.miparam / NUM_DISP_PARAMS;
+// }
 
 void OmxModeMidiKeyboard::onPotChanged(int potIndex, int prevValue, int newValue, int analogDelta)
 {
@@ -56,12 +65,36 @@ void OmxModeMidiKeyboard::onPotChanged(int potIndex, int prevValue, int newValue
     omxDisp.setDirty();
 }
 
+
+// Handles selecting params using encoder
+void OmxModeMidiKeyboard::onEncoderChangedSelectParam(Encoder::Update enc)
+{
+    if(enc.dir() == 0) return;
+
+    if (enc.dir() < 0) // if turn CCW
+    {
+        params.decrementParam();
+    }
+    else if (enc.dir() > 0) // if turn CW
+    {
+        params.incrementParam();
+    }
+
+    omxDisp.setDirty();
+}
+
 void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
 {
+    if (encoderSelect)
+    {
+        onEncoderChangedSelectParam(enc);
+        return;
+    }
+
     if (organelleMotherMode)
     {
         // CHANGE PAGE
-        if (midiPageParams.miparam == 0)
+        if (params.getSelParam() == 0)
         {
             if (enc.dir() < 0)
             { // if turn ccw
@@ -78,16 +111,16 @@ void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
 
     if (midiSettings.midiAUX)
     {
-        if (enc.dir() < 0)
-        { // if turn ccw
-            setParam(midiPageParams.miparam - 1);
-            omxDisp.setDirty();
-        }
-        else if (enc.dir() > 0)
-        { // if turn cw
-            setParam(midiPageParams.miparam + 1);
-            omxDisp.setDirty();
-        }
+        // if (enc.dir() < 0)
+        // { // if turn ccw
+        //     setParam(midiPageParams.miparam - 1);
+        //     omxDisp.setDirty();
+        // }
+        // else if (enc.dir() > 0)
+        // { // if turn cw
+        //     setParam(midiPageParams.miparam + 1);
+        //     omxDisp.setDirty();
+        // }
 
         // change MIDI Background Color
         // midiBg_Hue = constrain(midiBg_Hue + (amt * 32), 0, 65534); // 65535
@@ -96,128 +129,128 @@ void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
 
     auto amt = enc.accel(5); // where 5 is the acceleration factor if you want it, 0 if you don't)
 
-    // CHANGE PAGE
-    // if (midiPageParams.miparam  == 0 || midiPageParams.miparam  == 5 || midiPageParams.miparam  == 10)
-    if (midiPageParams.miparam % 5 == 0)
-    {
-        changePage(amt);
-        // midiPageParams.mmpage = constrain(midiPageParams.mmpage + amt, 0, 2);
-        // midiPageParams.miparam  = midiPageParams.mmpage * NUM_DISP_PARAMS;
-    }
-    int pageIndex = 0;
+    int8_t selPage = params.getSelPage() + 1; // Add one for readability
+    int8_t selParam = params.getSelParam() + 1;
 
     // PAGE ONE
-    if (midiPageParams.miparam == pageIndex + 1)
+    if (selPage == 1)
     {
-        // set octave
-        midiSettings.newoctave = constrain(midiSettings.octave + amt, -5, 4);
-        if (midiSettings.newoctave != midiSettings.octave)
+        if (selParam == 1)
         {
-            midiSettings.octave = midiSettings.newoctave;
-        }
-    }
-    else if (midiPageParams.miparam == pageIndex + 2)
-    {
-        int newchan = constrain(sysSettings.midiChannel + amt, 1, 16);
-        if (newchan != sysSettings.midiChannel)
-        {
-            sysSettings.midiChannel = newchan;
-        }
-    }
-
-    pageIndex = 5;
-
-    // PAGE TWO
-    if (midiPageParams.miparam == pageIndex + 1)
-    {
-        int newrrchan = constrain(midiSettings.midiRRChannelCount + amt, 1, 16);
-        if (newrrchan != midiSettings.midiRRChannelCount)
-        {
-            midiSettings.midiRRChannelCount = newrrchan;
-            if (midiSettings.midiRRChannelCount == 1)
+            // set octave
+            midiSettings.newoctave = constrain(midiSettings.octave + amt, -5, 4);
+            if (midiSettings.newoctave != midiSettings.octave)
             {
-                midiSettings.midiRoundRobin = false;
+                midiSettings.octave = midiSettings.newoctave;
+            }
+        }
+        else if (selParam == 2)
+        {
+            int newchan = constrain(sysSettings.midiChannel + amt, 1, 16);
+            if (newchan != sysSettings.midiChannel)
+            {
+                sysSettings.midiChannel = newchan;
+            }
+        }
+    }
+    // PAGE TWO
+    else if (selPage == 2)
+    {
+        if (selParam == 1)
+        {
+            int newrrchan = constrain(midiSettings.midiRRChannelCount + amt, 1, 16);
+            if (newrrchan != midiSettings.midiRRChannelCount)
+            {
+                midiSettings.midiRRChannelCount = newrrchan;
+                if (midiSettings.midiRRChannelCount == 1)
+                {
+                    midiSettings.midiRoundRobin = false;
+                }
+                else
+                {
+                    midiSettings.midiRoundRobin = true;
+                }
+            }
+        }
+        else if (selParam == 2)
+        {
+            midiSettings.midiRRChannelOffset = constrain(midiSettings.midiRRChannelOffset + amt, 0, 15);
+        }
+        else if (selParam == 3)
+        {
+            midiSettings.currpgm = constrain(midiSettings.currpgm + amt, 0, 127);
+
+            if (midiSettings.midiRoundRobin)
+            {
+                for (int q = midiSettings.midiRRChannelOffset + 1; q < midiSettings.midiRRChannelOffset + midiSettings.midiRRChannelCount + 1; q++)
+                {
+                    MM::sendProgramChange(midiSettings.currpgm, q);
+                }
             }
             else
             {
-                midiSettings.midiRoundRobin = true;
+                MM::sendProgramChange(midiSettings.currpgm, sysSettings.midiChannel);
             }
         }
-    }
-    else if (midiPageParams.miparam == pageIndex + 2)
-    {
-        midiSettings.midiRRChannelOffset = constrain(midiSettings.midiRRChannelOffset + amt, 0, 15);
-    }
-    else if (midiPageParams.miparam == pageIndex + 3)
-    {
-        midiSettings.currpgm = constrain(midiSettings.currpgm + amt, 0, 127);
-
-        if (midiSettings.midiRoundRobin)
+        else if (selParam == 4)
         {
-            for (int q = midiSettings.midiRRChannelOffset + 1; q < midiSettings.midiRRChannelOffset + midiSettings.midiRRChannelCount + 1; q++)
-            {
-                MM::sendProgramChange(midiSettings.currpgm, q);
-            }
-        }
-        else
-        {
+            midiSettings.currbank = constrain(midiSettings.currbank + amt, 0, 127);
+            // Bank Select is 2 mesages
+            MM::sendControlChange(0, 0, sysSettings.midiChannel);
+            MM::sendControlChange(32, midiSettings.currbank, sysSettings.midiChannel);
             MM::sendProgramChange(midiSettings.currpgm, sysSettings.midiChannel);
         }
     }
-    else if (midiPageParams.miparam == pageIndex + 4)
-    {
-        midiSettings.currbank = constrain(midiSettings.currbank + amt, 0, 127);
-        // Bank Select is 2 mesages
-        MM::sendControlChange(0, 0, sysSettings.midiChannel);
-        MM::sendControlChange(32, midiSettings.currbank, sysSettings.midiChannel);
-        MM::sendProgramChange(midiSettings.currpgm, sysSettings.midiChannel);
-    }
-    pageIndex = 10;
     // PAGE THREE
-    if (midiPageParams.miparam == pageIndex + 1)
+    else if (selPage == 3)
     {
-        potSettings.potbank = constrain(potSettings.potbank + amt, 0, NUM_CC_BANKS - 1);
+        if (selParam == 1)
+        {
+            potSettings.potbank = constrain(potSettings.potbank + amt, 0, NUM_CC_BANKS - 1);
+        }
+        if (selParam == 2)
+        {
+            midiSettings.midiSoftThru = constrain(midiSettings.midiSoftThru + amt, 0, 1);
+        }
+        if (selParam == 3)
+        {
+            midiMacroConfig.midiMacro = constrain(midiMacroConfig.midiMacro + amt, 0, nummacromodes);
+        }
+        if (selParam == 4)
+        {
+            midiMacroConfig.midiMacroChan = constrain(midiMacroConfig.midiMacroChan + amt, 1, 16);
+        }
     }
-    if (midiPageParams.miparam == pageIndex + 2)
-    {
-        midiSettings.midiSoftThru = constrain(midiSettings.midiSoftThru + amt, 0, 1);
-    }
-    if (midiPageParams.miparam == pageIndex + 3)
-    {
-        midiMacroConfig.midiMacro = constrain(midiMacroConfig.midiMacro + amt, 0, nummacromodes);
-    }
-    if (midiPageParams.miparam == pageIndex + 4)
-    {
-        midiMacroConfig.midiMacroChan = constrain(midiMacroConfig.midiMacroChan + amt, 1, 16);
-    }
-    pageIndex = 15;
     // PAGE FOUR - SCALES
-    if (midiPageParams.miparam == pageIndex + 1)
+    else if (selPage == 4)
     {
-        int prevRoot = scaleConfig.scaleRoot;
-        scaleConfig.scaleRoot = constrain(scaleConfig.scaleRoot + amt, 0, 12 - 1);
-        if (prevRoot != scaleConfig.scaleRoot)
+        if (selParam == 1)
         {
-            musicScale->calculateScale(scaleConfig.scaleRoot, scaleConfig.scalePattern);
+            int prevRoot = scaleConfig.scaleRoot;
+            scaleConfig.scaleRoot = constrain(scaleConfig.scaleRoot + amt, 0, 12 - 1);
+            if (prevRoot != scaleConfig.scaleRoot)
+            {
+                musicScale->calculateScale(scaleConfig.scaleRoot, scaleConfig.scalePattern);
+            }
         }
-    }
-    if (midiPageParams.miparam == pageIndex + 2)
-    {
-        int prevPat = scaleConfig.scalePattern;
-        scaleConfig.scalePattern = constrain(scaleConfig.scalePattern + amt, -1, musicScale->getNumScales() - 1);
-        if (prevPat != scaleConfig.scalePattern)
+        if (selParam == 2)
         {
-            omxDisp.displayMessage(musicScale->getScaleName(scaleConfig.scalePattern));
-            musicScale->calculateScale(scaleConfig.scaleRoot, scaleConfig.scalePattern);
+            int prevPat = scaleConfig.scalePattern;
+            scaleConfig.scalePattern = constrain(scaleConfig.scalePattern + amt, -1, musicScale->getNumScales() - 1);
+            if (prevPat != scaleConfig.scalePattern)
+            {
+                omxDisp.displayMessage(musicScale->getScaleName(scaleConfig.scalePattern));
+                musicScale->calculateScale(scaleConfig.scaleRoot, scaleConfig.scalePattern);
+            }
         }
-    }
-    if (midiPageParams.miparam == pageIndex + 3)
-    {
-        scaleConfig.lockScale = constrain(scaleConfig.lockScale + amt, 0, 1);
-    }
-    if (midiPageParams.miparam == pageIndex + 4)
-    {
-        scaleConfig.group16 = constrain(scaleConfig.group16 + amt, 0, 1);
+        if (selParam == 3)
+        {
+            scaleConfig.lockScale = constrain(scaleConfig.lockScale + amt, 0, 1);
+        }
+        if (selParam == 4)
+        {
+            scaleConfig.group16 = constrain(scaleConfig.group16 + amt, 0, 1);
+        }
     }
 
     omxDisp.setDirty();
@@ -225,20 +258,8 @@ void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
 
 void OmxModeMidiKeyboard::onEncoderButtonDown()
 {
-    if (organelleMotherMode)
-    {
-        setParam(midiPageParams.miparam + 1);
-
-        // midiPageParams.miparam  = (midiPageParams.miparam  + 1) % NUM_DISP_PARAMS;
-        // MM::sendControlChange(CC_OM1,100,sysSettings.midiChannel);
-    }
-    else
-    {
-        // switch midi oct/chan selection
-        setParam(midiPageParams.miparam + 1);
-        // midiPageParams.miparam  = (midiPageParams.miparam  + 1) % 15;
-        // midiPageParams.mmpage = midiPageParams.miparam  / NUM_DISP_PARAMS;
-    }
+    encoderSelect = !encoderSelect;
+    omxDisp.isDirty();
 }
 
 void OmxModeMidiKeyboard::onEncoderButtonUp()
@@ -296,9 +317,15 @@ void OmxModeMidiKeyboard::onKeyUpdate(OMXKeypadEvent e)
                 }
                 else if (thisKey == 1 || thisKey == 2) // Change Param selection
                 {
-                    int chng = thisKey == 1 ? -1 : 1;
+                    if(thisKey == 1){
+                        params.decrementParam();
+                    }
+                    else if(thisKey == 2){
+                        params.incrementParam();
+                    }
+                    // int chng = thisKey == 1 ? -1 : 1;
 
-                    setParam(constrain((midiPageParams.miparam + chng) % midiPageParams.numParams, 0, midiPageParams.numParams - 1));
+                    // setParam(constrain((midiPageParams.miparam + chng) % midiPageParams.numParams, 0, midiPageParams.numParams - 1));
                     keyConsumed = true;
                 }
             }
@@ -533,8 +560,7 @@ void OmxModeMidiKeyboard::onDisplayUpdate()
     { // DISPLAY
         if (!encoderConfig.enc_edit)
         {
-            int pselected = midiPageParams.miparam % NUM_DISP_PARAMS;
-            if (midiPageParams.mmpage == 0) // SUBMODE_MIDI
+            if (params.getSelPage() == 0) // SUBMODE_MIDI
             {
                 omxDisp.clearLegends();
 
@@ -549,11 +575,8 @@ void OmxModeMidiKeyboard::onDisplayUpdate()
                 omxDisp.legendVals[1] = sysSettings.midiChannel;
                 omxDisp.legendVals[2] = potSettings.potVal;
                 omxDisp.legendVals[3] = midiSettings.midiLastNote;
-                omxDisp.dispPage = 1;
-
-                omxDisp.dispGenericMode(pselected);
             }
-            else if (midiPageParams.mmpage == 1) // SUBMODE_MIDI2
+            else if (params.getSelPage() == 1) // SUBMODE_MIDI2
             {
                 omxDisp.clearLegends();
 
@@ -565,10 +588,8 @@ void OmxModeMidiKeyboard::onDisplayUpdate()
                 omxDisp.legendVals[1] = midiSettings.midiRRChannelOffset;
                 omxDisp.legendVals[2] = midiSettings.currpgm + 1;
                 omxDisp.legendVals[3] = midiSettings.currbank;
-                omxDisp.dispPage = 2;
-                omxDisp.dispGenericMode(pselected);
             }
-            else if (midiPageParams.mmpage == 2) // SUBMODE_MIDI3
+            else if (params.getSelPage() == 2) // SUBMODE_MIDI3
             {
                 omxDisp.clearLegends();
 
@@ -589,10 +610,8 @@ void OmxModeMidiKeyboard::onDisplayUpdate()
                 omxDisp.legendVals[2] = -127;
                 omxDisp.legendText[2] = macromodes[midiMacroConfig.midiMacro];
                 omxDisp.legendVals[3] = midiMacroConfig.midiMacroChan;
-                omxDisp.dispPage = 3;
-                omxDisp.dispGenericMode(pselected);
             }
-            else if (midiPageParams.mmpage == 3) // SCALES
+            else if (params.getSelPage() == 3) // SCALES
             {
                 omxDisp.clearLegends();
                 omxDisp.legends[0] = "ROOT";
@@ -616,9 +635,9 @@ void OmxModeMidiKeyboard::onDisplayUpdate()
                 omxDisp.legendText[0] = musicScale->getNoteName(scaleConfig.scaleRoot);
                 omxDisp.legendText[2] = scaleConfig.lockScale ? "On" : "Off";
                 omxDisp.legendText[3] = scaleConfig.group16 ? "On" : "Off";
-                omxDisp.dispPage = 4;
-                omxDisp.dispGenericMode(pselected);
             }
+
+            omxDisp.dispGenericMode2(4, params.getSelPage(), params.getSelParam(), encoderSelect);
         }
     }
 }

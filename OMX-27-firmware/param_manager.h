@@ -23,6 +23,8 @@ public:
 
     int8_t getSelPage();
     void setSelPage(int8_t newPage);
+    void setSelPageAndParam(int8_t newPage, int8_t newParam);
+
     int8_t getSelParam();
     void setSelParam(int8_t newParam);
     uint8_t getNumPages();

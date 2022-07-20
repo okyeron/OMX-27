@@ -6,6 +6,7 @@
 #include "colors.h"
 #include "config.h"
 #include "omx_mode_midi_keyboard.h"
+#include "param_manager.h"
 
 class OmxModeGrids : public OmxModeInterface
 {
@@ -42,7 +43,7 @@ public:
     grids::SnapShotSettings* getPattern(uint8_t patternIndex);
     void setPattern(uint8_t patternIndex, grids::SnapShotSettings snapShot);
 private:
-    void setParam(uint8_t pageIndex, uint8_t paramPosition);
+    void setPageAndParam(uint8_t pageIndex, uint8_t paramPosition);
     void setParam(uint8_t paramIndex);
     void setupPageLegends();
 
@@ -64,8 +65,8 @@ private:
     bool initSetup = false;
     grids::GridsWrapper grids_;
 
-    static const uint8_t kNumPages = 4;
-    static const uint8_t kNumParams = kNumPages * NUM_DISP_PARAMS;
+    // static const uint8_t kNumPages = 4;
+    // static const uint8_t kNumParams = kNumPages * NUM_DISP_PARAMS;
     static const uint8_t kNumGrids = 4;
 
     // static const int kParamGridX = 2;
@@ -75,10 +76,13 @@ private:
 
     const char * rateNames[3] = {"1 / 2", "1", "2"};
 
+    // If true, encoder selects param rather than modifies value
+    bool encoderSelect = false;
+    void onEncoderChangedSelectParam(Encoder::Update enc);
+    ParamManager params;
 
-
-    int page = 0;
-    int param = 0;
+    // int page = 0;
+    // int param = 0;
 
     // int gridXKeyChannel = 0; // Gets set by holding first 0-3 keys on bottom
     // int gridYKeyChannel = 0; // Gets set by holding keys 4-7 on bottom

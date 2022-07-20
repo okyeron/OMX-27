@@ -22,6 +22,12 @@ OmxModeGrids::OmxModeGrids()
     //     gridsXY[i][1] = grids_.getY(i);
     // }
     midiKeyboard.setMidiMode();
+
+    // 4 pages
+    params.addPage(4);
+    params.addPage(4);
+    params.addPage(4);
+    params.addPage(4);
 }
 
 void OmxModeGrids::InitSetup()
@@ -60,9 +66,10 @@ void OmxModeGrids::onPotChanged(int potIndex, int prevValue, int newValue, int a
         {
             grids_.setDensity(potIndex, newValue * 2);
 
-            if (page == GRIDS_DENSITY)
+            if (params.getSelPage() == GRIDS_DENSITY)
             {
-                setParam(GRIDS_DENSITY, potIndex + 1);
+                setParam(potIndex);
+                // setParam(GRIDS_DENSITY, potIndex + 1);
             }
         }
 
@@ -74,7 +81,8 @@ void OmxModeGrids::onPotChanged(int potIndex, int prevValue, int newValue, int a
         grids_.setResolution(newres);
         if (newres != prevResolution_)
         {
-            omxDisp.displayMessage(rateNames[newres]);
+            String msg = String(rateNames[newres]);
+            omxDisp.displayMessageTimed(msg, 5);
         }
         prevResolution_ = newres;
     }
@@ -96,32 +104,57 @@ void OmxModeGrids::loopUpdate()
     fNone_ = !keyState[1] && !keyState[2];
 }
 
-void OmxModeGrids::setParam(uint8_t pageIndex, uint8_t paramPosition)
+void OmxModeGrids::setPageAndParam(uint8_t pageIndex, uint8_t paramPosition)
 {
-    int p = pageIndex * NUM_DISP_PARAMS + paramPosition;
-    setParam(p);
+    params.setSelPage(pageIndex);
+    // int p = pageIndex * NUM_DISP_PARAMS + paramPosition;
+    setParam(paramPosition);
     omxDisp.setDirty();
 }
 
 void OmxModeGrids::setParam(uint8_t paramIndex)
 {
-    if (paramIndex >= 0)
-    {
-        param = paramIndex % kNumParams;
-    }
-    else
-    {
-        param = (paramIndex + kNumParams) % kNumParams;
-    }
-    page = param / NUM_DISP_PARAMS;
+    params.setSelParam(paramIndex);
 
-    if(instLockView_ && page == GRIDS_DENSITY)
+    // if (paramIndex >= 0)
+    // {
+    //     param = paramIndex % kNumParams;
+    // }
+    // else
+    // {
+    //     param = (paramIndex + kNumParams) % kNumParams;
+    // }
+    // page = param / NUM_DISP_PARAMS;
+
+
+    // Select instrument on this page
+    if(instLockView_ && params.getSelPage() == GRIDS_DENSITY)
     {
-        int pIndex = param % NUM_DISP_PARAMS;
-        if(pIndex > 0){
-            lockedInst_ = pIndex - 1;
-        }
+        lockedInst_ = paramIndex;
+
+        // int pIndex = param % NUM_DISP_PARAMS;
+        // if(pIndex > 0){
+        //     lockedInst_ = pIndex - 1;
+        // }
     }
+    omxDisp.setDirty();
+}
+
+// Handles selecting params using encoder
+void OmxModeGrids::onEncoderChangedSelectParam(Encoder::Update enc)
+{
+    if(enc.dir() == 0) return;
+
+    if (enc.dir() < 0) // if turn CCW
+    {
+        params.decrementParam();
+    }
+    else if (enc.dir() > 0) // if turn CW
+    {
+        params.incrementParam();
+    }
+
+    omxDisp.setDirty();
 }
 
 void OmxModeGrids::onEncoderChanged(Encoder::Update enc)
@@ -132,170 +165,181 @@ void OmxModeGrids::onEncoderChanged(Encoder::Update enc)
         return;
     }
 
+    if (encoderSelect)
+    {
+        onEncoderChangedSelectParam(enc);
+        return;
+    }
+
     if (f1_)
     {
-        // Change selected param while holding F1
-        if (enc.dir() < 0) // if turn CCW
-        { 
-            setParam(param - 1);
-            omxDisp.setDirty();
-        }
-        else if (enc.dir() > 0) // if turn CW
-        { 
-            setParam(param + 1);
-            omxDisp.setDirty();
-        }
+        // // Change selected param while holding F1
+        // if (enc.dir() < 0) // if turn CCW
+        // { 
+        //     setParam(param - 1);
+        //     omxDisp.setDirty();
+        // }
+        // else if (enc.dir() > 0) // if turn CW
+        // { 
+        //     setParam(param + 1);
+        //     omxDisp.setDirty();
+        // }
 
         return; // break;
     }
 
     auto amt = enc.accel(5); // where 5 is the acceleration factor if you want it, 0 if you don't)
 
-    int paramStep = param % 5;
+    // int paramStep = param % 5;
 
-    if (paramStep != 0) // Page select mode if 0
+    int8_t selPage = params.getSelPage(); // Add one for readability
+    int8_t selParam = params.getSelParam() + 1;
+
+    // if (paramStep != 0) // Page select mode if 0
+    // {
+    // }
+
+    switch (selPage)
     {
-        switch (page)
+    case GRIDS_DENSITY:
+    {
+        int newDensity = constrain(grids_.getDensity(selParam - 1) + amt, 0, 255);
+        grids_.setDensity(selParam - 1, newDensity);
+    }
+    break;
+    case GRIDS_XY:
+    {
+        if (selParam == 1) // Accent
         {
-        case GRIDS_DENSITY:
-        {
-            int newDensity = constrain(grids_.getDensity(paramStep - 1) + amt, 0, 255);
-            grids_.setDensity(paramStep - 1, newDensity);
+            int newAccent = constrain(grids_.accent + amt, 0, 255);
+            grids_.accent = newAccent;
         }
-        break;
-        case GRIDS_XY:
-        {
-            if (paramStep == 1) // Accent
-            {
-                int newAccent = constrain(grids_.accent + amt, 0, 255);
-                grids_.accent = newAccent;
-            }
-            else if (paramStep == 2) // GridX
-            {
-                if(instLockView_)
-                {
-                    int newX = constrain(grids_.getX(lockedInst_) + amt, 0, 255);
-                    grids_.setX(lockedInst_, newX);
-                }
-                else{ 
-                    bool gridSel = false;
-
-                    for (int g = 0; g < kNumGrids; g++)
-                    {
-                        if (gridsSelected[g])
-                        {
-                            int newX = constrain(grids_.getX(g) + amt, 0, 255);
-                            grids_.setX(g, newX);
-                            gridSel = true;
-                        }
-                    }
-                    if (!gridSel) // No grids selected, modify 0
-                    {
-                        int newX = constrain(grids_.getX(0) + amt, 0, 255);
-                        grids_.setX(0, newX);
-
-                        // for (int g = 0; g < kNumGrids; g++)
-                        // {
-                        //     int newX = constrain(grids_.getX(g) + amt, 0, 255);
-                        //     // gridsXY[g][0] = newX;
-                        //     grids_.setX(g, newX);
-                        // }
-                    }
-                }
-            }
-            else if (paramStep == 3) // GridY
-            {
-                if (instLockView_)
-                {
-                    int newY = constrain(grids_.getY(lockedInst_) + amt, 0, 255);
-                    grids_.setY(lockedInst_, newY);
-                }
-                else
-                {
-                    bool gridSel = false;
-                    for (int g = 0; g < kNumGrids; g++)
-                    {
-                        if (gridsSelected[g])
-                        {
-                            int newY = constrain(grids_.getY(g) + amt, 0, 255);
-                            grids_.setY(g, newY);
-                            gridSel = true;
-                        }
-                    }
-                    if (!gridSel) // No grids selected, modify 0
-                    {
-                        int newY = constrain(grids_.getY(0) + amt, 0, 255);
-                        grids_.setY(0, newY);
-
-                        // for (int g = 0; g < kNumGrids; g++)
-                        // {
-                        //     int newY = constrain(grids_.getY(g) + amt, 0, 255);
-                        //     grids_.setY(g, newY);
-                        // }
-                    }
-                }
-            }
-            else if (paramStep == 4) // Chaos
-            {
-                int newChaos = constrain(grids_.chaos + amt, 0, 255);
-                grids_.chaos = newChaos;
-            }
-        }
-        break;
-        case GRIDS_NOTES:
-        {
-            if (paramStep == 1)
-            {
-                grids_.grids_notes[0] = constrain(grids_.grids_notes[0] + amt, 0, 127);
-            }
-            else if (paramStep == 2)
-            {
-                grids_.grids_notes[1] = constrain(grids_.grids_notes[1] + amt, 0, 127);
-            }
-            else if (paramStep == 3)
-            {
-                grids_.grids_notes[2] = constrain(grids_.grids_notes[2] + amt, 0, 127);
-            }
-            else if (paramStep == 4)
-            {
-                grids_.grids_notes[3] = constrain(grids_.grids_notes[3] + amt, 0, 127);
-            }
-        }
-        break;
-        case GRIDS_CONFIG:
+        else if (selParam == 2) // GridX
         {
             if (instLockView_)
             {
-                if (paramStep == 1) // Note
-                {
-                    grids_.grids_notes[lockedInst_] = constrain(grids_.grids_notes[lockedInst_] + amt, 0, 127);
-                }
-                else if (paramStep == 2) // Midi Channel
-                {
-                    auto chan = grids_.getMidiChan(lockedInst_);
-                    chan = constrain(chan + amt, 1, 16);
-                    grids_.setMidiChan(lockedInst_, chan);
-                }
-                else if (paramStep == 3)
-                {
-                }
+                int newX = constrain(grids_.getX(lockedInst_) + amt, 0, 255);
+                grids_.setX(lockedInst_, newX);
             }
-
-            if (paramStep == 4) // Tempo
+            else
             {
-                clockConfig.newtempo = constrain(clockConfig.clockbpm + amt, 40, 300);
-                if (clockConfig.newtempo != clockConfig.clockbpm)
+                bool gridSel = false;
+
+                for (int g = 0; g < kNumGrids; g++)
                 {
-                    // SET TEMPO HERE
-                    clockConfig.clockbpm = clockConfig.newtempo;
-                    omxUtil.resetClocks();
+                    if (gridsSelected[g])
+                    {
+                        int newX = constrain(grids_.getX(g) + amt, 0, 255);
+                        grids_.setX(g, newX);
+                        gridSel = true;
+                    }
+                }
+                if (!gridSel) // No grids selected, modify 0
+                {
+                    int newX = constrain(grids_.getX(0) + amt, 0, 255);
+                    grids_.setX(0, newX);
+
+                    // for (int g = 0; g < kNumGrids; g++)
+                    // {
+                    //     int newX = constrain(grids_.getX(g) + amt, 0, 255);
+                    //     // gridsXY[g][0] = newX;
+                    //     grids_.setX(g, newX);
+                    // }
                 }
             }
         }
-        break;
-        default:
-            break;
+        else if (selParam == 3) // GridY
+        {
+            if (instLockView_)
+            {
+                int newY = constrain(grids_.getY(lockedInst_) + amt, 0, 255);
+                grids_.setY(lockedInst_, newY);
+            }
+            else
+            {
+                bool gridSel = false;
+                for (int g = 0; g < kNumGrids; g++)
+                {
+                    if (gridsSelected[g])
+                    {
+                        int newY = constrain(grids_.getY(g) + amt, 0, 255);
+                        grids_.setY(g, newY);
+                        gridSel = true;
+                    }
+                }
+                if (!gridSel) // No grids selected, modify 0
+                {
+                    int newY = constrain(grids_.getY(0) + amt, 0, 255);
+                    grids_.setY(0, newY);
+
+                    // for (int g = 0; g < kNumGrids; g++)
+                    // {
+                    //     int newY = constrain(grids_.getY(g) + amt, 0, 255);
+                    //     grids_.setY(g, newY);
+                    // }
+                }
+            }
         }
+        else if (selParam == 4) // Chaos
+        {
+            int newChaos = constrain(grids_.chaos + amt, 0, 255);
+            grids_.chaos = newChaos;
+        }
+    }
+    break;
+    case GRIDS_NOTES:
+    {
+        if (selParam == 1)
+        {
+            grids_.grids_notes[0] = constrain(grids_.grids_notes[0] + amt, 0, 127);
+        }
+        else if (selParam == 2)
+        {
+            grids_.grids_notes[1] = constrain(grids_.grids_notes[1] + amt, 0, 127);
+        }
+        else if (selParam == 3)
+        {
+            grids_.grids_notes[2] = constrain(grids_.grids_notes[2] + amt, 0, 127);
+        }
+        else if (selParam == 4)
+        {
+            grids_.grids_notes[3] = constrain(grids_.grids_notes[3] + amt, 0, 127);
+        }
+    }
+    break;
+    case GRIDS_CONFIG:
+    {
+        if (instLockView_)
+        {
+            if (selParam == 1) // Note
+            {
+                grids_.grids_notes[lockedInst_] = constrain(grids_.grids_notes[lockedInst_] + amt, 0, 127);
+            }
+            else if (selParam == 2) // Midi Channel
+            {
+                auto chan = grids_.getMidiChan(lockedInst_);
+                chan = constrain(chan + amt, 1, 16);
+                grids_.setMidiChan(lockedInst_, chan);
+            }
+            else if (selParam == 3)
+            {
+            }
+        }
+
+        if (selParam == 4) // Tempo
+        {
+            clockConfig.newtempo = constrain(clockConfig.clockbpm + amt, 40, 300);
+            if (clockConfig.newtempo != clockConfig.clockbpm)
+            {
+                // SET TEMPO HERE
+                clockConfig.clockbpm = clockConfig.newtempo;
+                omxUtil.resetClocks();
+            }
+        }
+    }
+    break;
+    default:
+        break;
     }
     omxDisp.setDirty();
 }
@@ -308,8 +352,11 @@ void OmxModeGrids::onEncoderButtonDown()
         return;
     }
 
-    param = (param + 1 ) % kNumParams;
-    setParam(param);
+    encoderSelect = !encoderSelect;
+    omxDisp.isDirty();
+
+    // param = (param + 1 ) % kNumParams;
+    // setParam(param);
 }
 
 void OmxModeGrids::onEncoderButtonDownLong()
@@ -350,7 +397,8 @@ void OmxModeGrids::saveActivePattern(uint8_t pattIndex)
     //     // Serial.println(grids_wrapper.gridSaves[patt][k].y);
     // }
 
-    omxDisp.displayMessage((String) "Saved " + (pattIndex + 1));
+    String msg = "Saved " + String(pattIndex + 1);
+    omxDisp.displayMessageTimed(msg, 5);
 }
 
 void OmxModeGrids::loadActivePattern(uint8_t pattIndex)
@@ -372,7 +420,8 @@ void OmxModeGrids::loadActivePattern(uint8_t pattIndex)
     //     // Serial.println(grids_wrapper.gridSaves[patt][k].y);
     // }
 
-    omxDisp.displayMessage((String) "Load " + (pattIndex + 1));
+    String msg = "Load " + String(pattIndex + 1);
+    omxDisp.displayMessageTimed(msg, 5);
 }
 
 void OmxModeGrids::startPlayback()
@@ -449,7 +498,8 @@ void OmxModeGrids::onKeyUpdate(OMXKeypadEvent e)
         if (e.down() && (thisKey > 10 && thisKey < 15))
         {
             gridsSelected[thisKey - 11] = true;
-            setParam(GRIDS_XY, 2);
+            setPageAndParam(GRIDS_XY, 1);
+            // setParam(GRIDS_XY, 2);
             omxDisp.setDirty();
         }
         else if (!e.down() && (thisKey > 10 && thisKey < 15))
@@ -462,7 +512,8 @@ void OmxModeGrids::onKeyUpdate(OMXKeypadEvent e)
         if (e.down() && (thisKey > 14 && thisKey < 19))
         {
             gridsSelected[thisKey - 15] = true;
-            setParam(GRIDS_XY, 3);
+            setPageAndParam(GRIDS_XY, 2);
+            // setParam(GRIDS_XY, 3);
             omxDisp.setDirty();
         }
         else if (!e.down() && (thisKey > 14 && thisKey < 19))
@@ -474,15 +525,18 @@ void OmxModeGrids::onKeyUpdate(OMXKeypadEvent e)
         // Select Grid X param
         if (e.down() && thisKey == 23) // Accent
         {
-            setParam(GRIDS_XY, 1);
+            setPageAndParam(GRIDS_XY, 0);
+            // setParam(GRIDS_XY, 1);
         }
         else if (e.down() && thisKey == 24) // Xaos
         {
-            setParam(GRIDS_XY, 4);
+            setPageAndParam(GRIDS_XY, 3);
+            // setParam(GRIDS_XY, 4);
         }
         else if (e.down() && thisKey == 26) // BPM
         {
-            setParam(GRIDS_CONFIG, 4);
+            setPageAndParam(GRIDS_CONFIG, 3);
+            // setParam(GRIDS_CONFIG, 4);
         }
     }
     if(f1_)
@@ -528,14 +582,16 @@ void OmxModeGrids::onKeyUpdate(OMXKeypadEvent e)
 					int whichX = j - 11;
 					int newX = random(0, 255);
 					grids_.setX(whichX, newX);
-					setParam(GRIDS_XY, 2);
+                    setPageAndParam(GRIDS_XY, 1);
+					// setParam(GRIDS_XY, 2);
 				}
 				else
 				{
 					int whichY = j - 15;
 					int newY = random(0, 255);
 					grids_.setY(whichY, newY);
-					setParam(GRIDS_XY, 3);
+                    setPageAndParam(GRIDS_XY, 2);
+					// setParam(GRIDS_XY, 3);
 				}
 				omxDisp.setDirty();
 			}
@@ -577,7 +633,8 @@ void OmxModeGrids::onKeyUpdateChanLock(OMXKeypadEvent e)
     // Function quick keys
     if (!f2_ && e.down() && thisKey == 2 && !keyState[1])
     {
-        setParam(GRIDS_CONFIG, 1);
+        setPageAndParam(GRIDS_CONFIG, 0);
+        // setParam(GRIDS_CONFIG, 1);
     }
     // if (!f3_ && e.down() && ((thisKey == 1 && keyState[2]) || (thisKey == 2 && keyState[1])))
     // {
@@ -603,25 +660,30 @@ void OmxModeGrids::onKeyUpdateChanLock(OMXKeypadEvent e)
         // Midi channel
         if (e.down() && thisKey == 3)
         {
-            setParam(GRIDS_CONFIG, 2);
+            setPageAndParam(GRIDS_CONFIG, 1);
+            // setParam(GRIDS_CONFIG, 2);
         }
 
         // Select Grid X param
         if (e.down() && thisKey == 5) // Accent
         {
-            setParam(GRIDS_XY, 1);
+            setPageAndParam(GRIDS_XY, 0);
+            // setParam(GRIDS_XY, 1);
         }
         if (e.down() && thisKey == 6) // Chan X
         {
-            setParam(GRIDS_XY, 2);
+            setPageAndParam(GRIDS_XY, 1);
+            // setParam(GRIDS_XY, 2);
         }
         if (e.down() && thisKey == 7) // Chan Y
         {
-            setParam(GRIDS_XY, 3);
+            setPageAndParam(GRIDS_XY, 2);
+            // setParam(GRIDS_XY, 3);
         }
         if (e.down() && thisKey == 8) // Xaos
         {
-            setParam(GRIDS_XY, 4);
+            setPageAndParam(GRIDS_XY, 3);
+            // setParam(GRIDS_XY, 4);
         }
 
         // Quick Select inst
@@ -632,7 +694,8 @@ void OmxModeGrids::onKeyUpdateChanLock(OMXKeypadEvent e)
         }
         else if (e.down() && thisKey == 26) // BPM
         {
-            setParam(GRIDS_CONFIG, 4);
+            setPageAndParam(GRIDS_CONFIG, 3);
+            // setParam(GRIDS_CONFIG, 4);
         }
     }
     if(f1_ && !justLocked_)
@@ -653,12 +716,14 @@ void OmxModeGrids::quickSelectInst(uint8_t instIndex)
     // justLocked_ = true; // Uncomment to immediately switch to channel view
     lockedInst_ = instIndex;
 
-    if (page == GRIDS_DENSITY || page == GRIDS_NOTES)
+    if (params.getSelPage() == GRIDS_DENSITY || params.getSelPage() == GRIDS_NOTES)
     {
-        setParam(page, lockedInst_ + 1);
+        setParam(lockedInst_);
+        // setParam(page, lockedInst_ + 1);
     }
 
-    omxDisp.displayMessage((String) "Inst " + (lockedInst_ + 1));
+    String msg = "Inst " + String(lockedInst_ + 1);
+    omxDisp.displayMessageTimed(msg, 5);
     omxDisp.setDirty();
 }
 
@@ -934,7 +999,9 @@ void OmxModeGrids::setupPageLegends()
 
     omxDisp.clearLegends();
 
-    omxDisp.dispPage = page + 1;
+    // omxDisp.dispPage = page + 1;
+
+    int8_t page = params.getSelPage();
 
     switch (page)
     {
@@ -1118,9 +1185,11 @@ void OmxModeGrids::onDisplayUpdate()
 
         if (!encoderConfig.enc_edit)
         {
-            int pselected = param % NUM_DISP_PARAMS;
             setupPageLegends();
-            omxDisp.dispGenericMode(pselected);
+            omxDisp.dispGenericMode2(4, params.getSelPage(), params.getSelParam(), encoderSelect);
+            
+            // int pselected = param % NUM_DISP_PARAMS;
+            // omxDisp.dispGenericMode(pselected);
         }
     }
 }

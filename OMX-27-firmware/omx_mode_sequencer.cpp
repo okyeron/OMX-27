@@ -103,8 +103,6 @@ void OmxModeSequencer::onEncoderChangedSelectParam(Encoder::Update enc)
 {
     if(enc.dir() == 0) return;
 
-    // auto amt = enc.accel(5); // where 5 is the acceleration factor if you want it, 0 if you don't)
-
     if (enc.dir() < 0) // if turn CCW
     {
         // NORMAL SEQ MODE
@@ -177,13 +175,6 @@ void OmxModeSequencer::onEncoderChanged(Encoder::Update enc)
 void OmxModeSequencer::onEncoderChangedNorm(Encoder::Update enc)
 {
     auto amt = enc.accel(5); // where 5 is the acceleration factor if you want it, 0 if you don't)
-
-    // CHANGE PAGE NORMAL
-    // if (seqPageParams.sqparam == 0 || seqPageParams.sqparam == 5)
-    // {
-    //     seqPageParams.sqpage = constrain(seqPageParams.sqpage + amt, 0, 1);
-    //     seqPageParams.sqparam = seqPageParams.sqpage * NUM_DISP_PARAMS;
-    // }
 
     int8_t selPage = seqParams.getSelPage() + 1; // Add one for readability
     int8_t selParam = seqParams.getSelParam() + 1;
@@ -262,19 +253,9 @@ void OmxModeSequencer::onEncoderChangedStep(Encoder::Update enc)
 {
     auto amt = enc.accel(5); // where 5 is the acceleration factor if you want it, 0 if you don't)
 
-    // should be no need to check enc_edit, function will only be called if enc_edit is false
-
-
     // SEQUENCE PATTERN PARAMS SUB MODE
-    if (patternParams && !encoderConfig.enc_edit)
+    if (patternParams)
     { 
-        // // CHANGE PAGE
-        // if (seqPageParams.ppparam == 0 || seqPageParams.ppparam == 5 || seqPageParams.ppparam == 10)
-        // {
-        //     seqPageParams.pppage = constrain(seqPageParams.pppage + amt, 0, 2); // HARDCODED - FIX WITH SIZE OF PAGES?
-        //     seqPageParams.ppparam = seqPageParams.pppage * NUM_DISP_PARAMS;
-        // }
-
         int8_t selPage = patParams.getSelPage() + 1; // Add one for readability
         int8_t selParam = patParams.getSelParam() + 1;
 
@@ -348,15 +329,8 @@ void OmxModeSequencer::onEncoderChangedStep(Encoder::Update enc)
         }
     }
     // STEP RECORD SUB MODE
-    else if (seqConfig.stepRecord && !encoderConfig.enc_edit)
+    else if (seqConfig.stepRecord)
     {
-        // CHANGE PAGE
-        // if (seqPageParams.srparam == 0 || seqPageParams.srparam == 5)
-        // {
-        //     seqPageParams.srpage = constrain(seqPageParams.srpage + amt, 0, 1); // HARDCODED - FIX WITH SIZE OF PAGES?
-        //     seqPageParams.srparam = seqPageParams.srpage * NUM_DISP_PARAMS;
-        // }
-
         int8_t selPage = sRecParams.getSelPage() + 1; // Add one for readability
         int8_t selParam = sRecParams.getSelParam() + 1;
 
@@ -413,15 +387,8 @@ void OmxModeSequencer::onEncoderChangedStep(Encoder::Update enc)
         }
     }
     // NOTE SELECT MODE
-    else if (seqConfig.noteSelect && seqConfig.noteSelection && !encoderConfig.enc_edit)
+    else if (seqConfig.noteSelect && seqConfig.noteSelection)
     {
-        // // CHANGE PAGE
-        // if (seqPageParams.nsparam == 0 || seqPageParams.nsparam == 5 || seqPageParams.nsparam == 10)
-        // {
-        //     seqPageParams.nspage = constrain(seqPageParams.nspage + amt, 0, 2); // HARDCODED - FIX WITH SIZE OF PAGES?
-        //     seqPageParams.nsparam = seqPageParams.nspage * NUM_DISP_PARAMS;
-        // }
-
         int8_t selPage = noteSelParams.getSelPage() + 1; // Add one for readability
         int8_t selParam = noteSelParams.getSelParam() + 1; 
 
@@ -499,65 +466,6 @@ void OmxModeSequencer::onEncoderButtonDown()
 {
     encoderSelect = !encoderSelect;
     omxDisp.isDirty();
-    return;
-
-
-    // if (seqConfig.noteSelect && seqConfig.noteSelection && !seqPageParams.patternParams)
-    // {
-    //     seqPageParams.nsparam = (seqPageParams.nsparam + 1) % 15;
-    //     if (seqPageParams.nsparam > 9)
-    //     {
-    //         seqPageParams.nspage = 2;
-    //     }
-    //     else if (seqPageParams.nsparam > 4)
-    //     {
-    //         seqPageParams.nspage = 1;
-    //     }
-    //     else
-    //     {
-    //         seqPageParams.nspage = 0;
-    //     }
-    // }
-    // else if (seqPageParams.patternParams)
-    // {
-    //     seqPageParams.ppparam = (seqPageParams.ppparam + 1) % 15;
-    //     if (seqPageParams.ppparam > 9)
-    //     {
-    //         seqPageParams.pppage = 2;
-    //     }
-    //     else if (seqPageParams.ppparam > 4)
-    //     {
-    //         seqPageParams.pppage = 1;
-    //     }
-    //     else
-    //     {
-    //         seqPageParams.pppage = 0;
-    //     }
-    // }
-    // else if (seqConfig.stepRecord)
-    // {
-    //     seqPageParams.srparam = (seqPageParams.srparam + 1) % 10;
-    //     if (seqPageParams.srparam > 4)
-    //     {
-    //         seqPageParams.srpage = 1;
-    //     }
-    //     else
-    //     {
-    //         seqPageParams.srpage = 0;
-    //     }
-    // }
-    // else
-    // {
-    //     seqPageParams.sqparam = (seqPageParams.sqparam  + 1) % 10;
-    //     if (seqPageParams.sqparam  > 4)
-    //     {
-    //         seqPageParams.sqpage = 1;
-    //     }
-    //     else
-    //     {
-    //         seqPageParams.sqpage = 0;
-    //     }
-    // }
 }
 
 void OmxModeSequencer::onEncoderButtonDownLong()
@@ -1546,214 +1454,6 @@ void OmxModeSequencer::onDisplayUpdate()
         }
     }
 }
-
-// void OmxModeSequencer::onDisplayUpdate()
-// {
-//     // MIDI SOLO
-//     if (sequencer.getCurrentPattern()->solo)
-//     {
-//         omxLeds.drawMidiLeds(musicScale);
-//     }
-//     if (omxDisp.isDirty())
-//     { // DISPLAY
-//         if (!encoderConfig.enc_edit && omxDisp.isMessageActive() == false)
-//         { // show only if not encoder edit or dialog display
-//             if (!seqConfig.noteSelect and !seqPageParams.patternParams and !seqConfig.stepRecord)
-//             {
-//                 int pselected = seqPageParams.sqparam  % NUM_DISP_PARAMS;
-//                 if (seqPageParams.sqpage == 0) // SUBMODE_SEQ
-//                 {
-//                     omxDisp.clearLegends();
-//                     omxDisp.legends[0] = "PTN";
-//                     omxDisp.legends[1] = "TRSP";
-//                     omxDisp.legends[2] = "SWNG"; //"TRSP";
-//                     omxDisp.legends[3] = "BPM";
-//                     omxDisp.legendVals[0] = sequencer.playingPattern + 1;
-//                     omxDisp.legendVals[1] = (int)midiSettings.transpose;
-//                     omxDisp.legendVals[2] = (int)sequencer.getCurrentPattern()->swing; //(int)swing;
-//                     // legendVals[2] =  swing_values[sequencer.getCurrentPattern()->swing];
-//                     omxDisp.legendVals[3] = (int)clockConfig.clockbpm;
-//                     omxDisp.dispPage = 1;
-
-//                     omxDisp.dispGenericMode(pselected);
-//                 }
-//                 else if (seqPageParams.sqpage == 1) // SUBMODE_SEQ2
-//                 {
-//                     omxDisp.clearLegends();
-//                     omxDisp.legends[0] = "SOLO";
-//                     omxDisp.legends[1] = "LEN";
-//                     omxDisp.legends[2] = "RATE";
-//                     omxDisp.legends[3] = "CV";                                   // cvPattern
-//                     omxDisp.legendVals[0] = sequencer.getCurrentPattern()->solo; // playingPattern+1;
-//                     omxDisp.legendVals[1] = sequencer.getPatternLength(sequencer.playingPattern);
-//                     omxDisp.legendVals[2] = -127;
-//                     omxDisp.legendText[2] = mdivs[sequencer.getCurrentPattern()->clockDivMultP];
-//                     omxDisp.legendVals[3] = -127; // TODO is this right?
-//                     if (sequencer.getCurrentPattern()->sendCV)
-//                     {
-//                         omxDisp.legendText[3] = "On";
-//                     }
-//                     else
-//                     {
-//                         omxDisp.legendText[3] = "Off";
-//                     }
-//                     omxDisp.dispPage = 2;
-
-//                     omxDisp.dispGenericMode(pselected);
-//                 }
-//             }
-//             if (seqConfig.noteSelect)
-//             {
-//                 int pselected = seqPageParams.nsparam % NUM_DISP_PARAMS;
-//                 if (seqPageParams.nspage == 0) // SUBMODE_NOTESEL
-//                 {
-//                     omxDisp.clearLegends();
-//                     omxDisp.legends[0] = "NOTE";
-//                     omxDisp.legends[1] = "OCT";
-//                     omxDisp.legends[2] = "VEL";
-//                     omxDisp.legends[3] = "LEN";
-//                     omxDisp.legendVals[0] = getSelectedStep()->note;
-//                     omxDisp.legendVals[1] = (int)midiSettings.octave + 4;
-//                     omxDisp.legendVals[2] = getSelectedStep()->vel;
-//                     omxDisp.legendVals[3] = getSelectedStep()->len + 1;
-//                     omxDisp.dispPage = 1;
-//                     omxDisp.dispGenericMode(pselected);
-//                 }
-//                 else if (seqPageParams.nspage == 1) // SUBMODE_NOTESEL2
-//                 {
-//                     omxDisp.clearLegends();
-//                     omxDisp.legends[0] = "TYPE";
-//                     omxDisp.legends[1] = "PROB";
-//                     omxDisp.legends[2] = "COND";
-//                     omxDisp.legends[3] = "";
-//                     omxDisp.legendVals[0] = -127;
-//                     omxDisp.legendText[0] = stepTypes[getSelectedStep()->stepType];
-//                     omxDisp.legendVals[1] = getSelectedStep()->prob;
-//                     //				String ac = String(trigConditionsAB[][0]);
-//                     //				String bc = String(trigConditionsAB[getSelectedStep()->condition][1]);
-
-//                     omxDisp.legendVals[2] = -127;
-//                     omxDisp.legendText[2] = trigConditions[getSelectedStep()->condition]; // ac + bc; // trigConditions
-
-//                     omxDisp.legendVals[3] = 0;
-//                     omxDisp.dispPage = 2;
-//                     omxDisp.dispGenericMode(pselected);
-//                 }
-//                 else if (seqPageParams.nspage == 2) // SUBMODE_NOTESEL3
-//                 {
-//                     omxDisp.clearLegends();
-//                     omxDisp.legends[0] = "L-1";
-//                     omxDisp.legends[1] = "L-2";
-//                     omxDisp.legends[2] = "L-3";
-//                     omxDisp.legends[3] = "L-4";
-//                     for (int j = 0; j < 4; j++)
-//                     {
-//                         int stepNoteParam = getSelectedStep()->params[j];
-//                         if (stepNoteParam > -1)
-//                         {
-//                             omxDisp.legendVals[j] = stepNoteParam;
-//                         }
-//                         else
-//                         {
-//                             omxDisp.legendVals[j] = -127;
-//                             omxDisp.legendText[j] = "---";
-//                         }
-//                     }
-//                     omxDisp.dispPage = 3;
-//                     omxDisp.dispGenericMode(pselected);
-//                 }
-//             }
-//             if (seqPageParams.patternParams)
-//             {
-//                 int pselected = seqPageParams.ppparam % NUM_DISP_PARAMS;
-//                 if (seqPageParams.pppage == 0) // SUBMODE_PATTPARAMS
-//                 {
-//                     omxDisp.clearLegends();
-//                     omxDisp.legends[0] = "PTN";
-//                     omxDisp.legends[1] = "LEN";
-//                     omxDisp.legends[2] = "ROT";
-//                     omxDisp.legends[3] = "CHAN";
-//                     omxDisp.legendVals[0] = sequencer.playingPattern + 1;
-//                     omxDisp.legendVals[1] = sequencer.getPatternLength(sequencer.playingPattern);
-//                     omxDisp.legendVals[2] = midiSettings.rotationAmt; //(int)transpose;
-//                     omxDisp.legendVals[3] = sequencer.getPatternChannel(sequencer.playingPattern);
-//                     omxDisp.dispPage = 1;
-//                     omxDisp.dispGenericMode(pselected);
-//                 }
-//                 else if (seqPageParams.pppage == 1) // SUBMODE_PATTPARAMS2
-//                 {
-//                     omxDisp.clearLegends();
-//                     omxDisp.legends[0] = "START";
-//                     omxDisp.legends[1] = "END";
-//                     omxDisp.legends[2] = "FREQ";
-//                     omxDisp.legends[3] = "PROB";
-//                     omxDisp.legendVals[0] = sequencer.getCurrentPattern()->startstep + 1; // STRT step to autoreset on
-//                     omxDisp.legendVals[1] = sequencer.getCurrentPattern()->autoresetstep; // STP step to autoreset on - 0 = no auto reset
-//                     omxDisp.legendVals[2] = sequencer.getCurrentPattern()->autoresetfreq; // FRQ to autoreset on -- every x cycles
-//                     omxDisp.legendVals[3] = sequencer.getCurrentPattern()->autoresetprob; // PRO probability of resetting 0=NEVER 1=Always 2=50%
-//                     omxDisp.dispPage = 2;
-//                     omxDisp.dispGenericMode(pselected);
-//                 }
-//                 else if (seqPageParams.pppage == 2) // SUBMODE_PATTPARAMS3
-//                 {
-//                     omxDisp.clearLegends();
-//                     omxDisp.legends[0] = "RATE";
-//                     omxDisp.legends[1] = "SOLO";
-//                     omxDisp.legends[2] = "---";
-//                     omxDisp.legends[3] = "---";
-
-//                     // RATE FOR CURR PATTERN
-//                     omxDisp.legendVals[0] = -127;
-//                     omxDisp.legendText[0] = mdivs[sequencer.getCurrentPattern()->clockDivMultP];
-
-//                     omxDisp.legendVals[1] = sequencer.getCurrentPattern()->solo;
-//                     omxDisp.legendVals[2] = 0; // TBD
-//                     omxDisp.legendVals[3] = 0; // TBD
-//                     omxDisp.dispPage = 3;
-//                     omxDisp.dispGenericMode(pselected);
-//                 }
-//             }
-//             if (seqConfig.stepRecord)
-//             {
-//                 int pselected = seqPageParams.srparam % NUM_DISP_PARAMS;
-//                 if (seqPageParams.srpage == 0) // SUBMODE_STEPREC
-//                 {
-//                     omxDisp.clearLegends();
-//                     omxDisp.legends[0] = "OCT";
-//                     omxDisp.legends[1] = "STEP";
-//                     omxDisp.legends[2] = "NOTE";
-//                     omxDisp.legends[3] = "PTN";
-//                     omxDisp.legendVals[0] = (int)midiSettings.octave + 4;
-//                     omxDisp.legendVals[1] = sequencer.seqPos[sequencer.playingPattern] + 1;
-//                     omxDisp.legendVals[2] = getSelectedStep()->note; //(int)transpose;
-//                     omxDisp.legendVals[3] = sequencer.playingPattern + 1;
-//                     omxDisp.dispPage = 1;
-//                     omxDisp.dispGenericMode(pselected);
-//                 }
-//                 else if (seqPageParams.srpage == 1) // SUBMODE_NOTESEL2
-//                 {
-//                     omxDisp.clearLegends();
-//                     omxDisp.legends[0] = "TYPE";
-//                     omxDisp.legends[1] = "PROB";
-//                     omxDisp.legends[2] = "COND";
-//                     omxDisp.legends[3] = "";
-//                     omxDisp.legendVals[0] = -127;
-//                     omxDisp.legendText[0] = stepTypes[getSelectedStep()->stepType];
-//                     omxDisp.legendVals[1] = getSelectedStep()->prob;
-//                     //				String ac = String(trigConditionsAB[][0]);
-//                     //				String bc = String(trigConditionsAB[getSelectedStep()->condition][1]);
-
-//                     omxDisp.legendVals[2] = -127;
-//                     omxDisp.legendText[2] = trigConditions[getSelectedStep()->condition]; // ac + bc; // trigConditions
-
-//                     omxDisp.legendVals[3] = 0;
-//                     omxDisp.dispPage = 2;
-//                     omxDisp.dispGenericMode(pselected);
-//                 }
-//             }
-//         }
-//     }
-// }
 
 void OmxModeSequencer::initPatterns()
 {

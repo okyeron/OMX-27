@@ -65,9 +65,10 @@ void OmxDisp::displayMessagef(const char *fmt, ...)
     displayMessage(buf);
 }
 
+// Something is keeping weird cache of display names or serial logs in memory
 void OmxDisp::displayMessageTimed(String msg, uint8_t secs)
 {
-    currentMsg = msg.c_str();
+    currentMsg = msg;
 
     renderMessage();
 
@@ -82,7 +83,7 @@ void OmxDisp::renderMessage()
     u8g2_display.setFont(FONT_TENFAT);
     u8g2_display.setForegroundColor(WHITE);
     u8g2_display.setBackgroundColor(BLACK);
-    u8g2centerText(currentMsg, 0, 10, 128, 32);
+    u8g2centerText(currentMsg.c_str(), 0, 10, 128, 32);
     // dirtyDisplay = true;
 }
 

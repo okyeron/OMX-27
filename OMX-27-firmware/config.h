@@ -131,13 +131,13 @@ struct MidiConfig
 
 extern MidiConfig midiSettings;
 
-struct MidiPage {
-	const int numPages = 4;
-	const int numParams = numPages * 5;
-	int miparam = 0; // midi params item counter
-    int mmpage = 0;
-};
-extern MidiPage midiPageParams;
+// struct MidiPage {
+// 	const int numPages = 4;
+// 	const int numParams = numPages * 5;
+// 	int miparam = 0; // midi params item counter
+//     int mmpage = 0;
+// };
+// extern MidiPage midiPageParams;
 
 struct MidiMacroConfig {
 	int midiMacro = 0;
