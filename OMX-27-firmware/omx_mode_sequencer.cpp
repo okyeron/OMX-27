@@ -18,6 +18,12 @@ void OmxModeSequencer::onModeActivated()
     }
 }
 
+uint8_t OmxModeSequencer::getAdjustedNote(uint8_t keyNumber)
+{
+    uint8_t adjnote = notes[keyNumber] + (midiSettings.octave * 12);
+    return adjnote;
+}
+
 void OmxModeSequencer::onPotChanged(int potIndex, int prevValue, int newValue, int analogDelta)
 {
     if (seqConfig.noteSelect && seqConfig.noteSelection)
@@ -476,8 +482,10 @@ void OmxModeSequencer::onKeyUpdate(OMXKeypadEvent e)
                 {
                     seqConfig.stepSelect = false;
                     seqConfig.selectedNote = thisKey;
-                    int adjnote = notes[thisKey] + (midiSettings.octave * 12);
-                    getSelectedStep()->note = adjnote;
+
+                    uint8_t adjNote = getAdjustedNote(thisKey);
+                    // int adjnote = notes[thisKey] + (midiSettings.octave * 12);
+                    getSelectedStep()->note = adjNote;
                     if (!sequencer.playing)
                     {
                         seqNoteOn(thisKey, midiSettings.defaultVelocity, sequencer.playingPattern);
@@ -559,7 +567,8 @@ void OmxModeSequencer::onKeyUpdate(OMXKeypadEvent e)
             seqConfig.selectedNote = thisKey;
             seqConfig.selectedStep = sequencer.seqPos[sequencer.playingPattern];
 
-            int adjnote = notes[thisKey] + (midiSettings.octave * 12);
+            // int adjnote = notes[thisKey] + (midiSettings.octave * 12);
+            uint8_t adjnote = getAdjustedNote(thisKey);
             getSelectedStep()->note = adjnote;
 
             if (!sequencer.playing)
@@ -697,6 +706,9 @@ void OmxModeSequencer::onKeyUpdate(OMXKeypadEvent e)
         {
             step_ahead();
             seqConfig.stepDirty = false;
+
+            seqConfig.selectedStep = sequencer.seqPos[sequencer.playingPattern];
+
             // EXIT STEP RECORD AFTER THE LAST STEP IN PATTERN
             if (sequencer.seqPos[sequencer.playingPattern] == 0)
             {
@@ -930,9 +942,30 @@ void OmxModeSequencer::showCurrentStep(int patternNum)
         //		int numPages = ceil(float(sequencer.getPatternLength(patternNum))/float(NUM_STEPKEYS));
 
         // BLANK THE TOP ROW
-        for (int j = 1; j < LED_COUNT - NUM_STEPKEYS; j++)
+        // for (int j = 1; j < LED_COUNT - NUM_STEPKEYS; j++)
+        // {
+        //     strip.setPixelColor(j, LEDOFF);
+        // }
+
+        // auto selStep = getSelectedStep();
+
+        uint8_t seqPos = sequencer.seqPos[sequencer.playingPattern];
+        uint8_t currentNote = sequencer.patterns[sequencer.playingPattern].steps[seqPos].note;
+
+        // 27 LEDS so use LED_COUNT
+        for (int j = 1; j < LED_COUNT; j++)
         {
-            strip.setPixelColor(j, LEDOFF);
+            auto pixelpos = j;
+            auto adjNote = getAdjustedNote(j);
+
+            if (adjNote == currentNote)
+            {
+                strip.setPixelColor(pixelpos, HALFWHITE);
+            }
+            else
+            {
+                strip.setPixelColor(pixelpos, LEDOFF);
+            }
         }
 
         for (int j = pagestepstart; j < (pagestepstart + NUM_STEPKEYS); j++)
@@ -940,9 +973,9 @@ void OmxModeSequencer::showCurrentStep(int patternNum)
             auto pixelpos = j - pagestepstart + 11;
             //			if (j < sequencer.getPatternLength(patternNum)){
             // ONLY DO LEDS FOR THE CURRENT PAGE
-            if (j == sequencer.seqPos[sequencer.playingPattern])
+            if (j == seqPos)
             {
-                strip.setPixelColor(pixelpos, SEQCHASE);
+                strip.setPixelColor(pixelpos, slowBlinkState ? SEQCHASE : LEDOFF);
             }
             else if (pixelpos != seqConfig.selectedNote)
             {
@@ -952,6 +985,8 @@ void OmxModeSequencer::showCurrentStep(int patternNum)
             //				strip.setPixelColor(pixelpos, LEDOFF);
             //			}
         }
+
+        
     }
     else if (sequencer.getCurrentPattern()->solo)
     { // MIDI SOLO

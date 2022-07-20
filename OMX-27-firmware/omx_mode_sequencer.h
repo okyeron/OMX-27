@@ -61,4 +61,6 @@ private:
     void onEncoderChangedNorm(Encoder::Update enc);
     void onEncoderChangedStep(Encoder::Update enc);
 
+    uint8_t getAdjustedNote(uint8_t keyNumber);
+
 };
