@@ -914,13 +914,18 @@ void OmxModeSequencer::showCurrentStep(int patternNum)
 
     if (seqConfig.noteSelect && seqConfig.noteSelection)
     {
+        // NOTE SELECTION
+        uint8_t seqPos = seqConfig.selectedStep;
+        uint8_t currentNote = sequencer.patterns[sequencer.playingPattern].steps[seqPos].note;
+
         // 27 LEDS so use LED_COUNT
         for (int j = 1; j < LED_COUNT; j++)
         {
             auto pixelpos = j;
             auto selectedStepPixel = (seqConfig.selectedStep % NUM_STEPKEYS) + 11;
+            auto adjNote = getAdjustedNote(j);
 
-            if (pixelpos == seqConfig.selectedNote)
+            if (adjNote == currentNote)
             {
                 strip.setPixelColor(pixelpos, HALFWHITE);
             }
@@ -955,7 +960,7 @@ void OmxModeSequencer::showCurrentStep(int patternNum)
             auto pixelpos = j;
             auto adjNote = getAdjustedNote(j);
 
-            Serial.println((String)"seqPos: " + seqPos + " currentNote: " + currentNote + " pixelPos: " + pixelpos + " adjNote: " + adjNote);
+            // Serial.println((String)"seqPos: " + seqPos + " currentNote: " + currentNote + " pixelPos: " + pixelpos + " adjNote: " + adjNote);
 
             if (adjNote == currentNote)
             {
