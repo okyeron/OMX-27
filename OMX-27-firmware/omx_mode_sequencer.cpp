@@ -831,9 +831,12 @@ void OmxModeSequencer::onKeyHeldUpdate(OMXKeypadEvent e)
         { // SKIP LONG PRESS IF FUNC KEYS ARE ALREDY HELD
             if (thisKey > 2 && thisKey < 11)
             { // skip AUX key, get pattern keys
-                seqPageParams.patternParams = true;
-                omxDisp.setDirty();
-                omxDisp.displayMessagef("PATT PARAMS");
+                if (!seqConfig.stepRecord)
+                {
+                    seqPageParams.patternParams = true;
+                    omxDisp.setDirty();
+                    omxDisp.displayMessagef("PATT PARAMS");
+                }
             }
             else if (thisKey > 10)
             {
