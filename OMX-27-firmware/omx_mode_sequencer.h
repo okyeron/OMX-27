@@ -2,11 +2,12 @@
 
 #include "omx_mode_interface.h"
 #include "music_scales.h"
+#include "param_manager.h"
 
 class OmxModeSequencer : public OmxModeInterface
 {
 public:
-    OmxModeSequencer() {}
+    OmxModeSequencer();
     ~OmxModeSequencer() {}
 
     void InitSetup() override;
@@ -58,9 +59,26 @@ private:
     // bool pastedFlag = false;
     // bool clearedFlag = false;
 
+    // If true, encoder selects param rather than modifies value
+    bool encoderSelect = false;
+
+    bool patternParams = false;
+    bool seqPages = false;
+
+    ParamManager seqParams; // seq params, 2 pages
+    ParamManager noteSelParams; // note select params, 3 pages
+    ParamManager patParams; // pattern params, 3 pages
+    ParamManager sRecParams; // step record params, 2 pages
+
+    // void setParam(uint8_t pageIndex, uint8_t paramPosition);
+    // void setParam(uint8_t paramIndex);
+
     void onEncoderChangedNorm(Encoder::Update enc);
     void onEncoderChangedStep(Encoder::Update enc);
 
+    void onEncoderChangedSelectParam(Encoder::Update enc);
+
     uint8_t getAdjustedNote(uint8_t keyNumber);
 
+    
 };

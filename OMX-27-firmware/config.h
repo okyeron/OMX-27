@@ -187,21 +187,21 @@ struct SequencerConfig {
 };
 extern SequencerConfig seqConfig;
 
-struct SequencerPage {
-	bool patternParams = false;
-    bool seqPages = false;
+// struct SequencerPage {
+// 	bool patternParams = false;
+//     bool seqPages = false;
 
-	int nspage = 0;
-    int pppage = 0;
-    int sqpage = 0;
-    int srpage = 0;
+// 	int nspage = 0;
+//     int pppage = 0;
+//     int sqpage = 0;
+//     int srpage = 0;
 
-    int nsparam = 0; // note select params
-    int ppparam = 0; // pattern params
-    int sqparam = 0; // seq params
-    int srparam = 0; // step record params
-};
-extern SequencerPage seqPageParams;
+//     int nsparam = 0; // note select params
+//     int ppparam = 0; // pattern params
+//     int sqparam = 0; // seq params
+//     int srparam = 0; // step record params
+// };
+// extern SequencerPage seqPageParams;
 
 struct ColorConfig
 {

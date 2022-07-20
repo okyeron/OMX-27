@@ -86,7 +86,7 @@ MidiMacroConfig midiMacroConfig;
 EncoderConfig encoderConfig;
 ClockConfig clockConfig;
 SequencerConfig seqConfig;
-SequencerPage seqPageParams;
+// SequencerPage seqPageParams;
 ColorConfig colorConfig;
 ScaleConfig scaleConfig;
 
