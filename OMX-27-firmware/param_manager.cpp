@@ -19,7 +19,14 @@ void ParamManager::incrementParam()
     selectedParam++;
     if (selectedParam >= pageConfigs[selectedPage])
     {
-        selectedParam = 0;
+        if (rollPages)
+        {
+            selectedParam = 0;
+        }
+        else
+        {
+            selectedParam = max(selectedParam - 1, 0);
+        }
         if (!lockSelectedPage)
         {
             incrementPage();
@@ -34,7 +41,14 @@ void ParamManager::decrementParam()
     selectedParam--;
     if (selectedParam < 0)
     {
-        selectedParam = max(pageConfigs[selectedPage] - 1, 0);
+        if (rollPages)
+        {
+            selectedParam = max(pageConfigs[selectedPage] - 1, 0);
+        }
+        else
+        {
+            selectedParam = 0;
+        }
         if (!lockSelectedPage)
         {
             decrementPage();

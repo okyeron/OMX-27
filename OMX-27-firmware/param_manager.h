@@ -8,7 +8,7 @@ public:
     
     // If true page will loop back to first after going past last page
     // If false, page will not increment
-    bool rollPages = true;
+    bool rollPages = false;
 
     // If true the current page will be locked. Incrementing or decrementing params will loop on current page
     bool lockSelectedPage = false;
