@@ -697,6 +697,7 @@ void OmxModeSequencer::onKeyUpdate(OMXKeypadEvent e)
         {
             step_ahead();
             seqConfig.stepDirty = false;
+			seqConfig.selectedStep = sequencer.seqPos[sequencer.playingPattern];
             // EXIT STEP RECORD AFTER THE LAST STEP IN PATTERN
             if (sequencer.seqPos[sequencer.playingPattern] == 0)
             {
