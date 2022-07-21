@@ -58,6 +58,7 @@ uint8_t OmxModeSequencer::getAdjustedNote(uint8_t keyNumber)
 // Helps keep things from getting in weird states and makes code more readable
 void OmxModeSequencer::changeSequencerMode(uint8_t newMode)
 {
+    Serial.println((String)"changeSequencerMode: " + String((SequencerMode)newMode));
     noteSelect_ = false;
     // noteSelection_ = false;
     // stepSelect_ = false;
@@ -69,10 +70,7 @@ void OmxModeSequencer::changeSequencerMode(uint8_t newMode)
     {
     case SEQMODE_MAIN:
     {
-        if(!noteSelect_ && !patternParams_ && !stepRecord_) return; // already in main mode
-
-        seqParams.setSelPage(0);
-        seqParams.setSelParam(0);
+        seqParams.setSelPageAndParam(0, 0);
         encoderSelect_ = true;
     }
     break;
@@ -81,8 +79,7 @@ void OmxModeSequencer::changeSequencerMode(uint8_t newMode)
         noteSelect_ = true;
         // stepSelect_ = true;
         // noteSelection_ = true;
-        noteSelParams.setSelPage(0);
-        noteSelParams.setSelParam(0);
+        noteSelParams.setSelPageAndParam(0, 0);
         encoderSelect_ = false;
         omxDisp.displayMessagef("NOTE SELECT");
     }
@@ -90,8 +87,7 @@ void OmxModeSequencer::changeSequencerMode(uint8_t newMode)
     case SEQMODE_PAT:
     {
         patternParams_ = true;
-        patParams.setSelPage(0);
-        patParams.setSelParam(1);
+        patParams.setSelPageAndParam(0, 1);
         encoderSelect_ = false;
         omxDisp.displayMessagef("PATT PARAMS");
     }
@@ -99,8 +95,7 @@ void OmxModeSequencer::changeSequencerMode(uint8_t newMode)
     case SEQMODE_STEPRECORD:
     {
         stepRecord_ = true;
-        sRecParams.setSelPage(0);
-        sRecParams.setSelParam(1);
+        sRecParams.setSelPageAndParam(0, 1);
         encoderSelect_ = false;
         omxDisp.displayMessagef("STEP RECORD");
     }
@@ -108,7 +103,9 @@ void OmxModeSequencer::changeSequencerMode(uint8_t newMode)
     default:
         break;
     }
+
     omxDisp.setDirty();
+    omxLeds.setDirty();
 }
 
 uint8_t OmxModeSequencer::getSequencerMode()
