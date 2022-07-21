@@ -11,6 +11,17 @@ int8_t ParamManager::addPage(uint8_t numberOfParams)
     numberOfPages = numberOfPages + 1;
     return newPageIndex;
 }
+
+void ParamManager::changeParam(int8_t direction)
+{
+    if (direction == 0)
+        return;
+    if (direction > 0)
+        incrementParam();
+    else
+        decrementParam();
+}
+
 void ParamManager::incrementParam()
 {
     if (numberOfPages == 0)

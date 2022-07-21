@@ -15,6 +15,10 @@ public:
 
     // Max 10 pages, returns index of new page. returns -1 if can't add
     int8_t addPage(uint8_t numberOfParams = 4);
+
+    // Increment or decrement based on direction
+    // < 0 == CCW   > 0 == CW   0 = do nothing
+    void changeParam(int8_t direction);
     void incrementParam();
     void decrementParam();
 

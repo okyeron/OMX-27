@@ -170,20 +170,21 @@ extern ClockConfig clockConfig;
 
 struct SequencerConfig {
 	int selectedStep = 0;
+    int selectedNote = 0;
+
 	bool plockDirty[NUM_CC_POTS] = {false, false, false, false, false};
 	int prevPlock[NUM_CC_POTS] = {0, 0, 0, 0, 0};
 
 	volatile unsigned long noteon_micros;
 	volatile unsigned long noteoff_micros;
 
-    bool noteSelect = false;
-    bool noteSelection = false;
+    // bool noteSelect = false;
+    // bool noteSelection = false;
 
-    int selectedNote = 0;
     // int omxSeqSelectedStep = 0;
-    bool stepSelect = false;
-    bool stepRecord = false;
-    bool stepDirty = false;
+    // bool stepSelect = false;
+    // bool stepRecord = false;
+    // bool stepDirty = false;
 };
 extern SequencerConfig seqConfig;
 

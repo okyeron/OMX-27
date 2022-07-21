@@ -728,6 +728,7 @@ void clearPattern(int patternNum){
 		steps[i].note = sequencer.patternDefaultNoteMap[patternNum];
 		steps[i].vel = midiSettings.defaultVelocity;
 		steps[i].len = 0;
+		steps[i].trig = TRIGTYPE_MUTE;
 		steps[i].stepType = STEPTYPE_NONE;
 		steps[i].params[0] = -1;
 		steps[i].params[1] = -1;
