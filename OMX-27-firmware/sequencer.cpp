@@ -116,6 +116,7 @@ SequencerState defaultSequencer() {
 		stepCV: 0,
 		seq_velocity: 100,
 		seq_acc_velocity: 127,
+		lastSeqPos: {0, 0, 0, 0, 0, 0, 0, 0},							// ZERO BASED
 		seqPos: {0, 0, 0, 0, 0, 0, 0, 0},							// ZERO BASED
 		patternDefaultNoteMap: {36, 38, 37, 39, 42, 46, 49, 51},    // default to GM Drum Map for now
 		patternPage: {0, 0, 0, 0, 0, 0, 0, 0},
@@ -164,6 +165,8 @@ StepNote* getSelectedStep() {
 void step_ahead() {
 	// step ALL patterns ahead one place
 	for (int j=0; j<8; j++){
+		sequencer.lastSeqPos[j] = sequencer.seqPos[j];
+
 		sequencer.seqPos[j]++;
 		if (sequencer.seqPos[j] >= sequencer.getPatternLength(j))
 			sequencer.seqPos[j] = 0;
@@ -186,6 +189,8 @@ void step_ahead() {
 void step_back() {
 	// step each pattern ahead one place
 	for (int j=0; j<8; j++){
+		sequencer.lastSeqPos[j] = sequencer.seqPos[j];
+
 		sequencer.seqPos[j]--;
 		if (sequencer.seqPos[j] < 0)
 			sequencer.seqPos[j] = sequencer.getPatternLength(j) - 1;
@@ -206,15 +211,21 @@ void step_back() {
 	}
 }
 
-void new_step_ahead(int patternNum) {
+void new_step_ahead(int patternNum)
+{
+	sequencer.lastSeqPos[patternNum] = sequencer.seqPos[patternNum];
+
 	// step ONE pattern ahead one place
-		if (sequencer.getPattern(patternNum)->reverse) {
-			sequencer.seqPos[patternNum]--;
-			auto_reset(patternNum); // determine whether to reset or not based on param settings
-		} else {
-			sequencer.seqPos[patternNum]++;
-			auto_reset(patternNum); // determine whether to reset or not based on param settings
-		}
+	if (sequencer.getPattern(patternNum)->reverse)
+	{
+		sequencer.seqPos[patternNum]--;
+		auto_reset(patternNum); // determine whether to reset or not based on param settings
+	}
+	else
+	{
+		sequencer.seqPos[patternNum]++;
+		auto_reset(patternNum); // determine whether to reset or not based on param settings
+	}
 }
 
 void auto_reset(int p) {
@@ -639,8 +650,12 @@ void seqReset() {
 			}
 			if (sequencer.getPattern(k)->reverse) { // REVERSE
 				sequencer.seqPos[k] = sequencer.getPatternLength(k) - 1;
-			} else {
+				sequencer.lastSeqPos[k] = sequencer.seqPos[k];
+			}
+			else
+			{
 				sequencer.seqPos[k] = 0;
+				sequencer.lastSeqPos[k] = sequencer.seqPos[k];
 			}
 		}
 		MM::stopClock();
@@ -713,6 +728,7 @@ void clearPattern(int patternNum){
 		steps[i].note = sequencer.patternDefaultNoteMap[patternNum];
 		steps[i].vel = midiSettings.defaultVelocity;
 		steps[i].len = 0;
+		steps[i].trig = TRIGTYPE_MUTE;
 		steps[i].stepType = STEPTYPE_NONE;
 		steps[i].params[0] = -1;
 		steps[i].params[1] = -1;

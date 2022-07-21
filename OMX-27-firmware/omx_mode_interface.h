@@ -26,7 +26,6 @@ public:
     virtual void onEncoderButtonDownLong() = 0; // Will only get called if shouldBlockEncEdit() returns true
 
     virtual void onKeyUpdate(OMXKeypadEvent e) = 0;
-
     virtual void onKeyHeldUpdate(OMXKeypadEvent e) {};
 
     virtual void onDisplayUpdate() {};

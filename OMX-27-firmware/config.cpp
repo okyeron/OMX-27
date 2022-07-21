@@ -81,12 +81,13 @@ bool m8mutesolo[] = {false, false, false, false, false, false, false, false, fal
 SysSettings sysSettings;
 PotSettings potSettings;
 MidiConfig midiSettings;
-MidiPage midiPageParams;
 MidiMacroConfig midiMacroConfig;
 EncoderConfig encoderConfig;
 ClockConfig clockConfig;
 SequencerConfig seqConfig;
-SequencerPage seqPageParams;
 ColorConfig colorConfig;
 ScaleConfig scaleConfig;
+
+// MidiPage midiPageParams;
+// SequencerPage seqPageParams;
 

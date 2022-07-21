@@ -2,11 +2,12 @@
 
 #include "omx_mode_interface.h"
 #include "music_scales.h"
+#include "param_manager.h"
 
 class OmxModeMidiKeyboard : public OmxModeInterface
 {
 public:
-    OmxModeMidiKeyboard() {}
+    OmxModeMidiKeyboard();
     ~OmxModeMidiKeyboard() {}
 
     void InitSetup() override;
@@ -52,4 +53,8 @@ private:
 
     void onKeyUpdateM8Macro(OMXKeypadEvent e);
 
+    // If true, encoder selects param rather than modifies value
+    bool encoderSelect = false;
+    void onEncoderChangedSelectParam(Encoder::Update enc);
+    ParamManager params;
 };

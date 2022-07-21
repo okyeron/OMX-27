@@ -1,6 +1,6 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
 
-// v 1.7.2b
+// v 1.7.5b5
 
 //
 // Steven Noreyko, Last update: July 2022
@@ -186,7 +186,7 @@ void setup()
 
 void changeOmxMode(OMXMode newOmxmode)
 {
-	Serial.println((String)"NewMode: " + newOmxmode);
+//	Serial.println((String)"NewMode: " + newOmxmode);
 	sysSettings.omxMode = newOmxmode;
 	sysSettings.newmode = newOmxmode;
 
@@ -264,11 +264,14 @@ void loop()
 	//
 	readPotentimeters();
 
+	bool omxModeChangedThisFrame = false;
+
 	// ############### EXTERNAL MODE CHANGE / SYSEX ###############
 	if ((!encoderConfig.enc_edit && (sysSettings.omxMode != sysSettings.newmode)) || sysSettings.refresh)
 	{
 		sysSettings.newmode = sysSettings.omxMode;
 		changeOmxMode(sysSettings.omxMode);
+		omxModeChangedThisFrame = true;
 
 		sequencer.playingPattern = sysSettings.playingPattern;
 		omxDisp.setDirty();
@@ -317,6 +320,7 @@ void loop()
 		if (sysSettings.newmode != sysSettings.omxMode && encoderConfig.enc_edit)
 		{
 			changeOmxMode(sysSettings.newmode);
+			omxModeChangedThisFrame = true;
 			seqStop();
 			omxLeds.setAllLEDS(0, 0, 0);
 			encoderConfig.enc_edit = false;
@@ -327,7 +331,11 @@ void loop()
 			encoderConfig.enc_edit = false;
 		}
 
-		activeOmxMode->onEncoderButtonDown();
+		// Prevents toggling encoder select when entering mode
+		if (!omxModeChangedThisFrame)
+		{
+			activeOmxMode->onEncoderButtonDown();
+		}
 
 		omxDisp.setDirty();
 		break;
@@ -389,12 +397,6 @@ void loop()
 		{
 			midiSettings.keyState[thisKey] = false;
 		}
-
-		// TODO I believe this is handled in omx_mode_sequencer.onKeyUpdate()
-		// need to test and make sure this works
-		// if (!midiSettings.keyState[1] && !midiSettings.keyState[2]) {
-		// 	seqPages = false;
-		// }
 
 		// ### LONG KEY SWITCH PRESS
 		if (e.held())

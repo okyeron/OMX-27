@@ -449,16 +449,19 @@ namespace grids
   {
       tickCount_ = 0;
       running_ = true;
+      MM::startClock();
   }
 
   void GridsWrapper::stop()
   {
       running_ = false;
+      MM::stopClock();
   }
 
   void GridsWrapper::proceed()
   {
       running_ = true;
+      MM::continueClock();
   }
 
   void GridsWrapper::gridsTick()

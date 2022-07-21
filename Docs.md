@@ -230,10 +230,10 @@ Keys/Commands:
 
 Parameters:  
 Page 1 Event Densities:
-- `DN 1`: event density - instrument 1  
-- `DN 2`: event density - instrument 2  
-- `DN 3`: event density - instrument 3  
-- `DN 4`: event density - instrument 4     
+- `DS 1`: event density - instrument 1  
+- `DS 2`: event density - instrument 2  
+- `DS 3`: event density - instrument 3  
+- `DS 4`: event density - instrument 4     
 
 Page 2:
 - `NT 1`: note number - instrument 1  
@@ -251,9 +251,10 @@ Page 4 - Main Mode:
 - `BPM`: tempo
 
 Page 4 - Instrument View Active:
-- `NT`: note number for active instrument
+- `NT -`: note number for active instrument
 - `M-CHAN`: midi chanel for active instrument. 
 - `BPM`: tempo
+
 
 ### Screensaver 
 After a default timeout (3 minutes), the display will be blanked and in MI Mode a "screensaver" animation will show on the LEDs. The rightmost pot (#5) can be turned to adjust the color. Touching any keys or any of the other pots will exit the screensaver.  
