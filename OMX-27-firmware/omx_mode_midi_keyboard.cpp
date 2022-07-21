@@ -28,6 +28,9 @@ void OmxModeMidiKeyboard::onModeActivated()
     {
         InitSetup();
     }
+
+    params.setSelPageAndParam(0, 0);
+    encoderSelect = true;
 }
 
 // void OmxModeMidiKeyboard::changePage(int amt)

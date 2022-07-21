@@ -46,6 +46,9 @@ void OmxModeGrids::onModeActivated()
     grids_.stop();
     grids_.loadSnapShot(grids_.playingPattern);
     gridsAUX = false;
+
+    params.setSelPageAndParam(0,0);
+    encoderSelect = true;
 }
 
 void OmxModeGrids::onClockTick() {
@@ -882,7 +885,7 @@ void OmxModeGrids::updateLEDsF1()
         strip.setPixelColor(k + 11, kColor);
     }
 
-    for (int k = 4; k < 8; k++)
+    for (int k = 4; k < 16; k++)
     {
         strip.setPixelColor(k + 11, LEDOFF);
     }
