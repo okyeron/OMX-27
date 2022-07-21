@@ -106,6 +106,7 @@ void OmxModeGrids::loopUpdate()
 
 void OmxModeGrids::setPageAndParam(uint8_t pageIndex, uint8_t paramPosition)
 {
+    encoderSelect = false;
     params.setSelPage(pageIndex);
     // int p = pageIndex * NUM_DISP_PARAMS + paramPosition;
     setParam(paramPosition);

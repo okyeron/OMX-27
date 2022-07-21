@@ -651,6 +651,7 @@ void OmxModeSequencer::onKeyUpdate(OMXKeypadEvent e)
                     sequencer.seqPos[sequencer.playingPattern] = 0;
                     sequencer.patternPage[sequencer.playingPattern] = 0; // Step Record always starts from first page
                     seqConfig.stepRecord = true;
+                    encoderSelect = false;
                     sRecParams.setSelPage(0);
                     sRecParams.setSelParam(1);
                     // seqPageParams.srpage = 0;
