@@ -58,7 +58,7 @@ uint8_t OmxModeSequencer::getAdjustedNote(uint8_t keyNumber)
 // Helps keep things from getting in weird states and makes code more readable
 void OmxModeSequencer::changeSequencerMode(uint8_t newMode)
 {
-    Serial.println((String)"changeSequencerMode: " + String((SequencerMode)newMode));
+    // Serial.println((String)"changeSequencerMode: " + String((SequencerMode)newMode));
     noteSelect_ = false;
     // noteSelection_ = false;
     // stepSelect_ = false;
