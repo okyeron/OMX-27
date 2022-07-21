@@ -331,6 +331,10 @@ void OmxModeMidiKeyboard::onKeyUpdate(OMXKeypadEvent e)
                     // setParam(constrain((midiPageParams.miparam + chng) % midiPageParams.numParams, 0, midiPageParams.numParams - 1));
                     keyConsumed = true;
                 }
+                else if (thisKey == 26)
+				{
+					keyConsumed = true;
+                }
             }
 
             if(!keyConsumed)
