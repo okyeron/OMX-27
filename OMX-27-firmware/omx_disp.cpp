@@ -445,7 +445,7 @@ void OmxDisp::drawEuclidPattern(bool *pattern, uint8_t steps, uint8_t yPos, bool
         return;
     }
 
-    const bool selectAsLine = true;
+    const bool selectAsLine = false;
 
     int16_t startSpacing = 6;
     int16_t patWidth = gridw - startSpacing;
