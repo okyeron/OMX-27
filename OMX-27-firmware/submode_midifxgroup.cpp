@@ -227,7 +227,11 @@ void SubModeMidiFxGroup::changeMidiFXType(uint8_t slotIndex, uint8_t typeIndex)
     {
         Serial.println("Deleting FX");
 
-        delete midifx_[slotIndex];
+        midifx::MidiFXInterface* midifxptr = midifx_[slotIndex];
+
+        midifx_[slotIndex] = nullptr;
+
+        delete midifxptr;
 
         // if (slotIndex == 0)
         //     delete midiFX1_;
