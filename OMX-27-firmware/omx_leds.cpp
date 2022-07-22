@@ -39,11 +39,13 @@ void OmxLeds::updateBlinkStates()
     {
         blinkState = !blinkState;
         blink_msec = 0;
+        setDirty();
     }
     if (slow_blink_msec >= slowBlinkInterval)
     {
         slowBlinkState = !slowBlinkState;
         slow_blink_msec = 0;
+        setDirty();
     }
 }
 

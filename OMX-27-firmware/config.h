@@ -34,6 +34,12 @@ enum OMXMode
 	NUM_OMX_MODES
 };
 
+enum MIDIFXTYPE
+{
+	MIDIFX_NONE,
+	MIDIFX_RANDNOTE
+};
+
 extern const OMXMode DEFAULT_MODE;
 
 // Increment this when data layout in EEPROM changes. May need to write version upgrade readers when this changes.

@@ -3,8 +3,34 @@
 
 namespace midifx
 {
+    void MidiFXInterface::setEnabled(bool newEnabled)
+    {
+        enabled_ = newEnabled;
+        if (enabled_)
+        {
+            onEnabled();
+        }
+        else
+        {
+            onDisabled();
+        }
+    }
+
+    bool MidiFXInterface::getEnabled()
+    {
+        return enabled_;
+    }
+
     void MidiFXInterface::onEncoderChanged(Encoder::Update enc)
     {
+        if (encoderSelect_)
+        {
+            onEncoderChangedSelectParam(enc);
+        }
+        else
+        {
+            onEncoderChangedEditParam(enc);
+        }
     }
 
     // Handles selecting params using encoder
@@ -17,6 +43,6 @@ namespace midifx
     void MidiFXInterface::onEncoderButtonDown()
     {
         encoderSelect_ = !encoderSelect_;
-        omxDisp.isDirty();
+        omxDisp.setDirty();
     }
 }

@@ -17,26 +17,32 @@ namespace midifx
         MidiFXInterface() {}
         virtual ~MidiFXInterface() {}
 
-        virtual void onActivate() {} // Called whenever entering mode
+        virtual int getFXType() = 0;
 
-        virtual void onPotChanged(int potIndex, int prevValue, int newValue, int analogDelta) {}
+        // Display name
+        virtual String getName() = 0;
+
+        virtual void setEnabled(bool newEnabled);
+        virtual bool getEnabled();
+
         virtual void loopUpdate() {}
-        virtual void updateLEDs() {}
+
         virtual void onEncoderChanged(Encoder::Update enc);
         virtual void onEncoderButtonDown();
 
-        virtual bool shouldBlockEncEdit() { return false; }
-
-        virtual void onKeyUpdate(OMXKeypadEvent e) {}
-
-        virtual void onDisplayUpdate(){};
+        virtual void onDisplayUpdate() = 0;
 
         virtual void noteInput(midifxnote note) = 0;
 
     protected:
+        bool enabled_;
         bool encoderSelect_;
         ParamManager params_;
 
-        void onEncoderChangedSelectParam(Encoder::Update enc);
+        virtual void onEnabled() {} // Called whenever entering mode
+        virtual void onDisabled() {} // Called whenever entering mode
+
+        virtual void onEncoderChangedSelectParam(Encoder::Update enc);
+        virtual void onEncoderChangedEditParam(Encoder::Update enc) = 0;
     };
 }

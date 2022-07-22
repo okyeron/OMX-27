@@ -633,7 +633,7 @@ void OmxModeEuclidean::onKeyHeldUpdate(OMXKeypadEvent e)
 
 void OmxModeEuclidean::updateLEDs()
 {
-    Serial.println("Euclidean Leds");
+    // Serial.println("Euclidean Leds");
 
     if (midiModeception)
     {

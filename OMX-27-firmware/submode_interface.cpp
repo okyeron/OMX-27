@@ -40,5 +40,5 @@ void SubmodeInterface::onEncoderChangedSelectParam(Encoder::Update enc)
 void SubmodeInterface::onEncoderButtonDown()
 {
     encoderSelect_ = !encoderSelect_;
-    omxDisp.isDirty();
+    omxDisp.setDirty();
 }
