@@ -297,6 +297,9 @@ void OmxModeMidiKeyboard::onKeyUpdate(OMXKeypadEvent e)
             }
         }
         onKeyUpdateM8Macro(e);
+
+        if(midiMacroConfig.m8AUX)
+            return;
     }
 
     // REGULAR KEY PRESSES
