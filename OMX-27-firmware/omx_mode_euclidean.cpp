@@ -52,6 +52,7 @@ void OmxModeEuclidean::onModeActivated()
     euclids[2].setNoteNumber(67);
     euclids[3].setNoteNumber(71);
 
+    omxLeds.setDirty();
     omxDisp.setDirty();
 }
 
@@ -129,6 +130,12 @@ void OmxModeEuclidean::onClockTick()
 
 void OmxModeEuclidean::onPotChanged(int potIndex, int prevValue, int newValue, int analogDelta)
 {
+    if (isSubmodeEnabled() && activeSubmode->usesPots())
+    {
+        activeSubmode->onPotChanged(potIndex, prevValue, newValue, analogDelta);
+        return;
+    }
+
     if(midiModeception){
         midiKeyboard.onPotChanged(potIndex, prevValue, newValue, analogDelta);
         return;
@@ -210,6 +217,7 @@ void OmxModeEuclidean::onPotChanged(int potIndex, int prevValue, int newValue, i
 
     // }
 
+    omxLeds.setDirty();
     omxDisp.setDirty();
 
     // Serial.println((String)"AnalogDelta: " + analogDelta);
@@ -235,20 +243,27 @@ void OmxModeEuclidean::onPotChanged(int potIndex, int prevValue, int newValue, i
 
 void OmxModeEuclidean::loopUpdate()
 {
+    if (isSubmodeEnabled())
+    {
+        activeSubmode->loopUpdate();
+        // return;
+    }
+    
     if (midiModeception)
     {
         midiKeyboard.loopUpdate();
-        return;
+        // return;
     }
 
-    auto keyState = midiSettings.keyState;
+    if (!isSubmodeEnabled() && !midiModeception)
+    {
+        auto keyState = midiSettings.keyState;
 
-    f1_ = keyState[1] && !keyState[2];
-    f2_ = !keyState[1] && keyState[2];
-    f3_ = keyState[1] && keyState[2];
-    fNone_ = !keyState[1] && !keyState[2];
-
-
+        f1_ = keyState[1] && !keyState[2];
+        f2_ = !keyState[1] && keyState[2];
+        f3_ = keyState[1] && keyState[2];
+        fNone_ = !keyState[1] && !keyState[2];
+    }
 
     // bool testProb = probResult(sequencer.getCurrentPattern()->steps[sequencer.seqPos[sequencer.playingPattern]].prob);
 
@@ -297,6 +312,12 @@ void OmxModeEuclidean::setParam(uint8_t paramIndex)
 
 void OmxModeEuclidean::onEncoderChanged(Encoder::Update enc)
 {
+    if (isSubmodeEnabled())
+    {
+        activeSubmode->onEncoderChanged(enc);
+        return;
+    }
+
     if (midiModeception)
     {
         midiKeyboard.onEncoderChanged(enc);
@@ -333,10 +354,19 @@ void OmxModeEuclidean::onEncoderChanged(Encoder::Update enc)
     //     }
     // }
     // omxDisp.setDirty();
+
+    omxLeds.setDirty();
+    omxDisp.setDirty();
 }
 
 void OmxModeEuclidean::onEncoderButtonDown()
 {
+    if (isSubmodeEnabled())
+    {
+        activeSubmode->onEncoderButtonDown();
+        return;
+    }
+
     if (midiModeception)
     {
         midiKeyboard.onEncoderButtonDown();
@@ -359,21 +389,35 @@ void OmxModeEuclidean::onEncoderButtonDown()
         omxDisp.displayMessage("pRhythm off");
     }
 
+    omxLeds.setDirty();
+    omxDisp.setDirty();
     // param = (param + 1 ) % kNumParams;
     // setParam(param);
 }
 
 void OmxModeEuclidean::onEncoderButtonDownLong()
 {
+    // if(isSubmodeEnabled()){
+    //     activeSubmode->onEncoderButtonDownLong();
+    //     return;
+    // }
+    
     if (midiModeception)
     {
         midiKeyboard.onEncoderButtonDownLong();
         return;
     }
+    
+    omxLeds.setDirty();
+    omxDisp.setDirty();
 }
 
 bool OmxModeEuclidean::shouldBlockEncEdit()
 {
+    if(isSubmodeEnabled()){
+        return activeSubmode->shouldBlockEncEdit();
+    }
+
     if (midiModeception)
     {
         return midiKeyboard.shouldBlockEncEdit();
@@ -396,6 +440,12 @@ void OmxModeEuclidean::loadActivePattern(uint8_t pattIndex)
 
 void OmxModeEuclidean::onKeyUpdate(OMXKeypadEvent e)
 {
+    if (isSubmodeEnabled())
+    {
+        activeSubmode->onKeyUpdate(e);
+        return;
+    }
+
     int thisKey = e.key();
 
     if (midiModeception)
@@ -458,6 +508,11 @@ void OmxModeEuclidean::onKeyUpdate(OMXKeypadEvent e)
         if (e.down() && (thisKey > 10 && thisKey < 15))
         {
             selectEuclid(thisKey - 11);
+        }
+
+        if(e.down() && thisKey == 26)
+        {
+            enableSubmode(&subModeMidiFx);
         }
     }
 
@@ -534,6 +589,8 @@ void OmxModeEuclidean::onKeyUpdate(OMXKeypadEvent e)
             
     //     // }
     // }
+    omxLeds.setDirty();
+    omxDisp.setDirty();
 }
 
 void OmxModeEuclidean::selectEuclid(uint8_t euclidIndex)
@@ -552,20 +609,32 @@ void OmxModeEuclidean::selectEuclid(uint8_t euclidIndex)
     selectedEuclid_ = euclidIndex;
 
     // omxDisp.displayMessage((String) "Euclid " + (euclidIndex + 1));
+    omxLeds.setDirty();
     omxDisp.setDirty();
 }
 
 void OmxModeEuclidean::onKeyHeldUpdate(OMXKeypadEvent e)
 {
+    // if (isSubmodeEnabled())
+    // {
+    //     activeSubmode->onKeyHeldUpdate(e);
+    //     return;
+    // }
+
     if (midiModeception)
     {
         midiKeyboard.onKeyHeldUpdate(e);
         return;
     }
+
+    omxLeds.setDirty();
+    omxDisp.setDirty();
 }
 
 void OmxModeEuclidean::updateLEDs()
 {
+    Serial.println("Euclidean Leds");
+
     if (midiModeception)
     {
         return;
@@ -574,6 +643,12 @@ void OmxModeEuclidean::updateLEDs()
     omxLeds.updateBlinkStates();
 
     bool blinkState = omxLeds.getBlinkState();
+
+    // turn leds off
+    for(uint8_t i = 1; i < 26; i++)
+    {
+        strip.setPixelColor(0, LEDOFF);
+    }
 
     // if (instLockView_)
     // {
@@ -624,6 +699,8 @@ void OmxModeEuclidean::updateLEDs()
         strip.setPixelColor(2, f2Color);
     }
 
+    strip.setPixelColor(26, BLUE);
+
 
     // if (instLockView_)
     // {
@@ -644,8 +721,6 @@ void OmxModeEuclidean::updateLEDs()
     //     else if (f1_)
     //         updateLEDsF1();
     // }
-
-    omxLeds.setDirty();
 }
 
 void OmxModeEuclidean::updateLEDsFNone()
@@ -746,6 +821,12 @@ void OmxModeEuclidean::setupPageLegends()
 
 void OmxModeEuclidean::onDisplayUpdate()
 {
+    if (isSubmodeEnabled())
+    {
+        activeSubmode->onDisplayUpdate();
+        return;
+    }
+
     if (midiModeception)
     {
         midiKeyboard.onDisplayUpdate();
@@ -758,7 +839,10 @@ void OmxModeEuclidean::onDisplayUpdate()
         return;
     }
 
-    // updateLEDs();
+    if (omxLeds.isDirty())
+    {
+        updateLEDs();
+    }
 
     if (omxDisp.isDirty() || sequencer.playing)
     { 
@@ -813,6 +897,31 @@ void OmxModeEuclidean::onDisplayUpdate()
 void OmxModeEuclidean::SetScale(MusicScales *scale)
 {
     midiKeyboard.SetScale(scale);
+}
+
+void OmxModeEuclidean::enableSubmode(SubmodeInterface *subMode)
+{
+    activeSubmode = subMode;
+    activeSubmode->setEnabled(true);
+    omxDisp.setDirty();
+}
+
+void OmxModeEuclidean::disableSubmode()
+{
+    activeSubmode = nullptr;
+    omxDisp.setDirty();
+}
+
+bool OmxModeEuclidean::isSubmodeEnabled()
+{
+    if(activeSubmode == nullptr) return false;
+
+    if(activeSubmode->isEnabled() == false){
+        disableSubmode();
+        return false;
+    }
+
+    return true;
 }
 
 // int OmxModeGrids::serializedPatternSize(bool eeprom)

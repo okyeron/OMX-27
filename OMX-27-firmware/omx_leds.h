@@ -32,6 +32,8 @@ public:
     void setAllLEDS(int R, int G, int B);
 
     void setDirty();
+    bool isDirty();
+
 
     // Rainbow cycle along whole strip. Pass delay time (in ms) between frames.
     void rainbow(int wait);

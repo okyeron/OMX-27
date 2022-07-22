@@ -41,7 +41,7 @@ void ParamManager::incrementParam()
         }
         else
         {
-            selectedParam = max(selectedParam - 1, 0);
+            selectedParam = max(min(selectedParam - 1, pageConfigs[selectedPage] - 1), 0);
         }
     }
 }

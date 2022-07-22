@@ -179,6 +179,11 @@ void OmxLeds::setDirty()
     dirtyPixels = true;
 }
 
+bool OmxLeds::isDirty()
+{
+    return dirtyPixels;
+}
+
 void OmxLeds::showLeds()
 {
     // are pixels dirty

@@ -6,6 +6,7 @@
 #include "config.h"
 #include "omx_mode_midi_keyboard.h"
 #include "euclidean_sequencer.h"
+#include "submode_midifxgroup.h"
 
 class OmxModeEuclidean : public OmxModeInterface
 {
@@ -103,5 +104,13 @@ private:
     void stopSequencers();
 
     euclidean::EuclideanSequencer euclids[4];
+
+    // SubModes
+    SubmodeInterface* activeSubmode = nullptr;
+    SubModeMidiFxGroup subModeMidiFx;
+
+    void enableSubmode(SubmodeInterface* subMode);
+    void disableSubmode();
+    bool isSubmodeEnabled();
 
 };
