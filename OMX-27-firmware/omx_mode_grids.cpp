@@ -709,6 +709,14 @@ void OmxModeGrids::onKeyUpdateChanLock(OMXKeypadEvent e)
         {
             quickSelectInst(thisKey - 11);
         }
+
+        if (e.down() && thisKey == 26)
+        {
+            midiKeyboard.onModeActivated();
+            midiModeception = true;
+            omxDisp.setDirty();
+            omxLeds.setDirty();
+        }
     }
 }
 
