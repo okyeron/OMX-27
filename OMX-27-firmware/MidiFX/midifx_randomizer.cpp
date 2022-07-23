@@ -38,7 +38,7 @@ namespace midifx
         // Serial.println("MidiFXRandomNote::noteInput");
 
         // Probability that we randomize the note
-        if(random(100) > chancePerc_)
+        if(chancePerc_ != 100 && (chancePerc_ == 0 || random(100) > chancePerc_))
         {
             sendNoteOut(note);
             return;

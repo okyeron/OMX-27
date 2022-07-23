@@ -33,7 +33,7 @@ namespace midifx
         uint8_t velMinus_ = 0;
         uint8_t velPlus_ = 0;
         uint8_t lengthPerc_ = 0;
-        uint8_t chancePerc_ = 0;
+        uint8_t chancePerc_ = 100;
 
         static uint8_t getRand(uint8_t v, uint8_t minus, uint8_t plus);
     };
