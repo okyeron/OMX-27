@@ -1,5 +1,37 @@
 # Change log
 
+```
+### 1.8.0alpha
+Warning: Alpha build, UI not really fleshed out, might lock up
+- New euclidean sequencer mode
+- MidiFX capabilities added
+   - Chance MidiFX: This sets the probability that a note will play. 
+   - Randomizer MidiFX: Randomized note number +-, octave +-, velocity +-, length, and chance that note is randomized. 
+
+knobs change settings for active euclid sequencer
+   - Knob 1: Rotation
+   - Knob 2: Events
+   - Knob 3: Steps
+   - Knob 4: Gate
+   - Knob 5: Sequence rate
+
+Keys 1-4 change selected euclid sequencer. *NOTE* no LEDs for this ATM, screen will display square next to selected sequencer lane. 
+
+Aux: Start / Stop playback. 
+
+Encoder Push: Change between polymeter and polyrhtym mode, recommend pressing this first. 
+
+## MIDIFX
+Key 16 Lower: Enter MidiFX Mode
+
+Aux: Exit MidiFX Mode
+
+Keys 1-4: select FX slot. Params change based on selected midifx. 
+
+Keys 9-16: select FX type for selected slot. 
+```
+
+
 ### 1.7.7beta
 - MI: Fixes normal midi notes being sent while in M8 midi macro mode. 
 
