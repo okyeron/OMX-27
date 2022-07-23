@@ -278,25 +278,34 @@ void SubModeMidiFxGroup::changeMidiFXType(uint8_t slotIndex, uint8_t typeIndex)
 
     midifxTypes_[slotIndex] = typeIndex;
 
-    // reconnectInputsOutputs();
+    reconnectInputsOutputs();
 }
 
 // Where the magic happens
 void SubModeMidiFxGroup::reconnectInputsOutputs()
 {
+    Serial.println("SubModeMidiFxGroup::reconnectInputsOutputs");
     bool validMidiFXFound = false;
     midifx::MidiFXInterface* lastValidMidiFX = nullptr;
 
-    for (uint8_t i = midifx_.size() - 1; i >= 0; i--)
+    for (int8_t i = 4 - 1; i >= 0; --i)
     {
+        Serial.println("i = " + String(i));
+
         midifx::MidiFXInterface* fx = getMidiFX(i);
 
         if (fx == nullptr)
+        {
+            Serial.println("midifx is null");
+
             continue;
+        }
 
         // Last valid MidiFX, connect it's output to the main midifxgroup output
         if (!validMidiFXFound)
         {
+            Serial.println("connecting midifx to main output");
+
             fx->setNoteOutput(&SubModeMidiFxGroup::noteFuncForwarder, this);
             lastValidMidiFX = fx;
             validMidiFXFound = true;
@@ -304,7 +313,14 @@ void SubModeMidiFxGroup::reconnectInputsOutputs()
         // connect the output of this midiFX to the input of the next one
         else
         {
-            fx->setNoteOutput(&midifx::MidiFXInterface::onNoteInputForwarder, lastValidMidiFX);
+            if(lastValidMidiFX == nullptr)
+            {
+                Serial.println("lastValidMidiFX is null");
+            }
+
+            Serial.println("connecting midifx to previous midifx");
+
+            fx->setNoteOutput(&MidiFXInterface::onNoteInputForwarder, lastValidMidiFX);
             lastValidMidiFX = fx;
         }
     }
@@ -312,12 +328,16 @@ void SubModeMidiFxGroup::reconnectInputsOutputs()
     // Connect doNoteOutput_ to the lastValidMidiFX
     if (validMidiFXFound)
     {
-        doNoteOutput_ = &midifx::MidiFXInterface::onNoteInputForwarder;
+        Serial.println("connecting group to lastValidMidiFX");
+
+        doNoteOutput_ = &MidiFXInterface::onNoteInputForwarder;
         doNoteOutputContext_ = lastValidMidiFX;
     }
     // No valid midifx, connect groups input to it's output
     else
     {
+        Serial.println("connecting group to self output");
+
         doNoteOutput_ = &SubModeMidiFxGroup::noteFuncForwarder;
         doNoteOutputContext_ = this;
     }
