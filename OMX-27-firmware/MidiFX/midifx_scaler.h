@@ -28,8 +28,8 @@ namespace midifx
     private:
         uint8_t chancePerc_ = 100;
 
-        int8_t rootNote;
-        int8_t scaleIndex;
+        int8_t rootNote = 0;
+        int8_t scaleIndex = 0;
 
         int8_t scaleRemapper[12];
 

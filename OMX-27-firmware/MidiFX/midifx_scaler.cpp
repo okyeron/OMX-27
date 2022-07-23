@@ -44,21 +44,41 @@ namespace midifx
         }
 
         // transpose original note by rootNote
-        int8_t transposedNote = note.noteNumber - rootNote;
+        // int8_t transposedNote = note.noteNumber + rootNote;
+
+        int8_t transposedNote = note.noteNumber;
+
 
         int8_t noteIndex = transposedNote % 12;
         int8_t octave = transposedNote / 12;
 
         // offset for root note
         // noteIndex = (noteIndex + rootNote) % 12;
+        // if(noteIndex + rootNote >= 12)
+        // {
+        //     octave++;
+        // }
+
+        // noteIndex = (noteIndex + rootNote) % 12;
+
+        // noteIndex = (noteIndex - rootNote + 12) % 12;
 
         int8_t remapedNoteIndex = scaleRemapper[noteIndex];
+
+        if(remapedNoteIndex > noteIndex)
+        {
+            octave--;
+        }
+
+        // remapedNoteIndex = (noteIndex + remapedNoteIndex) % 12;
 
         // remove root note offset
         // remapedNoteIndex = (remapedNoteIndex - rootNote + 12) % 12;
 
         int8_t newNoteNumber = octave * 12 + remapedNoteIndex;
-        newNoteNumber = newNoteNumber + rootNote;
+
+        // untranspose
+        // newNoteNumber = newNoteNumber - rootNote;
 
         // note out of range, kill
         if (newNoteNumber < 0 || newNoteNumber > 127)
@@ -95,8 +115,39 @@ namespace midifx
                 scaleIndex++;
             }
 
-            scaleRemapper[i] = lastNoteIndex;
+            // uint8_t destIndex = (i - rootNote + 12) % 12;
+            // uint8_t destIndex = i + rootNote % 12;
+
+            scaleRemapper[i] = (lastNoteIndex + rootNote) % 12;
         }
+
+        if (rootNote > 0)
+        {
+            // rotate the scale to root
+            int8_t temp[12];
+
+            uint8_t val = 12 - rootNote;
+
+            for (uint8_t i = 0; i < 12; i++)
+            {
+                temp[i] = scaleRemapper[(i + val) % 12];
+            }
+            for (int i = 0; i < 12; i++)
+            {
+                scaleRemapper[i] = temp[i];
+            }
+        }
+
+        String msg = "scaleRemapper: ";
+
+        for(int i = 0; i < 12; i++)
+        {
+            msg += String(scaleRemapper[i]) + ", ";
+        }
+
+        msg += "\n\n";
+
+        Serial.println(msg);
     }
 
     void MidiFXScaler::loopUpdate()
@@ -114,12 +165,12 @@ namespace midifx
         {
             if (param == 0)
             {
-                // int prevRoot = rootNote;
+                int prevRoot = rootNote;
                 rootNote = constrain(rootNote + amt, 0, 12 - 1);
-                // if (prevRoot != rootNote)
-                // {
-                //     musicScale->calculateScale(scaleConfig.scaleRoot, scaleConfig.scalePattern);
-                // }
+                if (prevRoot != rootNote)
+                {
+                    calculateRemap();
+                }
             }
             else if (param == 1)
             {
