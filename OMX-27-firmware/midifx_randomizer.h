@@ -5,11 +5,11 @@
 namespace midifx
 {
 
-    class MidiFXRandomNote : public MidiFXInterface
+    class MidiFXRandomizer : public MidiFXInterface
     {
     public:
-        MidiFXRandomNote();
-        ~MidiFXRandomNote() {}
+        MidiFXRandomizer();
+        ~MidiFXRandomizer() {}
 
         int getFXType() override;
         String getName() override;
@@ -25,5 +25,16 @@ namespace midifx
         void onDisabled() override;
 
         void onEncoderChangedEditParam(Encoder::Update enc) override;
+    private:
+        uint8_t noteMinus_ = 0;
+        uint8_t notePlus_ = 0;
+        uint8_t octMinus_ = 0;
+        uint8_t octPlus_ = 0;
+        uint8_t velMinus_ = 0;
+        uint8_t velPlus_ = 0;
+        uint8_t lengthPerc_ = 0;
+        uint8_t chancePerc_ = 0;
+
+        static uint8_t getRand(uint8_t v, uint8_t minus, uint8_t plus);
     };
 }

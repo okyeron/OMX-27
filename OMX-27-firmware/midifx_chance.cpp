@@ -34,9 +34,14 @@ namespace midifx
     void MidiFXChance::noteInput(MidiNoteGroup note)
     {
         Serial.println("MidiFXChance::noteInput");
-        note.noteNumber += 7;
+        // note.noteNumber += 7;
 
-        sendNoteOut(note);
+        uint8_t r = random(255);
+
+        if(r <= chancePerc_)
+        {
+            sendNoteOut(note);
+        }
     }
 
     // MidiFXNoteFunction MidiFXChance::getInputFunc()

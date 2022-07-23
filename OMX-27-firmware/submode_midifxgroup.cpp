@@ -2,7 +2,7 @@
 #include "omx_disp.h"
 #include "omx_leds.h"
 #include "colors.h"
-#include "midifx_randomnote.h"
+#include "midifx_randomizer.h"
 #include "midifx_chance.h"
 
 using namespace midifx;
@@ -249,10 +249,9 @@ void SubModeMidiFxGroup::changeMidiFXType(uint8_t slotIndex, uint8_t typeIndex)
 
     switch (typeIndex)
     {
-    case MIDIFX_RANDNOTE:
+    case MIDIFX_RANDOMIZER:
     {
-        setMidiFX(slotIndex, new MidiFXRandomNote());
-        
+        setMidiFX(slotIndex, new MidiFXRandomizer());
     }
     break;
     case MIDIFX_CHANCE:
