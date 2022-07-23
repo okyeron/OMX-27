@@ -14,7 +14,7 @@ const auto INSCALECOLOR = 0x000090;
 #include <Adafruit_NeoPixel.h>
 extern Adafruit_NeoPixel strip;
 
-const int scalePatterns[][7] = {
+const int8_t scalePatterns[][7] = {
     // major / ionian
     {0, 2, 4, 5, 7, 9, 11},
     // dorian
@@ -149,7 +149,7 @@ const char *noteNames[] = {
     "B ",
 };
 
-void MusicScales::calculateScale(int scaleRoot, int scalePattern)
+void MusicScales::calculateScale(uint8_t scaleRoot, uint8_t scalePattern)
 {
     rootNote = scaleRoot;
     scaleIndex = scalePattern;
@@ -244,12 +244,12 @@ void MusicScales::calculateScale(int scaleRoot, int scalePattern)
     scaleCalculated = true;
 }
 
-int MusicScales::getNumScales()
+uint8_t MusicScales::getNumScales()
 {
     return ARRAYLEN(scalePatterns);
 }
 
-bool MusicScales::isNoteInScale(int noteNum)
+bool MusicScales::isNoteInScale(int8_t noteNum)
 {
     // Serial.println((String)"isNoteInScale: " + noteNum );
     if (!scaleCalculated || noteNum < 0 || noteNum > 127) 
@@ -265,7 +265,7 @@ bool MusicScales::isNoteInScale(int noteNum)
     return inScale;
 }
 
-int MusicScales::getGroup16Note(int keyNum, int octave)
+int8_t MusicScales::getGroup16Note(uint8_t keyNum, int8_t octave)
 {
     //     1,2,   3,4,5,   6,7,   8,9,10,
     // 11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26
@@ -302,14 +302,14 @@ int MusicScales::getGroup16Note(int keyNum, int octave)
     return adjnote;
 }
 
-int MusicScales::getScaleColor(int noteIndex)
+int MusicScales::getScaleColor(uint8_t noteIndex)
 {
     if (!scaleCalculated)
         return LEDOFF;
     return scaleColors[noteIndex];
 }
 
-int MusicScales::getGroup16Color(int keyNum)
+int MusicScales::getGroup16Color(uint8_t keyNum)
 {
     if(!scaleCalculated || keyNum < 11 || keyNum > 26 || scaleIndex < 0 ) return LEDOFF;
 
@@ -322,13 +322,13 @@ int MusicScales::getGroup16Color(int keyNum)
     return scaleColors[note];
 }
 
-const char *MusicScales::getNoteName(int noteIndex)
+const char *MusicScales::getNoteName(uint8_t noteIndex)
 {
     constrain(noteIndex, 0, 11);
     return noteNames[noteIndex];
 }
 
-const char *MusicScales::getScaleName(int scaleIndex)
+const char *MusicScales::getScaleName(uint8_t scaleIndex)
 {
     if (scaleIndex < 0 || scaleIndex >= getNumScales())
         return "off";
@@ -338,4 +338,9 @@ const char *MusicScales::getScaleName(int scaleIndex)
 int MusicScales::getScaleLength()
 {
     return scaleLength;
+}
+
+const int8_t* MusicScales::getScalePattern(uint8_t noteIndex)
+{
+    return scalePatterns[noteIndex];
 }
