@@ -31,8 +31,9 @@ namespace midifx
     {
     }
 
-    void MidiFXChance::noteInput(midifxnote note)
+    void MidiFXChance::noteInput(MidiNoteGroup note)
     {
+        Serial.println("MidiFXChance::noteInput");
         note.noteNumber += 7;
 
         sendNoteOut(note);

@@ -1,19 +1,16 @@
 #pragma once
+#include "config.h"
 #include "ClearUI_Input.h"
 #include "omx_keypad.h"
 #include "param_manager.h"
 
 namespace midifx
 {
-    struct midifxnote
-    {
-        uint8_t noteNumber;
-        uint8_t velocity;
-    };
+    
 
     // void(*outNoteptr)(midifxnote); // out pointer type
 
-    typedef void (*MidiFXNoteFunction)(midifxnote);
+    // typedef void (*MidiFXNoteFunction)(midifxnote);
 
     class MidiFXInterface
     {
@@ -36,9 +33,15 @@ namespace midifx
 
         virtual void onDisplayUpdate() = 0;
 
-        virtual void noteInput(midifxnote note) = 0;
+        // Static glue to link a pointer to a member function
+        static void onNoteInputForwarder(void *context, MidiNoteGroup note)
+        {
+            static_cast<MidiFXInterface *>(context)->noteInput(note);
+        }
+
+        virtual void noteInput(MidiNoteGroup note) = 0;
         // virtual MidiFXNoteFunction getInputFunc() = 0;
-        virtual void setNoteOutput(void (*fptr)(void *, midifxnote), void *context);
+        virtual void setNoteOutput(void (*fptr)(void *, MidiNoteGroup), void *context);
 
         // // the function using the function pointers:
         // void somefunction(void (*fptr)(void *, int, int), void *context)
@@ -52,7 +55,7 @@ namespace midifx
         ParamManager params_;
 
         void* outFunctionContext_;
-        void (*outFunctionPtr_)(void *, midifxnote);
+        void (*outFunctionPtr_)(void *, MidiNoteGroup);
 
         virtual void onEnabled() {} // Called whenever entering mode
         virtual void onDisabled() {} // Called whenever entering mode
@@ -60,6 +63,6 @@ namespace midifx
         virtual void onEncoderChangedSelectParam(Encoder::Update enc);
         virtual void onEncoderChangedEditParam(Encoder::Update enc) = 0;
 
-        virtual void sendNoteOut(midifxnote note);
+        virtual void sendNoteOut(MidiNoteGroup note);
     };
 }

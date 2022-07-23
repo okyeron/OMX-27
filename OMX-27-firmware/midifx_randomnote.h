@@ -18,7 +18,7 @@ namespace midifx
 
         void onDisplayUpdate() override;
 
-        void noteInput(midifxnote note) override;
+        void noteInput(MidiNoteGroup note) override;
 
     protected:
         void onEnabled() override;

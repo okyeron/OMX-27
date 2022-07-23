@@ -147,6 +147,29 @@ namespace euclidean
       return running_;
   }
 
+  void EuclideanSequencer::setNoteOutputFunc(void (*fptr)(void *, uint8_t, MidiNoteGroup), void *context, u_int8_t euclidIndex)
+  {
+    onNoteOnFuncPtr_ = fptr;
+    onNoteOnFuncPtrContext_ = context;
+    euclidIndex_ = euclidIndex;
+  }
+
+  void EuclideanSequencer::onNoteOn(uint8_t channel, uint8_t noteNumber, uint8_t velocity, float stepLength, bool sendMidi, bool sendCV, uint32_t noteOnMicros)
+  {
+    if(onNoteOnFuncPtrContext_ == nullptr) return;
+
+    MidiNoteGroup noteGroup;
+    noteGroup.channel = channel;
+    noteGroup.noteNumber = noteNumber;
+    noteGroup.velocity = velocity;
+    noteGroup.stepLength = stepLength;
+    noteGroup.sendMidi = sendMidi;
+    noteGroup.sendCV = sendCV;
+    noteGroup.noteonMicros = noteOnMicros;
+
+    onNoteOnFuncPtr_(onNoteOnFuncPtrContext_, euclidIndex_, noteGroup);
+  }
+
 //   void EuclideanSequencer::setResolution(uint8_t r)
 //   {
 //       resolution_ = r;
@@ -528,8 +551,8 @@ void EuclideanSequencer::playNote() {
     float stepLength = kEuclidNoteLengths[noteLength_];
     uint8_t swing = 0;
 
-    uint32_t noteoff_micros = micros() + (stepLength) * clockConfig.step_micros;
-    pendingNoteOffs.insert(noteNumber_, channel, noteoff_micros, sendnoteCV);
+    // uint32_t noteoff_micros = micros() + (stepLength) * clockConfig.step_micros;
+    // pendingNoteOffs.insert(noteNumber_, channel, noteoff_micros, sendnoteCV);
 
     uint32_t noteon_micros;
 
@@ -551,7 +574,8 @@ void EuclideanSequencer::playNote() {
     }
 
     // Queue note-on
-    pendingNoteOns.insert(noteNumber_, vel, 1, noteon_micros, sendnoteCV);
+    onNoteOn(1, noteNumber_, vel, stepLength, true, false, noteon_micros);
+    // pendingNoteOns.insert(noteNumber_, vel, 1, noteon_micros, sendnoteCV);
 
     // {notenum, vel, notelen, step_type, {p1,p2,p3,p4}, prob}
     // send param locks

@@ -18,6 +18,10 @@ public:
     void onEncoderButtonDown() override;
     void onKeyUpdate(OMXKeypadEvent e) override;
     void onDisplayUpdate() override;
+
+    void noteInput(MidiNoteGroup note);
+    void setNoteOutputFunc(void (*fptr)(void *, MidiNoteGroup), void *context);
+
 protected:
 // Interface methods
     void onEnabled() override;
@@ -50,10 +54,27 @@ private:
     void selectMidiFX(uint8_t fxIndex);
     void changeMidiFXType(uint8_t slotIndex, uint8_t typeIndex);
 
-    static void noteFuncForwarder(void *context, midifx::midifxnote note)
+    // Static glue to link a pointer to a member function
+    static void noteFuncForwarder(void *context, MidiNoteGroup note)
     {
-        static_cast<SubModeMidiFxGroup *>(context)->testNoteFunc(note);
+        static_cast<SubModeMidiFxGroup *>(context)->noteOutputFunc(note);
     }
 
-    void testNoteFunc(midifx::midifxnote note);
+    // sends the final notes out of midifx 
+    void noteOutputFunc(MidiNoteGroup note);
+
+    // Pointer to external function that notes are sent out of fxgroup to
+    void *sendNoteOutFuncPtrContext_;
+    void (*sendNoteOutFuncPtr_)(void *, MidiNoteGroup);
+
+    // internal function link, will point to noteInput of first FX, or to noteOutputFunc if no FX
+    void *doNoteOutputContext_;
+    void (*doNoteOutput_)(void *, MidiNoteGroup);
+    // // Static glue to link a pointer to a member function
+    // static void doNoteOutputForwarder(void *context, MidiNoteGroup note)
+    // {
+    //     static_cast<SubModeMidiFxGroup *>(context)->noteOutputFunc(note);
+    // }
+
+    void reconnectInputsOutputs();
 };

@@ -100,6 +100,8 @@ namespace euclidean
 
         bool isRunning();
 
+        void setNoteOutputFunc(void (*fptr)(void *, uint8_t, MidiNoteGroup), void *context, u_int8_t euclidIndex);
+
         void setClockDivMult(uint8_t m);
         uint8_t getClockDivMult();
 
@@ -149,6 +151,12 @@ namespace euclidean
         // uint8_t triggeredNotes_[num_notes]; // Keep track of triggered notes to avoid stuck notes
         // uint8_t resolution_;
         bool running_;
+
+        // Note On pointers
+        uint8_t euclidIndex_;
+        void * onNoteOnFuncPtrContext_;
+        void (*onNoteOnFuncPtr_)(void *, uint8_t, MidiNoteGroup);
+        void onNoteOn(uint8_t channel, uint8_t noteNumber, uint8_t velocity, float stepLength, bool sendMidi, bool sendCV, uint32_t noteOnMicros);
 
         // uint8_t defaultMidiChannel_ = 1;
 

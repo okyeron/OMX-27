@@ -236,6 +236,17 @@ struct ScaleConfig
 
 extern ScaleConfig scaleConfig;
 
+struct MidiNoteGroup
+{
+	uint8_t channel;
+	uint8_t noteNumber;
+	uint8_t velocity;
+	float stepLength; // fraction or multiplier of clockConfig.step_micros, 1 == 1 step
+	bool sendMidi;
+	bool sendCV;
+	uint32_t noteonMicros;
+};
+
 #define NUM_DISP_PARAMS 5
 
 extern const int gridh;

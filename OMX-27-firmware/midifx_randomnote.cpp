@@ -33,8 +33,10 @@ namespace midifx
     {
     }
 
-    void MidiFXRandomNote::noteInput(midifxnote note)
+    void MidiFXRandomNote::noteInput(MidiNoteGroup note)
     {
+        Serial.println("MidiFXRandomNote::noteInput");
+        sendNoteOut(note);
     }
 
     void MidiFXRandomNote::loopUpdate()

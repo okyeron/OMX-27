@@ -22,6 +22,14 @@ enum EucModePage {
 OmxModeEuclidean::OmxModeEuclidean()
 {
     midiKeyboard.setMidiMode();
+
+    // Setup function pointers for note ons. 
+    for (int i = 0; i < kNumEuclids; i++)
+    {
+        euclids[i].setNoteOutputFunc(&OmxModeEuclidean::onNoteTriggeredForwarder, this, i);
+    }
+
+    subModeMidiFx.setNoteOutputFunc(&OmxModeEuclidean::onNotePostFXForwarder, this);
 }
 
 void OmxModeEuclidean::InitSetup()
@@ -794,6 +802,28 @@ void OmxModeEuclidean::updateLEDsPatterns()
     // }
 }
 
+// Called by a euclid sequencer when it triggers a note
+void OmxModeEuclidean::onNoteTriggered(uint8_t euclidIndex, MidiNoteGroup note)
+{
+    Serial.println("OmxModeEuclidean::onNoteTriggered " + String(euclidIndex) + " note: " + String(note.noteNumber));
+    
+    subModeMidiFx.noteInput(note);
+
+    omxDisp.setDirty();
+}
+
+// Called by the midiFX group when a note exits it's FX Pedalboard
+void OmxModeEuclidean::onNotePostFX(MidiNoteGroup note)
+{
+    Serial.println("OmxModeEuclidean::onNotePostFX note: " + String(note.noteNumber));
+
+    uint32_t noteOnMicros = note.noteonMicros; // TODO Might need to be set to current micros
+    pendingNoteOns.insert(note.noteNumber, note.velocity, note.channel, noteOnMicros, note.sendCV);
+
+    uint32_t noteOffMicros = noteOnMicros + (note.stepLength * clockConfig.step_micros);
+    pendingNoteOffs.insert(note.noteNumber, note.channel, noteOffMicros, note.sendCV);
+}
+
 void OmxModeEuclidean::setupPageLegends()
 {
     // omxDisp.clearLegends();
@@ -844,7 +874,7 @@ void OmxModeEuclidean::onDisplayUpdate()
         updateLEDs();
     }
 
-    if (omxDisp.isDirty() || sequencer.playing)
+    if (omxDisp.isDirty())
     { 
         if (!encoderConfig.enc_edit)
         {

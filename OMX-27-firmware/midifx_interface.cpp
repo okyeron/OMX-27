@@ -46,13 +46,13 @@ namespace midifx
         omxDisp.setDirty();
     }
 
-    void MidiFXInterface::setNoteOutput(void (*fptr)(void *, midifxnote), void *context)
+    void MidiFXInterface::setNoteOutput(void (*fptr)(void *, MidiNoteGroup), void *context)
     {
         outFunctionContext_ = context;
         outFunctionPtr_ = fptr;
     }
 
-    void MidiFXInterface::sendNoteOut(midifxnote note)
+    void MidiFXInterface::sendNoteOut(MidiNoteGroup note)
     {
         if(outFunctionContext_ != nullptr){
             outFunctionPtr_(outFunctionContext_, note);

@@ -113,4 +113,19 @@ private:
     void disableSubmode();
     bool isSubmodeEnabled();
 
+    // Static glue to link a pointer to a member function
+    static void onNoteTriggeredForwarder(void *context, uint8_t euclidIndex, MidiNoteGroup note)
+    {
+        static_cast<OmxModeEuclidean *>(context)->onNoteTriggered(euclidIndex, note);
+    }
+
+    void onNoteTriggered(uint8_t euclidIndex, MidiNoteGroup note);
+
+    // Static glue to link a pointer to a member function
+    static void onNotePostFXForwarder(void *context, MidiNoteGroup note)
+    {
+        static_cast<OmxModeEuclidean *>(context)->onNotePostFX(note);
+    }
+
+    void onNotePostFX(MidiNoteGroup note);
 };
