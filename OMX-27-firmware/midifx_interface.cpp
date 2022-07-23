@@ -45,4 +45,17 @@ namespace midifx
         encoderSelect_ = !encoderSelect_;
         omxDisp.setDirty();
     }
+
+    void MidiFXInterface::setNoteOutput(void (*fptr)(void *, midifxnote), void *context)
+    {
+        outFunctionContext_ = context;
+        outFunctionPtr_ = fptr;
+    }
+
+    void MidiFXInterface::sendNoteOut(midifxnote note)
+    {
+        if(outFunctionContext_ != nullptr){
+            outFunctionPtr_(outFunctionContext_, note);
+        }
+    }
 }

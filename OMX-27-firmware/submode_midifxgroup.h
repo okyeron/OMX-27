@@ -49,4 +49,11 @@ private:
 
     void selectMidiFX(uint8_t fxIndex);
     void changeMidiFXType(uint8_t slotIndex, uint8_t typeIndex);
+
+    static void noteFuncForwarder(void *context, midifx::midifxnote note)
+    {
+        static_cast<SubModeMidiFxGroup *>(context)->testNoteFunc(note);
+    }
+
+    void testNoteFunc(midifx::midifxnote note);
 };

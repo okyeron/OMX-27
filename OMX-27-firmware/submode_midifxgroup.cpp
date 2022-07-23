@@ -3,6 +3,7 @@
 #include "omx_leds.h"
 #include "colors.h"
 #include "midifx_randomnote.h"
+#include "midifx_chance.h"
 
 using namespace midifx;
 
@@ -246,8 +247,22 @@ void SubModeMidiFxGroup::changeMidiFXType(uint8_t slotIndex, uint8_t typeIndex)
     switch (typeIndex)
     {
     case MIDIFX_RANDNOTE:
+    {
         setMidiFX(slotIndex, new MidiFXRandomNote());
-        // midifx_[slotIndex] = new MidiFXRandomNote();
+        
+    }
+    break;
+    case MIDIFX_CHANCE:
+    {
+        setMidiFX(slotIndex, new MidiFXChance());
+
+        auto mfx = getMidiFX(slotIndex);
+        mfx->setNoteOutput(SubModeMidiFxGroup::noteFuncForwarder, this);
+
+        midifx::midifxnote testNote;
+        testNote.noteNumber = 10;
+        mfx->noteInput(testNote);
+    }
         break;
     default:
         break;
@@ -259,6 +274,12 @@ void SubModeMidiFxGroup::changeMidiFXType(uint8_t slotIndex, uint8_t typeIndex)
     }
 
     midifxTypes_[slotIndex] = typeIndex;
+}
+
+void SubModeMidiFxGroup::testNoteFunc(midifx::midifxnote note)
+{
+    Serial.println("testNoteFunc: " + String(note.noteNumber));
+    Serial.println("selectedMidiFX_: " + String(selectedMidiFX_));
 }
 
 void SubModeMidiFxGroup::setupPageLegends()

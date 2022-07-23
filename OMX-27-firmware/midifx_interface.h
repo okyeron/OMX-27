@@ -11,6 +11,10 @@ namespace midifx
         uint8_t velocity;
     };
 
+    // void(*outNoteptr)(midifxnote); // out pointer type
+
+    typedef void (*MidiFXNoteFunction)(midifxnote);
+
     class MidiFXInterface
     {
     public:
@@ -33,16 +37,29 @@ namespace midifx
         virtual void onDisplayUpdate() = 0;
 
         virtual void noteInput(midifxnote note) = 0;
+        // virtual MidiFXNoteFunction getInputFunc() = 0;
+        virtual void setNoteOutput(void (*fptr)(void *, midifxnote), void *context);
+
+        // // the function using the function pointers:
+        // void somefunction(void (*fptr)(void *, int, int), void *context)
+        // {
+        //     fptr(context, 17, 42);
+        // }
 
     protected:
         bool enabled_;
         bool encoderSelect_;
         ParamManager params_;
 
+        void* outFunctionContext_;
+        void (*outFunctionPtr_)(void *, midifxnote);
+
         virtual void onEnabled() {} // Called whenever entering mode
         virtual void onDisabled() {} // Called whenever entering mode
 
         virtual void onEncoderChangedSelectParam(Encoder::Update enc);
         virtual void onEncoderChangedEditParam(Encoder::Update enc) = 0;
+
+        virtual void sendNoteOut(midifxnote note);
     };
 }
