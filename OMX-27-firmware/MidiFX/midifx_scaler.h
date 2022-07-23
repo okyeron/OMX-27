@@ -26,6 +26,13 @@ namespace midifx
         void onEncoderChangedEditParam(Encoder::Update enc) override;
 
     private:
-        uint8_t chancePerc_ = 255;
+        uint8_t chancePerc_ = 100;
+
+        int8_t rootNote;
+        int8_t scaleIndex;
+
+        int8_t scaleRemapper[12];
+
+        void calculateRemap();
     };
 }
