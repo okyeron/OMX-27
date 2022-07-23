@@ -280,23 +280,45 @@ void OmxModeMidiKeyboard::onEncoderButtonDownLong()
 void OmxModeMidiKeyboard::onKeyUpdate(OMXKeypadEvent e)
 {
     int thisKey = e.key();
-    // int keyPos = thisKey - 11;
 
-    // ### KEY PRESS EVENTS
-    if (midiMacroConfig.midiMacro)
+    // // Aux key debugging
+    // if(thisKey == 0){
+    //     const char* dwn = e.down() ? " Down: True" : " Down: False";
+    //     Serial.println(String("Clicks: ") + String(e.clicks()) + dwn);
+    // }
+
+    // Aux double click toggle macro
+    if (midiMacroConfig.midiMacro > 0)
     {
-        if (e.clicks() == 2 && thisKey == 0)
+        if (!midiMacroConfig.m8AUX)
         {
-            midiMacroConfig.m8AUX = !midiMacroConfig.m8AUX;
-            if (!midiMacroConfig.m8AUX)
+            // Enter M8 Mode
+            if (!e.down() && thisKey == 0 && e.clicks() == 2)
             {
+                midiMacroConfig.m8AUX = true;
+                midiSettings.midiAUX = false;
+                return;
+            }
+        }
+        else // M8 Macro mode
+        {
+            // Exit M8 mode
+            if (!e.down() && thisKey == 0 && e.clicks() == 2)
+            {
+                midiMacroConfig.m8AUX = false;
+                midiSettings.midiAUX = false;
+
+                // Clear LEDs
                 for (int m = 1; m < LED_COUNT; m++)
                 {
                     strip.setPixelColor(m, LEDOFF);
                 }
+                return;
             }
+
+            onKeyUpdateM8Macro(e);
+            return;
         }
-        onKeyUpdateM8Macro(e);
     }
 
     // REGULAR KEY PRESSES
