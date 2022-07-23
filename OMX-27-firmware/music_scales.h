@@ -18,7 +18,8 @@ public:
     bool isNoteInScale(int8_t noteNum);
 
     // returns a note in the scale if key is one of the lower 16. Returns -1 otherwise. 
-    int8_t getGroup16Note(uint8_t keyNum, int8_t octave);
+    // TODO This won't work unless returns int, won't work with int8_t not sure why
+    int getGroup16Note(uint8_t keyNum, int8_t octave);
 
     // Returns a color for the note
     int getScaleColor(uint8_t noteIndex);
@@ -41,5 +42,5 @@ private:
     int8_t rootNote;
     int8_t scaleIndex;
     
-    int8_t group16Offsets[16]; // 16 offsets for group16 mode
+    int group16Offsets[16]; // 16 offsets for group16 mode
 };

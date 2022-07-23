@@ -153,6 +153,7 @@ void MusicScales::calculateScale(uint8_t scaleRoot, uint8_t scalePattern)
 {
     rootNote = scaleRoot;
     scaleIndex = scalePattern;
+    auto sPattern = getScalePattern(scalePattern);
 
     if (scalePattern == -1)
     {
@@ -171,9 +172,12 @@ void MusicScales::calculateScale(uint8_t scaleRoot, uint8_t scalePattern)
             int offset = -1;
             int degree = -1;
 
+
             for (int j = 0; j < 7; j++)
             {
-                int v = scalePatterns[scalePattern][j];
+                // int v = scalePatterns[scalePattern][j];
+                int v = sPattern[j];
+
                 if (v == -1)
                 {
                     continue;
@@ -265,7 +269,7 @@ bool MusicScales::isNoteInScale(int8_t noteNum)
     return inScale;
 }
 
-int8_t MusicScales::getGroup16Note(uint8_t keyNum, int8_t octave)
+int MusicScales::getGroup16Note(uint8_t keyNum, int8_t octave)
 {
     //     1,2,   3,4,5,   6,7,   8,9,10,
     // 11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26
@@ -298,6 +302,8 @@ int8_t MusicScales::getGroup16Note(uint8_t keyNum, int8_t octave)
     {
         adjnote = group16Offsets[stepIndex] + rootNote + 60 + (octave * 12);
     }
+
+    // adjnote = constrain(adjnote, -1, 127);
 
     return adjnote;
 }
