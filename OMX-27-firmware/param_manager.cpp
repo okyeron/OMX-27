@@ -30,18 +30,18 @@ void ParamManager::incrementParam()
     selectedParam++;
     if (selectedParam >= pageConfigs[selectedPage])
     {
-        if (!lockSelectedPage)
-        {
-            incrementPage();
-        }
-
-        if (rollPages || selectedPage != numberOfPages - 1) // Roll unless last page or roll pages
+        if (rollPages || selectedPage != numberOfPages -1) // Roll unless last page or roll pages
         {
             selectedParam = 0;
         }
         else
         {
             selectedParam = max(selectedParam - 1, 0);
+        }
+
+        if (!lockSelectedPage)
+        {
+            incrementPage();
         }
     }
 }
@@ -53,10 +53,6 @@ void ParamManager::decrementParam()
     selectedParam--;
     if (selectedParam < 0)
     {
-        if (!lockSelectedPage)
-        {
-            decrementPage();
-        }
         if (rollPages || selectedPage != 0) // Roll unless first page or roll pages
         {
             selectedParam = max(pageConfigs[selectedPage] - 1, 0);
@@ -64,6 +60,11 @@ void ParamManager::decrementParam()
         else
         {
             selectedParam = 0;
+        }
+
+        if (!lockSelectedPage)
+        {
+            decrementPage();
         }
     }
 }
