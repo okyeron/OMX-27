@@ -298,8 +298,33 @@ void OmxModeMidiKeyboard::onKeyUpdate(OMXKeypadEvent e)
         }
         onKeyUpdateM8Macro(e);
 
-        if(midiMacroConfig.m8AUX)
+        if (midiMacroConfig.m8AUX)
+        {
+            // TODO - Entering M8 Midi Macro Mode only seems to work with this code. 
+            // This doesn't even seem related. I have no idea why this works. 
+            // AUX KEY
+            if (e.down() && thisKey == 0)
+            {
+                if (!midiMacroConfig.m8AUX)
+                {
+                    midiSettings.midiAUX = true;
+                }
+            }
+            else if (!e.down() && thisKey == 0)
+            {
+                if (midiSettings.midiAUX)
+                {
+                    midiSettings.midiAUX = false;
+                }
+                // turn off leds
+                strip.setPixelColor(0, LEDOFF);
+                strip.setPixelColor(1, LEDOFF);
+                strip.setPixelColor(2, LEDOFF);
+                strip.setPixelColor(11, LEDOFF);
+                strip.setPixelColor(12, LEDOFF);
+            }
             return;
+        }
     }
 
     // REGULAR KEY PRESSES
