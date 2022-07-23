@@ -33,7 +33,7 @@ namespace midifx
 
     void MidiFXChance::noteInput(MidiNoteGroup note)
     {
-        Serial.println("MidiFXChance::noteInput");
+        // Serial.println("MidiFXChance::noteInput");
         // note.noteNumber += 7;
 
         uint8_t r = random(255);

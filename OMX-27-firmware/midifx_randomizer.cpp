@@ -35,7 +35,7 @@ namespace midifx
 
     void MidiFXRandomizer::noteInput(MidiNoteGroup note)
     {
-        Serial.println("MidiFXRandomNote::noteInput");
+        // Serial.println("MidiFXRandomNote::noteInput");
 
         // Probability that we randomize the note
         if(random(100) > chancePerc_)
@@ -96,11 +96,11 @@ namespace midifx
         {
             if (param == 0)
             {
-                velMinus_ = constrain(velMinus_ + amt, 0, 12);
+                velMinus_ = constrain(velMinus_ + amt, 0, 127);
             }
             else if (param == 1)
             {
-                velPlus_ = constrain(velPlus_ + amt, 0, 12);
+                velPlus_ = constrain(velPlus_ + amt, 0, 127);
             }
             else if (param == 2)
             {

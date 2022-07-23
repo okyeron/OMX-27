@@ -805,7 +805,7 @@ void OmxModeEuclidean::updateLEDsPatterns()
 // Called by a euclid sequencer when it triggers a note
 void OmxModeEuclidean::onNoteTriggered(uint8_t euclidIndex, MidiNoteGroup note)
 {
-    Serial.println("OmxModeEuclidean::onNoteTriggered " + String(euclidIndex) + " note: " + String(note.noteNumber));
+    // Serial.println("OmxModeEuclidean::onNoteTriggered " + String(euclidIndex) + " note: " + String(note.noteNumber));
     
     subModeMidiFx.noteInput(note);
 
@@ -815,7 +815,7 @@ void OmxModeEuclidean::onNoteTriggered(uint8_t euclidIndex, MidiNoteGroup note)
 // Called by the midiFX group when a note exits it's FX Pedalboard
 void OmxModeEuclidean::onNotePostFX(MidiNoteGroup note)
 {
-    Serial.println("OmxModeEuclidean::onNotePostFX note: " + String(note.noteNumber));
+    // Serial.println("OmxModeEuclidean::onNotePostFX note: " + String(note.noteNumber));
 
     uint32_t noteOnMicros = note.noteonMicros; // TODO Might need to be set to current micros
     pendingNoteOns.insert(note.noteNumber, note.velocity, note.channel, noteOnMicros, note.sendCV);

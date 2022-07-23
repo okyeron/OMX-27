@@ -215,7 +215,7 @@ void SubModeMidiFxGroup::setMidiFX(uint8_t index, midifx::MidiFXInterface* midif
 
 void SubModeMidiFxGroup::changeMidiFXType(uint8_t slotIndex, uint8_t typeIndex)
 {
-    Serial.println(String("changeMidiFXType slotIndex: ") + String(slotIndex) + " typeIndex: " + String(typeIndex));
+    // Serial.println(String("changeMidiFXType slotIndex: ") + String(slotIndex) + " typeIndex: " + String(typeIndex));
 
     if (!midiFXParamView_)
         return;
@@ -229,7 +229,7 @@ void SubModeMidiFxGroup::changeMidiFXType(uint8_t slotIndex, uint8_t typeIndex)
     // }
     if(getMidiFX(slotIndex) != nullptr)
     {
-        Serial.println("Deleting FX");
+        // Serial.println("Deleting FX");
 
         midifx::MidiFXInterface* midifxptr = midifx_[slotIndex];
 
@@ -283,19 +283,19 @@ void SubModeMidiFxGroup::changeMidiFXType(uint8_t slotIndex, uint8_t typeIndex)
 // Where the magic happens
 void SubModeMidiFxGroup::reconnectInputsOutputs()
 {
-    Serial.println("SubModeMidiFxGroup::reconnectInputsOutputs");
+    // Serial.println("SubModeMidiFxGroup::reconnectInputsOutputs");
     bool validMidiFXFound = false;
     midifx::MidiFXInterface* lastValidMidiFX = nullptr;
 
     for (int8_t i = 4 - 1; i >= 0; --i)
     {
-        Serial.println("i = " + String(i));
+        // Serial.println("i = " + String(i));
 
         midifx::MidiFXInterface* fx = getMidiFX(i);
 
         if (fx == nullptr)
         {
-            Serial.println("midifx is null");
+            // Serial.println("midifx is null");
 
             continue;
         }
@@ -303,7 +303,7 @@ void SubModeMidiFxGroup::reconnectInputsOutputs()
         // Last valid MidiFX, connect it's output to the main midifxgroup output
         if (!validMidiFXFound)
         {
-            Serial.println("connecting midifx to main output");
+            // Serial.println("connecting midifx to main output");
 
             fx->setNoteOutput(&SubModeMidiFxGroup::noteFuncForwarder, this);
             lastValidMidiFX = fx;
@@ -312,12 +312,12 @@ void SubModeMidiFxGroup::reconnectInputsOutputs()
         // connect the output of this midiFX to the input of the next one
         else
         {
-            if(lastValidMidiFX == nullptr)
-            {
-                Serial.println("lastValidMidiFX is null");
-            }
+            // if(lastValidMidiFX == nullptr)
+            // {
+            //     Serial.println("lastValidMidiFX is null");
+            // }
 
-            Serial.println("connecting midifx to previous midifx");
+            // Serial.println("connecting midifx to previous midifx");
 
             fx->setNoteOutput(&MidiFXInterface::onNoteInputForwarder, lastValidMidiFX);
             lastValidMidiFX = fx;
@@ -327,7 +327,7 @@ void SubModeMidiFxGroup::reconnectInputsOutputs()
     // Connect doNoteOutput_ to the lastValidMidiFX
     if (validMidiFXFound)
     {
-        Serial.println("connecting group to lastValidMidiFX");
+        // Serial.println("connecting group to lastValidMidiFX");
 
         doNoteOutput_ = &MidiFXInterface::onNoteInputForwarder;
         doNoteOutputContext_ = lastValidMidiFX;
@@ -335,7 +335,7 @@ void SubModeMidiFxGroup::reconnectInputsOutputs()
     // No valid midifx, connect groups input to it's output
     else
     {
-        Serial.println("connecting group to self output");
+        // Serial.println("connecting group to self output");
 
         doNoteOutput_ = &SubModeMidiFxGroup::noteFuncForwarder;
         doNoteOutputContext_ = this;
@@ -364,7 +364,7 @@ void SubModeMidiFxGroup::setNoteOutputFunc(void (*fptr)(void *, MidiNoteGroup), 
 
 void SubModeMidiFxGroup::noteOutputFunc(MidiNoteGroup note)
 {
-    Serial.println("SubModeMidiFxGroup::noteOutputFunc testNoteFunc: " + String(note.noteNumber) + " selectedMidiFX_: " + String(selectedMidiFX_));
+    // Serial.println("SubModeMidiFxGroup::noteOutputFunc testNoteFunc: " + String(note.noteNumber) + " selectedMidiFX_: " + String(selectedMidiFX_));
 
     // Send the note out of FX group
     if(sendNoteOutFuncPtrContext_ == nullptr) return;
@@ -439,7 +439,7 @@ void SubModeMidiFxGroup::onDisplayUpdateMidiFX()
     }
     else
     {
-        Serial.println("Selected MidiFX not null");
+        // Serial.println("Selected MidiFX not null");
 
         selFX->onDisplayUpdate();
     }
