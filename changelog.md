@@ -1,6 +1,12 @@
 # Change log
 
 ```
+### 1.8.1alpha
+Warning: Alpha build, UI not really fleshed out, might lock up, LEDs not fully implemented for Euclidean Mode
+- EuclideanMode: Adds Scaler MidiFX
+```
+
+```
 ### 1.8.0alpha
 Warning: Alpha build, UI not really fleshed out, might lock up
 - New euclidean sequencer mode

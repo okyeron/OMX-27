@@ -138,16 +138,16 @@ namespace midifx
             }
         }
 
-        String msg = "scaleRemapper: ";
+        // String msg = "scaleRemapper: ";
 
-        for(int i = 0; i < 12; i++)
-        {
-            msg += String(scaleRemapper[i]) + ", ";
-        }
+        // for (int i = 0; i < 12; i++)
+        // {
+        //     msg += String(scaleRemapper[i]) + ", ";
+        // }
 
-        msg += "\n\n";
+        // msg += "\n\n";
 
-        Serial.println(msg);
+        // Serial.println(msg);
     }
 
     void MidiFXScaler::loopUpdate()
