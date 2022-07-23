@@ -153,7 +153,10 @@ void MusicScales::calculateScale(uint8_t scaleRoot, uint8_t scalePattern)
 {
     rootNote = scaleRoot;
     scaleIndex = scalePattern;
-    auto sPattern = getScalePattern(scalePattern);
+    auto pattern = getScalePattern(scalePattern);
+
+    // auto sPattern2 = scalePatterns[scalePattern];
+
 
     if (scalePattern == -1)
     {
@@ -176,7 +179,7 @@ void MusicScales::calculateScale(uint8_t scaleRoot, uint8_t scalePattern)
             for (int j = 0; j < 7; j++)
             {
                 // int v = scalePatterns[scalePattern][j];
-                int v = sPattern[j];
+                int v = pattern[j];
 
                 if (v == -1)
                 {
@@ -217,12 +220,12 @@ void MusicScales::calculateScale(uint8_t scaleRoot, uint8_t scalePattern)
         // Populate offsets for group16 mode
         for(int i = 0; i < 16; i++)
         {
-            int offset = scalePatterns[scalePattern][k];
+            int offset = pattern[k];
 
             if(offset == -1)
             {
                 k = 0;
-                offset = scalePatterns[scalePattern][k];
+                offset = pattern[k];
                 octave++;
             }
             k++;
@@ -238,7 +241,7 @@ void MusicScales::calculateScale(uint8_t scaleRoot, uint8_t scalePattern)
     scaleLength = 0;
     for (int j = 0; j < 7; j++)
     {
-        int v = scalePatterns[scalePattern][j];
+        int v = pattern[j];
         if (v != -1)
         {
             scaleLength++;
