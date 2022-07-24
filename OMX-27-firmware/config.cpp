@@ -2,7 +2,7 @@
 #include "consts.h"
 
 const OMXMode DEFAULT_MODE = MODE_MIDI;
-const uint8_t EEPROM_VERSION = 10;
+const uint8_t EEPROM_VERSION = 11;
 
 // DEFINE CC NUMBERS FOR POTS // CCS mapped to Organelle Defaults
 const int CC1 = 21;
@@ -44,7 +44,7 @@ const int gridh = 32;
 const int gridw = 128;
 const int PPQ = 96;
 
-const char* modes[] = {"MI","S1","S2","OM"};
+const char* modes[] = {"MI","S1","S2","OM","GR"};
 const char* macromodes[] = {"Off", "M8"};
 const int nummacromodes = 1;
 
@@ -81,11 +81,13 @@ bool m8mutesolo[] = {false, false, false, false, false, false, false, false, fal
 SysSettings sysSettings;
 PotSettings potSettings;
 MidiConfig midiSettings;
-MidiPage midiPageParams;
 MidiMacroConfig midiMacroConfig;
 EncoderConfig encoderConfig;
 ClockConfig clockConfig;
 SequencerConfig seqConfig;
-SequencerPage seqPageParams;
 ColorConfig colorConfig;
+ScaleConfig scaleConfig;
+
+// MidiPage midiPageParams;
+// SequencerPage seqPageParams;
 

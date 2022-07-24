@@ -17,8 +17,10 @@ public:
     void setup();
     void clearDisplay();
     void drawStartupScreen();
+    void displayMessage(String msg);
     void displayMessage(const char *msg);
     void displayMessagef(const char *fmt, ...);
+    void displayMessageTimed(String msg, uint8_t secs);
 
     bool isMessageActive();
 
@@ -27,7 +29,10 @@ public:
     void dispValBox(int v, int16_t n, bool inv);
     void dispSymbBox(const char *v, int16_t n, bool inv);
     void dispGenericMode(int selected);
+
+    void dispGenericMode2(uint8_t numPages, int8_t selectedPage, int8_t selectedParam, bool encSelActive);
     void dispPageIndicators(int page, bool selected);
+    void dispPageIndicators2(uint8_t numPages, int8_t selected);
     void dispMode();
 
     void testdrawrect();
@@ -45,16 +50,21 @@ public:
 
     void UpdateMessageTextTimer();
 
+    void drawEuclidPattern(bool *pattern, uint8_t steps, uint8_t yPos, bool selected, bool isPlaying, uint8_t seqPos);
+
 private:
     int hline = 8;
     int messageTextTimer = 0;
     bool dirtyDisplay = false;
+
+    String currentMsg;
 
     elapsedMillis dirtyDisplayTimer = 0;
     unsigned long displayRefreshRate = 60;
 
     void u8g2centerText(const char *s, int16_t x, int16_t y, uint16_t w, uint16_t h);
     void u8g2centerNumber(int n, uint16_t x, uint16_t y, uint16_t w, uint16_t h);
+    void renderMessage();
 };
 
 extern OmxDisp omxDisp;

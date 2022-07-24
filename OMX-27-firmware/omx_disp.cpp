@@ -35,8 +35,15 @@ void OmxDisp::drawStartupScreen()
     drawLoading();
 }
 
+void OmxDisp::displayMessage(String msg)
+{
+    displayMessage(msg.c_str());
+}
+
 void OmxDisp::displayMessage(const char *msg)
 {
+    currentMsg = msg;
+
     display.fillRect(0, 0, 128, 32, BLACK);
     u8g2_display.setFontMode(1);
     u8g2_display.setFont(FONT_TENFAT);
@@ -56,6 +63,28 @@ void OmxDisp::displayMessagef(const char *fmt, ...)
     vsnprintf(buf, sizeof(buf), fmt, args);
     va_end(args);
     displayMessage(buf);
+}
+
+// Something is keeping weird cache of display names or serial logs in memory
+void OmxDisp::displayMessageTimed(String msg, uint8_t secs)
+{
+    currentMsg = msg;
+
+    renderMessage();
+
+    messageTextTimer = secs * 100000;
+    dirtyDisplay = true;
+}
+
+void OmxDisp::renderMessage()
+{
+    display.fillRect(0, 0, 128, 32, BLACK);
+    u8g2_display.setFontMode(1);
+    u8g2_display.setFont(FONT_TENFAT);
+    u8g2_display.setForegroundColor(WHITE);
+    u8g2_display.setBackgroundColor(BLACK);
+    u8g2centerText(currentMsg.c_str(), 0, 10, 128, 32);
+    // dirtyDisplay = true;
 }
 
 bool OmxDisp::isMessageActive(){
@@ -147,193 +176,7 @@ void OmxDisp::dispSymbBox(const char *v, int16_t n, bool inv)
     u8g2centerText(v, n * 32, hline * 2 + 3, 32, 22);
 }
 
-void OmxDisp::setSubmode(int submode)
-{
-    switch (submode)
-    {
-    case SUBMODE_MIDI:
-        //			if (midiRoundRobin) {
-        //				displaychan = rrChannel;
-        //			}
-        legends[0] = "OCT";
-        legends[1] = "CH";
-        legends[2] = "CC";
-        legends[3] = "NOTE";
-        legendVals[0] = (int)midiSettings.octave + 4;
-        legendVals[1] = sysSettings.midiChannel;
-        legendVals[2] = potSettings.potVal;
-        legendVals[3] = midiSettings.midiLastNote;
-        dispPage = 1;
-        break;
-    case SUBMODE_MIDI2:
-        legends[0] = "RR";
-        legends[1] = "RROF";
-        legends[2] = "PGM";
-        legends[3] = "BNK";
-        legendVals[0] = midiSettings.midiRRChannelCount;
-        legendVals[1] = midiSettings.midiRRChannelOffset;
-        legendVals[2] = midiSettings.currpgm + 1;
-        legendVals[3] = midiSettings.currbank;
-        dispPage = 2;
-        break;
-    case SUBMODE_MIDI3:
-        legends[0] = "PBNK"; // Potentiometer Banks
-        legends[1] = "THRU"; // MIDI thru (usb to hardware)
-        legends[2] = "MCRO"; // Macro mode
-        legends[3] = "M-CH";
-        legendVals[0] = potSettings.potbank + 1;
-        legendVals[1] = -127;
-        if (midiSettings.midiSoftThru)
-        {
-            legendText[1] = "On";
-        }
-        else
-        {
-            legendText[1] = "Off";
-        }
-        legendVals[2] = -127;
-        legendText[2] = macromodes[midiMacroConfig.midiMacro];
-        legendVals[3] = midiMacroConfig.midiMacroChan;
-        dispPage = 3;
-        break;
-    case SUBMODE_MIDI4:
-        legends[0] = " BG ";
-        legends[1] = "---";
-        legends[2] = "---";
-        legends[3] = "---";
-        legendVals[0] = 0;
-        legendVals[1] = 0;
-        legendVals[2] = 0;
-        legendVals[3] = 0;
-        dispPage = 4;
-        break;
-    case SUBMODE_SEQ:
-        // legends[0] = "PTN";
-        // legends[1] = "TRSP";
-        // legends[2] = "SWNG"; //"TRSP";
-        // legends[3] = "BPM";
-        // legendVals[0] = sequencer.playingPattern + 1;
-        // legendVals[1] = (int)transpose;
-        // legendVals[2] = (int)sequencer.getCurrentPattern()->swing; //(int)swing;
-        // // legendVals[2] =  swing_values[sequencer.getCurrentPattern()->swing];
-        // legendVals[3] = (int)clockbpm;
-        // dispPage = 1;
-        break;
-    case SUBMODE_SEQ2:
-        // legends[0] = "SOLO";
-        // legends[1] = "LEN";
-        // legends[2] = "RATE";
-        // legends[3] = "CV"; //cvPattern
-        // legendVals[0] = sequencer.getCurrentPattern()->solo; // playingPattern+1;
-        // legendVals[1] = sequencer.getPatternLength(sequencer.playingPattern);
-        // legendVals[2] = -127;
-        // legendText[2] = mdivs[sequencer.getCurrentPattern()->clockDivMultP];
 
-        // legendVals[3] = -127;
-        // if (sequencer.getCurrentPattern()->sendCV) {
-        // 	legendText[3] = "On";
-        // } else {
-        // 	legendText[3] = "Off";
-        // }
-        // dispPage = 2;
-        break;
-    case SUBMODE_PATTPARAMS:
-        // legends[0] = "PTN";
-        // legends[1] = "LEN";
-        // legends[2] = "ROT";
-        // legends[3] = "CHAN";
-        // legendVals[0] = sequencer.playingPattern + 1;
-        // legendVals[1] = sequencer.getPatternLength(sequencer.playingPattern);
-        // legendVals[2] = rotationAmt; //(int)transpose;
-        // legendVals[3] = sequencer.getPatternChannel(sequencer.playingPattern);
-        // dispPage = 1;
-        break;
-    case SUBMODE_PATTPARAMS2:
-        // legends[0] = "START";
-        // legends[1] = "END";
-        // legends[2] = "FREQ";
-        // legends[3] = "PROB";
-        // legendVals[0] = sequencer.getCurrentPattern()->startstep + 1;			// STRT step to autoreset on
-        // legendVals[1] = sequencer.getCurrentPattern()->autoresetstep;			// STP step to autoreset on - 0 = no auto reset
-        // legendVals[2] = sequencer.getCurrentPattern()->autoresetfreq; 			// FRQ to autoreset on -- every x cycles
-        // legendVals[3] = sequencer.getCurrentPattern()->autoresetprob;			// PRO probability of resetting 0=NEVER 1=Always 2=50%
-        // dispPage = 2;
-        break;
-    case SUBMODE_PATTPARAMS3:
-        // legends[0] = "RATE";
-        // legends[1] = "SOLO";
-        // legends[2] = "---";
-        // legends[3] = "---";
-
-        // // RATE FOR CURR PATTERN
-        // legendVals[0] = -127;
-        // legendText[0] = mdivs[sequencer.getCurrentPattern()->clockDivMultP];
-
-        // legendVals[1] = sequencer.getCurrentPattern()->solo;
-        // legendVals[2] = 0; 			// TBD
-        // legendVals[3] = 0;			// TBD
-        // dispPage = 3;
-        break;
-    case SUBMODE_STEPREC:
-        // legends[0] = "OCT";
-        // legends[1] = "STEP";
-        // legends[2] = "NOTE";
-        // legends[3] = "PTN";
-        // legendVals[0] = (int)octave+4;
-        // legendVals[1] = sequencer.seqPos[sequencer.playingPattern]+1;
-        // legendVals[2] = getSelectedStep()->note; //(int)transpose;
-        // legendVals[3] = sequencer.playingPattern+1;
-        // dispPage = 1;
-        break;
-    case SUBMODE_NOTESEL:
-        // legends[0] = "NOTE";
-        // legends[1] = "OCT";
-        // legends[2] = "VEL";
-        // legends[3] = "LEN";
-        // legendVals[0] = getSelectedStep()->note;
-        // legendVals[1] = (int)octave+4;
-        // legendVals[2] = getSelectedStep()->vel;
-        // legendVals[3] = getSelectedStep()->len + 1;
-        // dispPage = 1;
-        break;
-    case SUBMODE_NOTESEL2:
-        // 			legends[0] = "TYPE";
-        // 			legends[1] = "PROB";
-        // 			legends[2] = "COND";
-        // 			legends[3] = "";
-        // 			legendVals[0] = -127;
-        // 			legendText[0] = stepTypes[getSelectedStep()->stepType];
-        // 			legendVals[1] = getSelectedStep()->prob;
-        // //				String ac = String(trigConditionsAB[][0]);
-        // //				String bc = String(trigConditionsAB[getSelectedStep()->condition][1]);
-
-        // 			legendVals[2] = -127;
-        // 			legendText[2] = trigConditions[getSelectedStep()->condition]; //ac + bc; // trigConditions
-
-        // 			legendVals[3] = 0;
-        // 			dispPage = 2;
-        break;
-    case SUBMODE_NOTESEL3:
-        // legends[0] = "L-1";
-        // legends[1] = "L-2";
-        // legends[2] = "L-3";
-        // legends[3] = "L-4";
-        // for (int j=0; j<4; j++){
-        // 	int stepNoteParam = getSelectedStep()->params[j];
-        // 	if (stepNoteParam > -1){
-        // 		legendVals[j] = stepNoteParam;
-        // 	} else {
-        // 		legendVals[j] = -127;
-        // 		legendText[j] = "---";
-        // 	}
-        // }
-        // dispPage = 3;
-        break;
-
-    default:
-        break;
-    }
-}
 
 void OmxDisp::clearLegends()
 {
@@ -354,6 +197,12 @@ void OmxDisp::clearLegends()
 
 void OmxDisp::dispGenericMode(int selected)
 {
+    if (isMessageActive())
+    {
+        renderMessage();
+        return;
+    }
+
     // const char* legends[4] = {"","","",""};
     // int legendVals[4] = {0,0,0,0};
     // int dispPage = 0;
@@ -436,6 +285,88 @@ void OmxDisp::dispGenericMode(int selected)
     }
 }
 
+void OmxDisp::dispGenericMode2(uint8_t numPages, int8_t selectedPage, int8_t selectedParam, bool encSelActive)
+{
+    if (isMessageActive())
+    {
+        renderMessage();
+        return;
+    }
+
+    u8g2_display.setFontMode(1);
+    u8g2_display.setFont(FONT_LABELS);
+    u8g2_display.setCursor(0, 0);
+    dispGridBoxes();
+
+    // labels
+    u8g2_display.setForegroundColor(BLACK);
+    u8g2_display.setBackgroundColor(WHITE);
+
+    for (int j = 0; j < 4; j++)
+    {
+        u8g2centerText(legends[j], (j * 32) + 1, hline - 2, 32, 10);
+    }
+
+    // value text formatting
+    u8g2_display.setFontMode(1);
+    u8g2_display.setFont(FONT_VALUES);
+    u8g2_display.setForegroundColor(WHITE);
+    u8g2_display.setBackgroundColor(BLACK);
+
+    if (selectedParam >= 0 && selectedParam < 4)
+    {
+        if (encSelActive)
+        {
+            const int8_t bWidth = 1;
+            display.fillRect(selectedParam * 32 + 2, 9, 29, 21, WHITE);
+            display.fillRect(selectedParam * 32 + 2 + bWidth, 9 + bWidth, 29 - (bWidth * 2), 21 - (bWidth * 2), BLACK);
+        }
+        else
+        {
+            display.fillRect(selectedParam * 32 + 2, 9, 29, 21, WHITE);
+        }
+
+            // display.fillRect(selectedParam * 32 + 2, 9, 29, 21, WHITE);
+
+    }
+
+    // ValueBoxes
+    bool highlight = false;
+    for (int j = 0; j < 4; j++)
+    { 
+        highlight = (j == selectedParam && !encSelActive);
+       
+        if (legendVals[j] == -127)
+        {
+            dispSymbBox(legendText[j], j, highlight);
+        }
+        else
+        {
+            dispValBox(legendVals[j], j, highlight);
+        }
+    }
+
+    dispPageIndicators2(numPages, selectedPage);
+}
+
+void OmxDisp::dispPageIndicators2(uint8_t numPages, int8_t selected)
+{
+    int16_t indicatorWidth = 6;
+    int16_t indicatorYPos = 32;
+    int16_t segment = (6 + 6);
+
+    int16_t start = (128 - (segment * numPages)) / 2.0;
+
+    // Serial.println((String)"start: " + start + " indicatorYPos: " + indicatorYPos + " segment: " + segment);
+
+    for(uint8_t i = 0; i < numPages; i++)
+    {
+        int16_t h = ((i == selected) ? 2 : 1);
+
+        display.fillRect(start + (i * segment), indicatorYPos - h, indicatorWidth, h, WHITE);
+    }
+}
+
 void OmxDisp::dispPageIndicators(int page, bool selected)
 {
     if (selected)
@@ -504,6 +435,87 @@ void OmxDisp::showDisplay()
 void OmxDisp::bumpDisplayTimer()
 {
     dirtyDisplayTimer = displayRefreshRate + 1;
+}
+
+void OmxDisp::drawEuclidPattern(bool *pattern, uint8_t steps, uint8_t yPos, bool selected, bool isPlaying, uint8_t seqPos)
+{
+    if (isMessageActive())
+    {
+        renderMessage();
+        return;
+    }
+
+    const bool selectAsLine = true;
+
+    int16_t startSpacing = 6;
+    int16_t patWidth = gridw - startSpacing;
+    
+    if (selected)
+    {
+        if (selectAsLine)
+        {
+            display.drawLine(0, yPos, gridw, yPos, WHITE);
+            patWidth = gridw;
+            startSpacing = 0;
+        }
+        else
+        {
+            display.fillRect(0, yPos - 3, 3, 3, WHITE);
+            display.drawPixel(1, yPos - 2, BLACK);
+        }
+    }
+
+    if (steps == 0)
+    {
+        return;
+    }
+
+    int16_t steponHeight = 5;
+    // int16_t steponWidth = 2;
+    int16_t stepoffHeight = 2;
+    // int16_t stepoffWidth = 2;
+    // int16_t halfh = gridh / 2;
+    // int16_t halfw = gridw / 2;
+
+    float stepint = (float)patWidth / (float)steps;
+
+    for (int i = 0; i < steps; i++)
+    {
+        int16_t xPos = startSpacing + (stepint * i);
+        // int16_t yPos = halfh;
+
+        uint8_t w = 2;
+        if(isPlaying && i == seqPos){
+            w = 4;
+            xPos -= 1;
+        }
+
+        if (pattern[i])
+        {
+            display.fillRect(xPos, yPos - steponHeight, w, steponHeight, WHITE);
+        }
+        else
+        {
+            display.fillRect(xPos, yPos - stepoffHeight, w, stepoffHeight, WHITE);
+        }
+
+        // if(i == seqPos)
+        // {
+        //     display.fillRect(xPos, yPos, stepoffWidth, stepoffWidth, WHITE);
+
+        //     // display.drawPixel(xPos, yPos, WHITE);
+        // }
+    }
+
+    // if (isPlaying)
+    // {
+    //     uint8_t seqPos
+    //     int16_t xPos = (gridw - startSpacing) * playheadPerc + startSpacing;
+
+    //     display.drawPixel(xPos, yPos, WHITE);
+    // }
+
+    // omxDisp.setDirty();
 }
 
 OmxDisp omxDisp;

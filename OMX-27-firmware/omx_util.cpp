@@ -21,7 +21,7 @@ void OmxUtil::sendPots(int val, int channel)
     potSettings.potValues[val] = potSettings.potVal;
 }
 
-void OmxUtil::advanceClock(Micros advance)
+void OmxUtil::advanceClock(OmxModeInterface* activeOmxMode, Micros advance)
 {
 	static Micros timeToNextClock = 0;
 	while (advance >= timeToNextClock)
@@ -29,7 +29,13 @@ void OmxUtil::advanceClock(Micros advance)
 		advance -= timeToNextClock;
 
 		MM::sendClock();
-		timeToNextClock = clockConfig.ppqInterval * (PPQ / 24);
+
+        if (activeOmxMode != nullptr)
+        {
+            activeOmxMode->onClockTick();
+        }
+
+        timeToNextClock = clockConfig.ppqInterval * (PPQ / 24);
 	}
 	timeToNextClock -= advance;
 }
@@ -85,10 +91,29 @@ void OmxUtil::cvNoteOff()
     //	analogWrite(CVPITCH_PIN, 0);
 }
 
-// #### Outbound MIDI Mode note on/off
 void OmxUtil::midiNoteOn(int notenum, int velocity, int channel)
 {
+    midiNoteOn(nullptr, notenum, velocity, channel);
+}
+
+// #### Outbound MIDI Mode note on/off
+void OmxUtil::midiNoteOn(MusicScales* scale, int notenum, int velocity, int channel)
+{
     int adjnote = notes[notenum] + (midiSettings.octave * 12); // adjust key for octave range
+
+    if (scale != nullptr)
+    {
+        if (scaleConfig.group16)
+        {
+            adjnote = scale->getGroup16Note(notenum, midiSettings.octave);
+        }
+        else
+        {
+            if (scaleConfig.lockScale && scale->isNoteInScale(adjnote) == false)
+                return; // Only play note if in scale
+        }
+    }
+
     midiSettings.rrChannel = (midiSettings.rrChannel % midiSettings.midiRRChannelCount) + 1;
     int adjchan = midiSettings.rrChannel;
 
@@ -114,6 +139,10 @@ void OmxUtil::midiNoteOn(int notenum, int velocity, int channel)
         // CV
         cvNoteOn(adjnote);
     }
+    else
+    {
+        return; // no note sent, don't light LEDs
+    }
 
     strip.setPixelColor(notenum, MIDINOTEON); //  Set pixel's color (in RAM)
     omxLeds.setDirty();
@@ -137,5 +166,6 @@ void OmxUtil::midiNoteOff(int notenum, int channel)
     omxLeds.setDirty();
     omxDisp.setDirty();
 }
+
 
 OmxUtil omxUtil;

@@ -86,6 +86,7 @@ public:
 	int seq_acc_velocity;
 
 	// TODO: move into Pattern?
+	int lastSeqPos[NUM_PATTERNS]; // What position in the sequence are we in? ZERO BASED
 	int seqPos[NUM_PATTERNS]; // What position in the sequence are we in? ZERO BASED
 
 	int patternDefaultNoteMap[NUM_PATTERNS]; // default to GM Drum Map for now

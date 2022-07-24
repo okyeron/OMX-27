@@ -11,13 +11,14 @@
 
 // #include <cstdarg>
 
-//const int OMX_VERSION = 1.7.0beta
+
+//const int OMX_VERSION = 1.7.7b7;
 
 /* * firmware metadata  */
-// OMX_VERSION = 1.7.0beta
+// OMX_VERSION = 1.7.7
 const int MAJOR_VERSION = 1;
 const int MINOR_VERSION = 7;
-const int POINT_VERSION = 0;
+const int POINT_VERSION = 7;
 
 const int DEVICE_ID     = 2;
 
@@ -27,6 +28,7 @@ enum OMXMode
 	MODE_S1,
 	MODE_S2,
 	MODE_OM,
+	MODE_GRIDS,
 
 	NUM_OMX_MODES
 };
@@ -129,11 +131,13 @@ struct MidiConfig
 
 extern MidiConfig midiSettings;
 
-struct MidiPage {
-	int miparam = 0; // midi params item counter
-    int mmpage = 0;
-};
-extern MidiPage midiPageParams;
+// struct MidiPage {
+// 	const int numPages = 4;
+// 	const int numParams = numPages * 5;
+// 	int miparam = 0; // midi params item counter
+//     int mmpage = 0;
+// };
+// extern MidiPage midiPageParams;
 
 struct MidiMacroConfig {
 	int midiMacro = 0;
@@ -166,38 +170,39 @@ extern ClockConfig clockConfig;
 
 struct SequencerConfig {
 	int selectedStep = 0;
+    int selectedNote = 0;
+
 	bool plockDirty[NUM_CC_POTS] = {false, false, false, false, false};
 	int prevPlock[NUM_CC_POTS] = {0, 0, 0, 0, 0};
 
 	volatile unsigned long noteon_micros;
 	volatile unsigned long noteoff_micros;
 
-    bool noteSelect = false;
-    bool noteSelection = false;
+    // bool noteSelect = false;
+    // bool noteSelection = false;
 
-    int selectedNote = 0;
     // int omxSeqSelectedStep = 0;
-    bool stepSelect = false;
-    bool stepRecord = false;
-    bool stepDirty = false;
+    // bool stepSelect = false;
+    // bool stepRecord = false;
+    // bool stepDirty = false;
 };
 extern SequencerConfig seqConfig;
 
-struct SequencerPage {
-	bool patternParams = false;
-    bool seqPages = false;
+// struct SequencerPage {
+// 	bool patternParams = false;
+//     bool seqPages = false;
 
-	int nspage = 0;
-    int pppage = 0;
-    int sqpage = 0;
-    int srpage = 0;
+// 	int nspage = 0;
+//     int pppage = 0;
+//     int sqpage = 0;
+//     int srpage = 0;
 
-    int nsparam = 0; // note select params
-    int ppparam = 0; // pattern params
-    int sqparam = 0; // seq params
-    int srparam = 0; // step record params
-};
-extern SequencerPage seqPageParams;
+//     int nsparam = 0; // note select params
+//     int ppparam = 0; // pattern params
+//     int sqparam = 0; // seq params
+//     int srparam = 0; // step record params
+// };
+// extern SequencerPage seqPageParams;
 
 struct ColorConfig
 {
@@ -210,6 +215,18 @@ struct ColorConfig
 };
 
 extern ColorConfig colorConfig;
+
+struct ScaleConfig
+{
+	int scaleRoot = 0;
+	int scalePattern = -1;
+	bool lockScale = false; // If Scale is locked you will be unable to play notes out of the scale. 
+	bool group16 = false; // If group16 is active, all notes in scale will be grouped into lower 16 notes. 
+	bool scaleSelectHold;
+	bool showScaleInSeq = false;
+}; 
+
+extern ScaleConfig scaleConfig;
 
 #define NUM_DISP_PARAMS 5
 

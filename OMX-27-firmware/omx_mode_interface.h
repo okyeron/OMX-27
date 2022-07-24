@@ -12,7 +12,9 @@ public:
 
     virtual void onModeActivated() {} // Called whenever entering mode
 
-    virtual void onPotChanged(int potIndex, int potValue) = 0;
+    virtual void onClockTick() {}
+
+    virtual void onPotChanged(int potIndex, int prevValue, int newValue, int analogDelta) = 0;
     virtual void loopUpdate() {}
     virtual void updateLEDs() = 0;
     virtual void onEncoderChanged(Encoder::Update enc) = 0;
@@ -24,7 +26,6 @@ public:
     virtual void onEncoderButtonDownLong() = 0; // Will only get called if shouldBlockEncEdit() returns true
 
     virtual void onKeyUpdate(OMXKeypadEvent e) = 0;
-
     virtual void onKeyHeldUpdate(OMXKeypadEvent e) {};
 
     virtual void onDisplayUpdate() {};

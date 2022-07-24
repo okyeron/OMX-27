@@ -87,6 +87,8 @@ const auto PATTSEL = LIME;
 
 const auto FUNKONE = LTCYAN;
 const auto FUNKTWO = MINT;
+const auto FUNKTHREE = DKBLUE; 
+
 
 const auto SEQ1C = HALFWHITE;
 const auto SEQ2C = DKBLUE;
