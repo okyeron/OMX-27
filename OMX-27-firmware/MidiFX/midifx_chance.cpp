@@ -33,6 +33,12 @@ namespace midifx
 
     void MidiFXChance::noteInput(MidiNoteGroup note)
     {
+        if(note.noteOff)
+        {
+            processNoteOff(note);
+            return;
+        }
+
         // Serial.println("MidiFXChance::noteInput");
         // note.noteNumber += 7;
 
@@ -40,6 +46,7 @@ namespace midifx
 
         if(r <= chancePerc_)
         {
+            processNoteOn(note.noteNumber, note);
             sendNoteOut(note);
         }
     }

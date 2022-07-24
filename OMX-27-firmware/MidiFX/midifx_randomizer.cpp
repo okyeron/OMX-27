@@ -35,6 +35,12 @@ namespace midifx
 
     void MidiFXRandomizer::noteInput(MidiNoteGroup note)
     {
+        if(note.noteOff)
+        {
+            processNoteOff(note);
+            return;
+        }
+
         // Serial.println("MidiFXRandomNote::noteInput");
 
         // Probability that we randomize the note
@@ -44,6 +50,8 @@ namespace midifx
             return;
         }
 
+        int8_t origNote = note.noteNumber;
+
         int8_t octaveMax = octMinus_ + octPlus_ + 1;
         int8_t octave = random(0, octaveMax) - octMinus_;
 
@@ -51,6 +59,9 @@ namespace midifx
         note.noteNumber = constrain(note.noteNumber + (octave * 12), 0, 127);
         note.velocity = getRand(note.velocity, velMinus_, velPlus_);
         note.stepLength = note.stepLength * map(random(lengthPerc_), 0, 100, 1, 16);
+
+
+        processNoteOn(origNote, note);
 
         sendNoteOut(note);
     }

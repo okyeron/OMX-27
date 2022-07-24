@@ -38,25 +38,9 @@ namespace midifx
     {
         if(note.noteOff)
         {
-            // See if note was previously effected
-            // Adjust note number if it was and remove from vector
-            for (int i = 0; i < triggeredNotes.size(); i++)
-            {
-                if (triggeredNotes[i].prevNoteNumber == note.noteNumber)
-                {
-                    note.noteNumber = triggeredNotes[i].noteNumber;
-                    triggeredNotes.erase(triggeredNotes.begin() + i);
-                    Serial.println("Found previous triggered note");
-                    break;
-                }
-            }
-
-            Serial.println("TriggeredNotesSize: " + String(triggeredNotes.size()));
-
-            sendNoteOut(note);
+            processNoteOff(note);
             return;
         }
-
 
         // Probability that we scale the note
         if (chancePerc_ != 100 && (chancePerc_ == 0 || random(100) > chancePerc_))
@@ -110,29 +94,7 @@ namespace midifx
 
         note.noteNumber = newNoteNumber;
 
-        // From a keyboard source, length is 0
-        if(note.stepLength == 0)
-        {
-            note.prevNoteNumber = origNote;
-
-            bool alreadyExists = false;
-            // See if orig note alread exists
-            for (int i = 0; i < triggeredNotes.size(); i++)
-            {
-                if (triggeredNotes[i].prevNoteNumber == origNote)
-                {
-                    triggeredNotes[i] = note;
-                    alreadyExists = true;
-                    Serial.println("Orig note already existed");
-                    break;
-                }
-            }
-            
-            if (!alreadyExists)
-            {
-                triggeredNotes.push_back(note);
-            }
-        }
+        processNoteOn(origNote, note);
 
         sendNoteOut(note);
     }

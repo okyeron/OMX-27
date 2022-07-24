@@ -54,6 +54,8 @@ namespace midifx
         bool encoderSelect_;
         ParamManager params_;
 
+        std::vector<MidiNoteGroup> triggeredNotes; 
+
         void* outFunctionContext_;
         void (*outFunctionPtr_)(void *, MidiNoteGroup);
 
@@ -64,5 +66,9 @@ namespace midifx
         virtual void onEncoderChangedEditParam(Encoder::Update enc) = 0;
 
         virtual void sendNoteOut(MidiNoteGroup note);
+
+        virtual void processNoteOn(uint8_t origNoteNumber, MidiNoteGroup note);
+        virtual void processNoteOff(MidiNoteGroup note);
+
     };
 }

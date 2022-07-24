@@ -171,6 +171,8 @@ MidiNoteGroup OmxUtil::midiNoteOn2(MusicScales* scale, int notenum, int velocity
 {
     int adjnote = notes[notenum] + (midiSettings.octave * 12); // adjust key for octave range
 
+    MidiNoteGroup noteGroup;
+
     if (scale != nullptr)
     {
         if (scaleConfig.group16)
@@ -180,14 +182,16 @@ MidiNoteGroup OmxUtil::midiNoteOn2(MusicScales* scale, int notenum, int velocity
         else
         {
             if (scaleConfig.lockScale && scale->isNoteInScale(adjnote) == false)
-                return; // Only play note if in scale
+            {
+                noteGroup.noteNumber = 255;
+                return noteGroup; // Only play note if in scale
+            }
         }
     }
 
     midiSettings.rrChannel = (midiSettings.rrChannel % midiSettings.midiRRChannelCount) + 1;
     int adjchan = midiSettings.rrChannel;
 
-    MidiNoteGroup noteGroup;
 
     if (adjnote >= 0 && adjnote < 128)
     {

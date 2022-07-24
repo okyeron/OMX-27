@@ -26,6 +26,8 @@ namespace midifx
 
         void onEncoderChangedEditParam(Encoder::Update enc) override;
     private:
+        std::vector<MidiNoteGroup> triggeredNotes; 
+
         uint8_t noteMinus_ = 0;
         uint8_t notePlus_ = 0;
         uint8_t octMinus_ = 0;
