@@ -14,6 +14,8 @@ OmxModeMidiKeyboard::OmxModeMidiKeyboard()
     params.addPage(4);
     params.addPage(4);
     params.addPage(4);
+
+    subModeMidiFx.setNoteOutputFunc(&OmxModeMidiKeyboard::onNotePostFXForwarder, this);
 }
 
 void OmxModeMidiKeyboard::InitSetup()
@@ -56,6 +58,12 @@ void OmxModeMidiKeyboard::onModeActivated()
 
 void OmxModeMidiKeyboard::onPotChanged(int potIndex, int prevValue, int newValue, int analogDelta)
 {
+     if (isSubmodeEnabled() && activeSubmode->usesPots())
+    {
+        activeSubmode->onPotChanged(potIndex, prevValue, newValue, analogDelta);
+        return;
+    }
+
     if (midiMacroConfig.midiMacro)
     {
         omxUtil.sendPots(potIndex, midiMacroConfig.midiMacroChan);
@@ -66,6 +74,14 @@ void OmxModeMidiKeyboard::onPotChanged(int potIndex, int prevValue, int newValue
     }
 
     omxDisp.setDirty();
+}
+
+void OmxModeMidiKeyboard::loopUpdate()
+{
+    if (isSubmodeEnabled())
+    {
+        activeSubmode->loopUpdate();
+    }
 }
 
 
@@ -88,6 +104,12 @@ void OmxModeMidiKeyboard::onEncoderChangedSelectParam(Encoder::Update enc)
 
 void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
 {
+    if (isSubmodeEnabled())
+    {
+        activeSubmode->onEncoderChanged(enc);
+        return;
+    }
+
     if (encoderSelect)
     {
         onEncoderChangedSelectParam(enc);
@@ -261,6 +283,12 @@ void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
 
 void OmxModeMidiKeyboard::onEncoderButtonDown()
 {
+    if (isSubmodeEnabled())
+    {
+        activeSubmode->onEncoderButtonDown();
+        return;
+    }
+
     encoderSelect = !encoderSelect;
     omxDisp.isDirty();
 }
@@ -277,8 +305,24 @@ void OmxModeMidiKeyboard::onEncoderButtonDownLong()
 {
 }
 
+bool OmxModeMidiKeyboard::shouldBlockEncEdit()
+{
+    if (isSubmodeEnabled())
+    {
+        return activeSubmode->shouldBlockEncEdit();
+    }
+
+    return false;
+}
+
 void OmxModeMidiKeyboard::onKeyUpdate(OMXKeypadEvent e)
 {
+    if (isSubmodeEnabled())
+    {
+        activeSubmode->onKeyUpdate(e);
+        return;
+    }
+
     int thisKey = e.key();
 
     // // Aux key debugging
@@ -353,6 +397,11 @@ void OmxModeMidiKeyboard::onKeyUpdate(OMXKeypadEvent e)
                     // setParam(constrain((midiPageParams.miparam + chng) % midiPageParams.numParams, 0, midiPageParams.numParams - 1));
                     keyConsumed = true;
                 }
+                else if (e.down() && thisKey == 10)
+                {
+                    enableSubmode(&subModeMidiFx);
+                    keyConsumed = true;
+                }
                 else if (thisKey == 26)
 				{
 					keyConsumed = true;
@@ -361,12 +410,14 @@ void OmxModeMidiKeyboard::onKeyUpdate(OMXKeypadEvent e)
 
             if(!keyConsumed)
             {
-                omxUtil.midiNoteOn(musicScale, thisKey, midiSettings.defaultVelocity, sysSettings.midiChannel);
+                doNoteOn(thisKey);
+                // omxUtil.midiNoteOn(musicScale, thisKey, midiSettings.defaultVelocity, sysSettings.midiChannel);
             }
         }
         else if (!e.down() && thisKey != 0)
         {
-            omxUtil.midiNoteOff(thisKey, sysSettings.midiChannel);
+            doNoteOff(thisKey);
+            // omxUtil.midiNoteOff(thisKey, sysSettings.midiChannel);
         }
     }
     //				Serial.println(e.clicks());
@@ -583,6 +634,12 @@ void OmxModeMidiKeyboard::updateLEDs()
 
 void OmxModeMidiKeyboard::onDisplayUpdate()
 {
+    if (isSubmodeEnabled())
+    {
+        activeSubmode->onDisplayUpdate();
+        return;
+    }
+
     omxLeds.drawMidiLeds(musicScale); // SHOW LEDS
 
     if (omxDisp.isDirty())
@@ -751,4 +808,100 @@ void OmxModeMidiKeyboard::inMidiNoteOff(byte channel, byte note, byte velocity)
 void OmxModeMidiKeyboard::SetScale(MusicScales *scale)
 {
     this->musicScale = scale;
+}
+
+void OmxModeMidiKeyboard::enableSubmode(SubmodeInterface *subMode)
+{
+    activeSubmode = subMode;
+    activeSubmode->setEnabled(true);
+    omxDisp.setDirty();
+}
+
+void OmxModeMidiKeyboard::disableSubmode()
+{
+    activeSubmode = nullptr;
+    omxDisp.setDirty();
+}
+
+bool OmxModeMidiKeyboard::isSubmodeEnabled()
+{
+    if(activeSubmode == nullptr) return false;
+
+    if(activeSubmode->isEnabled() == false){
+        disableSubmode();
+        return false;
+    }
+
+    return true;
+}
+
+void OmxModeMidiKeyboard::doNoteOn(uint8_t keyIndex)
+{
+    MidiNoteGroup noteGroup = omxUtil.midiNoteOn2(musicScale, keyIndex, midiSettings.defaultVelocity, sysSettings.midiChannel);
+
+    if(noteGroup.noteNumber == 255) return;
+
+    Serial.println("doNoteOn: " + String(noteGroup.noteNumber));
+
+    noteGroup.prevNoteNumber = noteGroup.noteNumber;
+
+    subModeMidiFx.noteInput(noteGroup);
+}
+void OmxModeMidiKeyboard::doNoteOff(uint8_t keyIndex)
+{
+    MidiNoteGroup noteGroup = omxUtil.midiNoteOff2(keyIndex, sysSettings.midiChannel);
+
+    if(noteGroup.noteNumber == 255) return;
+
+    Serial.println("doNoteOff: " + String(noteGroup.noteNumber));
+
+    noteGroup.prevNoteNumber = noteGroup.noteNumber;
+    subModeMidiFx.noteInput(noteGroup);
+}
+
+// // Called by a euclid sequencer when it triggers a note
+// void OmxModeMidiKeyboard::onNoteTriggered(uint8_t euclidIndex, MidiNoteGroup note)
+// {
+//     // Serial.println("OmxModeEuclidean::onNoteTriggered " + String(euclidIndex) + " note: " + String(note.noteNumber));
+    
+//     subModeMidiFx.noteInput(note);
+
+//     omxDisp.setDirty();
+// }
+
+// Called by the midiFX group when a note exits it's FX Pedalboard
+void OmxModeMidiKeyboard::onNotePostFX(MidiNoteGroup note)
+{
+    if(note.noteOff)
+    {
+        Serial.println("OmxModeMidiKeyboard::onNotePostFX noteOff: " + String(note.noteNumber));
+
+        if (note.sendMidi)
+        {
+            MM::sendNoteOff(note.noteNumber, note.velocity, note.channel);
+        }
+        if (note.sendCV)
+        {
+            omxUtil.cvNoteOff();
+        }
+    }
+    else
+    {
+        Serial.println("OmxModeMidiKeyboard::onNotePostFX noteOn: " + String(note.noteNumber));
+
+        if (note.sendMidi)
+        {
+            MM::sendNoteOn(note.noteNumber, note.velocity, note.channel);
+        }
+        if (note.sendCV)
+        {
+            omxUtil.cvNoteOn(note.noteNumber);
+        }
+    }
+
+    // uint32_t noteOnMicros = note.noteonMicros; // TODO Might need to be set to current micros
+    // pendingNoteOns.insert(note.noteNumber, note.velocity, note.channel, noteOnMicros, note.sendCV);
+
+    // uint32_t noteOffMicros = noteOnMicros + (note.stepLength * clockConfig.step_micros);
+    // pendingNoteOffs.insert(note.noteNumber, note.channel, noteOffMicros, note.sendCV);
 }

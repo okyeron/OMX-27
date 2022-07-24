@@ -37,6 +37,8 @@ void SubModeMidiFxGroup::onEnabled()
     encoderSelect_ = true;
     omxLeds.setDirty();
     omxDisp.setDirty();
+
+    auxReleased_ = !midiSettings.keyState[0]; 
 }
 
 void SubModeMidiFxGroup::onDisabled()
@@ -152,7 +154,7 @@ void SubModeMidiFxGroup::onKeyUpdate(OMXKeypadEvent e)
                 midiFXParamView_ = false;
             }
             // Exit submode
-            else 
+            else if(auxReleased_)
             {
                 setEnabled(false);
             }
@@ -173,6 +175,12 @@ void SubModeMidiFxGroup::onKeyUpdate(OMXKeypadEvent e)
                 // selectMidiFX(thisKey - 19);
             }
         }
+    }
+
+    if(!e.down() && thisKey == 0)
+    {
+        // Used to prevent quickly exiting if entered through aux shortcut. 
+        auxReleased_ = true;
     }
 
     omxDisp.setDirty();

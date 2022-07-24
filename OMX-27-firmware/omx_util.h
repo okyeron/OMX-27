@@ -26,6 +26,9 @@ public:
     void midiNoteOn(int notenum, int velocity, int channel);
     void midiNoteOn(MusicScales* scale, int notenum, int velocity, int channel);
     void midiNoteOff(int notenum, int channel);
+
+    MidiNoteGroup midiNoteOn2(MusicScales* scale, int notenum, int velocity, int channel);
+    MidiNoteGroup midiNoteOff2(int notenum, int channel);
 private:
     // int potbank = 0;
     // int analogValues[5] = {0,0,0,0,0};		// default values

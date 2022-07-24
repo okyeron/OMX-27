@@ -239,13 +239,16 @@ extern ScaleConfig scaleConfig;
 
 struct MidiNoteGroup
 {
-	uint8_t channel;
-	uint8_t noteNumber;
-	uint8_t velocity;
-	float stepLength; // fraction or multiplier of clockConfig.step_micros, 1 == 1 step
-	bool sendMidi;
-	bool sendCV;
-	uint32_t noteonMicros;
+	uint8_t channel = 1;
+	uint8_t noteNumber = 0;
+	// uint8_t keyIndex = 0; // use if t
+	uint8_t prevNoteNumber = 0; // note number before being modified by midiFX
+	uint8_t velocity = 100;
+	float stepLength = 0; // fraction or multiplier of clockConfig.step_micros, 1 == 1 step
+	bool sendMidi = true;
+	bool sendCV = true;
+	uint32_t noteonMicros = 0;
+	bool noteOff = false; // Set true if note off, corresponding note on should have stepLength of 0
 };
 
 #define NUM_DISP_PARAMS 5

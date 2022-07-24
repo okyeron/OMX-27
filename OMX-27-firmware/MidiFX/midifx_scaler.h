@@ -26,6 +26,8 @@ namespace midifx
         void onEncoderChangedEditParam(Encoder::Update enc) override;
 
     private:
+        std::vector<MidiNoteGroup> triggeredNotes; 
+
         uint8_t chancePerc_ = 100;
 
         int8_t rootNote = 0;
@@ -34,5 +36,7 @@ namespace midifx
         int8_t scaleRemapper[12];
 
         void calculateRemap();
+
+        // MidiNoteGroup findTriggeredNote(uint8_t noteNumber);
     };
 }

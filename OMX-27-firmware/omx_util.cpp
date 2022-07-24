@@ -167,5 +167,108 @@ void OmxUtil::midiNoteOff(int notenum, int channel)
     omxDisp.setDirty();
 }
 
+MidiNoteGroup OmxUtil::midiNoteOn2(MusicScales* scale, int notenum, int velocity, int channel)
+{
+    int adjnote = notes[notenum] + (midiSettings.octave * 12); // adjust key for octave range
+
+    if (scale != nullptr)
+    {
+        if (scaleConfig.group16)
+        {
+            adjnote = scale->getGroup16Note(notenum, midiSettings.octave);
+        }
+        else
+        {
+            if (scaleConfig.lockScale && scale->isNoteInScale(adjnote) == false)
+                return; // Only play note if in scale
+        }
+    }
+
+    midiSettings.rrChannel = (midiSettings.rrChannel % midiSettings.midiRRChannelCount) + 1;
+    int adjchan = midiSettings.rrChannel;
+
+    MidiNoteGroup noteGroup;
+
+    if (adjnote >= 0 && adjnote < 128)
+    {
+        midiSettings.midiLastNote = adjnote;
+
+        // keep track of adjusted note when pressed so that when key is released we send
+        // the correct note off message
+        midiSettings.midiKeyState[notenum] = adjnote;
+
+        // RoundRobin Setting?
+        if (midiSettings.midiRoundRobin)
+        {
+            adjchan = midiSettings.rrChannel + midiSettings.midiRRChannelOffset;
+        }
+        else
+        {
+            adjchan = channel;
+        }
+        midiSettings.midiChannelState[notenum] = adjchan;
+
+        noteGroup.noteNumber = adjnote;
+        noteGroup.velocity = velocity;
+        noteGroup.channel = adjchan;
+        noteGroup.stepLength = 0;
+        noteGroup.sendMidi = true;
+        noteGroup.sendCV = true;
+        noteGroup.noteonMicros = micros();
+
+        // MM::sendNoteOn(adjnote, velocity, adjchan);
+        // // CV
+        // cvNoteOn(adjnote);
+    }
+    else
+    {
+        noteGroup.noteNumber = 255;
+        return noteGroup; // no note sent, don't light LEDs
+    }
+
+    strip.setPixelColor(notenum, MIDINOTEON); //  Set pixel's color (in RAM)
+    omxLeds.setDirty();
+    omxDisp.setDirty();
+
+    return noteGroup;
+}
+
+MidiNoteGroup OmxUtil::midiNoteOff2(int notenum, int channel)
+{
+    // we use the key state captured at the time we pressed the key to send the correct note off message
+    int adjnote = midiSettings.midiKeyState[notenum];
+    int adjchan = midiSettings.midiChannelState[notenum];
+
+    MidiNoteGroup noteGroup;
+    noteGroup.noteOff = true;
+
+    if (adjnote >= 0 && adjnote < 128)
+    {
+        MM::sendNoteOff(adjnote, 0, adjchan);
+        // CV off
+        cvNoteOff();
+        midiSettings.midiKeyState[notenum] = -1;
+
+        noteGroup.noteNumber = adjnote;
+        noteGroup.velocity = 0;
+        noteGroup.channel = adjchan;
+        noteGroup.stepLength = 0;
+        noteGroup.sendMidi = true;
+        noteGroup.sendCV = true;
+        noteGroup.noteonMicros = micros();
+    }
+    else
+    {
+        noteGroup.noteNumber = 255;
+        return noteGroup;
+    }
+
+    strip.setPixelColor(notenum, LEDOFF);
+    omxLeds.setDirty();
+    omxDisp.setDirty();
+
+    return noteGroup;
+}
+
 
 OmxUtil omxUtil;

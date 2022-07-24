@@ -32,6 +32,8 @@ private:
     bool midiFXParamView_ = false; // If true, parameters adjust the selected midiFX slot. 
     uint8_t selectedMidiFX_ = 0; // Index of selected midiFX slot
 
+    bool auxReleased_ = false; // set to aux state onEnable, must be true to exit mode with aux. 
+
     // typedef midifx::MidiFXInterface* MidiFXptr;
 
     std::vector<midifx::MidiFXInterface*> midifx_;

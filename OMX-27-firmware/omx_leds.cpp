@@ -101,6 +101,9 @@ void OmxLeds::drawMidiLeds(MusicScales* scale) {
 		strip.setPixelColor(2, color2);
 		strip.setPixelColor(11, color3);
 		strip.setPixelColor(12, color4);
+
+		strip.setPixelColor(10, color3); // MidiFX key
+
 	// Macros
 	} else if (midiMacroConfig.m8AUX){
 		auto color5 = blinkState ? ORANGE : LEDOFF;
