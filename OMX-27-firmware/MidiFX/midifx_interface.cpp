@@ -3,6 +3,12 @@
 
 namespace midifx
 {
+    MidiFXInterface::~MidiFXInterface()
+    {
+        std::vector<MidiNoteGroup>().swap(triggeredNotes);
+        Serial.println("Deleted vector");
+    }
+
     void MidiFXInterface::setEnabled(bool newEnabled)
     {
         enabled_ = newEnabled;
@@ -56,12 +62,12 @@ namespace midifx
             {
                 note.noteNumber = triggeredNotes[i].noteNumber;
                 triggeredNotes.erase(triggeredNotes.begin() + i);
-                Serial.println("Found previous triggered note");
+                // Serial.println("Found previous triggered note");
                 break;
             }
         }
 
-        Serial.println("TriggeredNotesSize: " + String(triggeredNotes.size()));
+        // Serial.println("TriggeredNotesSize: " + String(triggeredNotes.size()));
 
         sendNoteOut(note);
     }
@@ -81,7 +87,7 @@ namespace midifx
                 {
                     triggeredNotes[i] = note;
                     alreadyExists = true;
-                    Serial.println("Orig note already existed");
+                    // Serial.println("Orig note already existed");
                     break;
                 }
             }

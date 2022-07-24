@@ -35,11 +35,11 @@
 #include "omx_leds.h"
 #include "music_scales.h"
 
-// #define RAM_MONITOR 0
+#define RAM_MONITOR 1
 
-// #if RAM_MONITOR
-// #include "RamMonitor.h"
-// #endif
+#if RAM_MONITOR
+#include "RamMonitor.h"
+#endif
 
 OmxModeMidiKeyboard omxModeMidi;
 OmxModeSequencer omxModeSeq;
@@ -81,46 +81,46 @@ OMXKeypad keypad(longPressInterval, clickWindow, makeKeymap(keys), rowPins, colP
 Storage *storage;
 SysEx *sysEx;
 
-// #if RAM_MONITOR
-// RamMonitor ram;
-// uint32_t reporttime;
+#if RAM_MONITOR
+RamMonitor ram;
+uint32_t reporttime;
 
-// void report_ram_stat(const char *aname, uint32_t avalue)
-// {
-// 	Serial.print(aname);
-// 	Serial.print(": ");
-// 	Serial.print((avalue + 512) / 1024);
-// 	Serial.print(" Kb (");
-// 	Serial.print((((float)avalue) / ram.total()) * 100, 1);
-// 	Serial.println("%)");
-// };
+void report_ram_stat(const char *aname, uint32_t avalue)
+{
+	Serial.print(aname);
+	Serial.print(": ");
+	Serial.print((avalue + 512) / 1024);
+	Serial.print(" Kb (");
+	Serial.print((((float)avalue) / ram.total()) * 100, 1);
+	Serial.println("%)");
+};
 
-// void report_ram()
-// {
-// 	bool lowmem;
-// 	bool crash;
+void report_ram()
+{
+	bool lowmem;
+	bool crash;
 
-// 	Serial.println("==== memory report ====");
+	Serial.println("==== memory report ====");
 
-// 	report_ram_stat("free", ram.adj_free());
-// 	report_ram_stat("stack", ram.stack_total());
-// 	report_ram_stat("heap", ram.heap_total());
+	report_ram_stat("free", ram.adj_free());
+	report_ram_stat("stack", ram.stack_total());
+	report_ram_stat("heap", ram.heap_total());
 
-// 	lowmem = ram.warning_lowmem();
-// 	crash = ram.warning_crash();
-// 	if (lowmem || crash)
-// 	{
-// 		Serial.println();
+	lowmem = ram.warning_lowmem();
+	crash = ram.warning_crash();
+	if (lowmem || crash)
+	{
+		Serial.println();
 
-// 		if (crash)
-// 			Serial.println("**warning: stack and heap crash possible");
-// 		else if (lowmem)
-// 			Serial.println("**warning: unallocated memory running low");
-// 	};
+		if (crash)
+			Serial.println("**warning: stack and heap crash possible");
+		else if (lowmem)
+			Serial.println("**warning: unallocated memory running low");
+	};
 
-// 	Serial.println();
-// };
-// #endif
+	Serial.println();
+};
+#endif
 
 // ####### SETUP #######
 
@@ -131,9 +131,9 @@ void setup()
 	storage = Storage::initStorage();
 	sysEx = new SysEx(storage, &sysSettings);
 
-// #if RAM_MONITOR
-// 	ram.initialize();
-// #endif
+#if RAM_MONITOR
+	ram.initialize();
+#endif
 
 	// incoming usbMIDI callbacks
 	usbMIDI.setHandleNoteOff(OnNoteOff);
@@ -229,9 +229,9 @@ void setup()
 
 	omxScreensaver.InitSetup();
 
-// #if RAM_MONITOR
-// 	reporttime = millis();
-// #endif
+#if RAM_MONITOR
+	reporttime = millis();
+#endif
 }
 
 // ####### END SETUP #######
@@ -485,17 +485,17 @@ void loop()
 		// ignore incoming messages
 	}
 
-// #if RAM_MONITOR
-// 	uint32_t time = millis();
+#if RAM_MONITOR
+	uint32_t time = millis();
 
-// 	if ((time - reporttime) > 2000)
-// 	{
-// 		reporttime = time;
-// 		report_ram();
-// 	};
+	if ((time - reporttime) > 2000)
+	{
+		reporttime = time;
+		report_ram();
+	};
 
-// 	ram.run();
-// #endif
+	ram.run();
+#endif
 
 } // ######## END MAIN LOOP ########
 

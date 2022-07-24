@@ -841,7 +841,7 @@ void OmxModeMidiKeyboard::doNoteOn(uint8_t keyIndex)
 
     if(noteGroup.noteNumber == 255) return;
 
-    Serial.println("doNoteOn: " + String(noteGroup.noteNumber));
+    // Serial.println("doNoteOn: " + String(noteGroup.noteNumber));
 
     noteGroup.prevNoteNumber = noteGroup.noteNumber;
 
@@ -853,7 +853,7 @@ void OmxModeMidiKeyboard::doNoteOff(uint8_t keyIndex)
 
     if(noteGroup.noteNumber == 255) return;
 
-    Serial.println("doNoteOff: " + String(noteGroup.noteNumber));
+    // Serial.println("doNoteOff: " + String(noteGroup.noteNumber));
 
     noteGroup.prevNoteNumber = noteGroup.noteNumber;
     subModeMidiFx.noteInput(noteGroup);
@@ -874,7 +874,7 @@ void OmxModeMidiKeyboard::onNotePostFX(MidiNoteGroup note)
 {
     if(note.noteOff)
     {
-        Serial.println("OmxModeMidiKeyboard::onNotePostFX noteOff: " + String(note.noteNumber));
+        // Serial.println("OmxModeMidiKeyboard::onNotePostFX noteOff: " + String(note.noteNumber));
 
         if (note.sendMidi)
         {
@@ -887,7 +887,7 @@ void OmxModeMidiKeyboard::onNotePostFX(MidiNoteGroup note)
     }
     else
     {
-        Serial.println("OmxModeMidiKeyboard::onNotePostFX noteOn: " + String(note.noteNumber));
+        // Serial.println("OmxModeMidiKeyboard::onNotePostFX noteOn: " + String(note.noteNumber));
 
         if (note.sendMidi)
         {

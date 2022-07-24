@@ -141,18 +141,23 @@ namespace midifx
             omxDisp.legends[1] = "NT+";
             omxDisp.legends[2] = "OCT-";
             omxDisp.legends[3] = "OCT+";
-            omxDisp.legendVals[0] = -127;
-            omxDisp.legendVals[1] = -127;
-            omxDisp.legendVals[2] = -127;
-            omxDisp.legendVals[3] = -127;
-            String msg1 = "-"+String(noteMinus_);
-            String msg2 = "+"+String(notePlus_);
-            String msg3 = "-"+String(octMinus_);
-            String msg4 = "+"+String(octPlus_);
-            omxDisp.legendText[0] = msg1.c_str();
-            omxDisp.legendText[1] = msg2.c_str();
-            omxDisp.legendText[2] = msg3.c_str();
-            omxDisp.legendText[3] = msg4.c_str();
+            omxDisp.legendVals[0] = noteMinus_;
+            omxDisp.legendVals[1] = notePlus_;
+            omxDisp.legendVals[2] = octMinus_;
+            omxDisp.legendVals[3] = octPlus_;
+
+            // omxDisp.legendVals[0] = -127;
+            // omxDisp.legendVals[1] = -127;
+            // omxDisp.legendVals[2] = -127;
+            // omxDisp.legendVals[3] = -127;
+            // String msg1 = "-"+String(noteMinus_);
+            // String msg2 = "+"+String(notePlus_);
+            // String msg3 = "-"+String(octMinus_);
+            // String msg4 = "+"+String(octPlus_);
+            // omxDisp.legendText[0] = msg1.c_str();
+            // omxDisp.legendText[1] = msg2.c_str();
+            // omxDisp.legendText[2] = msg3.c_str();
+            // omxDisp.legendText[3] = msg4.c_str();
         }
         break;
         case RZPAGE_2:
@@ -161,18 +166,23 @@ namespace midifx
             omxDisp.legends[1] = "VEL+";
             omxDisp.legends[2] = "LEN%";
             omxDisp.legends[3] = "CHC%";
-            omxDisp.legendVals[0] = -127;
-            omxDisp.legendVals[1] = -127;
-            omxDisp.legendVals[2] = -127;
-            omxDisp.legendVals[3] = -127;
-            String msg1 = "-" + String(velMinus_);
-            String msg2 = "+" + String(velPlus_);
-            String msg3 = "+" + String(lengthPerc_) + "%";
-            String msg4 = String(chancePerc_) + "%";
-            omxDisp.legendText[0] = msg1.c_str();
-            omxDisp.legendText[1] = msg2.c_str();
-            omxDisp.legendText[2] = msg3.c_str();
-            omxDisp.legendText[3] = msg4.c_str();
+            omxDisp.legendVals[0] = velMinus_;
+            omxDisp.legendVals[1] = velPlus_;
+            omxDisp.legendVals[2] = lengthPerc_;
+            omxDisp.legendVals[3] = chancePerc_;
+
+            // omxDisp.legendVals[0] = -127;
+            // omxDisp.legendVals[1] = -127;
+            // omxDisp.legendVals[2] = -127;
+            // omxDisp.legendVals[3] = -127;
+            // String msg1 = "-" + String(velMinus_);
+            // String msg2 = "+" + String(velPlus_);
+            // String msg3 = "+" + String(lengthPerc_) + "%";
+            // String msg4 = String(chancePerc_) + "%";
+            // omxDisp.legendText[0] = msg1.c_str();
+            // omxDisp.legendText[1] = msg2.c_str();
+            // omxDisp.legendText[2] = msg3.c_str();
+            // omxDisp.legendText[3] = msg4.c_str();
         }
         break;
         default:

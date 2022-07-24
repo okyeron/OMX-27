@@ -16,7 +16,7 @@ namespace midifx
     {
     public:
         MidiFXInterface() {}
-        virtual ~MidiFXInterface() {}
+        virtual ~MidiFXInterface();
 
         virtual int getFXType() = 0;
 
