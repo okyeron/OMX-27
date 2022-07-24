@@ -485,17 +485,17 @@ void loop()
 		// ignore incoming messages
 	}
 
-#if RAM_MONITOR
-	uint32_t time = millis();
+// #if RAM_MONITOR
+// 	uint32_t time = millis();
 
-	if ((time - reporttime) > 2000)
-	{
-		reporttime = time;
-		report_ram();
-	};
+// 	if ((time - reporttime) > 2000)
+// 	{
+// 		reporttime = time;
+// 		report_ram();
+// 	};
 
-	ram.run();
-#endif
+// 	ram.run();
+// #endif
 
 } // ######## END MAIN LOOP ########
 

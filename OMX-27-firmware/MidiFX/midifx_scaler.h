@@ -26,7 +26,7 @@ namespace midifx
         void onEncoderChangedEditParam(Encoder::Update enc) override;
 
     private:
-        std::vector<MidiNoteGroup> triggeredNotes; 
+        // std::vector<MidiNoteGroup> triggeredNotes; 
 
         uint8_t chancePerc_ = 100;
 

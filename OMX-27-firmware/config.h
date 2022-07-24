@@ -248,6 +248,7 @@ struct MidiNoteGroup
 	bool sendMidi = true;
 	bool sendCV = true;
 	uint32_t noteonMicros = 0;
+	bool unknownLength = false;
 	bool noteOff = false; // Set true if note off, corresponding note on should have stepLength of 0
 };
 

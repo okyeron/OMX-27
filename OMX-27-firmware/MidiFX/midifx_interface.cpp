@@ -5,8 +5,8 @@ namespace midifx
 {
     MidiFXInterface::~MidiFXInterface()
     {
-        std::vector<MidiNoteGroup>().swap(triggeredNotes);
-        Serial.println("Deleted vector");
+        // std::vector<MidiNoteGroup>().swap(triggeredNotes);
+        // Serial.println("Deleted vector");
     }
 
     void MidiFXInterface::setEnabled(bool newEnabled)
@@ -54,18 +54,18 @@ namespace midifx
 
     void MidiFXInterface::processNoteOff(MidiNoteGroup note)
     {
-        // See if note was previously effected
-        // Adjust note number if it was and remove from vector
-        for (size_t i = 0; i < triggeredNotes.size(); i++)
-        {
-            if (triggeredNotes[i].prevNoteNumber == note.noteNumber)
-            {
-                note.noteNumber = triggeredNotes[i].noteNumber;
-                triggeredNotes.erase(triggeredNotes.begin() + i);
-                // Serial.println("Found previous triggered note");
-                break;
-            }
-        }
+        // // See if note was previously effected
+        // // Adjust note number if it was and remove from vector
+        // for (size_t i = 0; i < triggeredNotes.size(); i++)
+        // {
+        //     if (triggeredNotes[i].prevNoteNumber == note.noteNumber)
+        //     {
+        //         note.noteNumber = triggeredNotes[i].noteNumber;
+        //         triggeredNotes.erase(triggeredNotes.begin() + i);
+        //         // Serial.println("Found previous triggered note");
+        //         break;
+        //     }
+        // }
 
         // Serial.println("TriggeredNotesSize: " + String(triggeredNotes.size()));
 
@@ -75,28 +75,28 @@ namespace midifx
     void MidiFXInterface::processNoteOn(uint8_t origNoteNumber, MidiNoteGroup note)
     {
         // From a keyboard source, length is 0
-        if(note.stepLength == 0)
-        {
-            note.prevNoteNumber = origNoteNumber;
+        // if(note.stepLength == 0)
+        // {
+        //     note.prevNoteNumber = origNoteNumber;
 
-            bool alreadyExists = false;
-            // See if orig note alread exists
-            for (size_t i = 0; i < triggeredNotes.size(); i++)
-            {
-                if (triggeredNotes[i].prevNoteNumber == origNoteNumber)
-                {
-                    triggeredNotes[i] = note;
-                    alreadyExists = true;
-                    // Serial.println("Orig note already existed");
-                    break;
-                }
-            }
+        //     bool alreadyExists = false;
+        //     // See if orig note alread exists
+        //     for (size_t i = 0; i < triggeredNotes.size(); i++)
+        //     {
+        //         if (triggeredNotes[i].prevNoteNumber == origNoteNumber)
+        //         {
+        //             triggeredNotes[i] = note;
+        //             alreadyExists = true;
+        //             // Serial.println("Orig note already existed");
+        //             break;
+        //         }
+        //     }
             
-            if (!alreadyExists)
-            {
-                triggeredNotes.push_back(note);
-            }
-        }
+        //     if (!alreadyExists)
+        //     {
+        //         triggeredNotes.push_back(note);
+        //     }
+        // }
     }
 
     void MidiFXInterface::setNoteOutput(void (*fptr)(void *, MidiNoteGroup), void *context)

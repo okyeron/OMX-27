@@ -29,6 +29,11 @@ SubModeMidiFxGroup::SubModeMidiFxGroup()
 
     doNoteOutput_ = &SubModeMidiFxGroup::noteFuncForwarder;
     doNoteOutputContext_ = this;
+
+    for (uint8_t i = 0; i < 32; i++)
+    {
+        onNoteGroups[i].prevNoteNumber = 255;
+    }
 }
 
 void SubModeMidiFxGroup::onEnabled()
@@ -386,11 +391,76 @@ void SubModeMidiFxGroup::setNoteOutputFunc(void (*fptr)(void *, MidiNoteGroup), 
 
 void SubModeMidiFxGroup::noteOutputFunc(MidiNoteGroup note)
 {
+    if(note.noteOff && note.unknownLength)
+    {
+        Serial.println("Note off");
+        // See if note was previously effected
+        // Adjust note number if it was and remove from vector
+        for (uint8_t i = 0; i < 32; i++)
+        {
+            if (onNoteGroups[i].prevNoteNumber != 255)
+            {
+                if(onNoteGroups[i].channel == note.channel && onNoteGroups[i].prevNoteNumber == note.prevNoteNumber)
+                {
+                    Serial.println("Note Found: " + String(note.prevNoteNumber));
+
+                    // Send note off with adjusted note number
+
+                    if (sendNoteOutFuncPtrContext_ != nullptr)
+                    {
+                        note.noteNumber = onNoteGroups[i].noteNumber;
+                        // MidiNoteGroup noteOff = onNoteGroups[i];
+                        // noteOff.noteOff = true;
+                        // noteOff.velocity = 0;
+                        Serial.println("Note off sent: " + String(note.noteNumber));
+
+                        sendNoteOutFuncPtr_(sendNoteOutFuncPtrContext_, note);
+                    }
+                    onNoteGroups[i].prevNoteNumber = 255; // mark empty
+                }
+            }
+        }
+    }
+    else if(!note.noteOff && note.unknownLength)
+    {
+        Serial.println("Note on");
+
+        // Keep track of note, up to 32 notes tracked at once
+        for (uint8_t i = 0; i < 32; i++)
+        {
+            if (onNoteGroups[i].prevNoteNumber == 255)
+            {
+                Serial.println("Found empty slot: " + String(note.prevNoteNumber));
+
+                // onNoteGroups[i] = note;
+                onNoteGroups[i].channel = note.channel;
+                onNoteGroups[i].prevNoteNumber = note.prevNoteNumber;
+                onNoteGroups[i].noteNumber = note.noteNumber;
+
+
+                // Send the note out of FX group
+                if (sendNoteOutFuncPtrContext_ != nullptr) {
+                    Serial.println("Note on sent: " + String(note.noteNumber));
+                    sendNoteOutFuncPtr_(sendNoteOutFuncPtrContext_, note);
+                }
+
+                return;
+            }
+        }
+    }
+    else if(!note.unknownLength)
+    {
+        // Send the note out of FX group
+        if (sendNoteOutFuncPtrContext_ == nullptr)
+            return;
+        sendNoteOutFuncPtr_(sendNoteOutFuncPtrContext_, note);
+    }
+
     // Serial.println("SubModeMidiFxGroup::noteOutputFunc testNoteFunc: " + String(note.noteNumber) + " selectedMidiFX_: " + String(selectedMidiFX_));
 
-    // Send the note out of FX group
-    if(sendNoteOutFuncPtrContext_ == nullptr) return;
-    sendNoteOutFuncPtr_(sendNoteOutFuncPtrContext_, note);
+    // // Send the note out of FX group
+    // if(sendNoteOutFuncPtrContext_ == nullptr) return;
+    // sendNoteOutFuncPtr_(sendNoteOutFuncPtrContext_, note);
 }
 
 

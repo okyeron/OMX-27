@@ -47,6 +47,8 @@ private:
 
     uint8_t midifxTypes_[4] = {0,0,0,0};
 
+    MidiNoteGroup onNoteGroups[32];
+
     midifx::MidiFXInterface *getMidiFX(uint8_t index);
     void setMidiFX(uint8_t index, midifx::MidiFXInterface* midifx);
     void setupPageLegends();
