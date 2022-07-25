@@ -22,6 +22,7 @@ public:
     void noteInput(MidiNoteGroup note);
     void setNoteOutputFunc(void (*fptr)(void *, MidiNoteGroup), void *context);
 
+    void onPendingNoteOff(int note, int channel);
 protected:
 // Interface methods
     void onEnabled() override;

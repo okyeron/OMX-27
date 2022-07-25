@@ -212,7 +212,7 @@ void setup()
 		saveToStorage();
 	}
 
-	changeOmxMode(MODE_MIDI);
+	changeOmxMode(MODE_EUCLID);
 
 	// Init Display
 	omxDisp.setup();

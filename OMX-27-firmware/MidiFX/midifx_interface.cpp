@@ -114,15 +114,20 @@ namespace midifx
 
     void MidiFXInterface::sendNoteOff(MidiNoteGroupCache noteCache)
     {
+        Serial.println("Note off from cache: " + String(noteCache.noteNumber));
+
         sendNoteOff(noteCache.toMidiNoteGroup());
     }
 
     void MidiFXInterface::sendNoteOff(MidiNoteGroup note)
     {
+        Serial.println("Note off: " + String(note.noteNumber));
+
         note.velocity = 0;
         note.noteOff = true;
 
         if(outFunctionContext_ != nullptr){
+            Serial.println("Note off sent");
             outFunctionPtr_(outFunctionContext_, note);
         }
     }
