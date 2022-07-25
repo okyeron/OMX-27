@@ -120,6 +120,15 @@ namespace euclidean
         void setNoteNumber(uint8_t newNoteNumber);
         uint8_t getNoteNumber();
 
+        void setMidiChannel(uint8_t newMidiChannel);
+        uint8_t getMidiChannel();
+
+        void setVelocity(uint8_t newVelocity);
+        uint8_t getVelocity();
+
+        void setSwing(uint8_t newSwing);
+        uint8_t getSwing();
+
         void setNoteLength(uint8_t newNoteLength);
         uint8_t getNoteLength();
 
@@ -165,6 +174,10 @@ namespace euclidean
         uint8_t steps_ = 0;
 
         uint8_t noteNumber_ = 16;
+        uint8_t midiChannel_ = 1;
+        uint8_t velocity_ = 100;
+        uint8_t swing_ = 0;
+
 
         uint8_t noteLength_ = 1;
 

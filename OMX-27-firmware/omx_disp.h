@@ -50,7 +50,7 @@ public:
 
     void UpdateMessageTextTimer();
 
-    void drawEuclidPattern(bool *pattern, uint8_t steps, uint8_t yPos, bool selected, bool isPlaying, uint8_t seqPos);
+    void drawEuclidPattern(bool singleView, bool *pattern, uint8_t steps, uint8_t yPos, bool selected, bool isPlaying, uint8_t seqPos);
 
 private:
     int hline = 8;

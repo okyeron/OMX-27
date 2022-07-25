@@ -437,7 +437,7 @@ void OmxDisp::bumpDisplayTimer()
     dirtyDisplayTimer = displayRefreshRate + 1;
 }
 
-void OmxDisp::drawEuclidPattern(bool *pattern, uint8_t steps, uint8_t yPos, bool selected, bool isPlaying, uint8_t seqPos)
+void OmxDisp::drawEuclidPattern(bool singleView, bool *pattern, uint8_t steps, uint8_t yPos, bool selected, bool isPlaying, uint8_t seqPos)
 {
     if (isMessageActive())
     {
@@ -447,7 +447,7 @@ void OmxDisp::drawEuclidPattern(bool *pattern, uint8_t steps, uint8_t yPos, bool
 
     const bool selectAsLine = false;
 
-    int16_t startSpacing = 6;
+    int16_t startSpacing = singleView ? 0 : 6;
     int16_t patWidth = gridw - startSpacing;
     
     if (selected)
@@ -470,7 +470,7 @@ void OmxDisp::drawEuclidPattern(bool *pattern, uint8_t steps, uint8_t yPos, bool
         return;
     }
 
-    int16_t steponHeight = 5;
+    int16_t steponHeight = singleView ? 8 : 5;
     // int16_t steponWidth = 2;
     int16_t stepoffHeight = 2;
     // int16_t stepoffWidth = 2;

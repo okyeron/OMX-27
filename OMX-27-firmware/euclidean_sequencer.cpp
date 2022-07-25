@@ -270,6 +270,33 @@ namespace euclidean
   {
       return noteNumber_;
   }
+  void EuclideanSequencer::setMidiChannel(uint8_t newMidiChannel)
+  {
+    midiChannel_ = newMidiChannel;
+  }
+  uint8_t EuclideanSequencer::getMidiChannel()
+  {
+    return midiChannel_;
+  }
+
+  void EuclideanSequencer::setVelocity(uint8_t newVelocity)
+  {
+      velocity_ = newVelocity;
+  }
+  uint8_t EuclideanSequencer::getVelocity()
+  {
+      return velocity_;
+  }
+
+  void EuclideanSequencer::setSwing(uint8_t newSwing)
+  {
+      swing_ = newSwing;
+  }
+  uint8_t EuclideanSequencer::getSwing()
+  {
+      return swing_;
+  }
+
   void EuclideanSequencer::setNoteLength(uint8_t newNoteLength)
   {
       noteLength_ = newNoteLength;
@@ -546,23 +573,23 @@ void EuclideanSequencer::playNote() {
 
     // regular note on trigger
     // uint8_t note = 60;
-    uint8_t channel = 1;
-    uint8_t vel = 100;
+    // uint8_t channel = 1;
+    // uint8_t vel = 100;
     float stepLength = kEuclidNoteLengths[noteLength_];
-    uint8_t swing = 0;
+    // uint8_t swing = 0;
 
     // uint32_t noteoff_micros = micros() + (stepLength) * clockConfig.step_micros;
     // pendingNoteOffs.insert(noteNumber_, channel, noteoff_micros, sendnoteCV);
 
-    uint32_t noteon_micros;
+    uint32_t noteon_micros = micros();
 
-    if (swing > 0 && seqPos_ % 2 == 0)
+    if (swing_ > 0 && seqPos_ % 2 == 0)
     {
-        if (swing < 99)
+        if (swing_ < 99)
         {
-            noteon_micros = micros() + ((clockConfig.ppqInterval * multiplier_) / (PPQ / 24) * swing); // full range swing
+            noteon_micros = micros() + ((clockConfig.ppqInterval * multiplier_) / (PPQ / 24) * swing_); // full range swing
         }
-        else if (swing == 99)
+        else if (swing_ == 99)
         {                                // random drunken swing
             uint8_t rnd_swing = rand() % 95 + 1; // rand 1 - 95 // randomly apply swing value
             noteon_micros = micros() + ((clockConfig.ppqInterval * multiplier_) / (PPQ / 24) * rnd_swing);
@@ -570,11 +597,11 @@ void EuclideanSequencer::playNote() {
     }
     else
     {
-        noteon_micros = micros();
+        // noteon_micros = micros();
     }
 
     // Queue note-on
-    onNoteOn(1, noteNumber_, vel, stepLength, true, false, noteon_micros);
+    onNoteOn(midiChannel_, noteNumber_, velocity_, stepLength, true, sendnoteCV, noteon_micros);
     // pendingNoteOns.insert(noteNumber_, vel, 1, noteon_micros, sendnoteCV);
 
     // {notenum, vel, notelen, step_type, {p1,p2,p3,p4}, prob}

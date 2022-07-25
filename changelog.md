@@ -1,6 +1,21 @@
 # Change log
 
 ```
+### alpha5
+Warning: Alpha build, UI not really fleshed out, might lock up, LEDs not fully implemented for Euclidean Mode
+- Euclid UI improvements
+- Can change variables for each euclid now like note number, midi channel, velocity
+- LEDS should update correctly. 
+```
+
+```
+### alpha4
+Warning: Alpha build, UI not really fleshed out, might lock up, LEDs not fully implemented for Euclidean Mode
+- Adds midiFX to MI mode
+- Adds Make Mono MidiFX: stops polyphonic chords in their tracks, only one note can survive. 
+```
+
+```
 ### 1.8.1alpha
 Warning: Alpha build, UI not really fleshed out, might lock up, LEDs not fully implemented for Euclidean Mode
 - EuclideanMode: Adds Scaler MidiFX

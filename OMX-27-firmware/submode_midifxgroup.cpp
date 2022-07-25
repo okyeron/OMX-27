@@ -61,7 +61,7 @@ void SubModeMidiFxGroup::updateLEDs()
 {
     strip.clear();
 
-    bool blinkState = omxLeds.getBlinkState();
+    // bool blinkState = omxLeds.getBlinkState();
     bool blinkStateSlow = omxLeds.getSlowBlinkState();
 
     // Serial.println("MidiFX Leds");
@@ -147,7 +147,7 @@ void SubModeMidiFxGroup::onEncoderButtonDown()
 void SubModeMidiFxGroup::onKeyUpdate(OMXKeypadEvent e)
 {
     int thisKey = e.key();
-	auto keyState = midiSettings.keyState;
+	// auto keyState = midiSettings.keyState;
 
     if(e.down())
     {

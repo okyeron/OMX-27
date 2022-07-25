@@ -7,6 +7,7 @@
 #include "omx_mode_midi_keyboard.h"
 #include "euclidean_sequencer.h"
 #include "submode_midifxgroup.h"
+#include "param_manager.h"
 
 class OmxModeEuclidean : public OmxModeInterface
 {
@@ -45,8 +46,8 @@ public:
     // grids::SnapShotSettings* getPattern(uint8_t patternIndex);
     // void setPattern(uint8_t patternIndex, grids::SnapShotSettings snapShot);
 private:
-    void setParam(uint8_t pageIndex, uint8_t paramPosition);
-    void setParam(uint8_t paramIndex);
+    // void setParam(uint8_t pageIndex, uint8_t paramPosition);
+    // void setParam(uint8_t paramIndex);
     void setupPageLegends();
 
     void updateLEDsFNone();
@@ -63,6 +64,8 @@ private:
 
     bool initSetup = false;
 
+    String tempString;
+
     static const uint8_t kNumPages = 4;
     static const uint8_t kNumParams = kNumPages * NUM_DISP_PARAMS;
     static const uint8_t kNumGrids = 4;
@@ -71,8 +74,13 @@ private:
 
     const char * rateNames[3] = {"1 / 2", "1", "2"};
 
-    int page = 0;
-    int param = 0;
+    void setPageAndParam(uint8_t pageIndex, uint8_t paramPosition);
+    void setParam(uint8_t paramIndex);
+    void onEncoderChangedSelectParam(Encoder::Update enc);
+
+    bool encoderSelect_ = false;
+
+    ParamManager selEucParams;
 
     uint8_t selectedEuclid_ = 0;
 
@@ -112,6 +120,8 @@ private:
     void enableSubmode(SubmodeInterface* subMode);
     void disableSubmode();
     bool isSubmodeEnabled();
+
+    
 
     // Static glue to link a pointer to a member function
     static void onPendingNoteOffForwarder(void *context, int note, int channel)
