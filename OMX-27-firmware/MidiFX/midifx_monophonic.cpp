@@ -33,7 +33,7 @@ namespace midifx
 
     void MidiFXMonophonic::noteInput(MidiNoteGroup note)
     {
-        Serial.println("Mono input: " + String(note.noteNumber) + " " + String(note.channel));
+        // Serial.println("Mono input: " + String(note.noteNumber) + " " + String(note.channel));
 
         uint8_t midiChannel = constrain(note.channel - 1, 0, 15);
 
@@ -61,7 +61,7 @@ namespace midifx
         // Probability that effect happens
         if(chancePerc_ != 100 && (chancePerc_ == 0 || random(100) > chancePerc_))
         {
-            Serial.println("Skipping mono");
+            // Serial.println("Skipping mono");
             sendNoteOut(note);
             return;
         }
@@ -71,17 +71,17 @@ namespace midifx
 
         if (prevNoteOn[midiChannel].noteNumber != 255)
         {
-            Serial.println("Prev note found");
+            // Serial.println("Prev note found");
 
             // turn previous note on channel off
             sendNoteOff(prevNoteOn[midiChannel]);
             // mark empty
             // prevNoteOn[midiChannel].noteNumber = 255;
         }
-        else
-        {
-            Serial.println("Prev note not found");
-        }
+        // else
+        // {
+        //     Serial.println("Prev note not found");
+        // }
 
         // Update previous note history
         prevNoteOn[midiChannel].setFromNoteGroup(note);

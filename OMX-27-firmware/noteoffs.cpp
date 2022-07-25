@@ -94,15 +94,15 @@ void PendingNoteOffs::setNoteOffFunction(void (*fptr)(void *, int note, int chan
 
 void PendingNoteOffs::onNoteOff(int note, int channel)
 {
-	Serial.println("PendingNoteOffs::onNoteOff " + String(note) + " " + String(channel));
+	// Serial.println("PendingNoteOffs::onNoteOff " + String(note) + " " + String(channel));
 	if (setNoteOffFuncPtrContext != nullptr)
 	{
-		Serial.println("PendingNoteOffs::onNoteOff sending to pointer");
+		// Serial.println("PendingNoteOffs::onNoteOff sending to pointer");
 		setNoteOffFuncPtr(setNoteOffFuncPtrContext, note, channel);
 	}
-	else{
-		Serial.println("PendingNoteOffs::onNoteOff pointer not found");
-	}
+	// else{
+	// 	Serial.println("PendingNoteOffs::onNoteOff pointer not found");
+	// }
 }
 
 PendingNoteOffs pendingNoteOffs;

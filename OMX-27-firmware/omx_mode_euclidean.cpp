@@ -816,7 +816,7 @@ void OmxModeEuclidean::updateLEDsPatterns()
 // Called by pending note offs when a pending note off is sent
 void OmxModeEuclidean::onPendingNoteOff(int note, int channel)
 {
-    Serial.println("OmxModeEuclidean::onPendingNoteOff " + String(note) + " " + String(channel));
+    // Serial.println("OmxModeEuclidean::onPendingNoteOff " + String(note) + " " + String(channel));
     subModeMidiFx.onPendingNoteOff(note, channel);
 }
 
@@ -835,13 +835,13 @@ void OmxModeEuclidean::onNotePostFX(MidiNoteGroup note)
 {
     if (note.noteOff)
     {
-        Serial.println("onNotePostFX note off: " + String(note.noteNumber));
+        // Serial.println("onNotePostFX note off: " + String(note.noteNumber));
         pendingNoteOns.remove(note.noteNumber, note.channel);
         pendingNoteOffs.sendOffNow(note.noteNumber, note.channel, note.sendCV);
     }
     else
     {
-        Serial.println("onNotePostFX note on: " + String(note.noteNumber));
+        // Serial.println("onNotePostFX note on: " + String(note.noteNumber));
 
         // Serial.println("OmxModeEuclidean::onNotePostFX note: " + String(note.noteNumber));
 
@@ -852,7 +852,7 @@ void OmxModeEuclidean::onNotePostFX(MidiNoteGroup note)
         pendingNoteOffs.insert(note.noteNumber, note.channel, noteOffMicros, note.sendCV);
     }
 
-    Serial.println("\n\n");
+    // Serial.println("\n\n");
 }
 
 void OmxModeEuclidean::setupPageLegends()
