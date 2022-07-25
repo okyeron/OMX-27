@@ -111,4 +111,19 @@ namespace midifx
             outFunctionPtr_(outFunctionContext_, note);
         }
     }
+
+    void MidiFXInterface::sendNoteOff(MidiNoteGroupCache noteCache)
+    {
+        sendNoteOff(noteCache.toMidiNoteGroup());
+    }
+
+    void MidiFXInterface::sendNoteOff(MidiNoteGroup note)
+    {
+        note.velocity = 0;
+        note.noteOff = true;
+
+        if(outFunctionContext_ != nullptr){
+            outFunctionPtr_(outFunctionContext_, note);
+        }
+    }
 }

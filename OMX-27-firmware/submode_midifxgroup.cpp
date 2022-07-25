@@ -5,7 +5,7 @@
 #include "MidiFX/midifx_randomizer.h"
 #include "MidiFX/midifx_chance.h"
 #include "MidiFX/midifx_scaler.h"
-
+#include "MidiFX/midifx_monophonic.h"
 
 using namespace midifx;
 
@@ -242,11 +242,11 @@ void SubModeMidiFxGroup::changeMidiFXType(uint8_t slotIndex, uint8_t typeIndex)
     // {
     //     delete midifx_[slotIndex];
     // }
-    if(getMidiFX(slotIndex) != nullptr)
+    if (getMidiFX(slotIndex) != nullptr)
     {
         // Serial.println("Deleting FX");
 
-        midifx::MidiFXInterface* midifxptr = midifx_[slotIndex];
+        midifx::MidiFXInterface *midifxptr = midifx_[slotIndex];
 
         midifx_[slotIndex] = nullptr;
 
@@ -272,32 +272,23 @@ void SubModeMidiFxGroup::changeMidiFXType(uint8_t slotIndex, uint8_t typeIndex)
     case MIDIFX_CHANCE:
     {
         setMidiFX(slotIndex, new MidiFXChance());
-
-        // auto mfx = getMidiFX(slotIndex);
-        // mfx->setNoteOutput(SubModeMidiFxGroup::noteFuncForwarder, this);
-
-        // MidiNoteGroup testNote;
-        // testNote.noteNumber = 10;
-        // mfx->noteInput(testNote);
     }
-        break;
-        case MIDIFX_SCALER:
+    break;
+    case MIDIFX_SCALER:
     {
         setMidiFX(slotIndex, new MidiFXScaler());
-
-        // auto mfx = getMidiFX(slotIndex);
-        // mfx->setNoteOutput(SubModeMidiFxGroup::noteFuncForwarder, this);
-
-        // MidiNoteGroup testNote;
-        // testNote.noteNumber = 10;
-        // mfx->noteInput(testNote);
     }
-        break;
+    break;
+    case MIDIFX_MONOPHONIC:
+    {
+        setMidiFX(slotIndex, new MidiFXMonophonic());
+    }
+    break;
     default:
         break;
     }
 
-    if(getMidiFX(slotIndex) != nullptr)
+    if (getMidiFX(slotIndex) != nullptr)
     {
         omxDisp.displayMessageTimed(getMidiFX(slotIndex)->getName(), 5);
     }

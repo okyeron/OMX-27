@@ -6,7 +6,47 @@
 
 namespace midifx
 {
-    
+    // Lighter version of MidiNoteGroup for tracking note offs
+    struct MidiNoteGroupCache
+    {
+        uint8_t prevNoteNumber = 0;
+        uint8_t channel = 1;
+        uint8_t noteNumber = 0;
+        bool sendMidi = true;
+        bool sendCV = true;
+        bool unknownLength = false;
+
+        MidiNoteGroupCache()
+        {
+        }
+
+        MidiNoteGroupCache(MidiNoteGroup noteGroup)
+        {
+            setFromNoteGroup(noteGroup);
+        }
+
+        void setFromNoteGroup(MidiNoteGroup noteGroup)
+        {
+            prevNoteNumber = noteGroup.prevNoteNumber;
+            channel = noteGroup.channel;
+            noteNumber = noteGroup.noteNumber;
+            sendMidi = noteGroup.sendMidi;
+            sendCV = noteGroup.sendCV;
+            unknownLength = noteGroup.unknownLength;
+        }
+
+        MidiNoteGroup toMidiNoteGroup()
+        {
+            MidiNoteGroup noteGroup;
+            noteGroup.channel = channel;
+            noteGroup.prevNoteNumber = prevNoteNumber;
+            noteGroup.noteNumber = noteNumber;
+            noteGroup.sendCV = sendCV;
+            noteGroup.sendMidi = sendMidi;
+            noteGroup.unknownLength = unknownLength;
+            return noteGroup;
+        }
+    };
 
     // void(*outNoteptr)(midifxnote); // out pointer type
 
@@ -66,6 +106,10 @@ namespace midifx
         virtual void onEncoderChangedEditParam(Encoder::Update enc) = 0;
 
         virtual void sendNoteOut(MidiNoteGroup note);
+
+        virtual void sendNoteOff(MidiNoteGroupCache noteCache);
+        virtual void sendNoteOff(MidiNoteGroup note);
+
 
         virtual void processNoteOn(uint8_t origNoteNumber, MidiNoteGroup note);
         virtual void processNoteOff(MidiNoteGroup note);
