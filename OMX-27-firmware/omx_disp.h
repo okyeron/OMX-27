@@ -12,6 +12,9 @@ public:
     int legendVals[4] = {0, 0, 0, 0};
     int dispPage = 0;
     const char *legendText[4] = {"", "", "", ""};
+    bool useLegendString[4] = {false, false, false, false};
+    String legendString[4] = {"12345", "12345", "12345", "12345"};
+
 
     OmxDisp();
     void setup();

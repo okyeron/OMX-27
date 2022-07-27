@@ -6,6 +6,8 @@
 #include "MidiFX/midifx_chance.h"
 #include "MidiFX/midifx_scaler.h"
 #include "MidiFX/midifx_monophonic.h"
+#include "MidiFX/midifx_harmonizer.h"
+
 
 using namespace midifx;
 
@@ -267,6 +269,11 @@ void SubModeMidiFxGroup::changeMidiFXType(uint8_t slotIndex, uint8_t typeIndex)
     case MIDIFX_RANDOMIZER:
     {
         setMidiFX(slotIndex, new MidiFXRandomizer());
+    }
+    break;
+    case MIDIFX_HARMONIZER:
+    {
+        setMidiFX(slotIndex, new MidiFXHarmonizer());
     }
     break;
     case MIDIFX_CHANCE:

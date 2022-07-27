@@ -184,15 +184,19 @@ void OmxDisp::clearLegends()
     legends[1] = "";
     legends[2] = "";
     legends[3] = "";
-    legendVals[0] = 0;
-    legendVals[1] = 0;
-    legendVals[2] = 0;
-    legendVals[3] = 0;
+    legendVals[0] = -127;
+    legendVals[1] = -127;
+    legendVals[2] = -127;
+    legendVals[3] = -127;
     dispPage = 0;
     legendText[0] = "";
     legendText[1] = "";
     legendText[2] = "";
     legendText[3] = "";
+    useLegendString[0] = false;
+    useLegendString[1] = false;
+    useLegendString[2] = false;
+    useLegendString[3] = false;
 }
 
 void OmxDisp::dispGenericMode(int selected)
@@ -335,8 +339,12 @@ void OmxDisp::dispGenericMode2(uint8_t numPages, int8_t selectedPage, int8_t sel
     for (int j = 0; j < 4; j++)
     { 
         highlight = (j == selectedParam && !encSelActive);
-       
-        if (legendVals[j] == -127)
+
+        if(useLegendString[j])
+        {
+            dispSymbBox(legendString[j].c_str(), j, highlight);
+        }
+        else if (legendVals[j] == -127)
         {
             dispSymbBox(legendText[j], j, highlight);
         }
