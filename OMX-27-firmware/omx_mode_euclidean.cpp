@@ -775,7 +775,7 @@ void OmxModeEuclidean::updateLEDs()
     {
         auto mfxColor = (i == activeEuclid->midiFXGroup) ? LTCYAN : BLUE;
 
-        strip.setPixelColor(8 + i, mfxColor);
+        strip.setPixelColor(6 + i, mfxColor);
     }
 
     for (uint8_t i = 0; i < kNumEuclids; i++)
