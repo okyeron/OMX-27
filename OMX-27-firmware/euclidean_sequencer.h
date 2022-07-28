@@ -9,6 +9,25 @@ namespace euclidean
     extern const float kEuclidNoteLengths[10];
     extern const uint8_t kNumEuclidNoteLengths;
 
+    struct EuclidSave
+    {
+        uint8_t rotation_ = 0;
+        uint8_t events_ = 0;
+        uint8_t steps_ = 0;
+
+        uint8_t noteNumber_ = 16;
+        uint8_t midiChannel_ = 1;
+        uint8_t velocity_ = 100;
+        uint8_t swing_ = 0;
+
+        uint8_t noteLength_ = 1;
+
+        bool polyRhythmMode_ = true;
+
+        uint8_t clockDivMultP_ = 4;
+        uint8_t polyRClockDivMultP_ = 4;
+    };
+
     // #define EUCLID_PAT_SIZE = 32
     // enum Grid_Resolutions
     // {
@@ -64,11 +83,11 @@ namespace euclidean
     public:
         
 
-        uint8_t grids_notes[4] = {36, 38, 42, 46};
-        static const uint8_t num_notes = sizeof(grids_notes);
-        uint8_t playingPattern = 0;
+        // uint8_t grids_notes[4] = {36, 38, 42, 46};
+        // static const uint8_t num_notes = sizeof(grids_notes);
+        // uint8_t playingPattern = 0;
 
-        static const uint8_t kStepsPerPattern = 16;
+        // static const uint8_t kStepsPerPattern = 16;
 
         uint8_t midiFXGroup = 0;
 
@@ -145,6 +164,9 @@ namespace euclidean
         bool *getPattern();
 
         void printEuclidPattern();
+
+        EuclidSave getSave();
+        void loadSave(EuclidSave save);
 
     private:
         // GridsChannel channel_;

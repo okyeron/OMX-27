@@ -1,5 +1,12 @@
 # Change log
 
+```
+### alpha7
+- Increases number of euclids to 16 and MidiFX for euclidean seq mode to 5 for fun and profit. 
+- Select a euclid in lower 16. Assign it to 1 of the 5 midi FX in blue on top row
+- Hold down on a midifx to enter submode and adjust parameters. 
+```
+
 A light update tonight
 ```
 ### alpha6

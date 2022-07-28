@@ -9,6 +9,13 @@
 #include "submode_midifxgroup.h"
 #include "param_manager.h"
 
+
+struct EuclidPatternSave
+{
+    euclidean::EuclidSave euclids[8];
+    bool polyRhythmMode_ = true;
+};
+
 class OmxModeEuclidean : public OmxModeInterface
 {
 public:
@@ -39,7 +46,8 @@ public:
     void onDisplayUpdate() override;
     void SetScale(MusicScales* scale);
 
-    static const u_int8_t kNumEuclids = 16;
+    static const u_int8_t kNumEuclids = 8;
+    static const u_int8_t kNumSaves = 16;
     static const u_int8_t kNumMidiFXGroups = 5;
 
 
@@ -59,7 +67,7 @@ private:
     void updateLEDsChannelView();
     void onKeyUpdateChanLock(OMXKeypadEvent e);
 
-    void saveActivePattern(uint8_t pattIndex);
+    void saveActivePattern(uint8_t pattIndex, bool showMsg = true);
     void loadActivePattern(uint8_t pattIndex);
 
     void selectEuclid(uint8_t euclidIndex);
@@ -76,15 +84,27 @@ private:
 
     const char * rateNames[3] = {"1 / 2", "1", "2"};
 
-    void setPageAndParam(uint8_t pageIndex, uint8_t paramPosition);
+    ParamManager* getSelectedParamMode();
+    void setParamMode(uint8_t newParamMode);
+    void setPageAndParam(uint8_t pageIndex, uint8_t paramPosition, bool editParam);
     void setParam(uint8_t paramIndex);
     void onEncoderChangedSelectParam(Encoder::Update enc);
 
     bool encoderSelect_ = false;
 
-    ParamManager selEucParams;
+    // ParamManager selEucParams;
+
+    uint8_t paramMode_ = 0;
+
+    ParamManager params_[3];
 
     uint8_t selectedEuclid_ = 0;
+
+    EuclidPatternSave saveSlots_[kNumSaves];
+
+    uint8_t selectedSave_ = 0;
+
+    // int sizeSaves = sizeof(saveSlots_);
 
     // bool gridsSelected[4] = {false,false,false,false};
 

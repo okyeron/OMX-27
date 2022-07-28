@@ -12,11 +12,17 @@
 
 using namespace euclidean;
 
-enum EucModePage {
-    EUCLID_DENSITY,
-    EUCLID_XY,
-    EUCLID_NOTES,
-    EUCLID_CONFIG
+// enum EucModePage {
+//     EUCLID_DENSITY,
+//     EUCLID_XY,
+//     EUCLID_NOTES,
+//     EUCLID_CONFIG
+// };
+
+enum ParamModes {
+    PARAMMODE_MIX = 0,
+    PARAMMODE_EDIT = 1,
+    PARAMMODE_PATTERN = 2
 };
 
 enum SelEucModePage {
@@ -25,38 +31,68 @@ enum SelEucModePage {
     SELEUCLID_NOTES
 };
 
+const int kSelMixColor = WHITE;
+const int kMixColor = ORANGE;
+
+const int kSelSaveColor = WHITE;
+const int kSaveColor = DKGREEN;
+
+const int kSelEuclidColor = WHITE;
+const int kEuclidColor = DKRED;
+
+const int kSelMidiFXColor = LTCYAN;
+const int kMidiFXColor = BLUE;
+
 OmxModeEuclidean::OmxModeEuclidean()
 {
     midiKeyboard.setMidiMode();
 
     // Setup function pointers for note ons. 
-    for (int i = 0; i < kNumEuclids; i++)
+    for (uint8_t i = 0; i < kNumEuclids; i++)
     {
         euclids[i].setNoteOutputFunc(&OmxModeEuclidean::onNoteTriggeredForwarder, this, i);
     }
 
-    for(int i = 0; i < kNumMidiFXGroups; i++)
+    for(uint8_t i = 0; i < kNumMidiFXGroups; i++)
     {
         subModeMidiFx[i].setNoteOutputFunc(&OmxModeEuclidean::onNotePostFXForwarder, this);
     }
 
     polyRhythmMode = false;
 
-    for (u_int8_t i = 0; i < kNumEuclids; i++)
+    for (uint8_t i = 0; i < kNumEuclids; i++)
     {
         euclids[i].setPolyRhythmMode(polyRhythmMode);
         euclids[i].setClockDivMult(3);
         euclids[i].setPolyRClockDivMult(3);
     }
 
-    selEucParams.addPage(1);
-    selEucParams.addPage(4);
-    selEucParams.addPage(4);
+    paramMode_ = PARAMMODE_EDIT;
 
-    euclids[0].setNoteNumber(60);
-    euclids[1].setNoteNumber(64);
-    euclids[2].setNoteNumber(67);
-    euclids[3].setNoteNumber(71);
+    params_[PARAMMODE_MIX].addPage(1);
+
+    params_[PARAMMODE_EDIT].addPage(1);
+    params_[PARAMMODE_EDIT].addPage(4);
+    params_[PARAMMODE_EDIT].addPage(4);
+
+    params_[PARAMMODE_PATTERN].addPage(1);
+
+    euclids[0].setNoteNumber(36);
+    euclids[1].setNoteNumber(38);
+    euclids[2].setNoteNumber(42);
+    euclids[3].setNoteNumber(46);
+
+    euclids[4].setNoteNumber(60);
+    euclids[5].setNoteNumber(64);
+    euclids[6].setNoteNumber(67);
+    euclids[7].setNoteNumber(71);
+
+    for(uint8_t i = 0; i < kNumSaves; i++)
+    {
+        saveActivePattern(i, false);
+    }
+
+    selectedSave_ = 0;
 }
 
 void OmxModeEuclidean::InitSetup()
@@ -85,6 +121,7 @@ void OmxModeEuclidean::onModeActivated()
     omxLeds.setDirty();
     omxDisp.setDirty();
 
+    paramMode_ = PARAMMODE_EDIT;
     encoderSelect_ = true;
 
     pendingNoteOffs.setNoteOffFunction(&OmxModeEuclidean::onPendingNoteOffForwarder, this);
@@ -162,17 +199,55 @@ void OmxModeEuclidean::onClockTick()
 //     Serial.println(sOut.c_str());
 // }
 
-void OmxModeEuclidean::setPageAndParam(uint8_t pageIndex, uint8_t paramPosition)
+ParamManager* OmxModeEuclidean::getSelectedParamMode()
 {
-    encoderSelect_ = false;
-    selEucParams.setSelPage(pageIndex);
+    return &params_[paramMode_];
+}
+
+void OmxModeEuclidean::setParamMode(uint8_t newParamMode)
+{
+    switch (newParamMode)
+    {
+    case PARAMMODE_MIX:
+    {
+        paramMode_ = PARAMMODE_MIX;
+        omxDisp.displayMessageTimed("Mix", 5);
+        setPageAndParam(0,0, false);
+    }
+    break;
+    case PARAMMODE_EDIT:
+    {
+        paramMode_ = PARAMMODE_EDIT;
+        omxDisp.displayMessageTimed("Edit", 5);
+        setPageAndParam(0,0, false);
+    }
+    break;
+    case PARAMMODE_PATTERN:
+    {
+        paramMode_ = PARAMMODE_PATTERN;
+        omxDisp.displayMessageTimed("Pattern", 5);
+        setPageAndParam(0,0, false);
+    }
+    break;
+    default:
+        break;
+    }
+}
+
+void OmxModeEuclidean::setPageAndParam(uint8_t pageIndex, uint8_t paramPosition, bool editParam)
+{
+    encoderSelect_ = !editParam;
+    params_[paramMode_].setSelPage(pageIndex);
+    // selEucParams.setSelPage(pageIndex);
     setParam(paramPosition);
     omxDisp.setDirty();
 }
 
 void OmxModeEuclidean::setParam(uint8_t paramIndex)
 {
-    selEucParams.setSelParam(paramIndex);
+    params_[paramMode_].setSelParam(paramIndex);
+
+    // selEucParams.setSelParam(paramIndex);
 
     // // Select instrument on this page
     // if (instLockView_ && params.getSelPage() == GRIDS_DENSITY)
@@ -195,104 +270,80 @@ void OmxModeEuclidean::onPotChanged(int potIndex, int prevValue, int newValue, i
         return;
     }
 
-    if(analogDelta < 2) return;
+    EuclideanSequencer *activeEuclid = &euclids[selectedEuclid_];
 
-    // bool valuesChanged = false;
+    // Serial.println(String("PotChanged ") + String(potIndex));
 
-    EuclideanSequencer* activeEuclid = &euclids[selectedEuclid_];
-
-    if(potIndex == 0){
-        // uint8_t prevRotation = activeEuclid->getRotation();
-        // uint8_t rotation = map(newValue, 0, 127, 0, 32);
-        // valuesChanged = rotation != prevRotation;
-
-        activeEuclid->setRotation(map(newValue, 0, 127, 0, 32));
-    }
-    else if(potIndex == 1){
-        // uint8_t prevEvents = activeEuclid->getEvents();
-        // events = map(newValue, 0, 127, 0, 32);
-        // valuesChanged = events != prevEvents;
-
-        activeEuclid->setEvents(map(newValue, 0, 127, 0, 32));
-    }
-    else if(potIndex == 2){
-        // uint8_t prevSteps = steps;
-        // steps = map(newValue, 0, 127, 0, 32);
-        // valuesChanged = steps != prevSteps;
-
-        activeEuclid->setSteps(map(newValue, 0, 127, 0, 32));
-    }
-    else if(potIndex == 3){
-        // uint8_t prevSteps = steps;
-        // steps = map(newValue, 0, 127, 0, 32);
-        // valuesChanged = steps != prevSteps;
-
-        uint8_t prevLength = activeEuclid->getNoteLength();
-        uint8_t newLength = map(newValue, 0, 127, 0, euclidean::kNumEuclidNoteLengths - 1);
-
-        activeEuclid->setNoteLength(newLength);
-
-        if (prevLength != newLength)
-        {
-            omxDisp.displayMessageTimed(String(euclidean::kEuclidNoteLengths[newLength]), 10);
-        }
-    }
-
-    else if (potIndex == 4)
+    // --- EDIT MODE ---
+    if (paramMode_ == PARAMMODE_EDIT)
     {
-        uint8_t prevRes = activeEuclid->getClockDivMult();
-        uint8_t newres = map(newValue, 0, 127, 0, 6);
-        if (polyRhythmMode)
+        // Serial.println("Edit Mode");
+
+        if (analogDelta < 3)
+            return;
+
+
+        if (potIndex == 0)
         {
-            for (u_int8_t i = 0; i < kNumEuclids; i++)
+            // Serial.println("Rotation");
+
+            activeEuclid->setRotation(map(newValue, 0, 127, 0, 32));
+        }
+        if (potIndex == 1)
+        {
+            // Serial.println("Events");
+
+            activeEuclid->setEvents(map(newValue, 0, 127, 0, 32));
+        }
+        if (potIndex == 2)
+        {
+            // Serial.println("Steps");
+
+            activeEuclid->setSteps(map(newValue, 0, 127, 0, 32));
+        }
+        if (potIndex == 3)
+        {
+            // Serial.println("length");
+
+            uint8_t prevLength = activeEuclid->getNoteLength();
+            uint8_t newLength = map(newValue, 0, 127, 0, euclidean::kNumEuclidNoteLengths - 1);
+
+            activeEuclid->setNoteLength(newLength);
+
+            if (prevLength != newLength)
             {
-                euclids[i].setPolyRClockDivMult(newres);
+                omxDisp.displayMessageTimed(String(euclidean::kEuclidNoteLengths[newLength]), 10);
             }
         }
-        else
+        if (potIndex == 4)
         {
-            activeEuclid->setClockDivMult(newres);
-        }
+            // Serial.println("Clock");
 
-        // omxDisp.displayMessage(newres);
+            uint8_t prevRes = activeEuclid->getClockDivMult();
+            uint8_t newres = map(newValue, 0, 127, 0, 6);
+            if (polyRhythmMode)
+            {
+                for (u_int8_t i = 0; i < kNumEuclids; i++)
+                {
+                    euclids[i].setPolyRClockDivMult(newres);
+                }
+            }
+            else
+            {
+                activeEuclid->setClockDivMult(newres);
+            }
 
-        if (newres != prevRes)
-        {
-            omxDisp.displayMessageTimed(String(multValues[newres]), 10);
+            if (newres != prevRes)
+            {
+                omxDisp.displayMessageTimed(String(multValues[newres]), 10);
+            }
         }
     }
-
-    // if(activeEuclid->isDirty()){
-    //     // Serial.println((String)"rotation: " + rotation + " events: " + events + " steps: " + steps);
-
-    //     // EuclideanMath::generateEuclidPattern(euclidPattern, rotation, events, steps);
-    //     // printEuclidPattern(euclidPattern, steps);
-    //     // drawEuclidPattern(euclidPattern, steps);
-
-    // }
 
     omxLeds.setDirty();
     omxDisp.setDirty();
 
     // Serial.println((String)"AnalogDelta: " + analogDelta);
-
-    // Only change page for significant difference
-    // bool autoSelectParam = analogDelta >= 10 && page == GRIDS_DENSITY;
-
-    // if (potIndex < 4)
-    // {
-    //     if (autoSelectParam)
-    //     {
-    //         // grids_.setDensity(potIndex, newValue * 2);
-    //         // setParam(GRIDS_DENSITY, potIndex + 1);
-    //     }
-
-    //     omxDisp.setDirty();
-    // }
-    // else if (potIndex == 4)
-    // {
-        
-    // }
 }
 
 void OmxModeEuclidean::loopUpdate()
@@ -378,76 +429,81 @@ void OmxModeEuclidean::onEncoderChanged(Encoder::Update enc)
         return;
     }
 
-    int8_t selPage = selEucParams.getSelPage(); 
-
-    if (encoderSelect_ || selPage == SELEUCLID_PAT)
+    // --- EDIT MODE ---
+    if (paramMode_ == PARAMMODE_EDIT)
     {
-        onEncoderChangedSelectParam(enc);
-        return;
-    }
+        int8_t selPage = getSelectedParamMode()->getSelPage();
 
-    EuclideanSequencer* activeEuclid = &euclids[selectedEuclid_];
-
-    auto amt = enc.accel(5); // where 5 is the acceleration factor if you want it, 0 if you don't)
-
-    int8_t selParam = selEucParams.getSelParam() + 1; // Add one for readability
-
-    switch (selPage)
-    {
-    case SELEUCLID_PAT:
-    {
-    }
-    break;
-    case SELEUCLID_1:
-    {
-        if (selParam == 1)
+        if (encoderSelect_ || selPage == SELEUCLID_PAT)
         {
-            activeEuclid->setRotation(constrain(activeEuclid->getRotation() + amt, 0, 32));
+            onEncoderChangedSelectParam(enc);
+            return;
         }
-        else if (selParam == 2)
-        {
-            activeEuclid->setEvents(constrain(activeEuclid->getEvents() + amt, 0, 32));
-        }
-        else if (selParam == 3)
-        {
-            activeEuclid->setSteps(constrain(activeEuclid->getSteps() + amt, 0, 32));
-        }
-        else if (selParam == 4)
-        {
-            uint8_t prevLength = activeEuclid->getNoteLength();
-            uint8_t newLength = constrain(prevLength + amt, 0, euclidean::kNumEuclidNoteLengths - 1);
 
-            activeEuclid->setNoteLength(newLength);
+        EuclideanSequencer *activeEuclid = &euclids[selectedEuclid_];
 
-            if (prevLength != newLength)
+        auto amtSlow = enc.accel(1);
+        auto amtFast = enc.accel(5);
+
+        int8_t selParam = getSelectedParamMode()->getSelParam() + 1; // Add one for readability
+
+        switch (selPage)
+        {
+        case SELEUCLID_PAT:
+        {
+        }
+        break;
+        case SELEUCLID_1:
+        {
+            if (selParam == 1)
             {
-                omxDisp.displayMessageTimed(String(euclidean::kEuclidNoteLengths[newLength]), 10);
+                activeEuclid->setRotation(constrain(activeEuclid->getRotation() + amtSlow, 0, 32));
+            }
+            else if (selParam == 2)
+            {
+                activeEuclid->setEvents(constrain(activeEuclid->getEvents() + amtSlow, 0, 32));
+            }
+            else if (selParam == 3)
+            {
+                activeEuclid->setSteps(constrain(activeEuclid->getSteps() + amtSlow, 0, 32));
+            }
+            else if (selParam == 4)
+            {
+                uint8_t prevLength = activeEuclid->getNoteLength();
+                uint8_t newLength = constrain(prevLength + amtSlow, 0, euclidean::kNumEuclidNoteLengths - 1);
+
+                activeEuclid->setNoteLength(newLength);
+
+                if (prevLength != newLength)
+                {
+                    omxDisp.displayMessageTimed(String(euclidean::kEuclidNoteLengths[newLength]), 10);
+                }
             }
         }
-    }
-    break;
-    case SELEUCLID_NOTES:
-    {
-        if (selParam == 1)
-        {
-            activeEuclid->setNoteNumber(constrain(activeEuclid->getNoteNumber() + amt, 0, 127));
-        }
-        else if (selParam == 2)
-        {
-            activeEuclid->setMidiChannel(constrain(activeEuclid->getMidiChannel() + amt, 1, 16));
-        }
-        else if (selParam == 3)
-        {
-            activeEuclid->setVelocity(constrain(activeEuclid->getVelocity() + amt, 0, 127));
-        }
-        else if (selParam == 4)
-        {
-            activeEuclid->setSwing(constrain(activeEuclid->getSwing() + amt, 0, 100));
-        }
-    }
-    break;
-    default:
         break;
+        case SELEUCLID_NOTES:
+        {
+            if (selParam == 1)
+            {
+                activeEuclid->setNoteNumber(constrain(activeEuclid->getNoteNumber() + amtFast, 0, 127));
+            }
+            else if (selParam == 2)
+            {
+                activeEuclid->setMidiChannel(constrain(activeEuclid->getMidiChannel() + amtSlow, 1, 16));
+            }
+            else if (selParam == 3)
+            {
+                activeEuclid->setVelocity(constrain(activeEuclid->getVelocity() + amtFast, 0, 127));
+            }
+            else if (selParam == 4)
+            {
+                activeEuclid->setSwing(constrain(activeEuclid->getSwing() + amtFast, 0, 100));
+            }
+        }
+        break;
+        default:
+            break;
+        }
     }
 
     omxLeds.setDirty();
@@ -461,11 +517,11 @@ void OmxModeEuclidean::onEncoderChangedSelectParam(Encoder::Update enc)
 
     if (enc.dir() < 0) // if turn CCW
     {
-        selEucParams.decrementParam();
+        getSelectedParamMode()->decrementParam();
     }
     else if (enc.dir() > 0) // if turn CW
     {
-        selEucParams.incrementParam();
+        getSelectedParamMode()->incrementParam();
     }
 
     omxDisp.setDirty();
@@ -485,31 +541,45 @@ void OmxModeEuclidean::onEncoderButtonDown()
         return;
     }
 
-    int8_t selPage = selEucParams.getSelPage();
+    int8_t selPage = getSelectedParamMode()->getSelPage();
 
-    if (selPage == SELEUCLID_PAT)
+    // --- EDIT MODE ---
+    if (paramMode_ == PARAMMODE_EDIT)
     {
-        encoderSelect_ = true;
-
-        polyRhythmMode = !polyRhythmMode;
-
-        for (u_int8_t i = 0; i < kNumEuclids; i++)
+        if (selPage == SELEUCLID_PAT)
         {
-            euclids[i].setPolyRhythmMode(polyRhythmMode);
-        }
+            encoderSelect_ = true;
 
-        if (polyRhythmMode)
-        {
-            omxDisp.displayMessage("pRhythm on");
+            polyRhythmMode = !polyRhythmMode;
+
+            for (u_int8_t i = 0; i < kNumEuclids; i++)
+            {
+                euclids[i].setPolyRhythmMode(polyRhythmMode);
+            }
+
+            if (polyRhythmMode)
+            {
+                omxDisp.displayMessage("pRhythm on");
+            }
+            else
+            {
+                omxDisp.displayMessage("pRhythm off");
+            }
         }
         else
         {
-            omxDisp.displayMessage("pRhythm off");
+            encoderSelect_ = !encoderSelect_;
         }
     }
     else
     {
-        encoderSelect_ = !encoderSelect_;
+        if (selPage == SELEUCLID_PAT)
+        {
+        }
+        else
+        {
+            encoderSelect_ = !encoderSelect_;
+        }
     }
 
     omxLeds.setDirty();
@@ -547,16 +617,33 @@ bool OmxModeEuclidean::shouldBlockEncEdit()
     return false;
 }
 
-void OmxModeEuclidean::saveActivePattern(uint8_t pattIndex)
+void OmxModeEuclidean::saveActivePattern(uint8_t pattIndex, bool showMsg)
 {
-    // grids_.saveSnapShot(pattIndex);
-    // omxDisp.displayMessage((String) "Saved " + (pattIndex + 1));
+    for(uint8_t i = 0; i < kNumEuclids; i++)
+    {
+        saveSlots_[pattIndex].euclids[i] = euclids[i].getSave();
+    }
+
+    saveSlots_[pattIndex].polyRhythmMode_ = polyRhythmMode;
+    selectedSave_ = pattIndex;
+
+    if (showMsg)
+    {
+        omxDisp.displayMessageTimed("Saved " + String(pattIndex + 1), 5);
+    }
 }
 
 void OmxModeEuclidean::loadActivePattern(uint8_t pattIndex)
 {
-    // grids_.loadSnapShot(pattIndex);
-    // omxDisp.displayMessage((String) "Load " + (pattIndex + 1));
+    for(uint8_t i = 0; i < kNumEuclids; i++)
+    {
+        euclids[i].loadSave(saveSlots_[pattIndex].euclids[i]);
+    }
+
+    polyRhythmMode = saveSlots_[pattIndex].polyRhythmMode_;
+    selectedSave_ = pattIndex;
+
+    omxDisp.displayMessageTimed("Load " + String(pattIndex + 1), 5);
 }
 
 void OmxModeEuclidean::onKeyUpdate(OMXKeypadEvent e)
@@ -627,19 +714,58 @@ void OmxModeEuclidean::onKeyUpdate(OMXKeypadEvent e)
         // }
     }
 
-    if (fNone_)
+    if(e.down() && thisKey == 3)
     {
-        // Quick Select Note
-        if (e.down() && (thisKey > 10))
+        setParamMode(PARAMMODE_MIX);
+    }
+    else if(e.down() && thisKey == 4)
+    {
+        setParamMode(PARAMMODE_EDIT);
+    }
+    else if(e.down() && thisKey == 5)
+    {
+        setParamMode(PARAMMODE_PATTERN);
+    }
+
+
+    // --- EDIT MODE ---
+    if (paramMode_ == PARAMMODE_EDIT || paramMode_ == PARAMMODE_MIX)
+    {
+        if (fNone_)
         {
-            selectEuclid(thisKey - 11);
+            if (e.down() && (thisKey > 10) && thisKey < 19)
+            {
+                selectEuclid(thisKey - 11);
+            }
+
+            if (e.down() && thisKey >= 6 && thisKey < 11)
+            {
+                activeEuclid->midiFXGroup = thisKey - 6;
+
+                // enableSubmode(&subModeMidiFx[thisKey - 8]);
+            }
         }
-
-        if(e.down() && thisKey >= 6 && thisKey < 11)
+    }
+    // --- PATTERN MODE ---
+    else if(paramMode_ == PARAMMODE_PATTERN)
+    {
+        if(f2_)
         {
-            activeEuclid->midiFXGroup = thisKey - 6;
+            if(e.down() && e.clicks() == 0 && thisKey > 10)
+            {
+                uint8_t patt = thisKey - 11;
 
-            // enableSubmode(&subModeMidiFx[thisKey - 8]);
+                saveActivePattern(patt);
+            }
+        }
+        else
+        {
+            if(e.down() && e.clicks() == 0 && thisKey > 10)
+            {
+                uint8_t patt = thisKey - 11;
+
+                loadActivePattern(patt);
+            }
         }
     }
     omxDisp.setDirty();
@@ -681,10 +807,14 @@ void OmxModeEuclidean::onKeyHeldUpdate(OMXKeypadEvent e)
 
     int thisKey = e.key();
 
-    // Enter MidiFX mode
-    if (thisKey >= 6 && thisKey < 11)
+    // --- EDIT MODE ---
+    if (paramMode_ == PARAMMODE_EDIT)
     {
-        enableSubmode(&subModeMidiFx[thisKey - 6]);
+        // Enter MidiFX mode
+        if (thisKey >= 6 && thisKey < 11)
+        {
+            enableSubmode(&subModeMidiFx[thisKey - 6]);
+        }
     }
 
     omxLeds.setDirty();
@@ -706,9 +836,9 @@ void OmxModeEuclidean::updateLEDs()
     bool blinkState = omxLeds.getBlinkState();
 
     // turn leds off
-    for(uint8_t i = 1; i < 26; i++)
+    for(uint8_t i = 1; i < 27; i++)
     {
-        strip.setPixelColor(0, LEDOFF);
+        strip.setPixelColor(i, LEDOFF);
     }
 
     if (sequencer.playing)
@@ -721,39 +851,6 @@ void OmxModeEuclidean::updateLEDs()
     {
         strip.setPixelColor(0, LEDOFF);
     }
-
-    // if (instLockView_)
-    // {
-    //     int64_t instLockColor =  paramSelColors[lockedInst_];
-
-    //     // Always blink to show you're in mode, don't need differation between playing or not since the playhead makes this obvious
-    //     // auto color1 = blinkState ? instLockColor : LEDOFF;
-    //     // strip.setPixelColor(0, color1);
-
-    //     if (sequencer.playing)
-    //     {
-    //         // Blink left/right keys for octave select indicators.
-    //         auto color1 = blinkState ? instLockColor : LEDOFF;
-    //         strip.setPixelColor(0, color1);
-    //     }
-    //     else
-    //     {
-    //         strip.setPixelColor(0, instLockColor);
-    //     }
-    // }
-    // else
-    // {
-    //     if (sequencer.playing)
-    //     {
-    //         // Blink left/right keys for octave select indicators.
-    //         auto color1 = blinkState ? LIME : LEDOFF;
-    //         strip.setPixelColor(0, color1);
-    //     }
-    //     else
-    //     {
-    //         strip.setPixelColor(0, LEDOFF);
-    //     }
-    // }
 
     // Function Keys
     if (f3_)
@@ -771,38 +868,50 @@ void OmxModeEuclidean::updateLEDs()
         strip.setPixelColor(2, f2Color);
     }
 
-    for (uint8_t i = 0; i < kNumMidiFXGroups; i++)
+    strip.setPixelColor(3, paramMode_ == PARAMMODE_MIX ? WHITE : kMixColor);
+    strip.setPixelColor(4, paramMode_ == PARAMMODE_EDIT ? WHITE : kEuclidColor);
+    strip.setPixelColor(5, paramMode_ == PARAMMODE_PATTERN ? WHITE : kSaveColor);
+
+    // --- EDIT MODE ---
+    if(paramMode_ == PARAMMODE_MIX)
     {
-        auto mfxColor = (i == activeEuclid->midiFXGroup) ? LTCYAN : BLUE;
+        for (uint8_t i = 0; i < kNumMidiFXGroups; i++)
+        {
+            auto mfxColor = (i == activeEuclid->midiFXGroup) ? kSelMidiFXColor : kMidiFXColor;
 
-        strip.setPixelColor(6 + i, mfxColor);
+            strip.setPixelColor(6 + i, mfxColor);
+        }
+
+        for (uint8_t i = 0; i < kNumEuclids; i++)
+        {
+            auto eucColor = (i == selectedEuclid_) ? kSelMixColor : kMixColor;
+            strip.setPixelColor(11 + i, eucColor);
+        }
     }
-
-    for (uint8_t i = 0; i < kNumEuclids; i++)
+    else if (paramMode_ == PARAMMODE_EDIT)
     {
-        auto eucColor = (i == selectedEuclid_) ? WHITE : DKRED;
-        strip.setPixelColor(11 + i, eucColor);
+        for (uint8_t i = 0; i < kNumMidiFXGroups; i++)
+        {
+            auto mfxColor = (i == activeEuclid->midiFXGroup) ? kSelMidiFXColor : kMidiFXColor;
+
+            strip.setPixelColor(6 + i, mfxColor);
+        }
+
+        for (uint8_t i = 0; i < kNumEuclids; i++)
+        {
+            auto eucColor = (i == selectedEuclid_) ? kSelEuclidColor : kEuclidColor;
+            strip.setPixelColor(11 + i, eucColor);
+        }
     }
-
-    // if (instLockView_)
-    // {
-    //     updateLEDsChannelView();
-    // }
-    // else
-    // {
-    //     updateLEDsPatterns();
-
-    //     // Set 16 key leds to off to prevent them from sticking on after screensaver. 
-    //     for (int k = 0; k < 16; k++)
-    //     {
-    //         strip.setPixelColor(k + 11, LEDOFF);
-    //     }
-
-    //     if (fNone_ || f2_)
-    //         updateLEDsFNone();
-    //     else if (f1_)
-    //         updateLEDsF1();
-    // }
+    else if(paramMode_ == PARAMMODE_PATTERN)
+    {
+        for (uint8_t i = 0; i < kNumSaves; i++)
+        {
+            auto saveColor = (i == selectedSave_) ? kSelSaveColor : kSaveColor;
+            strip.setPixelColor(11 + i, saveColor);
+        }
+    }
+    
 }
 
 void OmxModeEuclidean::updateLEDsFNone()
@@ -929,7 +1038,7 @@ void OmxModeEuclidean::setupPageLegends()
 {
     omxDisp.clearLegends();
 
-    int8_t page = selEucParams.getSelPage();
+    int8_t page = getSelectedParamMode()->getSelPage();
 
     EuclideanSequencer* activeEuclid = &euclids[selectedEuclid_];
 
@@ -995,7 +1104,8 @@ void OmxModeEuclidean::onDisplayUpdate()
     { 
         if (!encoderConfig.enc_edit)
         {
-            if (selEucParams.getSelPage() == SELEUCLID_PAT)
+            auto params = getSelectedParamMode();
+            if (params->getSelPage() == SELEUCLID_PAT)
             {
 
                 if (sequencer.playing)
@@ -1016,7 +1126,7 @@ void OmxModeEuclidean::onDisplayUpdate()
 
                 omxDisp.drawEuclidPattern(true, activeEuclid->getPattern(), activeEuclid->getSteps(), ypos, false, activeEuclid->isRunning(), activeEuclid->getLastSeqPos());
 
-                omxDisp.dispPageIndicators2(selEucParams.getNumPages(), 0);
+                omxDisp.dispPageIndicators2(params->getNumPages(), 0);
 
                 // for(int i = 0; i < 4; i++){
 
@@ -1032,7 +1142,7 @@ void OmxModeEuclidean::onDisplayUpdate()
             else
             {
                 setupPageLegends();
-                omxDisp.dispGenericMode2(selEucParams.getNumPages(), selEucParams.getSelPage(), selEucParams.getSelParam(), encoderSelect_);
+                omxDisp.dispGenericMode2(params->getNumPages(), params->getSelPage(), params->getSelParam(), encoderSelect_);
             }
         }
     }

@@ -528,11 +528,10 @@ void readPotentimeters()
 			{
 				omxScreensaver.onPotChanged(k, prevValue, potSettings.analogValues[k], analogDelta);
 			}
+			// don't send pots in screensaver
 			else
-			{ // don't send pots in screensaver
-				{
-					activeOmxMode->onPotChanged(k, prevValue, potSettings.analogValues[k], analogDelta);
-				}
+			{ 
+				activeOmxMode->onPotChanged(k, prevValue, potSettings.analogValues[k], analogDelta);
 			}
 		}
 	}
@@ -764,6 +763,8 @@ void loadPatterns(void)
 	// Total storage size = 5749
 	// Fram = 32000 = 26251 available
 	// Eeprom = 2048
+
+	// 2832 - size of 16 euclid patterns of 16 euclids
 }
 
 // currently saves everything ( mode + patterns )
