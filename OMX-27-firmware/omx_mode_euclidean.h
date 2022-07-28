@@ -40,7 +40,7 @@ public:
     void SetScale(MusicScales* scale);
 
     static const u_int8_t kNumEuclids = 16;
-    static const u_int8_t kNumMidiFXGroups = 3;
+    static const u_int8_t kNumMidiFXGroups = 5;
 
 
     // static int serializedPatternSize(bool eeprom);
@@ -120,7 +120,7 @@ private:
     // SubModes
     SubmodeInterface* activeSubmode = nullptr;
 
-    SubModeMidiFxGroup subModeMidiFx;
+    SubModeMidiFxGroup subModeMidiFx[kNumMidiFXGroups];
 
     void enableSubmode(SubmodeInterface* subMode);
     void disableSubmode();

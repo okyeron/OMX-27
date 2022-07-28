@@ -37,9 +37,8 @@ OmxModeEuclidean::OmxModeEuclidean()
 
     for(int i = 0; i < kNumMidiFXGroups; i++)
     {
+        subModeMidiFx[i].setNoteOutputFunc(&OmxModeEuclidean::onNotePostFXForwarder, this);
     }
-
-    subModeMidiFx.setNoteOutputFunc(&OmxModeEuclidean::onNotePostFXForwarder, this);
 
     polyRhythmMode = false;
 
@@ -587,6 +586,8 @@ void OmxModeEuclidean::onKeyUpdate(OMXKeypadEvent e)
         return;
     }
 
+    EuclideanSequencer* activeEuclid = &euclids[selectedEuclid_];
+
     // if (instLockView_)
     // {
     //     onKeyUpdateChanLock(e);
@@ -634,9 +635,11 @@ void OmxModeEuclidean::onKeyUpdate(OMXKeypadEvent e)
             selectEuclid(thisKey - 11);
         }
 
-        if(e.down() && thisKey == 10)
+        if(e.down() && thisKey >= 6 && thisKey < 11)
         {
-            enableSubmode(&subModeMidiFx);
+            activeEuclid->midiFXGroup = thisKey - 6;
+
+            // enableSubmode(&subModeMidiFx[thisKey - 8]);
         }
     }
     omxDisp.setDirty();
@@ -676,6 +679,14 @@ void OmxModeEuclidean::onKeyHeldUpdate(OMXKeypadEvent e)
         return;
     }
 
+    int thisKey = e.key();
+
+    // Enter MidiFX mode
+    if (thisKey >= 6 && thisKey < 11)
+    {
+        enableSubmode(&subModeMidiFx[thisKey - 6]);
+    }
+
     omxLeds.setDirty();
     omxDisp.setDirty();
 }
@@ -690,6 +701,7 @@ void OmxModeEuclidean::updateLEDs()
     }
 
     // omxLeds.updateBlinkStates();
+    EuclideanSequencer* activeEuclid = &euclids[selectedEuclid_];
 
     bool blinkState = omxLeds.getBlinkState();
 
@@ -759,9 +771,14 @@ void OmxModeEuclidean::updateLEDs()
         strip.setPixelColor(2, f2Color);
     }
 
-    
+    for (uint8_t i = 0; i < kNumMidiFXGroups; i++)
+    {
+        auto mfxColor = (i == activeEuclid->midiFXGroup) ? LTCYAN : BLUE;
 
-    for (u_int8_t i = 0; i < kNumEuclids; i++)
+        strip.setPixelColor(8 + i, mfxColor);
+    }
+
+    for (uint8_t i = 0; i < kNumEuclids; i++)
     {
         auto eucColor = (i == selectedEuclid_) ? WHITE : DKRED;
         strip.setPixelColor(11 + i, eucColor);
@@ -865,15 +882,22 @@ void OmxModeEuclidean::updateLEDsPatterns()
 void OmxModeEuclidean::onPendingNoteOff(int note, int channel)
 {
     // Serial.println("OmxModeEuclidean::onPendingNoteOff " + String(note) + " " + String(channel));
-    subModeMidiFx.onPendingNoteOff(note, channel);
+    // subModeMidiFx.onPendingNoteOff(note, channel);
+
+    for(uint8_t i = 0; i < kNumMidiFXGroups; i++)
+    {
+        subModeMidiFx[i].onPendingNoteOff(note, channel);
+    }
 }
 
 // Called by a euclid sequencer when it triggers a note
 void OmxModeEuclidean::onNoteTriggered(uint8_t euclidIndex, MidiNoteGroup note)
 {
     // Serial.println("OmxModeEuclidean::onNoteTriggered " + String(euclidIndex) + " note: " + String(note.noteNumber));
+
+    uint8_t mfxIndex = euclids[euclidIndex].midiFXGroup;
     
-    subModeMidiFx.noteInput(note);
+    subModeMidiFx[mfxIndex].noteInput(note);
 
     omxDisp.setDirty();
 }

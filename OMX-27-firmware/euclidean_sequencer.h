@@ -70,6 +70,7 @@ namespace euclidean
 
         static const uint8_t kStepsPerPattern = 16;
 
+        uint8_t midiFXGroup = 0;
 
         // SnapShotSettings snapshots[8];
      
