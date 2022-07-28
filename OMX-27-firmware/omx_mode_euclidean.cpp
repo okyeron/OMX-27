@@ -784,8 +784,6 @@ void OmxModeEuclidean::updateLEDs()
         strip.setPixelColor(11 + i, eucColor);
     }
 
-    strip.setPixelColor(10, BLUE);
-
     // if (instLockView_)
     // {
     //     updateLEDsChannelView();
