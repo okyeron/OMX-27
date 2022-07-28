@@ -39,7 +39,9 @@ public:
     void onDisplayUpdate() override;
     void SetScale(MusicScales* scale);
 
-    static const u_int8_t kNumEuclids = 4;
+    static const u_int8_t kNumEuclids = 16;
+    static const u_int8_t kNumMidiFXGroups = 3;
+
 
     // static int serializedPatternSize(bool eeprom);
     // static inline int getNumPatterns() { return 8; }
@@ -84,7 +86,7 @@ private:
 
     uint8_t selectedEuclid_ = 0;
 
-    bool gridsSelected[4] = {false,false,false,false};
+    // bool gridsSelected[4] = {false,false,false,false};
 
     bool aux_ = false;
 
@@ -111,10 +113,13 @@ private:
     void startSequencers();
     void stopSequencers();
 
-    euclidean::EuclideanSequencer euclids[4];
+    euclidean::EuclideanSequencer euclids[kNumEuclids];
+
+    // int esize = sizeof(euclids);
 
     // SubModes
     SubmodeInterface* activeSubmode = nullptr;
+
     SubModeMidiFxGroup subModeMidiFx;
 
     void enableSubmode(SubmodeInterface* subMode);

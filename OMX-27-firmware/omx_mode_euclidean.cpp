@@ -35,6 +35,10 @@ OmxModeEuclidean::OmxModeEuclidean()
         euclids[i].setNoteOutputFunc(&OmxModeEuclidean::onNoteTriggeredForwarder, this, i);
     }
 
+    for(int i = 0; i < kNumMidiFXGroups; i++)
+    {
+    }
+
     subModeMidiFx.setNoteOutputFunc(&OmxModeEuclidean::onNotePostFXForwarder, this);
 
     polyRhythmMode = false;
@@ -625,12 +629,12 @@ void OmxModeEuclidean::onKeyUpdate(OMXKeypadEvent e)
     if (fNone_)
     {
         // Quick Select Note
-        if (e.down() && (thisKey > 10 && thisKey < 15))
+        if (e.down() && (thisKey > 10))
         {
             selectEuclid(thisKey - 11);
         }
 
-        if(e.down() && thisKey == 26)
+        if(e.down() && thisKey == 10)
         {
             enableSubmode(&subModeMidiFx);
         }
@@ -755,13 +759,15 @@ void OmxModeEuclidean::updateLEDs()
         strip.setPixelColor(2, f2Color);
     }
 
-    strip.setPixelColor(26, BLUE);
+    
 
     for (u_int8_t i = 0; i < kNumEuclids; i++)
     {
         auto eucColor = (i == selectedEuclid_) ? WHITE : DKRED;
         strip.setPixelColor(11 + i, eucColor);
     }
+
+    strip.setPixelColor(10, BLUE);
 
     // if (instLockView_)
     // {
@@ -988,7 +994,7 @@ void OmxModeEuclidean::onDisplayUpdate()
 
                 omxDisp.drawEuclidPattern(true, activeEuclid->getPattern(), activeEuclid->getSteps(), ypos, false, activeEuclid->isRunning(), activeEuclid->getLastSeqPos());
 
-                omxDisp.dispPageIndicators2(5, 0);
+                omxDisp.dispPageIndicators2(selEucParams.getNumPages(), 0);
 
                 // for(int i = 0; i < 4; i++){
 
@@ -1004,7 +1010,7 @@ void OmxModeEuclidean::onDisplayUpdate()
             else
             {
                 setupPageLegends();
-                omxDisp.dispGenericMode2(4, selEucParams.getSelPage(), selEucParams.getSelParam(), encoderSelect_);
+                omxDisp.dispGenericMode2(selEucParams.getNumPages(), selEucParams.getSelPage(), selEucParams.getSelParam(), encoderSelect_);
             }
         }
     }

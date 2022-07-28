@@ -1,5 +1,14 @@
 # Change log
 
+A light update tonight
+```
+### alpha6
+- Adds new Harmonizer MidiFX
+- ORIG plays original note if on, does not play if off. 
+- Add up to 7 additional notes
+- Play complex chords with ease!
+```
+
 ```
 ### alpha5
 Warning: Alpha build, UI not really fleshed out, might lock up, LEDs not fully implemented for Euclidean Mode
