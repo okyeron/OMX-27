@@ -2,11 +2,11 @@
 #include "omx_disp.h"
 #include "omx_leds.h"
 #include "colors.h"
-#include "MidiFX/midifx_randomizer.h"
-#include "MidiFX/midifx_chance.h"
-#include "MidiFX/midifx_scaler.h"
-#include "MidiFX/midifx_monophonic.h"
-#include "MidiFX/midifx_harmonizer.h"
+#include "midifx_randomizer.h"
+#include "midifx_chance.h"
+#include "midifx_scaler.h"
+#include "midifx_monophonic.h"
+#include "midifx_harmonizer.h"
 
 
 using namespace midifx;

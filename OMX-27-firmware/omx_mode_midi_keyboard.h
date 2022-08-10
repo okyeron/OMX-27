@@ -4,8 +4,10 @@
 #include "music_scales.h"
 #include "param_manager.h"
 #include "submode_midifxgroup.h"
-#include "Macros/midimacro_m8.h"
-#include "Macros/midimacro_norns.h"
+#include "midifx_interface.h"
+#include "midifx_interface.h"
+#include "midimacro_m8.h"
+#include "midimacro_norns.h"
 
 class OmxModeMidiKeyboard : public OmxModeInterface
 {

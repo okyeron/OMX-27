@@ -1,3 +1,4 @@
+#pragma once
 #ifndef _INCLUDE_CLEARUI_H_
 #define _INCLUDE_CLEARUI_H_
 

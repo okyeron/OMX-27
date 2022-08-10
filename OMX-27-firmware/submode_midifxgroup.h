@@ -1,7 +1,7 @@
 #pragma once
 
 #include "submode_interface.h"
-#include "MidiFX/midifx_interface.h"
+#include "midifx_interface.h"
 
 // Holds a group of 4 midi fx slots. 
 class SubModeMidiFxGroup : public SubmodeInterface

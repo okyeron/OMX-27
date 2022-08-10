@@ -1,3 +1,4 @@
+#pragma once
 #ifndef _INCLUDE_CLEARUI_FIELD_H_
 #define _INCLUDE_CLEARUI_FIELD_H_
 
