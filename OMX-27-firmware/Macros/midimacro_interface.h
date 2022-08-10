@@ -3,6 +3,7 @@
 #include "ClearUI_Input.h"
 #include "omx_keypad.h"
 #include "param_manager.h"
+#include "music_scales.h"
 
 namespace midimacro
 {
@@ -35,15 +36,31 @@ namespace midimacro
         virtual void onKeyUpdate(OMXKeypadEvent e) = 0;
         virtual void drawLEDs() = 0;
 
+        virtual void setScale(MusicScales* scale);
+
+        virtual void setDoNoteOn(void (*fptr)(void *, uint8_t), void *context);
+        virtual void setDoNoteOff(void (*fptr)(void *, uint8_t), void *context);
+
     protected:
         bool enabled_;
         bool encoderSelect_;
         ParamManager params_;
+
+        MusicScales* scale_;
+
+        void* doNoteOnFptrContext_;
+        void (*doNoteOnFptr_)(void *, uint8_t);
+
+        void* doNoteOffFptrContext_;
+        void (*doNoteOffFptr_)(void *, uint8_t);
 
         virtual void onEnabled() {} // Called whenever entering mode
         virtual void onDisabled() {} // Called whenever entering mode
 
         virtual void onEncoderChangedSelectParam(Encoder::Update enc);
         virtual void onEncoderChangedEditParam(Encoder::Update enc) = 0;
+
+        virtual void DoNoteOn(uint8_t keyIndex);
+        virtual void DoNoteOff(uint8_t keyIndex);
     };
 }

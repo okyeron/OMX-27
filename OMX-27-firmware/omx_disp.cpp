@@ -357,6 +357,27 @@ void OmxDisp::dispGenericMode2(uint8_t numPages, int8_t selectedPage, int8_t sel
     dispPageIndicators2(numPages, selectedPage);
 }
 
+void OmxDisp::dispGenericModeLabel(const char *label, uint8_t numPages, int8_t selectedPage)
+{
+    if (isMessageActive())
+    {
+        renderMessage();
+        return;
+    }
+
+    display.fillRect(0, 0, 128, 32, BLACK);
+    u8g2_display.setFontMode(1);
+    u8g2_display.setFont(FONT_TENFAT);
+    u8g2_display.setForegroundColor(WHITE);
+    u8g2_display.setBackgroundColor(BLACK);
+    u8g2centerText(label, 0, 10, 128, 32);
+
+    if (numPages > 1)
+    {
+        dispPageIndicators2(numPages, selectedPage);
+    }
+}
+
 void OmxDisp::dispPageIndicators2(uint8_t numPages, int8_t selected)
 {
     int16_t indicatorWidth = 6;

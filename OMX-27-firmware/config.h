@@ -158,7 +158,7 @@ struct MidiMacroConfig {
 
 extern MidiMacroConfig midiMacroConfig;
 
-extern bool m8mutesolo[];
+// extern bool m8mutesolo[];
 
 struct EncoderConfig {
 	bool enc_edit = false;

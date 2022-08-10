@@ -76,7 +76,7 @@ const int steps[] = {0,
 
 const int midiKeyMap[] = {12,1,13,2,14,15,3,16,4,17,5,18,19,6,20,7,21,22,8,23,9,24,10,25,26};
 
-bool m8mutesolo[] = {false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false};
+
 
 SysSettings sysSettings;
 PotSettings potSettings;

@@ -34,6 +34,9 @@ public:
     void dispGenericMode(int selected);
 
     void dispGenericMode2(uint8_t numPages, int8_t selectedPage, int8_t selectedParam, bool encSelActive);
+
+    // Displays a label and page numbers
+    void dispGenericModeLabel(const char* label, uint8_t numPages, int8_t selectedPage);
     void dispPageIndicators(int page, bool selected);
     void dispPageIndicators2(uint8_t numPages, int8_t selected);
     void dispMode();

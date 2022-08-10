@@ -16,6 +16,11 @@ OmxModeMidiKeyboard::OmxModeMidiKeyboard()
     params.addPage(4);
 
     subModeMidiFx.setNoteOutputFunc(&OmxModeMidiKeyboard::onNotePostFXForwarder, this);
+
+    m8Macro_.setDoNoteOn(&OmxModeMidiKeyboard::doNoteOnForwarder, this);
+    m8Macro_.setDoNoteOff(&OmxModeMidiKeyboard::doNoteOffForwarder, this);
+    nornsMarco_.setDoNoteOn(&OmxModeMidiKeyboard::doNoteOnForwarder, this);
+    nornsMarco_.setDoNoteOff(&OmxModeMidiKeyboard::doNoteOffForwarder, this);
 }
 
 void OmxModeMidiKeyboard::InitSetup()
@@ -64,7 +69,10 @@ void OmxModeMidiKeyboard::onPotChanged(int potIndex, int prevValue, int newValue
         return;
     }
 
-    if(macroActive_ && activeMacro_->consumesPots())
+    auto activeMacro = getActiveMacro();
+
+    // Note, these get sent even if macro mode is not active
+    if(activeMacro != nullptr && activeMacro->consumesPots())
     {
         activeMacro_->onPotChanged(potIndex, prevValue, newValue, analogDelta);
     }
@@ -115,6 +123,12 @@ void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
     if (isSubmodeEnabled())
     {
         activeSubmode->onEncoderChanged(enc);
+        return;
+    }
+
+    if(macroActive_ && activeMacro_->consumesDisplay())
+    {
+        activeMacro_->onEncoderChanged(enc);
         return;
     }
 
@@ -297,6 +311,12 @@ void OmxModeMidiKeyboard::onEncoderButtonDown()
         return;
     }
 
+    if(macroActive_ && activeMacro_->consumesDisplay())
+    {
+        activeMacro_->onEncoderButtonDown();
+        return;
+    }
+
     encoderSelect = !encoderSelect;
     omxDisp.isDirty();
 }
@@ -318,6 +338,11 @@ bool OmxModeMidiKeyboard::shouldBlockEncEdit()
     if (isSubmodeEnabled())
     {
         return activeSubmode->shouldBlockEncEdit();
+    }
+
+    if(macroActive_)
+    {
+        return true;
     }
 
     return false;
@@ -354,20 +379,23 @@ void OmxModeMidiKeyboard::onKeyUpdate(OMXKeypadEvent e)
                 {
                     macroActive_ = true;
                     activeMacro_->setEnabled(true);
+                    omxDisp.setDirty();
                     return;
                 }
                 // midiMacroConfig.m8AUX = true;
                 return;
             }
         }
-        else // M8 Macro mode
+        else // Macro mode active
         {
             if(!e.down() && thisKey == 0 && e.clicks() == 2)
             {
+                // exit macro mode
                 activeMacro_->setEnabled(false);
                 macroActive_ = false;
                 midiSettings.midiAUX = false;
                 activeMacro_ = nullptr;
+                omxDisp.setDirty();
 
                 // Clear LEDs
                 for (int m = 1; m < LED_COUNT; m++)
@@ -732,6 +760,8 @@ void OmxModeMidiKeyboard::inMidiNoteOff(byte channel, byte note, byte velocity)
 void OmxModeMidiKeyboard::SetScale(MusicScales *scale)
 {
     this->musicScale = scale;
+    m8Macro_.setScale(scale);
+    nornsMarco_.setScale(scale);
 }
 
 void OmxModeMidiKeyboard::enableSubmode(SubmodeInterface *subMode)

@@ -101,4 +101,16 @@ private:
 
     midimacro::MidiMacroInterface* getActiveMacro();
 
+    // Static glue to link a pointer to a member function
+    static void doNoteOnForwarder(void *context, uint8_t keyIndex)
+    {
+        static_cast<OmxModeMidiKeyboard *>(context)->doNoteOn(keyIndex);
+    }
+
+    // Static glue to link a pointer to a member function
+    static void doNoteOffForwarder(void *context, uint8_t keyIndex)
+    {
+        static_cast<OmxModeMidiKeyboard *>(context)->doNoteOff(keyIndex);
+    }
+
 };
