@@ -99,32 +99,32 @@ namespace midimacro
                     }
                     else if (thisKey == keyUp_)
                     {
-                        params_.setSelPageAndParam(1,0);
-                        encoderSelect_ = false;
+                        // params_.setSelPageAndParam(1,0);
+                        // encoderSelect_ = false;
                         MM::sendControlChange(ccEnc2_, 63, midiMacroConfig.midiMacroChan);
                         delay(20);
                         MM::sendControlChange(ccEnc2_, 63, midiMacroConfig.midiMacroChan);
                     }
                     else if (thisKey == keyDown_)
                     {
-                        params_.setSelPageAndParam(1,0);
-                        encoderSelect_ = false;
+                        // params_.setSelPageAndParam(1,0);
+                        // encoderSelect_ = false;
                         MM::sendControlChange(ccEnc2_, 65, midiMacroConfig.midiMacroChan);
                         delay(20);
                         MM::sendControlChange(ccEnc2_, 65, midiMacroConfig.midiMacroChan);
                     }
                     else if (thisKey == keyLeft_)
                     {
-                        params_.setSelPageAndParam(2,0);
-                        encoderSelect_ = false;
+                        // params_.setSelPageAndParam(2,0);
+                        // encoderSelect_ = false;
                         MM::sendControlChange(ccEnc3_, 63, midiMacroConfig.midiMacroChan);
                         delay(20);
                         MM::sendControlChange(ccEnc3_, 63, midiMacroConfig.midiMacroChan);
                     }
                     else if (thisKey == keyRight_)
                     {
-                        params_.setSelPageAndParam(2,0);
-                        encoderSelect_ = false;
+                        // params_.setSelPageAndParam(2,0);
+                        // encoderSelect_ = false;
                         MM::sendControlChange(ccEnc3_, 65, midiMacroConfig.midiMacroChan);
                         delay(20);
                         MM::sendControlChange(ccEnc3_, 65, midiMacroConfig.midiMacroChan);

@@ -50,6 +50,8 @@ void OmxLeds::updateBlinkStates()
 }
 
 int OmxLeds::getKeyColor(MusicScales* scale, int pixel) {
+    if(scale == nullptr) return LEDOFF;
+    
 	if(scaleConfig.scalePattern == -1) {
 		return LEDOFF;
 	} else {

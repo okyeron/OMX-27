@@ -71,8 +71,14 @@ void OmxModeMidiKeyboard::onPotChanged(int potIndex, int prevValue, int newValue
 
     auto activeMacro = getActiveMacro();
 
+    bool macroConsumesPots = false;
+    if(activeMacro != nullptr)
+    {
+        macroConsumesPots = activeMacro->consumesPots();
+    }
+
     // Note, these get sent even if macro mode is not active
-    if(activeMacro != nullptr && activeMacro->consumesPots())
+    if(macroConsumesPots)
     {
         activeMacro_->onPotChanged(potIndex, prevValue, newValue, analogDelta);
     }
@@ -126,7 +132,14 @@ void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
         return;
     }
 
-    if(macroActive_ && activeMacro_->consumesDisplay())
+    bool macroConsumesDisplay = false;
+
+    if(macroActive_ && activeMacro_ != nullptr)
+    {
+        macroConsumesDisplay = activeMacro_->consumesDisplay();
+    }
+
+    if(macroConsumesDisplay)
     {
         activeMacro_->onEncoderChanged(enc);
         return;
@@ -311,7 +324,13 @@ void OmxModeMidiKeyboard::onEncoderButtonDown()
         return;
     }
 
-    if(macroActive_ && activeMacro_->consumesDisplay())
+    bool macroConsumesDisplay = false;
+    if(macroActive_ && activeMacro_ != nullptr)
+    {
+        macroConsumesDisplay = activeMacro_->consumesDisplay();
+    }
+
+    if(macroConsumesDisplay)
     {
         activeMacro_->onEncoderButtonDown();
         return;
@@ -391,10 +410,14 @@ void OmxModeMidiKeyboard::onKeyUpdate(OMXKeypadEvent e)
             if(!e.down() && thisKey == 0 && e.clicks() == 2)
             {
                 // exit macro mode
-                activeMacro_->setEnabled(false);
-                macroActive_ = false;
+                if (activeMacro_ != nullptr)
+                {
+                    activeMacro_->setEnabled(false);
+                    activeMacro_ = nullptr;
+                }
+
                 midiSettings.midiAUX = false;
-                activeMacro_ = nullptr;
+                macroActive_ = false;
                 omxDisp.setDirty();
 
                 // Clear LEDs
@@ -405,7 +428,10 @@ void OmxModeMidiKeyboard::onKeyUpdate(OMXKeypadEvent e)
             }
             else
             {
-                activeMacro_->onKeyUpdate(e);
+                if(activeMacro_ != nullptr)
+                {
+                    activeMacro_->onKeyUpdate(e);
+                }
             }
             return;
 
@@ -578,16 +604,19 @@ void OmxModeMidiKeyboard::onDisplayUpdate()
         return;
     }
 
-    if(macroActive_)
+    bool macroConsumesDisplay = false;
+
+    if(macroActive_ && activeMacro_ != nullptr)
     {
         activeMacro_->drawLEDs();
+        macroConsumesDisplay = activeMacro_->consumesDisplay();
     }
     else
     {
         omxLeds.drawMidiLeds(musicScale); // SHOW LEDS
     }
 
-    if(macroActive_ && activeMacro_->consumesDisplay())
+    if(macroConsumesDisplay)
     {
         activeMacro_->onDisplayUpdate();
     }
