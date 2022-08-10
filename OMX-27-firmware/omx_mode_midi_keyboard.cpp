@@ -398,6 +398,7 @@ void OmxModeMidiKeyboard::onKeyUpdate(OMXKeypadEvent e)
                 {
                     macroActive_ = true;
                     activeMacro_->setEnabled(true);
+                    activeMacro_->setScale(musicScale);
                     omxDisp.setDirty();
                     return;
                 }

@@ -28,8 +28,6 @@ namespace midimacro
         void onEncoderChangedEditParam(Encoder::Update enc) override;
 
     private:
-        MusicScales* scale_;
-        
         bool m8mutesolo_[16];
 
         // Control key mappings
