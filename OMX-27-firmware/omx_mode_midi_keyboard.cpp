@@ -80,7 +80,7 @@ void OmxModeMidiKeyboard::onPotChanged(int potIndex, int prevValue, int newValue
     // Note, these get sent even if macro mode is not active
     if(macroConsumesPots)
     {
-        activeMacro_->onPotChanged(potIndex, prevValue, newValue, analogDelta);
+        activeMacro->onPotChanged(potIndex, prevValue, newValue, analogDelta);
     }
     else
     {

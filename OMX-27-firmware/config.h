@@ -50,8 +50,8 @@ extern const OMXMode DEFAULT_MODE;
 extern const uint8_t EEPROM_VERSION;
 
 #define EEPROM_HEADER_ADDRESS            0
-#define EEPROM_HEADER_SIZE               32
-#define EEPROM_PATTERN_ADDRESS           32
+#define EEPROM_HEADER_SIZE               34
+#define EEPROM_PATTERN_ADDRESS           64
 
 // next address 1104 (was 1096 before clock)
 

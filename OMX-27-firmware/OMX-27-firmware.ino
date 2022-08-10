@@ -633,11 +633,11 @@ void saveHeader()
 	uint8_t unMidiChannel = (uint8_t)(sysSettings.midiChannel - 1);
 	storage->write(EEPROM_HEADER_ADDRESS + 3, unMidiChannel);
 
-	uint8_t midiMacroChannel = (uint8_t)(midiMacroConfig.midiMacroChan - 1);
-	storage->write(EEPROM_HEADER_ADDRESS + 4, midiMacroChannel);
+	uint8_t midiMacroChan = (uint8_t)(midiMacroConfig.midiMacroChan - 1);
+	storage->write(EEPROM_HEADER_ADDRESS + 4, midiMacroChan);
 
-	uint8_t midiMacro = (uint8_t)midiMacroConfig.midiMacro;
-	storage->write(EEPROM_HEADER_ADDRESS + 5, midiMacro);
+	uint8_t midiMacroId = (uint8_t)midiMacroConfig.midiMacro;
+	storage->write(EEPROM_HEADER_ADDRESS + 5, midiMacroId);
 
 	for (int b = 0; b < NUM_CC_BANKS; b++)
 	{
@@ -656,15 +656,15 @@ bool loadHeader(void)
 {
 	uint8_t version = storage->read(EEPROM_HEADER_ADDRESS + 0);
 
-	//	char buf[64];
-	//	snprintf( buf, sizeof(buf), "EEPROM Header Version is %d\n", version );
-	//	Serial.print( buf );
+		char buf[64];
+		snprintf( buf, sizeof(buf), "EEPROM Header Version is %d\n", version );
+		Serial.print( buf );
 
 	// Uninitalized EEPROM memory is filled with 0xFF
 	if (version == 0xFF)
 	{
 		// EEPROM was uninitialized
-		//		Serial.println( "version was 0xFF" );
+				Serial.println( "version was 0xFF" );
 		return false;
 	}
 
@@ -672,7 +672,7 @@ bool loadHeader(void)
 	{
 		// write an adapter if we ever need to increment the EEPROM version and also save the existing patterns
 		// for now, return false will essentially reset the state
-		//		Serial.println( "version not matched" );
+				Serial.println( "version not matched" );
 		return false;
 	}
 
@@ -690,6 +690,7 @@ bool loadHeader(void)
 	uint8_t midiMacro = storage->read(EEPROM_HEADER_ADDRESS + 5);
 	midiMacroConfig.midiMacro = midiMacro;
 
+	Serial.println( "loading banks" );
 	for (int b = 0; b < NUM_CC_BANKS; b++)
 	{
 		for (int i = 0; i < NUM_CC_POTS; i++)
@@ -718,7 +719,7 @@ void savePatterns(void)
 		nLocalAddress += patternSize;
 	}
 
-	// Serial.println((String)"nLocalAddress: " + nLocalAddress);
+	Serial.println((String)"nLocalAddress: " + nLocalAddress);
 
 	// Grids patterns
 	patternSize = OmxModeGrids::serializedPatternSize(storage->isEeprom());
@@ -738,7 +739,7 @@ void savePatterns(void)
 		nLocalAddress += patternSize;
 	}
 
-	// Serial.println((String)"nLocalAddress: " + nLocalAddress);
+	Serial.println((String)"nLocalAddress: " + nLocalAddress);
 
 	// Seq patternSize: 715
 	// nLocalAddress: 5752
@@ -754,6 +755,9 @@ void loadPatterns(void)
 	int patternSize = serializedPatternSize(storage->isEeprom());
 	int nLocalAddress = EEPROM_PATTERN_ADDRESS;
 
+	Serial.println( "seq patterns nLocalAddress" );
+	Serial.println( nLocalAddress );
+
 	for (int i = 0; i < NUM_PATTERNS; i++)
 	{
 		auto pattern = Pattern{};
@@ -768,6 +772,8 @@ void loadPatterns(void)
 		nLocalAddress += patternSize;
 	}
 
+	Serial.println( "grids patterns nLocalAddress" );
+	Serial.println( nLocalAddress );
 	// 332 - eeprom size
 	// 332 * 8 = 2656
 
@@ -788,8 +794,10 @@ void loadPatterns(void)
 		nLocalAddress += patternSize;
 	}
 
-	// Serial.println( "Pattern size" );
-	// Serial.println( patternSize );
+	Serial.println( "Pattern size" );
+	Serial.println( patternSize );
+	Serial.println( "nLocalAddress" );
+	Serial.println( nLocalAddress );
 	// Pattern size = 715
 	// Total size of patterns = 5720
 	// Total storage size = 5749
@@ -813,18 +821,18 @@ bool loadFromStorage(void)
 	// This load can happen soon after Serial.begin - enable this 'wait for Serial' if you need to Serial.print during loading
 	// while( !Serial );
 
-	// Serial.println( "read the header" );
+	Serial.println( "read the header" );
 	bool bContainedData = loadHeader();
 
 	if (bContainedData)
 	{
-		// Serial.println( "loading patterns" );
+		Serial.println( "loading patterns" );
 		loadPatterns();
 		changeOmxMode(sysSettings.omxMode);
 		return true;
 	}
 
-	// Serial.println( "failed to load" );
+	Serial.println( "failed to load" );
 
 	return false;
 }
