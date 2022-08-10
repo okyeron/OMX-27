@@ -1,6 +1,15 @@
 # Change log
 
 ```
+### alpha8
+- Reduces number of euclids to 8. Resource problems with 16, pots not updating correctly
+- Adds modes: MIX, EDIT, PATTERN
+- Hold F2 + select save slot to save. Press key to load. Same concept as grids. 
+- Knobs only work to adjust euclid pattern in edit mode. 
+- Future plans for MIX mode, but doesn't do much currently. 
+```
+
+```
 ### alpha7
 - Increases number of euclids to 16 and MidiFX for euclidean seq mode to 5 for fun and profit. 
 - Select a euclid in lower 16. Assign it to 1 of the 5 midi FX in blue on top row

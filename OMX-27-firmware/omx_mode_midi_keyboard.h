@@ -4,6 +4,8 @@
 #include "music_scales.h"
 #include "param_manager.h"
 #include "submode_midifxgroup.h"
+#include "Macros/midimacro_m8.h"
+#include "Macros/midimacro_norns.h"
 
 class OmxModeMidiKeyboard : public OmxModeInterface
 {
@@ -62,6 +64,8 @@ private:
     void onEncoderChangedSelectParam(Encoder::Update enc);
     ParamManager params;
 
+    bool macroActive_ = false;
+
     // SubModes
     SubmodeInterface* activeSubmode = nullptr;
     SubModeMidiFxGroup subModeMidiFx;
@@ -89,4 +93,12 @@ private:
     }
 
     void onNotePostFX(MidiNoteGroup note);
+
+    midimacro::MidiMacroNorns nornsMarco_;
+    midimacro::MidiMacroM8 m8Macro_;
+
+    midimacro::MidiMacroInterface* activeMacro_;
+
+    midimacro::MidiMacroInterface* getActiveMacro();
+
 };

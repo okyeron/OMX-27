@@ -105,39 +105,6 @@ void OmxLeds::drawMidiLeds(MusicScales* scale) {
 		strip.setPixelColor(10, color3); // MidiFX key
 
 	// Macros
-	} else if (midiMacroConfig.m8AUX){
-		auto color5 = blinkState ? ORANGE : LEDOFF;
-		auto color6 = blinkState ? RED : LEDOFF;
-
-		strip.setPixelColor(0, BLUE);
-		strip.setPixelColor(1, ORANGE); // all mute
-		strip.setPixelColor(3, LIME); // MIXER
-		strip.setPixelColor(4, CYAN); // snap load
-		strip.setPixelColor(5, MAGENTA); // snap save
-
-		for(int m = 11; m < LED_COUNT-8; m++){
-			if (m8mutesolo[m-11]){
-				strip.setPixelColor(m, color5);
-			}else{
-				strip.setPixelColor(m, ORANGE);
-			}
-		}
-		
-		strip.setPixelColor(6, RED); // all solo
-		for(int m = 19; m < LED_COUNT; m++){
-			if (m8mutesolo[m-11]){
-				strip.setPixelColor(m, color6);
-			}else{
-				strip.setPixelColor(m, RED);
-			}
-		}
-		strip.setPixelColor(2, LEDOFF);
-		strip.setPixelColor(7, LEDOFF);
-		strip.setPixelColor(8, LEDOFF);
-
-		strip.setPixelColor(9, YELLOW); // WAVES
-		strip.setPixelColor(10, BLUE); // PLAY
-
 	} else {
 		// AUX key
 		strip.setPixelColor(0, LEDOFF);

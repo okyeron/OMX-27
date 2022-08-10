@@ -95,6 +95,14 @@ void report_ram_stat(const char *aname, uint32_t avalue)
 	Serial.println("%)");
 };
 
+void report_profile_time(const char *aname, uint32_t avalue)
+{
+	Serial.print(aname);
+	Serial.print(": ");
+	Serial.print(avalue);
+	Serial.println("\n");
+};
+
 void report_ram()
 {
 	bool lowmem;
@@ -212,7 +220,7 @@ void setup()
 		saveToStorage();
 	}
 
-	changeOmxMode(MODE_EUCLID);
+	// changeOmxMode(MODE_EUCLID);
 
 	// Init Display
 	omxDisp.setup();
@@ -303,7 +311,9 @@ void loop()
 		}
 	}
 
+	// Micros timeStart = micros();
 	activeOmxMode->loopUpdate();
+
 
 	// DISPLAY SETUP
 	display.clearDisplay();
@@ -484,6 +494,16 @@ void loop()
 	{
 		// ignore incoming messages
 	}
+
+	// Micros elapsed = micros() - timeStart;
+	// if ((timeStart - reporttime) > 2000)
+	// {
+	// 	report_profile_time("Elapsed", elapsed);
+	// 	reporttime = timeStart;
+	// 	// report_ram();
+	// };
+
+	
 
 // #if RAM_MONITOR
 // 	uint32_t time = millis();

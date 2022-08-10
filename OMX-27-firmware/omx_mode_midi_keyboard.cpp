@@ -64,14 +64,22 @@ void OmxModeMidiKeyboard::onPotChanged(int potIndex, int prevValue, int newValue
         return;
     }
 
-    if (midiMacroConfig.midiMacro)
+    if(macroActive_ && activeMacro_->consumesPots())
     {
-        omxUtil.sendPots(potIndex, midiMacroConfig.midiMacroChan);
+        activeMacro_->onPotChanged(potIndex, prevValue, newValue, analogDelta);
     }
     else
     {
         omxUtil.sendPots(potIndex, sysSettings.midiChannel);
     }
+
+    // if (midiMacroConfig.midiMacro)
+    // {
+    //     omxUtil.sendPots(potIndex, midiMacroConfig.midiMacroChan);
+    // }
+    // else
+    // {
+    // }
 
     omxDisp.setDirty();
 }
@@ -334,34 +342,75 @@ void OmxModeMidiKeyboard::onKeyUpdate(OMXKeypadEvent e)
     // Aux double click toggle macro
     if (midiMacroConfig.midiMacro > 0)
     {
-        if (!midiMacroConfig.m8AUX)
+        if (!macroActive_)
         {
             // Enter M8 Mode
             if (!e.down() && thisKey == 0 && e.clicks() == 2)
             {
-                midiMacroConfig.m8AUX = true;
                 midiSettings.midiAUX = false;
+
+                activeMacro_ = getActiveMacro();
+                if(activeMacro_ != nullptr)
+                {
+                    macroActive_ = true;
+                    activeMacro_->setEnabled(true);
+                    return;
+                }
+                // midiMacroConfig.m8AUX = true;
                 return;
             }
         }
         else // M8 Macro mode
         {
-            // Exit M8 mode
-            if (!e.down() && thisKey == 0 && e.clicks() == 2)
+            if(!e.down() && thisKey == 0 && e.clicks() == 2)
             {
-                midiMacroConfig.m8AUX = false;
+                activeMacro_->setEnabled(false);
+                macroActive_ = false;
                 midiSettings.midiAUX = false;
+                activeMacro_ = nullptr;
 
                 // Clear LEDs
                 for (int m = 1; m < LED_COUNT; m++)
                 {
                     strip.setPixelColor(m, LEDOFF);
                 }
-                return;
             }
-
-            onKeyUpdateM8Macro(e);
+            else
+            {
+                activeMacro_->onKeyUpdate(e);
+            }
             return;
+
+            // if(activeMarco_->getEnabled() == false)
+            // {
+            //     macroActive_ = false;
+            //     midiSettings.midiAUX = false;
+            //     activeMarco_ = nullptr;
+
+            //     // Clear LEDs
+            //     for (int m = 1; m < LED_COUNT; m++)
+            //     {
+            //         strip.setPixelColor(m, LEDOFF);
+            //     }
+            //     return;
+            // }
+            // // Exit M8 mode
+            // if (!e.down() && thisKey == 0 && e.clicks() == 2)
+            // {
+            //     midiMacroConfig.m8AUX = false;
+            //     midiSettings.midiAUX = false;
+            //     macroActive_ = true;
+
+            //     // Clear LEDs
+            //     for (int m = 1; m < LED_COUNT; m++)
+            //     {
+            //         strip.setPixelColor(m, LEDOFF);
+            //     }
+            //     return;
+            // }
+
+            // onKeyUpdateM8Macro(e);
+            // return;
         }
     }
 
@@ -428,7 +477,12 @@ void OmxModeMidiKeyboard::onKeyUpdate(OMXKeypadEvent e)
         // Hard coded Organelle stuff
         //					MM::sendControlChange(CC_AUX, 100, sysSettings.midiChannel);
 
-        if (!midiMacroConfig.m8AUX)
+        // if (!midiMacroConfig.m8AUX)
+        // {
+        //     midiSettings.midiAUX = true;
+        // }
+
+        if (!macroActive_)
         {
             midiSettings.midiAUX = true;
         }
@@ -459,174 +513,30 @@ void OmxModeMidiKeyboard::onKeyUpdate(OMXKeypadEvent e)
     }
 }
 
-void OmxModeMidiKeyboard::onKeyUpdateM8Macro(OMXKeypadEvent e)
+midimacro::MidiMacroInterface *OmxModeMidiKeyboard::getActiveMacro()
 {
-    if (!midiMacroConfig.m8AUX)
-        return;
-
-    int thisKey = e.key();
-    int keyPos = thisKey - 11;
-
-    if (!e.held())
+    switch (midiMacroConfig.midiMacro)
     {
-        if (e.down() && (thisKey > 10 && thisKey < 27))
-        {
-            // Mutes / Solos
-            m8mutesolo[keyPos] = !m8mutesolo[keyPos];
-            int mutePos = keyPos + 12;
-            if (m8mutesolo[keyPos])
-            {
-                MM::sendNoteOn(mutePos, 1, midiMacroConfig.midiMacroChan);
-            }
-            else
-            {
-                MM::sendNoteOff(mutePos, 0, midiMacroConfig.midiMacroChan);
-            }
-            return; // break;
-        }
-        else if (e.down() && (thisKey == 1))
-        {
-            // release all mutes
-            for (int z = 0; z < 8; z++)
-            {
-                int mutePos = z + 12;
-                if (m8mutesolo[z])
-                {
-                    m8mutesolo[z] = false;
-                    MM::sendNoteOff(mutePos, 0, midiMacroConfig.midiMacroChan);
-                }
-            }
-            return; // break;
-        }
-        else if (e.down() && (thisKey == 2))
-        {
-            // ?
-            return; // break;
-        }
-        else if (e.down() && (thisKey == 3))
-        {
-            // return to mixer
-            // hold shift 4 left 1 down, release shift
-            MM::sendNoteOn(1, 1, midiMacroConfig.midiMacroChan); // Shift
-            delay(40);
-            MM::sendNoteOn(6, 1, midiMacroConfig.midiMacroChan); // Up
-            delay(20);
-            MM::sendNoteOff(6, 0, midiMacroConfig.midiMacroChan);
-            delay(40);
-            MM::sendNoteOn(4, 1, midiMacroConfig.midiMacroChan); // Left
-            delay(20);
-            MM::sendNoteOff(4, 0, midiMacroConfig.midiMacroChan);
-            delay(40);
-            MM::sendNoteOn(4, 1, midiMacroConfig.midiMacroChan); // Left
-            delay(20);
-            MM::sendNoteOff(4, 0, midiMacroConfig.midiMacroChan);
-            delay(40);
-            MM::sendNoteOn(4, 1, midiMacroConfig.midiMacroChan); // Left
-            delay(20);
-            MM::sendNoteOff(4, 0, midiMacroConfig.midiMacroChan);
-            delay(40);
-            MM::sendNoteOn(4, 1, midiMacroConfig.midiMacroChan); // Left
-            delay(20);
-            MM::sendNoteOff(4, 0, midiMacroConfig.midiMacroChan);
-            delay(40);
-            MM::sendNoteOn(7, 1, midiMacroConfig.midiMacroChan); // Down
-            delay(20);
-            MM::sendNoteOff(7, 0, midiMacroConfig.midiMacroChan);
-            MM::sendNoteOff(1, 0, midiMacroConfig.midiMacroChan);
-
-            return; // break;
-        }
-        else if (e.down() && (thisKey == 4))
-        {
-            // snap save
-            MM::sendNoteOn(1, 1, midiMacroConfig.midiMacroChan); // Shift
-            delay(40);
-            MM::sendNoteOn(3, 1, midiMacroConfig.midiMacroChan); // Option
-            delay(40);
-            MM::sendNoteOff(3, 0, midiMacroConfig.midiMacroChan);
-            MM::sendNoteOff(1, 0, midiMacroConfig.midiMacroChan);
-
-            return; // break;
-        }
-        else if (e.down() && (thisKey == 5))
-        {
-            // snap load
-            MM::sendNoteOn(1, 1, midiMacroConfig.midiMacroChan); // Shift
-            delay(40);
-            MM::sendNoteOn(2, 1, midiMacroConfig.midiMacroChan); // Edit
-            delay(40);
-            MM::sendNoteOff(2, 0, midiMacroConfig.midiMacroChan);
-            MM::sendNoteOff(1, 0, midiMacroConfig.midiMacroChan);
-
-            // then reset mutes/solos
-            for (int z = 0; z < 16; z++)
-            {
-                if (m8mutesolo[z])
-                {
-                    m8mutesolo[z] = false;
-                }
-            }
-
-            return; // break;
-        }
-        else if (e.down() && (thisKey == 6))
-        {
-            // release all solos
-            for (int z = 8; z < 16; z++)
-            {
-                int mutePos = z + 12;
-                if (m8mutesolo[z])
-                {
-                    m8mutesolo[z] = false;
-                    MM::sendNoteOff(mutePos, 0, midiMacroConfig.midiMacroChan);
-                }
-            }
-            return; // break;
-        }
-        else if (e.down() && (thisKey == 7))
-        {
-            // ??
-            return; // break;
-        }
-        else if (e.down() && (thisKey == 8))
-        {
-            // ??
-            return; // break;
-        }
-        else if (e.down() && (thisKey == 9))
-        {
-            // waveform
-            MM::sendNoteOn(6, 1, midiMacroConfig.midiMacroChan); // Up
-            MM::sendNoteOn(7, 1, midiMacroConfig.midiMacroChan); // Down
-            MM::sendNoteOn(5, 1, midiMacroConfig.midiMacroChan); // Right
-            MM::sendNoteOn(4, 1, midiMacroConfig.midiMacroChan); // Left
-            delay(40);
-
-            MM::sendNoteOff(6, 0, midiMacroConfig.midiMacroChan); // Up
-            MM::sendNoteOff(7, 0, midiMacroConfig.midiMacroChan); // Down
-            MM::sendNoteOff(5, 0, midiMacroConfig.midiMacroChan); // Right
-            MM::sendNoteOff(4, 0, midiMacroConfig.midiMacroChan); // Left
-
-            return; // break;
-        }
-        else if (e.down() && (thisKey == 10))
-        {
-            // play
-            MM::sendNoteOn(0, 1, midiMacroConfig.midiMacroChan); // Play
-            delay(40);
-            MM::sendNoteOff(0, 0, midiMacroConfig.midiMacroChan); // Play
-
-            //								MM::sendNoteOn(1, 1, midiMacroChan); // Shift
-            //								MM::sendNoteOn(3, 1, midiMacroChan); // Option
-            //								MM::sendNoteOn(2, 1, midiMacroChan); // Edit
-            //								MM::sendNoteOn(6, 1, midiMacroChan); // Up
-            //								MM::sendNoteOn(7, 1, midiMacroChan); // Down
-            //								MM::sendNoteOn(4, 1, midiMacroChan); // Left
-            //								MM::sendNoteOn(5, 1, midiMacroChan); // Right
-            return; // break;
-        }
+    case 1:
+        return &m8Macro_;
+    case 2:
+        return &nornsMarco_;
     }
+    return nullptr;
 }
+
+// void OmxModeMidiKeyboard::onKeyUpdateM8Macro(OMXKeypadEvent e)
+// {
+//     if (!macroActive_)
+//         return;
+//     // if (!midiMacroConfig.m8AUX)
+//     //     return;
+
+//     auto activeMacro = getActiveMacro();
+//     if(activeMacro == nullptr) return;
+
+//     activeMacro->onKeyUpdate(e);
+// }
 
 void OmxModeMidiKeyboard::updateLEDs()
 {
@@ -640,90 +550,104 @@ void OmxModeMidiKeyboard::onDisplayUpdate()
         return;
     }
 
-    omxLeds.drawMidiLeds(musicScale); // SHOW LEDS
+    if(macroActive_)
+    {
+        activeMacro_->drawLEDs();
+    }
+    else
+    {
+        omxLeds.drawMidiLeds(musicScale); // SHOW LEDS
+    }
 
-    if (omxDisp.isDirty())
-    { // DISPLAY
-        if (!encoderConfig.enc_edit)
-        {
-            if (params.getSelPage() == 0) // SUBMODE_MIDI
+    if(macroActive_ && activeMacro_->consumesDisplay())
+    {
+        activeMacro_->onDisplayUpdate();
+    }
+    else
+    {
+        if (omxDisp.isDirty())
+        { // DISPLAY
+            if (!encoderConfig.enc_edit)
             {
-                omxDisp.clearLegends();
-
-                //			if (midiRoundRobin) {
-                //				displaychan = rrChannel;
-                //			}
-                omxDisp.legends[0] = "OCT";
-                omxDisp.legends[1] = "CH";
-                omxDisp.legends[2] = "CC";
-                omxDisp.legends[3] = "NOTE";
-                omxDisp.legendVals[0] = (int)midiSettings.octave + 4;
-                omxDisp.legendVals[1] = sysSettings.midiChannel;
-                omxDisp.legendVals[2] = potSettings.potVal;
-                omxDisp.legendVals[3] = midiSettings.midiLastNote;
-            }
-            else if (params.getSelPage() == 1) // SUBMODE_MIDI2
-            {
-                omxDisp.clearLegends();
-
-                omxDisp.legends[0] = "RR";
-                omxDisp.legends[1] = "RROF";
-                omxDisp.legends[2] = "PGM";
-                omxDisp.legends[3] = "BNK";
-                omxDisp.legendVals[0] = midiSettings.midiRRChannelCount;
-                omxDisp.legendVals[1] = midiSettings.midiRRChannelOffset;
-                omxDisp.legendVals[2] = midiSettings.currpgm + 1;
-                omxDisp.legendVals[3] = midiSettings.currbank;
-            }
-            else if (params.getSelPage() == 2) // SUBMODE_MIDI3
-            {
-                omxDisp.clearLegends();
-
-                omxDisp.legends[0] = "PBNK"; // Potentiometer Banks
-                omxDisp.legends[1] = "THRU"; // MIDI thru (usb to hardware)
-                omxDisp.legends[2] = "MCRO"; // Macro mode
-                omxDisp.legends[3] = "M-CH";
-                omxDisp.legendVals[0] = potSettings.potbank + 1;
-                omxDisp.legendVals[1] = -127;
-                if (midiSettings.midiSoftThru)
+                if (params.getSelPage() == 0) // SUBMODE_MIDI
                 {
-                    omxDisp.legendText[1] = "On";
+                    omxDisp.clearLegends();
+
+                    //			if (midiRoundRobin) {
+                    //				displaychan = rrChannel;
+                    //			}
+                    omxDisp.legends[0] = "OCT";
+                    omxDisp.legends[1] = "CH";
+                    omxDisp.legends[2] = "CC";
+                    omxDisp.legends[3] = "NOTE";
+                    omxDisp.legendVals[0] = (int)midiSettings.octave + 4;
+                    omxDisp.legendVals[1] = sysSettings.midiChannel;
+                    omxDisp.legendVals[2] = potSettings.potVal;
+                    omxDisp.legendVals[3] = midiSettings.midiLastNote;
                 }
-                else
+                else if (params.getSelPage() == 1) // SUBMODE_MIDI2
                 {
-                    omxDisp.legendText[1] = "Off";
+                    omxDisp.clearLegends();
+
+                    omxDisp.legends[0] = "RR";
+                    omxDisp.legends[1] = "RROF";
+                    omxDisp.legends[2] = "PGM";
+                    omxDisp.legends[3] = "BNK";
+                    omxDisp.legendVals[0] = midiSettings.midiRRChannelCount;
+                    omxDisp.legendVals[1] = midiSettings.midiRRChannelOffset;
+                    omxDisp.legendVals[2] = midiSettings.currpgm + 1;
+                    omxDisp.legendVals[3] = midiSettings.currbank;
                 }
-                omxDisp.legendVals[2] = -127;
-                omxDisp.legendText[2] = macromodes[midiMacroConfig.midiMacro];
-                omxDisp.legendVals[3] = midiMacroConfig.midiMacroChan;
-            }
-            else if (params.getSelPage() == 3) // SCALES
-            {
-                omxDisp.clearLegends();
-                omxDisp.legends[0] = "ROOT";
-                omxDisp.legends[1] = "SCALE";
-                omxDisp.legends[2] = "LOCK";
-                omxDisp.legends[3] = "GROUP";
-                omxDisp.legendVals[0] = -127;
-                if (scaleConfig.scalePattern < 0)
+                else if (params.getSelPage() == 2) // SUBMODE_MIDI3
                 {
+                    omxDisp.clearLegends();
+
+                    omxDisp.legends[0] = "PBNK"; // Potentiometer Banks
+                    omxDisp.legends[1] = "THRU"; // MIDI thru (usb to hardware)
+                    omxDisp.legends[2] = "MCRO"; // Macro mode
+                    omxDisp.legends[3] = "M-CH";
+                    omxDisp.legendVals[0] = potSettings.potbank + 1;
                     omxDisp.legendVals[1] = -127;
-                    omxDisp.legendText[1] = "Off";
+                    if (midiSettings.midiSoftThru)
+                    {
+                        omxDisp.legendText[1] = "On";
+                    }
+                    else
+                    {
+                        omxDisp.legendText[1] = "Off";
+                    }
+                    omxDisp.legendVals[2] = -127;
+                    omxDisp.legendText[2] = macromodes[midiMacroConfig.midiMacro];
+                    omxDisp.legendVals[3] = midiMacroConfig.midiMacroChan;
                 }
-                else
+                else if (params.getSelPage() == 3) // SCALES
                 {
-                    omxDisp.legendVals[1] = scaleConfig.scalePattern;
+                    omxDisp.clearLegends();
+                    omxDisp.legends[0] = "ROOT";
+                    omxDisp.legends[1] = "SCALE";
+                    omxDisp.legends[2] = "LOCK";
+                    omxDisp.legends[3] = "GROUP";
+                    omxDisp.legendVals[0] = -127;
+                    if (scaleConfig.scalePattern < 0)
+                    {
+                        omxDisp.legendVals[1] = -127;
+                        omxDisp.legendText[1] = "Off";
+                    }
+                    else
+                    {
+                        omxDisp.legendVals[1] = scaleConfig.scalePattern;
+                    }
+
+                    omxDisp.legendVals[2] = -127;
+                    omxDisp.legendVals[3] = -127;
+
+                    omxDisp.legendText[0] = musicScale->getNoteName(scaleConfig.scaleRoot);
+                    omxDisp.legendText[2] = scaleConfig.lockScale ? "On" : "Off";
+                    omxDisp.legendText[3] = scaleConfig.group16 ? "On" : "Off";
                 }
 
-                omxDisp.legendVals[2] = -127;
-                omxDisp.legendVals[3] = -127;
-
-                omxDisp.legendText[0] = musicScale->getNoteName(scaleConfig.scaleRoot);
-                omxDisp.legendText[2] = scaleConfig.lockScale ? "On" : "Off";
-                omxDisp.legendText[3] = scaleConfig.group16 ? "On" : "Off";
+                omxDisp.dispGenericMode2(4, params.getSelPage(), params.getSelParam(), encoderSelect);
             }
-
-            omxDisp.dispGenericMode2(4, params.getSelPage(), params.getSelParam(), encoderSelect);
         }
     }
 }
