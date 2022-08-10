@@ -633,11 +633,17 @@ void saveHeader()
 	uint8_t unMidiChannel = (uint8_t)(sysSettings.midiChannel - 1);
 	storage->write(EEPROM_HEADER_ADDRESS + 3, unMidiChannel);
 
+	uint8_t midiMacroChannel = (uint8_t)(midiMacroConfig.midiMacroChan - 1);
+	storage->write(EEPROM_HEADER_ADDRESS + 4, midiMacroChannel);
+
+	uint8_t midiMacro = (uint8_t)midiMacroConfig.midiMacro;
+	storage->write(EEPROM_HEADER_ADDRESS + 5, midiMacro);
+
 	for (int b = 0; b < NUM_CC_BANKS; b++)
 	{
 		for (int i = 0; i < NUM_CC_POTS; i++)
 		{
-			storage->write(EEPROM_HEADER_ADDRESS + 4 + i + (5 * b), pots[b][i]);
+			storage->write(EEPROM_HEADER_ADDRESS + 6 + i + (5 * b), pots[b][i]);
 		}
 	}
 
@@ -678,11 +684,17 @@ bool loadHeader(void)
 	uint8_t unMidiChannel = storage->read(EEPROM_HEADER_ADDRESS + 3);
 	sysSettings.midiChannel = unMidiChannel + 1;
 
+	uint8_t midiMacroChannel = storage->read(EEPROM_HEADER_ADDRESS + 4);
+	midiMacroConfig.midiMacroChan = midiMacroChannel + 1;
+
+	uint8_t midiMacro = storage->read(EEPROM_HEADER_ADDRESS + 5);
+	midiMacroConfig.midiMacro = midiMacro;
+
 	for (int b = 0; b < NUM_CC_BANKS; b++)
 	{
 		for (int i = 0; i < NUM_CC_POTS; i++)
 		{
-			pots[b][i] = storage->read(EEPROM_HEADER_ADDRESS + 4 + i + (5 * b));
+			pots[b][i] = storage->read(EEPROM_HEADER_ADDRESS + 6 + i + (5 * b));
 		}
 	}
 	return true;
