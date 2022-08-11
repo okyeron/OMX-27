@@ -4,6 +4,7 @@
 #include "music_scales.h"
 #include "param_manager.h"
 #include "submode_midifxgroup.h"
+#include "submode_potconfig.h"
 #include "midifx_interface.h"
 #include "midifx_interface.h"
 #include "midimacro_m8.h"
@@ -71,6 +72,7 @@ private:
     // SubModes
     SubmodeInterface* activeSubmode = nullptr;
     SubModeMidiFxGroup subModeMidiFx;
+    SubModePotConfig subModePotConfig_;
 
     void enableSubmode(SubmodeInterface* subMode);
     void disableSubmode();

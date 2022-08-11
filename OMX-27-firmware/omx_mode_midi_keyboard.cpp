@@ -14,6 +14,7 @@ OmxModeMidiKeyboard::OmxModeMidiKeyboard()
     params.addPage(4);
     params.addPage(4);
     params.addPage(4);
+    params.addPage(4);
 
     subModeMidiFx.setNoteOutputFunc(&OmxModeMidiKeyboard::onNotePostFXForwarder, this);
 
@@ -333,6 +334,13 @@ void OmxModeMidiKeyboard::onEncoderButtonDown()
     if(macroConsumesDisplay)
     {
         activeMacro_->onEncoderButtonDown();
+        return;
+    }
+
+    if(params.getSelPage() == 4 && params.getSelParam() == 0)
+    {
+        enableSubmode(&subModePotConfig_);
+        omxDisp.isDirty();
         return;
     }
 
@@ -703,8 +711,24 @@ void OmxModeMidiKeyboard::onDisplayUpdate()
                     omxDisp.legendText[2] = scaleConfig.lockScale ? "On" : "Off";
                     omxDisp.legendText[3] = scaleConfig.group16 ? "On" : "Off";
                 }
+                else if (params.getSelPage() == 4) // CONFIG
+                {
+                    omxDisp.clearLegends();
+                    omxDisp.legends[0] = "CC";
+                    omxDisp.legends[1] = "";
+                    omxDisp.legends[2] = "";
+                    omxDisp.legends[3] = "";
+                    omxDisp.legendVals[0] = -127;
+                    omxDisp.legendVals[1] = -127;
+                    omxDisp.legendVals[2] = -127;
+                    omxDisp.legendVals[3] = -127;
+                    omxDisp.legendText[0] = "CFG";
+                    omxDisp.legendText[1] = "";
+                    omxDisp.legendText[2] = "";
+                    omxDisp.legendText[3] = "";
+                }
 
-                omxDisp.dispGenericMode2(4, params.getSelPage(), params.getSelParam(), encoderSelect);
+                omxDisp.dispGenericMode2(params.getNumPages(), params.getSelPage(), params.getSelParam(), encoderSelect);
             }
         }
     }
