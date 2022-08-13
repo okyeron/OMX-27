@@ -92,7 +92,7 @@ namespace midifx
         {
         case CHPAGE_1:
         {
-            omxDisp.legends[0] = "PERC";
+            omxDisp.legends[0] = "CHC%";
             omxDisp.legends[1] = "";
             omxDisp.legends[2] = "";
             omxDisp.legends[3] = "";
@@ -100,10 +100,9 @@ namespace midifx
             omxDisp.legendVals[1] = -127;
             omxDisp.legendVals[2] = -127;
             omxDisp.legendVals[3] = -127;
-
+            omxDisp.useLegendString[0] = true;
             uint8_t perc = ((chancePerc_ / 255.0f) * 100);
-            String msg = String(perc) + "%";
-            omxDisp.legendText[0] = msg.c_str();
+            omxDisp.legendString[0] = String(perc) + "%";
         }
         break;
         default:

@@ -166,6 +166,8 @@ void SubModeMidiFxGroup::onEncoderButtonDown()
 
 void SubModeMidiFxGroup::onKeyUpdate(OMXKeypadEvent e)
 {
+    if(e.held()) return;
+
     int thisKey = e.key();
 	// auto keyState = midiSettings.keyState;
 

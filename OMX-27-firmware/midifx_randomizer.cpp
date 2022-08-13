@@ -174,7 +174,9 @@ namespace midifx
             omxDisp.legendVals[0] = velMinus_;
             omxDisp.legendVals[1] = velPlus_;
             omxDisp.legendVals[2] = lengthPerc_;
-            omxDisp.legendVals[3] = chancePerc_;
+            omxDisp.legendVals[3] = -127;
+            omxDisp.useLegendString[3] = true;
+            omxDisp.legendString[3] = String(chancePerc_) + "%";
 
             // omxDisp.legendVals[0] = -127;
             // omxDisp.legendVals[1] = -127;

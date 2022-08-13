@@ -616,6 +616,12 @@ void OmxModeMidiKeyboard::onKeyUpdate(OMXKeypadEvent e)
 
 void OmxModeMidiKeyboard::onKeyHeldUpdate(OMXKeypadEvent e)
 {
+    if (isSubmodeEnabled())
+    {
+        activeSubmode->onKeyHeldUpdate(e);
+        return;
+    }
+
     int thisKey = e.key();
 
     if (midiSettings.midiAUX) // Aux mode

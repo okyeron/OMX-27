@@ -251,8 +251,8 @@ namespace midifx
 
             omxDisp.legends[3] = "CHC%";
             omxDisp.legendVals[3] = -127;
-            String msg4 = String(chancePerc_) + "%";
-            omxDisp.legendText[3] = msg4.c_str();
+            omxDisp.useLegendString[3] = true;
+            omxDisp.legendString[3] = String(chancePerc_) + "%";
         }
         break;
         default:

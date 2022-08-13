@@ -43,7 +43,7 @@ void SubModePotConfig::updateLEDs()
     strip.clear();
 
     // bool blinkState = omxLeds.getBlinkState();
-    bool blinkStateSlow = omxLeds.getSlowBlinkState();
+    // bool blinkStateSlow = omxLeds.getSlowBlinkState();
 
     // Serial.println("MidiFX Leds");
     // auto auxColor = midiFXParamView_ ? (blinkStateSlow ? ORANGE : LEDOFF) : RED;

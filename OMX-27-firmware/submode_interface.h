@@ -22,6 +22,7 @@ public:
     virtual bool shouldBlockEncEdit() { return false; }
 
     virtual void onKeyUpdate(OMXKeypadEvent e) {}
+    virtual void onKeyHeldUpdate(OMXKeypadEvent e) {}
 
     virtual void onDisplayUpdate() = 0;
 

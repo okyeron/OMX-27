@@ -436,6 +436,7 @@ void loop()
 	{
 		auto e = keypad.next();
 		int thisKey = e.key();
+		bool keyConsumed = false;
 		// int keyPos = thisKey - 11;
 		// int seqKey = keyPos + (sequencer.patternPage[sequencer.playingPattern] * NUM_STEPKEYS);
 
@@ -451,9 +452,18 @@ void loop()
 			saveToStorage();
 			//	Serial.println("EEPROM saved");
 			omxDisp.displayMessage("Saved State");
+			encoderConfig.enc_edit = false;
+			omxLeds.setAllLEDS(0,0,0);
+			activeOmxMode->onModeActivated();
+			omxDisp.isDirty();
+			omxLeds.isDirty();
+			keyConsumed = true;
 		}
 
-		activeOmxMode->onKeyUpdate(e);
+		if (!keyConsumed)
+		{
+			activeOmxMode->onKeyUpdate(e);
+		}
 
 		// END MODE SWITCH
 
@@ -463,7 +473,7 @@ void loop()
 		}
 
 		// ### LONG KEY SWITCH PRESS
-		if (e.held())
+		if (e.held() && !keyConsumed)
 		{
 			// DO LONG PRESS THINGS
 			activeOmxMode->onKeyHeldUpdate(e); // Only the sequencer uses this, could probably be handled in onKeyUpdate() but keyStates are modified before this stuff happens.
@@ -842,8 +852,6 @@ void saveToStorage(void)
 	// Serial.println( "saving..." );
 	saveHeader();
 	savePatterns();
-	omxDisp.isDirty();
-	omxLeds.isDirty();
 }
 
 // currently loads everything ( mode + patterns )
