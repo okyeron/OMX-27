@@ -799,10 +799,12 @@ void loadPatterns(void)
 	Serial.println( "nLocalAddress" );
 	Serial.println( nLocalAddress );
 	// Pattern size = 715
+	// Pattern size eprom = 332
 	// Total size of patterns = 5720
 	// Total storage size = 5749
 	// Fram = 32000 = 26251 available
 	// Eeprom = 2048
+	// Eeprom rom can save 6 patterns, plus 56 bytes
 
 	// 2832 - size of 16 euclid patterns of 16 euclids
 }

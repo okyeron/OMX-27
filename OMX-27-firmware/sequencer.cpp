@@ -149,6 +149,10 @@ int serializedPatternSize(bool eeprom) {
 	int totalWithoutSteps = total - (singleStep * NUM_STEPS);
 	int numSteps = NUM_STEPS;
 
+	// 1292
+	// 1280
+	// totalWithoutSteps = 12
+
 	// for EEPROM we only serialize 16 steps
 	if (eeprom) {
 		numSteps = 16;
