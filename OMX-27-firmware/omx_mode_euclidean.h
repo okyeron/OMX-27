@@ -48,7 +48,7 @@ public:
 
     static const u_int8_t kNumEuclids = 8;
     static const u_int8_t kNumSaves = 16;
-    static const u_int8_t kNumMidiFXGroups = 5;
+    // static const u_int8_t kNumMidiFXGroups = 5;
 
 
     // static int serializedPatternSize(bool eeprom);
@@ -140,7 +140,7 @@ private:
     // SubModes
     SubmodeInterface* activeSubmode = nullptr;
 
-    SubModeMidiFxGroup subModeMidiFx[kNumMidiFXGroups];
+    // SubModeMidiFxGroup subModeMidiFx[kNumMidiFXGroups];
 
     void enableSubmode(SubmodeInterface* subMode);
     void disableSubmode();

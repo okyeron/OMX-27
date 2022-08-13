@@ -8,8 +8,9 @@
 #include "midifx_monophonic.h"
 #include "midifx_harmonizer.h"
 
-
 using namespace midifx;
+
+SubModeMidiFxGroup subModeMidiFx[NUM_MIDIFX_GROUPS];
 
 enum MidiFxPage
 {

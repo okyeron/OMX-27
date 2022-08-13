@@ -152,6 +152,7 @@ int serializedPatternSize(bool eeprom) {
 	// 1292
 	// 1280
 	// totalWithoutSteps = 12
+	// EPROM Size = 320 + 12 = 332
 
 	// for EEPROM we only serialize 16 steps
 	if (eeprom) {

@@ -3,6 +3,8 @@
 #include "submode_interface.h"
 #include "midifx_interface.h"
 
+#define NUM_MIDIFX_GROUPS 5
+
 // Holds a group of 4 midi fx slots. 
 class SubModeMidiFxGroup : public SubmodeInterface
 {
@@ -83,3 +85,6 @@ private:
 
     void reconnectInputsOutputs();
 };
+
+// static const u_int8_t kNumMidiFXGroups = 5;
+extern SubModeMidiFxGroup subModeMidiFx[NUM_MIDIFX_GROUPS];

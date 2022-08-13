@@ -43,7 +43,7 @@ public:
     bool shouldBlockEncEdit() override;
 
     void onKeyUpdate(OMXKeypadEvent e) override;
-    void onKeyHeldUpdate(OMXKeypadEvent e){};
+    void onKeyHeldUpdate(OMXKeypadEvent e) override;
 
     void onDisplayUpdate() override;
     void inMidiNoteOn(byte channel, byte note, byte velocity) override;
@@ -71,7 +71,7 @@ private:
 
     // SubModes
     SubmodeInterface* activeSubmode = nullptr;
-    SubModeMidiFxGroup subModeMidiFx;
+    // SubModeMidiFxGroup subModeMidiFx;
     SubModePotConfig subModePotConfig_;
 
     void enableSubmode(SubmodeInterface* subMode);
@@ -97,6 +97,18 @@ private:
     }
 
     void onNotePostFX(MidiNoteGroup note);
+
+     // Static glue to link a pointer to a member function
+    static void onPendingNoteOffForwarder(void *context, int note, int channel)
+    {
+        static_cast<OmxModeMidiKeyboard *>(context)->onPendingNoteOff(note, channel);
+    }
+
+    void onPendingNoteOff(int note, int channel);
+
+    void stopSequencers();
+
+    uint8_t mfxIndex = 0;
 
     midimacro::MidiMacroNorns nornsMarco_;
     midimacro::MidiMacroM8 m8Macro_;

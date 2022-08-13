@@ -53,11 +53,6 @@ OmxModeEuclidean::OmxModeEuclidean()
         euclids[i].setNoteOutputFunc(&OmxModeEuclidean::onNoteTriggeredForwarder, this, i);
     }
 
-    for(uint8_t i = 0; i < kNumMidiFXGroups; i++)
-    {
-        subModeMidiFx[i].setNoteOutputFunc(&OmxModeEuclidean::onNotePostFXForwarder, this);
-    }
-
     polyRhythmMode = false;
 
     for (uint8_t i = 0; i < kNumEuclids; i++)
@@ -123,6 +118,11 @@ void OmxModeEuclidean::onModeActivated()
 
     paramMode_ = PARAMMODE_EDIT;
     encoderSelect_ = true;
+
+    for(uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
+    {
+        subModeMidiFx[i].setNoteOutputFunc(&OmxModeEuclidean::onNotePostFXForwarder, this);
+    }
 
     pendingNoteOffs.setNoteOffFunction(&OmxModeEuclidean::onPendingNoteOffForwarder, this);
 }
@@ -875,7 +875,7 @@ void OmxModeEuclidean::updateLEDs()
     // --- EDIT MODE ---
     if(paramMode_ == PARAMMODE_MIX)
     {
-        for (uint8_t i = 0; i < kNumMidiFXGroups; i++)
+        for (uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
         {
             auto mfxColor = (i == activeEuclid->midiFXGroup) ? kSelMidiFXColor : kMidiFXColor;
 
@@ -890,7 +890,7 @@ void OmxModeEuclidean::updateLEDs()
     }
     else if (paramMode_ == PARAMMODE_EDIT)
     {
-        for (uint8_t i = 0; i < kNumMidiFXGroups; i++)
+        for (uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
         {
             auto mfxColor = (i == activeEuclid->midiFXGroup) ? kSelMidiFXColor : kMidiFXColor;
 
@@ -991,7 +991,7 @@ void OmxModeEuclidean::onPendingNoteOff(int note, int channel)
     // Serial.println("OmxModeEuclidean::onPendingNoteOff " + String(note) + " " + String(channel));
     // subModeMidiFx.onPendingNoteOff(note, channel);
 
-    for(uint8_t i = 0; i < kNumMidiFXGroups; i++)
+    for(uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
     {
         subModeMidiFx[i].onPendingNoteOff(note, channel);
     }

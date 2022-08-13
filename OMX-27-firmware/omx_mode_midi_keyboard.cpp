@@ -6,6 +6,14 @@
 #include "omx_leds.h"
 #include "MM.h"
 #include "music_scales.h"
+#include "noteoffs.h"
+#include "sequencer.h"
+
+const int kSelMidiFXOffColor = SALMON;
+const int kMidiFXOffColor = RED;
+
+const int kSelMidiFXColor = LTCYAN;
+const int kMidiFXColor = BLUE;
 
 OmxModeMidiKeyboard::OmxModeMidiKeyboard()
 {
@@ -16,7 +24,7 @@ OmxModeMidiKeyboard::OmxModeMidiKeyboard()
     params.addPage(4);
     params.addPage(4);
 
-    subModeMidiFx.setNoteOutputFunc(&OmxModeMidiKeyboard::onNotePostFXForwarder, this);
+    // subModeMidiFx.setNoteOutputFunc(&OmxModeMidiKeyboard::onNotePostFXForwarder, this);
 
     m8Macro_.setDoNoteOn(&OmxModeMidiKeyboard::doNoteOnForwarder, this);
     m8Macro_.setDoNoteOff(&OmxModeMidiKeyboard::doNoteOffForwarder, this);
@@ -37,8 +45,27 @@ void OmxModeMidiKeyboard::onModeActivated()
         InitSetup();
     }
 
+    sequencer.playing = false;
+    stopSequencers();
+
+    omxLeds.setDirty();
+    omxDisp.setDirty();
+
+    for(uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
+    {
+        subModeMidiFx[i].setNoteOutputFunc(&OmxModeMidiKeyboard::onNotePostFXForwarder, this);
+    }
+
+    pendingNoteOffs.setNoteOffFunction(&OmxModeMidiKeyboard::onPendingNoteOffForwarder, this);
+
     params.setSelPageAndParam(0, 0);
     encoderSelect = true;
+}
+
+void OmxModeMidiKeyboard::stopSequencers()
+{
+	MM::stopClock();
+    pendingNoteOffs.allOff();
 }
 
 // void OmxModeMidiKeyboard::changePage(int amt)
@@ -486,6 +513,8 @@ void OmxModeMidiKeyboard::onKeyUpdate(OMXKeypadEvent e)
 
             if (midiSettings.midiAUX) // Aux mode
             {
+                keyConsumed = true;
+
                 if (thisKey == 11 || thisKey == 12) // Change Octave
                 {
                     int amt = thisKey == 11 ? -1 : 1;
@@ -494,7 +523,6 @@ void OmxModeMidiKeyboard::onKeyUpdate(OMXKeypadEvent e)
                     {
                         midiSettings.octave = midiSettings.newoctave;
                     }
-                    keyConsumed = true;
                 }
                 else if (thisKey == 1 || thisKey == 2) // Change Param selection
                 {
@@ -507,17 +535,27 @@ void OmxModeMidiKeyboard::onKeyUpdate(OMXKeypadEvent e)
                     // int chng = thisKey == 1 ? -1 : 1;
 
                     // setParam(constrain((midiPageParams.miparam + chng) % midiPageParams.numParams, 0, midiPageParams.numParams - 1));
-                    keyConsumed = true;
                 }
-                else if (e.down() && thisKey == 10)
+                else if(thisKey == 5)
                 {
-                    enableSubmode(&subModeMidiFx);
-                    keyConsumed = true;
+                    // Turn off midiFx
+                    mfxIndex = 127;
                 }
-                else if (thisKey == 26)
-				{
-					keyConsumed = true;
+                else if (thisKey >= 6 && thisKey < 11)
+                {
+                    // Change active midiFx
+                    mfxIndex = thisKey - 6;
+                    // enableSubmode(&subModeMidiFx[thisKey - 6]);
                 }
+                // else if (e.down() && thisKey == 10)
+                // {
+                //     enableSubmode(&subModeMidiFx);
+                //     keyConsumed = true;
+                // }
+                // else if (thisKey == 26)
+				// {
+				// 	keyConsumed = true;
+                // }
             }
 
             if(!keyConsumed)
@@ -576,6 +614,20 @@ void OmxModeMidiKeyboard::onKeyUpdate(OMXKeypadEvent e)
     }
 }
 
+void OmxModeMidiKeyboard::onKeyHeldUpdate(OMXKeypadEvent e)
+{
+    int thisKey = e.key();
+
+    if (midiSettings.midiAUX) // Aux mode
+    {
+        // Enter MidiFX mode
+        if (thisKey >= 6 && thisKey < 11)
+        {
+            enableSubmode(&subModeMidiFx[thisKey - 6]);
+        }
+    }
+}
+
 midimacro::MidiMacroInterface *OmxModeMidiKeyboard::getActiveMacro()
 {
     switch (midiMacroConfig.midiMacro)
@@ -603,6 +655,60 @@ midimacro::MidiMacroInterface *OmxModeMidiKeyboard::getActiveMacro()
 
 void OmxModeMidiKeyboard::updateLEDs()
 {
+    if (midiSettings.midiAUX)
+    {
+        omxLeds.updateBlinkStates();
+
+        bool blinkState = omxLeds.getBlinkState();
+
+        // Blink left/right keys for octave select indicators.
+        auto color1 = blinkState ? LIME : LEDOFF;
+        auto color2 = blinkState ? MAGENTA : LEDOFF;
+        auto color3 = blinkState ? ORANGE : LEDOFF;
+        auto color4 = blinkState ? RBLUE : LEDOFF;
+
+        for (int q = 1; q < LED_COUNT; q++)
+        {
+            if (midiSettings.midiKeyState[q] == -1)
+            {
+                if (colorConfig.midiBg_Hue == 0)
+                {
+                    strip.setPixelColor(q, LEDOFF);
+                }
+                else if (colorConfig.midiBg_Hue == 32)
+                {
+                    strip.setPixelColor(q, LOWWHITE);
+                }
+                else
+                {
+                    strip.setPixelColor(q, strip.ColorHSV(colorConfig.midiBg_Hue, colorConfig.midiBg_Sat, colorConfig.midiBg_Brightness));
+                }
+            }
+        }
+        strip.setPixelColor(0, RED);
+        strip.setPixelColor(1, color1);
+        strip.setPixelColor(2, color2);
+        strip.setPixelColor(11, color3);
+        strip.setPixelColor(12, color4);
+
+        // MidiFX off
+        strip.setPixelColor(5, (mfxIndex >= NUM_MIDIFX_GROUPS ? kSelMidiFXOffColor : kMidiFXOffColor));
+
+        for (uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
+        {
+            auto mfxColor = (i == mfxIndex) ? kSelMidiFXColor : kMidiFXColor;
+
+            strip.setPixelColor(6 + i, mfxColor);
+        }
+
+        // strip.setPixelColor(10, color3); // MidiFX key
+
+        // Macros
+    }
+    else
+    {
+        omxLeds.drawMidiLeds(musicScale); // SHOW LEDS
+    }
 }
 
 void OmxModeMidiKeyboard::onDisplayUpdate()
@@ -622,7 +728,13 @@ void OmxModeMidiKeyboard::onDisplayUpdate()
     }
     else
     {
-        omxLeds.drawMidiLeds(musicScale); // SHOW LEDS
+        updateLEDs();
+
+        // if (omxLeds.isDirty())
+        // {
+        //     updateLEDs();
+        //     // omxLeds.drawMidiLeds(musicScale); // SHOW LEDS
+        // }
     }
 
     if(macroConsumesDisplay)
@@ -853,7 +965,16 @@ void OmxModeMidiKeyboard::doNoteOn(uint8_t keyIndex)
 
     noteGroup.unknownLength = true;
     noteGroup.prevNoteNumber = noteGroup.noteNumber;
-    subModeMidiFx.noteInput(noteGroup);
+
+    if (mfxIndex < NUM_MIDIFX_GROUPS)
+    {
+        subModeMidiFx[mfxIndex].noteInput(noteGroup);
+        // subModeMidiFx.noteInput(noteGroup);
+    }
+    else
+    {
+        onNotePostFX(noteGroup);
+    }
 }
 void OmxModeMidiKeyboard::doNoteOff(uint8_t keyIndex)
 {
@@ -865,7 +986,16 @@ void OmxModeMidiKeyboard::doNoteOff(uint8_t keyIndex)
 
     noteGroup.unknownLength = true;
     noteGroup.prevNoteNumber = noteGroup.noteNumber;
-    subModeMidiFx.noteInput(noteGroup);
+
+    if (mfxIndex < NUM_MIDIFX_GROUPS)
+    {
+        subModeMidiFx[mfxIndex].noteInput(noteGroup);
+    // subModeMidiFx.noteInput(noteGroup);
+    }
+    else
+    {
+        onNotePostFX(noteGroup);
+    }
 }
 
 // // Called by a euclid sequencer when it triggers a note
@@ -913,4 +1043,15 @@ void OmxModeMidiKeyboard::onNotePostFX(MidiNoteGroup note)
 
     // uint32_t noteOffMicros = noteOnMicros + (note.stepLength * clockConfig.step_micros);
     // pendingNoteOffs.insert(note.noteNumber, note.channel, noteOffMicros, note.sendCV);
+}
+
+void OmxModeMidiKeyboard::onPendingNoteOff(int note, int channel)
+{
+    // Serial.println("OmxModeEuclidean::onPendingNoteOff " + String(note) + " " + String(channel));
+    // subModeMidiFx.onPendingNoteOff(note, channel);
+
+    for(uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
+    {
+        subModeMidiFx[i].onPendingNoteOff(note, channel);
+    }
 }
