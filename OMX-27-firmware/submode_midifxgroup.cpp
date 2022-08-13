@@ -593,7 +593,7 @@ void SubModeMidiFxGroup::onDisplayUpdate()
 
 int SubModeMidiFxGroup::saveToDisk(int startingAddress, Storage *storage)
 {
-    for(uint8_t i = 0; i < 4; i++)
+    for(uint8_t i = 0; i < NUM_MIDIFX_SLOTS; i++)
     {
         MidiFXInterface* mFX = getMidiFX(i);
 
@@ -621,7 +621,7 @@ int SubModeMidiFxGroup::saveToDisk(int startingAddress, Storage *storage)
 
 int SubModeMidiFxGroup::loadFromDisk(int startingAddress, Storage *storage)
 {
-    for(uint8_t i = 0; i < 4; i++)
+    for(uint8_t i = 0; i < NUM_MIDIFX_SLOTS; i++)
     {
         int mfxType = storage->read(startingAddress);
         startingAddress++;

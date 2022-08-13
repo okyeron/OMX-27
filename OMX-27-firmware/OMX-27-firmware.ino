@@ -750,7 +750,7 @@ void savePatterns(void)
 		// Serial.println((String)"nLocalAddress: " + nLocalAddress);
 	}
 
-	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 5988
+	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 6321
 
 	// Seq patternSize: 715
 	// nLocalAddress: 5752

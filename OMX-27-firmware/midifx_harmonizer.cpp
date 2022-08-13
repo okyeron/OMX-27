@@ -137,7 +137,7 @@ namespace midifx
 
         if(modNote)
         {
-            notes_[noteIndex] = constrain(notes_[noteIndex] + amt, -127, 127);
+            notes_[noteIndex] = constrain(notes_[noteIndex] + amt, -126, 127);
         }
 
         omxDisp.setDirty();
