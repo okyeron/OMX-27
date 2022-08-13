@@ -5,6 +5,7 @@
 #include "storage.h"
 
 #define NUM_MIDIFX_GROUPS 5
+#define NUM_MIDIFX_SLOTS 8
 
 // Holds a group of 4 midi fx slots. 
 class SubModeMidiFxGroup : public SubmodeInterface
@@ -52,7 +53,7 @@ private:
 
     // MidiFXptr* midifx_[4] = {nullptr, nullptr, nullptr, nullptr};
 
-    uint8_t midifxTypes_[4] = {0,0,0,0};
+    uint8_t midifxTypes_[NUM_MIDIFX_SLOTS];
 
     MidiNoteGroup onNoteGroups[32];
 
@@ -61,6 +62,10 @@ private:
     void setupPageLegends();
 
     void onDisplayUpdateMidiFX();
+
+    void displayMidiFXName(uint8_t index);
+
+    const char* getMFXDispName(uint8_t index);
 
     void selectMidiFX(uint8_t fxIndex);
     void changeMidiFXType(uint8_t slotIndex, uint8_t typeIndex, bool fromLoad = false);

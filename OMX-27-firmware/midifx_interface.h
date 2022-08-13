@@ -62,7 +62,10 @@ namespace midifx
         virtual int getFXType() = 0;
 
         // Display name
-        virtual String getName() = 0;
+        virtual const char* getName() = 0;
+
+        // Short Display Name
+        virtual const char* getDispName() = 0;
 
         virtual void setEnabled(bool newEnabled);
         virtual bool getEnabled();

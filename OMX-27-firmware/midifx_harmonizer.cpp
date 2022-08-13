@@ -30,9 +30,14 @@ namespace midifx
         return MIDIFX_HARMONIZER;
     }
 
-    String MidiFXHarmonizer::getName()
+    const char* MidiFXHarmonizer::getName()
     {
-        return String("Harmonizer");
+        return "Harmonizer";
+    }
+
+    const char* MidiFXHarmonizer::getDispName()
+    {
+        return "HARM";
     }
 
     void MidiFXHarmonizer::onEnabled()
@@ -229,5 +234,32 @@ namespace midifx
         }
 
         omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), encoderSelect_);
+    }
+
+    int MidiFXHarmonizer::saveToDisk(int startingAddress, Storage *storage)
+    {
+        // Serial.println((String) "Saving mfx harmonizer: " + startingAddress); // 5969
+        storage->write(startingAddress + 0, chancePerc_);
+        storage->write(startingAddress + 1, (bool)playOrigin_);
+
+        for(uint8_t i = 0; i < 7; i++){
+            storage->write(startingAddress + 2 + i, (uint8_t)notes_[i]);
+        }
+
+        return startingAddress + 9;
+    }
+
+    int MidiFXHarmonizer::loadFromDisk(int startingAddress, Storage *storage)
+    {
+        // Serial.println((String) "Loading mfx harmonizer: " + startingAddress); // 5969
+
+        chancePerc_ = storage->read(startingAddress + 0);
+        playOrigin_ = (bool)storage->read(startingAddress + 1);
+
+        for(uint8_t i = 0; i < 7; i++){
+            notes_[i] = (int8_t)storage->read(startingAddress + 2 + i);
+        }
+
+        return startingAddress + 9;
     }
 }

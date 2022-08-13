@@ -12,7 +12,8 @@ namespace midifx
         ~MidiFXChance() {}
 
         int getFXType() override;
-        String getName() override;
+        const char* getName() override;
+        const char* getDispName() override;
 
         void loopUpdate() override;
 

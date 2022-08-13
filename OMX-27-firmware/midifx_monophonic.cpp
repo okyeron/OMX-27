@@ -18,9 +18,14 @@ namespace midifx
         return MIDIFX_MONOPHONIC;
     }
 
-    String MidiFXMonophonic::getName()
+    const char* MidiFXMonophonic::getName()
     {
-        return String("Make Mono");
+        return "Make Mono";
+    }
+
+    const char* MidiFXMonophonic::getDispName()
+    {
+        return "MONO";
     }
 
     void MidiFXMonophonic::onEnabled()
@@ -166,5 +171,22 @@ namespace midifx
         }
 
         omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), encoderSelect_);
+    }
+
+    int MidiFXMonophonic::saveToDisk(int startingAddress, Storage *storage)
+    {
+        // Serial.println((String) "Saving mfx monophonic: " + startingAddress); // 5969
+        storage->write(startingAddress + 0, chancePerc_);
+
+        return startingAddress + 1;
+    }
+
+    int MidiFXMonophonic::loadFromDisk(int startingAddress, Storage *storage)
+    {
+        // Serial.println((String) "Loading mfx monophonic: " + startingAddress); // 5969
+
+        chancePerc_ = storage->read(startingAddress + 0);
+
+        return startingAddress + 1;
     }
 }

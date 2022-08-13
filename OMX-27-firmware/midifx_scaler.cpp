@@ -21,9 +21,14 @@ namespace midifx
         return MIDIFX_SCALER;
     }
 
-    String MidiFXScaler::getName()
+    const char* MidiFXScaler::getName()
     {
-        return String("Scaler");
+        return "Scaler";
+    }
+
+    const char* MidiFXScaler::getDispName()
+    {
+        return "SCAL";
     }
 
     void MidiFXScaler::onEnabled()
@@ -255,5 +260,28 @@ namespace midifx
         }
 
         omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), encoderSelect_);
+    }
+
+    int MidiFXScaler::saveToDisk(int startingAddress, Storage *storage)
+    {
+        // Serial.println((String) "Saving mfx scaler: " + startingAddress); // 5969
+        storage->write(startingAddress + 0, chancePerc_);
+        storage->write(startingAddress + 1, (uint8_t)rootNote);
+        storage->write(startingAddress + 2, (uint8_t)scaleIndex);
+
+        return startingAddress + 3;
+    }
+
+    int MidiFXScaler::loadFromDisk(int startingAddress, Storage *storage)
+    {
+        // Serial.println((String) "Loading mfx scaler: " + startingAddress); // 5969
+
+        chancePerc_ = storage->read(startingAddress + 0);
+        rootNote = (int8_t)storage->read(startingAddress + 1);
+        scaleIndex = (int8_t)storage->read(startingAddress + 2);
+
+        calculateRemap();
+
+        return startingAddress + 3;
     }
 }

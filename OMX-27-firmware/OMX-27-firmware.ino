@@ -746,8 +746,8 @@ void savePatterns(void)
 	for(uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
 	{
 		nLocalAddress = subModeMidiFx[i].saveToDisk(nLocalAddress, storage);
-		Serial.println((String)"Saved: " + i);
-		Serial.println((String)"nLocalAddress: " + nLocalAddress);
+		// Serial.println((String)"Saved: " + i);
+		// Serial.println((String)"nLocalAddress: " + nLocalAddress);
 	}
 
 	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 5988
@@ -811,15 +811,15 @@ void loadPatterns(void)
 	Serial.println( "nLocalAddress" );
 	Serial.println( nLocalAddress );
 
-	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 5968
+	// Serial.println((String)"nLocalAddress: " + nLocalAddress); // 5968
 
 	Serial.println("Loading MidiFX");
 	
 	for(uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
 	{
 		nLocalAddress = subModeMidiFx[i].loadFromDisk(nLocalAddress, storage);
-		Serial.println((String)"Loaded: " + i);
-		Serial.println((String)"nLocalAddress: " + nLocalAddress);
+		// Serial.println((String)"Loaded: " + i);
+		// Serial.println((String)"nLocalAddress: " + nLocalAddress);
 	}
 
 	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 5988

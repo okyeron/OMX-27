@@ -12,22 +12,29 @@ using namespace midifx;
 
 SubModeMidiFxGroup subModeMidiFx[NUM_MIDIFX_GROUPS];
 
+const int kSelMFXColor = WHITE;
+const int kMFXColor = ROSE;
+
+const int kSelMFXTypeColor = WHITE;
+const int kMFXTypeColor = DKGREEN;
+
 enum MidiFxPage
 {
     MFXPAGE_FX,
-    MFXPAGE_TEST,
+    MFXPAGE_FX2,
     MFXPAGE_EXIT
 };
 
 SubModeMidiFxGroup::SubModeMidiFxGroup()
 {
     params_.addPage(4); // 4 Midi FX slots
-    params_.addPage(3); // 3 test slots
+    params_.addPage(4); // 4 Midi FX slots
     params_.addPage(1); // Exit submode
 
-    for (uint8_t i = 0; i < 4; i++)
+    for (uint8_t i = 0; i < NUM_MIDIFX_SLOTS; i++)
     {
         midifx_.push_back(nullptr);
+        midifxTypes_[i] = 0;
     }
 
     doNoteOutput_ = &SubModeMidiFxGroup::noteFuncForwarder;
@@ -76,11 +83,13 @@ void SubModeMidiFxGroup::updateLEDs()
     //     strip.setPixelColor(i, LEDOFF);
     // }
 
-    for(uint8_t i = 0; i < 4; i++)
+    for(uint8_t i = 0; i < NUM_MIDIFX_SLOTS; i++)
     {
-        auto fxColor = midiFXParamView_ ? (i == selectedMidiFX_ ? WHITE : ORANGE) : BLUE;
+        // auto fxColor = midiFXParamView_ ? (i == selectedMidiFX_ ? WHITE : ORANGE) : BLUE;
 
-        strip.setPixelColor(11 + i, fxColor);
+        auto fxColor = (i == selectedMidiFX_ ? kSelMFXColor : kMFXColor);
+
+        strip.setPixelColor(3 + i, fxColor);
     }
 
     if (midiFXParamView_)
@@ -93,11 +102,11 @@ void SubModeMidiFxGroup::updateLEDs()
             selFXType = getMidiFX(selectedMidiFX_)->getFXType();
         }
 
-        for (uint8_t i = 0; i < 8; i++)
+        for (uint8_t i = 0; i < 16; i++)
         {
-            auto fxColor = (i == selFXType ? GREEN : DKGREEN);
+            auto fxColor = (i == selFXType ? kSelMFXTypeColor : kMFXTypeColor);
 
-            strip.setPixelColor(19 + i, fxColor);
+            strip.setPixelColor(11 + i, fxColor);
         }
     }
 }
@@ -134,7 +143,15 @@ void SubModeMidiFxGroup::onEncoderButtonDown()
     }
     else
     {
-        if (params_.getSelPage() == MFXPAGE_EXIT && params_.getSelParam() == 0)
+        if(params_.getSelPage() == MFXPAGE_FX)
+        {
+            selectMidiFX(params_.getSelParam());
+        }
+        else if(params_.getSelPage() == MFXPAGE_FX2)
+        {
+            selectMidiFX(params_.getSelParam() + 4);
+        }
+        else if (params_.getSelPage() == MFXPAGE_EXIT && params_.getSelParam() == 0)
         {
             setEnabled(false);
         }
@@ -160,6 +177,7 @@ void SubModeMidiFxGroup::onKeyUpdate(OMXKeypadEvent e)
             if(midiFXParamView_) 
             {
                 midiFXParamView_ = false;
+                encoderSelect_ = true;
             }
             // Exit submode
             else if(auxReleased_)
@@ -169,17 +187,17 @@ void SubModeMidiFxGroup::onKeyUpdate(OMXKeypadEvent e)
         }
 
         // Quick Select FX Slot
-        if (thisKey > 10 && thisKey < 15)
+        if (thisKey >= 3 && thisKey < 3 + NUM_MIDIFX_SLOTS)
         {
-            selectMidiFX(thisKey - 11);
+            selectMidiFX(thisKey - 3);
         }
 
         // Change FX type
         if (midiFXParamView_)
         {
-            if (thisKey >= 19 && thisKey < 19 + 8)
+            if (thisKey >= 11 && thisKey < 11 + 16)
             {
-                changeMidiFXType(selectedMidiFX_, thisKey - 19);
+                changeMidiFXType(selectedMidiFX_, thisKey - 11);
                 // selectMidiFX(thisKey - 19);
             }
         }
@@ -199,36 +217,43 @@ void SubModeMidiFxGroup::selectMidiFX(uint8_t fxIndex)
 {
     midiFXParamView_ = true;
     selectedMidiFX_ = fxIndex;
+
+    displayMidiFXName(fxIndex);
+}
+
+void SubModeMidiFxGroup::displayMidiFXName(uint8_t index)
+{
+    auto mfx = getMidiFX(index);
+
+    if(mfx != nullptr)
+    {
+        omxDisp.displayMessage(mfx->getName());
+    }
+    else
+    {
+        omxDisp.displayMessage("None");
+    }
+}
+
+const char* SubModeMidiFxGroup::getMFXDispName(uint8_t index)
+{
+    auto mfx = getMidiFX(index);
+
+    if(mfx != nullptr)
+    {
+        return mfx->getDispName();
+    }
+    return "-";
 }
 
 midifx::MidiFXInterface *SubModeMidiFxGroup::getMidiFX(uint8_t index)
 {
     return midifx_[index];
-
-    // if (index == 0)
-    //     return midiFX1_;
-    // else if (index == 1)
-    //     return midiFX2_;
-    // else if (index == 2)
-    //     return midiFX3_;
-    // else if (index == 3)
-    //     return midiFX4_;
-
-    // return nullptr;
 }
 
 void SubModeMidiFxGroup::setMidiFX(uint8_t index, midifx::MidiFXInterface* midifx)
 {
     midifx_[index] = midifx;
-
-    // if (index == 0)
-    //     midiFX1_ = midifx;
-    // else if (index == 1)
-    //     midiFX2_ = midifx;
-    // else if (index == 2)
-    //     midiFX3_ = midifx;
-    // else if (index == 3)
-    //     midiFX4_ = midifx;
 }
 
 void SubModeMidiFxGroup::changeMidiFXType(uint8_t slotIndex, uint8_t typeIndex, bool fromLoad)
@@ -243,28 +268,15 @@ void SubModeMidiFxGroup::changeMidiFXType(uint8_t slotIndex, uint8_t typeIndex, 
     if (typeIndex == midifxTypes_[slotIndex])
             return;
 
-    // if (midifx_[slotIndex] != nullptr)
-    // {
-    //     delete midifx_[slotIndex];
-    // }
     if (getMidiFX(slotIndex) != nullptr)
     {
-        Serial.println("Deleting FX");
+        // Serial.println("Deleting FX");
 
         midifx::MidiFXInterface *midifxptr = midifx_[slotIndex];
 
         midifx_[slotIndex] = nullptr;
 
         delete midifxptr;
-
-        // if (slotIndex == 0)
-        //     delete midiFX1_;
-        // else if (slotIndex == 1)
-        //     delete midiFX2_;
-        // else if (slotIndex == 2)
-        //     delete midiFX3_;
-        // else if (slotIndex == 3)
-        //     delete midiFX4_;
     }
 
     switch (typeIndex)
@@ -298,9 +310,9 @@ void SubModeMidiFxGroup::changeMidiFXType(uint8_t slotIndex, uint8_t typeIndex, 
         break;
     }
 
-    if (!fromLoad && getMidiFX(slotIndex) != nullptr)
+    if (!fromLoad)
     {
-        omxDisp.displayMessageTimed(getMidiFX(slotIndex)->getName(), 5);
+        displayMidiFXName(slotIndex);
     }
 
     midifxTypes_[slotIndex] = typeIndex;
@@ -315,7 +327,7 @@ void SubModeMidiFxGroup::reconnectInputsOutputs()
     bool validMidiFXFound = false;
     midifx::MidiFXInterface* lastValidMidiFX = nullptr;
 
-    for (int8_t i = 4 - 1; i >= 0; --i)
+    for (int8_t i = NUM_MIDIFX_SLOTS - 1; i >= 0; --i)
     {
         // Serial.println("i = " + String(i));
 
@@ -470,88 +482,6 @@ void SubModeMidiFxGroup::noteOutputFunc(MidiNoteGroup note)
             }
         }
     }
-    // else if(!note.unknownLength)
-    // {
-    //     // Send the note out of FX group
-    //     if (sendNoteOutFuncPtrContext_ == nullptr)
-    //         return;
-    //     sendNoteOutFuncPtr_(sendNoteOutFuncPtrContext_, note);
-    // }
-
-
-
-
-
-    // if(note.noteOff && note.unknownLength)
-    // {
-    //     Serial.println("Note off");
-    //     // See if note was previously effected
-    //     // Adjust note number if it was and remove from vector
-    //     for (uint8_t i = 0; i < 32; i++)
-    //     {
-    //         if (onNoteGroups[i].prevNoteNumber != 255)
-    //         {
-    //             if(onNoteGroups[i].channel == note.channel && onNoteGroups[i].prevNoteNumber == note.prevNoteNumber)
-    //             {
-    //                 Serial.println("Note Found: " + String(note.prevNoteNumber));
-
-    //                 // Send note off with adjusted note number
-
-    //                 if (sendNoteOutFuncPtrContext_ != nullptr)
-    //                 {
-    //                     note.noteNumber = onNoteGroups[i].noteNumber;
-    //                     // MidiNoteGroup noteOff = onNoteGroups[i];
-    //                     // noteOff.noteOff = true;
-    //                     // noteOff.velocity = 0;
-    //                     Serial.println("Note off sent: " + String(note.noteNumber));
-
-    //                     sendNoteOutFuncPtr_(sendNoteOutFuncPtrContext_, note);
-    //                 }
-    //                 onNoteGroups[i].prevNoteNumber = 255; // mark empty
-    //             }
-    //         }
-    //     }
-    // }
-    // else if(!note.noteOff && note.unknownLength)
-    // {
-    //     Serial.println("Note on");
-
-    //     // Keep track of note, up to 32 notes tracked at once
-    //     for (uint8_t i = 0; i < 32; i++)
-    //     {
-    //         if (onNoteGroups[i].prevNoteNumber == 255)
-    //         {
-    //             Serial.println("Found empty slot: " + String(note.prevNoteNumber));
-
-    //             // onNoteGroups[i] = note;
-    //             onNoteGroups[i].channel = note.channel;
-    //             onNoteGroups[i].prevNoteNumber = note.prevNoteNumber;
-    //             onNoteGroups[i].noteNumber = note.noteNumber;
-
-
-    //             // Send the note out of FX group
-    //             if (sendNoteOutFuncPtrContext_ != nullptr) {
-    //                 Serial.println("Note on sent: " + String(note.noteNumber));
-    //                 sendNoteOutFuncPtr_(sendNoteOutFuncPtrContext_, note);
-    //             }
-
-    //             return;
-    //         }
-    //     }
-    // }
-    // else if(!note.unknownLength)
-    // {
-    //     // Send the note out of FX group
-    //     if (sendNoteOutFuncPtrContext_ == nullptr)
-    //         return;
-    //     sendNoteOutFuncPtr_(sendNoteOutFuncPtrContext_, note);
-    // }
-
-    // Serial.println("SubModeMidiFxGroup::noteOutputFunc testNoteFunc: " + String(note.noteNumber) + " selectedMidiFX_: " + String(selectedMidiFX_));
-
-    // // Send the note out of FX group
-    // if(sendNoteOutFuncPtrContext_ == nullptr) return;
-    // sendNoteOutFuncPtr_(sendNoteOutFuncPtrContext_, note);
 }
 
 
@@ -576,19 +506,26 @@ void SubModeMidiFxGroup::setupPageLegends()
         omxDisp.legendVals[1] = -127;
         omxDisp.legendVals[2] = -127;
         omxDisp.legendVals[3] = -127;
+        omxDisp.legendText[0] = getMFXDispName(0);
+        omxDisp.legendText[1] = getMFXDispName(1);
+        omxDisp.legendText[2] = getMFXDispName(2);
+        omxDisp.legendText[3] = getMFXDispName(3);
     }
     break;
-    case MFXPAGE_TEST:
+    case MFXPAGE_FX2:
     {
-        omxDisp.legends[0] = "Test";
-        omxDisp.legends[1] = "Test";
-        omxDisp.legends[2] = "Test";
-        omxDisp.legends[3] = "";
-        omxDisp.legendVals[0] = 1;
-        omxDisp.legendVals[1] = 2;
-        omxDisp.legendVals[2] = 3;
+        omxDisp.legends[0] = "FX 5";
+        omxDisp.legends[1] = "FX 6";
+        omxDisp.legends[2] = "FX 7";
+        omxDisp.legends[3] = "FX 8";
+        omxDisp.legendVals[0] = -127;
+        omxDisp.legendVals[1] = -127;
+        omxDisp.legendVals[2] = -127;
         omxDisp.legendVals[3] = -127;
-        omxDisp.legendText[3] = "";
+        omxDisp.legendText[0] = getMFXDispName(4);
+        omxDisp.legendText[1] = getMFXDispName(5);
+        omxDisp.legendText[2] = getMFXDispName(6);
+        omxDisp.legendText[3] = getMFXDispName(7);
     }
     break;
     case MFXPAGE_EXIT:
@@ -662,21 +599,21 @@ int SubModeMidiFxGroup::saveToDisk(int startingAddress, Storage *storage)
 
         if(mFX == nullptr)
         {
-            Serial.println("NoMFX");
+            // Serial.println("NoMFX");
             storage->write(startingAddress, MIDIFX_NONE);
             startingAddress++;
         }
         else
         {
             int mfxType = mFX->getFXType();
-            Serial.println((String)"MFX: " + mfxType);
+            // Serial.println((String)"MFX: " + mfxType);
             storage->write(startingAddress, mfxType);
             startingAddress++;
 
             startingAddress = mFX->saveToDisk(startingAddress, storage);
         }
 
-        Serial.println((String)"startingAddress: " + startingAddress);
+        // Serial.println((String)"startingAddress: " + startingAddress);
     }
 
     return startingAddress;
@@ -689,7 +626,7 @@ int SubModeMidiFxGroup::loadFromDisk(int startingAddress, Storage *storage)
         int mfxType = storage->read(startingAddress);
         startingAddress++;
 
-        Serial.println((String)"MFX: " + mfxType);
+        // Serial.println((String)"MFX: " + mfxType);
 
         changeMidiFXType(i, mfxType, true);
 
@@ -701,10 +638,10 @@ int SubModeMidiFxGroup::loadFromDisk(int startingAddress, Storage *storage)
         }
         else
         {
-            Serial.println("mfx is null");
+            // Serial.println("mfx is null");
         }
 
-        Serial.println((String)"startingAddress: " + startingAddress);
+        // Serial.println((String)"startingAddress: " + startingAddress);
     }
 
     return startingAddress;

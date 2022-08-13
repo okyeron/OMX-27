@@ -20,9 +20,14 @@ namespace midifx
         return MIDIFX_RANDOMIZER;
     }
 
-    String MidiFXRandomizer::getName()
+    const char* MidiFXRandomizer::getName()
     {
-        return String("Randomizer");
+        return "Randomizer";
+    }
+
+    const char* MidiFXRandomizer::getDispName()
+    {
+        return "RAND";
     }
 
     void MidiFXRandomizer::onEnabled()
@@ -194,7 +199,7 @@ namespace midifx
 
     int MidiFXRandomizer::saveToDisk(int startingAddress, Storage *storage)
     {
-        Serial.println((String) "Saving mfx randomizer: " + startingAddress); // 5969
+        // Serial.println((String) "Saving mfx randomizer: " + startingAddress); // 5969
         storage->write(startingAddress + 0, noteMinus_);
         storage->write(startingAddress + 1, notePlus_);
         storage->write(startingAddress + 2, octMinus_);
@@ -209,7 +214,7 @@ namespace midifx
 
     int MidiFXRandomizer::loadFromDisk(int startingAddress, Storage *storage)
     {
-        Serial.println((String) "Loading mfx randomizer: " + startingAddress); // 5969
+        // Serial.println((String) "Loading mfx randomizer: " + startingAddress); // 5969
 
         noteMinus_ = storage->read(startingAddress + 0);
         notePlus_ = storage->read(startingAddress + 1);

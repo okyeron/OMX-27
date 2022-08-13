@@ -18,9 +18,14 @@ namespace midifx
         return MIDIFX_CHANCE;
     }
 
-    String MidiFXChance::getName()
+    const char* MidiFXChance::getName()
     {
-        return String("Chance");
+        return "Chance";
+    }
+
+    const char* MidiFXChance::getDispName()
+    {
+        return "CHC";
     }
 
     void MidiFXChance::onEnabled()
@@ -110,18 +115,18 @@ namespace midifx
 
     int MidiFXChance::saveToDisk(int startingAddress, Storage *storage) 
     {
-        Serial.println((String)"Saving mfx chance: " + startingAddress); // 5969
-        Serial.println((String)"chancePerc_: " + chancePerc_);
+        // Serial.println((String)"Saving mfx chance: " + startingAddress); // 5969
+        // Serial.println((String)"chancePerc_: " + chancePerc_);
         storage->write(startingAddress, chancePerc_);
         return startingAddress + 1;
     }
 
     int MidiFXChance::loadFromDisk(int startingAddress, Storage *storage)
     {
-        Serial.println((String)"Loading mfx chance: " + startingAddress); // 5969
+        // Serial.println((String)"Loading mfx chance: " + startingAddress); // 5969
 
         chancePerc_ = storage->read(startingAddress);
-        Serial.println((String)"chancePerc_: " + chancePerc_);
+        // Serial.println((String)"chancePerc_: " + chancePerc_);
 
         return startingAddress + 1;
     }

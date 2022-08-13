@@ -12,13 +12,17 @@ namespace midifx
         ~MidiFXHarmonizer() {}
 
         int getFXType() override;
-        String getName() override;
+        const char* getName() override;
+        const char* getDispName() override;
 
         void loopUpdate() override;
 
         void onDisplayUpdate() override;
 
         void noteInput(MidiNoteGroup note) override;
+
+        int saveToDisk(int startingAddress, Storage *storage) override;
+        int loadFromDisk(int startingAddress, Storage *storage) override;
 
     protected:
         void onEnabled() override;
