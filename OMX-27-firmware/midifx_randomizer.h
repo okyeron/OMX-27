@@ -20,6 +20,9 @@ namespace midifx
 
         void noteInput(MidiNoteGroup note) override;
 
+        int saveToDisk(int startingAddress, Storage *storage) override;
+        int loadFromDisk(int startingAddress, Storage *storage) override;
+
     protected:
         void onEnabled() override;
         void onDisabled() override;

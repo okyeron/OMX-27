@@ -3,6 +3,7 @@
 #include "ClearUI_Input.h"
 #include "omx_keypad.h"
 #include "param_manager.h"
+#include "storage.h"
 
 namespace midifx
 {
@@ -82,6 +83,9 @@ namespace midifx
         virtual void noteInput(MidiNoteGroup note) = 0;
         // virtual MidiFXNoteFunction getInputFunc() = 0;
         virtual void setNoteOutput(void (*fptr)(void *, MidiNoteGroup), void *context);
+
+        virtual int saveToDisk(int startingAddress, Storage *storage);
+        virtual int loadFromDisk(int startingAddress, Storage *storage);
 
         // // the function using the function pointers:
         // void somefunction(void (*fptr)(void *, int, int), void *context)

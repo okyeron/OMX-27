@@ -107,4 +107,22 @@ namespace midifx
 
         omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), encoderSelect_);
     }
+
+    int MidiFXChance::saveToDisk(int startingAddress, Storage *storage) 
+    {
+        Serial.println((String)"Saving mfx chance: " + startingAddress); // 5969
+        Serial.println((String)"chancePerc_: " + chancePerc_);
+        storage->write(startingAddress, chancePerc_);
+        return startingAddress + 1;
+    }
+
+    int MidiFXChance::loadFromDisk(int startingAddress, Storage *storage)
+    {
+        Serial.println((String)"Loading mfx chance: " + startingAddress); // 5969
+
+        chancePerc_ = storage->read(startingAddress);
+        Serial.println((String)"chancePerc_: " + chancePerc_);
+
+        return startingAddress + 1;
+    }
 }

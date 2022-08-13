@@ -231,15 +231,17 @@ void SubModeMidiFxGroup::setMidiFX(uint8_t index, midifx::MidiFXInterface* midif
     //     midiFX4_ = midifx;
 }
 
-void SubModeMidiFxGroup::changeMidiFXType(uint8_t slotIndex, uint8_t typeIndex)
+void SubModeMidiFxGroup::changeMidiFXType(uint8_t slotIndex, uint8_t typeIndex, bool fromLoad)
 {
     // Serial.println(String("changeMidiFXType slotIndex: ") + String(slotIndex) + " typeIndex: " + String(typeIndex));
-
-    if (!midiFXParamView_)
-        return;
+    if (!fromLoad)
+    {
+        if (!midiFXParamView_)
+            return;
+    }
 
     if (typeIndex == midifxTypes_[slotIndex])
-        return;
+            return;
 
     // if (midifx_[slotIndex] != nullptr)
     // {
@@ -247,7 +249,7 @@ void SubModeMidiFxGroup::changeMidiFXType(uint8_t slotIndex, uint8_t typeIndex)
     // }
     if (getMidiFX(slotIndex) != nullptr)
     {
-        // Serial.println("Deleting FX");
+        Serial.println("Deleting FX");
 
         midifx::MidiFXInterface *midifxptr = midifx_[slotIndex];
 
@@ -296,7 +298,7 @@ void SubModeMidiFxGroup::changeMidiFXType(uint8_t slotIndex, uint8_t typeIndex)
         break;
     }
 
-    if (getMidiFX(slotIndex) != nullptr)
+    if (!fromLoad && getMidiFX(slotIndex) != nullptr)
     {
         omxDisp.displayMessageTimed(getMidiFX(slotIndex)->getName(), 5);
     }
@@ -650,4 +652,60 @@ void SubModeMidiFxGroup::onDisplayUpdate()
             }
         }
     }
+}
+
+int SubModeMidiFxGroup::saveToDisk(int startingAddress, Storage *storage)
+{
+    for(uint8_t i = 0; i < 4; i++)
+    {
+        MidiFXInterface* mFX = getMidiFX(i);
+
+        if(mFX == nullptr)
+        {
+            Serial.println("NoMFX");
+            storage->write(startingAddress, MIDIFX_NONE);
+            startingAddress++;
+        }
+        else
+        {
+            int mfxType = mFX->getFXType();
+            Serial.println((String)"MFX: " + mfxType);
+            storage->write(startingAddress, mfxType);
+            startingAddress++;
+
+            startingAddress = mFX->saveToDisk(startingAddress, storage);
+        }
+
+        Serial.println((String)"startingAddress: " + startingAddress);
+    }
+
+    return startingAddress;
+}
+
+int SubModeMidiFxGroup::loadFromDisk(int startingAddress, Storage *storage)
+{
+    for(uint8_t i = 0; i < 4; i++)
+    {
+        int mfxType = storage->read(startingAddress);
+        startingAddress++;
+
+        Serial.println((String)"MFX: " + mfxType);
+
+        changeMidiFXType(i, mfxType, true);
+
+        MidiFXInterface* mFX = getMidiFX(i);
+
+        if(mFX != nullptr)
+        {
+            startingAddress = mFX->loadFromDisk(startingAddress, storage);
+        }
+        else
+        {
+            Serial.println("mfx is null");
+        }
+
+        Serial.println((String)"startingAddress: " + startingAddress);
+    }
+
+    return startingAddress;
 }

@@ -739,7 +739,18 @@ void savePatterns(void)
 		nLocalAddress += patternSize;
 	}
 
-	Serial.println((String)"nLocalAddress: " + nLocalAddress);
+	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 5968
+
+	Serial.println("Saving MidiFX");
+	
+	for(uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
+	{
+		nLocalAddress = subModeMidiFx[i].saveToDisk(nLocalAddress, storage);
+		Serial.println((String)"Saved: " + i);
+		Serial.println((String)"nLocalAddress: " + nLocalAddress);
+	}
+
+	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 5988
 
 	// Seq patternSize: 715
 	// nLocalAddress: 5752
@@ -748,6 +759,7 @@ void savePatterns(void)
 	// numPatterns: 8
 	// nLocalAddress: 5936
 	// size of grids: 184
+
 }
 
 void loadPatterns(void)
@@ -798,6 +810,21 @@ void loadPatterns(void)
 	Serial.println( patternSize );
 	Serial.println( "nLocalAddress" );
 	Serial.println( nLocalAddress );
+
+	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 5968
+
+	Serial.println("Loading MidiFX");
+	
+	for(uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
+	{
+		nLocalAddress = subModeMidiFx[i].loadFromDisk(nLocalAddress, storage);
+		Serial.println((String)"Loaded: " + i);
+		Serial.println((String)"nLocalAddress: " + nLocalAddress);
+	}
+
+	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 5988
+
+
 	// Pattern size = 715
 	// Pattern size eprom = 332
 	// Total size of patterns = 5720
@@ -815,6 +842,8 @@ void saveToStorage(void)
 	// Serial.println( "saving..." );
 	saveHeader();
 	savePatterns();
+	omxDisp.isDirty();
+	omxLeds.isDirty();
 }
 
 // currently loads everything ( mode + patterns )
@@ -831,10 +860,16 @@ bool loadFromStorage(void)
 		Serial.println( "loading patterns" );
 		loadPatterns();
 		changeOmxMode(sysSettings.omxMode);
+
+		omxDisp.isDirty();
+		omxLeds.isDirty();
 		return true;
 	}
 
 	Serial.println( "failed to load" );
+
+	omxDisp.isDirty();
+	omxLeds.isDirty();
 
 	return false;
 }

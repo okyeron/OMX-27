@@ -191,4 +191,35 @@ namespace midifx
 
         omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), encoderSelect_);
     }
+
+    int MidiFXRandomizer::saveToDisk(int startingAddress, Storage *storage)
+    {
+        Serial.println((String) "Saving mfx randomizer: " + startingAddress); // 5969
+        storage->write(startingAddress + 0, noteMinus_);
+        storage->write(startingAddress + 1, notePlus_);
+        storage->write(startingAddress + 2, octMinus_);
+        storage->write(startingAddress + 3, octPlus_);
+        storage->write(startingAddress + 4, velMinus_);
+        storage->write(startingAddress + 5, velPlus_);
+        storage->write(startingAddress + 6, lengthPerc_);
+        storage->write(startingAddress + 7, chancePerc_);
+
+        return startingAddress + 8;
+    }
+
+    int MidiFXRandomizer::loadFromDisk(int startingAddress, Storage *storage)
+    {
+        Serial.println((String) "Loading mfx randomizer: " + startingAddress); // 5969
+
+        noteMinus_ = storage->read(startingAddress + 0);
+        notePlus_ = storage->read(startingAddress + 1);
+        octMinus_ = storage->read(startingAddress + 2);
+        octPlus_ = storage->read(startingAddress + 3);
+        velMinus_ = storage->read(startingAddress + 4);
+        velPlus_ = storage->read(startingAddress + 5);
+        lengthPerc_ = storage->read(startingAddress + 6);
+        chancePerc_ = storage->read(startingAddress + 7);
+
+        return startingAddress + 8;
+    }
 }

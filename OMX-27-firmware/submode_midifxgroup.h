@@ -2,6 +2,7 @@
 
 #include "submode_interface.h"
 #include "midifx_interface.h"
+#include "storage.h"
 
 #define NUM_MIDIFX_GROUPS 5
 
@@ -25,6 +26,9 @@ public:
     void setNoteOutputFunc(void (*fptr)(void *, MidiNoteGroup), void *context);
 
     void onPendingNoteOff(int note, int channel);
+
+    int saveToDisk(int startingAddress, Storage *storage);
+    int loadFromDisk(int startingAddress, Storage *storage);
 protected:
 // Interface methods
     void onEnabled() override;
@@ -59,7 +63,7 @@ private:
     void onDisplayUpdateMidiFX();
 
     void selectMidiFX(uint8_t fxIndex);
-    void changeMidiFXType(uint8_t slotIndex, uint8_t typeIndex);
+    void changeMidiFXType(uint8_t slotIndex, uint8_t typeIndex, bool fromLoad = false);
 
     // Static glue to link a pointer to a member function
     static void noteFuncForwarder(void *context, MidiNoteGroup note)

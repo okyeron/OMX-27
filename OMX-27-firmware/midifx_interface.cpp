@@ -131,4 +131,14 @@ namespace midifx
             outFunctionPtr_(outFunctionContext_, note);
         }
     }
+
+    int MidiFXInterface::saveToDisk(int startingAddress, Storage *storage)
+    {
+        return startingAddress;
+    }
+
+    int MidiFXInterface::loadFromDisk(int startingAddress, Storage *storage)
+    {
+        return startingAddress;
+    }
 }
