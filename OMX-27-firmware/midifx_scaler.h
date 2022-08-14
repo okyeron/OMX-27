@@ -15,6 +15,8 @@ namespace midifx
         const char* getName() override;
         const char* getDispName() override;
 
+        MidiFXInterface* getClone() override;
+
         void loopUpdate() override;
 
         void onDisplayUpdate() override;
@@ -35,8 +37,8 @@ namespace midifx
 
         uint8_t chancePerc_ = 100;
 
-        int8_t rootNote = 0;
-        int8_t scaleIndex = 0;
+        int8_t rootNote_ = 0;
+        int8_t scaleIndex_ = 0;
 
         int8_t scaleRemapper[12];
 

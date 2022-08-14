@@ -15,6 +15,8 @@ namespace midifx
         const char* getName() override;
         const char* getDispName() override;
 
+        MidiFXInterface* getClone() override;
+
         void loopUpdate() override;
 
         void onDisplayUpdate() override;

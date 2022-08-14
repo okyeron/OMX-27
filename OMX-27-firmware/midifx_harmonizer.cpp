@@ -40,6 +40,21 @@ namespace midifx
         return "HARM";
     }
 
+    MidiFXInterface* MidiFXHarmonizer::getClone()
+    {
+        auto clone = new MidiFXHarmonizer();
+
+        clone->chancePerc_ = chancePerc_;
+        clone->playOrigin_ = playOrigin_;
+
+        for(uint8_t i = 0; i < 7; i++)
+        {
+            clone->notes_[i] = notes_[i];
+        }
+
+        return clone;
+    }
+
     void MidiFXHarmonizer::onEnabled()
     {
     }

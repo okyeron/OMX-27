@@ -28,6 +28,13 @@ namespace midifx
         return "CHC";
     }
 
+    MidiFXInterface* MidiFXChance::getClone()
+    {
+        auto clone = new MidiFXChance();
+        clone->chancePerc_ = chancePerc_;
+        return clone;
+    }
+
     void MidiFXChance::onEnabled()
     {
     }

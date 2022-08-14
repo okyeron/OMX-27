@@ -30,6 +30,22 @@ namespace midifx
         return "RAND";
     }
 
+    MidiFXInterface* MidiFXRandomizer::getClone()
+    {
+        auto clone = new MidiFXRandomizer();
+
+        clone->noteMinus_ = noteMinus_;
+        clone->notePlus_ = notePlus_;
+        clone->octMinus_ = octMinus_;
+        clone->octPlus_ = octPlus_;
+        clone->velMinus_ = velMinus_;
+        clone->velPlus_ = velPlus_;
+        clone->lengthPerc_ = lengthPerc_;
+        clone->chancePerc_ = chancePerc_;
+
+        return clone;
+    }
+
     void MidiFXRandomizer::onEnabled()
     {
     }

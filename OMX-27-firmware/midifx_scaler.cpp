@@ -31,6 +31,19 @@ namespace midifx
         return "SCAL";
     }
 
+    MidiFXInterface* MidiFXScaler::getClone()
+    {
+        auto clone = new MidiFXScaler();
+
+        clone->chancePerc_ = chancePerc_;
+        clone->rootNote_ = rootNote_;
+        clone->scaleIndex_ = scaleIndex_;
+
+        clone->calculateRemap();
+
+        return clone;
+    }
+
     void MidiFXScaler::onEnabled()
     {
     }
@@ -121,7 +134,7 @@ namespace midifx
 
     void MidiFXScaler::calculateRemap()
     {
-        if (scaleIndex < 0)
+        if (scaleIndex_ < 0)
         {
             for (uint8_t i = 0; i < 12; i++)
             {
@@ -130,7 +143,7 @@ namespace midifx
             return;
         }
 
-        auto scalePattern = MusicScales::getScalePattern(scaleIndex);
+        auto scalePattern = MusicScales::getScalePattern(scaleIndex_);
 
         uint8_t scaleIndex = 0;
         uint8_t lastNoteIndex = 0;
@@ -148,15 +161,15 @@ namespace midifx
             // uint8_t destIndex = (i - rootNote + 12) % 12;
             // uint8_t destIndex = i + rootNote % 12;
 
-            scaleRemapper[i] = (lastNoteIndex + rootNote) % 12;
+            scaleRemapper[i] = (lastNoteIndex + rootNote_) % 12;
         }
 
-        if (rootNote > 0)
+        if (rootNote_ > 0)
         {
             // rotate the scale to root
             int8_t temp[12];
 
-            uint8_t val = 12 - rootNote;
+            uint8_t val = 12 - rootNote_;
 
             for (uint8_t i = 0; i < 12; i++)
             {
@@ -195,20 +208,20 @@ namespace midifx
         {
             if (param == 0)
             {
-                int prevRoot = rootNote;
-                rootNote = constrain(rootNote + amt, 0, 12 - 1);
-                if (prevRoot != rootNote)
+                int prevRoot = rootNote_;
+                rootNote_ = constrain(rootNote_ + amt, 0, 12 - 1);
+                if (prevRoot != rootNote_)
                 {
                     calculateRemap();
                 }
             }
             else if (param == 1)
             {
-                int prevPat = scaleIndex;
-                scaleIndex = constrain(scaleIndex + amt, -1, MusicScales::getNumScales() - 1);
-                if (prevPat != scaleIndex)
+                int prevPat = scaleIndex_;
+                scaleIndex_ = constrain(scaleIndex_ + amt, -1, MusicScales::getNumScales() - 1);
+                if (prevPat != scaleIndex_)
                 {
-                    omxDisp.displayMessage(MusicScales::getScaleName(scaleIndex));
+                    omxDisp.displayMessage(MusicScales::getScaleName(scaleIndex_));
                     calculateRemap();
                 }
             }
@@ -233,17 +246,17 @@ namespace midifx
         {
             omxDisp.legends[0] = "ROOT";
             omxDisp.legendVals[0] = -127;
-            omxDisp.legendText[0] = MusicScales::getNoteName(rootNote);
+            omxDisp.legendText[0] = MusicScales::getNoteName(rootNote_);
 
             omxDisp.legends[1] = "SCALE";
-            if (scaleIndex < 0)
+            if (scaleIndex_ < 0)
             {
                 omxDisp.legendVals[1] = -127;
                 omxDisp.legendText[1] = "Off";
             }
             else
             {
-                omxDisp.legendVals[1] = scaleIndex;
+                omxDisp.legendVals[1] = scaleIndex_;
             }
 
             omxDisp.legends[2] = "";
@@ -266,8 +279,8 @@ namespace midifx
     {
         // Serial.println((String) "Saving mfx scaler: " + startingAddress); // 5969
         storage->write(startingAddress + 0, chancePerc_);
-        storage->write(startingAddress + 1, (uint8_t)rootNote);
-        storage->write(startingAddress + 2, (uint8_t)scaleIndex);
+        storage->write(startingAddress + 1, (uint8_t)rootNote_);
+        storage->write(startingAddress + 2, (uint8_t)scaleIndex_);
 
         return startingAddress + 3;
     }
@@ -277,8 +290,8 @@ namespace midifx
         // Serial.println((String) "Loading mfx scaler: " + startingAddress); // 5969
 
         chancePerc_ = storage->read(startingAddress + 0);
-        rootNote = (int8_t)storage->read(startingAddress + 1);
-        scaleIndex = (int8_t)storage->read(startingAddress + 2);
+        rootNote_ = (int8_t)storage->read(startingAddress + 1);
+        scaleIndex_ = (int8_t)storage->read(startingAddress + 2);
 
         calculateRemap();
 

@@ -63,8 +63,33 @@ void SubModeMidiFxGroup::onDisabled()
     omxDisp.setDirty();
 }
 
+void SubModeMidiFxGroup::updateFuncKeyMode()
+{
+    auto keyState = midiSettings.keyState;
+
+    funcKeyMode_ = FUNCKEYMODE_NONE;
+
+    if(keyState[1] && !keyState[2])
+    {
+        funcKeyMode_ = FUNCKEYMODE_F1;
+    }
+    else if(!keyState[1] && keyState[2])
+    {
+        funcKeyMode_ = FUNCKEYMODE_F2;
+    }
+    else if(keyState[1] && keyState[2])
+    {
+        funcKeyMode_ = FUNCKEYMODE_F3;
+    }
+    else
+    {
+        funcKeyMode_ = FUNCKEYMODE_NONE;
+    }
+}
+
 void SubModeMidiFxGroup::loopUpdate()
 {
+    updateFuncKeyMode();
 }
 
 void SubModeMidiFxGroup::updateLEDs()
@@ -176,13 +201,13 @@ void SubModeMidiFxGroup::onKeyUpdate(OMXKeypadEvent e)
         if (thisKey == 0)
         {
             // Exit MidiFX view
-            if(midiFXParamView_) 
+            if (midiFXParamView_)
             {
                 midiFXParamView_ = false;
                 encoderSelect_ = true;
             }
             // Exit submode
-            else if(auxReleased_)
+            else if (auxReleased_)
             {
                 setEnabled(false);
             }
@@ -191,7 +216,29 @@ void SubModeMidiFxGroup::onKeyUpdate(OMXKeypadEvent e)
         // Quick Select FX Slot
         if (thisKey >= 3 && thisKey < 3 + NUM_MIDIFX_SLOTS)
         {
-            selectMidiFX(thisKey - 3);
+            if(funcKeyMode_ == FUNCKEYMODE_NONE)
+            {
+                selectMidiFX(thisKey - 3);
+            }
+            else if(funcKeyMode_ == FUNCKEYMODE_F1)
+            {
+                // Copy
+                copyMidiFX(thisKey - 3);
+                omxDisp.displayMessage("Copy");
+
+            }
+            else if(funcKeyMode_ == FUNCKEYMODE_F2)
+            {
+                // Paste
+                pasteMidiFX(thisKey - 3);
+                omxDisp.displayMessage("Paste");
+            }
+            else if(funcKeyMode_ == FUNCKEYMODE_F3)
+            {
+                // Cut
+                cutMidiFX(thisKey - 3);
+                omxDisp.displayMessage("Cut");
+            }
         }
 
         // Change FX type
@@ -202,6 +249,11 @@ void SubModeMidiFxGroup::onKeyUpdate(OMXKeypadEvent e)
                 changeMidiFXType(selectedMidiFX_, thisKey - 11);
                 // selectMidiFX(thisKey - 19);
             }
+        }
+
+        if (funcKeyMode_ == FUNCKEYMODE_NONE)
+        {
+            
         }
     }
 
@@ -221,6 +273,63 @@ void SubModeMidiFxGroup::selectMidiFX(uint8_t fxIndex)
     selectedMidiFX_ = fxIndex;
 
     displayMidiFXName(fxIndex);
+}
+
+void SubModeMidiFxGroup::copyMidiFX(uint8_t fxIndex)
+{
+    if(copyBuffer != nullptr)
+    {
+        delete copyBuffer;
+        copyBuffer = nullptr;
+    }
+    auto mfx = getMidiFX(fxIndex);
+    if(mfx != nullptr)
+    {
+        copyBuffer = mfx->getClone();
+    }
+}
+void SubModeMidiFxGroup::cutMidiFX(uint8_t fxIndex)
+{
+    copyMidiFX(fxIndex);
+
+    if (getMidiFX(fxIndex) != nullptr)
+    {
+        midifx::MidiFXInterface *midifxptr = midifx_[fxIndex];
+
+        midifx_[fxIndex] = nullptr;
+
+        delete midifxptr;
+    }
+
+    midifxTypes_[fxIndex] = MIDIFX_NONE;
+    reconnectInputsOutputs();
+}
+void SubModeMidiFxGroup::pasteMidiFX(uint8_t fxIndex)
+{
+    if (getMidiFX(fxIndex) != nullptr)
+    {
+        midifx::MidiFXInterface *midifxptr = midifx_[fxIndex];
+
+        midifx_[fxIndex] = nullptr;
+
+        delete midifxptr;
+    }
+
+    if(copyBuffer != nullptr)
+    {
+        setMidiFX(fxIndex, copyBuffer->getClone());
+    }
+
+    if (getMidiFX(fxIndex) != nullptr)
+    {
+        midifxTypes_[fxIndex] = getMidiFX(fxIndex)->getFXType();
+    }
+    else
+    {
+        midifxTypes_[fxIndex] = MIDIFX_NONE;
+    }
+
+    reconnectInputsOutputs();
 }
 
 void SubModeMidiFxGroup::displayMidiFXName(uint8_t index)

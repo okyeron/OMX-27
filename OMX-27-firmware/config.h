@@ -46,6 +46,14 @@ enum MIDIFXTYPE
 
 extern const OMXMode DEFAULT_MODE;
 
+enum FUNCKEYMODE
+{
+	FUNCKEYMODE_NONE, // No function keys
+	FUNCKEYMODE_F1, // F1 held
+	FUNCKEYMODE_F2, // F2 held
+	FUNCKEYMODE_F3 // F1 + F3 held
+};
+
 // Increment this when data layout in EEPROM changes. May need to write version upgrade readers when this changes.
 extern const uint8_t EEPROM_VERSION;
 

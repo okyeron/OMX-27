@@ -40,6 +40,8 @@ private:
     bool midiFXParamView_ = false; // If true, parameters adjust the selected midiFX slot. 
     uint8_t selectedMidiFX_ = 0; // Index of selected midiFX slot
 
+    uint8_t funcKeyMode_ = 0;
+
     bool auxReleased_ = false; // set to aux state onEnable, must be true to exit mode with aux. 
 
     // typedef midifx::MidiFXInterface* MidiFXptr;
@@ -61,6 +63,8 @@ private:
     void setMidiFX(uint8_t index, midifx::MidiFXInterface* midifx);
     void setupPageLegends();
 
+    void updateFuncKeyMode();
+
     void onDisplayUpdateMidiFX();
 
     void displayMidiFXName(uint8_t index);
@@ -69,6 +73,12 @@ private:
 
     void selectMidiFX(uint8_t fxIndex);
     void changeMidiFXType(uint8_t slotIndex, uint8_t typeIndex, bool fromLoad = false);
+
+    void copyMidiFX(uint8_t fxIndex);
+    void cutMidiFX(uint8_t fxIndex);
+    void pasteMidiFX(uint8_t fxIndex);
+
+    midifx::MidiFXInterface * copyBuffer;
 
     // Static glue to link a pointer to a member function
     static void noteFuncForwarder(void *context, MidiNoteGroup note)

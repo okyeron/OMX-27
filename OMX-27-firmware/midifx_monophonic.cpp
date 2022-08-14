@@ -28,6 +28,15 @@ namespace midifx
         return "MONO";
     }
 
+    MidiFXInterface* MidiFXMonophonic::getClone()
+    {
+        auto clone = new MidiFXMonophonic();
+
+        clone->chancePerc_ = chancePerc_;
+
+        return clone;
+    }
+
     void MidiFXMonophonic::onEnabled()
     {
     }

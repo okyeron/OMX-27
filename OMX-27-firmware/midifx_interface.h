@@ -67,6 +67,8 @@ namespace midifx
         // Short Display Name
         virtual const char* getDispName() = 0;
 
+        virtual MidiFXInterface* getClone() { return nullptr;}
+
         virtual void setEnabled(bool newEnabled);
         virtual bool getEnabled();
 
