@@ -40,7 +40,7 @@ extern SequencerState sequencer;
 // extern StepNote* getSelectedStep();
 
 // globals from sequencer.h
-uint8_t lastNote[NUM_PATTERNS][NUM_STEPS] = {
+uint8_t lastNote[NUM_SEQ_PATTERNS][NUM_STEPS] = {
 	{0},{0},{0},{0},{0},{0},{0},{0}
 };
 
@@ -63,7 +63,7 @@ StepNote copyPatternBuffer[NUM_STEPS] = {
 	{0, 0, 0, TRIGTYPE_MUTE, { -1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE }
 };
 
-int loopCount[NUM_PATTERNS][NUM_STEPS] = {
+int loopCount[NUM_SEQ_PATTERNS][NUM_STEPS] = {
 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -376,7 +376,7 @@ void doStepS1()
 	{
 		unsigned long playstepmicros = micros();
 
-		for (int j = 0; j < NUM_PATTERNS; j++)
+		for (int j = 0; j < NUM_SEQ_PATTERNS; j++)
 		{ // check all patterns for notes to play in time
 			// CLOCK PER PATTERN BASED APPROACH
 			auto pattern = sequencer.getPattern(j);
@@ -430,7 +430,7 @@ void doStepS2()
 	{
 		unsigned long playstepmicros = micros();
 
-		for (int j = 0; j < NUM_PATTERNS; j++)
+		for (int j = 0; j < NUM_SEQ_PATTERNS; j++)
 		{ // check all patterns for notes to play in time
 			// CLOCK PER PATTERN BASED APPROACH
 			auto pattern = sequencer.getPattern(j);
@@ -649,7 +649,7 @@ void transposeSeq(int patternNum, int amt) {
 
 void seqReset() {
 	if (sequencer.seqResetFlag) {
-		for (int k=0; k<NUM_PATTERNS; k++){
+		for (int k=0; k<NUM_SEQ_PATTERNS; k++){
 			for (int q=0; q<NUM_STEPS; q++){
 				loopCount[k][q] = 0;
 			}
@@ -672,7 +672,7 @@ void seqReset() {
 void seqStart() {
 	sequencer.playing = 1;
 
-	for (int x=0; x<NUM_PATTERNS; x++){
+	for (int x=0; x<NUM_SEQ_PATTERNS; x++){
 		sequencer.timePerPattern[x].nextStepTimeP = micros();
 		sequencer.timePerPattern[x].lastStepTimeP = micros();
 	}
@@ -700,7 +700,7 @@ int getPatternPage(int position){
 }
 
 void rotatePattern(int patternNum, int rot) {
-	if ( patternNum < 0 || patternNum >= NUM_PATTERNS )
+	if ( patternNum < 0 || patternNum >= NUM_SEQ_PATTERNS )
 		return;
 
 	auto pattern = sequencer.getPattern(patternNum);

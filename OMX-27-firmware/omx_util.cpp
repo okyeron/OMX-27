@@ -60,7 +60,7 @@ void OmxUtil::advanceSteps(Micros advance)
 
 void OmxUtil::setGlobalSwing(int swng_amt)
 {
-	for (int z = 0; z < NUM_PATTERNS; z++)
+	for (int z = 0; z < NUM_SEQ_PATTERNS; z++)
 	{
 		sequencer.getPattern(z)->swing = swng_amt;
 	}

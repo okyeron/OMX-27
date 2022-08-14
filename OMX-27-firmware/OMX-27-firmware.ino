@@ -719,7 +719,7 @@ void savePatterns(void)
 	int nLocalAddress = EEPROM_PATTERN_ADDRESS;
 
 	// Serial.println((String)"Seq patternSize: " + patternSize);
-	int seqPatternNum = isEeprom ? 5 : NUM_PATTERNS;
+	int seqPatternNum = isEeprom ? NUM_SEQ_PATTERNS_EEPROM : NUM_SEQ_PATTERNS;
 
 	for (int i = 0; i < seqPatternNum; i++)
 	{
@@ -793,7 +793,7 @@ void loadPatterns(void)
 	Serial.println( "seq patterns nLocalAddress" );
 	Serial.println( nLocalAddress );
 
-	int seqPatternNum = isEeprom ? 5 : NUM_PATTERNS;
+	int seqPatternNum = isEeprom ? NUM_SEQ_PATTERNS_EEPROM : NUM_SEQ_PATTERNS;
 
 	for (int i = 0; i < seqPatternNum; i++)
 	{

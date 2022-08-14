@@ -3,7 +3,8 @@
 #include <Arduino.h>
 #include "config.h"
 
-#define NUM_PATTERNS 8
+#define NUM_SEQ_PATTERNS_EEPROM 6
+#define NUM_SEQ_PATTERNS 8
 #define NUM_STEPS 64
 #define NUM_STEPKEYS 16
 
@@ -86,15 +87,15 @@ public:
 	int seq_acc_velocity;
 
 	// TODO: move into Pattern?
-	int lastSeqPos[NUM_PATTERNS]; // What position in the sequence are we in? ZERO BASED
-	int seqPos[NUM_PATTERNS]; // What position in the sequence are we in? ZERO BASED
+	int lastSeqPos[NUM_SEQ_PATTERNS]; // What position in the sequence are we in? ZERO BASED
+	int seqPos[NUM_SEQ_PATTERNS]; // What position in the sequence are we in? ZERO BASED
 
-	int patternDefaultNoteMap[NUM_PATTERNS]; // default to GM Drum Map for now
-		int patternPage[NUM_PATTERNS];
-	Pattern patterns[NUM_PATTERNS];
+	int patternDefaultNoteMap[NUM_SEQ_PATTERNS]; // default to GM Drum Map for now
+		int patternPage[NUM_SEQ_PATTERNS];
+	Pattern patterns[NUM_SEQ_PATTERNS];
 
 	// TODO: move into Pattern?
-	TimePerPattern timePerPattern[NUM_PATTERNS];
+	TimePerPattern timePerPattern[NUM_SEQ_PATTERNS];
 
 	Pattern* getPattern(int pattern) {
 		return &this->patterns[pattern];
@@ -118,7 +119,7 @@ public:
 	}
 };
 
-extern uint8_t lastNote[NUM_PATTERNS][NUM_STEPS];
+extern uint8_t lastNote[NUM_SEQ_PATTERNS][NUM_STEPS];
 extern const char* trigConditions[36];
 
 // forward declarations
