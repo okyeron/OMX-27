@@ -160,7 +160,7 @@ There are groups of Rows and Columns for sets of switches. If you get a group li
 
 ### MIDI test
 
-Use the [browser_test](browser_test/index.html) script to show USB-MIDI input to your computer. Then you can check to be sure the pots are sending CCs and that you get MIDI note-ons/note-offs when you test each keyswitch's pads. Be sure you have the `oct` (octave) set to 4 on the display (change with encoder knob).
+Use the [browser_test](../browser_test/index.html) script to show USB-MIDI input to your computer. Then you can check to be sure the pots are sending CCs and that you get MIDI note-ons/note-offs when you test each keyswitch's pads. Be sure you have the `oct` (octave) set to 4 on the display (change with encoder knob).
 
 Also test the Hardware MIDI 1/8" jack with an appropriate adapter and synth. Check the A/B switch position for your particular setup (try both to be sure you have the right one).
 
