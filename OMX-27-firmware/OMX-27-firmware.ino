@@ -1,6 +1,6 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
 
-// v 1.8.1alpha
+// v 1.10.1alpha
 
 //
 // Steven Noreyko, Last update: July 2022
@@ -713,12 +713,15 @@ bool loadHeader(void)
 
 void savePatterns(void)
 {
-	int patternSize = serializedPatternSize(storage->isEeprom());
+	bool isEeprom = storage->isEeprom();
+
+	int patternSize = serializedPatternSize(isEeprom);
 	int nLocalAddress = EEPROM_PATTERN_ADDRESS;
 
 	// Serial.println((String)"Seq patternSize: " + patternSize);
+	int seqPatternNum = isEeprom ? 5 : NUM_PATTERNS;
 
-	for (int i = 0; i < NUM_PATTERNS; i++)
+	for (int i = 0; i < seqPatternNum; i++)
 	{
 		auto pattern = (byte *)sequencer.getPattern(i);
 		for (int j = 0; j < patternSize; j++)
@@ -727,6 +730,11 @@ void savePatterns(void)
 		}
 
 		nLocalAddress += patternSize;
+	}
+
+	if(isEeprom)
+	{
+		return;
 	}
 
 	Serial.println((String)"nLocalAddress: " + nLocalAddress);
@@ -751,6 +759,9 @@ void savePatterns(void)
 
 	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 5968
 
+	Serial.println("Saving Euclidean");
+	nLocalAddress = omxModeEuclid.saveToDisk(nLocalAddress, storage);
+
 	Serial.println("Saving MidiFX");
 	
 	for(uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
@@ -774,13 +785,17 @@ void savePatterns(void)
 
 void loadPatterns(void)
 {
-	int patternSize = serializedPatternSize(storage->isEeprom());
+	bool isEeprom = storage->isEeprom();
+
+	int patternSize = serializedPatternSize(isEeprom);
 	int nLocalAddress = EEPROM_PATTERN_ADDRESS;
 
 	Serial.println( "seq patterns nLocalAddress" );
 	Serial.println( nLocalAddress );
 
-	for (int i = 0; i < NUM_PATTERNS; i++)
+	int seqPatternNum = isEeprom ? 5 : NUM_PATTERNS;
+
+	for (int i = 0; i < seqPatternNum; i++)
 	{
 		auto pattern = Pattern{};
 		auto current = (byte *)&pattern;
@@ -792,6 +807,11 @@ void loadPatterns(void)
 		sequencer.patterns[i] = pattern;
 
 		nLocalAddress += patternSize;
+	}
+
+	if(isEeprom)
+	{
+		return;
 	}
 
 	Serial.println( "grids patterns nLocalAddress" );
@@ -820,6 +840,9 @@ void loadPatterns(void)
 	Serial.println( patternSize );
 	Serial.println( "nLocalAddress" );
 	Serial.println( nLocalAddress );
+
+	Serial.println("Loading Euclidean");
+	nLocalAddress = omxModeEuclid.loadFromDisk(nLocalAddress, storage);
 
 	// Serial.println((String)"nLocalAddress: " + nLocalAddress); // 5968
 

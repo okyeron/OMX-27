@@ -168,6 +168,8 @@ namespace euclidean
         EuclidSave getSave();
         void loadSave(EuclidSave save);
 
+        
+
     private:
         // GridsChannel channel_;
         uint32_t divider_;

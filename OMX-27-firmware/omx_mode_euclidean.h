@@ -50,6 +50,9 @@ public:
     static const u_int8_t kNumSaves = 16;
     // static const u_int8_t kNumMidiFXGroups = 5;
 
+    int saveToDisk(int startingAddress, Storage *storage);
+    int loadFromDisk(int startingAddress, Storage *storage);
+
 
     // static int serializedPatternSize(bool eeprom);
     // static inline int getNumPatterns() { return 8; }

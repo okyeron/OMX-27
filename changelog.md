@@ -1,6 +1,22 @@
 # Change log
 
 ```
+### alpha10
+- Adds 5 global midifx shared between euclidean sequencer and MI modes. 
+- Quickly switch midifx mode in MI mode using aux plus upper 5 keys. 
+- Improved MidiFX UI. 
+- MidiFX slots in a midifx group increased from 4 to 8
+- MidiFX and Euclidean sequencer states are saved with global save
+- Cut/copy/paste MidiFX slots in a MidiFX group using F1 and F2 keys. 
+```
+
+```
+### alpha9
+- Adds Norns macro mode
+- Adds second page to m8 mode for remote or headless control
+```
+
+```
 ### alpha8
 - Reduces number of euclids to 8. Resource problems with 16, pots not updating correctly
 - Adds modes: MIX, EDIT, PATTERN

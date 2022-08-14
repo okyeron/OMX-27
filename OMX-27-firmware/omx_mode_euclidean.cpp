@@ -1211,3 +1211,56 @@ bool OmxModeEuclidean::isSubmodeEnabled()
 // {
 //     grids_.setSnapShot(patternIndex, snapShot);
 // }
+
+int OmxModeEuclidean::saveToDisk(int startingAddress, Storage *storage)
+{
+    storage->write(startingAddress, selectedSave_);
+    startingAddress++;
+
+    int saveSize = sizeof(EuclidPatternSave);
+
+    for(uint8_t i = 0; i < kNumSaves; i++)
+    {
+        auto saveBytesPtr = (byte *)(&saveSlots_[i]);
+		for (int j = 0; j < saveSize; j++)
+		{
+			storage->write(startingAddress + j, *saveBytesPtr++);
+		}
+
+		startingAddress += saveSize;
+    }
+
+    return startingAddress;
+}
+
+int OmxModeEuclidean::loadFromDisk(int startingAddress, Storage *storage)
+{
+    selectedSave_ = storage->read(startingAddress);
+    startingAddress++;
+
+    int saveSize = sizeof(EuclidPatternSave);
+
+	for (uint8_t i = 0; i < kNumSaves; i++)
+	{
+		auto pattern = EuclidPatternSave{};
+		auto current = (byte *)&pattern;
+		for (int j = 0; j < saveSize; j++)
+		{
+			*current = storage->read(startingAddress + j);
+			current++;
+		}
+
+        saveSlots_[i] = pattern;
+		startingAddress += saveSize;
+	}
+
+    // Load selected save to active
+    for(uint8_t i = 0; i < kNumEuclids; i++)
+    {
+        euclids[i].loadSave(saveSlots_[selectedSave_].euclids[i]);
+    }
+
+    polyRhythmMode = saveSlots_[selectedSave_].polyRhythmMode_;
+
+    return startingAddress;
+}
