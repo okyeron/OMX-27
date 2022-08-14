@@ -12,11 +12,18 @@ using namespace midifx;
 
 SubModeMidiFxGroup subModeMidiFx[NUM_MIDIFX_GROUPS];
 
-const int kSelMFXColor = WHITE;
+const int kSelMFXColor = 0xFACAE2;
 const int kMFXColor = ROSE;
+const int kMFXEmptyColor = 0x600030;
 
-const int kSelMFXTypeColor = WHITE;
+const int kSelMFXTypeColor = 0xE6FFCF;
 const int kMFXTypeColor = DKGREEN;
+const int kMFXTypeEmptyColor = 0x400000;
+
+
+// None, Chance, Randomizer, Harmonizer = Heliotrope gray, Scaler = Spanish viridian, Monophonic = Maroon (Crayola), 
+// const int kMFXTypeColors[16] = {kMFXTypeEmptyColor, CYAN, RED, 0xAA98A9, 0x007F5C, 0xC32148, kMFXTypeEmptyColor, kMFXTypeEmptyColor, 
+// kMFXTypeEmptyColor, kMFXTypeEmptyColor, kMFXTypeEmptyColor, kMFXTypeEmptyColor, kMFXTypeEmptyColor, kMFXTypeEmptyColor, kMFXTypeEmptyColor, kMFXTypeEmptyColor};
 
 enum MidiFxPage
 {
@@ -96,7 +103,7 @@ void SubModeMidiFxGroup::updateLEDs()
 {
     strip.clear();
 
-    // bool blinkState = omxLeds.getBlinkState();
+    bool blinkState = omxLeds.getBlinkState();
     bool blinkStateSlow = omxLeds.getSlowBlinkState();
 
     // Serial.println("MidiFX Leds");
@@ -108,11 +115,27 @@ void SubModeMidiFxGroup::updateLEDs()
     //     strip.setPixelColor(i, LEDOFF);
     // }
 
+    // Function Keys
+    if (funcKeyMode_ == FUNCKEYMODE_F3)
+    {
+        auto f3Color = blinkState ? LEDOFF : FUNKTHREE;
+        strip.setPixelColor(1, f3Color);
+        strip.setPixelColor(2, f3Color);
+    }
+    else
+    {
+        auto f1Color = (funcKeyMode_ == FUNCKEYMODE_F1 && blinkState) ? LEDOFF : FUNKONE;
+        strip.setPixelColor(1, f1Color);
+
+        auto f2Color = (funcKeyMode_ == FUNCKEYMODE_F2 && blinkState) ? LEDOFF : FUNKTWO;
+        strip.setPixelColor(2, f2Color);
+    }
+
     for(uint8_t i = 0; i < NUM_MIDIFX_SLOTS; i++)
     {
         // auto fxColor = midiFXParamView_ ? (i == selectedMidiFX_ ? WHITE : ORANGE) : BLUE;
 
-        auto fxColor = (i == selectedMidiFX_ ? kSelMFXColor : kMFXColor);
+        auto fxColor = (i == selectedMidiFX_ ? kSelMFXColor : (getMidiFX(i) == nullptr ? kMFXEmptyColor : kMFXColor));
 
         strip.setPixelColor(3 + i, fxColor);
     }
@@ -129,7 +152,7 @@ void SubModeMidiFxGroup::updateLEDs()
 
         for (uint8_t i = 0; i < 16; i++)
         {
-            auto fxColor = (i == selFXType ? kSelMFXTypeColor : kMFXTypeColor);
+            auto fxColor = (i == selFXType ? kSelMFXTypeColor : ((i == MIDIFX_NONE || i >= MIDIFX_COUNT) ? kMFXTypeEmptyColor : kMFXTypeColor));
 
             strip.setPixelColor(11 + i, fxColor);
         }
