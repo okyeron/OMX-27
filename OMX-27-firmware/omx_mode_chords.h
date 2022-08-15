@@ -2,10 +2,9 @@
 
 #include "omx_mode_interface.h"
 #include "music_scales.h"
-#include "retro_grids.h"
-#include "colors.h"
+// #include "colors.h"
 #include "config.h"
-#include "omx_mode_midi_keyboard.h"
+// #include "omx_mode_midi_keyboard.h"
 #include "param_manager.h"
 
 enum ChordVoicing
@@ -74,8 +73,9 @@ struct ChordSettings
 
 struct ChordNotes
 {
+    bool active = false;
     uint8_t channel = 0;
-    uint8_t velocity = 100;
+    // uint8_t velocity = 100;
     int notes[6] = {-1,-1,-1,-1,-1,-1};
 };
 
@@ -111,12 +111,16 @@ public:
 private:
     // If true, encoder selects param rather than modifies value
     bool encoderSelect_ = false;
+    bool chordEditMode_ = false;
+
     ParamManager params_;
+    ParamManager chordEditParams_;
     uint8_t funcKeyMode_ = 0;
 
     MusicScales* musicScale_;
 
     ChordSettings chords_[16];
+    ChordNotes chordNotes_[16];
 
     void updateFuncKeyMode();
     void setupPageLegends();
@@ -124,7 +128,7 @@ private:
     void onChordOn(uint8_t chordIndex);
     void onChordOff(uint8_t chordIndex);
 
-    bool constructChord(uint8_t chordIndex, ChordNotes notes);
+    bool constructChord(uint8_t chordIndex);
 
     static int AddOctave(int note, int8_t octave);
     static int TransposeNote(int note, int8_t semitones);
