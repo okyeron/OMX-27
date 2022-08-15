@@ -311,6 +311,27 @@ int MusicScales::getGroup16Note(uint8_t keyNum, int8_t octave)
     return adjnote;
 }
 
+int8_t MusicScales::getNoteByDegree(uint8_t degree, int8_t octave)
+{
+    // degree should be less than 16
+    if(degree >= 16) return -1;
+
+    int adjnote;
+
+    if(scaleIndex < 0)
+    {
+        // Chromatically offset
+        adjnote = degree + rootNote + 60 + (octave * 12);
+    }
+    {
+        adjnote = group16Offsets[degree] + rootNote + 60 + (octave * 12);
+    }
+    if(adjnote > 127 || adjnote < -1) adjnote = -1;
+    adjnote = constrain(adjnote,-1,127);
+
+    return (int8_t)adjnote;
+}
+
 int MusicScales::getScaleColor(uint8_t noteIndex)
 {
     if (!scaleCalculated)

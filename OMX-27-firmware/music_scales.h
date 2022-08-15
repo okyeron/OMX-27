@@ -21,6 +21,8 @@ public:
     // TODO This won't work unless returns int, won't work with int8_t not sure why
     int getGroup16Note(uint8_t keyNum, int8_t octave);
 
+    int8_t getNoteByDegree(uint8_t degree, int8_t octave);
+
     // Returns a color for the note
     int getScaleColor(uint8_t noteIndex);
 

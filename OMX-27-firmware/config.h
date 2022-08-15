@@ -25,6 +25,7 @@ const int DEVICE_ID     = 2;
 enum OMXMode
 {
 	MODE_MIDI = 0,
+	MODE_CHORDS,
 	MODE_S1,
 	MODE_S2,
 	MODE_OM,
