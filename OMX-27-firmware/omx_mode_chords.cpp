@@ -207,7 +207,9 @@ bool OmxModeChords::constructChord(uint8_t chordIndex, ChordNotes notes)
 {
     auto chord = chords_[chordIndex];
 
-    int8_t octave = midiSettings.octave;
+    int8_t octave = midiSettings.octave + chord.octave;
+
+    uint8_t numNotes = 0;
 
     for(uint8_t i = 0; i < 6; i++)
     {
@@ -221,18 +223,20 @@ bool OmxModeChords::constructChord(uint8_t chordIndex, ChordNotes notes)
     else if(chord.numNotes == 1)
     {
         notes.notes[0] = musicScale_->getNoteByDegree(chord.degree, octave);
-        return true;
+        numNotes = 1;
     }
     else if(chord.numNotes == 2)
     {
         notes.notes[0] = musicScale_->getNoteByDegree(chord.degree, octave);
         notes.notes[1] = musicScale_->getNoteByDegree(chord.degree + 2, octave);
+        numNotes = 2;
     }
     else if(chord.numNotes == 3)
     {
         notes.notes[0] = musicScale_->getNoteByDegree(chord.degree, octave);
         notes.notes[1] = musicScale_->getNoteByDegree(chord.degree + 2, octave);
         notes.notes[2] = musicScale_->getNoteByDegree(chord.degree + 4, octave);
+        numNotes = 3;
     }
     else if(chord.numNotes == 4)
     {
@@ -240,6 +244,7 @@ bool OmxModeChords::constructChord(uint8_t chordIndex, ChordNotes notes)
         notes.notes[1] = musicScale_->getNoteByDegree(chord.degree + 2, octave);
         notes.notes[2] = musicScale_->getNoteByDegree(chord.degree + 4, octave);
         notes.notes[3] = musicScale_->getNoteByDegree(chord.degree + 6, octave);
+        numNotes = 4;
     }
 
     switch (chord.voicing)
@@ -261,6 +266,7 @@ bool OmxModeChords::constructChord(uint8_t chordIndex, ChordNotes notes)
             {
                 notes.notes[i] = -1;
             }
+            numNotes = 3;
         }
     }
     break;
@@ -295,19 +301,35 @@ bool OmxModeChords::constructChord(uint8_t chordIndex, ChordNotes notes)
     case CHRDVOICE_ADD6:
     {
         notes.notes[chord.numNotes] = musicScale_->getNoteByDegree(chord.degree + 5, octave);
+        numNotes = chord.numNotes + 1;
     }
     break;
     case CHRDVOICE_ADD69:
     {
         notes.notes[chord.numNotes] = musicScale_->getNoteByDegree(chord.degree + 5, octave);
         notes.notes[chord.numNotes + 1] = musicScale_->getNoteByDegree(chord.degree + 8, octave);
+        numNotes = chord.numNotes + 2;
     }
     break;
     case CHRDVOICE_KB11:
     {
         if(chord.numNotes > 1)
         {
-            notes.notes[chord.numNotes] = musicScale_->getNoteByDegree(chord.degree + 5, octave);
+            notes.notes[0] = musicScale_->getNoteByDegree(chord.degree + 0, octave);
+            notes.notes[1] = musicScale_->getNoteByDegree(chord.degree + 4, octave);
+            numNotes = 2;
+        }
+        if(chord.numNotes > 2)
+        {
+            notes.notes[2] = musicScale_->getNoteByDegree(chord.degree + 8, octave);
+            numNotes = 3;
+        }
+        if(chord.numNotes > 3)
+        {
+            notes.notes[3] = musicScale_->getNoteByDegree(chord.degree + 9, octave);
+            notes.notes[4] = musicScale_->getNoteByDegree(chord.degree + 6, octave + 1);
+            notes.notes[5] = musicScale_->getNoteByDegree(chord.degree + 10, octave + 1);
+            numNotes = 6;
         }
     }
     break;
@@ -315,18 +337,86 @@ bool OmxModeChords::constructChord(uint8_t chordIndex, ChordNotes notes)
         break;
     }
 
-    for(uint8_t i = 0; i < chord.numNotes; i++)
+    if (chord.quartalVoicing)
     {
-        notes.notes[i] = chord.degree + i; 
-
+        notes.notes[0] = AddOctave(notes.notes[0], 2);
+        notes.notes[1] = AddOctave(notes.notes[1], 0);
+        notes.notes[2] = AddOctave(notes.notes[2], 1);
+        notes.notes[3] = AddOctave(notes.notes[3], -1);
     }
 
-    chord.degree
+    if(chord.spreadUpDown)
+    {
+        for(uint8_t i = 0; i < 6; i++)
+        {
+            if(i % 2 == 0)
+            {
+                notes.notes[i] = AddOctave(notes.notes[i], -1);
+            }
+            else
+            {
+                notes.notes[i] = AddOctave(notes.notes[i], 1);
+            }
+        }
+    }
 
-    musicScale_->getNoteByDegree()
+    if(chord.spread < 0)
+    {
+        for(uint8_t i = 0; i < 6; i++)
+        {
+            if(i % 2 == 0)
+            {
+                notes.notes[i] = AddOctave(notes.notes[i], chord.spread);
+            }
+        }
+    }
+    else if(chord.spread > 0)
+    {
+        for(uint8_t i = 0; i < 6; i++)
+        {
+            if(i % 2 != 0)
+            {
+                notes.notes[i] = AddOctave(notes.notes[i], chord.spread);
+            }
+        }
+    }
 
+    if(chord.rotate != 0)
+    {
+        int temp[numNotes];
 
+        uint8_t val = numNotes - chord.rotate;
 
+        for (uint8_t i = 0; i < numNotes; i++)
+        {
+            temp[i] = notes.notes[abs((i + val) % numNotes)];
+        }
+        for (int i = 0; i < numNotes; i++)
+        {
+            notes.notes[i] = temp[i];
+        }
+    }
 
+    for(uint8_t i = 0; i < 6; i++)
+    {
+        notes.notes[i] = TransposeNote(notes.notes[i], chord.transpose);
+    }
+}
 
+int OmxModeChords::AddOctave(int note, int8_t octave)
+{
+    if(note < 0 || note > 127) return -1;
+
+    int newNote = note + (12 * octave);
+    if(newNote < 0 || newNote > 127) return -1;
+    return newNote;
+}
+
+int OmxModeChords::TransposeNote(int note, int8_t semitones)
+{
+    if(note < 0 || note > 127) return -1;
+
+    int newNote = note + semitones;
+    if(newNote < 0 || newNote > 127) return -1;
+    return newNote;
 }

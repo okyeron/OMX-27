@@ -18,7 +18,7 @@ enum ChordVoicing
     CHRDVOICE_ADD6,
     CHRDVOICE_ADD69,
     CHRDVOICE_KB11
-}
+};
 
 struct ChordSettings
 {
@@ -41,7 +41,7 @@ struct ChordSettings
     // rotate 4 =   E3,G3,C4        C3,E3,G3,B3
     bool spreadUpDown = false; // spreads notes in both directions
     // false =      C3,E3,G3        C3,E3,G3,B3
-    // true =       C2,E4,G2        C2,E4,G2,E4
+    // true =       C2,E4,G2        C2,E4,G2,B4
     // Spead -1 =   C1,E4,G1        C1,E4,G1,E4
     // bool widerInterDown = false; // Eh, not sure about this one. Could get with a rotate spread combo
     // false =      C3,E3,G3        C3,E3,G3,B3
@@ -125,4 +125,7 @@ private:
     void onChordOff(uint8_t chordIndex);
 
     bool constructChord(uint8_t chordIndex, ChordNotes notes);
+
+    static int AddOctave(int note, int8_t octave);
+    static int TransposeNote(int note, int8_t semitones);
 };
