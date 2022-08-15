@@ -58,17 +58,17 @@ OmxModeChords::OmxModeChords()
         }
     }
 
-    chords_[0].numNotes = 3;
-    chords_[0].degree = 0;
+    // chords_[0].numNotes = 3;
+    // chords_[0].degree = 0;
 
-    chords_[1].numNotes = 3;
-    chords_[1].degree = 1;
+    // chords_[1].numNotes = 3;
+    // chords_[1].degree = 1;
 
-    chords_[2].numNotes = 4;
-    chords_[2].degree = 0;
+    // chords_[2].numNotes = 4;
+    // chords_[2].degree = 0;
 
-    chords_[3].numNotes = 4;
-    chords_[3].degree = 1;
+    // chords_[3].numNotes = 4;
+    // chords_[3].degree = 1;
 }
 
 void OmxModeChords::InitSetup()
