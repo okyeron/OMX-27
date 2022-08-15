@@ -2,6 +2,7 @@
 
 ```
 ### 1.11.1 alpha
+***Warning: Will clear your global save state***
 - Adds new Chord Mode
 - Chords from chords mode will get saved with global save
 - Scale settings now also get saved with global save
