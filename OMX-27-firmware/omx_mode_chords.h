@@ -6,6 +6,7 @@
 #include "config.h"
 // #include "omx_mode_midi_keyboard.h"
 #include "param_manager.h"
+#include "storage.h"
 
 enum ChordVoicing
 {
@@ -22,6 +23,7 @@ enum ChordVoicing
 struct ChordSettings
 {
     public:
+    int color = 0xFFFFFF;
     uint8_t numNotes = 3;
     int8_t degree = 0; // degree from root note of scale, if scale is cmaj, degree of 0 = c, degree of 3 = e
     int8_t octave = 0; // transposes note by octave
@@ -108,14 +110,21 @@ public:
 
     void onDisplayUpdate() override;
     void SetScale(MusicScales* scale);
+
+    int saveToDisk(int startingAddress, Storage *storage);
+    int loadFromDisk(int startingAddress, Storage *storage);
 private:
     // If true, encoder selects param rather than modifies value
+    bool auxDown_ = false;
     bool encoderSelect_ = false;
     bool chordEditMode_ = false;
 
+    int8_t selectedChord_ = -1;
+
     ParamManager params_;
-    ParamManager chordEditParams_;
+    // ParamManager chordEditParams_;
     uint8_t funcKeyMode_ = 0;
+    uint8_t chordEditParam_ = 0; // None, Octave, Transpose, Spread, Rotate, Voicing 
 
     MusicScales* musicScale_;
 
@@ -123,6 +132,8 @@ private:
     ChordNotes chordNotes_[16];
 
     void updateFuncKeyMode();
+    void onKeyUpdateChordEdit(OMXKeypadEvent e);
+    void updateLEDsChordEdit();
     void setupPageLegends();
 
     void onChordOn(uint8_t chordIndex);

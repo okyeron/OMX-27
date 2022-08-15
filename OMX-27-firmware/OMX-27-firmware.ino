@@ -655,15 +655,27 @@ void saveHeader()
 	uint8_t midiMacroId = (uint8_t)midiMacroConfig.midiMacro;
 	storage->write(EEPROM_HEADER_ADDRESS + 5, midiMacroId);
 
+	uint8_t scaleRoot = (uint8_t)scaleConfig.scaleRoot;
+	storage->write(EEPROM_HEADER_ADDRESS + 6, scaleRoot);
+
+	uint8_t scalePattern = (uint8_t)scaleConfig.scalePattern;
+	storage->write(EEPROM_HEADER_ADDRESS + 7, scalePattern);
+
+	uint8_t lockScale = (uint8_t)scaleConfig.lockScale;
+	storage->write(EEPROM_HEADER_ADDRESS + 8, lockScale);
+
+	uint8_t scaleGrp16 = (uint8_t)scaleConfig.group16 ;
+	storage->write(EEPROM_HEADER_ADDRESS + 9, scaleGrp16);
+
 	for (int b = 0; b < NUM_CC_BANKS; b++)
 	{
 		for (int i = 0; i < NUM_CC_POTS; i++)
 		{
-			storage->write(EEPROM_HEADER_ADDRESS + 6 + i + (5 * b), pots[b][i]);
+			storage->write(EEPROM_HEADER_ADDRESS + 10 + i + (5 * b), pots[b][i]);
 		}
 	}
 
-	// 29 bytes
+	// 35 bytes
 }
 
 // returns true if the header contained initialized data
@@ -706,12 +718,24 @@ bool loadHeader(void)
 	uint8_t midiMacro = storage->read(EEPROM_HEADER_ADDRESS + 5);
 	midiMacroConfig.midiMacro = midiMacro;
 
+	uint8_t scaleRoot = storage->read(EEPROM_HEADER_ADDRESS + 6);
+	scaleConfig.scaleRoot = scaleRoot;
+
+	int8_t scalePattern = (int8_t)storage->read(EEPROM_HEADER_ADDRESS + 7);
+	scaleConfig.scalePattern = scalePattern;
+
+	bool lockScale = (bool)storage->read(EEPROM_HEADER_ADDRESS + 8);
+	scaleConfig.lockScale = lockScale;
+
+	bool scaleGrp16 = (bool)storage->read(EEPROM_HEADER_ADDRESS + 9);
+	scaleConfig.group16 = scaleGrp16;
+
 	Serial.println( "loading banks" );
 	for (int b = 0; b < NUM_CC_BANKS; b++)
 	{
 		for (int i = 0; i < NUM_CC_POTS; i++)
 		{
-			pots[b][i] = storage->read(EEPROM_HEADER_ADDRESS + 6 + i + (5 * b));
+			pots[b][i] = storage->read(EEPROM_HEADER_ADDRESS + 10 + i + (5 * b));
 		}
 	}
 	return true;
@@ -767,6 +791,10 @@ void savePatterns(void)
 
 	Serial.println("Saving Euclidean");
 	nLocalAddress = omxModeEuclid.saveToDisk(nLocalAddress, storage);
+	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 6321
+	Serial.println("Saving Chords");
+	nLocalAddress = omxModeChords.saveToDisk(nLocalAddress, storage);
+	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 6321
 
 	Serial.println("Saving MidiFX");
 	
@@ -849,6 +877,10 @@ void loadPatterns(void)
 
 	Serial.println("Loading Euclidean");
 	nLocalAddress = omxModeEuclid.loadFromDisk(nLocalAddress, storage);
+	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 5988
+	Serial.println("Loading Chords");
+	nLocalAddress = omxModeChords.loadFromDisk(nLocalAddress, storage);
+	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 5988
 
 	// Serial.println((String)"nLocalAddress: " + nLocalAddress); // 5968
 

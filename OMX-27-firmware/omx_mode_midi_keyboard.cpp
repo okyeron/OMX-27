@@ -434,6 +434,7 @@ void OmxModeMidiKeyboard::onKeyUpdate(OMXKeypadEvent e)
                     macroActive_ = true;
                     activeMacro_->setEnabled(true);
                     activeMacro_->setScale(musicScale);
+                    omxLeds.setDirty();
                     omxDisp.setDirty();
                     return;
                 }
@@ -454,6 +455,7 @@ void OmxModeMidiKeyboard::onKeyUpdate(OMXKeypadEvent e)
 
                 midiSettings.midiAUX = false;
                 macroActive_ = false;
+                omxLeds.setDirty();
                 omxDisp.setDirty();
 
                 // Clear LEDs
@@ -612,6 +614,9 @@ void OmxModeMidiKeyboard::onKeyUpdate(OMXKeypadEvent e)
         strip.setPixelColor(11, LEDOFF);
         strip.setPixelColor(12, LEDOFF);
     }
+
+    omxLeds.setDirty();
+    omxDisp.setDirty();
 }
 
 void OmxModeMidiKeyboard::onKeyHeldUpdate(OMXKeypadEvent e)
