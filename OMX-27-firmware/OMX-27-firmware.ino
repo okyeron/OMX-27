@@ -1,6 +1,6 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
 
-// v 1.10.1alpha
+// v 1.11.1alpha
 
 //
 // Steven Noreyko, Last update: July 2022
@@ -355,7 +355,7 @@ void loop()
 	auto u = myEncoder.update();
 	if (u.active())
 	{
-		auto amt = u.accel(5);		   // where 5 is the acceleration factor if you want it, 0 if you don't)
+		auto amt = u.accel(1);		   // where 5 is the acceleration factor if you want it, 0 if you don't)
 		omxScreensaver.resetCounter(); // screenSaverCounter = 0;
 									   //    	Serial.println(u.dir() < 0 ? "ccw " : "cw ");
 									   //    	Serial.println(amt);
@@ -729,6 +729,8 @@ bool loadHeader(void)
 
 	bool scaleGrp16 = (bool)storage->read(EEPROM_HEADER_ADDRESS + 9);
 	scaleConfig.group16 = scaleGrp16;
+
+	globalScale.calculateScale(scaleConfig.scaleRoot, scaleConfig.scalePattern);
 
 	Serial.println( "loading banks" );
 	for (int b = 0; b < NUM_CC_BANKS; b++)

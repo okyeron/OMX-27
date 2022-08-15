@@ -1,6 +1,44 @@
 # Change log
 
 ```
+### 1.11.1 alpha
+- Adds new Chord Mode
+- Chords from chords mode will get saved with global save
+- Scale settings now also get saved with global save
+- Lower 16 keys play chords. 
+- Each Chord can be configured by pressing it and using params or in chord edit mode
+- Hold F1 + a chord key to jump into chord edit mode
+- Chord Edit Mode:
+-  Lower Right 8 keys set degree and play the chord
+-  Right 4 keys set the base amount of notes in chord
+-  Lower Key 5 toggles Spread Up Down - spreads notes in both directions
+-  Lower Key 6 toggles Quartal Voicing
+-  Key 1 quickselects Root Note
+-  Key 2 quickselects Scale Pattern
+-  Key 3 quickselects Chord Octave Offset, hold and use lower keys to change value
+-  Key 4 quickselects Chord Transpose, hold and use lower keys to change value
+-  Key 5 quickselects Chord Spread, hold and use lower keys to change value
+-  Key 6 quickselects Chord Rotation, hold and use lower keys to change value
+-  Key 7 quickselects Chord Voicing, hold and use lower keys to change value
+
+- Spread:
+   Spreads the notes accross note range by lowering or increasing each note of the chord by an octave
+
+- Rotation:
+   Changes the order of the notes in the scale
+
+- Voicings:
+   0 = none - based off numNotes
+   1 = powerChord
+   2 = sus2
+   3 = sus4
+   4 = sus2 + sus4
+   5 = add 6th
+   6 = add 6th and add 9th
+   7 = Kenny Barron Jazz Minor 11th
+```
+
+```
 ### alpha10
 - Adds 5 global midifx shared between euclidean sequencer and MI modes. 
 - Quickly switch midifx mode in MI mode using aux plus upper 5 keys. 

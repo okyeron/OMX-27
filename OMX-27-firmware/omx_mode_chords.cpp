@@ -412,6 +412,16 @@ void OmxModeChords::onKeyUpdateChordEdit(OMXKeypadEvent e)
     {
         if (chordEditParam_ == 0)
         {
+            if (thisKey == 1) // Select Root
+            {
+                params_.setSelPageAndParam(CHRDPAGE_1, 0);
+                encoderSelect_ = false;
+            }
+            if (thisKey == 2) // Select Scale
+            {
+                params_.setSelPageAndParam(CHRDPAGE_1, 1);
+                encoderSelect_ = false;
+            }
             if (thisKey == 3) // Octave
             {
                 chordEditParam_ = 1;
@@ -453,14 +463,14 @@ void OmxModeChords::onKeyUpdateChordEdit(OMXKeypadEvent e)
                 chords_[selectedChord_].spreadUpDown = !chords_[selectedChord_].spreadUpDown;
                 params_.setSelPageAndParam(CHRDPAGE_4, 0);
                 encoderSelect_ = false;
-                omxDisp.displayMessage(chords_[selectedChord_].spreadUpDown ? "Spread UpDn On" : "Spread UpDn Off");
+                omxDisp.displayMessage(chords_[selectedChord_].spreadUpDown ? "SpdUpDn On" : "SpdUpDn Off");
             }
             else if (thisKey == 16)
             {
                 chords_[selectedChord_].quartalVoicing = !chords_[selectedChord_].quartalVoicing;
                 params_.setSelPageAndParam(CHRDPAGE_4, 1);
                 encoderSelect_ = false;
-                omxDisp.displayMessage(chords_[selectedChord_].quartalVoicing ? "Quartal Voice On" : "Quartal Voice Off");
+                omxDisp.displayMessage(chords_[selectedChord_].quartalVoicing ? "Quartal On" : "Quartal Off");
             }
             else if (thisKey >= 19)
             {

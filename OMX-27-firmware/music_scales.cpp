@@ -321,8 +321,10 @@ int8_t MusicScales::getNoteByDegree(uint8_t degree, int8_t octave)
     if(scaleIndex < 0)
     {
         // Chromatically offset
-        adjnote = degree + rootNote + 60 + (octave * 12);
+        adjnote = 60 + rootNote + degree + (octave * 12);
+        // Serial.println("Chromatic note: " + String(adjnote));
     }
+    else 
     {
         adjnote = group16Offsets[degree] + rootNote + 60 + (octave * 12);
     }
