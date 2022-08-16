@@ -67,19 +67,35 @@ Quick Keys - Hold AUX
 - first 2 "white keys" are octave up/down  
 - first 2 "black keys" cycle through the selected parameter on the display  
 
-Parameters:  
+Parameters:
+
+Page 1:
 - `OCT`: current Octave  
 - `CH`: active MIDI Channel 
+- `CC`: displays CC being sent when turning a potentiometer
+- `NOTE`: displays the last note number that was sent
 
+Page 2:
 - `RR`: RoundRobin MIDI Channel distribution
 - `RROF`: RR offset value   
 - `PGM`: MIDI program change  
-- `BNK`: MIDI bank select  
+- `BNK`: MIDI bank select.
 
+Page 3:
 - `PBNK`: Potentiometer bank select (CC assignments are still hard coded)  
 - `THRU`: when "On" incoming USBMIDI will be passed to TRS MIDI Out.
 - `MCRO`: MIDI Macro Mode Select (default is OFF)
 - `M-CH`: MIDI Macro Mode Channel
+
+Page 4:
+- `ROOT` : select the root note for scale mode
+- `SCALE` : select a scale or turn off scale mode
+- `LOCK` : locks to the active scale. If this is enabled, you will only be able to play notes in the scale
+- `GROUP` : groups all the notes of the scale across the lower row of 16 keys. 
+
+#### Musical Scales
+
+Scales can be turned on using the 4th parameter page. When a scale is enabled, the keys in the scale will light up, and the root notes will light up a brighter color. You can still play chromatically and out of key. Enabling the 'LOCK' param will make it so only the notes in the scale will send midi notes out. Turning on the 'GROUP' parameter will map the scale across the lower row of 16 keys. The root note will start one key in on what would normally be a C in chromatic mode. 
 
 #### MIDI Macro Modes
 
@@ -96,16 +112,20 @@ The bottom row of keys correspond to mutes (orange) and solos (red). The top "bl
 ```
 Orange - release all mutes  
 Lime - go to mixer screen  
-Cyan - snapshot load/paste  
-Magenta - snapshot save/copy  
+Cyan - snapshot load/paste *   
+Magenta - snapshot save/enter selection mode *  
 Red - release all solos  
 Yellow - waveform display  
 Blue - play  
 ```
 <img src="images/omx27_m8macro.png" alt="omx27_m8_macro_mode" width="1045" height="425" />
 
-
 When M8 is selected from the `MCRO` parameter - potentiometers will send on the `M-CH` MIDI channel in both regular keyboard mode and in the macro mode. However, notes played on keys will send on the currently selected `CH` MIDI channel.
+
+\* __Notes:__ 
+* M8 must be on the Mixer view for snapshots.  
+* Snapshot Load uses the M8 key combo [SHIFT]+[OPTION]. On any view with a grid (song, chain, phrase, table, etc.) this key enters selection mode.  
+* Snapshot Save uses the M8 key combo [SHIFT]+[EDIT]. On any view with a grid this key pastes the copied contents from selection mode.  
 
 
 ### S1 - Sequencer 1
@@ -171,6 +191,69 @@ Pretty much the same as MI, but with the following tweaks for Organelle Mother o
 
 - AUX key sends CC 25 (127 on press, 0 on release)
 - Encoder turn sends CC 28 (127 on CW, 0 on CCW)
+
+
+### GR - Grids Sequencer
+
+An adaptation of the Mutable Instruments "Topographic drum sequencer" module.
+
+See the original [Grids Manual](https://mutable-instruments.net/modules/grids/manual/) [or a video ?] for more.
+
+Grids on OMX is a 4-channel/instrument MIDI trigger generator specialized in the creation and sculpting of rhythmic patterns. The "grid" refers to a map or library of preset drum patterns arranged in a 5x5 grid - which you can steer using X/Y controls.
+
+Typical drum use would be Bass Drum, Snare, Closed HiHat, Open HiHat (The default note numbers are mapped to these in the GM drum map).
+
+**Quick Keys**
+Grids has many quick keys. Pressing these keys will quickly jump the display to select a specific parameter which can be adjusted with the encoder.
+
+Keys/Commands:   
+ - AUX is sequencer Start/Stop  
+ - Pots 1-4 control "event density" (probability) of 4 instruments - values will show on display.
+ - Pot 5 sets resolution (1/2, 1, 2)
+ - Bottom row keys 1-8 are quick-keys for X/Y values - hold a key and turn encoder to change that instrument's X or Y value. You can hold multiple keys to change X/Y on multiple instruments at the same time.
+ - LEDs on Keys 9-12 show trigger activity of the playing pattern  
+ - Lighted Keys 13,14,16 are quick keys for ACNT/XAOS/BPM
+ - Pattern keys (black keys) can load "snapshots" of density/x/y settings
+ - F2 + Pattern saves a "snapshot" current state of that pattern. Patterns do not automatically save, this is a performance feature, allowing you to load a pattern, tweak it, then quickly load back to it's original state. 
+
+  Instrument View Mode:
+  - F1 + Keys 1-4 jump to Instrument View. This shows the current pattern on that instrument (over 2 pages since patterns are 32 steps) and playhead. Then render of the pattern will update to show each page while playing. 
+  - Top row lighted keys(A#1, C#2, D#2, F#2) are quick-keys for ACNT/X/Y/XAOS
+  - First 4 keys of bottom row will not be specially lit since they are rendering the pattern, but will allow you to quickly select a different instrument.
+  - F2 is a quick key to jump to params page to set Note Number, MIDI Channel and BPM.
+  - Key 3(F#1) in Instrument View is a quick key for Midi Channel for the instrument. 
+  - AUX-key exits Instrument View 
+
+  Midi Keyboard Mode:
+   - F1 plus bottom key 16 enters into the Midi Keyboard for sending CCs or playing over the top of the sequencer. Everything works the same as mode MI.
+   - Hold Aux and bottom key 16 to exit out of the Midi Keyboard mode. 
+
+Parameters:  
+Page 1 Event Densities:
+- `DS 1`: event density - instrument 1  
+- `DS 2`: event density - instrument 2  
+- `DS 3`: event density - instrument 3  
+- `DS 4`: event density - instrument 4     
+
+Page 2:
+- `NT 1`: note number - instrument 1  
+- `NT 2`: note number - instrument 2  
+- `NT 3`: note number - instrument 3  
+- `NT 4`: note number - instrument 4  
+
+Page 3:
+- `ACNT`: accent amount (larger number is more variation) - applies to all instruments   
+- `X `: X amount for selected instrument  
+- `Y `: Y amount for selected instrument  
+- `XAOS`: chaos amount - applies to all instruments
+
+Page 4 - Main Mode:
+- `BPM`: tempo
+
+Page 4 - Instrument View Active:
+- `NT -`: note number for active instrument
+- `M-CHAN`: midi chanel for active instrument. 
+- `BPM`: tempo
 
 
 ### Screensaver 

@@ -1,18 +1,24 @@
 #pragma once
 
+#ifndef OMX_CONFIG_DONE
+#define OMX_CONFIG_DONE // prevent redifinition pragma once should handle though. 
+
 #include <Arduino.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdint.h>
+#include <ResponsiveAnalogRead.h>
+
 // #include <cstdarg>
 
-//const int OMX_VERSION = 1.6.0;
+
+//const int OMX_VERSION = 1.7.7;
 
 /* * firmware metadata  */
-// OMX_VERSION = 1.6.0
+// OMX_VERSION = 1.7.7
 const int MAJOR_VERSION = 1;
-const int MINOR_VERSION = 6;
-const int POINT_VERSION = 0;
+const int MINOR_VERSION = 7;
+const int POINT_VERSION = 7;
 
 const int DEVICE_ID     = 2;
 
@@ -22,6 +28,7 @@ enum OMXMode
 	MODE_S1,
 	MODE_S2,
 	MODE_OM,
+	MODE_GRIDS,
 
 	NUM_OMX_MODES
 };
@@ -62,13 +69,164 @@ extern const int analogPins[];
 #define NUM_CC_POTS 5
 extern int pots[NUM_CC_BANKS][NUM_CC_POTS];         // the MIDI CC (continuous controller) for each analog input
 
+using Micros = unsigned long;    // for tracking time per pattern
+
 struct SysSettings {
 	OMXMode omxMode = DEFAULT_MODE;
 	OMXMode newmode = DEFAULT_MODE;
 	uint8_t midiChannel = 0;
 	int playingPattern;
 	bool refresh = false;
+	bool screenSaverMode = false;
+	unsigned long timeElasped;
 };
+
+extern SysSettings sysSettings;
+
+extern const int potCount;
+
+struct PotSettings
+{
+	ResponsiveAnalogRead *analog[NUM_CC_POTS];
+
+	// ANALOGS
+	int potbank = 0;
+	int analogValues[NUM_CC_POTS] = {0, 0, 0, 0, 0}; // default values
+	int potValues[NUM_CC_POTS] = {0, 0, 0, 0, 0};
+	int potCC = pots[potbank][0];
+	int potVal = analogValues[0];
+	int potNum = 0;
+	
+};
+// Put in global struct to share across classes
+extern PotSettings potSettings;
+
+struct MidiConfig
+{
+    int defaultVelocity = 100;
+    int octave = 0; // default C4 is 0 - range is -4 to +5
+    int newoctave = octave;
+    int transpose = 0;
+    int rotationAmt = 0;
+
+    uint8_t swing = 0;
+    const int maxswing = 100;
+    // int swing_values[maxswing] = {0, 1, 3, 5, 52, 66, 70, 72, 80, 99 }; // 0 = off, <50 early swing , >50 late swing, 99=drunken swing
+
+    bool keyState[27] = {false};
+    int midiKeyState[27] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+    int midiChannelState[27] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+    int rrChannel = 0;
+    bool midiRoundRobin = false;
+    int midiRRChannelOffset = 0;
+    int midiRRChannelCount = 1;
+    uint8_t midiLastNote = 0;
+    int currpgm = 0;
+    int currbank = 0;
+    bool midiInToCV = true;
+    bool midiSoftThru = false;
+	int pitchCV;
+	bool midiAUX = false;
+};
+
+extern MidiConfig midiSettings;
+
+// struct MidiPage {
+// 	const int numPages = 4;
+// 	const int numParams = numPages * 5;
+// 	int miparam = 0; // midi params item counter
+//     int mmpage = 0;
+// };
+// extern MidiPage midiPageParams;
+
+struct MidiMacroConfig {
+	int midiMacro = 0;
+	bool m8AUX = false;
+	int midiMacroChan = 10;
+};
+
+extern MidiMacroConfig midiMacroConfig;
+
+extern bool m8mutesolo[];
+
+struct EncoderConfig {
+	bool enc_edit = false;
+};
+
+extern EncoderConfig encoderConfig;
+
+struct ClockConfig {
+	float clockbpm = 120;
+	float newtempo = clockbpm;
+	unsigned long tempoStartTime;
+	unsigned long tempoEndTime;
+	float step_delay;
+
+	volatile unsigned long step_micros;
+	volatile unsigned long ppqInterval;
+};
+
+extern ClockConfig clockConfig;
+
+struct SequencerConfig {
+	int selectedStep = 0;
+    int selectedNote = 0;
+
+	bool plockDirty[NUM_CC_POTS] = {false, false, false, false, false};
+	int prevPlock[NUM_CC_POTS] = {0, 0, 0, 0, 0};
+
+	volatile unsigned long noteon_micros;
+	volatile unsigned long noteoff_micros;
+
+    // bool noteSelect = false;
+    // bool noteSelection = false;
+
+    // int omxSeqSelectedStep = 0;
+    // bool stepSelect = false;
+    // bool stepRecord = false;
+    // bool stepDirty = false;
+};
+extern SequencerConfig seqConfig;
+
+// struct SequencerPage {
+// 	bool patternParams = false;
+//     bool seqPages = false;
+
+// 	int nspage = 0;
+//     int pppage = 0;
+//     int sqpage = 0;
+//     int srpage = 0;
+
+//     int nsparam = 0; // note select params
+//     int ppparam = 0; // pattern params
+//     int sqparam = 0; // seq params
+//     int srparam = 0; // step record params
+// };
+// extern SequencerPage seqPageParams;
+
+struct ColorConfig
+{
+	uint32_t screensaverColor = 0xFF0000;
+	uint32_t stepColor = 0x000000;
+	uint32_t muteColor = 0x000000;
+	uint16_t midiBg_Hue = 0;
+	uint8_t midiBg_Sat = 255;
+	uint8_t midiBg_Brightness = 255;
+};
+
+extern ColorConfig colorConfig;
+
+struct ScaleConfig
+{
+	int scaleRoot = 0;
+	int scalePattern = -1;
+	bool lockScale = false; // If Scale is locked you will be unable to play notes out of the scale. 
+	bool group16 = false; // If group16 is active, all notes in scale will be grouped into lower 16 notes. 
+	bool scaleSelectHold;
+	bool showScaleInSeq = false;
+}; 
+
+extern ScaleConfig scaleConfig;
 
 #define NUM_DISP_PARAMS 5
 
@@ -148,3 +306,5 @@ extern byte colPins[COLS]; // column pins for key switches
 extern const int notes[];
 extern const int steps[];
 extern const int midiKeyMap[];
+
+#endif

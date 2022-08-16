@@ -1,12 +1,11 @@
 #pragma once
 
 #include <Arduino.h>
+#include "config.h"
 
 #define NUM_PATTERNS 8
 #define NUM_STEPS 64
 #define NUM_STEPKEYS 16
-
-using Micros = unsigned long;    // for tracking time per pattern
 
 struct TimePerPattern {
 	Micros lastProcessTimeP : 32;
@@ -87,6 +86,7 @@ public:
 	int seq_acc_velocity;
 
 	// TODO: move into Pattern?
+	int lastSeqPos[NUM_PATTERNS]; // What position in the sequence are we in? ZERO BASED
 	int seqPos[NUM_PATTERNS]; // What position in the sequence are we in? ZERO BASED
 
 	int patternDefaultNoteMap[NUM_PATTERNS]; // default to GM Drum Map for now
@@ -126,7 +126,9 @@ SequencerState defaultSequencer();
 int serializedPatternSize(bool eeprom);
 
 StepNote* getSelectedStep();
-void doStep();
+void doStepS1();
+void doStepS2();
+
 void transposeSeq(int patternNum, int amt);
 int getPatternPage(int position);
 void rotatePattern(int patternNum, int rot);
@@ -153,3 +155,6 @@ void resetPatternDefaults(int patternNum);
 void copyPattern(int patternNum);
 void pastePattern(int patternNum);
 void clearPattern(int patternNum);
+
+// global sequencer shared state
+extern SequencerState sequencer;

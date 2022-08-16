@@ -2,7 +2,7 @@
 #include "consts.h"
 
 const OMXMode DEFAULT_MODE = MODE_MIDI;
-const uint8_t EEPROM_VERSION = 10;
+const uint8_t EEPROM_VERSION = 11;
 
 // DEFINE CC NUMBERS FOR POTS // CCS mapped to Organelle Defaults
 const int CC1 = 21;
@@ -30,6 +30,8 @@ const int LED_COUNT = 27;
 	const int analogPins[] = {A10,22,21,20,16}; // on 1.0
 #endif
 
+const int potCount = NUM_CC_POTS;
+
 int pots[NUM_CC_BANKS][NUM_CC_POTS] = {
 	{CC1,CC2,CC3,CC4,CC5},
 	{29,30,31,32,33},
@@ -42,7 +44,7 @@ const int gridh = 32;
 const int gridw = 128;
 const int PPQ = 96;
 
-const char* modes[] = {"MI","S1","S2","OM"};
+const char* modes[] = {"MI","S1","S2","OM","GR"};
 const char* macromodes[] = {"Off", "M8"};
 const int nummacromodes = 1;
 
@@ -73,3 +75,19 @@ const int steps[] = {0,
 11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26};
 
 const int midiKeyMap[] = {12,1,13,2,14,15,3,16,4,17,5,18,19,6,20,7,21,22,8,23,9,24,10,25,26};
+
+bool m8mutesolo[] = {false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false};
+
+SysSettings sysSettings;
+PotSettings potSettings;
+MidiConfig midiSettings;
+MidiMacroConfig midiMacroConfig;
+EncoderConfig encoderConfig;
+ClockConfig clockConfig;
+SequencerConfig seqConfig;
+ColorConfig colorConfig;
+ScaleConfig scaleConfig;
+
+// MidiPage midiPageParams;
+// SequencerPage seqPageParams;
+
