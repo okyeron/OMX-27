@@ -1,6 +1,12 @@
 # Change log
 
 ```
+### 1.11.4 alpha
+*** Warning!!!: Will clear your global save state***
+- Adds note length control
+```
+
+```
 ### 1.11.3 alpha
 *** Warning!!!: Will clear your global save state***
 - Adds encoder strum mode to Chords Mode

@@ -17,7 +17,7 @@
 // OMX_VERSION = 1.11.2
 const int MAJOR_VERSION = 1;
 const int MINOR_VERSION = 11;
-const int POINT_VERSION = 2;
+const int POINT_VERSION = 4;
 
 const int DEVICE_ID     = 2;
 
