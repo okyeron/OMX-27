@@ -649,31 +649,32 @@ void saveHeader()
 	uint8_t unMidiChannel = (uint8_t)(sysSettings.midiChannel - 1);
 	storage->write(EEPROM_HEADER_ADDRESS + 3, unMidiChannel);
 
-	uint8_t midiMacroChan = (uint8_t)(midiMacroConfig.midiMacroChan - 1);
-	storage->write(EEPROM_HEADER_ADDRESS + 4, midiMacroChan);
-
-	uint8_t midiMacroId = (uint8_t)midiMacroConfig.midiMacro;
-	storage->write(EEPROM_HEADER_ADDRESS + 5, midiMacroId);
-
-	uint8_t scaleRoot = (uint8_t)scaleConfig.scaleRoot;
-	storage->write(EEPROM_HEADER_ADDRESS + 6, scaleRoot);
-
-	uint8_t scalePattern = (uint8_t)scaleConfig.scalePattern;
-	storage->write(EEPROM_HEADER_ADDRESS + 7, scalePattern);
-
-	uint8_t lockScale = (uint8_t)scaleConfig.lockScale;
-	storage->write(EEPROM_HEADER_ADDRESS + 8, lockScale);
-
-	uint8_t scaleGrp16 = (uint8_t)scaleConfig.group16 ;
-	storage->write(EEPROM_HEADER_ADDRESS + 9, scaleGrp16);
-
 	for (int b = 0; b < NUM_CC_BANKS; b++)
 	{
 		for (int i = 0; i < NUM_CC_POTS; i++)
 		{
-			storage->write(EEPROM_HEADER_ADDRESS + 10 + i + (5 * b), pots[b][i]);
+			storage->write(EEPROM_HEADER_ADDRESS + 4 + i + (5 * b), pots[b][i]);
 		}
 	}
+	// Last is 28
+
+	uint8_t midiMacroChan = (uint8_t)(midiMacroConfig.midiMacroChan - 1);
+	storage->write(EEPROM_HEADER_ADDRESS + 29, midiMacroChan);
+
+	uint8_t midiMacroId = (uint8_t)midiMacroConfig.midiMacro;
+	storage->write(EEPROM_HEADER_ADDRESS + 30, midiMacroId);
+
+	uint8_t scaleRoot = (uint8_t)scaleConfig.scaleRoot;
+	storage->write(EEPROM_HEADER_ADDRESS + 31, scaleRoot);
+
+	uint8_t scalePattern = (uint8_t)scaleConfig.scalePattern;
+	storage->write(EEPROM_HEADER_ADDRESS + 32, scalePattern);
+
+	uint8_t lockScale = (uint8_t)scaleConfig.lockScale;
+	storage->write(EEPROM_HEADER_ADDRESS + 33, lockScale);
+
+	uint8_t scaleGrp16 = (uint8_t)scaleConfig.group16 ;
+	storage->write(EEPROM_HEADER_ADDRESS + 34, scaleGrp16);
 
 	// 35 bytes
 }
@@ -712,34 +713,35 @@ bool loadHeader(void)
 	uint8_t unMidiChannel = storage->read(EEPROM_HEADER_ADDRESS + 3);
 	sysSettings.midiChannel = unMidiChannel + 1;
 
-	uint8_t midiMacroChannel = storage->read(EEPROM_HEADER_ADDRESS + 4);
-	midiMacroConfig.midiMacroChan = midiMacroChannel + 1;
-
-	uint8_t midiMacro = storage->read(EEPROM_HEADER_ADDRESS + 5);
-	midiMacroConfig.midiMacro = midiMacro;
-
-	uint8_t scaleRoot = storage->read(EEPROM_HEADER_ADDRESS + 6);
-	scaleConfig.scaleRoot = scaleRoot;
-
-	int8_t scalePattern = (int8_t)storage->read(EEPROM_HEADER_ADDRESS + 7);
-	scaleConfig.scalePattern = scalePattern;
-
-	bool lockScale = (bool)storage->read(EEPROM_HEADER_ADDRESS + 8);
-	scaleConfig.lockScale = lockScale;
-
-	bool scaleGrp16 = (bool)storage->read(EEPROM_HEADER_ADDRESS + 9);
-	scaleConfig.group16 = scaleGrp16;
-
-	globalScale.calculateScale(scaleConfig.scaleRoot, scaleConfig.scalePattern);
-
 	Serial.println( "loading banks" );
 	for (int b = 0; b < NUM_CC_BANKS; b++)
 	{
 		for (int i = 0; i < NUM_CC_POTS; i++)
 		{
-			pots[b][i] = storage->read(EEPROM_HEADER_ADDRESS + 10 + i + (5 * b));
+			pots[b][i] = storage->read(EEPROM_HEADER_ADDRESS + 4 + i + (5 * b));
 		}
 	}
+
+	uint8_t midiMacroChannel = storage->read(EEPROM_HEADER_ADDRESS + 29);
+	midiMacroConfig.midiMacroChan = midiMacroChannel + 1;
+
+	uint8_t midiMacro = storage->read(EEPROM_HEADER_ADDRESS + 30);
+	midiMacroConfig.midiMacro = midiMacro;
+
+	uint8_t scaleRoot = storage->read(EEPROM_HEADER_ADDRESS + 31);
+	scaleConfig.scaleRoot = scaleRoot;
+
+	int8_t scalePattern = (int8_t)storage->read(EEPROM_HEADER_ADDRESS + 32);
+	scaleConfig.scalePattern = scalePattern;
+
+	bool lockScale = (bool)storage->read(EEPROM_HEADER_ADDRESS + 33);
+	scaleConfig.lockScale = lockScale;
+
+	bool scaleGrp16 = (bool)storage->read(EEPROM_HEADER_ADDRESS + 34);
+	scaleConfig.group16 = scaleGrp16;
+
+	globalScale.calculateScale(scaleConfig.scaleRoot, scaleConfig.scalePattern);
+
 	return true;
 }
 
