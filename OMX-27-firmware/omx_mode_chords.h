@@ -138,7 +138,7 @@ private:
     bool chordEditMode_ = false;
 
     bool wrapManStrum_ = true;
-    bool incrementManStrum_ = false;
+    uint8_t incrementManStrum_ = 0;
     uint8_t manStrumSensit_ = 10;
 
 

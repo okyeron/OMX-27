@@ -140,18 +140,11 @@ void OmxModeChords::onPotChanged(int potIndex, int prevValue, int newValue, int 
         }
         else if (potIndex == 2)
         {
-            bool oldV = incrementManStrum_;
-            incrementManStrum_ = (bool)map(newValue, 0, 127, 0, 1);
+            uint8_t oldV = incrementManStrum_;
+            incrementManStrum_ = (uint8_t)map(newValue, 0, 127, 0, 4);
             if (incrementManStrum_ != oldV)
             {
-                if (incrementManStrum_)
-                {
-                    omxDisp.displayMessageTimed("Increm on", 5);
-                }
-                else
-                {
-                    omxDisp.displayMessageTimed("Increm off", 5);
-                }
+                omxDisp.displayMessageTimed("Increm: " + String(incrementManStrum_), 5);
             }
         }
         else if (potIndex == 3)
@@ -426,17 +419,20 @@ void OmxModeChords::onEncoderChangedManStrum(Encoder::Update enc)
         {
             if (strumPos >= numNotes)
             {
-                if(incrementManStrum_)
+                chordNotes_[selectedChord_].octIncrement++;
+                if (chordNotes_[selectedChord_].octIncrement > incrementManStrum_)
                 {
-                    chordNotes_[selectedChord_].octIncrement++;
+                    chordNotes_[selectedChord_].octIncrement = 0;
                 }
                 strumPos = 0;
             }
             if (strumPos < 0)
             {
-                if(incrementManStrum_)
+
+                chordNotes_[selectedChord_].octIncrement--;
+                if (chordNotes_[selectedChord_].octIncrement < -incrementManStrum_)
                 {
-                    chordNotes_[selectedChord_].octIncrement--;
+                    chordNotes_[selectedChord_].octIncrement = 0;
                 }
                 strumPos = numNotes - 1;
             }
@@ -448,7 +444,7 @@ void OmxModeChords::onEncoderChangedManStrum(Encoder::Update enc)
             chordNotes_[selectedChord_].strumPos = constrain(strumPos, -1, 6); // Allow to be one outside of notes
         }
 
-        chordNotes_[selectedChord_].octIncrement = constrain(chordNotes_[selectedChord_].octIncrement, -8, 8);
+        // chordNotes_[selectedChord_].octIncrement = constrain(chordNotes_[selectedChord_].octIncrement, -8, 8);
 
         chordNotes_[selectedChord_].encDelta = 0;
     }
