@@ -148,7 +148,7 @@ private:
 
     uint8_t mode_ = 0; // Play, Edit Chord, Presets, Manual Strum
 
-    float manStrumNoteLength_ = 1.0f;
+    uint8_t manStrumNoteLength_ = 4;
 
     ParamManager params_;
     // ParamManager chordEditParams_;

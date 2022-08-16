@@ -25,6 +25,9 @@ enum ChordsMainMode {
 
 const char* kVoicingNames[8] = {"NONE", "POWR", "SUS2", "SUS4", "SU24", "+6", "+6+9", "KB11"};
 
+const float kNoteLengths[] = {0.1, 0.25, 0.5, 0.75, 1, 1.5, 2, 4, 8, 16};
+const uint8_t kNumNoteLengths = 10;
+
 const int kDegreeColor = ORANGE;
 const int kDegreeSelColor = 0xFFBF80;
 const int kNumNotesColor = BLUE;
@@ -149,6 +152,18 @@ void OmxModeChords::onPotChanged(int potIndex, int prevValue, int newValue, int 
                 {
                     omxDisp.displayMessageTimed("Increm off", 5);
                 }
+            }
+        }
+        else if (potIndex == 3)
+        {
+            // Serial.println("length");
+
+            uint8_t prevLength = manStrumNoteLength_;
+            manStrumNoteLength_ = map(newValue, 0, 127, 0, kNumNoteLengths - 1);
+
+            if (prevLength != manStrumNoteLength_)
+            {
+                omxDisp.displayMessageTimed(String(kNoteLengths[manStrumNoteLength_]), 10);
             }
         }
 
@@ -353,7 +368,7 @@ void OmxModeChords::onEncoderChangedManStrum(Encoder::Update enc)
 {
     if(chordNotes_[selectedChord_].active == false) return;
 
-    auto amt = enc.accel(3);
+    auto amt = enc.accel(1);
 
     // Serial.println("EncDelta: " + String(chordNotes_[selectedChord_].encDelta));
 
@@ -361,6 +376,17 @@ void OmxModeChords::onEncoderChangedManStrum(Encoder::Update enc)
 
     if(abs(chordNotes_[selectedChord_].encDelta) >= manStrumSensit_)
     {
+
+        uint8_t numNotes = 0;
+
+        for(uint8_t i = 0; i < 6; i++)
+        {
+            if(chordNotes_[selectedChord_].notes[i] >= 0)
+            {
+                numNotes++;
+            }
+        }
+
         // Serial.println("Do Note");
         uint8_t velocity = midiSettings.defaultVelocity;
 
@@ -368,14 +394,15 @@ void OmxModeChords::onEncoderChangedManStrum(Encoder::Update enc)
 
         // Serial.println("strumPos: " + String(strumPos));
 
-        if (strumPos >= 0 && strumPos < 6)
+        if (strumPos >= 0 && strumPos < numNotes)
         {
             int note = chordNotes_[selectedChord_].notes[strumPos] + (chordNotes_[selectedChord_].octIncrement * 12);
 
             if (note >= 0 && note <= 127)
             {
                 uint32_t noteOnMicros = micros();
-                uint32_t noteOffMicros = noteOnMicros + (manStrumNoteLength_ * clockConfig.step_micros);
+                float noteLength = kNoteLengths[manStrumNoteLength_];
+                uint32_t noteOffMicros = noteOnMicros + (noteLength * clockConfig.step_micros);
 
                 pendingNoteOns.insert(note, velocity, chordNotes_[selectedChord_].channel, noteOnMicros, false);
                 pendingNoteOffs.insert(note, chordNotes_[selectedChord_].channel, noteOffMicros, false);
@@ -397,7 +424,7 @@ void OmxModeChords::onEncoderChangedManStrum(Encoder::Update enc)
 
         if(wrapManStrum_)
         {
-            if (strumPos >= 6)
+            if (strumPos >= numNotes)
             {
                 if(incrementManStrum_)
                 {
@@ -411,7 +438,7 @@ void OmxModeChords::onEncoderChangedManStrum(Encoder::Update enc)
                 {
                     chordNotes_[selectedChord_].octIncrement--;
                 }
-                strumPos = 5;
+                strumPos = numNotes - 1;
             }
 
             chordNotes_[selectedChord_].strumPos = strumPos;

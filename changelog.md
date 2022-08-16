@@ -1,6 +1,17 @@
 # Change log
 
 ```
+### 1.11.3 alpha
+*** Warning!!!: Will clear your global save state***
+- Adds encoder strum mode to Chords Mode
+- Press C#2 to enter mode
+- Hold chord and turn encoder
+- Pots change Sensitivity, Wrap, and Increment
+-
+- Changed header format to not interfere with sysex
+```
+
+```
 ### 1.11.2 alpha
 ***Warning: Will clear your global save state***
 - Adds ability to paste chords by holding F2 and selecting a destination
