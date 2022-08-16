@@ -30,7 +30,7 @@ public:
 
     void onPotChanged(int potIndex, int prevValue, int newValue, int analogDelta) override;
 
-    void loopUpdate() override;
+    void loopUpdate(Micros elapsedTime) override;
 
     void updateLEDs() override;
 

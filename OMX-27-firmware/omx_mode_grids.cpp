@@ -91,11 +91,11 @@ void OmxModeGrids::onPotChanged(int potIndex, int prevValue, int newValue, int a
     }
 }
 
-void OmxModeGrids::loopUpdate()
+void OmxModeGrids::loopUpdate(Micros elapsedTime)
 {
     if (midiModeception)
     {
-        midiKeyboard.loopUpdate();
+        midiKeyboard.loopUpdate(elapsedTime);
         return;
     }
 

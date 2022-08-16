@@ -94,6 +94,9 @@ struct ChordNotes
     uint8_t channel = 0;
     // uint8_t velocity = 100;
     int notes[6] = {-1,-1,-1,-1,-1,-1};
+    int8_t strumPos = 0;
+    int8_t encDelta = 0;
+    int8_t octIncrement = 0;
 };
 
 class OmxModeChords : public OmxModeInterface
@@ -110,7 +113,7 @@ public:
 
     void onPotChanged(int potIndex, int prevValue, int newValue, int analogDelta) override;
 
-    void loopUpdate() override;
+    void loopUpdate(Micros elapsedTime) override;
 
     void updateLEDs() override;
 
@@ -134,11 +137,18 @@ private:
     bool encoderSelect_ = false;
     bool chordEditMode_ = false;
 
+    bool wrapManStrum_ = true;
+    bool incrementManStrum_ = false;
+    uint8_t manStrumSensit_ = 10;
+
+
     uint8_t selectedChord_ = 0;
 
     uint8_t selectedSave_ = 0;
 
-    uint8_t mode_ = 0; // Play, Edit Chord, Presets
+    uint8_t mode_ = 0; // Play, Edit Chord, Presets, Manual Strum
+
+    float manStrumNoteLength_ = 1.0f;
 
     ParamManager params_;
     // ParamManager chordEditParams_;
@@ -159,6 +169,7 @@ private:
     // int chordSize = sizeof(chords_);
 
     void updateFuncKeyMode();
+    void onEncoderChangedManStrum(Encoder::Update enc);
     void onKeyUpdateChordEdit(OMXKeypadEvent e);
     void enterChordEditMode();
     void updateLEDsChordEdit();
@@ -168,6 +179,7 @@ private:
     bool loadPreset(uint8_t presetIndex);
     bool savePreset(uint8_t presetIndex);
 
+    void onManualStrumOn(uint8_t chordIndex);
     void onChordOn(uint8_t chordIndex);
     void onChordOff(uint8_t chordIndex);
 

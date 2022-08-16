@@ -126,7 +126,7 @@ void OmxModeMidiKeyboard::onPotChanged(int potIndex, int prevValue, int newValue
     omxDisp.setDirty();
 }
 
-void OmxModeMidiKeyboard::loopUpdate()
+void OmxModeMidiKeyboard::loopUpdate(Micros elapsedTime)
 {
     if (isSubmodeEnabled())
     {

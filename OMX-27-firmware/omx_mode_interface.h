@@ -1,6 +1,7 @@
 #pragma once
 #include "ClearUI_Input.h"
 #include "omx_keypad.h"
+#include "config.h"
 
 class OmxModeInterface
 {
@@ -15,7 +16,7 @@ public:
     virtual void onClockTick() {}
 
     virtual void onPotChanged(int potIndex, int prevValue, int newValue, int analogDelta) = 0;
-    virtual void loopUpdate() {}
+    virtual void loopUpdate(Micros elapsedTime) {}
     virtual void updateLEDs() = 0;
     virtual void onEncoderChanged(Encoder::Update enc) = 0;
     virtual void onEncoderButtonDown() = 0;

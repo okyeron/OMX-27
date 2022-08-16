@@ -346,7 +346,7 @@ void OmxModeEuclidean::onPotChanged(int potIndex, int prevValue, int newValue, i
     // Serial.println((String)"AnalogDelta: " + analogDelta);
 }
 
-void OmxModeEuclidean::loopUpdate()
+void OmxModeEuclidean::loopUpdate(Micros elapsedTime)
 {
     if (isSubmodeEnabled())
     {
@@ -356,7 +356,7 @@ void OmxModeEuclidean::loopUpdate()
     
     if (midiModeception)
     {
-        midiKeyboard.loopUpdate();
+        midiKeyboard.loopUpdate(elapsedTime);
         // return;
     }
 

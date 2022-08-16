@@ -318,7 +318,7 @@ void loop()
 	}
 
 	// Micros timeStart = micros();
-	activeOmxMode->loopUpdate();
+	activeOmxMode->loopUpdate(passed);
 
 
 	// DISPLAY SETUP
@@ -556,6 +556,16 @@ void readPotentimeters()
 		int newAnalog = potSettings.analog[k]->getValue();
 
 		int analogDelta = abs(newAnalog - prevAnalog);
+
+		// if (k == 1)
+		// {
+		// 	Serial.print(analogPins[k]);
+		// 	Serial.print(" ");
+		// 	Serial.print(temp);
+		// 	Serial.print(" ");
+		// 	Serial.print(potSettings.analogValues[k]);
+		// 	Serial.print("\n");
+		// }
 
 		if (potSettings.analog[k]->hasChanged())
 		{

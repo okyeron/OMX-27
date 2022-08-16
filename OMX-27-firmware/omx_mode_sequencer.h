@@ -18,7 +18,7 @@ public:
 
     void onPotChanged(int potIndex, int prevValue, int newValue, int analogDelta) override;
 
-    void loopUpdate() override;
+    void loopUpdate(Micros elapsedTime) override;
 
     // Should be part of LED update, intertangled with the sequencer class which is calling it in main FW code.
     void showCurrentStepLEDs(int patternNum);

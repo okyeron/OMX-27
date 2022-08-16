@@ -165,7 +165,7 @@ void OmxModeSequencer::onPotChanged(int potIndex, int prevValue, int newValue, i
     }
 }
 
-void OmxModeSequencer::loopUpdate()
+void OmxModeSequencer::loopUpdate(Micros elapsedTime)
 {
     if (!seq2Mode) // S1
     {
