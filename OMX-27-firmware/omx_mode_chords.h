@@ -20,6 +20,8 @@ enum ChordVoicing
     CHRDVOICE_KB11
 };
 
+#define NUM_CHORD_SAVES 8
+
 struct ChordSettings
 {
     public:
@@ -71,6 +73,19 @@ struct ChordSettings
     //  Two hand jazz voicing
     //  1,5,9,  10, 7th+oct,11+Oct
     //  C3,G3,D4,E4,B4,F5
+
+    void CopySettingsFrom(ChordSettings other)
+    {
+        this->numNotes = other.numNotes;
+        this->degree = other.degree;
+        this->octave = other.octave;
+        this->transpose = other.transpose;
+        this->spread = other.spread;
+        this->rotate = other.rotate;
+        this->spreadUpDown = other.spreadUpDown;
+        this->quartalVoicing = other.quartalVoicing;
+        this->voicing = other.voicing;
+    }
 };
 
 struct ChordNotes
@@ -119,7 +134,11 @@ private:
     bool encoderSelect_ = false;
     bool chordEditMode_ = false;
 
-    int8_t selectedChord_ = -1;
+    uint8_t selectedChord_ = 0;
+
+    uint8_t selectedSave_ = 0;
+
+    uint8_t mode_ = 0; // Play, Edit Chord, Presets
 
     ParamManager params_;
     // ParamManager chordEditParams_;
@@ -131,10 +150,23 @@ private:
     ChordSettings chords_[16];
     ChordNotes chordNotes_[16];
 
+    ChordSettings chordSaves_[NUM_CHORD_SAVES][16];
+
+    String notesString = "";
+    String notesString2 = "";
+
+
+    // int chordSize = sizeof(chords_);
+
     void updateFuncKeyMode();
     void onKeyUpdateChordEdit(OMXKeypadEvent e);
+    void enterChordEditMode();
     void updateLEDsChordEdit();
     void setupPageLegends();
+
+    bool pasteSelectedChordTo(uint8_t chordIndex);
+    bool loadPreset(uint8_t presetIndex);
+    bool savePreset(uint8_t presetIndex);
 
     void onChordOn(uint8_t chordIndex);
     void onChordOff(uint8_t chordIndex);

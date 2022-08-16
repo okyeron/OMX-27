@@ -29,6 +29,7 @@ public:
     int getGroup16Color(uint8_t keyNum);
 
     static const char* getNoteName(uint8_t noteIndex);
+    static const char* getFullNoteName(uint8_t noteNumber);
     static const char* getScaleName(uint8_t scaleIndex);
     static const int8_t* getScalePattern(uint8_t noteIndex);
     int getScaleLength();
@@ -45,4 +46,6 @@ private:
     int8_t scaleIndex;
     
     int group16Offsets[16]; // 16 offsets for group16 mode
+
+    
 };

@@ -4,12 +4,15 @@
 #include "logic_util.h"
 // #include "config.h"
 // #include "omx_leds.h"
+#include <Arduino.h>
 
 const uint8_t rainbowSaturation = 127;
 const uint8_t scaleBrightness = 200;
 
 const auto ROOTNOTECOLOR = 0xA2A2FF;
 const auto INSCALECOLOR = 0x000090;
+
+String tempFullNoteName;
 
 #include <Adafruit_NeoPixel.h>
 extern Adafruit_NeoPixel strip;
@@ -147,6 +150,21 @@ const char *noteNames[] = {
     "A ",
     "A#",
     "B ",
+};
+
+const char *noteNamesNoFormat[] = {
+    "C",
+    "C#",
+    "D",
+    "D#",
+    "E",
+    "F",
+    "F#",
+    "G",
+    "G#",
+    "A",
+    "A#",
+    "B",
 };
 
 void MusicScales::calculateScale(uint8_t scaleRoot, uint8_t scalePattern)
@@ -356,8 +374,26 @@ int MusicScales::getGroup16Color(uint8_t keyNum)
 
 const char *MusicScales::getNoteName(uint8_t noteIndex)
 {
-    constrain(noteIndex, 0, 11);
+    noteIndex = constrain(noteIndex, 0, 11);
     return noteNames[noteIndex];
+}
+
+const char *MusicScales::getFullNoteName(uint8_t noteNumber)
+{
+    int8_t octave = (noteNumber / 12) - 2;
+    tempFullNoteName = String(noteNamesNoFormat[noteNumber % 12] + String(octave));
+    
+    // strcpy(fullNoteNameBuf, noteNamesNoFormat[noteNumber % 12]);
+    // strcat(fullNoteNameBuf, itoa(octave,fullNoteNameBuf,10));
+
+    // return fullNoteNameBuf;
+    // int8_t octave = (noteNumber / 12) - 2;
+
+    // String newString = noteNamesNoFormat[noteNumber % 12] + String(octave);
+
+    // tempFullNoteName = newString;
+
+    return tempFullNoteName.c_str();
 }
 
 const char *MusicScales::getScaleName(uint8_t scaleIndex)

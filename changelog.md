@@ -1,6 +1,18 @@
 # Change log
 
 ```
+### 1.11.2 alpha
+***Warning: Will clear your global save state***
+- Adds ability to paste chords by holding F2 and selecting a destination
+- Adds 3 modes to switch between using F#1,G#1,A#1
+- Modes are: Play, Edit, Preset
+- Adds 8 presets which save all 16 chord configurations to a slot. 
+- Page one now displays the notes of a chord. 
+- Press A#2 in Chord edit mode to quickjump to chord notes page. 
+- Rotate parameter was not working correctly and did nothing. Now it will rotate and increase octave of rotated notes. 
+```
+
+```
 ### 1.11.1 alpha
 ***Warning: Will clear your global save state***
 - Adds new Chord Mode

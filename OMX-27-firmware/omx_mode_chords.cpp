@@ -8,6 +8,7 @@
 #include "MM.h"
 
 enum ChordsModePage {
+    CHRDPAGE_NOTES,
     CHRDPAGE_1, // Root, Scale, Octave, Midi Channel
     CHRDPAGE_2, // numNotes, degree, octave, transpose
     CHRDPAGE_3, // spread, rotate, voicing
@@ -30,8 +31,13 @@ const int kSpreadColor = BLUE;
 const int kRotateColor = BLUE;
 const int kVoicingColor = BLUE;
 
+const int kPlayColor = ORANGE;
+const int kEditColor = DKRED;
+const int kPresetColor = DKGREEN;
+
 OmxModeChords::OmxModeChords()
 {
+    params_.addPage(1);
     params_.addPage(4);
     params_.addPage(4);
     params_.addPage(4);
@@ -123,6 +129,8 @@ void OmxModeChords::updateFuncKeyMode()
 {
     auto keyState = midiSettings.keyState;
 
+    uint8_t prevMode = funcKeyMode_;
+
     funcKeyMode_ = FUNCKEYMODE_NONE;
 
     if(keyState[1] && !keyState[2])
@@ -140,6 +148,12 @@ void OmxModeChords::updateFuncKeyMode()
     else
     {
         funcKeyMode_ = FUNCKEYMODE_NONE;
+    }
+
+    if(funcKeyMode_ != prevMode)
+    {
+        omxDisp.setDirty();
+        omxLeds.setDirty();
     }
 }
 
@@ -203,24 +217,21 @@ void OmxModeChords::onEncoderChanged(Encoder::Update enc)
     {
         auto amt = enc.accel(1); // where 5 is the acceleration factor if you want it, 0 if you don't)
 
-        if (selectedChord_ >= 0)
+        if (selParam == 1)
         {
-            if (selParam == 1)
-            {
-                chords_[selectedChord_].numNotes = constrain(chords_[selectedChord_].numNotes + amt, 1, 4);
-            }
-            else if (selParam == 2)
-            {
-                chords_[selectedChord_].degree = constrain(chords_[selectedChord_].degree + amt, 0, 7);
-            }
-            else if (selParam == 3)
-            {
-                chords_[selectedChord_].octave = constrain(chords_[selectedChord_].octave + amt, -2, 2);
-            }
-            else if (selParam == 4)
-            {
-                chords_[selectedChord_].transpose = constrain(chords_[selectedChord_].transpose + amt, -7, 7);
-            }
+            chords_[selectedChord_].numNotes = constrain(chords_[selectedChord_].numNotes + amt, 1, 4);
+        }
+        else if (selParam == 2)
+        {
+            chords_[selectedChord_].degree = constrain(chords_[selectedChord_].degree + amt, 0, 7);
+        }
+        else if (selParam == 3)
+        {
+            chords_[selectedChord_].octave = constrain(chords_[selectedChord_].octave + amt, -2, 2);
+        }
+        else if (selParam == 4)
+        {
+            chords_[selectedChord_].transpose = constrain(chords_[selectedChord_].transpose + amt, -7, 7);
         }
     }
     // PAGE THREE - spread, rotate, voicing
@@ -228,20 +239,17 @@ void OmxModeChords::onEncoderChanged(Encoder::Update enc)
     {
         auto amt = enc.accel(1); // where 5 is the acceleration factor if you want it, 0 if you don't)
 
-        if (selectedChord_ >= 0)
+        if (selParam == 1)
         {
-            if (selParam == 1)
-            {
-                chords_[selectedChord_].spread = constrain(chords_[selectedChord_].spread + amt, -2, 2);
-            }
-            else if (selParam == 2)
-            {
-                chords_[selectedChord_].rotate = constrain(chords_[selectedChord_].rotate + amt, 0, 4);
-            }
-            else if (selParam == 3)
-            {
-                chords_[selectedChord_].voicing = constrain(chords_[selectedChord_].voicing + amt, 0, 7);
-            }
+            chords_[selectedChord_].spread = constrain(chords_[selectedChord_].spread + amt, -2, 2);
+        }
+        else if (selParam == 2)
+        {
+            chords_[selectedChord_].rotate = constrain(chords_[selectedChord_].rotate + amt, 0, 4);
+        }
+        else if (selParam == 3)
+        {
+            chords_[selectedChord_].voicing = constrain(chords_[selectedChord_].voicing + amt, 0, 7);
         }
     }
     // PAGE FOUR - spreadUpDown, quartalVoicing
@@ -249,16 +257,13 @@ void OmxModeChords::onEncoderChanged(Encoder::Update enc)
     {
         auto amt = enc.accel(1); // where 5 is the acceleration factor if you want it, 0 if you don't)
 
-        if (selectedChord_ >= 0)
+        if (selParam == 1)
         {
-            if (selParam == 1)
-            {
-                chords_[selectedChord_].spreadUpDown = constrain(chords_[selectedChord_].spreadUpDown + amt, 0, 1);
-            }
-            else if (selParam == 2)
-            {
-                chords_[selectedChord_].quartalVoicing = constrain(chords_[selectedChord_].quartalVoicing + amt, 0, 1);
-            }
+            chords_[selectedChord_].spreadUpDown = constrain(chords_[selectedChord_].spreadUpDown + amt, 0, 1);
+        }
+        else if (selParam == 2)
+        {
+            chords_[selectedChord_].quartalVoicing = constrain(chords_[selectedChord_].quartalVoicing + amt, 0, 1);
         }
     }
     
@@ -352,10 +357,44 @@ void OmxModeChords::onKeyUpdate(OMXKeypadEvent e)
         {
             if (e.down())
             {
+                if(thisKey == 3)
+                {
+                    mode_ = 0;
+                    params_.setSelPageAndParam(CHRDPAGE_NOTES, 0);
+                    omxDisp.displayMessage("Play");
+                }
+                else if(thisKey == 4)
+                {
+                    mode_ = 1;
+                    params_.setSelPageAndParam(CHRDPAGE_NOTES, 0);
+                    omxDisp.displayMessage("Edit");
+                }
+                else if(thisKey == 5)
+                {
+                    mode_ = 2;
+                    omxDisp.displayMessage("Preset");
+                }
                 if (thisKey >= 11)
                 {
-                    selectedChord_ = thisKey - 11;
-                    onChordOn(thisKey - 11);
+                    if(mode_ == 0) // Play
+                    {
+                        selectedChord_ = thisKey - 11;
+                        onChordOn(thisKey - 11);
+                    }
+                    else if(mode_ == 1) // Edit
+                    {
+                        // Enter chord edit mode
+                        selectedChord_ = thisKey - 11;
+                        enterChordEditMode();
+                        return;
+                    }
+                    else if(mode_ == 2) // Preset
+                    {
+                        if(loadPreset(thisKey - 11))
+                        {
+                            omxDisp.displayMessageTimed("Load " + String(thisKey - 11), 5);
+                        }
+                    }
                 }
             }
             else
@@ -366,18 +405,54 @@ void OmxModeChords::onKeyUpdate(OMXKeypadEvent e)
                 }
             }
         }
-        else if(funcKeyMode_ == FUNCKEYMODE_F1)
+        else // Function key held
         {
-            if (e.down())
+            if (e.down() && thisKey >= 11)
             {
-                if (thisKey >= 11)
+                if (mode_ == 0) // Play
                 {
-                    selectedChord_ = thisKey - 11;
-                    chordEditMode_ = true;
-                    chordEditParam_ = 0;
-                    omxLeds.setDirty();
-                    omxDisp.setDirty();
-                    return;
+                    if (funcKeyMode_ == FUNCKEYMODE_F1)
+                    {
+                        selectedChord_ = thisKey - 11;
+                        enterChordEditMode();
+                        return;
+                    }
+                    else if (funcKeyMode_ == FUNCKEYMODE_F2)
+                    {
+                        if (pasteSelectedChordTo(thisKey - 11))
+                        {
+                            omxDisp.displayMessageTimed("Copied to " + String(thisKey - 11), 5);
+                        }
+                    }
+                }
+                else if (mode_ == 1) // Edit
+                {
+                    if (funcKeyMode_ == FUNCKEYMODE_F1)
+                    {
+                        selectedChord_ = thisKey - 11;
+                        enterChordEditMode();
+                        return;
+                    }
+                    else if (funcKeyMode_ == FUNCKEYMODE_F2)
+                    {
+                        if (pasteSelectedChordTo(thisKey - 11))
+                        {
+                            omxDisp.displayMessageTimed("Copied to " + String(thisKey - 11), 5);
+                        }
+                    }
+                }
+                else if (mode_ == 2) // Preset
+                {
+                    if (funcKeyMode_ == FUNCKEYMODE_F1)
+                    {
+                    }
+                    else if (funcKeyMode_ == FUNCKEYMODE_F2)
+                    {
+                        if (savePreset(thisKey - 11))
+                        {
+                            omxDisp.displayMessageTimed("Saved to " + String(thisKey - 11), 5);
+                        }
+                    }
                 }
             }
         }
@@ -389,7 +464,7 @@ void OmxModeChords::onKeyUpdate(OMXKeypadEvent e)
 
 void OmxModeChords::onKeyUpdateChordEdit(OMXKeypadEvent e)
 {
-    if(e.held() || selectedChord_ < 0) return;
+    if(e.held()) return;
 
     uint8_t thisKey = e.key();
 
@@ -398,7 +473,8 @@ void OmxModeChords::onKeyUpdateChordEdit(OMXKeypadEvent e)
     {
         if(e.down())
         {
-            params_.setSelPageAndParam(CHRDPAGE_1, 0);
+            // Exit Chord Edit Mode
+            params_.setSelPageAndParam(CHRDPAGE_NOTES, 0);
             encoderSelect_ = true;
             chordEditMode_ = false;
         }
@@ -451,6 +527,11 @@ void OmxModeChords::onKeyUpdateChordEdit(OMXKeypadEvent e)
                 chordEditParam_ = 5;
                 params_.setSelPageAndParam(CHRDPAGE_3, 2);
                 encoderSelect_ = false;
+            }
+            else if (thisKey == 10) // Show Chord Notes
+            {
+                params_.setSelPageAndParam(CHRDPAGE_NOTES, 0);
+                encoderSelect_ = true;
             }
             else if (thisKey >= 11 && thisKey < 15)
             {
@@ -539,6 +620,14 @@ void OmxModeChords::onKeyUpdateChordEdit(OMXKeypadEvent e)
     omxDisp.setDirty();
 }
 
+void OmxModeChords::enterChordEditMode()
+{
+    chordEditMode_ = true;
+    chordEditParam_ = 0;
+    omxLeds.setDirty();
+    omxDisp.setDirty();
+}
+
 void OmxModeChords::onKeyHeldUpdate(OMXKeypadEvent e)
 {
     
@@ -583,23 +672,49 @@ void OmxModeChords::updateLEDs()
         strip.setPixelColor(2, f2Color);
     }
 
-    for(uint8_t i = 0; i < 16; i++)
+    strip.setPixelColor(3, mode_ == 0 ? WHITE : kPlayColor);
+    strip.setPixelColor(4, mode_ == 1 ? WHITE : kEditColor);
+    strip.setPixelColor(5, mode_ == 2 ? WHITE : kPresetColor);
+
+    if (mode_ == 0) // Play
     {
-        if (i == selectedChord_)
+        for (uint8_t i = 0; i < 16; i++)
         {
-            strip.setPixelColor(11 + i, (chordNotes_[i].active ? WHITE : CYAN));
+            if (i == selectedChord_)
+            {
+                strip.setPixelColor(11 + i, (chordNotes_[i].active ? WHITE : CYAN));
+            }
+            else
+            {
+                strip.setPixelColor(11 + i, (chordNotes_[i].active ? WHITE : chords_[i].color));
+            }
         }
-        else
+    }
+    else if (mode_ == 1) // Edit
+    {
+        for (uint8_t i = 0; i < 16; i++)
         {
-            strip.setPixelColor(11 + i, (chordNotes_[i].active ? WHITE : chords_[i].color));
+            if (i == selectedChord_)
+            {
+                strip.setPixelColor(11 + i, (chordNotes_[i].active ? WHITE : CYAN));
+            }
+            else
+            {
+                strip.setPixelColor(11 + i, (chordNotes_[i].active ? WHITE : kEditColor));
+            }
+        }
+    }
+    else if (mode_ == 2) // Preset
+    {
+        for (uint8_t i = 0; i < NUM_CHORD_SAVES; i++)
+        {
+            strip.setPixelColor(11 + i, (i == selectedSave_ ? WHITE : kPresetColor));
         }
     }
 }
 
 void OmxModeChords::updateLEDsChordEdit()
 {
-    if(selectedChord_ < 0) return;
-
     bool blinkState = omxLeds.getBlinkState();
 
     omxLeds.setAllLEDS(0,0,0);
@@ -627,6 +742,7 @@ void OmxModeChords::updateLEDsChordEdit()
     strip.setPixelColor(5, kSpreadColor);    // Spread
     strip.setPixelColor(6, kRotateColor);    // Rotate
     strip.setPixelColor(7, kVoicingColor);   // Voicing
+    strip.setPixelColor(10, ROSE);   // Show Chord Notes
 
     if (chordEditParam_ == 0)
     {
@@ -817,8 +933,58 @@ void OmxModeChords::onDisplayUpdate()
     { 
         if (!encoderConfig.enc_edit)
         {
-            setupPageLegends();
+            if(chordEditMode_ == false && (mode_ == 0 || mode_ == 1) && funcKeyMode_ == FUNCKEYMODE_F2) // Play mode copy
+            {
+                omxDisp.dispGenericModeLabel("Copy to", params_.getNumPages(), params_.getSelPage());
+            }
+            else if(chordEditMode_ == false && (mode_ == 2) && funcKeyMode_ == FUNCKEYMODE_F2) // Preset move save
+            {
+                omxDisp.dispGenericModeLabel("Save to", params_.getNumPages(), params_.getSelPage());
+            }
+            else if(params_.getSelPage() == CHRDPAGE_NOTES)
+            {
+                if(chordNotes_[selectedChord_].active)
+                {
+                    notesString = "";
+                    notesString2 = "";
+
+                    for(uint8_t i = 0; i < 6; i++)
+                    {
+                        int8_t note = chordNotes_[selectedChord_].notes[i];
+
+                        if(note >= 0 && note <= 127)
+                        {
+                            if(i < 4)
+                            {
+                                if (i > 0)
+                                {
+                                    notesString.append(" ");
+                                }
+                                notesString.append(musicScale_->getFullNoteName(note));
+                            }
+                            else
+                            {
+                                if (i > 4)
+                                {
+                                    notesString2.append(" ");
+                                }
+                                notesString2.append(musicScale_->getFullNoteName(note));
+
+                            }
+                        }
+                    }
+
+                    omxDisp.dispGenericModeLabelDoubleLine(notesString.c_str(), notesString2.c_str(), params_.getNumPages(), params_.getSelPage());
+                }
+                else{
+                    omxDisp.dispGenericModeLabel("-", params_.getNumPages(), params_.getSelPage());
+                }
+            }
+            else
+            {
+                setupPageLegends();
                 omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), encoderSelect_);
+            }
         }
     }
 }
@@ -826,6 +992,42 @@ void OmxModeChords::onDisplayUpdate()
 void OmxModeChords::SetScale(MusicScales *scale)
 {
     musicScale_ = scale;
+}
+
+bool OmxModeChords::pasteSelectedChordTo(uint8_t chordIndex)
+{
+    if(chordIndex == selectedChord_ || chordIndex >= 16) return false;
+
+    chords_[chordIndex].CopySettingsFrom(chords_[selectedChord_]);
+    selectedChord_ = chordIndex;
+    return true;
+}
+bool OmxModeChords::loadPreset(uint8_t presetIndex)
+{
+    if(presetIndex >= NUM_CHORD_SAVES) return false;
+
+    for(uint8_t i = 0; i < 16; i++)
+    {
+        chords_[i].CopySettingsFrom(chordSaves_[presetIndex][i]);
+    }
+
+    selectedSave_ = presetIndex;
+
+    return true;
+}
+
+bool OmxModeChords::savePreset(uint8_t presetIndex)
+{
+    if(presetIndex >= NUM_CHORD_SAVES) return false;
+
+    for(uint8_t i = 0; i < 16; i++)
+    {
+        chordSaves_[presetIndex][i].CopySettingsFrom(chords_[i]);
+    }
+
+    selectedSave_ = presetIndex;
+
+    return true;
 }
 
 void OmxModeChords::onChordOn(uint8_t chordIndex)
@@ -1060,11 +1262,18 @@ bool OmxModeChords::constructChord(uint8_t chordIndex)
         }
     }
 
-    if(chord.rotate != 0)
+    if(chord.rotate != 0 && numNotes > 0)
     {
         int temp[numNotes];
 
         uint8_t val = numNotes - chord.rotate;
+
+        uint8_t offset = chord.rotate % numNotes;
+
+        for (uint8_t i = 0; i < offset; i++)
+        {
+            chordNotes_[chordIndex].notes[i] = AddOctave(chordNotes_[chordIndex].notes[i], 1);
+        }
 
         for (uint8_t i = 0; i < numNotes; i++)
         {
@@ -1107,15 +1316,18 @@ int OmxModeChords::saveToDisk(int startingAddress, Storage *storage)
 {
     int saveSize = sizeof(ChordSettings);
 
-    for(uint8_t i = 0; i < 16; i++)
+    for (uint8_t saveIndex = 0; saveIndex < NUM_CHORD_SAVES; saveIndex++)
     {
-        auto saveBytesPtr = (byte *)(&chords_[i]);
-		for (int j = 0; j < saveSize; j++)
-		{
-			storage->write(startingAddress + j, *saveBytesPtr++);
-		}
+        for (uint8_t i = 0; i < 16; i++)
+        {
+            auto saveBytesPtr = (byte *)(&chordSaves_[saveIndex][i]);
+            for (int j = 0; j < saveSize; j++)
+            {
+                storage->write(startingAddress + j, *saveBytesPtr++);
+            }
 
-		startingAddress += saveSize;
+            startingAddress += saveSize;
+        }
     }
 
     return startingAddress;
@@ -1125,19 +1337,24 @@ int OmxModeChords::loadFromDisk(int startingAddress, Storage *storage)
 {
     int saveSize = sizeof(ChordSettings);
 
-	for (uint8_t i = 0; i < 16; i++)
-	{
-		auto chord = ChordSettings{};
-		auto current = (byte *)&chord;
-		for (int j = 0; j < saveSize; j++)
-		{
-			*current = storage->read(startingAddress + j);
-			current++;
-		}
+    for (uint8_t saveIndex = 0; saveIndex < NUM_CHORD_SAVES; saveIndex++)
+    {
+        for (uint8_t i = 0; i < 16; i++)
+        {
+            auto chord = ChordSettings{};
+            auto current = (byte *)&chord;
+            for (int j = 0; j < saveSize; j++)
+            {
+                *current = storage->read(startingAddress + j);
+                current++;
+            }
 
-        chords_[i] = chord;
-		startingAddress += saveSize;
-	}
+            chordSaves_[saveIndex][i] = chord;
+            startingAddress += saveSize;
+        }
+    }
+
+    loadPreset(0);
 
     return startingAddress;
 }
