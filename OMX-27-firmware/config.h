@@ -11,7 +11,6 @@
 
 // #include <cstdarg>
 
-
 //const int OMX_VERSION = 1.11.2alpha;
 
 /* * firmware metadata  */

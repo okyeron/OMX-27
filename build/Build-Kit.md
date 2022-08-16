@@ -149,18 +149,20 @@ If your LEDs work up to a certain point (e.g. LEDs 1-7 work, LED 8-27 don't):
 
 ### Switch contact test - AKA "the tweezer test"
 
-You will want to test the pads for each keyswitch on the PCB using tweezers or a piece of wire. This is also a second check that the LED for that switch is working correctly.
+You will want to test the pads for each keyswitch on the PCB using tweezers or a piece of wire (a piece of wire will work much better than tweezers!). This is also a second check that the LED for that switch is working correctly.
 
-If not working here, check the LEDs again first. If all the LEDs are working OK look to be sure the diode adjacent to that switch position is OK.
+When you test the AUX key (top left-most key) - this will light up a total of 5 LEDs on the left side of the board. This is normal. 
 
-There are groups of Rows and Columns for sets of switches. If you get a group lighting up, it may be a corresponding pin on the Teensy for that row or column. (Link to troubleshooting guide needed)
+If the LEDs do not light up for each switch contact, check the LEDs again first. A good test is to temove power and re-plug to see if the rainbow LED pattern shows on startup. If all the LEDs are working OK examine the diode adjacent to that switch position and be sure the soldering looks OK.
+
+Note - There are groups of Rows and Columns for sets of switches. If you get a group lighting up, it may be a corresponding pin on the Teensy for that row or column. Ask on Discord if you're stuck here.  
 
 (PIC NEEDED) 
 
 
 ### MIDI test
 
-Use the [browser_test](browser_test/index.html) script to show USB-MIDI input to your computer. Then you can check to be sure the pots are sending CCs and that you get MIDI note-ons/note-offs when you test each keyswitch's pads. Be sure you have the `oct` (octave) set to 4 on the display (change with encoder knob).
+Use the [browser_test](../browser_test/index.html) script to show USB-MIDI input to your computer. Then you can check to be sure the pots are sending CCs and that you get MIDI note-ons/note-offs when you test each keyswitch's pads. Be sure you have the `oct` (octave) set to 4 on the display (change with encoder knob).
 
 Also test the Hardware MIDI 1/8" jack with an appropriate adapter and synth. Check the A/B switch position for your particular setup (try both to be sure you have the right one).
 
