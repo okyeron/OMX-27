@@ -65,6 +65,14 @@ private:
     bool initSetup = false;
     grids::GridsWrapper grids_;
 
+    // Static glue to link a pointer to a member function
+    static void onNoteTriggeredForwarder(void *context, uint8_t gridsChannel, MidiNoteGroup note)
+    {
+        static_cast<OmxModeGrids *>(context)->onNoteTriggered(gridsChannel, note);
+    }
+
+    void onNoteTriggered(uint8_t gridsChannel, MidiNoteGroup note);
+
     // static const uint8_t kNumPages = 4;
     // static const uint8_t kNumParams = kNumPages * NUM_DISP_PARAMS;
     static const uint8_t kNumGrids = 4;
@@ -108,4 +116,6 @@ private:
 
     bool midiModeception = false;
     OmxModeMidiKeyboard midiKeyboard; // Mode inside a mode. For science!
+
+    
 };

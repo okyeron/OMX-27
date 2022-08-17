@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include "config.h"
 // #define NUM_GRIDS 8
 
 namespace grids
@@ -16,6 +17,7 @@ namespace grids
     struct InstSettings
     {
         uint8_t note = 60;
+        uint8_t noteLength = 3;
         uint8_t midiChan = 1;
         uint8_t density = 0;
         uint8_t x = 128;
@@ -93,6 +95,8 @@ namespace grids
         void proceed();
         void gridsTick();
 
+        void setNoteOutputFunc(void (*fptr)(void *, uint8_t, MidiNoteGroup), void *context);
+
         void saveSnapShot(uint8_t snapShotIndex);
         void loadSnapShot(uint8_t snapShotIndex);
         SnapShotSettings* getSnapShot(uint8_t snapShotIndex);
@@ -136,12 +140,19 @@ namespace grids
         uint8_t x_[num_notes];
         uint8_t y_[num_notes];
         uint8_t midiChannels_[num_notes];
+        uint8_t noteLengths_[num_notes];
+        uint32_t noteOffMicros_[num_notes];
         bool channelTriggered_[num_notes];
         uint8_t triggeredNotes_[num_notes]; // Keep track of triggered notes to avoid stuck notes
         uint8_t resolution_;
         bool running_;
 
         uint8_t defaultMidiChannel_ = 1;
+
+        // Note On pointers
+        void * onNoteOnFuncPtrContext_;
+        void (*onNoteOnFuncPtr_)(void *, uint8_t, MidiNoteGroup);
+        void onNoteOn(uint8_t gridsChannel, uint8_t channel, uint8_t noteNumber, uint8_t velocity, float stepLength, bool sendMidi, bool sendCV, uint32_t noteOnMicros);
     };
 
 }

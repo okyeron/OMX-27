@@ -410,6 +410,7 @@ namespace grids
       for (auto i = 0; i < num_notes; i++)
       {
           midiChannels_[i] = defaultMidiChannel_;
+          noteLengths_[i] = 3;
           channelTriggered_[i] = false;
           density_[i] = i == 0 ? 128 : 64;
           perturbations_[i] = 0;
@@ -464,6 +465,29 @@ namespace grids
       MM::continueClock();
   }
 
+  void GridsWrapper::setNoteOutputFunc(void (*fptr)(void *, uint8_t, MidiNoteGroup), void *context)
+  {
+    onNoteOnFuncPtr_ = fptr;
+    onNoteOnFuncPtrContext_ = context;
+  }
+
+  void GridsWrapper::onNoteOn(uint8_t gridsChannel, uint8_t channel, uint8_t noteNumber, uint8_t velocity, float stepLength, bool sendMidi, bool sendCV, uint32_t noteOnMicros)
+  {
+    if (onNoteOnFuncPtrContext_ == nullptr)
+      return;
+
+    MidiNoteGroup noteGroup;
+    noteGroup.channel = channel;
+    noteGroup.noteNumber = noteNumber;
+    noteGroup.velocity = velocity;
+    noteGroup.stepLength = stepLength;
+    noteGroup.sendMidi = sendMidi;
+    noteGroup.sendCV = sendCV;
+    noteGroup.noteonMicros = noteOnMicros;
+
+    onNoteOnFuncPtr_(onNoteOnFuncPtrContext_, gridsChannel, noteGroup);
+  }
+
   void GridsWrapper::gridsTick()
   {
       if (!running_)
@@ -471,6 +495,8 @@ namespace grids
 
       uint32_t ticksPerClock = 3 << divider_;
       bool trigger = ((tickCount_ % ticksPerClock) == 0);
+
+      uint32_t noteon_micros = micros();
 
       if (trigger)
       {
@@ -496,9 +522,13 @@ namespace grids
               {
                   uint8_t targetLevel = uint8_t(127.f * float(level - threshold) / float(256 - threshold));
                   uint8_t noteLevel = GridsChannel::U8Mix(127, targetLevel, accent);
-                  MM::sendNoteOn(grids_notes[channel], noteLevel, midiChannels_[channel]);
+                  float stepLength = kNoteLengths[noteLengths_[channel]];
+
+                  onNoteOn(channel, midiChannels_[channel], grids_notes[channel], noteLevel, stepLength, true, false, noteon_micros);
+                  // MM::sendNoteOn(grids_notes[channel], noteLevel, midiChannels_[channel]);
                   triggeredNotes_[channel] = grids_notes[channel];
                   channelTriggered_[channel] = true;
+                  noteOffMicros_[channel] = noteon_micros + (stepLength * clockConfig.step_micros); // time at which note will be off
               }
           }
       }
@@ -506,9 +536,9 @@ namespace grids
       {
           for (auto channel = 0; channel < num_notes; channel++)
           {
-              if (channelTriggered_[channel])
+              if (channelTriggered_[channel] && noteon_micros >= noteOffMicros_[channel])
               {
-                  MM::sendNoteOff(triggeredNotes_[channel], 0, midiChannels_[channel]);
+                  // MM::sendNoteOff(triggeredNotes_[channel], 0, midiChannels_[channel]);
                   // MM::sendNoteOff(grids_notes[channel], 0, midiChannels_[channel]);
                   channelTriggered_[channel] = false;
               }
@@ -578,6 +608,7 @@ namespace grids
     for (uint8_t i = 0; i < 4; i++)
     {
       snapshots[snapShotIndex].instruments[i].note = grids_notes[i];
+      snapshots[snapShotIndex].instruments[i].noteLength = noteLengths_[i];
       snapshots[snapShotIndex].instruments[i].midiChan = midiChannels_[i];
       snapshots[snapShotIndex].instruments[i].density = getDensity(i);
       snapshots[snapShotIndex].instruments[i].x = getX(i);
@@ -597,6 +628,7 @@ namespace grids
     {
       grids_notes[i] = snapshots[snapShotIndex].instruments[i].note;
       midiChannels_[i] = snapshots[snapShotIndex].instruments[i].midiChan;
+      noteLengths_[i] = snapshots[snapShotIndex].instruments[i].noteLength;
       setDensity(i, snapshots[snapShotIndex].instruments[i].density);
       setX(i, snapshots[snapShotIndex].instruments[i].x);
       setY(i, snapshots[snapShotIndex].instruments[i].y);

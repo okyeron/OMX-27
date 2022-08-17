@@ -4,6 +4,7 @@
 ### 1.11.4 alpha
 *** Warning!!!: Will clear your global save state***
 - Adds note length control
+- Changes octave increment to a value
 ```
 
 ```

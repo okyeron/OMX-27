@@ -149,8 +149,6 @@ private:
     void disableSubmode();
     bool isSubmodeEnabled();
 
-    
-
     // Static glue to link a pointer to a member function
     static void onPendingNoteOffForwarder(void *context, int note, int channel)
     {

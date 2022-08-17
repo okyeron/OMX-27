@@ -4,6 +4,7 @@
 #include "omx_disp.h"
 #include "omx_leds.h"
 #include "sequencer.h"
+#include "noteoffs.h"
 
 using namespace grids;
 
@@ -16,6 +17,8 @@ enum GridModePage {
 
 OmxModeGrids::OmxModeGrids()
 {
+    grids_.setNoteOutputFunc(&OmxModeGrids::onNoteTriggeredForwarder, this);
+
     // for (int i = 0; i < 4; i++)
     // {
     //     gridsXY[i][0] = grids_.getX(i);
@@ -439,6 +442,40 @@ void OmxModeGrids::stopPlayback()
     gridsAUX = false;
     grids_.stop();
     sequencer.playing = false;
+}
+
+// Called by a grids sequencer when it triggers a note
+void OmxModeGrids::onNoteTriggered(uint8_t gridsChannel, MidiNoteGroup note)
+{
+    // Serial.println("OmxModeEuclidean::onNoteTriggered " + String(euclidIndex) + " note: " + String(note.noteNumber));
+
+    // uint8_t mfxIndex = euclids[euclidIndex].midiFXGroup;
+    
+    // subModeMidiFx[mfxIndex].noteInput(note);
+
+    // omxDisp.setDirty();
+
+    if (note.noteOff)
+    {
+        // Serial.println("onNotePostFX note off: " + String(note.noteNumber));
+        pendingNoteOns.remove(note.noteNumber, note.channel);
+        pendingNoteOffs.sendOffNow(note.noteNumber, note.channel, note.sendCV);
+    }
+    else
+    {
+        // Serial.println("onNotePostFX note on: " + String(note.noteNumber));
+        // Serial.println("OmxModeEuclidean::onNotePostFX note: " + String(note.noteNumber));
+
+        uint32_t noteOnMicros = note.noteonMicros; // TODO Might need to be set to current micros
+        pendingNoteOns.insert(note.noteNumber, note.velocity, note.channel, noteOnMicros, note.sendCV);
+
+        uint32_t noteOffMicros = noteOnMicros + (note.stepLength * clockConfig.step_micros);
+        pendingNoteOffs.insert(note.noteNumber, note.channel, noteOffMicros, note.sendCV);
+    }
+
+    omxLeds.setDirty();
+
+    // Serial.println("\n\n");
 }
 
 void OmxModeGrids::onKeyUpdate(OMXKeypadEvent e)

@@ -11,13 +11,11 @@
 
 // #include <cstdarg>
 
-//const int OMX_VERSION = 1.11.2alpha;
-
 /* * firmware metadata  */
-// OMX_VERSION = 1.11.2
+// OMX_VERSION = 1.11.5
 const int MAJOR_VERSION = 1;
 const int MINOR_VERSION = 11;
-const int POINT_VERSION = 4;
+const int POINT_VERSION = 5;
 
 const int DEVICE_ID     = 2;
 
@@ -264,6 +262,9 @@ struct MidiNoteGroup
 };
 
 #define NUM_DISP_PARAMS 5
+
+extern const float kNoteLengths[];
+extern const uint8_t kNumNoteLengths;
 
 extern const int gridh;
 extern const int gridw;

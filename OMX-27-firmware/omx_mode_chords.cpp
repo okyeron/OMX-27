@@ -25,8 +25,7 @@ enum ChordsMainMode {
 
 const char* kVoicingNames[8] = {"NONE", "POWR", "SUS2", "SUS4", "SU24", "+6", "+6+9", "KB11"};
 
-const float kNoteLengths[] = {0.1, 0.25, 0.5, 0.75, 1, 1.5, 2, 4, 8, 16};
-const uint8_t kNumNoteLengths = 10;
+
 
 const int kDegreeColor = ORANGE;
 const int kDegreeSelColor = 0xFFBF80;
