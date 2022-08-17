@@ -91,4 +91,6 @@ private:
     void changeSequencerMode(uint8_t newMode);
     uint8_t getSequencerMode(); // based on enum SequencerMode in cpp file
 
+    void pasteStep(uint8_t stepKey);
+
 };

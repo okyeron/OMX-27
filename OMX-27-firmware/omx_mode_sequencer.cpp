@@ -784,12 +784,13 @@ void OmxModeSequencer::onKeyUpdate(OMXKeypadEvent e)
                         // IGNORE LONG PRESSES IN STEP RECORD and Pattern Params
                         if (!stepRecord_ && !patternParams_)
                         {
-                            seqConfig.selectedStep = thisKey - 11; // set noteSelection to this step
+                            seqConfig.selectedStep = (thisKey - 11) + (sequencer.patternPage[sequencer.playingPattern] * NUM_STEPKEYS); // set noteSelection to this step
                             // seqConfig.noteSelect = true;
                             // seqConfig.stepSelect = true;
                             // seqConfig.noteSelection = true;
                             // omxDisp.setDirty();
                             // omxDisp.displayMessagef("NOTE SELECT");
+
 
                             changeSequencerMode(SEQMDOE_NOTESEL);
                             // re-toggle the key you just held
@@ -801,6 +802,7 @@ void OmxModeSequencer::onKeyUpdate(OMXKeypadEvent e)
                     // F2 HOLD
                     else if (midiSettings.keyState[2])
                     {
+
                     }
                     else
                     {
