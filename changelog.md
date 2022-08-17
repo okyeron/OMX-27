@@ -1,6 +1,14 @@
 # Change log
 
 ```
+### 1.11.7 alpha
+*** Warning!!!: Will clear your global save state***
+- Adds note lengths below 1 to the sequencer. 
+- Noteoffs improvement to avoid stuck notes at fast bpms and small note lengths. 
+- Reduced struct size of grids saves and euclid saves
+```
+
+```
 ### 1.11.6 alpha
 *** Warning!!!: Will clear your global save state***
 - Adds swing to grids sequencer
