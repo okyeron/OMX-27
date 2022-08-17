@@ -328,8 +328,17 @@ void OmxModeGrids::onEncoderChanged(Encoder::Update enc)
                 chan = constrain(chan + amt, 1, 16);
                 grids_.setMidiChan(lockedInst_, chan);
             }
-            else if (selParam == 3)
+            else if (selParam == 3) // Note Length
             {
+                uint8_t noteLength = grids_.getNoteLength(lockedInst_);
+                uint8_t newNoteLength = constrain(noteLength + amt, 0, kNumNoteLengths - 1);
+
+                if(noteLength != newNoteLength)
+                {
+                    grids_.setNoteLength(lockedInst_, newNoteLength);
+                    omxDisp.displayMessage(kNoteLengths[newNoteLength]);
+                    omxDisp.setDirty();
+                }
             }
         }
 
@@ -1183,12 +1192,11 @@ void OmxModeGrids::setupPageLegends()
 
             omxDisp.legends[0] = noteLegend.c_str();
             omxDisp.legends[1] = "M-CHAN";
-            omxDisp.legends[2] = "";
+            omxDisp.legends[2] = "GATE";
             omxDisp.legends[3] = "BPM";
             omxDisp.legendVals[0] = grids_.grids_notes[lockedInst_];
             omxDisp.legendVals[1] = grids_.getMidiChan(lockedInst_);
-            omxDisp.legendVals[2] = -127;
-            omxDisp.legendText[2] = "";
+            omxDisp.legendVals[2] = grids_.getNoteLength(lockedInst_);
             omxDisp.legendVals[3] = (int)clockConfig.clockbpm;
         }
         else

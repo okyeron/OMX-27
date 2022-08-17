@@ -102,6 +102,9 @@ namespace grids
         SnapShotSettings* getSnapShot(uint8_t snapShotIndex);
         void setSnapShot(uint8_t snapShotIndex, SnapShotSettings snapShot);
 
+        void setNoteLength(uint8_t channel, uint8_t newNoteLength);
+        uint8_t getNoteLength(uint8_t channel);
+
         void setDensity(uint8_t channel, uint8_t density);
         uint8_t getDensity(uint8_t channel);
 

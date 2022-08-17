@@ -669,14 +669,24 @@ namespace grids
     return midiChannels_[chanIndex];
   }
 
+  void GridsWrapper::setNoteLength(uint8_t channel, uint8_t newNoteLength)
+  {
+    noteLengths_[channel] = newNoteLength;
+  }
+
+  uint8_t GridsWrapper::getNoteLength(uint8_t channel)
+  {
+    return noteLengths_[channel];
+  }
+
   void GridsWrapper::setDensity(uint8_t channel, uint8_t density)
   {
-      density_[channel] = density;
+    density_[channel] = density;
   }
 
   uint8_t GridsWrapper::getDensity(uint8_t channel)
   {
-      return density_[channel];
+    return density_[channel];
   }
 
   void GridsWrapper::setX(uint8_t channel, uint8_t x)
