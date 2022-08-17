@@ -96,10 +96,10 @@ void PendingNoteOffs::play(uint32_t now)
 
 				onNoteOff(queue[i].note, queue[i].channel);
 			}
-		}
-		else
-		{
-			queue[i].time += 200;
+			else
+			{
+				// queue[i].time += 200;
+			}
 		}
 	}
 }
@@ -242,7 +242,7 @@ void PendingNoteOns::play(uint32_t now)
 			}
 			else
 			{
-				queue[i].time += 200;
+				// queue[i].time += 200;
 			}
 		}
 	}

@@ -591,6 +591,7 @@ void playNote(int patternNum) {
 		// Delta = 12499.2 for 0.1 length at 120bpm
 		// Delta = 3571.2 for 0.1 length at 300bpm
 		// Delta = 8928 for 0.25 length at 300bpm
+
 		seqConfig.noteoff_micros = micros() + (uint32_t)(noteLength * clockConfig.step_micros);
 
 		if (sequencer.seqPos[patternNum] % 2 == 0){
@@ -613,8 +614,8 @@ void playNote(int patternNum) {
 		if(pendingNoteOffs.sendOffIfPresent(steps[sequencer.seqPos[patternNum]].note, sequencer.getPatternChannel(patternNum), sendnoteCV))
 		{
 			// Delay slightly so noteoff and note on are not on top of each other
-			seqConfig.noteon_micros += 1000;
-			seqConfig.noteoff_micros += 1000;
+			// seqConfig.noteon_micros += 1000;
+			// seqConfig.noteoff_micros += 1000;
 		}
 
 		// Queue note-on
