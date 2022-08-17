@@ -322,13 +322,7 @@ void OmxModeGrids::onEncoderChanged(Encoder::Update enc)
             {
                 grids_.grids_notes[lockedInst_] = constrain(grids_.grids_notes[lockedInst_] + amt, 0, 127);
             }
-            else if (selParam == 2) // Midi Channel
-            {
-                auto chan = grids_.getMidiChan(lockedInst_);
-                chan = constrain(chan + amt, 1, 16);
-                grids_.setMidiChan(lockedInst_, chan);
-            }
-            else if (selParam == 3) // Note Length
+            else if (selParam == 2) // Note Length
             {
                 uint8_t noteLength = grids_.getNoteLength(lockedInst_);
                 uint8_t newNoteLength = constrain(noteLength + amt, 0, kNumNoteLengths - 1);
@@ -339,6 +333,12 @@ void OmxModeGrids::onEncoderChanged(Encoder::Update enc)
                     omxDisp.displayMessage(kNoteLengths[newNoteLength]);
                     omxDisp.setDirty();
                 }
+            }
+            else if (selParam == 3) // Midi Channel
+            {
+                auto chan = grids_.getMidiChan(lockedInst_);
+                chan = constrain(chan + amt, 1, 16);
+                grids_.setMidiChan(lockedInst_, chan);
             }
         }
 
@@ -713,13 +713,16 @@ void OmxModeGrids::onKeyUpdateChanLock(OMXKeypadEvent e)
 
     if (fNone_)
     {
-        // Midi channel
-        if (e.down() && thisKey == 3)
+        if (e.down() && thisKey == 3) // Note Number
+        {
+            setPageAndParam(GRIDS_CONFIG, 0);
+            // setParam(GRIDS_CONFIG, 2);
+        }
+        if (e.down() && thisKey == 4) // Note Length
         {
             setPageAndParam(GRIDS_CONFIG, 1);
             // setParam(GRIDS_CONFIG, 2);
         }
-
         // Select Grid X param
         if (e.down() && thisKey == 5) // Accent
         {
@@ -739,6 +742,16 @@ void OmxModeGrids::onKeyUpdateChanLock(OMXKeypadEvent e)
         if (e.down() && thisKey == 8) // Xaos
         {
             setPageAndParam(GRIDS_XY, 3);
+            // setParam(GRIDS_XY, 4);
+        }
+        if (e.down() && thisKey == 9) // Midi Chan
+        {
+            setPageAndParam(GRIDS_CONFIG, 2);
+            // setParam(GRIDS_XY, 4);
+        }
+        if (e.down() && thisKey == 10) // BPM
+        {
+            setPageAndParam(GRIDS_CONFIG, 3);
             // setParam(GRIDS_XY, 4);
         }
 
@@ -978,17 +991,21 @@ void OmxModeGrids::updateLEDsChannelView()
         // Shortcut LEDS for top row
         for (int j = 3; j < LED_COUNT - 16; j++)
         {
-            if (j == 3) // Midi Chan
+            if (j == 3) // Note Number
             {
-                strip.setPixelColor(j, (keyState[5] ? LBLUE : DKBLUE));
+                strip.setPixelColor(j, (keyState[3] ? LBLUE : DKBLUE));
+            }
+            else if (j == 4) // Note Length
+            {
+                strip.setPixelColor(j, (keyState[4] ? LBLUE : DKBLUE));
             }
             else if (j == 5) // Accent
             {
-                strip.setPixelColor(j, (keyState[5] ? LBLUE : BLUE));
+                strip.setPixelColor(j, (keyState[5] ? WHITE : BLUE));
             }
             else if (j == 6) // ChanX
             {
-                strip.setPixelColor(j, (keyState[6] ? LBLUE : RED));
+                strip.setPixelColor(j, (keyState[6] ? WHITE : RED));
             }
             else if (j == 7) // Chan Y
             {
@@ -997,6 +1014,14 @@ void OmxModeGrids::updateLEDsChannelView()
             else if (j == 8) // Chaos
             {
                 strip.setPixelColor(j,  (keyState[8] ? WHITE : ORANGE));
+            }
+            else if (j == 9) // Midi Chan
+            {
+                strip.setPixelColor(j,  (keyState[9] ? WHITE : RED));
+            }
+            else if (j == 10) // BPM
+            {
+                strip.setPixelColor(j,  (keyState[9] ? WHITE : RED));
             }
             // else if (j == 10) // Tempo
             // {
@@ -1197,12 +1222,12 @@ void OmxModeGrids::setupPageLegends()
             legendTemp = "NT " + String(lockedInst_ + 1);
 
             omxDisp.legends[0] = legendTemp.c_str();
-            omxDisp.legends[1] = "M-CHAN";
-            omxDisp.legends[2] = "GATE";
+            omxDisp.legends[1] = "GATE";
+            omxDisp.legends[2] = "M-CHAN";
             omxDisp.legends[3] = "BPM";
             omxDisp.legendVals[0] = grids_.grids_notes[lockedInst_];
-            omxDisp.legendVals[1] = grids_.getMidiChan(lockedInst_);
-            omxDisp.legendVals[2] = grids_.getNoteLength(lockedInst_);
+            omxDisp.legendVals[1] = grids_.getNoteLength(lockedInst_);
+            omxDisp.legendVals[2] = grids_.getMidiChan(lockedInst_);
             omxDisp.legendVals[3] = (int)clockConfig.clockbpm;
         }
         else

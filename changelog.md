@@ -5,6 +5,8 @@
 *** Warning!!!: Will clear your global save state***
 - Adds note lengths to grids sequencer
 - Change via GATE param in Instrument view, configurable per instrument
+- Fixes labels not always displaying correctly in grids mode
+- Adds quickkeys for note length, BPM, and note number to Instrument view
 ```
 
 ```
