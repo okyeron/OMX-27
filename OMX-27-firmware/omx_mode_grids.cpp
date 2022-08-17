@@ -451,6 +451,7 @@ void OmxModeGrids::stopPlayback()
     gridsAUX = false;
     grids_.stop();
     sequencer.playing = false;
+    pendingNoteOffs.allOff();
 }
 
 // Called by a grids sequencer when it triggers a note
@@ -474,6 +475,11 @@ void OmxModeGrids::onNoteTriggered(uint8_t gridsChannel, MidiNoteGroup note)
     {
         // Serial.println("onNotePostFX note on: " + String(note.noteNumber));
         // Serial.println("OmxModeEuclidean::onNotePostFX note: " + String(note.noteNumber));
+
+        // Kill any on notes if they were on
+        pendingNoteOns.remove(note.noteNumber, note.channel);
+        pendingNoteOffs.sendOffNow(note.noteNumber, note.channel, note.sendCV);
+
 
         uint32_t noteOnMicros = note.noteonMicros; // TODO Might need to be set to current micros
         pendingNoteOns.insert(note.noteNumber, note.velocity, note.channel, noteOnMicros, note.sendCV);
@@ -1124,11 +1130,11 @@ void OmxModeGrids::setupPageLegends()
         if (setLegendsToChannel)
         {
             // Not sure why string.c_str doesn't work
-            String l1 = "X " + String(targetChannel + 1);
-            String l2 = "Y " + String(targetChannel + 1);
+            xTemp = "X " + String(targetChannel + 1);
+            yTemp = "Y " + String(targetChannel + 1);
 
-            omxDisp.legends[1] = l1.c_str();
-            omxDisp.legends[2] = l2.c_str();
+            omxDisp.legends[1] = xTemp.c_str();
+            omxDisp.legends[2] = yTemp.c_str();
 
             // char bufx[4];
             // char bufy[4];
@@ -1188,9 +1194,9 @@ void OmxModeGrids::setupPageLegends()
     {
         if (instLockView_)
         {
-            String noteLegend = "NT " + String(lockedInst_ + 1);
+            legendTemp = "NT " + String(lockedInst_ + 1);
 
-            omxDisp.legends[0] = noteLegend.c_str();
+            omxDisp.legends[0] = legendTemp.c_str();
             omxDisp.legends[1] = "M-CHAN";
             omxDisp.legends[2] = "GATE";
             omxDisp.legends[3] = "BPM";

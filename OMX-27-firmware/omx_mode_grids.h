@@ -117,5 +117,7 @@ private:
     bool midiModeception = false;
     OmxModeMidiKeyboard midiKeyboard; // Mode inside a mode. For science!
 
-    
+    String legendTemp;
+    String xTemp;
+    String yTemp;
 };

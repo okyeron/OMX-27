@@ -1,6 +1,13 @@
 # Change log
 
 ```
+### 1.11.5 alpha
+*** Warning!!!: Will clear your global save state***
+- Adds note lengths to grids sequencer
+- Change via GATE param in Instrument view, configurable per instrument
+```
+
+```
 ### 1.11.4 alpha
 *** Warning!!!: Will clear your global save state***
 - Adds note length control
