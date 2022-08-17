@@ -422,6 +422,7 @@ namespace grids
       chaos = 0;
       divider_ = 0;
       multiplier_ = 1;
+      resMultiplier_ = 1;
       running_ = false;
 
       // Init default snapshot notes
@@ -451,6 +452,9 @@ namespace grids
       tickCount_ = 0;
       running_ = true;
       MM::startClock();
+
+      nextStepTimeP_ = micros();
+      lastStepTimeP_ = micros();
   }
 
   void GridsWrapper::stop()
@@ -488,6 +492,41 @@ namespace grids
     onNoteOnFuncPtr_(onNoteOnFuncPtrContext_, gridsChannel, noteGroup);
   }
 
+  void GridsWrapper::clockTick(uint32_t stepmicros, uint32_t microsperstep)
+  {
+    if (!running_)
+      return;
+
+    if (stepmicros >= nextStepTimeP_)
+    {
+      lastStepTimeP_ = nextStepTimeP_;
+      stepMicroDelta_ = microsperstep;
+      nextStepTimeP_ += stepMicroDelta_; // calc step based on rate
+
+      gridsTick();
+    }
+  }
+
+  // void GridsWrapper::advanceStep(uint32_t stepmicros)
+  // {
+
+  //   if (steps_ == 0)
+  //   {
+  //     seqPos_ = 0;
+  //     lastSeqPos_ = seqPos_;
+
+  //     return;
+  //   }
+  //   lastSeqPos_ = seqPos_;
+
+  //   seqPos_ = (seqPos_ + 1) % steps_;
+
+  //   if (seqPos_ == 0)
+  //   {
+  //     startMicros = stepmicros;
+  //   }
+  // }
+
   void GridsWrapper::gridsTick()
   {
       if (!running_)
@@ -502,6 +541,20 @@ namespace grids
       {
           const auto step = (tickCount_ / ticksPerClock * multiplier_) % grids::kStepsPerPattern;
           channel_.setStep(step);
+
+          if (step % 2 == 0)
+          {
+            if (swing_ < 99)
+            {
+              // clockConfig.ppqInterval = 5208 for 120 bpm
+              noteon_micros = micros() + ((clockConfig.ppqInterval * resMultiplier_) / (PPQ / 24) * swing_); // full range swing
+            }
+            else if (swing_ == 99)
+            {                              // random drunken swing
+              uint8_t rnd_swing = rand() % 95 + 1; // rand 1 - 95 // randomly apply swing value
+              noteon_micros = micros() + ((clockConfig.ppqInterval * resMultiplier_) / (PPQ / 24) * rnd_swing);
+            }
+          }
 
           for (auto channel = 0; channel < num_notes; channel++)
           {
@@ -523,6 +576,8 @@ namespace grids
                   uint8_t targetLevel = uint8_t(127.f * float(level - threshold) / float(256 - threshold));
                   uint8_t noteLevel = GridsChannel::U8Mix(127, targetLevel, accent);
                   float stepLength = kNoteLengths[noteLengths_[channel]];
+
+                  
 
                   onNoteOn(channel, midiChannels_[channel], grids_notes[channel], noteLevel, stepLength, true, false, noteon_micros);
                   // MM::sendNoteOn(grids_notes[channel], noteLevel, midiChannels_[channel]);
@@ -618,6 +673,7 @@ namespace grids
     snapshots[snapShotIndex].accent = getAccent();
     snapshots[snapShotIndex].resolution = resolution_;
     snapshots[snapShotIndex].chaos = getChaos();
+    snapshots[snapShotIndex].swing = getSwing();
 
     playingPattern = snapShotIndex;
   }
@@ -637,6 +693,7 @@ namespace grids
     setAccent(snapshots[snapShotIndex].accent);
     setResolution(snapshots[snapShotIndex].resolution);
     setChaos(snapshots[snapShotIndex].chaos);
+    setSwing(snapshots[snapShotIndex].swing);
 
     playingPattern = snapShotIndex;
   }
@@ -731,17 +788,29 @@ namespace grids
       {
           multiplier_ = 1;
           divider_ = 1;
+          resMultiplier_ = 0.5f;
       }
       else if (r == 1)
       {
           multiplier_ = 1;
+          resMultiplier_ = 1;
       }
       else if (r == 2)
       {
           multiplier_ = 2;
+          resMultiplier_ = 2;
           //     } else if (r == 3){
           //     	multiplier_ = 4;
       }
+  }
+
+  void GridsWrapper::setSwing(uint8_t newSwing)
+  {
+    swing_ = newSwing;
+  }
+  uint8_t GridsWrapper::getSwing()
+  {
+    return swing_;
   }
 
   void GridsWrapper::setAccent(uint8_t a)

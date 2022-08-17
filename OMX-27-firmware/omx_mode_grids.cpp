@@ -12,7 +12,8 @@ enum GridModePage {
     GRIDS_DENSITY,
     GRIDS_XY,
     GRIDS_NOTES,
-    GRIDS_CONFIG
+    GRIDS_CONFIG,
+    GRIDS_CONFIG2
 };
 
 OmxModeGrids::OmxModeGrids()
@@ -31,6 +32,7 @@ OmxModeGrids::OmxModeGrids()
     params.addPage(4);
     params.addPage(4);
     params.addPage(4);
+    params.addPage(1);
 }
 
 void OmxModeGrids::InitSetup()
@@ -96,6 +98,9 @@ void OmxModeGrids::onPotChanged(int potIndex, int prevValue, int newValue, int a
 
 void OmxModeGrids::loopUpdate(Micros elapsedTime)
 {
+    // uint32_t playstepmicros = micros();
+    // grids_.clockTick(playstepmicros, clockConfig.step_micros);
+
     if (midiModeception)
     {
         midiKeyboard.loopUpdate(elapsedTime);
@@ -199,8 +204,8 @@ void OmxModeGrids::onEncoderChanged(Encoder::Update enc)
 
     // int paramStep = param % 5;
 
-    int8_t selPage = params.getSelPage(); // Add one for readability
-    int8_t selParam = params.getSelParam() + 1;
+    int8_t selPage = params.getSelPage(); 
+    int8_t selParam = params.getSelParam() + 1; // Add one for readability
 
     // if (paramStep != 0) // Page select mode if 0
     // {
@@ -351,6 +356,16 @@ void OmxModeGrids::onEncoderChanged(Encoder::Update enc)
                 clockConfig.clockbpm = clockConfig.newtempo;
                 omxUtil.resetClocks();
             }
+        }
+    }
+    break;
+    case GRIDS_CONFIG2:
+    {
+        if (selParam == 1) // Tempo
+        {
+            uint8_t swing = grids_.getSwing();
+            uint8_t newSwing = constrain(swing + amt, 0, 99);
+            grids_.setSwing(newSwing);
         }
     }
     break;
@@ -1246,6 +1261,12 @@ void OmxModeGrids::setupPageLegends()
         }
     }
     break;
+    case GRIDS_CONFIG2:
+    {
+        omxDisp.legends[0] = "SWNG";
+        omxDisp.legendVals[0] = grids_.getSwing();
+    }
+    break;
     default:
         break;
     }
@@ -1274,7 +1295,7 @@ void OmxModeGrids::onDisplayUpdate()
         if (!encoderConfig.enc_edit)
         {
             setupPageLegends();
-            omxDisp.dispGenericMode2(4, params.getSelPage(), params.getSelParam(), encoderSelect);
+            omxDisp.dispGenericMode2(params.getNumPages(), params.getSelPage(), params.getSelParam(), encoderSelect);
             
             // int pselected = param % NUM_DISP_PARAMS;
             // omxDisp.dispGenericMode(pselected);

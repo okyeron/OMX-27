@@ -30,6 +30,7 @@ namespace grids
         uint8_t chaos = 0;
         uint8_t accent = 128;
         uint8_t resolution = 1;
+        uint8_t swing = 1;
     };
 
     constexpr uint8_t kStepsPerPattern = 32;
@@ -95,6 +96,8 @@ namespace grids
         void proceed();
         void gridsTick();
 
+        void clockTick(uint32_t stepmicros, uint32_t microsperstep);
+
         void setNoteOutputFunc(void (*fptr)(void *, uint8_t, MidiNoteGroup), void *context);
 
         void saveSnapShot(uint8_t snapShotIndex);
@@ -118,6 +121,9 @@ namespace grids
         uint8_t getChaos();
 
         void setResolution(uint8_t r);
+
+        void setSwing(uint8_t newSwing);
+        uint8_t getSwing();
 
         void setAccent(uint8_t a);
         uint8_t getAccent();
@@ -148,7 +154,9 @@ namespace grids
         bool channelTriggered_[num_notes];
         uint8_t triggeredNotes_[num_notes]; // Keep track of triggered notes to avoid stuck notes
         uint8_t resolution_;
+        uint8_t swing_ = 0;
         bool running_;
+        float resMultiplier_ = 1;
 
         uint8_t defaultMidiChannel_ = 1;
 
@@ -156,6 +164,13 @@ namespace grids
         void * onNoteOnFuncPtrContext_;
         void (*onNoteOnFuncPtr_)(void *, uint8_t, MidiNoteGroup);
         void onNoteOn(uint8_t gridsChannel, uint8_t channel, uint8_t noteNumber, uint8_t velocity, float stepLength, bool sendMidi, bool sendCV, uint32_t noteOnMicros);
+
+        // clock values
+        Micros nextStepTimeP_ = 32;
+        Micros lastStepTimeP_ = 32;
+        uint32_t stepMicroDelta_ = 0;
+
+        // void advanceStep(uint32_t stepmicros);
     };
 
 }
