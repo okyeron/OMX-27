@@ -6,26 +6,37 @@
 
 namespace euclidean
 {
-    extern const float kEuclidNoteLengths[10];
-    extern const uint8_t kNumEuclidNoteLengths;
+    // extern const float kEuclidNoteLengths[10];
+    // extern const uint8_t kNumEuclidNoteLengths;
 
     struct EuclidSave
     {
-        uint8_t rotation_ = 0;
-        uint8_t events_ = 0;
-        uint8_t steps_ = 0;
+        uint8_t rotation_ : 6;
+        uint8_t events_ : 6;
+        uint8_t steps_ : 6;
 
-        uint8_t noteNumber_ = 16;
-        uint8_t midiChannel_ = 1;
-        uint8_t velocity_ = 100;
-        uint8_t swing_ = 0;
+        uint8_t noteNumber_ : 7;
+        uint8_t midiChannel_ : 4;
+        uint8_t velocity_ : 7;
+        uint8_t swing_ : 7;
 
-        uint8_t noteLength_ = 1;
+        uint8_t noteLength_ : 4;
 
         bool polyRhythmMode_ = true;
 
-        uint8_t clockDivMultP_ = 4;
-        uint8_t polyRClockDivMultP_ = 4;
+        uint8_t clockDivMultP_ : 3;
+        uint8_t polyRClockDivMultP_ : 3;
+
+        EuclidSave()
+        {
+            noteNumber_ = 16;
+            midiChannel_ = 1;
+            velocity_ = 100;
+            noteLength_ = 1;
+            polyRhythmMode_ = false;
+            clockDivMultP_ = 4;
+            polyRClockDivMultP_ = 4;
+        }
     };
 
     // #define EUCLID_PAT_SIZE = 32

@@ -547,6 +547,8 @@ namespace grids
             if (swing_ < 99)
             {
               // clockConfig.ppqInterval = 5208 for 120 bpm
+              // 1488 for 120 bpm
+              // 
               noteon_micros = micros() + ((clockConfig.ppqInterval * resMultiplier_) / (PPQ / 24) * swing_); // full range swing
             }
             else if (swing_ == 99)

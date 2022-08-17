@@ -2,6 +2,30 @@
 
 #include <stdint.h>
 
+class PendingNoteHistory
+{
+public:
+	PendingNoteHistory();
+	void clear();
+	void clearIfChanged(uint32_t time);
+	bool insert(int note, int channel);
+	bool eventThisFrame(int note, int channel);
+
+private:
+	struct Entry
+	{
+		bool inUse = false;
+		int note : 7;
+		int channel : 5;
+	};
+	static const int queueSize = 32;
+	Entry queue[queueSize];
+
+	uint32_t prevTime;
+};
+
+extern PendingNoteHistory pendingNoteHistory;
+
 class PendingNoteOffs {
 	public:
 		PendingNoteOffs();
@@ -11,6 +35,7 @@ class PendingNoteOffs {
 		// Finds any pending note offs for this note and kills them
 		// so they won't later fire
 		// then sends the note off event now
+		bool sendOffIfPresent(int note, int channel, bool sendCV);
 		void sendOffNow(int note, int channel, bool sendCV);
 		void allOff();
 
@@ -44,7 +69,6 @@ class PendingNoteOns {
 		// Remove any notes matching description
 		bool remove(int note, int channel);
 		void play(uint32_t time);
-
 	private:
 		struct Entry {
 			bool inUse;

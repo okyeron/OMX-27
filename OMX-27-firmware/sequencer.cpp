@@ -585,8 +585,13 @@ void playNote(int patternNum) {
 	if (steps[sequencer.seqPos[patternNum]].trig == TRIGTYPE_PLAY) {
 		sequencer.seq_velocity = steps[sequencer.seqPos[patternNum]].vel;
 
-		seqConfig.noteoff_micros = micros() + (steps[sequencer.seqPos[patternNum]].len + 1) * clockConfig.step_micros;
-		pendingNoteOffs.insert(steps[sequencer.seqPos[patternNum]].note, sequencer.getPatternChannel(patternNum), seqConfig.noteoff_micros, sendnoteCV);
+		uint8_t lenIndex = steps[sequencer.seqPos[patternNum]].len;
+		float noteLength = kNoteLengths[lenIndex];
+
+		// Delta = 12499.2 for 0.1 length at 120bpm
+		// Delta = 3571.2 for 0.1 length at 300bpm
+		// Delta = 8928 for 0.25 length at 300bpm
+		seqConfig.noteoff_micros = micros() + (uint32_t)(noteLength * clockConfig.step_micros);
 
 		if (sequencer.seqPos[patternNum] % 2 == 0){
 
@@ -605,8 +610,18 @@ void playNote(int patternNum) {
 			seqConfig.noteon_micros = micros();
 		}
 
+		if(pendingNoteOffs.sendOffIfPresent(steps[sequencer.seqPos[patternNum]].note, sequencer.getPatternChannel(patternNum), sendnoteCV))
+		{
+			// Delay slightly so noteoff and note on are not on top of each other
+			seqConfig.noteon_micros += 1000;
+			seqConfig.noteoff_micros += 1000;
+		}
+
 		// Queue note-on
 		pendingNoteOns.insert(steps[sequencer.seqPos[patternNum]].note, sequencer.seq_velocity, sequencer.getPatternChannel(patternNum), seqConfig.noteon_micros, sendnoteCV);
+
+		// Pending Note Offs needs to happen after note-on
+		pendingNoteOffs.insert(steps[sequencer.seqPos[patternNum]].note, sequencer.getPatternChannel(patternNum), seqConfig.noteoff_micros, sendnoteCV);
 
 		// {notenum, vel, notelen, step_type, {p1,p2,p3,p4}, prob}
 		// send param locks
@@ -721,7 +736,7 @@ void resetPatternDefaults(int patternNum){
 	for (int i = 0; i < NUM_STEPS; i++){
 		// {notenum,vel,len,stepType,{p1,p2,p3,p4,p5}}
 		pattern->steps[i].note = sequencer.patternDefaultNoteMap[patternNum];
-		pattern->steps[i].len = 0;
+		pattern->steps[i].len = 3;
 	}
 }
 
@@ -732,7 +747,7 @@ void clearPattern(int patternNum){
 		// {notenum,vel,len,stepType,{p1,p2,p3,p4,p5}}
 		steps[i].note = sequencer.patternDefaultNoteMap[patternNum];
 		steps[i].vel = midiSettings.defaultVelocity;
-		steps[i].len = 0;
+		steps[i].len = 3; // Default 0.75
 		steps[i].trig = TRIGTYPE_MUTE;
 		steps[i].stepType = STEPTYPE_NONE;
 		steps[i].params[0] = -1;

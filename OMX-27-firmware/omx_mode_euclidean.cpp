@@ -28,7 +28,8 @@ enum ParamModes {
 enum SelEucModePage {
     SELEUCLID_PAT,
     SELEUCLID_1,
-    SELEUCLID_NOTES
+    SELEUCLID_NOTES,
+    SELEUCLID_CFG1 // PolyRythm, Rate, Global Rate, BPM
 };
 
 const int kSelMixColor = WHITE;
@@ -67,6 +68,7 @@ OmxModeEuclidean::OmxModeEuclidean()
     params_[PARAMMODE_MIX].addPage(1);
 
     params_[PARAMMODE_EDIT].addPage(1);
+    params_[PARAMMODE_EDIT].addPage(4);
     params_[PARAMMODE_EDIT].addPage(4);
     params_[PARAMMODE_EDIT].addPage(4);
 
@@ -306,13 +308,14 @@ void OmxModeEuclidean::onPotChanged(int potIndex, int prevValue, int newValue, i
             // Serial.println("length");
 
             uint8_t prevLength = activeEuclid->getNoteLength();
-            uint8_t newLength = map(newValue, 0, 127, 0, euclidean::kNumEuclidNoteLengths - 1);
+            uint8_t newLength = map(newValue, 0, 127, 0, kNumNoteLengths - 1);
 
             activeEuclid->setNoteLength(newLength);
 
             if (prevLength != newLength)
             {
-                omxDisp.displayMessageTimed(String(euclidean::kEuclidNoteLengths[newLength]), 10);
+                tempString = String(kNoteLengths[newLength]);
+                omxDisp.displayMessage(tempString.c_str());
             }
         }
         if (potIndex == 4)
@@ -335,7 +338,8 @@ void OmxModeEuclidean::onPotChanged(int potIndex, int prevValue, int newValue, i
 
             if (newres != prevRes)
             {
-                omxDisp.displayMessageTimed(String(multValues[newres]), 10);
+                tempString = String(multValues[newres]);
+                omxDisp.displayMessage(tempString.c_str());
             }
         }
     }
@@ -470,13 +474,13 @@ void OmxModeEuclidean::onEncoderChanged(Encoder::Update enc)
             else if (selParam == 4)
             {
                 uint8_t prevLength = activeEuclid->getNoteLength();
-                uint8_t newLength = constrain(prevLength + amtSlow, 0, euclidean::kNumEuclidNoteLengths - 1);
+                uint8_t newLength = constrain(prevLength + amtSlow, 0, kNumNoteLengths - 1);
 
                 activeEuclid->setNoteLength(newLength);
 
                 if (prevLength != newLength)
                 {
-                    omxDisp.displayMessageTimed(String(euclidean::kEuclidNoteLengths[newLength]), 10);
+                    omxDisp.displayMessageTimed(String(kNoteLengths[newLength]), 10);
                 }
             }
         }
@@ -498,6 +502,72 @@ void OmxModeEuclidean::onEncoderChanged(Encoder::Update enc)
             else if (selParam == 4)
             {
                 activeEuclid->setSwing(constrain(activeEuclid->getSwing() + amtFast, 0, 100));
+            }
+        }
+        break;
+        case SELEUCLID_CFG1:
+        {
+            if (selParam == 1)
+            {
+                bool prevVal = polyRhythmMode;
+
+                polyRhythmMode = (bool)constrain(polyRhythmMode + amtSlow, 0, 1);
+
+                if (prevVal != polyRhythmMode)
+                {
+                    for (u_int8_t i = 0; i < kNumEuclids; i++)
+                    {
+                        euclids[i].setPolyRhythmMode(polyRhythmMode);
+                    }
+
+                    if (polyRhythmMode)
+                    {
+                        omxDisp.displayMessage("PolyRhythm");
+                    }
+                    else
+                    {
+                        omxDisp.displayMessage("PolyMeter");
+                    }
+                }
+            }
+            else if (selParam == 2) // Track Mult
+            {
+                uint8_t prevRes = activeEuclid->getClockDivMult();
+                uint8_t newres = constrain(prevRes + amtSlow, 0, 6);
+
+                if(prevRes != newres)
+                {
+                    activeEuclid->setClockDivMult(newres);
+
+                    tempString = String(multValues[newres]);
+                    omxDisp.displayMessage(tempString.c_str());
+                }
+            }
+            else if (selParam == 3) // Global polyRhythm Mult
+            {
+                uint8_t prevRes = euclids[0].getPolyRClockDivMult();
+                uint8_t newres = constrain(prevRes + amtSlow, 0, 6);
+
+                if(prevRes != newres)
+                {
+                    for (u_int8_t i = 0; i < kNumEuclids; i++)
+                    {
+                        euclids[i].setPolyRClockDivMult(newres);
+                    }
+
+                    tempString = String(multValues[newres]);
+                    omxDisp.displayMessage(tempString.c_str());
+                }
+            }
+            else if (selParam == 4) // BPM
+            {
+                clockConfig.newtempo = constrain(clockConfig.clockbpm + amtFast, 40, 300);
+                if (clockConfig.newtempo != clockConfig.clockbpm)
+                {
+                    // SET TEMPO HERE
+                    clockConfig.clockbpm = clockConfig.newtempo;
+                    omxUtil.resetClocks();
+                }
             }
         }
         break;
@@ -559,11 +629,11 @@ void OmxModeEuclidean::onEncoderButtonDown()
 
             if (polyRhythmMode)
             {
-                omxDisp.displayMessage("pRhythm on");
+                omxDisp.displayMessage("PolyRhythm");
             }
             else
             {
-                omxDisp.displayMessage("pRhythm off");
+                omxDisp.displayMessage("PolyMeter");
             }
         }
         else
@@ -1066,6 +1136,20 @@ void OmxModeEuclidean::setupPageLegends()
         omxDisp.legendVals[1] = activeEuclid->getMidiChannel();
         omxDisp.legendVals[2] = activeEuclid->getVelocity();
         omxDisp.legendVals[3] = activeEuclid->getSwing();
+    }
+    break;
+    case SELEUCLID_CFG1:
+    {
+        omxDisp.legends[0] = "MODE";
+        omxDisp.legends[1] = "TRAT";
+        omxDisp.legends[2] = "PRAT";
+        omxDisp.legends[3] = "BPM";
+        omxDisp.legendVals[0] = (int)polyRhythmMode;
+        omxDisp.useLegendString[1] = true;
+        omxDisp.legendString[1] = String(activeEuclid->getClockDivMult());
+        omxDisp.useLegendString[2] = true;
+        omxDisp.legendString[2] = String(euclids[0].getPolyRClockDivMult());
+        omxDisp.legendVals[3] = (int)clockConfig.clockbpm;
     }
     break;
     default:

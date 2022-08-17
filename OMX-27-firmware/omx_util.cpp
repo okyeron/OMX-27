@@ -49,11 +49,15 @@ void OmxUtil::advanceSteps(Micros advance)
 		advance -= timeToNextStep;
 		timeToNextStep = clockConfig.ppqInterval;
 
-		// turn off any expiring notes
-		pendingNoteOffs.play(micros());
+        auto currentMicros = micros();
 
-		// turn on any pending notes
-		pendingNoteOns.play(micros());
+        pendingNoteHistory.clearIfChanged(currentMicros);
+
+        // turn on any pending notes
+		pendingNoteOns.play(currentMicros);
+
+		// turn off any expiring notes
+		pendingNoteOffs.play(currentMicros);
 	}
 	timeToNextStep -= advance;
 }

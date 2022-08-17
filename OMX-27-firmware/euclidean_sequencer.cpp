@@ -4,8 +4,8 @@
 
 namespace euclidean
 {
-    const float kEuclidNoteLengths[] = {0.1, 0.25, 0.5, 0.75, 1, 1.5, 2, 4, 8, 16};
-    const uint8_t kNumEuclidNoteLengths = 10;
+    // const float kEuclidNoteLengths[] = {0.1, 0.25, 0.5, 0.75, 1, 1.5, 2, 4, 8, 16};
+    // const uint8_t kNumEuclidNoteLengths = 10;
 
     EuclideanMath::EuclideanMath()
     {
@@ -123,6 +123,7 @@ namespace euclidean
     void EuclideanSequencer::stop()
     {
         running_ = false;
+        pendingNoteOffs.allOff();
     }
 
     void EuclideanSequencer::proceed()
@@ -320,7 +321,7 @@ namespace euclidean
         save.events_ = events_;
         save.steps_ = steps_;
         save.noteNumber_ = noteNumber_;
-        save.midiChannel_ = midiChannel_;
+        save.midiChannel_ = midiChannel_ - 1;
         save.velocity_ = velocity_;
         save.swing_ = swing_;
         save.noteLength_ = noteLength_;
@@ -336,7 +337,7 @@ namespace euclidean
         events_ = save.events_;
         steps_ = save.steps_;
         noteNumber_ = save.noteNumber_;
-        midiChannel_ = save.midiChannel_;
+        midiChannel_ = save.midiChannel_ + 1;
         velocity_ = save.velocity_;
         swing_ = save.swing_;
         noteLength_ = save.noteLength_;
@@ -454,7 +455,7 @@ namespace euclidean
         // uint8_t note = 60;
         // uint8_t channel = 1;
         // uint8_t vel = 100;
-        float stepLength = kEuclidNoteLengths[noteLength_];
+        float stepLength = kNoteLengths[noteLength_];
         // uint8_t swing = 0;
 
         // uint32_t noteoff_micros = micros() + (stepLength) * clockConfig.step_micros;

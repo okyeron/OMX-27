@@ -179,9 +179,10 @@ struct ClockConfig {
 	unsigned long tempoStartTime;
 	unsigned long tempoEndTime;
 	float step_delay;
+	unsigned long minDelta = 5000;
 
-	volatile unsigned long step_micros;
-	volatile unsigned long ppqInterval;
+	volatile unsigned long step_micros; // 124992 for 120 bpm : 35712 for 300 bpm
+	volatile unsigned long ppqInterval; // 5208 for 120 bpm : 1488 for 300 bpm
 };
 
 extern ClockConfig clockConfig;

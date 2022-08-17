@@ -26,17 +26,17 @@ struct ChordSettings
 {
     public:
     int color = 0xFFFFFF;
-    uint8_t numNotes = 3;
-    int8_t degree = 0; // degree from root note of scale, if scale is cmaj, degree of 0 = c, degree of 3 = e
-    int8_t octave = 0; // transposes note by octave
-    int8_t transpose = 0; // transposes note by semitone, can bump off scale
-    int8_t spread = 0; // spreads chord notes over octave
+    uint8_t numNotes : 3;
+    int8_t degree : 6; // degree from root note of scale, if scale is cmaj, degree of 0 = c, degree of 3 = e
+    int8_t octave : 4; // transposes note by octave
+    int8_t transpose : 5; // transposes note by semitone, can bump off scale
+    int8_t spread : 4; // spreads chord notes over octave
     // spread 0 =   C3,E3,G3        C3,E3,G3,B3
     // spread -1 =  C2,E3,G2        C2,E3,G2,B3     -1,*,-1     -1,*,-1,*
     // spread -2 =  C1,E3,G1        C1,E3,G1,B3     -2,*,-2     -2,*,-2,*
     // spread 1 =   C3,E4,G3        C3,E4,G3,B4     *,+1,*      *,+1,*,+1
     // spread 2 =   C3,E5,G3        C3,E5,G3,B5     *,+2,*      *,+2,*,+2
-    uint8_t rotate = 0; // Rotates the chord notes
+    uint8_t rotate : 4; // Rotates the chord notes
     // rotate 0 =   C3,E3,G3        C3,E3,G3,B3
     // rotate 1 =   E3,G3,C4        E3,G3,B3,C4 
     // rotate 2 =   G3,C4,E4        G3,B3,C4,E4
@@ -52,7 +52,7 @@ struct ChordSettings
     bool quartalVoicing = false;
     // false =      C3,E3,G3        C3,E3,G3,B3
     // true =       C5,E3,G4        C5,E3,G4,B2
-    uint8_t voicing = 0;
+    uint8_t voicing : 3;
     // 0 = none - based off numNotes
     // 1 = powerChord
     //  C3,G3       C3,G3,C4        C3,G3,C4
@@ -73,6 +73,19 @@ struct ChordSettings
     //  Two hand jazz voicing
     //  1,5,9,  10, 7th+oct,11+Oct
     //  C3,G3,D4,E4,B4,F5
+
+    ChordSettings()
+    {
+        numNotes = 3;
+        degree = 0;
+        octave = 0;
+        transpose = 0;
+        spread = 0;
+        rotate = 0;
+        spreadUpDown = false;
+        quartalVoicing = false;
+        voicing = 0;
+    }
 
     void CopySettingsFrom(ChordSettings other)
     {

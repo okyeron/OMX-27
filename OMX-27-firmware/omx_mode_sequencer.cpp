@@ -309,6 +309,7 @@ void OmxModeSequencer::onEncoderChangedNorm(Encoder::Update enc)
 void OmxModeSequencer::onEncoderChangedStep(Encoder::Update enc)
 {
     auto amt = enc.accel(5); // where 5 is the acceleration factor if you want it, 0 if you don't)
+    auto amtSlow = enc.accel(1); 
 
     uint8_t seqMode = getSequencerMode();
 
@@ -474,8 +475,21 @@ void OmxModeSequencer::onEncoderChangedStep(Encoder::Update enc)
             }
             if (selParam == 4) // SET NOTE LENGTH
             {
-                int tempLen = getSelectedStep()->len;
-                getSelectedStep()->len = constrain(tempLen + amt, 0, 15); // Note Len between 1-16
+                auto step = getSelectedStep();
+
+                step->len = constrain(step->len + amtSlow, 0, kNumNoteLengths - 1); // Note Len between 1-16
+
+                // int tempLen = step->len;
+                // // int newLen = tempLen + amtSlow;
+                // auto newLen = constrain(step->len + amtSlow, 0, kNumNoteLengths - 1); // Note Len between 1-16
+                // step->len = (uint8_t)newLen;                                          // Note Len between 1-16
+
+                // Serial.println("amtSlow = " + String(amtSlow));
+                // Serial.println("tempLen = " + String(tempLen));
+                // Serial.println("newLen = " + String(newLen));
+                // Serial.println("len = " + String(step->len));
+                // Serial.println("NumNoteLengths = " + String(kNumNoteLengths));
+                // Serial.println("NoteLength = " + String(kNoteLengths[step->len]));
             }
         }
         // PAGE TWO
@@ -1444,7 +1458,8 @@ void OmxModeSequencer::onDisplayUpdate()
                     omxDisp.legendVals[0] = getSelectedStep()->note;
                     omxDisp.legendVals[1] = (int)midiSettings.octave + 4;
                     omxDisp.legendVals[2] = getSelectedStep()->vel;
-                    omxDisp.legendVals[3] = getSelectedStep()->len + 1;
+                    omxDisp.useLegendString[3] = true;
+                    omxDisp.legendString[3] = String(kNoteLengths[getSelectedStep()->len]);
                 }
                 else if (noteSelParams.getSelPage() == 1) // SUBMODE_NOTESEL2
                 {

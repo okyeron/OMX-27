@@ -39,7 +39,7 @@ struct StepNote {           // ?? bytes
 	uint8_t note : 7;         // 0 - 127
 	// uint8_t unused : 1;    // not hooked up. example of how to sneak a bool into the first byte in the structure
 	uint8_t vel : 7;          // 0 - 127
-	uint8_t len : 4;          // 0 - 15
+	uint8_t len : 4;          // Plugs into kNoteLengths
 	TrigType trig : 1;        // 0 - 1
 	int8_t params[5];         // -128 -> 127 // 40 bits
 	uint8_t prob : 7;         // 0 - 100

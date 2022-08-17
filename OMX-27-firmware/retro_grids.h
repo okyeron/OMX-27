@@ -16,12 +16,22 @@ namespace grids
 
     struct InstSettings
     {
-        uint8_t note = 60;
-        uint8_t noteLength = 3;
-        uint8_t midiChan = 1;
+        uint8_t note : 7;
+        uint8_t noteLength : 4;
+        uint8_t midiChan : 5;
         uint8_t density = 0;
         uint8_t x = 128;
         uint8_t y = 128;
+
+        InstSettings()
+        {
+            note = 60;
+            noteLength = 3;
+            midiChan = 1;
+            density = 0;
+            x = 128;
+            y = 128;
+        }
     };
 
     struct SnapShotSettings
@@ -29,8 +39,14 @@ namespace grids
         InstSettings instruments[4];
         uint8_t chaos = 0;
         uint8_t accent = 128;
-        uint8_t resolution = 1;
-        uint8_t swing = 1;
+        uint8_t resolution : 2;
+        uint8_t swing : 7;
+
+        SnapShotSettings()
+        {
+            resolution = 1;
+            swing = 0;
+        }
     };
 
     constexpr uint8_t kStepsPerPattern = 32;
