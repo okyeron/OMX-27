@@ -1,6 +1,26 @@
 # Change log
 
 ```
+### 1.11.6 alpha
+*** Warning!!!: Will clear your global save state***
+- Adds swing to grids sequencer
+-
+- Adds cut/paste step feature to S1 and S2
+- - Selecting a step by holding it or F1 plus a step will copy it to a buffer
+- - 
+- - Hold F2:
+- - - Select an unlit step to paste the buffer to that step
+- - - Select a lit(unmuted) step to "Cut"(Copies and mutes)
+- - - - Simply paste back to that step or unmute if you want to undo
+- - 
+- - This was inspired by my cut paste feature in GridStep for norns and makes it very quick to shuffle notes around! 
+- -
+- Fixes bugs by using F1 + step to enter step
+- - Notes won't change
+- - Works with multiple pages
+```
+
+```
 ### 1.11.5 alpha
 *** Warning!!!: Will clear your global save state***
 - Adds note lengths to grids sequencer

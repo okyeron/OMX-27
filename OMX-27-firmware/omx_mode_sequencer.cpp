@@ -9,10 +9,13 @@
 enum SequencerMode
 {
     SEQMODE_MAIN,
-    SEQMDOE_NOTESEL,
+    SEQMODE_NOTESEL,
     SEQMODE_PAT,
     SEQMODE_STEPRECORD
 };
+
+StepNote stepCopyBuffer_;
+String tempString_;
 
 OmxModeSequencer::OmxModeSequencer() {
     // seq params
@@ -74,7 +77,7 @@ void OmxModeSequencer::changeSequencerMode(uint8_t newMode)
         encoderSelect_ = true;
     }
     break;
-    case SEQMDOE_NOTESEL:
+    case SEQMODE_NOTESEL:
     {
         noteSelect_ = true;
         // stepSelect_ = true;
@@ -111,7 +114,7 @@ void OmxModeSequencer::changeSequencerMode(uint8_t newMode)
 uint8_t OmxModeSequencer::getSequencerMode()
 {
     if(noteSelect_){
-        return SEQMDOE_NOTESEL;
+        return SEQMODE_NOTESEL;
     }
     else if(patternParams_){
         return SEQMODE_PAT;
@@ -128,7 +131,7 @@ void OmxModeSequencer::onPotChanged(int potIndex, int prevValue, int newValue, i
     uint8_t seqMode = getSequencerMode();
 
     // note selection - do P-Locks
-    if (seqMode == SEQMDOE_NOTESEL)
+    if (seqMode == SEQMODE_NOTESEL)
     { 
         potSettings.potNum = potIndex;
         potSettings.potCC = pots[potSettings.potbank][potIndex];
@@ -191,7 +194,7 @@ void OmxModeSequencer::onEncoderChangedSelectParam(Encoder::Update enc)
     {
         seqParams.changeParam(enc.dir());
     }
-    else if (seqMode == SEQMDOE_NOTESEL)
+    else if (seqMode == SEQMODE_NOTESEL)
     {
         noteSelParams.changeParam(enc.dir());
     }
@@ -443,7 +446,7 @@ void OmxModeSequencer::onEncoderChangedStep(Encoder::Update enc)
         }
     }
     // NOTE SELECT MODE
-    else if (seqMode == SEQMDOE_NOTESEL)
+    else if (seqMode == SEQMODE_NOTESEL)
     {
         int8_t selPage = noteSelParams.getSelPage() + 1; // Add one for readability
         int8_t selParam = noteSelParams.getSelParam() + 1; 
@@ -558,7 +561,7 @@ void OmxModeSequencer::onKeyUpdate(OMXKeypadEvent e)
         //					keyPressTime[thisKey] = 0;
 
         // NOTE SELECT
-        if (seqMode == SEQMDOE_NOTESEL)
+        if (seqMode == SEQMODE_NOTESEL)
         {
             // SET NOTE
             // left and right keys change the octave
@@ -574,15 +577,18 @@ void OmxModeSequencer::onKeyUpdate(OMXKeypadEvent e)
             }
             else
             {
-                // stepSelect_ = false;
-                seqConfig.selectedNote = thisKey;
-
-                uint8_t adjNote = getAdjustedNote(thisKey);
-                // int adjnote = notes[thisKey] + (midiSettings.octave * 12);
-                getSelectedStep()->note = adjNote;
-                if (!sequencer.playing)
+                if (!e.held()) // Prevent held F1 key from changing note. 
                 {
-                    seqNoteOn(thisKey, midiSettings.defaultVelocity, sequencer.playingPattern);
+                    // stepSelect_ = false;
+                    seqConfig.selectedNote = thisKey;
+
+                    uint8_t adjNote = getAdjustedNote(thisKey);
+                    // int adjnote = notes[thisKey] + (midiSettings.octave * 12);
+                    getSelectedStep()->note = adjNote;
+                    if (!sequencer.playing)
+                    {
+                        seqNoteOn(thisKey, midiSettings.defaultVelocity, sequencer.playingPattern);
+                    }
                 }
             }
             // see RELEASE events for more
@@ -791,18 +797,36 @@ void OmxModeSequencer::onKeyUpdate(OMXKeypadEvent e)
                             // omxDisp.setDirty();
                             // omxDisp.displayMessagef("NOTE SELECT");
 
+                            auto selectedStep = getSelectedStep();
+                            stepCopyBuffer_.CopyFrom(selectedStep);
 
-                            changeSequencerMode(SEQMDOE_NOTESEL);
+                            changeSequencerMode(SEQMODE_NOTESEL);
                             // re-toggle the key you just held
                             //										if (getSelectedStep()->trig == TRIGTYPE_PLAY || getSelectedStep()->trig == TRIGTYPE_MUTE ) {
                             //											getSelectedStep()->trig = (getSelectedStep()->trig == TRIGTYPE_PLAY ) ? TRIGTYPE_MUTE : TRIGTYPE_PLAY;
                             //										}
                         }
                     }
-                    // F2 HOLD
+                    // F2 HOLD - CUT / PASTE
                     else if (midiSettings.keyState[2])
                     {
+                        // paste copied note to current
+                        seqConfig.selectedStep = (thisKey - 11) + (sequencer.patternPage[sequencer.playingPattern] * NUM_STEPKEYS); // set noteSelection to this step
+                        auto selectedStep = getSelectedStep();
 
+                        if(selectedStep->trig == TRIGTYPE_MUTE) // paste copied note to current if trig is off
+                        {
+                            selectedStep->CopyFrom(&stepCopyBuffer_);
+                            tempString_ = "Paste " + String(seqConfig.selectedStep);
+                            omxDisp.displayMessage(tempString_.c_str());
+                        }
+                        else // Cut - copy and turn trig off if trig on
+                        {
+                            stepCopyBuffer_.CopyFrom(selectedStep);
+                            selectedStep->trig = TrigType::TRIGTYPE_MUTE;
+                            tempString_ = "Cut " + String(seqConfig.selectedStep);
+                            omxDisp.displayMessage(tempString_.c_str());
+                        }
                     }
                     else
                     {
@@ -852,7 +876,7 @@ void OmxModeSequencer::onKeyUpdate(OMXKeypadEvent e)
 
     if (e.down() && thisKey == 0)
     {
-        if (seqMode == SEQMDOE_NOTESEL)
+        if (seqMode == SEQMODE_NOTESEL)
         {
             // if (seqConfig.noteSelection)
             // {
@@ -973,7 +997,12 @@ void OmxModeSequencer::onKeyHeldUpdate(OMXKeypadEvent e)
                     // seqConfig.noteSelection = true;
                     // omxDisp.setDirty();
                     // omxDisp.displayMessagef("NOTE SELECT");
-                    changeSequencerMode(SEQMDOE_NOTESEL);
+
+                    // Copy the step to the buffer
+                    auto selectedStep = getSelectedStep();
+                    stepCopyBuffer_.CopyFrom(selectedStep);
+
+                    changeSequencerMode(SEQMODE_NOTESEL);
                     // re-toggle the key you just held
                     //									if ( getSelectedStep()->trig == TRIGTYPE_PLAY || getSelectedStep()->trig == TRIGTYPE_MUTE ) {
                     //										getSelectedStep()->trig = ( getSelectedStep()->trig == TRIGTYPE_PLAY ) ? TRIGTYPE_MUTE : TRIGTYPE_PLAY;
@@ -1041,7 +1070,7 @@ void OmxModeSequencer::showCurrentStepLEDs(int patternNum)
     uint8_t seqMode = getSequencerMode();
 
     // NOTE SELECTION
-    if (seqMode == SEQMDOE_NOTESEL)
+    if (seqMode == SEQMODE_NOTESEL)
     {
         uint8_t seqPos = seqConfig.selectedStep;
         uint8_t currentNote = sequencer.patterns[sequencer.playingPattern].steps[seqPos].note;
@@ -1403,7 +1432,7 @@ void OmxModeSequencer::onDisplayUpdate()
                 }
                 omxDisp.dispGenericMode2(2, seqParams.getSelPage(), seqParams.getSelParam(), encoderSelect_);
             }
-            else if (seqMode == SEQMDOE_NOTESEL)
+            else if (seqMode == SEQMODE_NOTESEL)
             {
                 if (noteSelParams.getSelPage() == 0) // SUBMODE_NOTESEL
                 {

@@ -72,7 +72,6 @@ private:
     bool stepRecord_ = false;
     bool stepDirty_ = false;
 
-
     ParamManager seqParams; // seq params, 2 pages
     ParamManager noteSelParams; // note select params, 3 pages
     ParamManager patParams; // pattern params, 3 pages

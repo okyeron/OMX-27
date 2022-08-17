@@ -45,6 +45,22 @@ struct StepNote {           // ?? bytes
 	uint8_t prob : 7;         // 0 - 100
 	uint8_t condition : 6;    // 0 - 36
 	StepType stepType : 3;    // can be 2 bits as long as StepType has 4 values or fewer
+
+	void CopyFrom(StepNote* other)
+	{
+		note = other->note;
+		vel = other->vel;
+		len = other->len;
+		trig = other->trig;
+
+		for(uint8_t i = 0; i < 5; i++)
+		{
+			params[i] = other->params[i];
+		}
+		prob = other->prob;
+		condition = other->condition;
+		stepType = other->stepType;
+	}
 }; // {note, vel, len, TRIG_TYPE, {params0, params1, params2, params3}, prob, cond, STEP_TYPE}
 
 
