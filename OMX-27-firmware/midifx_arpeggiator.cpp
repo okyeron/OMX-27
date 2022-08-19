@@ -12,9 +12,50 @@ namespace midifx
         ARPPAGE_3
     };
 
+    const char* kModeDisp_[] = {"OFF", "ON", "1-ST", "HOLD"};
+
+    const char *kPatMsg_[] = {
+        "Up",
+        "Down",
+        "UpDown",
+        "DownUp",
+        "Up & Down",
+        "Down & Up",
+        "Converge",
+        "Diverge",
+        "Con-Div",
+        "Hi-Up",
+        "Hi-UpDown",
+        "Low-Up",
+        "Low-UpDown",
+        "As Played",
+        "Random",
+        "Rand Other",
+        "Rand Once"};
+
+    const char *kPatDisp_[] = {
+        "UP",
+        "DN",
+        "UPDN",
+        "DNUP",
+        "U&D",
+        "D&U",
+        "CON",
+        "DIV",
+        "C-V",
+        "HI 1",
+        "HI 2",
+        "LO 1",
+        "LO 2",
+        "ASP",
+        "RAND",
+        "ROTH",
+        "RONC"};
+
     MidiFXArpeggiator::MidiFXArpeggiator()
     {
         arpMode_ = 1;
+        arpPattern_ = 0;
         midiChannel_ = 0;
         swing_ = 0;
         rateIndex_ = 6;
@@ -116,10 +157,11 @@ namespace midifx
         nextStepTimeP_ = Micros();
 
         // tickCount_ = 0;
-        patPos_ = 0;
-        notePos_ = 0;
-        octavePos_ = 0;
-        // running_ = true;
+        // patPos_ = 0;
+        // notePos_ = 0;
+        // octavePos_ = 0;
+
+        resetArpSeq();
 
         nextStepTimeP_ = micros();
         lastStepTimeP_ = micros();
@@ -229,6 +271,12 @@ namespace midifx
             sortedNoteQueue.shrink_to_fit();
         }
 
+
+        // c, e, g, g, e, c
+        // c, g, g, c
+        // c, e, g
+        // c, g, 
+
         std::sort(sortedNoteQueue.begin(), sortedNoteQueue.end(), compareArpNote);
     }
 
@@ -271,9 +319,11 @@ namespace midifx
             sendMidi_ = note.sendMidi;
             sendCV_ = note.sendCV;
 
+            resetArpSeq();
+
             holdNoteQueue.clear();
 
-            if(arpMode_ == ARPMODE_ONESHOT)
+            if(arpMode_ == ARPMODE_ONESHOT) // Only start when no notes for oneshot
             {
                 startArp();
             }
@@ -343,6 +393,16 @@ namespace midifx
         }
     }
 
+    void MidiFXArpeggiator::resetArpSeq()
+    {
+        patPos_ = 0;
+        notePos_ = 0;
+        octavePos_ = 0;
+
+        goingUp_ = true;
+        goingDown_ = true;
+    }
+
     void MidiFXArpeggiator::arpNoteTrigger()
     {
         if(sortedNoteQueue.size() == 0)
@@ -374,11 +434,127 @@ namespace midifx
         //     // reset pattern
         //     patPos_ = 0;
         // }
+        bool incrementOctave = false;
+        int nextNotePos = notePos_;
+        int qLength = sortedNoteQueue.size();
 
-        if(notePos_ >= sortedNoteQueue.size())
+        switch (arpPattern_)
         {
-            // reset note position
-            notePos_ = 0;
+            case ARPPAT_UP:
+            {
+                if (notePos_ >= qLength)
+                {
+                    notePos_ = 0;
+                    incrementOctave = true;
+                }
+                nextNotePos = notePos_ + 1;
+            }
+            break;
+            case ARPPAT_DOWN:
+            {
+                if (notePos_ < 0)
+                {
+                    notePos_ = qLength - 1;
+                    incrementOctave = true;
+                }
+                nextNotePos = notePos_ - 1;
+            }
+            break;
+            case ARPPAT_UP_DOWN:
+            {
+                // Get down
+                if(goingUp_)
+                {
+                    // Turn around
+                    if (notePos_ >= qLength)
+                    {
+                        goingUp_ = false;
+                        notePos_ = qLength - 2;
+                        // incrementOctave = true;
+                    }
+                }
+                // go to town
+                else
+                {
+                    //Boot scootin' boogie
+                    if (notePos_ < 1)
+                    {
+                        notePos_ = 0;
+                        goingUp_ = true;
+                        incrementOctave = true;
+                    }
+                }
+
+                if(goingUp_)
+                {
+                    nextNotePos = notePos_ + 1;
+                }
+                else
+                {
+                    nextNotePos = notePos_ - 1;
+                }
+            }
+            break;
+            case ARPPAT_DOWN_UP:
+            {
+            }
+            break;
+            case ARPPAT_UP_AND_DOWN:
+            {
+            }
+            break;
+            case ARPPAT_DOWN_AND_UP:
+            {
+            }
+            break;
+            case ARPPAT_CONVERGE:
+            {
+            }
+            break;
+            case ARPPAT_DIVERGE:
+            {
+            }
+            break;
+            case ARPPAT_CONVERGE_DIVERGE:
+            {
+            }
+            break;
+            case ARPPAT_HI_UP:
+            {
+            }
+            break;
+            case ARPPAT_HI_UP_DOWN:
+            {
+            }
+            break;
+            case ARPPAT_LOW_UP:
+            {
+            }
+            break;
+            case ARPPAT_LOW_UP_DOWN:
+            {
+            }
+            break;
+            case ARPPAT_AS_PLAYED:
+            {
+            }
+            break;
+            case ARPPAT_RAND:
+            {
+            }
+            break;
+            case ARPPAT_RAND_OTHER:
+            {
+            }
+            break;
+            case ARPPAT_RAND_ONCE:
+            {
+            }
+            break;
+        }
+
+        if(incrementOctave)
+        {
             octavePos_++;
         }
 
@@ -393,13 +569,15 @@ namespace midifx
             }
         }
 
+        notePos_ = constrain(notePos_, 0, qLength-1);
+
         ArpNote arpNote = sortedNoteQueue[notePos_];
 
         arpNote.noteNumber = arpNote.noteNumber + (octavePos_ * 12);
 
         playNote(noteon_micros, arpNote);
 
-        notePos_++;
+        notePos_ = nextNotePos;
 
         // playNote(noteon_micros, notePat_[patPos_]);
 
@@ -470,6 +648,12 @@ namespace midifx
         {
             if (param == 0)
             {
+                uint8_t prevArpPat = arpPattern_;
+                arpPattern_ = constrain(arpPattern_ + amtSlow, 0, ARPPAT_NUM_OF_PATS - 1);
+                if(prevArpPat != arpPattern_)
+                {
+                    omxDisp.displayMessage(kPatMsg_[arpPattern_]);
+                }
                 // holdNotes_ = constrain(holdNotes_ + amt, 0, 1);
             }
             else if (param == 1)
@@ -512,7 +696,7 @@ namespace midifx
         omxDisp.setDirty();
     }
 
-    const char* arpModeDisp_[] = {"OFF", "ON", "1-ST", "HOLD"};
+    
 
     void MidiFXArpeggiator::onDisplayUpdate()
     {
@@ -522,11 +706,11 @@ namespace midifx
 
         if(page == ARPPAGE_1) // Hold, rate, octave range, gate
         {
-            omxDisp.legends[0] = "HOLD";
+            omxDisp.legends[0] = "MODE";
             omxDisp.legends[1] = "RATE";
             omxDisp.legends[2] = "RANG";
             omxDisp.legends[3] = "GATE";
-            omxDisp.legendText[0] = arpModeDisp_[arpMode_];
+            omxDisp.legendText[0] = kModeDisp_[arpMode_];
             omxDisp.useLegendString[1] = true;
             omxDisp.legendString[1] = "1/" + String(kArpRates[rateIndex_]);
             omxDisp.legendVals[2] = (octaveRange_ + 1);
@@ -535,9 +719,10 @@ namespace midifx
         else if(page == ARPPAGE_2) // Pattern, Sort, , BPM
         {
             omxDisp.legends[0] = "PAT";
-            omxDisp.legends[1] = "SORT";
+            omxDisp.legends[1] = "";
             omxDisp.legends[2] = "";
             omxDisp.legends[3] = "BPM";
+            omxDisp.legendText[0] = kPatDisp_[arpPattern_];
             omxDisp.legendVals[3] = (int)clockConfig.clockbpm;
         }
         else if(page == ARPPAGE_3) // Velocity, midiChannel_, sendMidi, sendCV

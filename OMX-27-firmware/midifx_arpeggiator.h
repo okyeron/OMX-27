@@ -12,6 +12,29 @@ namespace midifx
         ARPMODE_HOLD
     };
 
+    // in: C,E,G,B
+    enum ArpPattern
+    {
+        ARPPAT_UP,                  // Plays notes from lowest to highest: CEGB-CEGB
+        ARPPAT_DOWN,                // Plays notes from highest to loweest: BGEC-BGEC
+        ARPPAT_UP_DOWN,             // Plays notes up then down: CEGBGE-CEGBGE
+        ARPPAT_DOWN_UP,             // Plays notes down then up: BGECEG-BGECEG
+        ARPPAT_UP_AND_DOWN,         // Plays notes up then down, end notes repeat: CEGBBGEC-CEGBBGEC
+        ARPPAT_DOWN_AND_UP,         // Down then up, ends repeat: BGECCEGB
+        ARPPAT_CONVERGE,            // Converges notes to center point: CBEG-CBEG
+        ARPPAT_DIVERGE,             // Diverges notes from center: GEBC-GEBC
+        ARPPAT_CONVERGE_DIVERGE,    // Converges then diverges: CBEGEB-CBEGEB
+        ARPPAT_HI_UP,            // Alternates between highest note: BGBEBC-BGBEBC
+        ARPPAT_HI_UP_DOWN,       // BGBEBCBE-BGBEBCBE
+        ARPPAT_LOW_UP,            // Alternates between lowest note: CECGCB-CECGCB
+        ARPPAT_LOW_UP_DOWN,       // CECGCBCG-CECGCBCG
+        ARPPAT_AS_PLAYED,           // Plays notes in the order they are played
+        ARPPAT_RAND,                // Plays notes randomly, same note could get played twice: GGEGCBB-
+        ARPPAT_RAND_OTHER,          // Plays notes randomly, but won't play same note in a row: EGEBCEB
+        ARPPAT_RAND_ONCE,           // Plays notes randomly only once, so all notes get played: GCBE
+        ARPPAT_NUM_OF_PATS
+    };
+
     class MidiFXArpeggiator : public MidiFXInterface
     {
     public:
@@ -81,6 +104,8 @@ namespace midifx
 
         uint8_t arpMode_ : 3;
 
+        uint8_t arpPattern_ : 5;
+
         // bool holdNotes_;
 
         uint8_t midiChannel_ : 4; // 0-15, Add 1 when using
@@ -109,12 +134,14 @@ namespace midifx
         std::vector<ArpNote> holdNoteQueue; // Holds notes
         std::vector<ArpNote> sortedNoteQueue; // Notes that are used in arp
 
-        uint8_t notePos_;
+        int8_t notePos_;
         uint8_t octavePos_;
 
         ArpNote notePat_[256];
         int notePatLength_ = 0;
         int patPos_;
+        bool goingUp_;
+        bool goingDown_;
 
         Micros nextStepTimeP_ = 32;
         Micros lastStepTimeP_ = 32;
@@ -138,6 +165,7 @@ namespace midifx
 
         void startArp();
         void stopArp();
+        void resetArpSeq();
 
         void arpNoteTrigger();
         void playNote(uint32_t noteOnMicros, ArpNote note);
