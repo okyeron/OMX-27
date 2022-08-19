@@ -54,6 +54,8 @@ const char* mdivs[] = {"1/64", "1/32", "1/16", "1/8", "1/4", "1/2", "W"};
 const float kNoteLengths[] = {0.10, 0.25, 0.5, 0.75, 1, 1.5, 2, 4, 8, 16};
 const uint8_t kNumNoteLengths = 10;
 
+const uint8_t kArpRates[] = {1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, 32, 40, 48, 64};
+const uint8_t kNumArpRates = 16;
 
 // KEY SWITCH ROWS/COLS
 

@@ -267,6 +267,9 @@ struct MidiNoteGroup
 extern const float kNoteLengths[];
 extern const uint8_t kNumNoteLengths;
 
+extern const uint8_t arpRates[];
+extern const uint8_t kNumArpRates;
+
 extern const int gridh;
 extern const int gridw;
 extern const int PPQ;

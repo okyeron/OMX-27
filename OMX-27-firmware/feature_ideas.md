@@ -3,6 +3,7 @@
     Steps that are off get ignored as if they did not exist. 
     Allows for fun performance manipulation of sequence without changing it. 
 
+- S1/S2 pattern gate feature
 
 - Arpegiator
 
