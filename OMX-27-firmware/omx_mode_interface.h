@@ -12,6 +12,7 @@ public:
     virtual void InitSetup() {} // Called once when mode is created
 
     virtual void onModeActivated() {} // Called whenever entering mode
+    virtual void onModeDeactivated() {} // Called whenever entering mode
 
     virtual void onClockTick() {}
 

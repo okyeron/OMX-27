@@ -255,6 +255,11 @@ void changeOmxMode(OMXMode newOmxmode)
 	sysSettings.omxMode = newOmxmode;
 	sysSettings.newmode = newOmxmode;
 
+	if(activeOmxMode != nullptr)
+	{
+		activeOmxMode->onModeDeactivated();
+	}
+
 	switch (newOmxmode)
 	{
 	case MODE_MIDI:

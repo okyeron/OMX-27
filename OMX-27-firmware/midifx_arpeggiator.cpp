@@ -7,18 +7,23 @@
 namespace midifx
 {
     enum ArpPage {
-        ARPPAGE_1
+        ARPPAGE_1,
+        ARPPAGE_2,
+        ARPPAGE_3
     };
 
     MidiFXArpeggiator::MidiFXArpeggiator()
     {
-        chancePerc_ = 100;
+        holdNotes_ = true;
         midiChannel_ = 0;
         swing_ = 0;
         rateIndex_ = 6;
         octaveRange_ = 1; // 2 Octaves
 
         params_.addPage(4);
+        params_.addPage(4);
+        params_.addPage(4);
+
         encoderSelect_ = true;
     }
 
@@ -43,12 +48,28 @@ namespace midifx
         return clone;
     }
 
+    void MidiFXArpeggiator::onModeChanged()
+    {
+        stopArp();
+        playedNoteQueue.clear();
+        holdNoteQueue.clear();
+        sortedNoteQueue.clear();
+    }
+
     void MidiFXArpeggiator::onEnabled()
     {
+        // stopArp();
+        // playedNoteQueue.clear();
+        // holdNoteQueue.clear();
+        // sortedNoteQueue.clear();
     }
 
     void MidiFXArpeggiator::onDisabled()
     {
+        // stopArp();
+        // playedNoteQueue.clear();
+        // holdNoteQueue.clear();
+        // sortedNoteQueue.clear();
     }
 
     void MidiFXArpeggiator::noteInput(MidiNoteGroup note)
@@ -120,13 +141,24 @@ namespace midifx
         {
             playedNoteQueue.shrink_to_fit();
         }
-
-        if(playedNoteQueue.size() >= queueSize)
+        if(holdNoteQueue.capacity() > queueSize)
         {
-            return false;
+            holdNoteQueue.shrink_to_fit();
         }
 
-        playedNoteQueue.push_back(ArpNote(note));
+        bool noteAdded = false;
+
+        if(playedNoteQueue.size() < queueSize)
+        {
+            playedNoteQueue.push_back(ArpNote(note));
+            noteAdded = true;
+        }
+
+        if(holdNoteQueue.size() < queueSize)
+        {
+            holdNoteQueue.push_back(ArpNote(note));
+            noteAdded = true;
+        }
 
         // for (int i = 0; i < queueSize; ++i)
         // {
@@ -141,7 +173,7 @@ namespace midifx
         //     return true;
         // }
         // return false; // couldn't find room!
-        return true;
+        return noteAdded;
     }
 
     bool MidiFXArpeggiator::removeMidiNoteQueue(MidiNoteGroup note)
@@ -175,9 +207,19 @@ namespace midifx
     {
         sortedNoteQueue.clear();
 
-        for(ArpNote a : playedNoteQueue)
+        if (holdNotes_)
         {
-            sortedNoteQueue.push_back(a);
+            for (ArpNote a : holdNoteQueue)
+            {
+                sortedNoteQueue.push_back(a);
+            }
+        }
+        else
+        {
+            for (ArpNote a : playedNoteQueue)
+            {
+                sortedNoteQueue.push_back(a);
+            }
         }
 
         Serial.println("sortedNoteQueue capacity: " + String(sortedNoteQueue.capacity()));
@@ -228,11 +270,13 @@ namespace midifx
             velocity_ = note.velocity;
             sendMidi_ = note.sendMidi;
             sendCV_ = note.sendCV;
+
+            holdNoteQueue.clear();
         }
 
         insertMidiNoteQueue(note);
         sortNotes();
-        generatePattern();
+        // generatePattern();
     }
 
     void MidiFXArpeggiator::arpNoteOff(MidiNoteGroup note)
@@ -240,13 +284,9 @@ namespace midifx
         removeMidiNoteQueue(note);
 
         sortNotes();
-        generatePattern();
+        // generatePattern();
 
-        if(hasMidiNotes())
-        {
-
-        }
-        else
+        if(holdNotes_ == false && hasMidiNotes() == false)
         {
             stopArp();
         }
@@ -300,7 +340,7 @@ namespace midifx
 
     void MidiFXArpeggiator::arpNoteTrigger()
     {
-        if(sortedNoteQueue.size() == 0 || notePatLength_ < 1)
+        if(sortedNoteQueue.size() == 0)
         {
             return;
         }
@@ -380,47 +420,116 @@ namespace midifx
 
     void MidiFXArpeggiator::onEncoderChangedEditParam(Encoder::Update enc)
     {
-        // int8_t page = params_.getSelPage();
-        // int8_t param = params_.getSelParam();
+        int8_t page = params_.getSelPage();
+        int8_t param = params_.getSelParam();
 
         // auto amt = enc.accel(5);
 
-        // if(page == ARPPAGE_1)
-        // {
-        //     // if (param == 0)
-        //     // {
-        //     //     chancePerc_ = constrain(chancePerc_ + amt, 0, 255);
-        //     // }
-        // }
-        // omxDisp.setDirty();
+        auto amtSlow = enc.accel(1);
+        auto amtFast = enc.accel(5);
+
+        if(page == ARPPAGE_1) // Hold, rate, octave range, gate
+        {
+            if (param == 0)
+            {
+                holdNotes_ = constrain(holdNotes_ + amtSlow, 0, 1);
+            }
+            else if (param == 1)
+            {
+                rateIndex_ = constrain(rateIndex_ + amtSlow, 0, kNumArpRates - 1);
+            }
+            else if (param == 2)
+            {
+                octaveRange_ = constrain(octaveRange_ + amtSlow, 0, 7);
+            }
+            else if (param == 3)
+            {
+                gate = constrain(gate + amtFast, 0, 200);
+            }
+        }
+        if(page == ARPPAGE_2) // Pattern, Sort, , BPM
+        {
+            if (param == 0)
+            {
+                // holdNotes_ = constrain(holdNotes_ + amt, 0, 1);
+            }
+            else if (param == 1)
+            {
+                // rateIndex_ = constrain(rateIndex_ + amt, 0, kNumArpRates - 1);
+            }
+            else if (param == 3)
+            {
+                clockConfig.newtempo = constrain(clockConfig.clockbpm + amtFast, 40, 300);
+                if (clockConfig.newtempo != clockConfig.clockbpm)
+                {
+                    // SET TEMPO HERE
+                    clockConfig.clockbpm = clockConfig.newtempo;
+                    omxUtil.resetClocks();
+                }
+                // rateIndex_ = constrain(rateIndex_ + amt, 0, kNumArpRates - 1);
+            }
+        }
+        if(page == ARPPAGE_3) // Velocity, midiChannel_, sendMidi, sendCV
+        {
+            // if (param == 0)
+            // {
+            //     midiChannel_ = constrain(midiChannel_ + amtSlow, 0, 15);
+
+            //     // velocity_ = constrain(velocity_ + amtFast, 0, 127);
+            // }
+            // else if (param == 1)
+            // {
+            //     midiChannel_ = constrain(midiChannel_ + amtSlow, 0, 15);
+            // }
+            // else if (param == 2)
+            // {
+            //     sendMidi_ = constrain(sendMidi_ + amtSlow, 0, 1);
+            // }
+            // else if (param == 2)
+            // {
+            //     sendCV_ = constrain(sendCV_ + amtSlow, 0, 1);
+            // }
+        }
+        omxDisp.setDirty();
     }
 
     void MidiFXArpeggiator::onDisplayUpdate()
     {
         omxDisp.clearLegends();
 
-        // int8_t page = params_.getSelPage();
+        int8_t page = params_.getSelPage();
 
-        // switch (page)
-        // {
-        // case ARPPAGE_1:
-        // {
-        //     // omxDisp.legends[0] = "CHC%";
-        //     // omxDisp.legends[1] = "";
-        //     // omxDisp.legends[2] = "";
-        //     // omxDisp.legends[3] = "";
-        //     // omxDisp.legendVals[0] = -127;
-        //     // omxDisp.legendVals[1] = -127;
-        //     // omxDisp.legendVals[2] = -127;
-        //     // omxDisp.legendVals[3] = -127;
-        //     // omxDisp.useLegendString[0] = true;
-        //     // uint8_t perc = ((chancePerc_ / 255.0f) * 100);
-        //     // omxDisp.legendString[0] = String(perc) + "%";
-        // }
-        // break;
-        // default:
-        //     break;
-        // }
+        if(page == ARPPAGE_1) // Hold, rate, octave range, gate
+        {
+            omxDisp.legends[0] = "HOLD";
+            omxDisp.legends[1] = "RATE";
+            omxDisp.legends[2] = "RANG";
+            omxDisp.legends[3] = "GATE";
+            omxDisp.legends[0] = holdNotes_ ? "ON" : "OFF";
+            omxDisp.useLegendString[1] = true;
+            omxDisp.legendString[1] = "1/" + String(kArpRates[rateIndex_]);
+            omxDisp.legendVals[2] = (octaveRange_ + 1);
+            omxDisp.legendVals[3] = gate;
+        }
+        else if(page == ARPPAGE_2) // Pattern, Sort, , BPM
+        {
+            omxDisp.legends[0] = "PAT";
+            omxDisp.legends[1] = "SORT";
+            omxDisp.legends[2] = "";
+            omxDisp.legends[3] = "BPM";
+            omxDisp.legendVals[3] = (int)clockConfig.clockbpm;
+        }
+        else if(page == ARPPAGE_3) // Velocity, midiChannel_, sendMidi, sendCV
+        {
+            omxDisp.legends[0] = "VEL";
+            omxDisp.legends[1] = "CHAN";
+            omxDisp.legends[2] = "MIDI";
+            omxDisp.legends[3] = "CV";
+            omxDisp.legendVals[0] = velocity_;
+            omxDisp.legendVals[1] = midiChannel_ + 1;
+            omxDisp.legendVals[2] = sendMidi_;
+            omxDisp.legendVals[3] = sendCV_;
+        }
 
         omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), encoderSelect_);
     }

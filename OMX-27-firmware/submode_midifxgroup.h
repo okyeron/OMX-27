@@ -16,6 +16,7 @@ public:
     ~SubModeMidiFxGroup() {}
 
 // Interface methods
+    void onModeChanged() override;
     void loopUpdate() override;
     void updateLEDs() override;
     void onEncoderChanged(Encoder::Update enc);

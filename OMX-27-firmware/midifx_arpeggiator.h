@@ -16,6 +16,8 @@ namespace midifx
 
         MidiFXInterface* getClone() override;
 
+        void onModeChanged() override;
+
         void loopUpdate() override;
 
         void onDisplayUpdate() override;
@@ -69,10 +71,10 @@ namespace midifx
             return (a1.noteNumber < a2.noteNumber);
         }
 
+        bool holdNotes_;
+
         uint8_t midiChannel_ : 4; // 0-15, Add 1 when using
 
-        uint8_t chancePerc_ : 7; // max 100
-        
         uint8_t swing_ : 7; // max 100
 
         uint8_t rateIndex_ : 4; // max 15
@@ -93,8 +95,9 @@ namespace midifx
 
         static const int queueSize = 8;
 
-        std::vector<ArpNote> playedNoteQueue;
-        std::vector<ArpNote> sortedNoteQueue;
+        std::vector<ArpNote> playedNoteQueue; // Keeps track of which notes are being played
+        std::vector<ArpNote> holdNoteQueue; // Holds notes
+        std::vector<ArpNote> sortedNoteQueue; // Notes that are used in arp
 
         uint8_t notePos_;
         uint8_t octavePos_;

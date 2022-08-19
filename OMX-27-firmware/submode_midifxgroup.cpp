@@ -54,6 +54,18 @@ SubModeMidiFxGroup::SubModeMidiFxGroup()
     }
 }
 
+void SubModeMidiFxGroup::onModeChanged()
+{
+    for (uint8_t i = 0; i < NUM_MIDIFX_SLOTS; i++)
+    {
+        auto mfx = getMidiFX(i);
+        if (mfx != nullptr)
+        {
+            mfx->onModeChanged();
+        }
+    }
+}
+
 void SubModeMidiFxGroup::onEnabled()
 {
     params_.setSelPageAndParam(0, 0);
@@ -61,7 +73,16 @@ void SubModeMidiFxGroup::onEnabled()
     omxLeds.setDirty();
     omxDisp.setDirty();
 
-    auxReleased_ = !midiSettings.keyState[0]; 
+    auxReleased_ = !midiSettings.keyState[0];
+
+    for (uint8_t i = 0; i < NUM_MIDIFX_SLOTS; i++)
+    {
+        auto mfx = getMidiFX(i);
+        if (mfx != nullptr)
+        {
+            mfx->setEnabled(true);
+        }
+    }
 }
 
 void SubModeMidiFxGroup::onDisabled()
@@ -69,6 +90,15 @@ void SubModeMidiFxGroup::onDisabled()
     strip.clear();
     omxLeds.setDirty();
     omxDisp.setDirty();
+
+    for (uint8_t i = 0; i < NUM_MIDIFX_SLOTS; i++)
+    {
+        auto mfx = getMidiFX(i);
+        if (mfx != nullptr)
+        {
+            mfx->setEnabled(false);
+        }
+    }
 }
 
 void SubModeMidiFxGroup::updateFuncKeyMode()
@@ -554,6 +584,8 @@ void SubModeMidiFxGroup::setNoteOutputFunc(void (*fptr)(void *, MidiNoteGroup), 
 {
     sendNoteOutFuncPtr_ = fptr;
     sendNoteOutFuncPtrContext_ = context;
+
+    
 }
 
 void SubModeMidiFxGroup::onPendingNoteOff(int note, int channel)

@@ -10,6 +10,8 @@ public:
     SubmodeInterface() {}
     virtual ~SubmodeInterface() {}
 
+    virtual void onModeChanged() {};
+
     virtual void setEnabled(bool newEnabled);
     virtual bool isEnabled();
 

@@ -18,6 +18,8 @@ public:
 
     void InitSetup() override;
     void onModeActivated() override;
+    void onModeDeactivated() override;
+
 
     void setOrganelleMode()
     {

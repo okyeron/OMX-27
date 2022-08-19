@@ -69,6 +69,8 @@ namespace midifx
 
         virtual MidiFXInterface* getClone() { return nullptr;}
 
+        virtual void onModeChanged(){};
+
         virtual void setEnabled(bool newEnabled);
         virtual bool getEnabled();
 

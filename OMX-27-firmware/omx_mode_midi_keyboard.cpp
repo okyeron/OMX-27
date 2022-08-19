@@ -53,6 +53,8 @@ void OmxModeMidiKeyboard::onModeActivated()
 
     for(uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
     {
+        subModeMidiFx[i].setEnabled(true);
+        subModeMidiFx[i].onModeChanged();
         subModeMidiFx[i].setNoteOutputFunc(&OmxModeMidiKeyboard::onNotePostFXForwarder, this);
     }
 
@@ -60,6 +62,18 @@ void OmxModeMidiKeyboard::onModeActivated()
 
     params.setSelPageAndParam(0, 0);
     encoderSelect = true;
+}
+
+void OmxModeMidiKeyboard::onModeDeactivated()
+{
+    sequencer.playing = false;
+    stopSequencers();
+
+    for(uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
+    {
+        subModeMidiFx[i].setEnabled(false);
+        subModeMidiFx[i].onModeChanged();
+    }
 }
 
 void OmxModeMidiKeyboard::stopSequencers()
@@ -958,6 +972,11 @@ void OmxModeMidiKeyboard::SetScale(MusicScales *scale)
 
 void OmxModeMidiKeyboard::enableSubmode(SubmodeInterface *subMode)
 {
+    if(activeSubmode != nullptr)
+    {
+        activeSubmode->setEnabled(false);
+    }
+
     activeSubmode = subMode;
     activeSubmode->setEnabled(true);
     omxDisp.setDirty();
@@ -1039,7 +1058,7 @@ void OmxModeMidiKeyboard::onNotePostFX(MidiNoteGroup note)
 {
     if(note.noteOff)
     {
-        // Serial.println("OmxModeMidiKeyboard::onNotePostFX noteOff: " + String(note.noteNumber));
+        Serial.println("OmxModeMidiKeyboard::onNotePostFX noteOff: " + String(note.noteNumber));
 
         if (note.sendMidi)
         {
