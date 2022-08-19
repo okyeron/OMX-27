@@ -40,6 +40,7 @@ enum MIDIFXTYPE
 	MIDIFX_HARMONIZER,
 	MIDIFX_SCALER,
 	MIDIFX_MONOPHONIC,
+	MIDIFX_ARP,
 	MIDIFX_COUNT
 };
 
@@ -267,7 +268,7 @@ struct MidiNoteGroup
 extern const float kNoteLengths[];
 extern const uint8_t kNumNoteLengths;
 
-extern const uint8_t arpRates[];
+extern const uint8_t kArpRates[];
 extern const uint8_t kNumArpRates;
 
 extern const int gridh;

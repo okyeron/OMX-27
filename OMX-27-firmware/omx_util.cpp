@@ -53,11 +53,11 @@ void OmxUtil::advanceSteps(Micros advance)
 
         pendingNoteHistory.clearIfChanged(currentMicros);
 
+        // turn off any expiring notes
+		pendingNoteOffs.play(currentMicros);
+
         // turn on any pending notes
 		pendingNoteOns.play(currentMicros);
-
-		// turn off any expiring notes
-		pendingNoteOffs.play(currentMicros);
 	}
 	timeToNextStep -= advance;
 }

@@ -7,6 +7,7 @@
 #include "midifx_scaler.h"
 #include "midifx_monophonic.h"
 #include "midifx_harmonizer.h"
+#include "midifx_arpeggiator.h"
 
 using namespace midifx;
 
@@ -96,7 +97,19 @@ void SubModeMidiFxGroup::updateFuncKeyMode()
 
 void SubModeMidiFxGroup::loopUpdate()
 {
-    updateFuncKeyMode();
+    if(enabled_)
+    {
+        updateFuncKeyMode();
+    }
+
+    for(uint8_t i = 0; i < NUM_MIDIFX_SLOTS; i++)
+    {
+        auto mfx = getMidiFX(i);
+        if(mfx != nullptr)
+        {
+            mfx->loopUpdate();
+        }
+    }
 }
 
 void SubModeMidiFxGroup::updateLEDs()
@@ -438,6 +451,11 @@ void SubModeMidiFxGroup::changeMidiFXType(uint8_t slotIndex, uint8_t typeIndex, 
     case MIDIFX_MONOPHONIC:
     {
         setMidiFX(slotIndex, new MidiFXMonophonic());
+    }
+    break;
+    case MIDIFX_ARP:
+    {
+        setMidiFX(slotIndex, new MidiFXArpeggiator());
     }
     break;
     default:

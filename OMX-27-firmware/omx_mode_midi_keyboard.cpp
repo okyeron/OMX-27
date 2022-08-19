@@ -128,10 +128,25 @@ void OmxModeMidiKeyboard::onPotChanged(int potIndex, int prevValue, int newValue
 
 void OmxModeMidiKeyboard::loopUpdate(Micros elapsedTime)
 {
-    if (isSubmodeEnabled())
+    if (elapsedTime > 0)
+	{
+		if (!sequencer.playing)
+		{
+            // Needed to make pendingNoteOns/pendingNoteOffs work
+			omxUtil.advanceSteps(elapsedTime);
+		}
+	}
+
+    for(uint8_t i = 0; i < 5; i++)
     {
-        activeSubmode->loopUpdate();
+        // Lets them do things in background
+        subModeMidiFx[i].loopUpdate();
     }
+
+    // if (isSubmodeEnabled())
+    // {
+    //     activeSubmode->loopUpdate();
+    // }
 }
 
 
@@ -1037,15 +1052,31 @@ void OmxModeMidiKeyboard::onNotePostFX(MidiNoteGroup note)
     }
     else
     {
-        // Serial.println("OmxModeMidiKeyboard::onNotePostFX noteOn: " + String(note.noteNumber));
+        if (note.unknownLength == false)
+        {
+            uint32_t noteOnMicros = note.noteonMicros; // TODO Might need to be set to current micros
+            pendingNoteOns.insert(note.noteNumber, note.velocity, note.channel, noteOnMicros, note.sendCV);
 
-        if (note.sendMidi)
-        {
-            MM::sendNoteOn(note.noteNumber, note.velocity, note.channel);
+            Serial.println("StepLength: " + String(note.stepLength));
+
+            uint32_t noteOffMicros = noteOnMicros + (note.stepLength * clockConfig.step_micros);
+            pendingNoteOffs.insert(note.noteNumber, note.channel, noteOffMicros, note.sendCV);
+
+            Serial.println("noteOnMicros: " + String(noteOnMicros));
+            Serial.println("noteOffMicros: " + String(noteOffMicros));
         }
-        if (note.sendCV)
+        else
         {
-            omxUtil.cvNoteOn(note.noteNumber);
+            // Serial.println("OmxModeMidiKeyboard::onNotePostFX noteOn: " + String(note.noteNumber));
+
+            if (note.sendMidi)
+            {
+                MM::sendNoteOn(note.noteNumber, note.velocity, note.channel);
+            }
+            if (note.sendCV)
+            {
+                omxUtil.cvNoteOn(note.noteNumber);
+            }
         }
     }
 

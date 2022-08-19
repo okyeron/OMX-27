@@ -82,24 +82,34 @@ void PendingNoteOffs::play(uint32_t now)
 	{
 		if (queue[i].inUse && queue[i].time <= now)
 		{
-			if (pendingNoteHistory.eventThisFrame(queue[i].note, queue[i].channel) == false)
+			MM::sendNoteOff(queue[i].note, 0, queue[i].channel);
+			//	 		analogWrite(CVPITCH_PIN, 0);
+			if (queue[i].sendCV)
 			{
-				pendingNoteHistory.insert(queue[i].note, queue[i].channel);
-
-				MM::sendNoteOff(queue[i].note, 0, queue[i].channel);
-				//	 		analogWrite(CVPITCH_PIN, 0);
-				if (queue[i].sendCV)
-				{
-					digitalWrite(CVGATE_PIN, LOW);
-				}
-				queue[i].inUse = false;
-
-				onNoteOff(queue[i].note, queue[i].channel);
+				digitalWrite(CVGATE_PIN, LOW);
 			}
-			else
-			{
-				// queue[i].time += 200;
-			}
+			queue[i].inUse = false;
+
+			onNoteOff(queue[i].note, queue[i].channel);
+
+			// if (pendingNoteHistory.eventThisFrame(queue[i].note, queue[i].channel) == false)
+			// {
+			// 	pendingNoteHistory.insert(queue[i].note, queue[i].channel);
+
+			// 	MM::sendNoteOff(queue[i].note, 0, queue[i].channel);
+			// 	//	 		analogWrite(CVPITCH_PIN, 0);
+			// 	if (queue[i].sendCV)
+			// 	{
+			// 		digitalWrite(CVGATE_PIN, LOW);
+			// 	}
+			// 	queue[i].inUse = false;
+
+			// 	onNoteOff(queue[i].note, queue[i].channel);
+			// }
+			// else
+			// {
+			// 	// queue[i].time += 200;
+			// }
 		}
 	}
 }
@@ -224,26 +234,39 @@ void PendingNoteOns::play(uint32_t now)
 	{
 		if (queue[i].inUse && queue[i].time <= now)
 		{
-			if (pendingNoteHistory.eventThisFrame(queue[i].note, queue[i].channel) == false)
-			{
-				pendingNoteHistory.insert(queue[i].note, queue[i].channel);
-				MM::sendNoteOn(queue[i].note, queue[i].velocity, queue[i].channel);
+			MM::sendNoteOn(queue[i].note, queue[i].velocity, queue[i].channel);
 
-				if (queue[i].sendCV)
-				{
-					if (queue[i].note >= midiLowestNote && queue[i].note < midiHightestNote)
-					{
-						pCV = static_cast<int>(roundf((queue[i].note - midiLowestNote) * stepsPerSemitone));
-						digitalWrite(CVGATE_PIN, HIGH);
-						analogWrite(CVPITCH_PIN, pCV);
-					}
-				}
-				queue[i].inUse = false;
-			}
-			else
+			if (queue[i].sendCV)
 			{
-				// queue[i].time += 200;
+				if (queue[i].note >= midiLowestNote && queue[i].note < midiHightestNote)
+				{
+					pCV = static_cast<int>(roundf((queue[i].note - midiLowestNote) * stepsPerSemitone));
+					digitalWrite(CVGATE_PIN, HIGH);
+					analogWrite(CVPITCH_PIN, pCV);
+				}
 			}
+			queue[i].inUse = false;
+
+			// if (pendingNoteHistory.eventThisFrame(queue[i].note, queue[i].channel) == false)
+			// {
+			// 	pendingNoteHistory.insert(queue[i].note, queue[i].channel);
+			// 	MM::sendNoteOn(queue[i].note, queue[i].velocity, queue[i].channel);
+
+			// 	if (queue[i].sendCV)
+			// 	{
+			// 		if (queue[i].note >= midiLowestNote && queue[i].note < midiHightestNote)
+			// 		{
+			// 			pCV = static_cast<int>(roundf((queue[i].note - midiLowestNote) * stepsPerSemitone));
+			// 			digitalWrite(CVGATE_PIN, HIGH);
+			// 			analogWrite(CVPITCH_PIN, pCV);
+			// 		}
+			// 	}
+			// 	queue[i].inUse = false;
+			// }
+			// else
+			// {
+			// 	// queue[i].time += 200;
+			// }
 		}
 	}
 }
