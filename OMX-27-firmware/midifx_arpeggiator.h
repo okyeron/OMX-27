@@ -125,6 +125,8 @@ namespace midifx
         bool sendMidi_ = false;
         bool sendCV_ = false;
 
+        uint8_t randPrevNote_;
+
 
         bool arpRunning_ = false;
 
@@ -133,6 +135,7 @@ namespace midifx
         std::vector<ArpNote> playedNoteQueue; // Keeps track of which notes are being played
         std::vector<ArpNote> holdNoteQueue; // Holds notes
         std::vector<ArpNote> sortedNoteQueue; // Notes that are used in arp
+        std::vector<ArpNote> tempNoteQueue; // Notes that are used in arp
 
         int8_t notePos_;
         uint8_t octavePos_;
@@ -141,7 +144,6 @@ namespace midifx
         int notePatLength_ = 0;
         int patPos_;
         bool goingUp_;
-        bool goingDown_;
 
         Micros nextStepTimeP_ = 32;
         Micros lastStepTimeP_ = 32;

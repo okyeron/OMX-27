@@ -249,6 +249,7 @@ namespace midifx
     {
         sortedNoteQueue.clear();
 
+        // Copy played or held notes to sorted note queue
         if (arpMode_ != ARPMODE_ON)
         {
             for (ArpNote a : holdNoteQueue)
@@ -264,20 +265,150 @@ namespace midifx
             }
         }
 
-        Serial.println("sortedNoteQueue capacity: " + String(sortedNoteQueue.capacity()));
+        // Sort low to high. 
+        if(arpPattern_ != ARPPAT_AS_PLAYED)
+        {
+            std::sort(sortedNoteQueue.begin(), sortedNoteQueue.end(), compareArpNote);
+        }
 
-        if(sortedNoteQueue.capacity() > queueSize)
+        // Serial.println("sortedNoteQueue capacity: " + String(sortedNoteQueue.capacity()));
+
+        // Alternate sorted with upper high note or lower note. 
+        if(arpPattern_ == ARPPAT_HI_UP || arpPattern_ == ARPPAT_HI_UP_DOWN || arpPattern_ == ARPPAT_LOW_UP || arpPattern_ == ARPPAT_LOW_UP_DOWN)
+        {
+            tempNoteQueue.clear();
+
+            auto rootNote = sortedNoteQueue[sortedNoteQueue.size() - 1]; // High note
+
+            if(arpPattern_ == ARPPAT_LOW_UP || arpPattern_ == ARPPAT_LOW_UP_DOWN)
+            {
+                rootNote = sortedNoteQueue[0]; // Low note
+            }
+            // CEGB
+            // BCBEBG-BE-BCBEBG // on updown, down will need to end at index 2
+
+            for(uint8_t i = 0; i < sortedNoteQueue.size(); i++)
+            {
+                auto note = sortedNoteQueue[i];
+
+                // add root than note if note is not the base
+                if(note.noteNumber != rootNote.noteNumber)
+                {
+                    tempNoteQueue.push_back(rootNote);
+                    tempNoteQueue.push_back(note);
+                }
+            }
+
+            if(tempNoteQueue.size() == 0)
+            {
+                tempNoteQueue.push_back(rootNote);
+            }
+
+            sortedNoteQueue.clear();
+
+            for (ArpNote a : tempNoteQueue)
+            {
+                sortedNoteQueue.push_back(a);
+            }
+        }
+
+        // Randomize notes, playing each note in sorted list only once
+        if(arpPattern_ == ARPPAT_RAND_ONCE)
+        {
+            tempNoteQueue.clear();
+
+            int queueSize = sortedNoteQueue.size();
+
+            for(uint8_t i = 0; i < queueSize; i++)
+            {
+                int randIndex = rand() % sortedNoteQueue.size();
+
+                auto note = sortedNoteQueue[randIndex];
+                tempNoteQueue.push_back(note); // Store in temp
+
+                sortedNoteQueue.erase(sortedNoteQueue.begin() + randIndex); // Remove note from sorted
+            }
+
+            // Put temp back in sorted
+            sortedNoteQueue.clear();
+
+            for (ArpNote a : tempNoteQueue)
+            {
+                sortedNoteQueue.push_back(a);
+            }
+        }
+
+        // Alternate pattern converging in center
+        if (arpPattern_ == ARPPAT_CONVERGE || arpPattern_ == ARPPAT_CONVERGE_DIVERGE || arpPattern_ == ARPPAT_DIVERGE)
+        {
+            uint8_t front = 0;
+            uint8_t back = sortedNoteQueue.size() - 1;
+
+            tempNoteQueue.clear();
+            for(uint8_t i = 0; i < sortedNoteQueue.size(); i++)
+            {
+                uint8_t noteIndex = 0;
+
+                // c,e,g,b,d
+                // c,d,e,b,g
+
+                if(i % 2 == 0)
+                {
+                    noteIndex = front;
+                    front++;
+                }
+                else
+                {
+                    noteIndex = back;
+                    back--;
+                }
+
+                tempNoteQueue.push_back(sortedNoteQueue[noteIndex]);
+            }
+
+            sortedNoteQueue.clear();
+
+            for (ArpNote a : tempNoteQueue)
+            {
+                sortedNoteQueue.push_back(a);
+            }
+        }
+
+        // Flip pattern
+        if (arpPattern_ == ARPPAT_DOWN || arpPattern_ == ARPPAT_DOWN_AND_UP || arpPattern_ == ARPPAT_DOWN_UP || arpPattern_ == ARPPAT_DIVERGE)
+        {
+            tempNoteQueue.clear();
+            for (ArpNote a : sortedNoteQueue)
+            {
+                tempNoteQueue.push_back(a);
+            }
+
+            sortedNoteQueue.clear();
+
+            for(int8_t i = tempNoteQueue.size() - 1; i >= 0; i--)
+            {
+                sortedNoteQueue.push_back(tempNoteQueue[i]);
+            }
+
+            // auto it = tempNoteQueue.end();
+            // while (it != tempNoteQueue.begin())
+            // {
+            //     auto note = *it;
+            //     sortedNoteQueue.push_back(note);
+            //     it--;
+            // }
+        }
+
+        // Keep vectors in check
+        if (sortedNoteQueue.capacity() > queueSize)
         {
             sortedNoteQueue.shrink_to_fit();
         }
 
-
-        // c, e, g, g, e, c
-        // c, g, g, c
-        // c, e, g
-        // c, g, 
-
-        std::sort(sortedNoteQueue.begin(), sortedNoteQueue.end(), compareArpNote);
+        if (tempNoteQueue.capacity() > queueSize)
+        {
+            tempNoteQueue.shrink_to_fit();
+        }
     }
 
     void MidiFXArpeggiator::generatePattern()
@@ -399,8 +530,9 @@ namespace midifx
         notePos_ = 0;
         octavePos_ = 0;
 
+        randPrevNote_ = 255;
+
         goingUp_ = true;
-        goingDown_ = true;
     }
 
     void MidiFXArpeggiator::arpNoteTrigger()
@@ -435,13 +567,119 @@ namespace midifx
         //     patPos_ = 0;
         // }
         bool incrementOctave = false;
+        int currentNotePos = notePos_;
         int nextNotePos = notePos_;
         int qLength = sortedNoteQueue.size();
 
         switch (arpPattern_)
         {
             case ARPPAT_UP:
+            case ARPPAT_DOWN:
+            case ARPPAT_CONVERGE:
+            case ARPPAT_DIVERGE:
+            case ARPPAT_HI_UP:
+            case ARPPAT_LOW_UP:
+            case ARPPAT_AS_PLAYED:
             {
+                if (currentNotePos >= qLength)
+                {
+                    currentNotePos = 0;
+                    incrementOctave = true;
+                }
+                nextNotePos = currentNotePos + 1;
+            }
+            break;
+            case ARPPAT_UP_DOWN:
+            case ARPPAT_DOWN_UP:
+            case ARPPAT_CONVERGE_DIVERGE:
+            case ARPPAT_HI_UP_DOWN:
+            case ARPPAT_LOW_UP_DOWN:
+            {
+                // Get down
+                if(goingUp_)
+                {
+                    // Turn around
+                    if (currentNotePos >= qLength)
+                    {
+                        goingUp_ = false;
+                        currentNotePos = qLength - 2;
+                        // incrementOctave = true;
+                    }
+                }
+                // go to town
+                else
+                {
+                    int endIndex = 1;
+                    //Boot scootin' boogie
+                    
+                    if (arpPattern_ == ARPPAT_HI_UP_DOWN || arpPattern_ == ARPPAT_LOW_UP_DOWN)
+                    {
+                        // CEGB
+                        // BCBEBG-BE-BCBEBG // on updown, down will need to end at index 2
+                        // CECGCB-CG
+                        // CEG
+                        // CECG-CE //
+
+                        endIndex = 1;
+                    }
+
+                    if (currentNotePos < endIndex)
+                    {
+                        currentNotePos = 0;
+                        goingUp_ = true;
+                        incrementOctave = true;
+                    }
+                }
+
+                if(goingUp_)
+                {
+                    nextNotePos = currentNotePos + 1;
+                }
+                else
+                {
+                    nextNotePos = currentNotePos - 1;
+                }
+            }
+            break;
+            case ARPPAT_UP_AND_DOWN:
+            case ARPPAT_DOWN_AND_UP:
+            {
+                // Get down
+                if(goingUp_)
+                {
+                    // Turn around
+                    if (currentNotePos >= qLength)
+                    {
+                        goingUp_ = false;
+                        currentNotePos = qLength - 1;
+                        // incrementOctave = true;
+                    }
+                }
+                // go to town
+                else
+                {
+                    //Boot scootin' boogie
+                    if (currentNotePos < 0)
+                    {
+                        currentNotePos = 0;
+                        goingUp_ = true;
+                        incrementOctave = true;
+                    }
+                }
+
+                if(goingUp_)
+                {
+                    nextNotePos = currentNotePos + 1;
+                }
+                else
+                {
+                    nextNotePos = currentNotePos - 1;
+                }
+            }
+            break;
+            case ARPPAT_RAND:
+            {
+                currentNotePos = rand() % qLength;
                 if (notePos_ >= qLength)
                 {
                     notePos_ = 0;
@@ -450,105 +688,42 @@ namespace midifx
                 nextNotePos = notePos_ + 1;
             }
             break;
-            case ARPPAT_DOWN:
-            {
-                if (notePos_ < 0)
-                {
-                    notePos_ = qLength - 1;
-                    incrementOctave = true;
-                }
-                nextNotePos = notePos_ - 1;
-            }
-            break;
-            case ARPPAT_UP_DOWN:
-            {
-                // Get down
-                if(goingUp_)
-                {
-                    // Turn around
-                    if (notePos_ >= qLength)
-                    {
-                        goingUp_ = false;
-                        notePos_ = qLength - 2;
-                        // incrementOctave = true;
-                    }
-                }
-                // go to town
-                else
-                {
-                    //Boot scootin' boogie
-                    if (notePos_ < 1)
-                    {
-                        notePos_ = 0;
-                        goingUp_ = true;
-                        incrementOctave = true;
-                    }
-                }
-
-                if(goingUp_)
-                {
-                    nextNotePos = notePos_ + 1;
-                }
-                else
-                {
-                    nextNotePos = notePos_ - 1;
-                }
-            }
-            break;
-            case ARPPAT_DOWN_UP:
-            {
-            }
-            break;
-            case ARPPAT_UP_AND_DOWN:
-            {
-            }
-            break;
-            case ARPPAT_DOWN_AND_UP:
-            {
-            }
-            break;
-            case ARPPAT_CONVERGE:
-            {
-            }
-            break;
-            case ARPPAT_DIVERGE:
-            {
-            }
-            break;
-            case ARPPAT_CONVERGE_DIVERGE:
-            {
-            }
-            break;
-            case ARPPAT_HI_UP:
-            {
-            }
-            break;
-            case ARPPAT_HI_UP_DOWN:
-            {
-            }
-            break;
-            case ARPPAT_LOW_UP:
-            {
-            }
-            break;
-            case ARPPAT_LOW_UP_DOWN:
-            {
-            }
-            break;
-            case ARPPAT_AS_PLAYED:
-            {
-            }
-            break;
-            case ARPPAT_RAND:
-            {
-            }
-            break;
             case ARPPAT_RAND_OTHER:
             {
+                if(qLength == 1)
+                {
+                    currentNotePos = 0;
+                }
+                else
+                {
+                    // search up to 4 times the queue size for a note that's not the previous
+                    for(uint8_t i = 0; i < queueSize * 4; i++)
+                    {
+                        currentNotePos = rand() % qLength;
+
+                        if(sortedNoteQueue[currentNotePos].noteNumber != randPrevNote_)
+                        {
+                            break;
+                        }
+                    }
+                }
+                if (notePos_ >= qLength)
+                {
+                    notePos_ = 0;
+                    incrementOctave = true;
+                }
+                nextNotePos = notePos_ + 1;
             }
             break;
             case ARPPAT_RAND_ONCE:
             {
+                if (currentNotePos >= qLength)
+                {
+                    currentNotePos = 0;
+                    incrementOctave = true;
+                    sortNotes(); // Resort every time octave increments
+                }
+                nextNotePos = currentNotePos + 1;
             }
             break;
         }
@@ -569,9 +744,11 @@ namespace midifx
             }
         }
 
-        notePos_ = constrain(notePos_, 0, qLength-1);
+        currentNotePos = constrain(currentNotePos, 0, qLength-1);
 
-        ArpNote arpNote = sortedNoteQueue[notePos_];
+        ArpNote arpNote = sortedNoteQueue[currentNotePos];
+
+        randPrevNote_ = arpNote.noteNumber;
 
         arpNote.noteNumber = arpNote.noteNumber + (octavePos_ * 12);
 
@@ -653,6 +830,7 @@ namespace midifx
                 if(prevArpPat != arpPattern_)
                 {
                     omxDisp.displayMessage(kPatMsg_[arpPattern_]);
+                    sortNotes();
                 }
                 // holdNotes_ = constrain(holdNotes_ + amt, 0, 1);
             }
