@@ -14,7 +14,7 @@ namespace midifx
 
     MidiFXArpeggiator::MidiFXArpeggiator()
     {
-        holdNotes_ = true;
+        arpMode_ = 1;
         midiChannel_ = 0;
         swing_ = 0;
         rateIndex_ = 6;
@@ -74,11 +74,11 @@ namespace midifx
 
     void MidiFXArpeggiator::noteInput(MidiNoteGroup note)
     {
-        // if(note.noteOff)
-        // {
-        //     processNoteOff(note);
-        //     return;
-        // }
+        if(arpMode_ == ARPMODE_OFF)
+        {
+            processNoteOff(note);
+            return;
+        }
 
         if(note.channel != (midiChannel_ + 1))
         {
@@ -207,7 +207,7 @@ namespace midifx
     {
         sortedNoteQueue.clear();
 
-        if (holdNotes_)
+        if (arpMode_ != ARPMODE_ON)
         {
             for (ArpNote a : holdNoteQueue)
             {
@@ -260,7 +260,7 @@ namespace midifx
 
     void MidiFXArpeggiator::arpNoteOn(MidiNoteGroup note)
     {
-        if(!arpRunning_)
+        if(arpMode_ != ARPMODE_ONESHOT && !arpRunning_ )
         {
             startArp();
         }
@@ -272,6 +272,11 @@ namespace midifx
             sendCV_ = note.sendCV;
 
             holdNoteQueue.clear();
+
+            if(arpMode_ == ARPMODE_ONESHOT)
+            {
+                startArp();
+            }
         }
 
         insertMidiNoteQueue(note);
@@ -286,7 +291,7 @@ namespace midifx
         sortNotes();
         // generatePattern();
 
-        if(holdNotes_ == false && hasMidiNotes() == false)
+        if(arpMode_ == ARPMODE_ON && hasMidiNotes() == false)
         {
             stopArp();
         }
@@ -381,6 +386,11 @@ namespace midifx
         {
             // reset octave
             octavePos_ = 0;
+            if(arpMode_ == ARPMODE_ONESHOT)
+            {
+                stopArp();
+                return;
+            }
         }
 
         ArpNote arpNote = sortedNoteQueue[notePos_];
@@ -432,14 +442,15 @@ namespace midifx
         {
             if (param == 0)
             {
-                bool prevHoldNotes = holdNotes_;
-                holdNotes_ = constrain(holdNotes_ + amtSlow, 0, 1);
-                if(prevHoldNotes != holdNotes_ && holdNotes_ == false)
+                uint8_t prevArpMode = arpMode_;
+                arpMode_ = constrain(arpMode_ + amtSlow, 0, 3);
+                if(prevArpMode != arpMode_ && arpMode_ != ARPMODE_HOLD)
                 {
-                    if(hasMidiNotes() == false)
+                    if((arpMode_ == ARPMODE_ON && hasMidiNotes() == false) || arpMode_ == ARPMODE_OFF)
                     {
                         stopArp();
                     }
+                    // omxDisp.displayMessage(tempString_.c_str());
                 }
             }
             else if (param == 1)
@@ -501,6 +512,8 @@ namespace midifx
         omxDisp.setDirty();
     }
 
+    const char* arpModeDisp_[] = {"OFF", "ON", "1-ST", "HOLD"};
+
     void MidiFXArpeggiator::onDisplayUpdate()
     {
         omxDisp.clearLegends();
@@ -513,7 +526,7 @@ namespace midifx
             omxDisp.legends[1] = "RATE";
             omxDisp.legends[2] = "RANG";
             omxDisp.legends[3] = "GATE";
-            omxDisp.legendText[0] = holdNotes_ ? "ON" : "OFF";
+            omxDisp.legendText[0] = arpModeDisp_[arpMode_];
             omxDisp.useLegendString[1] = true;
             omxDisp.legendString[1] = "1/" + String(kArpRates[rateIndex_]);
             omxDisp.legendVals[2] = (octaveRange_ + 1);

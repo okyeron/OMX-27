@@ -4,6 +4,14 @@
 
 namespace midifx
 {
+    enum ArpMode
+    {
+        ARPMODE_OFF,
+        ARPMODE_ON,
+        ARPMODE_ONESHOT,
+        ARPMODE_HOLD
+    };
+
     class MidiFXArpeggiator : public MidiFXInterface
     {
     public:
@@ -71,7 +79,9 @@ namespace midifx
             return (a1.noteNumber < a2.noteNumber);
         }
 
-        bool holdNotes_;
+        uint8_t arpMode_ : 3;
+
+        // bool holdNotes_;
 
         uint8_t midiChannel_ : 4; // 0-15, Add 1 when using
 
@@ -113,7 +123,7 @@ namespace midifx
 
         float multiplier_ = 1;
 
-        
+        String tempString_;
 
         bool insertMidiNoteQueue(MidiNoteGroup note);
         bool removeMidiNoteQueue(MidiNoteGroup note);
