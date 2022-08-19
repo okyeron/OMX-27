@@ -432,7 +432,15 @@ namespace midifx
         {
             if (param == 0)
             {
+                bool prevHoldNotes = holdNotes_;
                 holdNotes_ = constrain(holdNotes_ + amtSlow, 0, 1);
+                if(prevHoldNotes != holdNotes_ && holdNotes_ == false)
+                {
+                    if(hasMidiNotes() == false)
+                    {
+                        stopArp();
+                    }
+                }
             }
             else if (param == 1)
             {
@@ -444,7 +452,7 @@ namespace midifx
             }
             else if (param == 3)
             {
-                gate = constrain(gate + amtFast, 0, 200);
+                gate = constrain(gate + amtFast, 2, 200);
             }
         }
         if(page == ARPPAGE_2) // Pattern, Sort, , BPM
@@ -505,7 +513,7 @@ namespace midifx
             omxDisp.legends[1] = "RATE";
             omxDisp.legends[2] = "RANG";
             omxDisp.legends[3] = "GATE";
-            omxDisp.legends[0] = holdNotes_ ? "ON" : "OFF";
+            omxDisp.legendText[0] = holdNotes_ ? "ON" : "OFF";
             omxDisp.useLegendString[1] = true;
             omxDisp.legendString[1] = "1/" + String(kArpRates[rateIndex_]);
             omxDisp.legendVals[2] = (octaveRange_ + 1);
