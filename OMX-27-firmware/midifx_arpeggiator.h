@@ -12,6 +12,7 @@ namespace midifx
         ARPMODE_HOLD
     };
 
+    
     // in: C,E,G,B
     enum ArpPattern
     {

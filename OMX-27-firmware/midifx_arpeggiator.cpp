@@ -603,6 +603,12 @@ namespace midifx
                     {
                         goingUp_ = false;
                         currentNotePos = qLength - 2;
+                        if (sortedNoteQueue.size() <= 4 && (arpPattern_ == ARPPAT_HI_UP_DOWN || arpPattern_ == ARPPAT_LOW_UP_DOWN))
+                        {
+                            currentNotePos = 0;
+                            goingUp_ = true;
+                            incrementOctave = true;
+                        }
                         // incrementOctave = true;
                     }
                 }
@@ -620,7 +626,7 @@ namespace midifx
                         // CEG
                         // CECG-CE //
 
-                        endIndex = 1;
+                        endIndex = 3;
                     }
 
                     if (currentNotePos < endIndex)
