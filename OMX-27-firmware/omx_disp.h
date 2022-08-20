@@ -40,6 +40,8 @@ public:
     void dispGenericModeLabelDoubleLine(const char* label1, const char* label2, uint8_t numPages, int8_t selectedPage);
     void dispGenericModeLabelSmallText(const char* label, uint8_t numPages, int8_t selectedPage);
 
+    void dispChar16(const char* charArray[], uint8_t selected, uint8_t numPages, int8_t selectedPage, bool encSelActive, bool showLabel, bool labelSelected, const char* label);
+
     void dispPageIndicators(int page, bool selected);
     void dispPageIndicators2(uint8_t numPages, int8_t selected);
     void dispMode();

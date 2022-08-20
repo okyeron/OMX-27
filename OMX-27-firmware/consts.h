@@ -39,3 +39,4 @@ const int midiHightestNote = midiLowestNote + int(fullRangeV * 12) - 1;
 #define FONT_SYMB_BIG u8g2_font_cu12_h_symbols
 #define FONT_TENFAT u8g2_font_tenfatguys_tf
 #define FONT_BIG u8g2_font_helvB18_tr
+#define FONT_CHAR16 u8g2_font_6x12_tf

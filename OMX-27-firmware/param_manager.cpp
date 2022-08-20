@@ -42,6 +42,7 @@ void ParamManager::incrementParam()
         if (!lockSelectedPage)
         {
             incrementPage();
+            selectedParam = constrain(selectedParam, 0, pageConfigs[selectedPage] - 1);
         }
     }
 }
@@ -65,6 +66,8 @@ void ParamManager::decrementParam()
         if (!lockSelectedPage)
         {
             decrementPage();
+
+            selectedParam = constrain(selectedParam, 0, pageConfigs[selectedPage] - 1);
         }
     }
 }

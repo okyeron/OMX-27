@@ -9,7 +9,8 @@ namespace midifx
     enum ArpPage {
         ARPPAGE_1,
         ARPPAGE_2,
-        ARPPAGE_3
+        ARPPAGE_3,
+        ARPPAGE_MODPAT
     };
 
     const char* kModeDisp_[] = {"OFF", "ON", "1-ST", "HOLD"};
@@ -64,8 +65,22 @@ namespace midifx
         params_.addPage(4);
         params_.addPage(4);
         params_.addPage(4);
+        params_.addPage(17);
 
         encoderSelect_ = true;
+
+
+        for(uint8_t i = 0; i < 16; i++)
+        {
+            if(i % 2 == 0)
+            {
+                modPattern_[i].mod = MODPAT_ARPNOTE;
+            }
+            else
+            {
+                modPattern_[i].mod = MODPAT_REST;
+            }
+        }
     }
 
     int MidiFXArpeggiator::getFXType()
@@ -411,31 +426,31 @@ namespace midifx
         }
     }
 
-    void MidiFXArpeggiator::generatePattern()
-    {
-        int index = 0;
+    // void MidiFXArpeggiator::generatePattern()
+    // {
+    //     int index = 0;
 
-        Serial.print("Pat: ");
+    //     Serial.print("Pat: ");
 
-        for(uint8_t o = 0; o < (octaveRange_ + 1); o++)
-        {
-            for(uint8_t n = 0; n < sortedNoteQueue.size(); n++)
-            {
-                notePat_[index].noteNumber = sortedNoteQueue[n].noteNumber + (12 * o);
-                Serial.print(notePat_[index].noteNumber);
-                Serial.print(" ");
-                index++;
-            }
-        }
+    //     for(uint8_t o = 0; o < (octaveRange_ + 1); o++)
+    //     {
+    //         for(uint8_t n = 0; n < sortedNoteQueue.size(); n++)
+    //         {
+    //             notePat_[index].noteNumber = sortedNoteQueue[n].noteNumber + (12 * o);
+    //             Serial.print(notePat_[index].noteNumber);
+    //             Serial.print(" ");
+    //             index++;
+    //         }
+    //     }
 
-        Serial.print("\n");
+    //     Serial.print("\n");
 
-        notePatLength_ = index;
+    //     notePatLength_ = index;
 
-        Serial.print("Length: ");
-        Serial.print(notePatLength_);
-        Serial.print("\n\n");
-    }
+    //     Serial.print("Length: ");
+    //     Serial.print(notePatLength_);
+    //     Serial.print("\n\n");
+    // }
 
     void MidiFXArpeggiator::arpNoteOn(MidiNoteGroup note)
     {
@@ -457,6 +472,13 @@ namespace midifx
             if(arpMode_ == ARPMODE_ONESHOT) // Only start when no notes for oneshot
             {
                 startArp();
+            }
+        }
+        else
+        {
+            if(resetMode_ == ARPRESET_NOTE)
+            {
+                resetArpSeq();
             }
         }
 
@@ -526,7 +548,9 @@ namespace midifx
 
     void MidiFXArpeggiator::resetArpSeq()
     {
-        patPos_ = 0;
+        // patPos_ = 0;
+        transpPos_ = 0;
+        modPos_ = 0;
         notePos_ = 0;
         octavePos_ = 0;
 
@@ -765,7 +789,7 @@ namespace midifx
         // playNote(noteon_micros, notePat_[patPos_]);
 
 
-        patPos_++;
+        // patPos_++;
     }
 
     void MidiFXArpeggiator::playNote(uint32_t noteOnMicros, ArpNote note)
@@ -884,9 +908,34 @@ namespace midifx
 
     void MidiFXArpeggiator::onDisplayUpdate()
     {
+        int8_t page = params_.getSelPage();
+        if(page == ARPPAGE_MODPAT)
+        {
+            const char* modChars[16];
+
+            for(uint8_t i = 0; i < 16; i++)
+            {
+                if(modPattern_[i].mod == MODPAT_ARPNOTE)
+                {
+                    modChars[i] = "A";
+                }
+                else
+                {
+                    modChars[i] = "-";
+                }
+            }
+
+            tempString_ = "Length: " + String(modPatternLength_);
+
+            bool labelSelected = params_.getSelParam() == 16;
+
+            omxDisp.dispChar16(modChars, params_.getSelParam(), params_.getNumPages(), params_.getSelPage(), encoderSelect_, true, labelSelected, tempString_.c_str());
+            return;
+        }
+
+
         omxDisp.clearLegends();
 
-        int8_t page = params_.getSelPage();
 
         if(page == ARPPAGE_1) // Hold, rate, octave range, gate
         {

@@ -422,6 +422,78 @@ void OmxDisp::dispGenericModeLabelSmallText(const char *label, uint8_t numPages,
     }
 }
 
+void OmxDisp::dispChar16(const char* charArray[], uint8_t selected, uint8_t numPages, int8_t selectedPage, bool encSelActive, bool showLabel, bool labelSelected, const char* label)
+{
+    if (isMessageActive())
+    {
+        renderMessage();
+        return;
+    }
+
+    display.fillRect(0, 0, 128, 32, BLACK);
+
+    if(showLabel)
+    {
+        u8g2_display.setFontMode(1);
+        u8g2_display.setFont(FONT_LABELS);
+        u8g2_display.setCursor(0, 0);
+
+        bool invert = false;
+
+        if(labelSelected)
+        {
+            display.drawFastHLine(16, 12, 128 - 32, WHITE);
+
+            if(encSelActive == false)
+            {
+                display.fillRect(0, 0, gridw, 10, WHITE);
+                invert = true;
+            }
+        }
+
+        invertColor(invert);
+
+        u8g2centerText(label, 2, hline - 2, 128 - 4, 10);
+    }
+
+    uint8_t charWidth = 128 / 16; // 8
+
+    u8g2_display.setFontMode(1);
+    u8g2_display.setFont(FONT_CHAR16);
+
+    uint8_t yPos = hline * 2 + 3; // 19
+    
+    for(uint8_t i = 0; i < 16; i++)
+    {
+        if(i == selected)
+        {
+            display.drawFastHLine(i * charWidth + 1, 26, charWidth - 2, WHITE);
+
+            if(encSelActive == false)
+            {
+                display.fillRect(i * charWidth, 14, charWidth, 10, WHITE);
+                invertColor(true);
+            }
+            else
+            {
+                invertColor(false);
+            }
+            // display.drawLine(i * charWidth - charWidth + 1, yPos + 2, i * charWidth - 1, yPos + 2, WHITE);
+        }
+        else
+        {
+            invertColor(false);
+        }
+
+        u8g2centerText(charArray[i], i * charWidth, yPos, charWidth - 1, 16);
+    }
+
+    if (numPages > 1)
+    {
+        dispPageIndicators2(numPages, selectedPage);
+    }
+}
+
 void OmxDisp::dispPageIndicators2(uint8_t numPages, int8_t selected)
 {
     int16_t indicatorWidth = 6;
