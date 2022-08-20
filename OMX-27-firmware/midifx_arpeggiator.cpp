@@ -53,6 +53,23 @@ namespace midifx
         "ROTH",
         "RONC"};
 
+    const char *kArpModDisp_[] = {
+        "×",
+        ".",
+        "-",
+        "R",
+        "<",
+        ">",
+        "\"",
+        "#",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+       };
+
     MidiFXArpeggiator::MidiFXArpeggiator()
     {
         arpMode_ = 1;
@@ -61,6 +78,8 @@ namespace midifx
         swing_ = 0;
         rateIndex_ = 6;
         octaveRange_ = 1; // 2 Octaves
+        modPatternLength_ = 15;
+        transpPatternLength_ = 15;
 
         params_.addPage(4);
         params_.addPage(4);
@@ -901,6 +920,17 @@ namespace midifx
             //     sendCV_ = constrain(sendCV_ + amtSlow, 0, 1);
             // }
         }
+        if(page == ARPPAGE_MODPAT)
+        {
+            if(param < 16)
+            {
+                modPattern_[param].mod = constrain(modPattern_[param].mod + amtSlow, 0, MODPAT_NUM_OF_MODS - 1);
+            }
+            else
+            {
+                modPatternLength_ = constrain(modPatternLength_ + amtSlow, 0, 15);
+            }
+        }
         omxDisp.setDirty();
     }
 
@@ -915,17 +945,17 @@ namespace midifx
 
             for(uint8_t i = 0; i < 16; i++)
             {
-                if(modPattern_[i].mod == MODPAT_ARPNOTE)
+                if(i <= modPatternLength_)
                 {
-                    modChars[i] = "A";
+                    modChars[i] = kArpModDisp_[modPattern_[i].mod];
                 }
                 else
                 {
-                    modChars[i] = "-";
+                    modChars[i] = " ";
                 }
             }
 
-            tempString_ = "Length: " + String(modPatternLength_);
+            tempString_ = "Length: " + String(modPatternLength_ + 1);
 
             bool labelSelected = params_.getSelParam() == 16;
 
