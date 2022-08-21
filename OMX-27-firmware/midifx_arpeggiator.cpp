@@ -37,6 +37,20 @@ namespace midifx
         "Rand Other",
         "Rand Once"};
 
+    const char *kResetMsg_[] = {
+        "Normal",
+        "Note",
+        "Mod Pat",
+        "Transp Pat",
+        };
+
+    const char *kResetDisp_[] = {
+        "NORM",
+        "NOTE",
+        "MPAT",
+        "TPAT",
+    };
+
     const char *kPatDisp_[] = {
         "UP",
         "DN",
@@ -536,7 +550,7 @@ namespace midifx
 
             holdNoteQueue.clear();
 
-            if(arpMode_ == ARPMODE_ONESHOT && !arpRunning_) // Only start when no notes for oneshot
+            if(arpMode_ == ARPMODE_ONESHOT) // Only start when no notes for oneshot
             {
                 startArp();
             }
@@ -1116,7 +1130,7 @@ namespace midifx
         auto amtSlow = enc.accel(1);
         auto amtFast = enc.accel(5);
 
-        if(page == ARPPAGE_1) // Hold, rate, octave range, gate
+        if(page == ARPPAGE_1) // Mode, Pattern, Reset mode
         {
             if (param == 0)
             {
@@ -1133,21 +1147,6 @@ namespace midifx
             }
             else if (param == 1)
             {
-                rateIndex_ = constrain(rateIndex_ + amtSlow, 0, kNumArpRates - 1);
-            }
-            else if (param == 2)
-            {
-                octaveRange_ = constrain(octaveRange_ + amtSlow, 0, 7);
-            }
-            else if (param == 3)
-            {
-                gate = constrain(gate + amtFast, 2, 200);
-            }
-        }
-        else if(page == ARPPAGE_2) // Pattern, Sort, , BPM
-        {
-            if (param == 0)
-            {
                 uint8_t prevArpPat = arpPattern_;
                 arpPattern_ = constrain(arpPattern_ + amtSlow, 0, ARPPAT_NUM_OF_PATS - 1);
                 if(prevArpPat != arpPattern_)
@@ -1157,9 +1156,30 @@ namespace midifx
                 }
                 // holdNotes_ = constrain(holdNotes_ + amt, 0, 1);
             }
+            else if (param == 2)
+            {
+                uint8_t prevResetMode = resetMode_;
+                resetMode_ = constrain(resetMode_ + amtSlow, 0, 4 - 1);
+                if(prevResetMode != resetMode_)
+                {
+                    // omxDisp.displayMessage(kResetMsg_[resetMode_]);
+                }
+            }
+            
+        }
+        else if(page == ARPPAGE_2) // Rate, Octave Range, Gate, BPM
+        {
+            if (param == 0)
+            {
+                rateIndex_ = constrain(rateIndex_ + amtSlow, 0, kNumArpRates - 1);
+            }
             else if (param == 1)
             {
-                // rateIndex_ = constrain(rateIndex_ + amt, 0, kNumArpRates - 1);
+                octaveRange_ = constrain(octaveRange_ + amtSlow, 0, 7);
+            }
+            else if (param == 2)
+            {
+                gate = constrain(gate + amtFast, 2, 200);
             }
             else if (param == 3)
             {
@@ -1648,25 +1668,28 @@ namespace midifx
         omxDisp.clearLegends();
 
 
-        if(page == ARPPAGE_1) // Hold, rate, octave range, gate
+        if(page == ARPPAGE_1) // Mode, Pattern, Reset mode
         {
             omxDisp.legends[0] = "MODE";
-            omxDisp.legends[1] = "RATE";
-            omxDisp.legends[2] = "RANG";
-            omxDisp.legends[3] = "GATE";
+            omxDisp.legends[1] = "PAT";
+            omxDisp.legends[2] = "RSET";
             omxDisp.legendText[0] = kModeDisp_[arpMode_];
-            omxDisp.useLegendString[1] = true;
-            omxDisp.legendString[1] = "1/" + String(kArpRates[rateIndex_]);
-            omxDisp.legendVals[2] = (octaveRange_ + 1);
-            omxDisp.legendVals[3] = gate;
+            omxDisp.legendText[1] = kPatDisp_[arpPattern_];
+            omxDisp.legendText[2] = kResetDisp_[resetMode_];
         }
-        else if(page == ARPPAGE_2) // Pattern, Sort, , BPM
+        else if(page == ARPPAGE_2) // Rate, Octave Range, Gate, BPM
         {
-            omxDisp.legends[0] = "PAT";
-            omxDisp.legends[1] = "";
-            omxDisp.legends[2] = "";
+            omxDisp.legends[0] = "RATE";
+            omxDisp.useLegendString[0] = true;
+            omxDisp.legendString[0] = "1/" + String(kArpRates[rateIndex_]);
+
+            omxDisp.legends[1] = "RANG";
+            omxDisp.legendVals[1] = (octaveRange_ + 1);
+
+            omxDisp.legends[2] = "GATE";
+            omxDisp.legendVals[2] = gate;
+            
             omxDisp.legends[3] = "BPM";
-            omxDisp.legendText[0] = kPatDisp_[arpPattern_];
             omxDisp.legendVals[3] = (int)clockConfig.clockbpm;
         }
         else if(page == ARPPAGE_3) // Velocity, midiChannel_, sendMidi, sendCV
