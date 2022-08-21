@@ -1058,7 +1058,7 @@ void OmxModeMidiKeyboard::onNotePostFX(MidiNoteGroup note)
 {
     if(note.noteOff)
     {
-        Serial.println("OmxModeMidiKeyboard::onNotePostFX noteOff: " + String(note.noteNumber));
+        // Serial.println("OmxModeMidiKeyboard::onNotePostFX noteOff: " + String(note.noteNumber));
 
         if (note.sendMidi)
         {
@@ -1076,13 +1076,13 @@ void OmxModeMidiKeyboard::onNotePostFX(MidiNoteGroup note)
             uint32_t noteOnMicros = note.noteonMicros; // TODO Might need to be set to current micros
             pendingNoteOns.insert(note.noteNumber, note.velocity, note.channel, noteOnMicros, note.sendCV);
 
-            Serial.println("StepLength: " + String(note.stepLength));
+            // Serial.println("StepLength: " + String(note.stepLength));
 
             uint32_t noteOffMicros = noteOnMicros + (note.stepLength * clockConfig.step_micros);
             pendingNoteOffs.insert(note.noteNumber, note.channel, noteOffMicros, note.sendCV);
 
-            Serial.println("noteOnMicros: " + String(noteOnMicros));
-            Serial.println("noteOffMicros: " + String(noteOffMicros));
+            // Serial.println("noteOnMicros: " + String(noteOnMicros));
+            // Serial.println("noteOffMicros: " + String(noteOffMicros));
         }
         else
         {
