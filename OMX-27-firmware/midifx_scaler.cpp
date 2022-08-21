@@ -234,7 +234,7 @@ namespace midifx
         omxDisp.setDirty();
     }
 
-    void MidiFXScaler::onDisplayUpdate()
+    void MidiFXScaler::onDisplayUpdate(uint8_t funcKeyMode)
     {
         omxDisp.clearLegends();
 

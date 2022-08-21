@@ -75,14 +75,14 @@ void SubModeMidiFxGroup::onEnabled()
 
     auxReleased_ = !midiSettings.keyState[0];
 
-    for (uint8_t i = 0; i < NUM_MIDIFX_SLOTS; i++)
-    {
-        auto mfx = getMidiFX(i);
-        if (mfx != nullptr)
-        {
-            mfx->setEnabled(true);
-        }
-    }
+    // for (uint8_t i = 0; i < NUM_MIDIFX_SLOTS; i++)
+    // {
+    //     auto mfx = getMidiFX(i);
+    //     if (mfx != nullptr)
+    //     {
+    //         mfx->setEnabled(true);
+    //     }
+    // }
 }
 
 void SubModeMidiFxGroup::onDisabled()
@@ -105,6 +105,8 @@ void SubModeMidiFxGroup::updateFuncKeyMode()
 {
     auto keyState = midiSettings.keyState;
 
+    uint8_t prevMode = funcKeyMode_;
+
     funcKeyMode_ = FUNCKEYMODE_NONE;
 
     if(keyState[1] && !keyState[2])
@@ -122,6 +124,12 @@ void SubModeMidiFxGroup::updateFuncKeyMode()
     else
     {
         funcKeyMode_ = FUNCKEYMODE_NONE;
+    }
+
+    if(funcKeyMode_ != prevMode)
+    {
+        omxDisp.setDirty();
+        omxLeds.setDirty();
     }
 }
 
@@ -157,6 +165,16 @@ void SubModeMidiFxGroup::updateLEDs()
     // {
     //     strip.setPixelColor(i, LEDOFF);
     // }
+
+    if (midiFXParamView_)
+    {
+        auto mfx = getMidiFX(selectedMidiFX_);
+        if (mfx != nullptr && mfx->usesKeys())
+        {
+            mfx->updateLEDs(funcKeyMode_);
+            return;
+        }
+    }
 
     // Function Keys
     if (funcKeyMode_ == FUNCKEYMODE_F3)
@@ -262,6 +280,14 @@ void SubModeMidiFxGroup::onKeyUpdate(OMXKeypadEvent e)
     int thisKey = e.key();
 	// auto keyState = midiSettings.keyState;
 
+    bool mfxKeysActive = false;
+
+    auto mfx = getMidiFX(selectedMidiFX_);
+    if(midiFXParamView_ && mfx != nullptr && mfx->usesKeys())
+    {
+        mfxKeysActive = true;
+    }
+
     if(e.down())
     {
         if (thisKey == 0)
@@ -279,47 +305,48 @@ void SubModeMidiFxGroup::onKeyUpdate(OMXKeypadEvent e)
             }
         }
 
-        // Quick Select FX Slot
-        if (thisKey >= 3 && thisKey < 3 + NUM_MIDIFX_SLOTS)
+        if (mfxKeysActive == false)
         {
-            if(funcKeyMode_ == FUNCKEYMODE_NONE)
+            // Quick Select FX Slot
+            if (thisKey >= 3 && thisKey < 3 + NUM_MIDIFX_SLOTS)
             {
-                selectMidiFX(thisKey - 3);
+                if (funcKeyMode_ == FUNCKEYMODE_NONE)
+                {
+                    selectMidiFX(thisKey - 3);
+                }
+                else if (funcKeyMode_ == FUNCKEYMODE_F1)
+                {
+                    // Copy
+                    copyMidiFX(thisKey - 3);
+                    omxDisp.displayMessage("Copy");
+                }
+                else if (funcKeyMode_ == FUNCKEYMODE_F2)
+                {
+                    // Paste
+                    pasteMidiFX(thisKey - 3);
+                    omxDisp.displayMessage("Paste");
+                }
+                else if (funcKeyMode_ == FUNCKEYMODE_F3)
+                {
+                    // Cut
+                    cutMidiFX(thisKey - 3);
+                    omxDisp.displayMessage("Cut");
+                }
             }
-            else if(funcKeyMode_ == FUNCKEYMODE_F1)
-            {
-                // Copy
-                copyMidiFX(thisKey - 3);
-                omxDisp.displayMessage("Copy");
 
-            }
-            else if(funcKeyMode_ == FUNCKEYMODE_F2)
+            // Change FX type
+            if (midiFXParamView_)
             {
-                // Paste
-                pasteMidiFX(thisKey - 3);
-                omxDisp.displayMessage("Paste");
+                if (thisKey >= 11 && thisKey < 11 + 16)
+                {
+                    changeMidiFXType(selectedMidiFX_, thisKey - 11);
+                    // selectMidiFX(thisKey - 19);
+                }
             }
-            else if(funcKeyMode_ == FUNCKEYMODE_F3)
-            {
-                // Cut
-                cutMidiFX(thisKey - 3);
-                omxDisp.displayMessage("Cut");
-            }
-        }
 
-        // Change FX type
-        if (midiFXParamView_)
-        {
-            if (thisKey >= 11 && thisKey < 11 + 16)
+            if (funcKeyMode_ == FUNCKEYMODE_NONE)
             {
-                changeMidiFXType(selectedMidiFX_, thisKey - 11);
-                // selectMidiFX(thisKey - 19);
             }
-        }
-
-        if (funcKeyMode_ == FUNCKEYMODE_NONE)
-        {
-            
         }
     }
 
@@ -329,14 +356,36 @@ void SubModeMidiFxGroup::onKeyUpdate(OMXKeypadEvent e)
         auxReleased_ = true;
     }
 
+    if(mfxKeysActive)
+    {
+        mfx->onKeyUpdate(e, funcKeyMode_);
+    }
+
     omxDisp.setDirty();
     omxLeds.setDirty();
 }
 
 void SubModeMidiFxGroup::selectMidiFX(uint8_t fxIndex)
 {
+    uint8_t prevSelMFX = selectedMidiFX_;
     midiFXParamView_ = true;
     selectedMidiFX_ = fxIndex;
+
+    if(selectedMidiFX_ != prevSelMFX)
+    {
+        auto prevMFX = getMidiFX(prevSelMFX);
+        auto newMFX = getMidiFX(selectedMidiFX_);
+
+        if(prevMFX != nullptr)
+        {
+            prevMFX->setEnabled(false);
+        }
+
+        if(newMFX != nullptr)
+        {
+            newMFX->setEnabled(true);
+        }
+    }
 
     displayMidiFXName(fxIndex);
 }
@@ -745,7 +794,7 @@ void SubModeMidiFxGroup::onDisplayUpdateMidiFX()
     {
         // Serial.println("Selected MidiFX not null");
 
-        selFX->onDisplayUpdate();
+        selFX->onDisplayUpdate(funcKeyMode_);
     }
 }
 

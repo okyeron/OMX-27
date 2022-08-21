@@ -79,11 +79,11 @@ namespace midifx
         void loopUpdate() override;
 
         bool usesKeys() override;
-        void onKeyUpdate(OMXKeypadEvent e) override;
-        void onKeyHeldUpdate(OMXKeypadEvent e) override;
-        void updateLEDs() override;
+        void onKeyUpdate(OMXKeypadEvent e, uint8_t funcKeyMode) override;
+        void onKeyHeldUpdate(OMXKeypadEvent e, uint8_t funcKeyMode) override;
+        void updateLEDs(uint8_t funcKeyMode) override;
 
-        void onDisplayUpdate() override;
+        void onDisplayUpdate(uint8_t funcKeyMode) override;
 
         void noteInput(MidiNoteGroup note) override;
         // MidiFXNoteFunction getInputFunc() override;
@@ -172,7 +172,6 @@ namespace midifx
 
         uint8_t randPrevNote_;
 
-
         bool arpRunning_ = false;
 
         static const int queueSize = 8;
@@ -198,6 +197,11 @@ namespace midifx
         int patPos_;
         bool goingUp_;
 
+        int8_t heldKey16_ = -1; // Key that is held
+
+        int8_t modCopyBuffer_;
+        int8_t transpCopyBuffer_;
+
         Micros nextStepTimeP_ = 32;
         Micros lastStepTimeP_ = 32;
         uint32_t stepMicroDelta_ = 0;
@@ -208,6 +212,10 @@ namespace midifx
         String tempString_;
         String tempString2_;
         String tempString3_;
+
+        String headerMessage_;
+
+        int messageTextTimer = 0;
 
 
 
@@ -228,5 +236,7 @@ namespace midifx
 
         void arpNoteTrigger();
         void playNote(uint32_t noteOnMicros, ArpNote note);
+
+        void showMessage();
     };
 }

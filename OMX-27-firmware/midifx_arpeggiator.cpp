@@ -1,6 +1,8 @@
 #include "midifx_arpeggiator.h"
 #include "omx_disp.h"
 #include "omx_util.h"
+#include "omx_leds.h"
+#include "colors.h"
 #include <algorithm>
 // #include <bits/stdc++.h>
 
@@ -82,6 +84,8 @@ namespace midifx
         modPatternLength_ = 15;
         transpPatternLength_ = 15;
 
+        heldKey16_ = -1;
+
         params_.addPage(4);
         params_.addPage(4);
         params_.addPage(4);
@@ -135,10 +139,12 @@ namespace midifx
         playedNoteQueue.clear();
         holdNoteQueue.clear();
         sortedNoteQueue.clear();
+        heldKey16_ = -1;
     }
 
     void MidiFXArpeggiator::onEnabled()
     {
+        heldKey16_ = -1;
         // stopArp();
         // playedNoteQueue.clear();
         // holdNoteQueue.clear();
@@ -532,6 +538,17 @@ namespace midifx
 
     void MidiFXArpeggiator::loopUpdate()
     {
+        if (messageTextTimer > 0)
+        {
+            messageTextTimer -= sysSettings.timeElasped;
+            if (messageTextTimer <= 0)
+            {
+                omxDisp.setDirty();
+                omxLeds.setDirty();
+                messageTextTimer = 0;
+            }
+        }
+
         // if (patternDirty_)
         // {
         //     regeneratePattern();
@@ -954,85 +971,416 @@ namespace midifx
 
     bool MidiFXArpeggiator::usesKeys()
     {
+        return params_.getSelPage() >= ARPPAGE_MODPAT;
     }
-    void MidiFXArpeggiator::onKeyUpdate(OMXKeypadEvent e)
+    void MidiFXArpeggiator::onKeyUpdate(OMXKeypadEvent e, uint8_t funcKeyMode)
     {
-    }
-    void MidiFXArpeggiator::onKeyHeldUpdate(OMXKeypadEvent e)
-    {
-    }
-    void MidiFXArpeggiator::updateLEDs()
-    {
-    }
+        if(e.held()) return;
 
-    void MidiFXArpeggiator::onDisplayUpdate()
-    {
-        int8_t page = params_.getSelPage();
-        if(page == ARPPAGE_MODPAT)
+        int thisKey = e.key();
+
+        auto page = params_.getSelPage();
+        auto param = params_.getSelParam();
+
+        if (funcKeyMode == FUNCKEYMODE_NONE || heldKey16_ >= 0)
         {
-            const char* modChars[16];
-            for(uint8_t i = 0; i < 16; i++)
+            if (e.down())
             {
-                modChars[i] = kArpModDisp_[modPattern_[i].mod];
-                // if(i <= modPatternLength_)
-                // {
-                //     modChars[i] = kArpModDisp_[modPattern_[i].mod];
-                // }
-                // else
-                // {
-                //     modChars[i] = " ";
-                // }
-            }
+                if (page == ARPPAGE_MODPAT || page == ARPPAGE_TRANSPPAT)
+                {
+                    if (heldKey16_ >= 0 && thisKey > 0 && thisKey < 11)
+                    {
+                        if (page == ARPPAGE_MODPAT)
+                        {
+                            modPattern_[heldKey16_].mod = thisKey - 1;
+                            modCopyBuffer_ = thisKey - 1;
+                        }
+                        else if (page == ARPPAGE_TRANSPPAT)
+                        {
+                            transpPattern_[heldKey16_] = thisKey - 1;
+                            transpCopyBuffer_ = thisKey - 1;
+                        }
+                    }
+                    // Select step
+                    if (thisKey >= 11)
+                    {
+                        if (param == 16)
+                        {
+                            if (page == ARPPAGE_MODPAT)
+                            {
+                                modPatternLength_ = thisKey - 11;
+                            }
+                            else if (page == ARPPAGE_TRANSPPAT)
+                            {
+                                transpPatternLength_ = thisKey - 11;
+                            }
 
-            const char* labels[3];
+                            heldKey16_ = -1;
+                        }
+                        else
+                        {
+                            if (page == ARPPAGE_MODPAT)
+                            {
+                                modCopyBuffer_ = modPattern_[thisKey - 11].mod;
+                            }
+                            else if (page == ARPPAGE_TRANSPPAT)
+                            {
+                                transpCopyBuffer_ = transpPattern_[thisKey - 11];
+                            }
 
-            tempString_ = "LEN: " + String(modPatternLength_ + 1);
-
-            if(params_.getSelParam() < 16)
-            {
-                tempString2_ = "SEL: " + String(params_.getSelParam() + 1);
-                tempString3_ = "MOD: " + String(kArpModDisp_[modPattern_[params_.getSelParam()].mod]);
+                            params_.setSelParam(thisKey - 11);
+                            heldKey16_ = thisKey - 11;
+                        }
+                    }
+                }
             }
             else
             {
-                tempString2_ = "SEL: -";
-                tempString3_ = "MOD: -";
+                if (thisKey >= 11 && thisKey - 11 == heldKey16_)
+                {
+                    heldKey16_ = -1;
+                }
             }
+        }
+        else if(funcKeyMode == FUNCKEYMODE_F1)
+        {
+            if (page == ARPPAGE_MODPAT || page == ARPPAGE_TRANSPPAT)
+            {
+                if (e.down())
+                {
+                    if (thisKey >= 11)
+                    {
+                        if (page == ARPPAGE_MODPAT)
+                        {
+                            modPattern_[thisKey - 11].mod = 0;
+                            modCopyBuffer_ = 0;
+                        }
+                        else if (page == ARPPAGE_TRANSPPAT)
+                        {
+                            transpPattern_[thisKey - 11] = 0;
+                            transpCopyBuffer_ = 0;
+                        }
 
-            labels[0] = tempString_.c_str();
-            labels[1] = tempString2_.c_str();
-            labels[2] = tempString3_.c_str();
+                        params_.setSelParam(thisKey - 11);
 
-            // bool labelSelected = params_.getSelParam() == 16;
+                        headerMessage_ = "Reset: " + String(thisKey - 11 + 1);
+                        showMessage();
+                    }
+                }
+            }
+        }
+        else if(funcKeyMode == FUNCKEYMODE_F2)
+        {
+            if (page == ARPPAGE_MODPAT || page == ARPPAGE_TRANSPPAT)
+            {
+                if (e.down())
+                {
+                    if (thisKey >= 11)
+                    {
+                        if (page == ARPPAGE_MODPAT)
+                        {
+                            modPattern_[thisKey - 11].mod = modCopyBuffer_;
+                        }
+                        else if (page == ARPPAGE_TRANSPPAT)
+                        {
+                            transpPattern_[thisKey - 11] = transpCopyBuffer_;
+                        }
 
-            omxDisp.dispChar16(modChars, modPatternLength_ + 1, params_.getSelParam(), params_.getNumPages(), params_.getSelPage(), encoderSelect_, true, labels, 3);
-            return;
+                        params_.setSelParam(thisKey - 11);
+
+                        headerMessage_ = "Pasted: " + String(thisKey - 11 + 1);
+                        showMessage();
+                    }
+                }
+            }
+        }
+        else if(funcKeyMode == FUNCKEYMODE_F3)
+        {
+            if (page == ARPPAGE_MODPAT || page == ARPPAGE_TRANSPPAT)
+            {
+                if (e.down())
+                {
+                    if (thisKey >= 11)
+                    {
+                        if (page == ARPPAGE_MODPAT)
+                        {
+                            modCopyBuffer_ = rand() % MODPAT_NUM_OF_MODS;
+                            modPattern_[thisKey - 11].mod = modCopyBuffer_;
+                        }
+                        else if (page == ARPPAGE_TRANSPPAT)
+                        {
+                            transpCopyBuffer_ = rand() % 12;
+                            transpPattern_[thisKey - 11] = transpCopyBuffer_;
+                        }
+
+                        params_.setSelParam(thisKey - 11);
+
+                        headerMessage_ = "Random: " + String(thisKey - 11 + 1);
+                        showMessage();
+                    }
+                }
+            }
+        }
+    }
+    
+    void MidiFXArpeggiator::onKeyHeldUpdate(OMXKeypadEvent e, uint8_t funcKeyMode)
+    {
+    }
+
+    void MidiFXArpeggiator::updateLEDs(uint8_t funcKeyMode)
+    {
+        bool blinkState = omxLeds.getBlinkState();
+
+        auto page = params_.getSelPage();
+        auto param = params_.getSelParam();
+
+        if(heldKey16_ < 0)
+        {
+            // Function Keys
+            if (funcKeyMode == FUNCKEYMODE_F3)
+            {
+                auto f3Color = blinkState ? LEDOFF : FUNKTHREE;
+                strip.setPixelColor(1, f3Color);
+                strip.setPixelColor(2, f3Color);
+            }
+            else
+            {
+                auto f1Color = (funcKeyMode == FUNCKEYMODE_F1 && blinkState) ? LEDOFF : FUNKONE;
+                strip.setPixelColor(1, f1Color);
+
+                auto f2Color = (funcKeyMode == FUNCKEYMODE_F2 && blinkState) ? LEDOFF : FUNKTWO;
+                strip.setPixelColor(2, f2Color);
+            }
+        }
+        else // Key 16 is held, quick change value
+        {
+            const uint32_t vcolor = 0x101010;
+            const uint32_t vcolor2 = 0xD0D0D0;
+
+            if (page == ARPPAGE_MODPAT)
+            {
+                for (uint8_t i = 0; i < 10; i++)
+                {
+                    if(modPattern_[heldKey16_].mod == i)
+                    {
+                        strip.setPixelColor(i+1, blinkState ? vcolor : LEDOFF);
+                    }
+                    else
+                    {
+                        strip.setPixelColor(i+1, vcolor);
+                    }
+                }
+            }
+            else if (page == ARPPAGE_TRANSPPAT)
+            {
+                for (uint8_t i = 0; i < 10; i++)
+                {
+                    if(i <= transpPattern_[heldKey16_])
+                    {
+                        strip.setPixelColor(i+1, vcolor2);
+                    }
+                    else
+                    {
+                        strip.setPixelColor(i+1, vcolor);
+                    }
+                }
+            }
+        }
+
+        if(page == ARPPAGE_MODPAT)
+        {
+            // const auto MSEL = 0xFFC0C0;
+            const uint32_t MASP = ORANGE;
+            // const uint32_t MREST = 0x440600;
+            const uint32_t MREST = 0x100000;
+            const uint32_t MTIE = 0x801000;
+            const uint32_t MREPEAT = RED;
+            const uint32_t MOTHER = 0xFF00FF;
+
+            for (uint8_t i = 0; i < 16; i++)
+            {
+                if(param == i && blinkState) // Selected
+                {
+                    // strip.setPixelColor(11 + i, MSEL);
+                }
+                else
+                {
+                    if (i < modPatternLength_ + 1)
+                    {
+                        auto mod = modPattern_[i].mod;
+
+                        if(mod == MODPAT_ARPNOTE)
+                        {
+                            strip.setPixelColor(11 + i, MASP);
+                        }
+                        else if(mod == MODPAT_REST)
+                        {
+                            strip.setPixelColor(11 + i, MREST);
+                        }
+                        else if(mod == MODPAT_TIE)
+                        {
+                            strip.setPixelColor(11 + i, MTIE);
+                        }
+                        else if(mod == MODPAT_REPEAT)
+                        {
+                            strip.setPixelColor(11 + i, MREPEAT);
+                        }
+                        else 
+                        {
+                            strip.setPixelColor(11 + i, MOTHER);
+                        }
+
+                    }
+                }
+            }
         }
         else if(page == ARPPAGE_TRANSPPAT)
         {
-            const char* labels[3];
+            // const auto TSEL = 0x9090FF;
+            const uint32_t TZERO = 0x0000FF;
+            const uint32_t THIGH = 0x8080FF;
+            const uint32_t TLOW = 0x000020;
 
-            tempString_ = "LEN: " + String(transpPatternLength_ + 1);
-
-            if(params_.getSelParam() < 16)
+            for (uint8_t i = 0; i < 16; i++)
             {
-                tempString2_ = "SEL: " + String(params_.getSelParam() + 1);
-                tempString3_ = "OFS: " + String(transpPattern_[params_.getSelParam()]);
+                if(param == i && blinkState) // Selected
+                {
+                    // strip.setPixelColor(11 + i, TSEL);
+                }
+                else
+                {
+                    if (i < transpPatternLength_ + 1)
+                    {
+                        if(transpPattern_[i] == 0)
+                        {
+                            strip.setPixelColor(11 + i, TZERO);
+                        }
+                        else if(transpPattern_[i] > 0)
+                        {
+                            strip.setPixelColor(11 + i, THIGH);
+                        }
+                        else
+                        {
+                            strip.setPixelColor(11 + i, TLOW);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    void MidiFXArpeggiator::showMessage()
+    {
+        const uint8_t secs = 5;
+        messageTextTimer = secs * 100000;
+        omxDisp.setDirty();
+    }
+
+    void MidiFXArpeggiator::onDisplayUpdate(uint8_t funcKeyMode)
+    {
+        int8_t page = params_.getSelPage();
+        bool useLabelHeader = false;
+
+        if (messageTextTimer > 0)
+        {
+            tempString_ = headerMessage_;
+            useLabelHeader = true;
+        }
+
+        if (!useLabelHeader && funcKeyMode != FUNCKEYMODE_NONE && (page == ARPPAGE_MODPAT || page == ARPPAGE_TRANSPPAT))
+        {
+            useLabelHeader = true;
+            if (funcKeyMode == FUNCKEYMODE_F1)
+            {
+                tempString_ = "Reset";
+                // omxDisp.dispGenericModeLabel("Reset", params_.getNumPages(), params_.getSelPage());
+            }
+            else if (funcKeyMode == FUNCKEYMODE_F2)
+            {
+                tempString_ = "Paste";
+                // omxDisp.dispGenericModeLabel("Paste", params_.getNumPages(), params_.getSelPage());
+            }
+            else if (funcKeyMode == FUNCKEYMODE_F3)
+            {
+                tempString_ = "Random";
+                // omxDisp.dispGenericModeLabel("Random", params_.getNumPages(), params_.getSelPage());
+            }
+        }
+
+        if (page == ARPPAGE_MODPAT)
+        {
+            const char *modChars[16];
+            for (uint8_t i = 0; i < 16; i++)
+            {
+                modChars[i] = kArpModDisp_[modPattern_[i].mod];
+            }
+
+            if(useLabelHeader)
+            {
+                const char *labels[1];
+                labels[0] = tempString_.c_str();
+
+                omxDisp.dispChar16(modChars, modPatternLength_ + 1, constrain(params_.getSelParam(), 0, 15), params_.getNumPages(), params_.getSelPage(), encoderSelect_, true, labels, 1);
             }
             else
             {
-                tempString2_ = "SEL: -";
-                tempString3_ = "OFS: -";
+                const char *labels[3];
+
+                tempString_ = "LEN: " + String(modPatternLength_ + 1);
+
+                if (params_.getSelParam() < 16)
+                {
+                    tempString2_ = "SEL: " + String(params_.getSelParam() + 1);
+                    tempString3_ = "MOD: " + String(kArpModDisp_[modPattern_[params_.getSelParam()].mod]);
+                }
+                else
+                {
+                    tempString2_ = "SEL: -";
+                    tempString3_ = "MOD: -";
+                }
+
+                labels[0] = tempString_.c_str();
+                labels[1] = tempString2_.c_str();
+                labels[2] = tempString3_.c_str();
+                omxDisp.dispChar16(modChars, modPatternLength_ + 1, params_.getSelParam(), params_.getNumPages(), params_.getSelPage(), encoderSelect_, true, labels, 3);
             }
 
-            labels[0] = tempString_.c_str();
-            labels[1] = tempString2_.c_str();
-            labels[2] = tempString3_.c_str();
+            return;
+        }
+        else if (page == ARPPAGE_TRANSPPAT)
+        {
+            if (useLabelHeader)
+            {
+                const char *labels[1];
+                labels[0] = tempString_.c_str();
 
-            omxDisp.dispValues16(transpPattern_, transpPatternLength_ + 1, -10, 10, true, params_.getSelParam(), params_.getNumPages(), params_.getSelPage(), encoderSelect_, true, labels, 3);
+                omxDisp.dispValues16(transpPattern_, transpPatternLength_ + 1, -10, 10, true, constrain(params_.getSelParam(), 0, 15), params_.getNumPages(), params_.getSelPage(), encoderSelect_, true, labels, 1);
+            }
+            else
+            {
+                const char *labels[3];
+
+                tempString_ = "LEN: " + String(transpPatternLength_ + 1);
+
+                if (params_.getSelParam() < 16)
+                {
+                    tempString2_ = "SEL: " + String(params_.getSelParam() + 1);
+                    tempString3_ = "OFS: " + String(transpPattern_[params_.getSelParam()]);
+                }
+                else
+                {
+                    tempString2_ = "SEL: -";
+                    tempString3_ = "OFS: -";
+                }
+
+                labels[0] = tempString_.c_str();
+                labels[1] = tempString2_.c_str();
+                labels[2] = tempString3_.c_str();
+
+                omxDisp.dispValues16(transpPattern_, transpPatternLength_ + 1, -10, 10, true, params_.getSelParam(), params_.getNumPages(), params_.getSelPage(), encoderSelect_, true, labels, 3);
+            }
 
             // omxDisp.dispValues16(transpPattern_, transpPatternLength_ + 1, 0, 127, false, params_.getSelParam(), params_.getNumPages(), params_.getSelPage(), encoderSelect_, true, labels, 3);
-
             return;
         }
 

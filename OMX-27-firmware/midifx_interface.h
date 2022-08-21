@@ -72,9 +72,9 @@ namespace midifx
         // If returns true, midifx will use the keys
         // Recommend only using keys on specific pages
         virtual bool usesKeys() { return false; }
-        virtual void onKeyUpdate(OMXKeypadEvent e) {}
-        virtual void onKeyHeldUpdate(OMXKeypadEvent e) {}
-        virtual void updateLEDs() {}
+        virtual void onKeyUpdate(OMXKeypadEvent e, uint8_t funcKeyMode) {}
+        virtual void onKeyHeldUpdate(OMXKeypadEvent e, uint8_t funcKeyMode) {}
+        virtual void updateLEDs(uint8_t funcKeyMode) {}
 
 
         virtual void onModeChanged(){};
@@ -87,7 +87,7 @@ namespace midifx
         virtual void onEncoderChanged(Encoder::Update enc);
         virtual void onEncoderButtonDown();
 
-        virtual void onDisplayUpdate() = 0;
+        virtual void onDisplayUpdate(uint8_t funcKeyMode) = 0;
 
         // Static glue to link a pointer to a member function
         static void onNoteInputForwarder(void *context, MidiNoteGroup note)

@@ -151,7 +151,7 @@ namespace midifx
         omxDisp.setDirty();
     }
 
-    void MidiFXMonophonic::onDisplayUpdate()
+    void MidiFXMonophonic::onDisplayUpdate(uint8_t funcKeyMode)
     {
         omxDisp.clearLegends();
 

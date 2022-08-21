@@ -20,7 +20,7 @@ namespace midifx
 
         void loopUpdate() override;
 
-        void onDisplayUpdate() override;
+        void onDisplayUpdate(uint8_t funcKeyMode) override;
 
         void noteInput(MidiNoteGroup note) override;
         // MidiFXNoteFunction getInputFunc() override;
