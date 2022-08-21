@@ -78,6 +78,11 @@ namespace midifx
 
         void loopUpdate() override;
 
+        bool usesKeys() override;
+        void onKeyUpdate(OMXKeypadEvent e) override;
+        void onKeyHeldUpdate(OMXKeypadEvent e) override;
+        void updateLEDs() override;
+
         void onDisplayUpdate() override;
 
         void noteInput(MidiNoteGroup note) override;
@@ -201,6 +206,10 @@ namespace midifx
         float multiplier_ = 1;
 
         String tempString_;
+        String tempString2_;
+        String tempString3_;
+
+
 
         bool insertMidiNoteQueue(MidiNoteGroup note);
         bool removeMidiNoteQueue(MidiNoteGroup note);

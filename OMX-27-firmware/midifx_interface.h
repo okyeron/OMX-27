@@ -69,6 +69,14 @@ namespace midifx
 
         virtual MidiFXInterface* getClone() { return nullptr;}
 
+        // If returns true, midifx will use the keys
+        // Recommend only using keys on specific pages
+        virtual bool usesKeys() { return false; }
+        virtual void onKeyUpdate(OMXKeypadEvent e) {}
+        virtual void onKeyHeldUpdate(OMXKeypadEvent e) {}
+        virtual void updateLEDs() {}
+
+
         virtual void onModeChanged(){};
 
         virtual void setEnabled(bool newEnabled);

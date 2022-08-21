@@ -103,6 +103,15 @@ void OmxDisp::u8g2centerText(const char *s, int16_t x, int16_t y, uint16_t w, ui
     u8g2_display.print(s);
 }
 
+void OmxDisp::u8g2leftText(const char *s, int16_t x, int16_t y, uint16_t w, uint16_t h)
+{
+    uint16_t bh = u8g2_display.getFontAscent();
+    u8g2_display.setCursor(
+        x,
+        y + (h - bh) / 2);
+    u8g2_display.print(s);
+}
+
 void OmxDisp::u8g2centerNumber(int n, uint16_t x, uint16_t y, uint16_t w, uint16_t h)
 {
     char buf[8];
@@ -422,7 +431,7 @@ void OmxDisp::dispGenericModeLabelSmallText(const char *label, uint8_t numPages,
     }
 }
 
-void OmxDisp::dispChar16(const char* charArray[], uint8_t selected, uint8_t numPages, int8_t selectedPage, bool encSelActive, bool showLabel, bool labelSelected, const char* label)
+void OmxDisp::dispChar16(const char* charArray[], uint8_t charCount, uint8_t selected, uint8_t numPages, int8_t selectedPage, bool encSelActive, bool showLabels, const char* labels[], uint8_t labelCount)
 {
     if (isMessageActive())
     {
@@ -432,28 +441,10 @@ void OmxDisp::dispChar16(const char* charArray[], uint8_t selected, uint8_t numP
 
     display.fillRect(0, 0, 128, 32, BLACK);
 
-    if(showLabel)
+    if(showLabels)
     {
-        u8g2_display.setFontMode(1);
-        u8g2_display.setFont(FONT_LABELS);
-        u8g2_display.setCursor(0, 0);
-
-        bool invert = false;
-
-        if(labelSelected)
-        {
-            display.drawFastHLine(16, 12, 128 - 32, WHITE);
-
-            if(encSelActive == false)
-            {
-                display.fillRect(0, 0, gridw, 10, WHITE);
-                invert = true;
-            }
-        }
-
-        invertColor(invert);
-
-        u8g2centerText(label, 2, hline - 2, 128 - 4, 10);
+        int8_t selIndex = constrain(selected - 16, -1, 127);
+        dispLabelParams(selIndex, encSelActive, labels, labelCount);
     }
 
     uint8_t charWidth = 128 / 16; // 8
@@ -465,6 +456,7 @@ void OmxDisp::dispChar16(const char* charArray[], uint8_t selected, uint8_t numP
     
     for(uint8_t i = 0; i < 16; i++)
     {
+        bool showChar = i < charCount;
         if(i == selected)
         {
             display.drawFastHLine(i * charWidth + 1, 26, charWidth - 2, WHITE);
@@ -473,6 +465,7 @@ void OmxDisp::dispChar16(const char* charArray[], uint8_t selected, uint8_t numP
             {
                 display.fillRect(i * charWidth, 14, charWidth, 10, WHITE);
                 invertColor(true);
+                showChar = true;
             }
             else
             {
@@ -485,12 +478,129 @@ void OmxDisp::dispChar16(const char* charArray[], uint8_t selected, uint8_t numP
             invertColor(false);
         }
 
-        u8g2centerText(charArray[i], i * charWidth, yPos, charWidth - 1, 16);
+        if(showChar)
+        {
+            u8g2centerText(charArray[i], i * charWidth, yPos, charWidth - 1, 16);
+        }
     }
 
-    if (numPages > 1)
+    // if (numPages > 1)
+    // {
+    //     dispPageIndicators2(numPages, selectedPage);
+    // }
+}
+
+
+void OmxDisp::dispValues16(int8_t valueArray[], uint8_t valueCount, int8_t minValue, int8_t maxValue, bool centered, uint8_t selected, uint8_t numPages, int8_t selectedPage, bool encSelActive, bool showLabels, const char* labels[], uint8_t labelCount)
+{
+    if (isMessageActive())
     {
-        dispPageIndicators2(numPages, selectedPage);
+        renderMessage();
+        return;
+    }
+
+    display.fillRect(0, 0, 128, 32, BLACK);
+
+    if(showLabels)
+    {
+        int8_t selIndex = constrain(selected - 16, -1, 127);
+        dispLabelParams(selIndex, encSelActive, labels, labelCount);
+    }
+
+    uint8_t boxWidth = 128 / 16; // 8
+    uint8_t boxStartY = 10;
+    uint8_t heightMax = 32;
+    uint8_t boxHeight = heightMax - boxStartY;
+    uint8_t halfBoxHeight = boxHeight / 2;
+
+    int8_t middleValue = ((maxValue - minValue) / 2) + minValue;
+
+    for(uint8_t i = 0; i < 16; i++)
+    {
+        if(i < valueCount && valueArray[i] == -127) continue;
+
+        uint16_t fgColor = WHITE;
+
+        uint8_t xPos = i * boxWidth + 2;
+        uint8_t width = boxWidth - 4;
+
+        if(i == selected && encSelActive)
+        {
+            display.fillRect(i * boxWidth, boxStartY, boxWidth, boxHeight, WHITE);
+            display.fillRect(i * boxWidth + 1, boxStartY + 1, boxWidth - 2, boxHeight - 2, BLACK);
+        }
+
+        if(i >= valueCount)
+        {
+            // display.fillRect(i * boxWidth + 3, boxStartY + (halfBoxHeight + 1), 1, 1, fgColor);
+
+            continue;
+        }
+
+        if (centered)
+        {
+            if (valueArray[i] >= middleValue)
+            {
+                float valuePerc = constrain(map((float)valueArray[i], (float)middleValue, (float)maxValue, 0.0f, 1.0f), 0.0f, 1.0f);
+                uint8_t valueHeight = max(halfBoxHeight * valuePerc, 0);
+                display.fillRect(xPos, boxStartY + (halfBoxHeight + 1) - valueHeight, width, valueHeight + 1, fgColor);
+
+                // if(i == selected)
+                // {
+                //     Serial.println("valuePerc: " + String(valuePerc) + " valueHeight: " + String(valueHeight) + " startY: " + String(boxStartY + halfBoxHeight - valueHeight));
+                // }
+            }
+            else
+            {
+                float valuePerc = 1.0f - constrain(map((float)valueArray[i], (float)minValue, (float)middleValue, 0.0f, 1.0f), 0.0f, 1.0f);
+                uint8_t valueHeight = constrain((boxHeight - halfBoxHeight) * valuePerc, 0, halfBoxHeight - 3);
+                display.fillRect(xPos, boxStartY + halfBoxHeight + 1, width, valueHeight + 1, fgColor);
+                // display.fillRect(i + 3, boxStartY + halfBoxHeight + 1, boxWidth - 4, valueHeight - 2, bgColor);
+            }
+        }
+        else
+        {
+            float valuePerc = constrain(map((float)valueArray[i], (float)minValue, (float)maxValue, 0.0f, 1.0f), 0.0f, 1.0f);
+            uint8_t valueHeight = constrain(boxHeight * valuePerc, 0, boxHeight - 1);
+            display.fillRect(xPos, boxStartY + boxHeight - valueHeight, width, valueHeight + 1, fgColor);
+        }
+    }
+
+    // if (numPages > 1)
+    // {
+    //     dispPageIndicators2(numPages, selectedPage);
+    // }
+}
+
+
+void OmxDisp::dispLabelParams(int8_t selected, bool encSelActive, const char *labels[], uint8_t labelCount)
+{
+    u8g2_display.setFontMode(1);
+    u8g2_display.setFont(FONT_LABELS);
+    u8g2_display.setCursor(0, 0);
+
+    uint8_t labelWidth = 128 / labelCount; // 8
+
+    for (uint8_t i = 0; i < labelCount; i++)
+    {
+        bool invert = false;
+        // Label Selected
+        if (i == selected)
+        {
+            if (encSelActive == false)
+            {
+                display.fillRect(i * labelWidth, 0, labelWidth, 10, WHITE);
+                invert = true;
+            }
+            else
+            {
+                display.fillRect(i * labelWidth, 0, labelWidth, 10, WHITE);
+                display.fillRect(i * labelWidth + 1, 0 + 1, labelWidth - 2, 10 - 2, BLACK);
+            }
+        }
+
+        invertColor(invert);
+        u8g2leftText(labels[i], i * labelWidth + 2, hline - 2, labelWidth - 4, 10);
     }
 }
 

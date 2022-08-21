@@ -40,8 +40,12 @@ public:
     void dispGenericModeLabelDoubleLine(const char* label1, const char* label2, uint8_t numPages, int8_t selectedPage);
     void dispGenericModeLabelSmallText(const char* label, uint8_t numPages, int8_t selectedPage);
 
-    void dispChar16(const char* charArray[], uint8_t selected, uint8_t numPages, int8_t selectedPage, bool encSelActive, bool showLabel, bool labelSelected, const char* label);
+    void dispChar16(const char* charArray[], uint8_t charCount, uint8_t selected, uint8_t numPages, int8_t selectedPage, bool encSelActive, bool showLabels, const char* labels[], uint8_t labelCount);
 
+    // Renders values as bars
+    void dispValues16(int8_t valueArray[], uint8_t valueCount, int8_t minValue, int8_t maxValue, bool centered, uint8_t selected, uint8_t numPages, int8_t selectedPage, bool encSelActive, bool showLabels, const char* labels[], uint8_t labelCount);
+
+    void dispLabelParams(int8_t selected, bool encSelActive, const char* labels[], uint8_t labelCount);
     void dispPageIndicators(int page, bool selected);
     void dispPageIndicators2(uint8_t numPages, int8_t selected);
     void dispMode();
@@ -74,6 +78,7 @@ private:
     unsigned long displayRefreshRate = 60;
 
     void u8g2centerText(const char *s, int16_t x, int16_t y, uint16_t w, uint16_t h);
+    void u8g2leftText(const char *s, int16_t x, int16_t y, uint16_t w, uint16_t h);
     void u8g2centerNumber(int n, uint16_t x, uint16_t y, uint16_t w, uint16_t h);
     void renderMessage();
 };

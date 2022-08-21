@@ -10,7 +10,8 @@ namespace midifx
         ARPPAGE_1,
         ARPPAGE_2,
         ARPPAGE_3,
-        ARPPAGE_MODPAT
+        ARPPAGE_MODPAT,
+        ARPPAGE_TRANSPPAT
     };
 
     const char* kModeDisp_[] = {"OFF", "ON", "1-ST", "HOLD"};
@@ -85,20 +86,25 @@ namespace midifx
         params_.addPage(4);
         params_.addPage(4);
         params_.addPage(17);
+        params_.addPage(17);
+
 
         encoderSelect_ = true;
 
 
         for(uint8_t i = 0; i < 16; i++)
         {
-            if(i % 2 == 0)
-            {
-                modPattern_[i].mod = MODPAT_ARPNOTE;
-            }
-            else
-            {
-                modPattern_[i].mod = MODPAT_REST;
-            }
+            modPattern_[i].mod = MODPAT_ARPNOTE;
+            transpPattern_[i] = 0;
+
+            // if(i % 2 == 0)
+            // {
+            //     modPattern_[i].mod = MODPAT_ARPNOTE;
+            // }
+            // else
+            // {
+            //     modPattern_[i].mod = MODPAT_REST;
+            // }
         }
     }
 
@@ -870,7 +876,7 @@ namespace midifx
                 gate = constrain(gate + amtFast, 2, 200);
             }
         }
-        if(page == ARPPAGE_2) // Pattern, Sort, , BPM
+        else if(page == ARPPAGE_2) // Pattern, Sort, , BPM
         {
             if (param == 0)
             {
@@ -899,7 +905,7 @@ namespace midifx
                 // rateIndex_ = constrain(rateIndex_ + amt, 0, kNumArpRates - 1);
             }
         }
-        if(page == ARPPAGE_3) // Velocity, midiChannel_, sendMidi, sendCV
+        else if(page == ARPPAGE_3) // Velocity, midiChannel_, sendMidi, sendCV
         {
             // if (param == 0)
             // {
@@ -920,7 +926,7 @@ namespace midifx
             //     sendCV_ = constrain(sendCV_ + amtSlow, 0, 1);
             // }
         }
-        if(page == ARPPAGE_MODPAT)
+        else if(page == ARPPAGE_MODPAT)
         {
             if(param < 16)
             {
@@ -931,10 +937,33 @@ namespace midifx
                 modPatternLength_ = constrain(modPatternLength_ + amtSlow, 0, 15);
             }
         }
+        else if(page == ARPPAGE_TRANSPPAT)
+        {
+            if(param < 16)
+            {
+                transpPattern_[param] = constrain(transpPattern_[param] + amtSlow, -48, 48);
+                // transpPattern_[param] = constrain(transpPattern_[param] + amtSlow, 0, 127);
+            }
+            else
+            {
+                transpPatternLength_ = constrain(transpPatternLength_ + amtSlow, 0, 15);
+            }
+        }
         omxDisp.setDirty();
     }
 
-    
+    bool MidiFXArpeggiator::usesKeys()
+    {
+    }
+    void MidiFXArpeggiator::onKeyUpdate(OMXKeypadEvent e)
+    {
+    }
+    void MidiFXArpeggiator::onKeyHeldUpdate(OMXKeypadEvent e)
+    {
+    }
+    void MidiFXArpeggiator::updateLEDs()
+    {
+    }
 
     void MidiFXArpeggiator::onDisplayUpdate()
     {
@@ -942,27 +971,70 @@ namespace midifx
         if(page == ARPPAGE_MODPAT)
         {
             const char* modChars[16];
-
             for(uint8_t i = 0; i < 16; i++)
             {
-                if(i <= modPatternLength_)
-                {
-                    modChars[i] = kArpModDisp_[modPattern_[i].mod];
-                }
-                else
-                {
-                    modChars[i] = " ";
-                }
+                modChars[i] = kArpModDisp_[modPattern_[i].mod];
+                // if(i <= modPatternLength_)
+                // {
+                //     modChars[i] = kArpModDisp_[modPattern_[i].mod];
+                // }
+                // else
+                // {
+                //     modChars[i] = " ";
+                // }
             }
 
-            tempString_ = "Length: " + String(modPatternLength_ + 1);
+            const char* labels[3];
 
-            bool labelSelected = params_.getSelParam() == 16;
+            tempString_ = "LEN: " + String(modPatternLength_ + 1);
 
-            omxDisp.dispChar16(modChars, params_.getSelParam(), params_.getNumPages(), params_.getSelPage(), encoderSelect_, true, labelSelected, tempString_.c_str());
+            if(params_.getSelParam() < 16)
+            {
+                tempString2_ = "SEL: " + String(params_.getSelParam() + 1);
+                tempString3_ = "MOD: " + String(kArpModDisp_[modPattern_[params_.getSelParam()].mod]);
+            }
+            else
+            {
+                tempString2_ = "SEL: -";
+                tempString3_ = "MOD: -";
+            }
+
+            labels[0] = tempString_.c_str();
+            labels[1] = tempString2_.c_str();
+            labels[2] = tempString3_.c_str();
+
+            // bool labelSelected = params_.getSelParam() == 16;
+
+            omxDisp.dispChar16(modChars, modPatternLength_ + 1, params_.getSelParam(), params_.getNumPages(), params_.getSelPage(), encoderSelect_, true, labels, 3);
             return;
         }
+        else if(page == ARPPAGE_TRANSPPAT)
+        {
+            const char* labels[3];
 
+            tempString_ = "LEN: " + String(transpPatternLength_ + 1);
+
+            if(params_.getSelParam() < 16)
+            {
+                tempString2_ = "SEL: " + String(params_.getSelParam() + 1);
+                tempString3_ = "OFS: " + String(transpPattern_[params_.getSelParam()]);
+            }
+            else
+            {
+                tempString2_ = "SEL: -";
+                tempString3_ = "OFS: -";
+            }
+
+            labels[0] = tempString_.c_str();
+            labels[1] = tempString2_.c_str();
+            labels[2] = tempString3_.c_str();
+
+            omxDisp.dispValues16(transpPattern_, transpPatternLength_ + 1, -10, 10, true, params_.getSelParam(), params_.getNumPages(), params_.getSelPage(), encoderSelect_, true, labels, 3);
+
+            // omxDisp.dispValues16(transpPattern_, transpPatternLength_ + 1, 0, 127, false, params_.getSelParam(), params_.getNumPages(), params_.getSelPage(), encoderSelect_, true, labels, 3);
+
+            return;
+        }
 
         omxDisp.clearLegends();
 
