@@ -73,6 +73,22 @@ namespace midifx
         "6"
        };
 
+    const char *kArpModMsg_[] = {
+        "As Played",
+        "Rest",
+        "Tie",
+        "Repeat",
+        "LoPitch -Oct",
+        "HiPitch +Oct",
+        "PwrChord",
+        "Chord",
+        "Note 1",
+        "Note 2",
+        "Note 3",
+        "Note 4",
+        "Note 5",
+        "Note 6"};
+
     MidiFXArpeggiator::MidiFXArpeggiator()
     {
         arpMode_ = 1;
@@ -315,6 +331,18 @@ namespace midifx
         if(arpPattern_ != ARPPAT_AS_PLAYED)
         {
             std::sort(sortedNoteQueue.begin(), sortedNoteQueue.end(), compareArpNote);
+        }
+
+
+        if(sortedNoteQueue.size() > 0)
+        {
+            lowestPitch_ = sortedNoteQueue[0].noteNumber;
+            highestPitch_ = sortedNoteQueue[sortedNoteQueue.size() - 1].noteNumber;
+        }
+        else
+        {
+            lowestPitch_ = -127;
+            highestPitch_ = -127;
         }
 
         // Serial.println("sortedNoteQueue capacity: " + String(sortedNoteQueue.capacity()));
@@ -596,6 +624,8 @@ namespace midifx
         notePos_ = 0;
         octavePos_ = 0;
 
+        lastPlayedNoteNumber_ = -127;
+
         randPrevNote_ = 255;
 
         goingUp_ = true;
@@ -819,12 +849,46 @@ namespace midifx
         currentNotePos = constrain(currentNotePos, 0, qLength-1);
 
         ArpNote arpNote = sortedNoteQueue[currentNotePos];
-
         randPrevNote_ = arpNote.noteNumber;
 
-        arpNote.noteNumber = arpNote.noteNumber + (octavePos_ * 12);
+        int16_t noteNumber = arpNote.noteNumber;
 
-        playNote(noteon_micros, arpNote);
+
+        noteNumber = applyModPattern(noteNumber);
+        stepLength_ = findStepLength(); // Can be changed by ties in mod pattern
+        // Advance mod pattern
+        modPos_++;
+        if(modPos_ >= modPatternLength_ + 1)
+        {
+            if(arpMode_ != ARPMODE_ONESHOT && resetMode_ == ARPRESET_MODPAT)
+            {
+                resetArpSeq();
+            }
+            modPos_ = 0;
+        }
+
+        if (noteNumber != -127)
+        {
+            noteNumber = applyTranspPattern(noteNumber);
+        }
+
+        // Advance transpose pattern
+        transpPos_++;
+        if (transpPos_ >= transpPatternLength_ + 1)
+        {
+            if (arpMode_ != ARPMODE_ONESHOT && resetMode_ == ARPRESET_TRANSPOSEPAT)
+            {
+                resetArpSeq();
+            }
+            transpPos_ = 0;
+        }
+
+        if (noteNumber != -127)
+        {
+            // Add octave
+            noteNumber = noteNumber + (octavePos_ * 12);
+            playNote(noteon_micros, noteNumber, velocity_);
+        }
 
         notePos_ = nextNotePos;
 
@@ -834,23 +898,173 @@ namespace midifx
         // patPos_++;
     }
 
-    void MidiFXArpeggiator::playNote(uint32_t noteOnMicros, ArpNote note)
+    int16_t MidiFXArpeggiator::applyModPattern(int16_t noteNumber)
     {
-        Serial.println("PlayNote: " + String(note.noteNumber));
-        if(note.noteNumber > 127) return;
+        uint8_t modMode = modPattern_[modPos_].mod;
+
+        int16_t newNote = noteNumber;
+
+        switch (modMode)
+        {
+        case MODPAT_ARPNOTE:
+        {
+            newNote = noteNumber;
+        }
+        break;
+        case MODPAT_REST:
+        {
+            newNote = -127;
+        }
+        break;
+        case MODPAT_TIE:
+        {
+            newNote = -127;
+        }
+        break;
+        case MODPAT_REPEAT:
+        {
+            newNote = lastPlayedNoteNumber_;
+        }
+        break;
+        case MODPAT_LOWPITCH_OCTAVE:
+        {
+            newNote = lowestPitch_ - 12;
+        }
+        break;
+        case MODPAT_HIGHPITCH_OCTAVE:
+        {
+            newNote = highestPitch_ + 12;
+        }
+        break;
+        case MODPAT_PWRCHORD:
+        {
+            uint32_t noteon_micros = micros();
+            stepLength_ = findStepLength();
+
+            if(sortedNoteQueue.size() > 1)
+            {
+                newNote = lowestPitch_;
+                newNote = applyTranspPattern(newNote);
+                newNote = newNote + (octavePos_ * 12);
+                playNote(noteon_micros, newNote, velocity_);
+
+                newNote = highestPitch_;
+                newNote = applyTranspPattern(newNote);
+                newNote = newNote + (octavePos_ * 12);
+                playNote(noteon_micros, newNote, velocity_);
+
+                newNote = -127; // Don't play this note. 
+            }
+            else // only 1 note in queue
+            {
+                newNote = noteNumber;
+            }
+        }
+        break;
+        case MODPAT_CHORD:
+        {
+            uint32_t noteon_micros = micros();
+            stepLength_ = findStepLength();
+            
+            for(ArpNote n : sortedNoteQueue)
+            {
+                newNote = n.noteNumber;
+                newNote = applyTranspPattern(newNote);
+                newNote = newNote + (octavePos_ * 12);
+
+                playNote(noteon_micros, newNote, velocity_);
+            }
+
+            newNote = -127; // Don't play this note. 
+        }
+        break;
+        case MODPAT_NOTE1:
+        case MODPAT_NOTE2:
+        case MODPAT_NOTE3:
+        case MODPAT_NOTE4:
+        case MODPAT_NOTE5:
+        case MODPAT_NOTE6:
+        {
+            uint8_t noteIndex = modMode - MODPAT_NOTE1;
+
+            if(arpMode_ == ARPMODE_ON)
+            {
+                if (noteIndex < playedNoteQueue.size())
+                {
+                    newNote = playedNoteQueue[noteIndex].noteNumber;
+                }
+                else
+                {
+                    newNote = -127;
+                }
+            }
+            else // Hold or one shot
+            {
+                if (noteIndex < holdNoteQueue.size())
+                {
+                    newNote = holdNoteQueue[noteIndex].noteNumber;
+                }
+                else
+                {
+                    newNote = -127;
+                }
+            }
+        }
+        break;
+        }
+
+        return newNote;
+    }
+
+    uint8_t MidiFXArpeggiator::findStepLength()
+    {
+        uint8_t len = 1;
+
+        for(uint8_t i = 1; i < 16; i++)
+        {
+            uint8_t modIndex = (modPos_ + i) % (modPatternLength_ + 1);
+            uint8_t mod = modPattern_[modIndex].mod;
+            if(mod == MODPAT_TIE)
+            {
+                // Increase length for each tie
+                len++;
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        return len;
+    }
+
+    int16_t MidiFXArpeggiator::applyTranspPattern(int16_t noteNumber)
+    {
+        // Simple
+        int16_t newNote = noteNumber + transpPattern_[transpPos_];
+
+        return newNote;
+    }
+
+    void MidiFXArpeggiator::playNote(uint32_t noteOnMicros, int16_t noteNumber, uint8_t velocity)
+    {
+        // Serial.println("PlayNote: " + String(note.noteNumber));
+        if(noteNumber < 0 || noteNumber > 127) return;
 
         MidiNoteGroup noteOut;
 
         noteOut.channel = midiChannel_ + 1;
-        noteOut.noteNumber = note.noteNumber;
-        noteOut.prevNoteNumber = note.noteNumber;
-        noteOut.velocity = velocity_;
+        noteOut.noteNumber = (uint8_t)noteNumber;
+        noteOut.prevNoteNumber = (uint8_t)noteNumber;
+        noteOut.velocity = velocity;
         noteOut.stepLength = ((float)gate * 0.01f) * (16.0f * multiplier_);
         noteOut.sendMidi = sendMidi_;
         noteOut.sendCV = sendCV_;
         noteOut.noteonMicros = noteOnMicros;
         noteOut.unknownLength = false;
         noteOut.noteOff = false;
+
+        lastPlayedNoteNumber_ = noteNumber;
 
         sendNoteOut(noteOut);
     }
@@ -947,7 +1161,14 @@ namespace midifx
         {
             if(param < 16)
             {
+                uint8_t prevMod = modPattern_[param].mod;
                 modPattern_[param].mod = constrain(modPattern_[param].mod + amtSlow, 0, MODPAT_NUM_OF_MODS - 1);
+
+                if(prevMod != modPattern_[param].mod)
+                {
+                    headerMessage_ = kArpModMsg_[modPattern_[param].mod];
+                    showMessage();
+                }
             }
             else
             {
@@ -994,6 +1215,9 @@ namespace midifx
                         {
                             modPattern_[heldKey16_].mod = thisKey - 1;
                             modCopyBuffer_ = thisKey - 1;
+
+                            headerMessage_ = kArpModMsg_[modPattern_[param].mod];
+                            showMessage();
                         }
                         else if (page == ARPPAGE_TRANSPPAT)
                         {

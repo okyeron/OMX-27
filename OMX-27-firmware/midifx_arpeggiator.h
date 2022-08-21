@@ -113,7 +113,7 @@ namespace midifx
 
             ArpNote(int noteNumber)
             {
-                if(noteNumber < 0 || noteNumber > 127)
+                if (noteNumber < 0 || noteNumber > 127)
                 {
                     noteNumber = 255;
                 }
@@ -192,6 +192,10 @@ namespace midifx
         int8_t notePos_;
         uint8_t octavePos_ : 4;
 
+        uint8_t lowestPitch_;
+        uint8_t highestPitch_;
+        uint8_t stepLength_ = 1; // length of note in arp steps
+
         // ArpNote notePat_[256];
         // int notePatLength_ = 0;
         int patPos_;
@@ -202,10 +206,11 @@ namespace midifx
         int8_t modCopyBuffer_;
         int8_t transpCopyBuffer_;
 
+        int16_t lastPlayedNoteNumber_;
+
         Micros nextStepTimeP_ = 32;
         Micros lastStepTimeP_ = 32;
         uint32_t stepMicroDelta_ = 0;
-
 
         float multiplier_ = 1;
 
@@ -216,8 +221,6 @@ namespace midifx
         String headerMessage_;
 
         int messageTextTimer = 0;
-
-
 
         bool insertMidiNoteQueue(MidiNoteGroup note);
         bool removeMidiNoteQueue(MidiNoteGroup note);
@@ -235,7 +238,11 @@ namespace midifx
         void resetArpSeq();
 
         void arpNoteTrigger();
-        void playNote(uint32_t noteOnMicros, ArpNote note);
+        int16_t applyModPattern(int16_t note);
+        uint8_t findStepLength();
+        int16_t applyTranspPattern(int16_t note);
+
+        void playNote(uint32_t noteOnMicros, int16_t noteNumber, uint8_t velocity);
 
         void showMessage();
     };
