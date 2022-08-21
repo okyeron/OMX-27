@@ -16,7 +16,7 @@ namespace midifx
         ARPPAGE_TRANSPPAT
     };
 
-    const char* kModeDisp_[] = {"OFF", "ON", "1-ST", "HOLD"};
+    const char* kModeDisp_[] = {"OFF", "ON", "1-ST", "ONCE", "HOLD"};
 
     const char *kPatMsg_[] = {
         "Up",
@@ -238,7 +238,7 @@ namespace midifx
         // notePos_ = 0;
         // octavePos_ = 0;
 
-        resetArpSeq();
+        // resetArpSeq();
 
         nextStepTimeP_ = micros();
         lastStepTimeP_ = micros();
@@ -327,7 +327,7 @@ namespace midifx
         sortedNoteQueue.clear();
 
         // Copy played or held notes to sorted note queue
-        if (arpMode_ != ARPMODE_ON)
+        if (arpMode_ != ARPMODE_ON && arpMode_ != ARPMODE_ONCE)
         {
             for (ArpNote a : holdNoteQueue)
             {
@@ -528,9 +528,20 @@ namespace midifx
 
     void MidiFXArpeggiator::arpNoteOn(MidiNoteGroup note)
     {
-        if(arpMode_ != ARPMODE_ONESHOT && !arpRunning_ )
+        // if(arpMode_ != ARPMODE_ONESHOT && !arpRunning_ )
+        // {
+        //     startArp();
+        // }
+
+        // if(arpMode_ == ARPMODE_ONESHOT && !arpRunning_)
+        // {
+        //     startArp(); 
+        // }
+
+        if(!arpRunning_)
         {
             startArp();
+            resetArpSeq();
         }
 
         if(hasMidiNotes() == false)
@@ -539,7 +550,7 @@ namespace midifx
             sendMidi_ = note.sendMidi;
             sendCV_ = note.sendCV;
 
-            if(arpMode_ == ARPMODE_ON)
+            if(arpMode_ == ARPMODE_ON || arpMode_ == ARPMODE_ONCE)
             {
                 resetArpSeq();
             }
@@ -550,10 +561,10 @@ namespace midifx
 
             holdNoteQueue.clear();
 
-            if(arpMode_ == ARPMODE_ONESHOT) // Only start when no notes for oneshot
-            {
-                startArp();
-            }
+            // if(arpMode_ == ARPMODE_ONESHOT) // Only start when no notes for oneshot
+            // {
+            //     startArp();
+            // }
         }
         else
         {
@@ -575,7 +586,7 @@ namespace midifx
         sortNotes();
         // generatePattern();
 
-        if(arpMode_ == ARPMODE_ON && hasMidiNotes() == false)
+        if((arpMode_ == ARPMODE_ON || arpMode_ == ARPMODE_ONCE) && hasMidiNotes() == false)
         {
             stopArp();
         }
@@ -862,7 +873,7 @@ namespace midifx
         {
             // reset octave
             octavePos_ = 0;
-            if(arpMode_ == ARPMODE_ONESHOT)
+            if(arpMode_ == ARPMODE_ONESHOT || arpMode_ == ARPMODE_ONCE)
             {
                 stopArp();
                 return;
@@ -879,41 +890,53 @@ namespace midifx
 
         noteNumber = applyModPattern(noteNumber);
         stepLength_ = findStepLength(); // Can be changed by ties in mod pattern
+        
+        if (noteNumber != -127)
+        {
+            noteNumber = applyTranspPattern(noteNumber);
+
+            // Add octave
+            noteNumber = noteNumber + (octavePos_ * 12);
+            playNote(noteon_micros, noteNumber, velocity_);
+        }
+
+        bool seqReset = false;
+
         // Advance mod pattern
         modPos_++;
         if(modPos_ >= modPatternLength_ + 1)
         {
-            if(arpMode_ != ARPMODE_ONESHOT && resetMode_ == ARPRESET_MODPAT)
+            if(resetMode_ == ARPRESET_MODPAT)
             {
                 resetArpSeq();
+                seqReset = true;
             }
             modPos_ = 0;
-        }
-
-        if (noteNumber != -127)
-        {
-            noteNumber = applyTranspPattern(noteNumber);
         }
 
         // Advance transpose pattern
         transpPos_++;
         if (transpPos_ >= transpPatternLength_ + 1)
         {
-            if (arpMode_ != ARPMODE_ONESHOT && resetMode_ == ARPRESET_TRANSPOSEPAT)
+            if (resetMode_ == ARPRESET_TRANSPOSEPAT)
             {
                 resetArpSeq();
+                seqReset = true;
             }
             transpPos_ = 0;
         }
 
-        if (noteNumber != -127)
-        {
-            // Add octave
-            noteNumber = noteNumber + (octavePos_ * 12);
-            playNote(noteon_micros, noteNumber, velocity_);
-        }
+        // if (noteNumber != -127)
+        // {
+        //     // Add octave
+        //     noteNumber = noteNumber + (octavePos_ * 12);
+        //     playNote(noteon_micros, noteNumber, velocity_);
+        // }
 
-        notePos_ = nextNotePos;
+        if(!seqReset)
+        {
+            notePos_ = nextNotePos;
+        }
 
         // playNote(noteon_micros, notePat_[patPos_]);
 
@@ -927,11 +950,11 @@ namespace midifx
 
         int16_t newNote = noteNumber;
 
-        if(modMode == MODPAT_REPEAT && lastPlayedNoteNumber_ == -130)
+        if(modMode == MODPAT_REPEAT && lastPlayedMod_ == MODPAT_PWRCHORD)
         {
             modMode = MODPAT_PWRCHORD;
         }
-        else if(modMode == MODPAT_REPEAT && lastPlayedNoteNumber_ == -131)
+        else if(modMode == MODPAT_REPEAT && lastPlayedMod_ == MODPAT_CHORD)
         {
             modMode = MODPAT_CHORD;
         }
@@ -997,7 +1020,9 @@ namespace midifx
 
                 newNote = -127; // Don't play this note. 
 
-                lastPlayedNoteNumber_ = -130;
+                // lastPlayedNoteNumber_ = -130;
+                lastPlayedMod_ = modMode;
+                lastPlayedNoteNumber_ = newNote;
             }
             else // only 1 note in queue
             {
@@ -1019,7 +1044,10 @@ namespace midifx
                 playNote(noteon_micros, newNote, velocity_);
             }
 
-            lastPlayedNoteNumber_ = -131;
+            lastPlayedMod_ = modMode;
+            lastPlayedNoteNumber_ = newNote;
+
+            // lastPlayedNoteNumber_ = -131;
 
             newNote = -127; // Don't play this note. 
         }
@@ -1033,7 +1061,7 @@ namespace midifx
         {
             uint8_t noteIndex = modMode - MODPAT_NOTE1;
 
-            if(arpMode_ == ARPMODE_ON)
+            if(arpMode_ == ARPMODE_ON || arpMode_ == ARPMODE_ONCE)
             {
                 if (noteIndex < playedNoteQueue.size())
                 {
@@ -1061,6 +1089,7 @@ namespace midifx
 
         if(newNote != -127)
         {
+            lastPlayedMod_ = modMode;
             lastPlayedNoteNumber_ = newNote;
         }
 
@@ -1135,10 +1164,10 @@ namespace midifx
             if (param == 0)
             {
                 uint8_t prevArpMode = arpMode_;
-                arpMode_ = constrain(arpMode_ + amtSlow, 0, 3);
+                arpMode_ = constrain(arpMode_ + amtSlow, 0, 4);
                 if(prevArpMode != arpMode_ && arpMode_ != ARPMODE_HOLD)
                 {
-                    if((arpMode_ == ARPMODE_ON && hasMidiNotes() == false) || arpMode_ == ARPMODE_OFF)
+                    if((arpMode_ == ARPMODE_ON && hasMidiNotes() == false) || (arpMode_ == ARPMODE_ONCE && hasMidiNotes() == false) || arpMode_ == ARPMODE_OFF)
                     {
                         stopArp();
                     }

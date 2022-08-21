@@ -9,6 +9,7 @@ namespace midifx
         ARPMODE_OFF,
         ARPMODE_ON,
         ARPMODE_ONESHOT,
+        ARPMODE_ONCE,
         ARPMODE_HOLD
     };
     
@@ -207,6 +208,7 @@ namespace midifx
         int8_t transpCopyBuffer_;
 
         int16_t lastPlayedNoteNumber_;
+        int8_t lastPlayedMod_;
 
         Micros nextStepTimeP_ = 32;
         Micros lastStepTimeP_ = 32;
