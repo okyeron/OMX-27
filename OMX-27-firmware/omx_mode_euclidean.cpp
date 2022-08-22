@@ -161,6 +161,11 @@ void OmxModeEuclidean::startSequencers()
         euclids[i].start();
     }
 
+    for(uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
+    {
+        subModeMidiFx[i].setSelected(true);
+    }
+
     MM::startClock();
 }
 void OmxModeEuclidean::stopSequencers()
@@ -171,6 +176,11 @@ void OmxModeEuclidean::stopSequencers()
     }
 	MM::stopClock();
     pendingNoteOffs.allOff();
+
+    for(uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
+    {
+        subModeMidiFx[i].resync();
+    }
 }
 
 void OmxModeEuclidean::onClockTick()
@@ -408,7 +418,7 @@ void OmxModeEuclidean::loopUpdate(Micros elapsedTime)
     //     euclids[0].clockTick(playstepmicros, clockConfig.step_micros);
 	// }
 
-    uint32_t playstepmicros = micros();
+    uint32_t playstepmicros = seqConfig.currentFrameMicros;
 
     for (u_int8_t i = 0; i < kNumEuclids; i++)
     {

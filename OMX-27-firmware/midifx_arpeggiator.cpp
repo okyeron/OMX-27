@@ -249,7 +249,7 @@ namespace midifx
                     if(p.noteCache.noteNumber == note.noteNumber && p.noteCache.channel == note.channel)
                     {
                         // Update note off time
-                        pendingNotes[i].offTime = micros() + (note.stepLength * clockConfig.step_micros);
+                        pendingNotes[i].offTime = seqConfig.currentFrameMicros + (note.stepLength * clockConfig.step_micros);
                         canInsert = false;
                         break;
                     }
@@ -265,7 +265,7 @@ namespace midifx
                 Serial.println("Inserting pending note");
                 PendingArpNote pendingNote;
                 pendingNote.noteCache.setFromNoteGroup(note);
-                pendingNote.offTime = micros() + (note.stepLength * clockConfig.step_micros);
+                pendingNote.offTime = seqConfig.currentFrameMicros + (note.stepLength * clockConfig.step_micros);
                 pendingNotes.push_back(pendingNote);
                 arpNoteOn(note);
             }
@@ -293,7 +293,7 @@ namespace midifx
     {
         Serial.println("startArp");
         omxUtil.resetClocks();
-        nextStepTimeP_ = Micros();
+        nextStepTimeP_ = seqConfig.currentFrameMicros;
 
         // tickCount_ = 0;
         // patPos_ = 0;
@@ -302,8 +302,8 @@ namespace midifx
 
         // resetArpSeq();
 
-        nextStepTimeP_ = micros();
-        lastStepTimeP_ = micros();
+        nextStepTimeP_ = seqConfig.currentFrameMicros;
+        lastStepTimeP_ = seqConfig.currentFrameMicros;
         // startMicros = micros();
 
         arpRunning_ = true;
@@ -659,6 +659,17 @@ namespace midifx
     //     return &MidiFXChance::noteInput;
     // }
 
+    // Used with stoping sequencers
+    void MidiFXArpeggiator::resync()
+    {
+        playedNoteQueue.clear();
+        holdNoteQueue.clear();
+        sortedNoteQueue.clear();
+        tempNoteQueue.clear();
+        
+        resetArpSeq();
+    }
+
     void MidiFXArpeggiator::loopUpdate()
     {
         if (messageTextTimer > 0)
@@ -672,7 +683,7 @@ namespace midifx
             }
         }
 
-        auto now = micros();
+        auto now = seqConfig.currentFrameMicros;
 
         // Send arp offs for notes that had fixed lengths
         auto it = pendingNotes.begin();
@@ -714,7 +725,7 @@ namespace midifx
 
         //   uint32_t nextBarMicros = stepMicroDelta_ * (steps_ + 1);
 
-        uint32_t stepmicros = micros();
+        uint32_t stepmicros = seqConfig.currentFrameMicros;
 
         if (stepmicros >= nextStepTimeP_)
         {
@@ -754,7 +765,7 @@ namespace midifx
             return;
         }
 
-        uint32_t noteon_micros = micros();
+        uint32_t noteon_micros = seqConfig.currentFrameMicros;
 
         // if (swing_ > 0 && patPos_ % 2 == 0)
         // {
@@ -1067,7 +1078,7 @@ namespace midifx
         {
             newNote = lowestPitch_ - 12;
             newNote = applyTranspPattern(newNote);
-            uint32_t noteon_micros = micros();
+            uint32_t noteon_micros = seqConfig.currentFrameMicros;
             playNote(noteon_micros, newNote, velocity_);
             lastPlayedNoteNumber_ = newNote;
             newNote = -127;
@@ -1077,7 +1088,7 @@ namespace midifx
         {
             newNote = highestPitch_ + 12;
             newNote = applyTranspPattern(newNote);
-            uint32_t noteon_micros = micros();
+            uint32_t noteon_micros = seqConfig.currentFrameMicros;
             playNote(noteon_micros, newNote, velocity_);
             lastPlayedNoteNumber_ = newNote;
             newNote = -127;
@@ -1085,7 +1096,7 @@ namespace midifx
         break;
         case MODPAT_PWRCHORD:
         {
-            uint32_t noteon_micros = micros();
+            uint32_t noteon_micros = seqConfig.currentFrameMicros;
             stepLength_ = findStepLength();
 
             if(sortedNoteQueue.size() > 1)
@@ -1114,7 +1125,7 @@ namespace midifx
         break;
         case MODPAT_CHORD:
         {
-            uint32_t noteon_micros = micros();
+            uint32_t noteon_micros = seqConfig.currentFrameMicros;
             stepLength_ = findStepLength();
 
             for(ArpNote n : sortedNoteQueue)

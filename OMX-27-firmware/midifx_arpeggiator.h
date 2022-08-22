@@ -78,6 +78,7 @@ namespace midifx
         void onModeChanged() override;
 
         void loopUpdate() override;
+        void resync() override;
 
         bool usesKeys() override;
         void onKeyUpdate(OMXKeypadEvent e, uint8_t funcKeyMode) override;

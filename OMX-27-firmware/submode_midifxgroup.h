@@ -18,6 +18,7 @@ public:
 // Interface methods
     void onModeChanged() override;
     void loopUpdate() override;
+    void resync();
     void updateLEDs() override;
     void onEncoderChanged(Encoder::Update enc);
     void onEncoderButtonDown() override;

@@ -86,6 +86,8 @@ namespace midifx
 
         virtual void loopUpdate() {}
 
+        virtual void resync() {}
+
         virtual void onEncoderChanged(Encoder::Update enc);
         virtual void onEncoderButtonDown();
 

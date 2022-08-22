@@ -199,6 +199,8 @@ struct SequencerConfig {
 	volatile unsigned long noteon_micros;
 	volatile unsigned long noteoff_micros;
 
+	uint32_t currentFrameMicros;
+
     // bool noteSelect = false;
     // bool noteSelection = false;
 

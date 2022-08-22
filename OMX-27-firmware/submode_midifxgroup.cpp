@@ -147,6 +147,18 @@ void SubModeMidiFxGroup::updateFuncKeyMode()
     }
 }
 
+void SubModeMidiFxGroup::resync()
+{
+    for(uint8_t i = 0; i < NUM_MIDIFX_SLOTS; i++)
+    {
+        auto mfx = getMidiFX(i);
+        if(mfx != nullptr)
+        {
+            mfx->resync();
+        }
+    }
+}
+
 void SubModeMidiFxGroup::loopUpdate()
 {
     if(enabled_)
@@ -562,7 +574,7 @@ void SubModeMidiFxGroup::changeMidiFXType(uint8_t slotIndex, uint8_t typeIndex, 
         {
             mfx->setSelected(true);
         }
-        
+
         displayMidiFXName(slotIndex);
     }
 

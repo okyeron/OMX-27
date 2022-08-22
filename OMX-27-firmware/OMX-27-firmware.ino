@@ -322,6 +322,7 @@ void loop()
 		}
 	}
 
+	seqConfig.currentFrameMicros = micros();
 	// Micros timeStart = micros();
 	activeOmxMode->loopUpdate(passed);
 
