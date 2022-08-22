@@ -66,6 +66,20 @@ void SubModeMidiFxGroup::onModeChanged()
     }
 }
 
+void SubModeMidiFxGroup::setSelected(bool newSelected)
+{
+    selected_ = newSelected;
+
+    for (uint8_t i = 0; i < NUM_MIDIFX_SLOTS; i++)
+    {
+        auto mfx = getMidiFX(i);
+        if (mfx != nullptr)
+        {
+            mfx->setSelected(newSelected);
+        }
+    }
+}
+
 void SubModeMidiFxGroup::onEnabled()
 {
     params_.setSelPageAndParam(0, 0);
@@ -543,6 +557,12 @@ void SubModeMidiFxGroup::changeMidiFXType(uint8_t slotIndex, uint8_t typeIndex, 
 
     if (!fromLoad)
     {
+        auto mfx = getMidiFX(slotIndex);
+        if(mfx != nullptr)
+        {
+            mfx->setSelected(true);
+        }
+        
         displayMidiFXName(slotIndex);
     }
 

@@ -62,6 +62,8 @@ void OmxModeMidiKeyboard::onModeActivated()
 
     params.setSelPageAndParam(0, 0);
     encoderSelect = true;
+
+    selectMidiFx(mfxIndex);
 }
 
 void OmxModeMidiKeyboard::onModeDeactivated()
@@ -80,6 +82,16 @@ void OmxModeMidiKeyboard::stopSequencers()
 {
 	MM::stopClock();
     pendingNoteOffs.allOff();
+}
+
+void OmxModeMidiKeyboard::selectMidiFx(uint8_t mfxIndex)
+{
+    this->mfxIndex = mfxIndex;
+
+    for(uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
+    {
+        subModeMidiFx[i].setSelected(i == mfxIndex);
+    }
 }
 
 // void OmxModeMidiKeyboard::changePage(int amt)
@@ -570,12 +582,14 @@ void OmxModeMidiKeyboard::onKeyUpdate(OMXKeypadEvent e)
                 else if(thisKey == 5)
                 {
                     // Turn off midiFx
-                    mfxIndex = 127;
+                    selectMidiFx(127);
+                    // mfxIndex = 127;
                 }
                 else if (thisKey >= 6 && thisKey < 11)
                 {
                     // Change active midiFx
-                    mfxIndex = thisKey - 6;
+                    // mfxIndex = thisKey - 6;
+                    selectMidiFx(thisKey - 6);
                     // enableSubmode(&subModeMidiFx[thisKey - 6]);
                 }
                 // else if (e.down() && thisKey == 10)

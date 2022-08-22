@@ -110,6 +110,8 @@ private:
 
     void stopSequencers();
 
+    void selectMidiFx(uint8_t mfxIndex);
+
     uint8_t mfxIndex = 0;
 
     midimacro::MidiMacroNorns nornsMarco_;

@@ -9,6 +9,24 @@ namespace midifx
         // Serial.println("Deleted vector");
     }
 
+    void MidiFXInterface::setSelected(bool selected)
+    {
+        bool prevSel = selected_;
+        selected_ = selected;
+
+        if (prevSel != selected_)
+        {
+            if (selected_)
+            {
+                onSelected();
+            }
+            else
+            {
+                onDeselected();
+            }
+        }
+    }
+
     void MidiFXInterface::setEnabled(bool newEnabled)
     {
         enabled_ = newEnabled;

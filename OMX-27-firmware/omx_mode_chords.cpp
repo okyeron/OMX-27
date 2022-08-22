@@ -110,6 +110,8 @@ void OmxModeChords::onModeActivated()
     }
 
     pendingNoteOffs.setNoteOffFunction(&OmxModeChords::onPendingNoteOffForwarder, this);
+
+    selectMidiFx(mfxIndex_);
 }
 
 void OmxModeChords::onModeDeactivated()
@@ -128,6 +130,16 @@ void OmxModeChords::stopSequencers()
 {
 	MM::stopClock();
     pendingNoteOffs.allOff();
+}
+
+void OmxModeChords::selectMidiFx(uint8_t mfxIndex)
+{
+    this->mfxIndex_ = mfxIndex;
+
+    for(uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
+    {
+        subModeMidiFx[i].setSelected(i == mfxIndex);
+    }
 }
 
 void OmxModeChords::onClockTick() {
@@ -971,13 +983,15 @@ bool OmxModeChords::onKeyUpdateSelMidiFX(OMXKeypadEvent e)
                 {
                     keyConsumed = true;
                     // Turn off midiFx
-                    mfxIndex_ = 127;
+                    selectMidiFx(127);
+                    // mfxIndex_ = 127;
                 }
                 else if (thisKey >= 6 && thisKey < 11)
                 {
                     keyConsumed = true;
+                    selectMidiFx(thisKey - 6);
                     // Change active midiFx
-                    mfxIndex_ = thisKey - 6;
+                    // mfxIndex_ = thisKey - 6;
                 }
             }
         }

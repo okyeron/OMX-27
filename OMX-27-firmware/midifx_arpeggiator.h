@@ -96,6 +96,9 @@ namespace midifx
         void onEnabled() override;
         void onDisabled() override;
 
+        void onSelected() override;
+        void onDeselected() override;
+
         void onEncoderChangedEditParam(Encoder::Update enc) override;
 
     private:
@@ -130,6 +133,12 @@ namespace midifx
             }
         };
 
+        struct PendingArpNote
+        {
+            MidiNoteGroupCache noteCache;
+            Micros offTime;
+        };
+
         // In struct to limit bits
         struct ArpMod
         {
@@ -145,6 +154,8 @@ namespace midifx
         {
             return (a1.noteNumber < a2.noteNumber);
         }
+
+        uint8_t chancePerc_ : 7;
 
         uint8_t arpMode_ : 3;
 
@@ -181,6 +192,8 @@ namespace midifx
         std::vector<ArpNote> holdNoteQueue; // Holds notes
         std::vector<ArpNote> sortedNoteQueue; // Notes that are used in arp
         std::vector<ArpNote> tempNoteQueue; // Notes that are used in arp
+
+        std::vector<PendingArpNote> pendingNotes; // Notes that are used in arp
 
         uint8_t modPatternLength_ : 4; // Max 15
         ArpMod modPattern_[16];

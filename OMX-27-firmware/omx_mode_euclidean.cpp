@@ -124,9 +124,34 @@ void OmxModeEuclidean::onModeActivated()
     for(uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
     {
         subModeMidiFx[i].setNoteOutputFunc(&OmxModeEuclidean::onNotePostFXForwarder, this);
+        subModeMidiFx[i].setSelected(true);
+        subModeMidiFx[i].onModeChanged();
     }
 
     pendingNoteOffs.setNoteOffFunction(&OmxModeEuclidean::onPendingNoteOffForwarder, this);
+}
+
+void OmxModeEuclidean::onModeDeactivated()
+{
+    sequencer.playing = false;
+    stopSequencers();
+
+    for(uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
+    {
+        subModeMidiFx[i].setEnabled(false);
+        subModeMidiFx[i].setSelected(false);
+        subModeMidiFx[i].onModeChanged();
+    }
+}
+
+void OmxModeEuclidean::selectMidiFx(uint8_t mfxIndex)
+{
+    // this->mfxIndex = mfxIndex;
+
+    // for(uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
+    // {
+    //     subModeMidiFx[i].setSelected(i == mfxIndex);
+    // }
 }
 
 void OmxModeEuclidean::startSequencers()
@@ -352,11 +377,11 @@ void OmxModeEuclidean::onPotChanged(int potIndex, int prevValue, int newValue, i
 
 void OmxModeEuclidean::loopUpdate(Micros elapsedTime)
 {
-    if (isSubmodeEnabled())
-    {
-        activeSubmode->loopUpdate();
-        // return;
-    }
+    // if (isSubmodeEnabled())
+    // {
+    //     activeSubmode->loopUpdate();
+    //     // return;
+    // }
     
     if (midiModeception)
     {
@@ -388,6 +413,12 @@ void OmxModeEuclidean::loopUpdate(Micros elapsedTime)
     for (u_int8_t i = 0; i < kNumEuclids; i++)
     {
         euclids[i].clockTick(playstepmicros, clockConfig.step_micros);
+    }
+
+    for(uint8_t i = 0; i < 5; i++)
+    {
+        // Lets them do things in background
+        subModeMidiFx[i].loopUpdate();
     }
 }
 
@@ -811,7 +842,6 @@ void OmxModeEuclidean::onKeyUpdate(OMXKeypadEvent e)
             if (e.down() && thisKey >= 6 && thisKey < 11)
             {
                 activeEuclid->midiFXGroup = thisKey - 6;
-
                 // enableSubmode(&subModeMidiFx[thisKey - 8]);
             }
         }

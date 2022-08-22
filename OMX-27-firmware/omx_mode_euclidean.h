@@ -25,6 +25,8 @@ public:
     void InitSetup() override;
 
     void onModeActivated() override;
+    void onModeDeactivated() override;
+
 
     void onClockTick() override;
 
@@ -142,6 +144,8 @@ private:
 
     // SubModes
     SubmodeInterface* activeSubmode = nullptr;
+
+    void selectMidiFx(uint8_t mfxIndex);
 
     // SubModeMidiFxGroup subModeMidiFx[kNumMidiFXGroups];
 

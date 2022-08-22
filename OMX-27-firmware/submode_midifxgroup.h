@@ -24,6 +24,8 @@ public:
     void onKeyUpdate(OMXKeypadEvent e) override;
     void onDisplayUpdate() override;
 
+    void setSelected(bool newSelected);
+
     void noteInput(MidiNoteGroup note);
     void setNoteOutputFunc(void (*fptr)(void *, MidiNoteGroup), void *context);
 
@@ -38,6 +40,7 @@ protected:
     void onEncoderChangedEditParam(Encoder::Update enc) override;
 
 private:
+    bool selected_ = false;
     bool midiFXParamView_ = false; // If true, parameters adjust the selected midiFX slot. 
     uint8_t selectedMidiFX_ = 0; // Index of selected midiFX slot
 

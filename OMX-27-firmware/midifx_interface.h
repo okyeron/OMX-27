@@ -79,6 +79,8 @@ namespace midifx
 
         virtual void onModeChanged(){};
 
+        virtual void setSelected(bool selected);
+
         virtual void setEnabled(bool newEnabled);
         virtual bool getEnabled();
 
@@ -110,6 +112,8 @@ namespace midifx
 
     protected:
         bool enabled_;
+        bool selected_;
+
         bool encoderSelect_;
         ParamManager params_;
 
@@ -120,6 +124,9 @@ namespace midifx
 
         virtual void onEnabled() {} // Called whenever entering mode
         virtual void onDisabled() {} // Called whenever entering mode
+
+        virtual void onSelected() {} // Called whenever MidiFX group containing this MidiFX is selected
+        virtual void onDeselected() {} // Called whenever MidiFX group containing this MidiFX is deselected
 
         virtual void onEncoderChangedSelectParam(Encoder::Update enc);
         virtual void onEncoderChangedEditParam(Encoder::Update enc) = 0;

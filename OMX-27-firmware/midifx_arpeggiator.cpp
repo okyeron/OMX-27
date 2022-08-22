@@ -105,6 +105,7 @@ namespace midifx
 
     MidiFXArpeggiator::MidiFXArpeggiator()
     {
+        chancePerc_ = 100;
         arpMode_ = 1;
         resetMode_ = ARPRESET_NORMAL;
         arpPattern_ = 0;
@@ -190,17 +191,37 @@ namespace midifx
         // sortedNoteQueue.clear();
     }
 
+    void MidiFXArpeggiator::onSelected()
+    {
+        if(arpRunning_)
+        {
+            resetArpSeq();
+            startArp();
+        }
+    }
+
+    void MidiFXArpeggiator::onDeselected()
+    {
+
+    }
+
     void MidiFXArpeggiator::noteInput(MidiNoteGroup note)
     {
         if(arpMode_ == ARPMODE_OFF)
         {
-            processNoteOff(note);
+            sendNoteOut(note);
             return;
         }
 
         if(note.channel != (midiChannel_ + 1))
         {
             sendNoteOut(note);
+        }
+
+        if(chancePerc_ != 100 && (chancePerc_ == 0 || random(100) > chancePerc_))
+        {
+            sendNoteOut(note);
+            return;
         }
 
         if(note.unknownLength)
@@ -213,6 +234,47 @@ namespace midifx
             {
                 arpNoteOn(note);
             }
+        }
+        else
+        {
+            bool canInsert = true;
+
+            if(pendingNotes.size() < queueSize)
+            {
+                for(uint8_t i = 0; i < pendingNotes.size(); i++)
+                {
+                    PendingArpNote p = pendingNotes[i];
+
+                    // Note already exists
+                    if(p.noteCache.noteNumber == note.noteNumber && p.noteCache.channel == note.channel)
+                    {
+                        // Update note off time
+                        pendingNotes[i].offTime = micros() + (note.stepLength * clockConfig.step_micros);
+                        canInsert = false;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                canInsert = false;
+            }
+
+            if(canInsert)
+            {
+                Serial.println("Inserting pending note");
+                PendingArpNote pendingNote;
+                pendingNote.noteCache.setFromNoteGroup(note);
+                pendingNote.offTime = micros() + (note.stepLength * clockConfig.step_micros);
+                pendingNotes.push_back(pendingNote);
+                arpNoteOn(note);
+            }
+            else
+            {
+                sendNoteOut(note);
+            }
+            // if(pendingNotes.si)
+            // arpNoteOn(note);
         }
 
         // Serial.println("MidiFXChance::noteInput");
@@ -610,13 +672,33 @@ namespace midifx
             }
         }
 
+        auto now = micros();
+
+        // Send arp offs for notes that had fixed lengths
+        auto it = pendingNotes.begin();
+        while (it != pendingNotes.end())
+        {
+            // remove matching note numbers
+            if(it->offTime <= now)
+            {
+                Serial.println("Removing pending note");
+                arpNoteOff(it->noteCache.toMidiNoteGroup());
+                // `erase()` invalidates the iterator, use returned iterator
+                it = pendingNotes.erase(it);
+            }
+            else
+            {
+                ++it;
+            }
+        }
+
         // if (patternDirty_)
         // {
         //     regeneratePattern();
         //     patternDirty_ = false;
         // }
 
-        if (!arpRunning_)
+        if (!arpRunning_ || !selected_)
         {
             return;
         }
@@ -1159,7 +1241,7 @@ namespace midifx
         auto amtSlow = enc.accel(1);
         auto amtFast = enc.accel(5);
 
-        if(page == ARPPAGE_1) // Mode, Pattern, Reset mode
+        if(page == ARPPAGE_1) // Mode, Pattern, Reset mode, Chance
         {
             if (param == 0)
             {
@@ -1193,6 +1275,10 @@ namespace midifx
                 {
                     // omxDisp.displayMessage(kResetMsg_[resetMode_]);
                 }
+            }
+            else if(param == 3)
+            {
+                chancePerc_ = constrain(chancePerc_ + amtFast, 0, 100);
             }
             
         }
@@ -1697,14 +1783,17 @@ namespace midifx
         omxDisp.clearLegends();
 
 
-        if(page == ARPPAGE_1) // Mode, Pattern, Reset mode
+        if(page == ARPPAGE_1) // Mode, Pattern, Reset mode, Chance
         {
             omxDisp.legends[0] = "MODE";
             omxDisp.legends[1] = "PAT";
             omxDisp.legends[2] = "RSET";
+            omxDisp.legends[3] = "CHC%";
             omxDisp.legendText[0] = kModeDisp_[arpMode_];
             omxDisp.legendText[1] = kPatDisp_[arpPattern_];
             omxDisp.legendText[2] = kResetDisp_[resetMode_];
+            omxDisp.useLegendString[3] = true;
+            omxDisp.legendString[3] = String(chancePerc_) + "%";
         }
         else if(page == ARPPAGE_2) // Rate, Octave Range, Gate, BPM
         {
