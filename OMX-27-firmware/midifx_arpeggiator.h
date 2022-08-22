@@ -151,7 +151,27 @@ namespace midifx
             }
         };
 
-        static inline bool compareArpNote(ArpNote a1, ArpNote a2)
+        struct ArpSave
+        {
+            uint8_t chancePerc : 7;
+            uint8_t arpMode : 3;
+            uint8_t arpPattern : 5;
+            uint8_t resetMode : 3;
+            uint8_t midiChannel : 4; // 0-15, Add 1 when using
+            uint8_t swing : 7;       // max 100
+            uint8_t rateIndex : 4;   // max 15
+            uint8_t octaveRange : 4; // max 7, 0 = 1 octave
+            uint8_t gate : 7;       // 0 - 200
+
+            uint8_t modPatternLength : 4; // Max 15
+            ArpMod modPattern[16];
+
+            uint8_t transpPatternLength : 4; // Max 15
+            int8_t transpPattern[16];
+        };
+
+        static inline bool
+        compareArpNote(ArpNote a1, ArpNote a2)
         {
             return (a1.noteNumber < a2.noteNumber);
         }
@@ -176,7 +196,7 @@ namespace midifx
 
         uint8_t gate = 100; // 0 - 200
 
-        int arpSize = sizeof(ArpNote);
+        // int arpSize = sizeof(ArpNote);
 
 
         uint8_t velocity_ : 7;

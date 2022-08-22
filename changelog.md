@@ -1,5 +1,19 @@
 # Change log
 
+```
+### 1.12.2 arp preview
+*** Warning!!!: This will clear your global save state***
+- Saving and loading arpeggiator configs
+- Copy pasting arpeggiators
+- Arps have chance param now
+- MidiFX and arps work in Chord Mode now
+- - Use in same way as MI by holding aux key
+- Arps work in euclidean mode
+- Midifx like harmonizer and randomize in front of the arp can cause arp to get stuck on when used in MI and Chord modes.
+- - Turn arp mode to off then back on if this happens. 
+- - Recommend trying this with the euclidean sequencer. 
+- - MidiFX after the arp are fun and won't cause arp to be stuck on
+```
 
 ```
 ### 1.12.1 arp preview

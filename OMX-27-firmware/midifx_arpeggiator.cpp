@@ -161,7 +161,25 @@ namespace midifx
 
     MidiFXInterface* MidiFXArpeggiator::getClone()
     {
-        auto clone = new MidiFXArpeggiator();
+        MidiFXArpeggiator* clone = new MidiFXArpeggiator();
+        clone->chancePerc_ = chancePerc_;
+        clone->arpMode_ = arpMode_;
+        clone->arpPattern_ = arpPattern_;
+        clone->resetMode_ = resetMode_;
+        clone->midiChannel_ = midiChannel_;
+        clone->swing_ = swing_;
+        clone->rateIndex_ = rateIndex_;
+        clone->octaveRange_ = octaveRange_;
+        clone->gate = gate;
+        clone->modPatternLength_ = modPatternLength_;
+        clone->transpPatternLength_ = transpPatternLength_;
+
+        for(uint8_t i = 0; i < 16; i++)
+        {
+            clone->modPattern_[i] = modPattern_[i];
+            clone->transpPattern_[i] = transpPattern_[i];
+        }
+
         return clone;
     }
 
@@ -171,6 +189,8 @@ namespace midifx
         playedNoteQueue.clear();
         holdNoteQueue.clear();
         sortedNoteQueue.clear();
+        tempNoteQueue.clear();
+        pendingNotes.clear();
         heldKey16_ = -1;
     }
 
@@ -1264,6 +1284,14 @@ namespace midifx
                     {
                         stopArp();
                     }
+
+                    switch (arpMode_)
+                    {
+                    case ARPMODE_OFF:
+                    case ARPMODE_ON:
+                        resync();
+                        break;
+                    }
                     // omxDisp.displayMessage(tempString_.c_str());
                 }
             }
@@ -1838,21 +1866,66 @@ namespace midifx
 
     int MidiFXArpeggiator::saveToDisk(int startingAddress, Storage *storage)
     {
-        return startingAddress;
-        // // Serial.println((String)"Saving mfx chance: " + startingAddress); // 5969
-        // // Serial.println((String)"chancePerc_: " + chancePerc_);
-        // storage->write(startingAddress, chancePerc_);
-        // return startingAddress + 1;
+        ArpSave arpSave;
+        arpSave.chancePerc = chancePerc_;
+        arpSave.arpMode = arpMode_;
+        arpSave.arpPattern = arpPattern_;
+        arpSave.resetMode = resetMode_;
+        arpSave.midiChannel = midiChannel_;
+        arpSave.swing = swing_;
+        arpSave.rateIndex = rateIndex_;
+        arpSave.octaveRange = octaveRange_;
+        arpSave.gate = gate;
+        arpSave.modPatternLength = modPatternLength_;
+        arpSave.transpPatternLength = transpPatternLength_;
+
+        for (uint8_t i = 0; i < 16; i++)
+        {
+            arpSave.modPattern[i] = modPattern_[i];
+            arpSave.transpPattern[i] = transpPattern_[i];
+        }
+
+        int saveSize = sizeof(ArpSave);
+
+        auto saveBytesPtr = (byte *)(&arpSave);
+        for (int j = 0; j < saveSize; j++)
+        {
+            storage->write(startingAddress + j, *saveBytesPtr++);
+        }
+
+        return startingAddress + saveSize;
     }
 
     int MidiFXArpeggiator::loadFromDisk(int startingAddress, Storage *storage)
     {
-        return startingAddress;
-        // // Serial.println((String)"Loading mfx chance: " + startingAddress); // 5969
+        int saveSize = sizeof(ArpSave);
 
-        // chancePerc_ = storage->read(startingAddress);
-        // // Serial.println((String)"chancePerc_: " + chancePerc_);
+        auto arpSave = ArpSave{};
+        auto current = (byte *)&arpSave;
+        for (int j = 0; j < saveSize; j++)
+        {
+            *current = storage->read(startingAddress + j);
+            current++;
+        }
 
-        // return startingAddress + 1;
+        chancePerc_ = arpSave.chancePerc;
+        arpMode_ = arpSave.arpMode;
+        arpPattern_= arpSave.arpPattern;
+        resetMode_= arpSave.resetMode;
+        midiChannel_= arpSave.midiChannel;
+        swing_= arpSave.swing; 
+        rateIndex_= arpSave.rateIndex;   
+        octaveRange_= arpSave.octaveRange;
+        gate= arpSave.gate;       
+        modPatternLength_= arpSave.modPatternLength;
+        transpPatternLength_= arpSave.transpPatternLength;
+
+        for (uint8_t i = 0; i < 16; i++)
+        {
+            modPattern_[i] = arpSave.modPattern[i];
+            transpPattern_[i] = arpSave.transpPattern[i];
+        }
+
+        return startingAddress + saveSize;
     }
 }
