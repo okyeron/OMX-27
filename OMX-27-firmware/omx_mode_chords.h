@@ -7,6 +7,8 @@
 // #include "omx_mode_midi_keyboard.h"
 #include "param_manager.h"
 #include "storage.h"
+#include "submode_interface.h"
+#include "submode_midifxgroup.h"
 
 enum ChordVoicing
 {
@@ -121,6 +123,7 @@ public:
     void InitSetup() override;
 
     void onModeActivated() override;
+    void onModeDeactivated() override;
 
     void onClockTick() override;
 
@@ -173,10 +176,19 @@ private:
     ChordSettings chords_[16];
     ChordNotes chordNotes_[16];
 
+    ChordNotes chordEditNotes_;
+    uint8_t activeChordEditDegree_;
+
     ChordSettings chordSaves_[NUM_CHORD_SAVES][16];
 
     String notesString = "";
     String notesString2 = "";
+
+     // SubModes
+    SubmodeInterface* activeSubmode = nullptr;
+
+    uint8_t mfxIndex_ = 0;
+
 
 
     // int chordSize = sizeof(chords_);
@@ -195,9 +207,37 @@ private:
     void onManualStrumOn(uint8_t chordIndex);
     void onChordOn(uint8_t chordIndex);
     void onChordOff(uint8_t chordIndex);
+    void onChordEditOn(uint8_t chordIndex);
+    void onChordEditOff();
 
     bool constructChord(uint8_t chordIndex);
 
     static int AddOctave(int note, int8_t octave);
     static int TransposeNote(int note, int8_t semitones);
+
+
+    void enableSubmode(SubmodeInterface* subMode);
+    void disableSubmode();
+    bool isSubmodeEnabled();
+
+    bool onKeyUpdateSelMidiFX(OMXKeypadEvent e);
+    bool onKeyHeldSelMidiFX(OMXKeypadEvent e);
+
+    void doNoteOn(int noteNumber, uint8_t velocity, uint8_t midiChannel);
+    void doNoteOff(int noteNumber, uint8_t midiChannel);
+
+    void stopSequencers();
+
+    static void onNotePostFXForwarder(void *context, MidiNoteGroup note)
+    {
+        static_cast<OmxModeChords *>(context)->onNotePostFX(note);
+    }
+    void onNotePostFX(MidiNoteGroup note);
+
+    static void onPendingNoteOffForwarder(void *context, int note, int channel)
+    {
+        static_cast<OmxModeChords *>(context)->onPendingNoteOff(note, channel);
+    }
+
+    void onPendingNoteOff(int note, int channel);
 };

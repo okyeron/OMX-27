@@ -1,5 +1,17 @@
 # Change log
 
+
+```
+### 1.12.1 arp preview
+*** Warning!!!: Might clear your global save state***
+- Adds the arpeggiator MidiFX
+- Arpeggiator currently only works in MI mode. 
+- Enter MidiFX mode by holding AUX + MidiFX Mode Key
+- Arps for MidiFX groups are currently always running, so if you have multiple arps with hold on
+- Things can get weird. 
+- Try adding MidiFX before and after arp for fun and profit!
+```
+
 ```
 ### 1.11.7 alpha
 *** Warning!!!: Will clear your global save state***

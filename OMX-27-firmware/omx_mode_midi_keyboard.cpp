@@ -9,11 +9,11 @@
 #include "noteoffs.h"
 #include "sequencer.h"
 
-const int kSelMidiFXOffColor = SALMON;
-const int kMidiFXOffColor = RED;
+// const int kSelMidiFXOffColor = SALMON;
+// const int kMidiFXOffColor = RED;
 
-const int kSelMidiFXColor = LTCYAN;
-const int kMidiFXColor = BLUE;
+// const int kSelMidiFXColor = LTCYAN;
+// const int kMidiFXColor = BLUE;
 
 OmxModeMidiKeyboard::OmxModeMidiKeyboard()
 {
@@ -105,7 +105,7 @@ void OmxModeMidiKeyboard::stopSequencers()
 
 void OmxModeMidiKeyboard::onPotChanged(int potIndex, int prevValue, int newValue, int analogDelta)
 {
-     if (isSubmodeEnabled() && activeSubmode->usesPots())
+    if (isSubmodeEnabled() && activeSubmode->usesPots())
     {
         activeSubmode->onPotChanged(potIndex, prevValue, newValue, analogDelta);
         return;
@@ -732,11 +732,11 @@ void OmxModeMidiKeyboard::updateLEDs()
         strip.setPixelColor(12, color4);
 
         // MidiFX off
-        strip.setPixelColor(5, (mfxIndex >= NUM_MIDIFX_GROUPS ? kSelMidiFXOffColor : kMidiFXOffColor));
+        strip.setPixelColor(5, (mfxIndex >= NUM_MIDIFX_GROUPS ? colorConfig.selMidiFXOffColor : colorConfig.midiFXOffColor));
 
         for (uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
         {
-            auto mfxColor = (i == mfxIndex) ? kSelMidiFXColor : kMidiFXColor;
+            auto mfxColor = (i == mfxIndex) ? colorConfig.selMidiFXColor : colorConfig.midiFXColor;
 
             strip.setPixelColor(6 + i, mfxColor);
         }
@@ -984,6 +984,11 @@ void OmxModeMidiKeyboard::enableSubmode(SubmodeInterface *subMode)
 
 void OmxModeMidiKeyboard::disableSubmode()
 {
+    if(activeSubmode != nullptr)
+    {
+        activeSubmode->setEnabled(false);
+    }
+
     activeSubmode = nullptr;
     omxDisp.setDirty();
 }

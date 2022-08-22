@@ -8,6 +8,7 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <ResponsiveAnalogRead.h>
+#include "colors.h"
 
 // #include <cstdarg>
 
@@ -232,6 +233,11 @@ struct ColorConfig
 	uint16_t midiBg_Hue = 0;
 	uint8_t midiBg_Sat = 255;
 	uint8_t midiBg_Brightness = 255;
+
+	uint32_t selMidiFXOffColor = SALMON;
+	uint32_t midiFXOffColor = RED;
+	uint32_t selMidiFXColor = LTCYAN;
+	uint32_t midiFXColor = BLUE;
 };
 
 extern ColorConfig colorConfig;

@@ -95,6 +95,39 @@ void OmxModeChords::onModeActivated()
 {
     params_.setSelPageAndParam(0,0);
     encoderSelect_ = true;
+
+    sequencer.playing = false;
+    stopSequencers();
+
+    omxLeds.setDirty();
+    omxDisp.setDirty();
+
+    for(uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
+    {
+        subModeMidiFx[i].setEnabled(true);
+        subModeMidiFx[i].onModeChanged();
+        subModeMidiFx[i].setNoteOutputFunc(&OmxModeChords::onNotePostFXForwarder, this);
+    }
+
+    pendingNoteOffs.setNoteOffFunction(&OmxModeChords::onPendingNoteOffForwarder, this);
+}
+
+void OmxModeChords::onModeDeactivated()
+{
+    sequencer.playing = false;
+    stopSequencers();
+
+    for(uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
+    {
+        subModeMidiFx[i].setEnabled(false);
+        subModeMidiFx[i].onModeChanged();
+    }
+}
+
+void OmxModeChords::stopSequencers()
+{
+	MM::stopClock();
+    pendingNoteOffs.allOff();
 }
 
 void OmxModeChords::onClockTick() {
@@ -102,6 +135,12 @@ void OmxModeChords::onClockTick() {
 
 void OmxModeChords::onPotChanged(int potIndex, int prevValue, int newValue, int analogDelta)
 {
+    if (isSubmodeEnabled() && activeSubmode->usesPots())
+    {
+        activeSubmode->onPotChanged(potIndex, prevValue, newValue, analogDelta);
+        return;
+    }
+
     // Serial.println("onPotChanged: " + String(potIndex));
     if (chordEditMode_ == false && mode_ == CHRDMODE_MANSTRUM)
     {
@@ -193,6 +232,8 @@ void OmxModeChords::onPotChanged(int potIndex, int prevValue, int newValue, int 
 
 void OmxModeChords::loopUpdate(Micros elapsedTime)
 {
+    updateFuncKeyMode();
+
     if (elapsedTime > 0)
 	{
 		if (!sequencer.playing)
@@ -202,7 +243,11 @@ void OmxModeChords::loopUpdate(Micros elapsedTime)
 		}
 	}
 
-    updateFuncKeyMode();
+    for(uint8_t i = 0; i < 5; i++)
+    {
+        // Lets them do things in background
+        subModeMidiFx[i].loopUpdate();
+    }
 }
 
 void OmxModeChords::updateFuncKeyMode()
@@ -239,6 +284,12 @@ void OmxModeChords::updateFuncKeyMode()
 
 void OmxModeChords::onEncoderChanged(Encoder::Update enc)
 {
+    if (isSubmodeEnabled())
+    {
+        activeSubmode->onEncoderChanged(enc);
+        return;
+    }
+
     if(chordEditMode_ == false && mode_ == CHRDMODE_MANSTRUM)
     {
         onEncoderChangedManStrum(enc);
@@ -451,6 +502,12 @@ void OmxModeChords::onEncoderChangedManStrum(Encoder::Update enc)
 
 void OmxModeChords::onEncoderButtonDown()
 {
+    if (isSubmodeEnabled())
+    {
+        activeSubmode->onEncoderButtonDown();
+        return;
+    }
+
     encoderSelect_ = !encoderSelect_;
     omxDisp.setDirty();
 }
@@ -461,16 +518,29 @@ void OmxModeChords::onEncoderButtonDownLong()
 
 bool OmxModeChords::shouldBlockEncEdit()
 {
+    if (isSubmodeEnabled())
+    {
+        return activeSubmode->shouldBlockEncEdit();
+    }
+
     return false;
 }
 
 void OmxModeChords::onKeyUpdate(OMXKeypadEvent e)
 {
+    if (isSubmodeEnabled())
+    {
+        activeSubmode->onKeyUpdate(e);
+        return;
+    }
+
     if(chordEditMode_)
     {
         onKeyUpdateChordEdit(e);
         return;
     }
+
+    if(onKeyUpdateSelMidiFX(e)) return;
 
     if(e.held()) return;
 
@@ -681,6 +751,7 @@ void OmxModeChords::onKeyUpdateChordEdit(OMXKeypadEvent e)
         if(e.down())
         {
             // Exit Chord Edit Mode
+            onChordEditOff();
             params_.setSelPageAndParam(CHRDPAGE_NOTES, 0);
             encoderSelect_ = true;
             chordEditMode_ = false;
@@ -765,8 +836,9 @@ void OmxModeChords::onKeyUpdateChordEdit(OMXKeypadEvent e)
                 chords_[selectedChord_].degree = thisKey - 19;
                 // params_.setSelPageAndParam(CHRDPAGE_2, 1);
                 // encoderSelect_ = false;
-                onChordOff(selectedChord_);
-                onChordOn(selectedChord_);
+                onChordEditOff();
+                onChordEditOn(selectedChord_);
+                activeChordEditDegree_ = thisKey - 19;
             }
         }
         else if(chordEditParam_ == 1) // Octave
@@ -819,7 +891,10 @@ void OmxModeChords::onKeyUpdateChordEdit(OMXKeypadEvent e)
         }
         else if (thisKey >= 19)
         {
-            onChordOff(selectedChord_);
+            if(thisKey - 19 == activeChordEditDegree_)
+            {
+                onChordEditOff();
+            }
         }
     }
 
@@ -837,7 +912,224 @@ void OmxModeChords::enterChordEditMode()
 
 void OmxModeChords::onKeyHeldUpdate(OMXKeypadEvent e)
 {
-    
+    if (isSubmodeEnabled())
+    {
+        activeSubmode->onKeyHeldUpdate(e);
+        return;
+    }
+
+    if(onKeyHeldSelMidiFX(e)) return;
+}
+
+void OmxModeChords::enableSubmode(SubmodeInterface *subMode)
+{
+    if(activeSubmode != nullptr)
+    {
+        activeSubmode->setEnabled(false);
+    }
+
+    activeSubmode = subMode;
+    activeSubmode->setEnabled(true);
+    omxDisp.setDirty();
+}
+void OmxModeChords::disableSubmode()
+{
+    if(activeSubmode != nullptr)
+    {
+        activeSubmode->setEnabled(false);
+    }
+
+    activeSubmode = nullptr;
+    omxDisp.setDirty();
+}
+
+bool OmxModeChords::isSubmodeEnabled()
+{
+    if(activeSubmode == nullptr) return false;
+
+    if(activeSubmode->isEnabled() == false){
+        disableSubmode();
+        return false;
+    }
+
+    return true;
+}
+
+bool OmxModeChords::onKeyUpdateSelMidiFX(OMXKeypadEvent e)
+{
+    int thisKey = e.key();
+
+    bool keyConsumed = false;
+
+    if (!e.held())
+    { 
+        if (e.down() && thisKey != 0)
+        {
+            if (auxDown_) // Aux mode
+            {
+                if(thisKey == 5)
+                {
+                    keyConsumed = true;
+                    // Turn off midiFx
+                    mfxIndex_ = 127;
+                }
+                else if (thisKey >= 6 && thisKey < 11)
+                {
+                    keyConsumed = true;
+                    // Change active midiFx
+                    mfxIndex_ = thisKey - 6;
+                }
+            }
+        }
+    }
+
+    return keyConsumed;
+}
+
+bool OmxModeChords::onKeyHeldSelMidiFX(OMXKeypadEvent e)
+{
+    int thisKey = e.key();
+
+    bool keyConsumed = false;
+
+    if (auxDown_) // Aux mode
+    {
+        // Enter MidiFX mode
+        if (thisKey >= 6 && thisKey < 11)
+        {
+            keyConsumed = true;
+            enableSubmode(&subModeMidiFx[thisKey - 6]);
+        }
+    }
+
+    return keyConsumed;
+}
+
+void OmxModeChords::doNoteOn(int noteNumber, uint8_t velocity, uint8_t midiChannel)
+{
+    if(noteNumber < 0 || noteNumber > 127) return;
+
+    // MidiNoteGroup noteGroup = omxUtil.midiNoteOn2(musicScale, keyIndex, midiSettings.defaultVelocity, sysSettings.midiChannel);
+    // if(noteGroup.noteNumber == 255) return;
+
+    MidiNoteGroup noteGroup;
+
+    noteGroup.noteOff = false;
+    noteGroup.noteNumber = noteNumber;
+    noteGroup.prevNoteNumber = noteNumber;
+    noteGroup.velocity = velocity;
+    noteGroup.channel = midiChannel;
+    noteGroup.unknownLength = true;
+    noteGroup.stepLength = 0;
+    noteGroup.sendMidi = true;
+    noteGroup.sendCV = false;
+    noteGroup.noteonMicros = micros();
+
+    // Serial.println("doNoteOn: " + String(noteGroup.noteNumber));
+
+    if (mfxIndex_ < NUM_MIDIFX_GROUPS)
+    {
+        subModeMidiFx[mfxIndex_].noteInput(noteGroup);
+        // subModeMidiFx.noteInput(noteGroup);
+    }
+    else
+    {
+        onNotePostFX(noteGroup);
+    }
+}
+
+void OmxModeChords::doNoteOff(int noteNumber, uint8_t midiChannel)
+{
+    if(noteNumber < 0 || noteNumber > 127) return;
+
+    // MidiNoteGroup noteGroup = omxUtil.midiNoteOff2(keyIndex, sysSettings.midiChannel);
+
+    // if(noteGroup.noteNumber == 255) return;
+
+    MidiNoteGroup noteGroup;
+
+    noteGroup.noteOff = true;
+    noteGroup.noteNumber = noteNumber;
+    noteGroup.prevNoteNumber = noteNumber;
+    noteGroup.velocity = 0;
+    noteGroup.channel = midiChannel;
+    noteGroup.unknownLength = true;
+    noteGroup.stepLength = 0;
+    noteGroup.sendMidi = true;
+    noteGroup.sendCV = false;
+    noteGroup.noteonMicros = micros();
+
+    // Serial.println("doNoteOff: " + String(noteGroup.noteNumber));
+
+    noteGroup.unknownLength = true;
+    noteGroup.prevNoteNumber = noteGroup.noteNumber;
+
+    if (mfxIndex_ < NUM_MIDIFX_GROUPS)
+    {
+        subModeMidiFx[mfxIndex_].noteInput(noteGroup);
+    // subModeMidiFx.noteInput(noteGroup);
+    }
+    else
+    {
+        onNotePostFX(noteGroup);
+    }
+}
+
+void OmxModeChords::onNotePostFX(MidiNoteGroup note)
+{
+    if(note.noteOff)
+    {
+        // Serial.println("OmxModeMidiKeyboard::onNotePostFX noteOff: " + String(note.noteNumber));
+
+        if (note.sendMidi)
+        {
+            MM::sendNoteOff(note.noteNumber, note.velocity, note.channel);
+        }
+        if (note.sendCV)
+        {
+            omxUtil.cvNoteOff();
+        }
+    }
+    else
+    {
+        if (note.unknownLength == false)
+        {
+            uint32_t noteOnMicros = note.noteonMicros; // TODO Might need to be set to current micros
+            pendingNoteOns.insert(note.noteNumber, note.velocity, note.channel, noteOnMicros, note.sendCV);
+
+            // Serial.println("StepLength: " + String(note.stepLength));
+
+            uint32_t noteOffMicros = noteOnMicros + (note.stepLength * clockConfig.step_micros);
+            pendingNoteOffs.insert(note.noteNumber, note.channel, noteOffMicros, note.sendCV);
+
+            // Serial.println("noteOnMicros: " + String(noteOnMicros));
+            // Serial.println("noteOffMicros: " + String(noteOffMicros));
+        }
+        else
+        {
+            // Serial.println("OmxModeMidiKeyboard::onNotePostFX noteOn: " + String(note.noteNumber));
+
+            if (note.sendMidi)
+            {
+                MM::sendNoteOn(note.noteNumber, note.velocity, note.channel);
+            }
+            if (note.sendCV)
+            {
+                omxUtil.cvNoteOn(note.noteNumber);
+            }
+        }
+    }
+}
+
+void OmxModeChords::onPendingNoteOff(int note, int channel)
+{
+    // Serial.println("OmxModeEuclidean::onPendingNoteOff " + String(note) + " " + String(channel));
+    // subModeMidiFx.onPendingNoteOff(note, channel);
+
+    for(uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
+    {
+        subModeMidiFx[i].onPendingNoteOff(note, channel);
+    }
 }
 
 void OmxModeChords::updateLEDs()
@@ -860,6 +1152,17 @@ void OmxModeChords::updateLEDs()
 		strip.setPixelColor(2, (blinkState ? MAGENTA : LEDOFF));
 		strip.setPixelColor(11, (blinkState ? ORANGE : LEDOFF));
 		strip.setPixelColor(12, (blinkState ? RBLUE : LEDOFF));
+
+        // MidiFX off
+        strip.setPixelColor(5, (mfxIndex_ >= NUM_MIDIFX_GROUPS ? colorConfig.selMidiFXOffColor : colorConfig.midiFXOffColor));
+
+        for (uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
+        {
+            auto mfxColor = (i == mfxIndex_) ? colorConfig.selMidiFXColor : colorConfig.midiFXColor;
+
+            strip.setPixelColor(6 + i, mfxColor);
+        }
+
         return;
     }
 
@@ -1130,6 +1433,12 @@ void OmxModeChords::setupPageLegends()
 
 void OmxModeChords::onDisplayUpdate()
 {
+    if (isSubmodeEnabled())
+    {
+        activeSubmode->onDisplayUpdate();
+        return;
+    }
+
     omxLeds.updateBlinkStates();
 
     if (omxLeds.isDirty())
@@ -1295,18 +1604,20 @@ void OmxModeChords::onChordOn(uint8_t chordIndex)
         chordNotes_[chordIndex].channel = sysSettings.midiChannel;
         uint8_t velocity = midiSettings.defaultVelocity;
 
-        uint32_t noteOnMicros = micros();
+        // uint32_t noteOnMicros = micros();
 
         // Serial.print("Chord: ");
         for(uint8_t i = 0; i < 6; i++)
         {
             int note = chordNotes_[chordIndex].notes[i];
-            // Serial.print(String(note) + " ");
-            if(note >= 0 && note <= 127)
-            {
-                // MM::sendNoteOn(note, velocity, chordNotes_[chordIndex].channel);
-                pendingNoteOns.insert(note, velocity, chordNotes_[chordIndex].channel, noteOnMicros, false);
-            }
+
+            // if(note >= 0 && note <= 127)
+            // {
+            //     // MM::sendNoteOn(note, velocity, chordNotes_[chordIndex].channel);
+            //     pendingNoteOns.insert(note, velocity, chordNotes_[chordIndex].channel, noteOnMicros, false);
+            // }
+
+            doNoteOn(note, velocity, chordNotes_[chordIndex].channel);
         }
         // Serial.print("\n");
     }
@@ -1324,15 +1635,83 @@ void OmxModeChords::onChordOff(uint8_t chordIndex)
     for (uint8_t i = 0; i < 6; i++)
     {
         int note = chordNotes_[chordIndex].notes[i];
-        if (note >= 0 && note <= 127)
-        {
-            // MM::sendNoteOff(note, 0, chordNotes_[chordIndex].channel);
 
-            pendingNoteOns.remove(note, chordNotes_[chordIndex].channel);
-            pendingNoteOffs.sendOffNow(note, chordNotes_[chordIndex].channel, false);
-        }
+        doNoteOff(note, chordNotes_[chordIndex].channel);
+
+        // if (note >= 0 && note <= 127)
+        // {
+        //     // MM::sendNoteOff(note, 0, chordNotes_[chordIndex].channel);
+
+        //     pendingNoteOns.remove(note, chordNotes_[chordIndex].channel);
+        //     pendingNoteOffs.sendOffNow(note, chordNotes_[chordIndex].channel, false);
+        // }
     }
     chordNotes_[chordIndex].active = false;
+}
+
+void OmxModeChords::onChordEditOn(uint8_t chordIndex)
+{
+    // Serial.println("onChordOn: " + String(chordIndex));
+    if(chordEditNotes_.active) 
+    {
+        // Serial.println("chord already active");
+        return; // This shouldn't happen
+    }
+
+    if(constructChord(chordIndex))
+    {
+        // chordNotes_[chordIndex].active = true;
+        chordNotes_[chordIndex].channel = sysSettings.midiChannel;
+        uint8_t velocity = midiSettings.defaultVelocity;
+
+        chordEditNotes_.active = true;
+        chordEditNotes_.channel = chordNotes_[chordIndex].channel;
+
+        // uint32_t noteOnMicros = micros();
+
+        // Serial.print("Chord: ");
+        for(uint8_t i = 0; i < 6; i++)
+        {
+            int note = chordNotes_[chordIndex].notes[i];
+
+            chordEditNotes_.notes[i] = note;
+            // Serial.print(String(note) + " ");
+            // if(note >= 0 && note <= 127)
+            // {
+            //     // MM::sendNoteOn(note, velocity, chordNotes_[chordIndex].channel);
+            //     pendingNoteOns.insert(note, velocity, chordNotes_[chordIndex].channel, noteOnMicros, false);
+            // }
+
+            doNoteOn(note, velocity, chordEditNotes_.channel);
+        }
+        // Serial.print("\n");
+    }
+    else
+    {
+        // Serial.println("constructChord failed");
+    }
+}
+
+void OmxModeChords::onChordEditOff()
+{
+    // Serial.println("onChordOff: " + String(chordIndex));
+    if(chordEditNotes_.active == false) return;
+
+    for (uint8_t i = 0; i < 6; i++)
+    {
+        int note = chordEditNotes_.notes[i];
+
+        doNoteOff(note, chordEditNotes_.channel);
+
+        // if (note >= 0 && note <= 127)
+        // {
+        //     // MM::sendNoteOff(note, 0, chordNotes_[chordIndex].channel);
+
+        //     pendingNoteOns.remove(note, chordNotes_[chordIndex].channel);
+        //     pendingNoteOffs.sendOffNow(note, chordNotes_[chordIndex].channel, false);
+        // }
+    }
+    chordEditNotes_.active = false;
 }
 
 bool OmxModeChords::constructChord(uint8_t chordIndex)
