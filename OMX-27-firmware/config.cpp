@@ -78,6 +78,7 @@ const int midiKeyMap[] = {12,1,13,2,14,15,3,16,4,17,5,18,19,6,20,7,21,22,8,23,9,
 
 bool m8mutesolo[] = {false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false};
 
+Adafruit_MCP4725 dac;
 SysSettings sysSettings;
 PotSettings potSettings;
 MidiConfig midiSettings;

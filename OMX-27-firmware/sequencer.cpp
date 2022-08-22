@@ -628,7 +628,7 @@ void allNotesOff() {
 }
 
 void allNotesOffPanic() {
-	analogWrite(CVPITCH_PIN, 0);
+// 	analogWrite(CVPITCH_PIN, 0);
 	digitalWrite(CVGATE_PIN, LOW);
 	for (int j=0; j<128; j++){
 		MM::sendNoteOff(j, 0, sysSettings.midiChannel); // NEEDS FIXING

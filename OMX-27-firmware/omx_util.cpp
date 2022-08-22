@@ -82,7 +82,10 @@ void OmxUtil::cvNoteOn(int notenum)
     {
         midiSettings.pitchCV = static_cast<int>(roundf((notenum - midiLowestNote) * stepsPerSemitone)); // map (adjnote, 36, 91, 0, 4080);
         digitalWrite(CVGATE_PIN, HIGH);
-        analogWrite(CVPITCH_PIN, midiSettings.pitchCV);
+Serial.println("gate on");
+//         analogWrite(CVPITCH_PIN, midiSettings.pitchCV);
+Serial.println(midiSettings.pitchCV);
+ 			dac.setVoltage(midiSettings.pitchCV, false);
     }
 }
 void OmxUtil::cvNoteOff()
@@ -136,6 +139,7 @@ void OmxUtil::midiNoteOn(MusicScales* scale, int notenum, int velocity, int chan
         }
         midiSettings.midiChannelState[notenum] = adjchan;
         MM::sendNoteOn(adjnote, velocity, adjchan);
+        Serial.println(adjnote);
         // CV
         cvNoteOn(adjnote);
     }

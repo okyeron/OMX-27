@@ -8,6 +8,8 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <ResponsiveAnalogRead.h>
+#include <Wire.h>
+#include <Adafruit_MCP4725.h>
 
 // #include <cstdarg>
 
@@ -21,6 +23,9 @@ const int MINOR_VERSION = 7;
 const int POINT_VERSION = 7;
 
 const int DEVICE_ID     = 2;
+
+// DAC
+extern Adafruit_MCP4725 dac;
 
 enum OMXMode
 {

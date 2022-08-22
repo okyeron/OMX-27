@@ -79,7 +79,9 @@ void setup()
 {
 	Serial.begin(115200);
 	//	while( !Serial );
-
+	Serial.println("DAC Start!");
+	dac.begin(0x62);
+	
 	storage = Storage::initStorage();
 	sysEx = new SysEx(storage, &sysSettings);
 
@@ -126,10 +128,11 @@ void setup()
 
 	// set DAC Resolution CV/GATE
 	RES = 12;
-	analogWriteResolution(RES); // set resolution for DAC
+//	analogWriteResolution(RES); // set resolution for DAC
 	AMAX = pow(2, RES);
 	V_scale = 64; // pow(2,(RES-7)); 4095 max
-	analogWrite(CVPITCH_PIN, 0);
+//	analogWrite(CVPITCH_PIN, 0);
+	dac.setVoltage(0, false);
 
 	globalScale.calculateScale(scaleConfig.scaleRoot, scaleConfig.scalePattern);
 	omxModeMidi.SetScale(&globalScale);

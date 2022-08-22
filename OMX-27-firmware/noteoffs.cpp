@@ -74,7 +74,7 @@ void PendingNoteOns::play(uint32_t now) {
 			if (queue[i].note>=midiLowestNote && queue[i].note <midiHightestNote){
 				pCV = static_cast<int>(roundf( (queue[i].note - midiLowestNote) * stepsPerSemitone));
 				digitalWrite(CVGATE_PIN, HIGH);
-				analogWrite(CVPITCH_PIN, pCV);
+// 				analogWrite(CVPITCH_PIN, pCV);
 			}
 		}
 		queue[i].inUse = false;
