@@ -1,3 +1,17 @@
+"Was messing around with the Grids mode, and thought it would be nice if the four buttons that blink showing the different 'hits' could also act as mutes."
+
+- Move MidiFX easily rather than cut/paste
+
+- Quickkeys for arps. 
+
+- Way to adjust midifx and play keyboard at same time. 
+
+
+
+
+
+
+
 - S1/S2 - Active step mode
     This would add an additional view in which steps can be turned on or off. 
     Steps that are off get ignored as if they did not exist. 
