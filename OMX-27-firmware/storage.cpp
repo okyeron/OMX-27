@@ -1,5 +1,4 @@
-#include <WString.h>
-
+#include <Arduino.h>
 #include <EEPROM.h>
 #include <Adafruit_FRAM_I2C.h>
 
