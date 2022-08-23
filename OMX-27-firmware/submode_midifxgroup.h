@@ -60,6 +60,8 @@ private:
 
     uint8_t selectedMidiFX_ = 0; // Index of selected midiFX slot
 
+    int8_t heldMidiFX_ = -1;
+
     uint8_t funcKeyMode_ = 0;
 
     bool auxReleased_ = false; // set to aux state onEnable, must be true to exit mode with aux. 

@@ -1,3 +1,7 @@
+Arps don't work in MidiModeception
+
+
+
 "Was messing around with the Grids mode, and thought it would be nice if the four buttons that blink showing the different 'hits' could also act as mutes."
 
 - Move MidiFX easily rather than cut/paste

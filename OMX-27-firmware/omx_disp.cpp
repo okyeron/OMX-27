@@ -572,6 +572,77 @@ void OmxDisp::dispValues16(int8_t valueArray[], uint8_t valueCount, int8_t minVa
     // }
 }
 
+void OmxDisp::dispSlots(const char* slotNames[], uint8_t slotCount, uint8_t selected, bool encSelActive, bool showLabels, const char* labels[], uint8_t labelCount)
+{
+    // if (isMessageActive())
+    // {
+    //     renderMessage();
+    //     return;
+    // }
+
+    display.fillRect(0, 0, 128, 32, BLACK);
+
+    // if(showLabels)
+    // {
+    //     int8_t selIndex = constrain(selected - 16, -1, 127);
+    //     dispLabelParams(selIndex, encSelActive, labels, labelCount);
+    // }
+
+    // uint8_t rowCount = slotCount - 1;// Selected slot will be raised
+
+    uint8_t rowCount = 4;// Selected slot will be raised
+
+
+    uint8_t slotWidth = 128 / rowCount; 
+    uint8_t slotHeight = 12;
+    uint8_t slotPad = 1;
+
+    // uint8_t charWidth = 128 / 16; // 8
+
+    u8g2_display.setFontMode(1);
+    u8g2_display.setFont(FONT_LABELS);
+
+    // uint8_t yPos = hline * 2 + 3; // 19
+
+    uint8_t yPos = 15; // 19
+
+    int8_t slotIndex = selected - 2;
+    uint8_t slotOffset = 0;
+
+    for(uint8_t i = slotIndex; i < slotCount; i++)
+    {
+        if(i != selected)
+        {
+            if (slotIndex >= 0 && slotIndex < slotCount)
+            {
+                display.fillRect(slotOffset * slotWidth + slotPad, yPos, slotWidth - (slotPad * 2), slotHeight, WHITE);
+                display.fillRect(slotOffset * slotWidth + slotPad + 1, yPos + 1, slotWidth - 2 - (slotPad * 2), slotHeight - 2, BLACK);
+                invertColor(false);
+                u8g2centerText(slotNames[i], slotOffset * slotWidth + slotPad + 1, yPos + (slotHeight / 2) + 2, slotWidth - 2 - (slotPad * 2), 8);
+                slotOffset++;
+            }
+            slotIndex++;
+
+            if(slotOffset >= 4)
+            {
+                break;
+            }
+        }
+    }
+
+    // Display selected slot
+    slotWidth = 36; 
+    slotHeight = 13;
+    yPos = 0; // 19
+    uint8_t selectedStart = 64 - (slotWidth / 2);
+
+    display.fillRect(selectedStart + slotPad, yPos, slotWidth - (slotPad * 2), slotHeight, WHITE);
+    display.fillRect(selectedStart + slotPad + 1, yPos + 1, slotWidth - 2 - (slotPad * 2), slotHeight - 2, BLACK);
+    invertColor(false);
+    u8g2_display.setFont(FONT_CHAR16);
+    u8g2centerText(slotNames[selected], selectedStart + slotPad + 1, yPos + (slotHeight / 2) + 3, slotWidth - 2 - (slotPad * 2), 8);
+}
+
 
 void OmxDisp::dispLabelParams(int8_t selected, bool encSelActive, const char *labels[], uint8_t labelCount)
 {

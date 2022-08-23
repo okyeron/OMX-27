@@ -169,6 +169,7 @@ void SubModeMidiFxGroup::gotoArpParams()
 {
     midiFXParamView_ = true;
     arpParamView_ = true;
+    heldMidiFX_ = -1;
 
     getArp(true); // Create arp if empty
 
@@ -221,6 +222,25 @@ void SubModeMidiFxGroup::setSelected(bool newSelected)
 void SubModeMidiFxGroup::onEnabled()
 {
     // params_.setSelPageAndParam(0, 0);
+    midiFXParamView_ = true;
+
+    // Goto first available midifx if selected one is empty. 
+    auto mfx = getMidiFX(selectedMidiFX_);
+    if(mfx == nullptr)
+    {
+        for (uint8_t i = 0; i < NUM_MIDIFX_SLOTS; i++)
+        {
+            auto mfx = getMidiFX(i);
+            if (mfx != nullptr)
+            {
+                selectedMidiFX_ = i;
+                break;
+            }
+        }
+    }
+
+    heldMidiFX_ = -1;
+    
     encoderSelect_ = true;
     omxLeds.setDirty();
     omxDisp.setDirty();
@@ -378,7 +398,8 @@ bool SubModeMidiFxGroup::updateLEDs()
         strip.setPixelColor(3 + i, fxColor);
     }
 
-    if (midiFXParamView_ && !arpParamView_)
+    // Change midifx while holding down midifx slot
+    if (heldMidiFX_ >= 0 && midiFXParamView_ && !arpParamView_)
     {
         uint8_t selFXType = 0;
 
@@ -456,7 +477,7 @@ bool SubModeMidiFxGroup::onKeyUpdate(OMXKeypadEvent e)
 {
     if(e.held()) 
     {
-        if(arpParamView_) return false;
+        if(arpParamView_) return false; // Don't consume key update
         return true;
     }
 
@@ -482,14 +503,16 @@ bool SubModeMidiFxGroup::onKeyUpdate(OMXKeypadEvent e)
                 setEnabled(false);
                 return true;
             }
-            // Exit MidiFX view
-            if (midiFXParamView_)
-            {
-                midiFXParamView_ = false;
-                encoderSelect_ = true;
-            }
-            // Exit submode
-            else if (auxReleased_)
+            // // Exit MidiFX view
+            // if (midiFXParamView_)
+            // {
+            //     midiFXParamView_ = false;
+            //     encoderSelect_ = true;
+            // }
+            // // Exit submode
+            // else 
+            
+            if (auxReleased_)
             {
                 setEnabled(false);
                 return true;
@@ -508,6 +531,7 @@ bool SubModeMidiFxGroup::onKeyUpdate(OMXKeypadEvent e)
             {
                 if (funcKeyMode_ == FUNCKEYMODE_NONE)
                 {
+                    heldMidiFX_ = thisKey - 3;
                     selectMidiFX(thisKey - 3);
                 }
                 else if (funcKeyMode_ == FUNCKEYMODE_F1)
@@ -531,7 +555,7 @@ bool SubModeMidiFxGroup::onKeyUpdate(OMXKeypadEvent e)
             }
 
             // Change FX type
-            if (midiFXParamView_ && !arpParamView_)
+            if (heldMidiFX_ >= 0 && midiFXParamView_ && !arpParamView_)
             {
                 if (thisKey >= 11 && thisKey < 11 + 16)
                 {
@@ -552,6 +576,12 @@ bool SubModeMidiFxGroup::onKeyUpdate(OMXKeypadEvent e)
         auxReleased_ = true;
     }
 
+    // release held midiFX whenever a midifx key is released. 
+    if(!e.down() && thisKey >= 3 && thisKey < 3 + NUM_MIDIFX_SLOTS)
+    {
+        heldMidiFX_ = -1;
+    }
+
     if (arpParamView_)
     {
         return false;
@@ -561,6 +591,7 @@ bool SubModeMidiFxGroup::onKeyUpdate(OMXKeypadEvent e)
     {
         mfx->onKeyUpdate(e, funcKeyMode_);
     }
+    
 
     omxDisp.setDirty();
     omxLeds.setDirty();
@@ -995,6 +1026,29 @@ void SubModeMidiFxGroup::setupPageLegends()
 
 void SubModeMidiFxGroup::onDisplayUpdateMidiFX()
 {
+    if(heldMidiFX_ >= 0)
+    {
+        const char* slotNames[NUM_MIDIFX_SLOTS];
+
+        for(uint8_t i = 0; i < NUM_MIDIFX_SLOTS; i++)
+        {
+            auto mfx = getMidiFX(i);
+            if(mfx == nullptr)
+            {
+                slotNames[i] = "-";
+            }
+            else
+            {
+                slotNames[i] = mfx->getDispName();
+            }
+        }
+
+        omxDisp.dispSlots(slotNames, NUM_MIDIFX_SLOTS, heldMidiFX_, encoderSelect_, false, nullptr, 0);
+        return;
+    }
+
+
+
     MidiFXInterface* selFX = getMidiFX(selectedMidiFX_);
 
     if(selFX == nullptr)
