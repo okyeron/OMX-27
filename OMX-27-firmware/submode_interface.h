@@ -16,6 +16,7 @@ public:
     virtual bool isEnabled();
 
     virtual void onPotChanged(int potIndex, int prevValue, int newValue, int analogDelta) {}
+    virtual void onClockTick() {}
     virtual void loopUpdate() {}
     virtual void updateLEDs() {}
     virtual void onEncoderChanged(Encoder::Update enc);

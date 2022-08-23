@@ -312,20 +312,19 @@ void loop()
 
 	sysSettings.timeElasped = passed;
 
+	seqConfig.currentFrameMicros = micros();
+	// Micros timeStart = micros();
+	activeOmxMode->loopUpdate(passed);
+
 	if (passed > 0)
 	{
 		if (sequencer.playing)
 		{
 			omxScreensaver.resetCounter(); // screenSaverCounter = 0;
-			omxUtil.advanceClock(activeOmxMode, passed);
-			omxUtil.advanceSteps(passed);
 		}
+		omxUtil.advanceClock(activeOmxMode, passed);
+		omxUtil.advanceSteps(passed);
 	}
-
-	seqConfig.currentFrameMicros = micros();
-	// Micros timeStart = micros();
-	activeOmxMode->loopUpdate(passed);
-
 
 	// DISPLAY SETUP
 	display.clearDisplay();

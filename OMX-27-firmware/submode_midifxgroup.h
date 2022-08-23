@@ -17,6 +17,7 @@ public:
 
 // Interface methods
     void onModeChanged() override;
+    void onClockTick() override;
     void loopUpdate() override;
     void resync();
     void updateLEDs() override;

@@ -159,6 +159,17 @@ void SubModeMidiFxGroup::resync()
     }
 }
 
+void SubModeMidiFxGroup::onClockTick() {
+    for(uint8_t i = 0; i < NUM_MIDIFX_SLOTS; i++)
+    {
+        auto mfx = getMidiFX(i);
+        if(mfx != nullptr)
+        {
+            mfx->onClockTick();
+        }
+    }
+}
+
 void SubModeMidiFxGroup::loopUpdate()
 {
     if(enabled_)

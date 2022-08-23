@@ -312,27 +312,21 @@ namespace midifx
     void MidiFXArpeggiator::startArp()
     {
         Serial.println("startArp");
-        omxUtil.resetClocks();
-        nextStepTimeP_ = seqConfig.currentFrameMicros;
+        if(arpRunning_) return;
 
-        // tickCount_ = 0;
-        // patPos_ = 0;
-        // notePos_ = 0;
-        // octavePos_ = 0;
+        pendingStart_ = true;
 
-        // resetArpSeq();
-
-        nextStepTimeP_ = seqConfig.currentFrameMicros;
-        lastStepTimeP_ = seqConfig.currentFrameMicros;
-        // startMicros = micros();
-
-        arpRunning_ = true;
+        // if(seqConfig.currentFrameMicros - seqConfig.lastClockMicros < 300)
+        // {
+        //     onClockTick();
+        // }
     }
 
     void MidiFXArpeggiator::stopArp()
     {
         Serial.println("stopArp");
         arpRunning_ = false;
+        pendingStart_ = false;
     }
 
     bool MidiFXArpeggiator::insertMidiNoteQueue(MidiNoteGroup note)
@@ -688,6 +682,31 @@ namespace midifx
         tempNoteQueue.clear();
         
         resetArpSeq();
+    }
+
+    void MidiFXArpeggiator::onClockTick()
+    {
+        if (pendingStart_)
+        {
+            omxUtil.resetClocks();
+            nextStepTimeP_ = seqConfig.currentFrameMicros;
+
+            // tickCount_ = 0;
+            // patPos_ = 0;
+            // notePos_ = 0;
+            // octavePos_ = 0;
+
+            // resetArpSeq();
+
+            nextStepTimeP_ = seqConfig.currentFrameMicros;
+            lastStepTimeP_ = seqConfig.currentFrameMicros;
+            // startMicros = micros();
+
+            arpRunning_ = true;
+            pendingStart_ = false;
+
+            loopUpdate();
+        }
     }
 
     void MidiFXArpeggiator::loopUpdate()

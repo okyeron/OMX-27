@@ -78,6 +78,7 @@ namespace midifx
         void onModeChanged() override;
 
         void loopUpdate() override;
+        void onClockTick() override;
         void resync() override;
 
         bool usesKeys() override;
@@ -205,6 +206,7 @@ namespace midifx
 
         uint8_t randPrevNote_;
 
+        bool pendingStart_ = false;
         bool arpRunning_ = false;
 
         static const int queueSize = 8;

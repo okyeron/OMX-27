@@ -115,9 +115,9 @@ namespace euclidean
         seqPos_ = 0;
         running_ = true;
 
-        nextStepTimeP_ = micros();
-        lastStepTimeP_ = micros();
-        startMicros = micros();
+        nextStepTimeP_ = seqConfig.currentFrameMicros;
+        lastStepTimeP_ = seqConfig.currentFrameMicros;
+        startMicros = seqConfig.currentFrameMicros;
     }
 
     void EuclideanSequencer::stop()
@@ -461,18 +461,18 @@ namespace euclidean
         // uint32_t noteoff_micros = micros() + (stepLength) * clockConfig.step_micros;
         // pendingNoteOffs.insert(noteNumber_, channel, noteoff_micros, sendnoteCV);
 
-        uint32_t noteon_micros = micros();
+        uint32_t noteon_micros = seqConfig.currentFrameMicros;
 
         if (swing_ > 0 && seqPos_ % 2 == 0)
         {
             if (swing_ < 99)
             {
-                noteon_micros = micros() + ((clockConfig.ppqInterval * multiplier_) / (PPQ / 24) * swing_); // full range swing
+                noteon_micros = seqConfig.currentFrameMicros + ((clockConfig.ppqInterval * multiplier_) / (PPQ / 24) * swing_); // full range swing
             }
             else if (swing_ == 99)
             {                                        // random drunken swing
                 uint8_t rnd_swing = rand() % 95 + 1; // rand 1 - 95 // randomly apply swing value
-                noteon_micros = micros() + ((clockConfig.ppqInterval * multiplier_) / (PPQ / 24) * rnd_swing);
+                noteon_micros = seqConfig.currentFrameMicros + ((clockConfig.ppqInterval * multiplier_) / (PPQ / 24) * rnd_swing);
             }
         }
         else

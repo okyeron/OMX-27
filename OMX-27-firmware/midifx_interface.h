@@ -85,6 +85,7 @@ namespace midifx
         virtual bool getEnabled();
 
         virtual void loopUpdate() {}
+        virtual void onClockTick() {}
 
         virtual void resync() {}
 

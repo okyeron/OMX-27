@@ -123,6 +123,7 @@ private:
     bool midiModeception = false;
     OmxModeMidiKeyboard midiKeyboard; // Mode inside a mode. For science!
 
+    bool pendingStart_ = false;
 
     bool euclidPattern[32];
     bool polyRhythmMode = false;

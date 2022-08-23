@@ -30,6 +30,9 @@ void OmxUtil::advanceClock(OmxModeInterface* activeOmxMode, Micros advance)
 
 		MM::sendClock();
 
+        seqConfig.currentFrameMicros = micros();
+        seqConfig.lastClockMicros = micros();
+
         if (activeOmxMode != nullptr)
         {
             activeOmxMode->onClockTick();

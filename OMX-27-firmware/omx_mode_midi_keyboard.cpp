@@ -152,6 +152,14 @@ void OmxModeMidiKeyboard::onPotChanged(int potIndex, int prevValue, int newValue
     omxDisp.setDirty();
 }
 
+void OmxModeMidiKeyboard::onClockTick() {
+    for(uint8_t i = 0; i < 5; i++)
+    {
+        // Lets them do things in background
+        subModeMidiFx[i].onClockTick();
+    }
+}
+
 void OmxModeMidiKeyboard::loopUpdate(Micros elapsedTime)
 {
     if (elapsedTime > 0)

@@ -6,6 +6,8 @@
 
 - Way to adjust midifx and play keyboard at same time. 
 
+"feedback dialogs when selecting FXgroup or FX-off might be nice"
+
 
 
 

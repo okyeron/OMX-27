@@ -156,20 +156,13 @@ void OmxModeEuclidean::selectMidiFx(uint8_t mfxIndex)
 
 void OmxModeEuclidean::startSequencers()
 {
-    for (u_int8_t i = 0; i < kNumEuclids; i++)
-    {
-        euclids[i].start();
-    }
-
-    for(uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
-    {
-        subModeMidiFx[i].setSelected(true);
-    }
-
-    MM::startClock();
+    pendingStart_ = true;
+    
 }
 void OmxModeEuclidean::stopSequencers()
 {
+    pendingStart_ = false;
+
     for (u_int8_t i = 0; i < kNumEuclids; i++)
     {
         euclids[i].stop();
@@ -185,6 +178,29 @@ void OmxModeEuclidean::stopSequencers()
 
 void OmxModeEuclidean::onClockTick()
 {
+    if (pendingStart_)
+    {
+        for (u_int8_t i = 0; i < kNumEuclids; i++)
+        {
+            euclids[i].start();
+        }
+
+        for (uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
+        {
+            subModeMidiFx[i].setSelected(true);
+        }
+        MM::startClock();
+
+        pendingStart_ = false;
+    }
+
+
+    for(uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
+    {
+        // Lets them do things in background
+        subModeMidiFx[i].onClockTick();
+    }
+
     // euclids[0].clockTick();
 
     // for (u_int8_t i = 0; i < kNumEuclids; i++)
@@ -1136,6 +1152,11 @@ void OmxModeEuclidean::onNotePostFX(MidiNoteGroup note)
 
         uint32_t noteOnMicros = note.noteonMicros; // TODO Might need to be set to current micros
         pendingNoteOns.insert(note.noteNumber, note.velocity, note.channel, noteOnMicros, note.sendCV);
+
+
+        // MM::sendNoteOn(note.noteNumber, note.velocity, note.channel);
+
+        // uint32_t noteOnMicros = seqConfig.currentFrameMicros; // TODO Might need to be set to current micros
 
         uint32_t noteOffMicros = noteOnMicros + (note.stepLength * clockConfig.step_micros);
         pendingNoteOffs.insert(note.noteNumber, note.channel, noteOffMicros, note.sendCV);

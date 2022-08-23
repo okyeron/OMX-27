@@ -609,6 +609,7 @@ void playNote(int patternNum) {
 
 		} else {
 			seqConfig.noteon_micros = micros();
+			
 		}
 
 		if(pendingNoteOffs.sendOffIfPresent(steps[sequencer.seqPos[patternNum]].note, sequencer.getPatternChannel(patternNum), sendnoteCV))

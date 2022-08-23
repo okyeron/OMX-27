@@ -142,7 +142,13 @@ void OmxModeChords::selectMidiFx(uint8_t mfxIndex)
     }
 }
 
-void OmxModeChords::onClockTick() {
+void OmxModeChords::onClockTick()
+{
+    for (uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
+    {
+        // Lets them do things in background
+        subModeMidiFx[i].onClockTick();
+    }
 }
 
 void OmxModeChords::onPotChanged(int potIndex, int prevValue, int newValue, int analogDelta)
