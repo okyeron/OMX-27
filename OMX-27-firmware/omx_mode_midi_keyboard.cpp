@@ -63,7 +63,7 @@ void OmxModeMidiKeyboard::onModeActivated()
     params.setSelPageAndParam(0, 0);
     encoderSelect = true;
 
-    selectMidiFx(mfxIndex);
+    selectMidiFx(mfxIndex_, false);
 }
 
 void OmxModeMidiKeyboard::onModeDeactivated()
@@ -84,13 +84,25 @@ void OmxModeMidiKeyboard::stopSequencers()
     pendingNoteOffs.allOff();
 }
 
-void OmxModeMidiKeyboard::selectMidiFx(uint8_t mfxIndex)
+void OmxModeMidiKeyboard::selectMidiFx(uint8_t mfxIndex, bool dispMsg)
 {
-    this->mfxIndex = mfxIndex;
+    this->mfxIndex_ = mfxIndex;
 
     for(uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
     {
         subModeMidiFx[i].setSelected(i == mfxIndex);
+    }
+
+    if (dispMsg)
+    {
+        if (mfxIndex < NUM_MIDIFX_GROUPS)
+        {
+            omxDisp.displayMessageTimed("MidiFX " + String(mfxIndex + 1), 5);
+        }
+        else
+        {
+            omxDisp.displayMessageTimed("MidiFX Off", 5);
+        }
     }
 }
 
@@ -555,6 +567,8 @@ void OmxModeMidiKeyboard::onKeyUpdate(OMXKeypadEvent e)
         }
     }
 
+    if(onKeyUpdateSelMidiFX(e)) return;
+
     // REGULAR KEY PRESSES
     if (!e.held())
     { // IGNORE LONG PRESS EVENTS
@@ -587,19 +601,59 @@ void OmxModeMidiKeyboard::onKeyUpdate(OMXKeypadEvent e)
 
                     // setParam(constrain((midiPageParams.miparam + chng) % midiPageParams.numParams, 0, midiPageParams.numParams - 1));
                 }
-                else if(thisKey == 5)
-                {
-                    // Turn off midiFx
-                    selectMidiFx(127);
-                    // mfxIndex = 127;
-                }
-                else if (thisKey >= 6 && thisKey < 11)
-                {
-                    // Change active midiFx
-                    // mfxIndex = thisKey - 6;
-                    selectMidiFx(thisKey - 6);
-                    // enableSubmode(&subModeMidiFx[thisKey - 6]);
-                }
+                // else if(thisKey == 5)
+                // {
+                //     // Turn off midiFx
+                //     selectMidiFx(127, true);
+                //     // mfxIndex = 127;
+                // }
+                // else if (thisKey >= 6 && thisKey < 11)
+                // {
+                //     // Change active midiFx
+                //     // mfxIndex = thisKey - 6;
+                //     selectMidiFx(thisKey - 6, true);
+                //     // enableSubmode(&subModeMidiFx[thisKey - 6]);
+                // }
+                // else if(thisKey == 25)
+                // {
+                //     if (mfxIndex_ < NUM_MIDIFX_GROUPS)
+                //     {
+                //         subModeMidiFx[mfxIndex_].toggleArpHold();
+
+                //         if (subModeMidiFx[mfxIndex_].isArpHoldOn())
+                //         {
+                //             omxDisp.displayMessageTimed("Arp Hold: On", 5);
+                //         }
+                //         else
+                //         {
+                //             omxDisp.displayMessageTimed("Arp Hold: Off", 5);
+                //         }
+                //     }
+                //     else
+                //     {
+                //         omxDisp.displayMessageTimed("MidiFX are Off", 5);
+                //     }
+                // }
+                // else if(thisKey == 26)
+                // {
+                //     if(mfxIndex_ < NUM_MIDIFX_GROUPS)
+                //     {
+                //         subModeMidiFx[mfxIndex_].toggleArp();
+
+                //         if (subModeMidiFx[mfxIndex_].isArpOn())
+                //         {
+                //             omxDisp.displayMessageTimed("Arp On", 5);
+                //         }
+                //         else
+                //         {
+                //             omxDisp.displayMessageTimed("Arp Off", 5);
+                //         }
+                //     }
+                //     else
+                //     {
+                //         omxDisp.displayMessageTimed("MidiFX are Off", 5);
+                //     }
+                // }
                 // else if (e.down() && thisKey == 10)
                 // {
                 //     enableSubmode(&subModeMidiFx);
@@ -670,6 +724,99 @@ void OmxModeMidiKeyboard::onKeyUpdate(OMXKeypadEvent e)
     omxDisp.setDirty();
 }
 
+
+bool OmxModeMidiKeyboard::onKeyUpdateSelMidiFX(OMXKeypadEvent e)
+{
+    int thisKey = e.key();
+
+    bool keyConsumed = false;
+
+    if (!e.held())
+    { 
+        if (e.down() && thisKey != 0)
+        {
+            if (midiSettings.midiAUX) // Aux mode
+            {
+                if (thisKey == 5)
+                {
+                    keyConsumed = true;
+                    // Turn off midiFx
+                    selectMidiFx(127, true);
+                    // mfxIndex_ = 127;
+                }
+                else if (thisKey >= 6 && thisKey < 11)
+                {
+                    keyConsumed = true;
+                    selectMidiFx(thisKey - 6, true);
+                    // Change active midiFx
+                    // mfxIndex_ = thisKey - 6;
+                }
+                else if (thisKey == 25)
+                {
+                    if (mfxIndex_ < NUM_MIDIFX_GROUPS)
+                    {
+                        subModeMidiFx[mfxIndex_].toggleArpHold();
+
+                        if (subModeMidiFx[mfxIndex_].isArpHoldOn())
+                        {
+                            omxDisp.displayMessageTimed("Arp Hold: On", 5);
+                        }
+                        else
+                        {
+                            omxDisp.displayMessageTimed("Arp Hold: Off", 5);
+                        }
+                    }
+                    else
+                    {
+                        omxDisp.displayMessageTimed("MidiFX are Off", 5);
+                    }
+                }
+                else if (thisKey == 26)
+                {
+                    if (mfxIndex_ < NUM_MIDIFX_GROUPS)
+                    {
+                        subModeMidiFx[mfxIndex_].toggleArp();
+
+                        if (subModeMidiFx[mfxIndex_].isArpOn())
+                        {
+                            omxDisp.displayMessageTimed("Arp On", 5);
+                        }
+                        else
+                        {
+                            omxDisp.displayMessageTimed("Arp Off", 5);
+                        }
+                    }
+                    else
+                    {
+                        omxDisp.displayMessageTimed("MidiFX are Off", 5);
+                    }
+                }
+            }
+        }
+    }
+
+    return keyConsumed;
+}
+
+bool OmxModeMidiKeyboard::onKeyHeldSelMidiFX(OMXKeypadEvent e)
+{
+    int thisKey = e.key();
+
+    bool keyConsumed = false;
+
+    if (midiSettings.midiAUX) // Aux mode
+    {
+        // Enter MidiFX mode
+        if (thisKey >= 6 && thisKey < 11)
+        {
+            keyConsumed = true;
+            enableSubmode(&subModeMidiFx[thisKey - 6]);
+        }
+    }
+
+    return keyConsumed;
+}
+
 void OmxModeMidiKeyboard::onKeyHeldUpdate(OMXKeypadEvent e)
 {
     if (isSubmodeEnabled())
@@ -678,16 +825,18 @@ void OmxModeMidiKeyboard::onKeyHeldUpdate(OMXKeypadEvent e)
         return;
     }
 
-    int thisKey = e.key();
+    if(onKeyHeldSelMidiFX(e)) return;
 
-    if (midiSettings.midiAUX) // Aux mode
-    {
-        // Enter MidiFX mode
-        if (thisKey >= 6 && thisKey < 11)
-        {
-            enableSubmode(&subModeMidiFx[thisKey - 6]);
-        }
-    }
+    // int thisKey = e.key();
+
+    // if (midiSettings.midiAUX) // Aux mode
+    // {
+    //     // Enter MidiFX mode
+    //     if (thisKey >= 6 && thisKey < 11)
+    //     {
+    //         enableSubmode(&subModeMidiFx[thisKey - 6]);
+    //     }
+    // }
 }
 
 midimacro::MidiMacroInterface *OmxModeMidiKeyboard::getActiveMacro()
@@ -754,13 +903,27 @@ void OmxModeMidiKeyboard::updateLEDs()
         strip.setPixelColor(12, color4);
 
         // MidiFX off
-        strip.setPixelColor(5, (mfxIndex >= NUM_MIDIFX_GROUPS ? colorConfig.selMidiFXOffColor : colorConfig.midiFXOffColor));
+        strip.setPixelColor(5, (mfxIndex_ >= NUM_MIDIFX_GROUPS ? colorConfig.selMidiFXOffColor : colorConfig.midiFXOffColor));
 
         for (uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
         {
-            auto mfxColor = (i == mfxIndex) ? colorConfig.selMidiFXColor : colorConfig.midiFXColor;
+            auto mfxColor = (i == mfxIndex_) ? colorConfig.selMidiFXColor : colorConfig.midiFXColor;
 
             strip.setPixelColor(6 + i, mfxColor);
+        }
+
+        if(mfxIndex_ < NUM_MIDIFX_GROUPS)
+        {
+            bool isOn = subModeMidiFx[mfxIndex_].isArpOn() && blinkState;
+            bool isHoldOn = subModeMidiFx[mfxIndex_].isArpHoldOn();
+
+            strip.setPixelColor(25, isHoldOn ? colorConfig.arpHoldOn : colorConfig.arpHoldOff);
+            strip.setPixelColor(26, isOn ? colorConfig.arpOn : colorConfig.arpOff);
+        }
+        else
+        {
+            strip.setPixelColor(25, colorConfig.arpHoldOff);
+            strip.setPixelColor(26, colorConfig.arpOff);
         }
 
         // strip.setPixelColor(10, color3); // MidiFX key
@@ -1038,9 +1201,9 @@ void OmxModeMidiKeyboard::doNoteOn(uint8_t keyIndex)
     noteGroup.unknownLength = true;
     noteGroup.prevNoteNumber = noteGroup.noteNumber;
 
-    if (mfxIndex < NUM_MIDIFX_GROUPS)
+    if (mfxIndex_ < NUM_MIDIFX_GROUPS)
     {
-        subModeMidiFx[mfxIndex].noteInput(noteGroup);
+        subModeMidiFx[mfxIndex_].noteInput(noteGroup);
         // subModeMidiFx.noteInput(noteGroup);
     }
     else
@@ -1059,9 +1222,9 @@ void OmxModeMidiKeyboard::doNoteOff(uint8_t keyIndex)
     noteGroup.unknownLength = true;
     noteGroup.prevNoteNumber = noteGroup.noteNumber;
 
-    if (mfxIndex < NUM_MIDIFX_GROUPS)
+    if (mfxIndex_ < NUM_MIDIFX_GROUPS)
     {
-        subModeMidiFx[mfxIndex].noteInput(noteGroup);
+        subModeMidiFx[mfxIndex_].noteInput(noteGroup);
     // subModeMidiFx.noteInput(noteGroup);
     }
     else

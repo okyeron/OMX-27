@@ -220,7 +220,7 @@ private:
     void disableSubmode();
     bool isSubmodeEnabled();
 
-    void selectMidiFx(uint8_t mfxIndex);
+    void selectMidiFx(uint8_t mfxIndex, bool dispMsg);
     bool onKeyUpdateSelMidiFX(OMXKeypadEvent e);
     bool onKeyHeldSelMidiFX(OMXKeypadEvent e);
 

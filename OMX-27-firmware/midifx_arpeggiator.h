@@ -94,6 +94,13 @@ namespace midifx
         int saveToDisk(int startingAddress, Storage *storage) override;
         int loadFromDisk(int startingAddress, Storage *storage) override;
 
+        // Toggles between off and previous mode
+        void toggleArp();
+        void toggleHold();
+
+        bool isOn();
+        bool isHoldOn();
+
     protected:
         void onEnabled() override;
         void onDisabled() override;
@@ -228,6 +235,7 @@ namespace midifx
         uint8_t transpPos_ : 5;
         int8_t notePos_;
         uint8_t octavePos_ : 4;
+        uint8_t syncPos_ : 5;
 
         uint8_t lowestPitch_;
         uint8_t highestPitch_;
@@ -260,6 +268,12 @@ namespace midifx
 
         int messageTextTimer = 0;
 
+
+        // Used for toggling arp
+        uint8_t prevArpMode_ : 3;
+
+
+
         bool insertMidiNoteQueue(MidiNoteGroup note);
         bool removeMidiNoteQueue(MidiNoteGroup note);
 
@@ -283,5 +297,9 @@ namespace midifx
         void playNote(uint32_t noteOnMicros, int16_t noteNumber, uint8_t velocity);
 
         void showMessage();
+
+        bool isModeHold(uint8_t arpMode);
+
+        void changeArpMode(uint8_t newArpMode);
     };
 }

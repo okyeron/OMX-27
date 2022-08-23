@@ -3,6 +3,7 @@
 #include "submode_interface.h"
 #include "midifx_interface.h"
 #include "storage.h"
+#include "midifx_arpeggiator.h"
 
 #define NUM_MIDIFX_GROUPS 5
 #define NUM_MIDIFX_SLOTS 8
@@ -35,6 +36,14 @@ public:
 
     int saveToDisk(int startingAddress, Storage *storage);
     int loadFromDisk(int startingAddress, Storage *storage);
+
+    void toggleArp();
+    void toggleArpHold();
+    bool isArpOn();
+    bool isArpHoldOn();
+    void gotoArpParams();
+
+    midifx::MidiFXArpeggiator *getArp(bool autoCreate);
 protected:
 // Interface methods
     void onEnabled() override;

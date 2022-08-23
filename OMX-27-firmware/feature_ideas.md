@@ -8,6 +8,8 @@
 
 "feedback dialogs when selecting FXgroup or FX-off might be nice"
 
+- Save / recall arp settings. 
+
 
 
 

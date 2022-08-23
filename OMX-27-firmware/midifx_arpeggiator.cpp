@@ -106,7 +106,7 @@ namespace midifx
     MidiFXArpeggiator::MidiFXArpeggiator()
     {
         chancePerc_ = 100;
-        arpMode_ = 1;
+        arpMode_ = 0;
         resetMode_ = ARPRESET_NORMAL;
         arpPattern_ = 0;
         midiChannel_ = 0;
@@ -115,8 +115,13 @@ namespace midifx
         octaveRange_ = 1; // 2 Octaves
         modPatternLength_ = 15;
         transpPatternLength_ = 15;
+        syncPos_ = 0;
 
         heldKey16_ = -1;
+
+        prevArpMode_ = 0;
+
+        changeArpMode(arpMode_);
 
         params_.addPage(4);
         params_.addPage(4);
@@ -180,7 +185,114 @@ namespace midifx
             clone->transpPattern_[i] = transpPattern_[i];
         }
 
+        clone->changeArpMode(arpMode_);
+
         return clone;
+    }
+
+    // Toggles between off and previous mode
+    void MidiFXArpeggiator::toggleArp()
+    {
+        if(prevArpMode_ == ARPMODE_OFF)
+        {
+            prevArpMode_ = ARPMODE_ON;
+        }
+
+        if(arpMode_ == ARPMODE_OFF)
+        {
+            changeArpMode(prevArpMode_);
+        }
+        else
+        {
+            prevArpMode_ = arpMode_;
+            changeArpMode(ARPMODE_OFF);
+        }
+    }
+
+    void MidiFXArpeggiator::toggleHold()
+    {
+        if(arpMode_ == ARPMODE_OFF)
+        {
+            if(prevArpMode_ == ARPMODE_HOLD)
+            {
+                prevArpMode_ = ARPMODE_ON;
+            }
+            else
+            {
+                prevArpMode_ = ARPMODE_HOLD;
+            }
+        }
+        else
+        {
+            if(arpMode_ == ARPMODE_HOLD)
+            {
+                if(prevArpMode_ == ARPMODE_HOLD)
+                {
+                    changeArpMode(ARPMODE_ON);
+                }
+                else
+                {
+                    changeArpMode(prevArpMode_);
+                }
+                changeArpMode(prevArpMode_);
+                prevArpMode_ = ARPMODE_HOLD;
+            }
+            else
+            {
+                prevArpMode_ = arpMode_;
+                changeArpMode(ARPMODE_HOLD);
+            }
+        }
+    }
+
+    bool MidiFXArpeggiator::isOn()
+    {
+        return arpMode_ != ARPMODE_OFF;
+    }
+    bool MidiFXArpeggiator::isHoldOn()
+    {
+        if(arpMode_ == ARPMODE_OFF)
+        {
+            return isModeHold(prevArpMode_);
+        }
+        else
+        {
+            return isModeHold(arpMode_);
+        }
+    }
+
+    bool MidiFXArpeggiator::isModeHold(uint8_t arpMode)
+    {
+        switch (arpMode)
+        {
+        case ARPMODE_OFF:
+        case ARPMODE_ON:
+        case ARPMODE_ONESHOT:
+        case ARPMODE_ONCE:
+        return false;
+        case ARPMODE_HOLD:
+        return true;
+        }
+
+        return false;
+    }
+
+    void MidiFXArpeggiator::changeArpMode(uint8_t newArpMode)
+    {
+        arpMode_ = newArpMode;
+
+        if ((arpMode_ == ARPMODE_ON && hasMidiNotes() == false) || (arpMode_ == ARPMODE_ONCE && hasMidiNotes() == false) || arpMode_ == ARPMODE_OFF)
+        {
+            stopArp();
+        }
+
+        switch (arpMode_)
+        {
+        case ARPMODE_OFF:
+        case ARPMODE_ON:
+            resync();
+            break;
+        }
     }
 
     void MidiFXArpeggiator::onModeChanged()
@@ -710,7 +822,7 @@ namespace midifx
             arpRunning_ = true;
             pendingStart_ = false;
 
-            loopUpdate();
+            // loopUpdate();
         }
     }
 
@@ -780,7 +892,7 @@ namespace midifx
 
             stepMicroDelta_ = (clockConfig.step_micros * 16) * multiplier_;
 
-            nextStepTimeP_ += stepMicroDelta_; // calc step based on rate
+            nextStepTimeP_ = seqConfig.currentFrameMicros + stepMicroDelta_; // calc step based on rate
 
             arpNoteTrigger();
         }
@@ -794,6 +906,7 @@ namespace midifx
         modPos_ = 0;
         notePos_ = 0;
         octavePos_ = 0;
+        syncPos_ = 0;
 
         lastPlayedNoteNumber_ = -127;
 
@@ -1016,6 +1129,14 @@ namespace midifx
                 return;
             }
         }
+
+        syncPos_ = syncPos_ + 1 % 16;
+
+        // if(syncPos_ == 0)
+        // {
+        //     stepMicroDelta_ = (clockConfig.step_micros * 16) * multiplier_;
+        //     nextStepTimeP_ = seqConfig.lastClockMicros + stepMicroDelta_; // calc step based on rate
+        // }
 
         currentNotePos = constrain(currentNotePos, 0, qLength-1);
 
@@ -1304,18 +1425,19 @@ namespace midifx
                 arpMode_ = constrain(arpMode_ + amtSlow, 0, 4);
                 if(prevArpMode != arpMode_ && arpMode_ != ARPMODE_HOLD)
                 {
-                    if((arpMode_ == ARPMODE_ON && hasMidiNotes() == false) || (arpMode_ == ARPMODE_ONCE && hasMidiNotes() == false) || arpMode_ == ARPMODE_OFF)
-                    {
-                        stopArp();
-                    }
+                    changeArpMode(arpMode_);
+                    // if((arpMode_ == ARPMODE_ON && hasMidiNotes() == false) || (arpMode_ == ARPMODE_ONCE && hasMidiNotes() == false) || arpMode_ == ARPMODE_OFF)
+                    // {
+                    //     stopArp();
+                    // }
 
-                    switch (arpMode_)
-                    {
-                    case ARPMODE_OFF:
-                    case ARPMODE_ON:
-                        resync();
-                        break;
-                    }
+                    // switch (arpMode_)
+                    // {
+                    // case ARPMODE_OFF:
+                    // case ARPMODE_ON:
+                    //     resync();
+                    //     break;
+                    // }
                     // omxDisp.displayMessage(tempString_.c_str());
                 }
             }
@@ -1934,6 +2056,7 @@ namespace midifx
 
         chancePerc_ = arpSave.chancePerc;
         arpMode_ = arpSave.arpMode;
+        changeArpMode(arpMode_);
         arpPattern_= arpSave.arpPattern;
         resetMode_= arpSave.resetMode;
         midiChannel_= arpSave.midiChannel;

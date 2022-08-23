@@ -64,6 +64,8 @@ private:
     void setParam(int paramIndex);
 
     void onKeyUpdateM8Macro(OMXKeypadEvent e);
+    bool onKeyUpdateSelMidiFX(OMXKeypadEvent e);
+    bool onKeyHeldSelMidiFX(OMXKeypadEvent e);
 
     // If true, encoder selects param rather than modifies value
     bool encoderSelect = false;
@@ -111,9 +113,9 @@ private:
 
     void stopSequencers();
 
-    void selectMidiFx(uint8_t mfxIndex);
+    void selectMidiFx(uint8_t mfxIndex, bool dispMsg);
 
-    uint8_t mfxIndex = 0;
+    uint8_t mfxIndex_ = 0;
 
     midimacro::MidiMacroNorns nornsMarco_;
     midimacro::MidiMacroM8 m8Macro_;

@@ -111,7 +111,7 @@ void OmxModeChords::onModeActivated()
 
     pendingNoteOffs.setNoteOffFunction(&OmxModeChords::onPendingNoteOffForwarder, this);
 
-    selectMidiFx(mfxIndex_);
+    selectMidiFx(mfxIndex_, false);
 }
 
 void OmxModeChords::onModeDeactivated()
@@ -132,13 +132,25 @@ void OmxModeChords::stopSequencers()
     pendingNoteOffs.allOff();
 }
 
-void OmxModeChords::selectMidiFx(uint8_t mfxIndex)
+void OmxModeChords::selectMidiFx(uint8_t mfxIndex, bool dispMsg)
 {
     this->mfxIndex_ = mfxIndex;
 
     for(uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
     {
         subModeMidiFx[i].setSelected(i == mfxIndex);
+    }
+
+    if (dispMsg)
+    {
+        if (mfxIndex < NUM_MIDIFX_GROUPS)
+        {
+            omxDisp.displayMessageTimed("MidiFX " + String(mfxIndex + 1), 5);
+        }
+        else
+        {
+            omxDisp.displayMessageTimed("MidiFX Off", 5);
+        }
     }
 }
 
@@ -985,19 +997,59 @@ bool OmxModeChords::onKeyUpdateSelMidiFX(OMXKeypadEvent e)
         {
             if (auxDown_) // Aux mode
             {
-                if(thisKey == 5)
+                if (thisKey == 5)
                 {
                     keyConsumed = true;
                     // Turn off midiFx
-                    selectMidiFx(127);
+                    selectMidiFx(127, true);
                     // mfxIndex_ = 127;
                 }
                 else if (thisKey >= 6 && thisKey < 11)
                 {
                     keyConsumed = true;
-                    selectMidiFx(thisKey - 6);
+                    selectMidiFx(thisKey - 6, true);
                     // Change active midiFx
                     // mfxIndex_ = thisKey - 6;
+                }
+                else if (thisKey == 25)
+                {
+                    if (mfxIndex_ < NUM_MIDIFX_GROUPS)
+                    {
+                        subModeMidiFx[mfxIndex_].toggleArpHold();
+
+                        if (subModeMidiFx[mfxIndex_].isArpHoldOn())
+                        {
+                            omxDisp.displayMessageTimed("Arp Hold: On", 5);
+                        }
+                        else
+                        {
+                            omxDisp.displayMessageTimed("Arp Hold: Off", 5);
+                        }
+                    }
+                    else
+                    {
+                        omxDisp.displayMessageTimed("MidiFX are Off", 5);
+                    }
+                }
+                else if (thisKey == 26)
+                {
+                    if (mfxIndex_ < NUM_MIDIFX_GROUPS)
+                    {
+                        subModeMidiFx[mfxIndex_].toggleArp();
+
+                        if (subModeMidiFx[mfxIndex_].isArpOn())
+                        {
+                            omxDisp.displayMessageTimed("Arp On", 5);
+                        }
+                        else
+                        {
+                            omxDisp.displayMessageTimed("Arp Off", 5);
+                        }
+                    }
+                    else
+                    {
+                        omxDisp.displayMessageTimed("MidiFX are Off", 5);
+                    }
                 }
             }
         }
@@ -1181,6 +1233,20 @@ void OmxModeChords::updateLEDs()
             auto mfxColor = (i == mfxIndex_) ? colorConfig.selMidiFXColor : colorConfig.midiFXColor;
 
             strip.setPixelColor(6 + i, mfxColor);
+        }
+
+        if(mfxIndex_ < NUM_MIDIFX_GROUPS)
+        {
+            bool isOn = subModeMidiFx[mfxIndex_].isArpOn() && blinkState;
+            bool isHoldOn = subModeMidiFx[mfxIndex_].isArpHoldOn();
+
+            strip.setPixelColor(25, isHoldOn ? colorConfig.arpHoldOn : colorConfig.arpHoldOff);
+            strip.setPixelColor(26, isOn ? colorConfig.arpOn : colorConfig.arpOff);
+        }
+        else
+        {
+            strip.setPixelColor(25, colorConfig.arpHoldOff);
+            strip.setPixelColor(26, colorConfig.arpOff);
         }
 
         return;

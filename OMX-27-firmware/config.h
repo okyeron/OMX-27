@@ -242,6 +242,11 @@ struct ColorConfig
 	uint32_t midiFXOffColor = RED;
 	uint32_t selMidiFXColor = LTCYAN;
 	uint32_t midiFXColor = BLUE;
+
+	uint32_t arpOn = MINT;
+	uint32_t arpOff = DKCYAN;
+	uint32_t arpHoldOn = YELLOW;
+	uint32_t arpHoldOff = DKYELLOW;
 };
 
 extern ColorConfig colorConfig;

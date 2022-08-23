@@ -7,7 +7,7 @@
 #include "midifx_scaler.h"
 #include "midifx_monophonic.h"
 #include "midifx_harmonizer.h"
-#include "midifx_arpeggiator.h"
+// #include "midifx_arpeggiator.h"
 
 using namespace midifx;
 
@@ -52,6 +52,85 @@ SubModeMidiFxGroup::SubModeMidiFxGroup()
     {
         onNoteGroups[i].prevNoteNumber = 255;
     }
+}
+
+midifx::MidiFXArpeggiator *SubModeMidiFxGroup::getArp(bool autoCreate)
+{
+    bool canAddArp = false;
+    uint8_t addArpIndex = 0;
+
+    for (uint8_t i = 0; i < NUM_MIDIFX_SLOTS; i++)
+    {
+        auto mfx = getMidiFX(i);
+        if (mfx != nullptr)
+        {
+            if(mfx->getFXType() == MIDIFX_ARP)
+            {
+                return static_cast<midifx::MidiFXArpeggiator*>(mfx);
+            }
+        }
+        else // empty slot
+        {
+            if (!canAddArp)
+            {
+                canAddArp = true;
+                addArpIndex = i;
+            }
+        }
+    }
+
+    // If we are here, no arp was found
+
+    if(autoCreate && canAddArp)
+    {
+        changeMidiFXType(addArpIndex, MIDIFX_ARP, true);
+        return getArp();
+    }
+
+    return nullptr;
+}
+
+void SubModeMidiFxGroup::toggleArp()
+{
+    auto arp = getArp(true);
+    if(arp != nullptr)
+    {
+        arp->toggleArp();
+    }
+}
+
+void SubModeMidiFxGroup::toggleArpHold()
+{
+    auto arp = getArp(true);
+    if(arp != nullptr)
+    {
+        arp->toggleHold();
+    }
+}
+
+bool SubModeMidiFxGroup::isArpOn()
+{
+    auto arp = getArp(false);
+    if(arp != nullptr)
+    {
+        return arp->isOn();
+    }
+    return false;
+}
+
+bool SubModeMidiFxGroup::isArpHoldOn()
+{
+    auto arp = getArp(false);
+    if(arp != nullptr)
+    {
+        return arp->isHoldOn();
+    }
+    return false;
+}
+
+void SubModeMidiFxGroup::gotoArpParams()
+{
+
 }
 
 void SubModeMidiFxGroup::onModeChanged()
