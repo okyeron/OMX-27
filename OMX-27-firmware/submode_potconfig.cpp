@@ -38,7 +38,7 @@ void SubModePotConfig::loopUpdate()
 {
 }
 
-void SubModePotConfig::updateLEDs()
+bool SubModePotConfig::updateLEDs()
 {
     strip.clear();
 
@@ -77,6 +77,8 @@ void SubModePotConfig::updateLEDs()
     //         strip.setPixelColor(19 + i, fxColor);
     //     }
     // }
+
+    return true;
 }
 
 void SubModePotConfig::onEncoderChanged(Encoder::Update enc)
@@ -142,7 +144,7 @@ void SubModePotConfig::onEncoderButtonDown()
     omxLeds.setDirty();
 }
 
-void SubModePotConfig::onKeyUpdate(OMXKeypadEvent e)
+bool SubModePotConfig::onKeyUpdate(OMXKeypadEvent e)
 {
     int thisKey = e.key();
 	// auto keyState = midiSettings.keyState;
@@ -182,6 +184,8 @@ void SubModePotConfig::onKeyUpdate(OMXKeypadEvent e)
 
     omxDisp.setDirty();
     omxLeds.setDirty();
+
+    return true;
 }
 
 void SubModePotConfig::setupPageLegends()
@@ -243,12 +247,12 @@ void SubModePotConfig::setupPageLegends()
 
 void SubModePotConfig::onDisplayUpdate()
 {
-    omxLeds.updateBlinkStates();
+    // omxLeds.updateBlinkStates();
 
-    if (omxLeds.isDirty())
-    {
-        updateLEDs();
-    }
+    // if (omxLeds.isDirty())
+    // {
+    //     updateLEDs();
+    // }
 
     if (omxDisp.isDirty())
     { 

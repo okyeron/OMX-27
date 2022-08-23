@@ -13,10 +13,10 @@
 // #include <cstdarg>
 
 /* * firmware metadata  */
-// OMX_VERSION = 1.12.2
+// OMX_VERSION = 1.12.3
 const int MAJOR_VERSION = 1;
 const int MINOR_VERSION = 12;
-const int POINT_VERSION = 2;
+const int POINT_VERSION = 3;
 
 const int DEVICE_ID     = 2;
 
@@ -247,6 +247,11 @@ struct ColorConfig
 	uint32_t arpOff = DKCYAN;
 	uint32_t arpHoldOn = YELLOW;
 	uint32_t arpHoldOff = DKYELLOW;
+
+	uint32_t gotoArpParams = DKORANGE;
+	uint32_t nextArpPattern = DKPURPLE;
+	uint32_t nextArpOctave = DKPURPLE;
+
 };
 
 extern ColorConfig colorConfig;
@@ -290,10 +295,14 @@ extern const int gridh;
 extern const int gridw;
 extern const int PPQ;
 
+extern const char* mfxOffMsg;
+
 extern const char* modes[];
 extern const char* macromodes[];
 extern const int nummacromodes;
 extern const char* infoDialogText[];
+
+
 
 enum multDiv
 {

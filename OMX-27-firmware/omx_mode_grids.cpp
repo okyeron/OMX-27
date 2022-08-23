@@ -835,7 +835,7 @@ void OmxModeGrids::updateLEDs()
         return;
     }
 
-    omxLeds.updateBlinkStates();
+    // omxLeds.updateBlinkStates();
 
     bool blinkState = omxLeds.getBlinkState();
 

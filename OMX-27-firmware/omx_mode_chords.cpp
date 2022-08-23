@@ -25,8 +25,6 @@ enum ChordsMainMode {
 
 const char* kVoicingNames[8] = {"NONE", "POWR", "SUS2", "SUS4", "SU24", "+6", "+6+9", "KB11"};
 
-
-
 const int kDegreeColor = ORANGE;
 const int kDegreeSelColor = 0xFFBF80;
 const int kNumNotesColor = BLUE;
@@ -560,8 +558,7 @@ void OmxModeChords::onKeyUpdate(OMXKeypadEvent e)
 {
     if (isSubmodeEnabled())
     {
-        activeSubmode->onKeyUpdate(e);
-        return;
+        if(activeSubmode->onKeyUpdate(e)) return;
     }
 
     if(chordEditMode_)
@@ -944,8 +941,7 @@ void OmxModeChords::onKeyHeldUpdate(OMXKeypadEvent e)
 {
     if (isSubmodeEnabled())
     {
-        activeSubmode->onKeyHeldUpdate(e);
-        return;
+        if(activeSubmode->onKeyHeldUpdate(e)) return;
     }
 
     if(onKeyHeldSelMidiFX(e)) return;
@@ -957,6 +953,8 @@ void OmxModeChords::enableSubmode(SubmodeInterface *subMode)
     {
         activeSubmode->setEnabled(false);
     }
+
+    auxDown_ = false;
 
     activeSubmode = subMode;
     activeSubmode->setEnabled(true);
@@ -1011,8 +1009,46 @@ bool OmxModeChords::onKeyUpdateSelMidiFX(OMXKeypadEvent e)
                     // Change active midiFx
                     // mfxIndex_ = thisKey - 6;
                 }
+                else if (thisKey == 22) // Goto arp params
+                {
+                    keyConsumed = true;
+                    if (mfxIndex_ < NUM_MIDIFX_GROUPS)
+                    {
+                        enableSubmode(&subModeMidiFx[mfxIndex_]);
+                        subModeMidiFx[mfxIndex_].gotoArpParams();
+                    }
+                    else
+                    {
+                        omxDisp.displayMessage(mfxOffMsg);
+                    }
+                }
+                else if (thisKey == 23) // Next arp pattern
+                {
+                    keyConsumed = true;
+                    if (mfxIndex_ < NUM_MIDIFX_GROUPS)
+                    {
+                        subModeMidiFx[mfxIndex_].nextArpPattern();
+                    }
+                    else
+                    {
+                        omxDisp.displayMessage(mfxOffMsg);
+                    }
+                }
+                else if (thisKey == 24) // Next arp octave
+                {
+                    keyConsumed = true;
+                    if (mfxIndex_ < NUM_MIDIFX_GROUPS)
+                    {
+                        subModeMidiFx[mfxIndex_].nextArpOctRange();
+                    }
+                    else
+                    {
+                        omxDisp.displayMessage(mfxOffMsg);
+                    }
+                }
                 else if (thisKey == 25)
                 {
+                    keyConsumed = true;
                     if (mfxIndex_ < NUM_MIDIFX_GROUPS)
                     {
                         subModeMidiFx[mfxIndex_].toggleArpHold();
@@ -1028,11 +1064,12 @@ bool OmxModeChords::onKeyUpdateSelMidiFX(OMXKeypadEvent e)
                     }
                     else
                     {
-                        omxDisp.displayMessageTimed("MidiFX are Off", 5);
+                        omxDisp.displayMessage(mfxOffMsg);
                     }
                 }
                 else if (thisKey == 26)
                 {
+                    keyConsumed = true;
                     if (mfxIndex_ < NUM_MIDIFX_GROUPS)
                     {
                         subModeMidiFx[mfxIndex_].toggleArp();
@@ -1048,7 +1085,7 @@ bool OmxModeChords::onKeyUpdateSelMidiFX(OMXKeypadEvent e)
                     }
                     else
                     {
-                        omxDisp.displayMessageTimed("MidiFX are Off", 5);
+                        omxDisp.displayMessage(mfxOffMsg);
                     }
                 }
             }
@@ -1206,6 +1243,11 @@ void OmxModeChords::onPendingNoteOff(int note, int channel)
 
 void OmxModeChords::updateLEDs()
 {
+    if (isSubmodeEnabled())
+    {
+        if(activeSubmode->updateLEDs()) return;
+    }
+
     if(chordEditMode_)
     {
         updateLEDsChordEdit();
@@ -1220,10 +1262,31 @@ void OmxModeChords::updateLEDs()
     {
         // Blink left/right keys for octave select indicators.
 		strip.setPixelColor(0, RED);
-		strip.setPixelColor(1, (blinkState ? LIME : LEDOFF));
-		strip.setPixelColor(2, (blinkState ? MAGENTA : LEDOFF));
-		strip.setPixelColor(11, (blinkState ? ORANGE : LEDOFF));
-		strip.setPixelColor(12, (blinkState ? RBLUE : LEDOFF));
+		strip.setPixelColor(1, LIME);
+		strip.setPixelColor(2, MAGENTA);
+
+		auto octDnColor = ORANGE;
+        auto octUpColor = RBLUE;
+
+        if(midiSettings.octave == 0)
+        {
+            strip.setPixelColor(11, octDnColor);
+            strip.setPixelColor(12, octUpColor);
+        }
+        else if(midiSettings.octave > 0)
+        {
+            bool blinkOctave = omxLeds.getBlinkPattern(midiSettings.octave);
+
+            strip.setPixelColor(11, octDnColor);
+            strip.setPixelColor(12, blinkOctave ? octUpColor : LEDOFF);
+        }
+        else
+        {
+            bool blinkOctave = omxLeds.getBlinkPattern(-midiSettings.octave);
+
+            strip.setPixelColor(11, blinkOctave ? octDnColor : LEDOFF);
+            strip.setPixelColor(12, octUpColor);
+        }
 
         // MidiFX off
         strip.setPixelColor(5, (mfxIndex_ >= NUM_MIDIFX_GROUPS ? colorConfig.selMidiFXOffColor : colorConfig.midiFXOffColor));
@@ -1235,8 +1298,24 @@ void OmxModeChords::updateLEDs()
             strip.setPixelColor(6 + i, mfxColor);
         }
 
+        strip.setPixelColor(22, colorConfig.gotoArpParams);
+        strip.setPixelColor(23, colorConfig.nextArpPattern);
+        
         if(mfxIndex_ < NUM_MIDIFX_GROUPS)
         {
+            uint8_t octaveRange = subModeMidiFx[mfxIndex_].getArpOctaveRange();
+            if(octaveRange == 0)
+            {
+                strip.setPixelColor(24, colorConfig.nextArpOctave);
+            }
+            else
+            {
+                // Serial.println("Blink Octave: " + String(octaveRange));
+                bool blinkOctave = omxLeds.getBlinkPattern(octaveRange);
+
+                strip.setPixelColor(24, blinkOctave ? colorConfig.nextArpOctave : LEDOFF);
+            }
+
             bool isOn = subModeMidiFx[mfxIndex_].isArpOn() && blinkState;
             bool isHoldOn = subModeMidiFx[mfxIndex_].isArpHoldOn();
 
@@ -1307,6 +1386,14 @@ void OmxModeChords::updateLEDs()
         {
             strip.setPixelColor(11 + i, (i == selectedSave_ ? WHITE : kPresetColor));
         }
+    }
+
+    if (isSubmodeEnabled())
+    {
+        bool blinkStateSlow = omxLeds.getSlowBlinkState();
+
+        auto auxColor = (blinkStateSlow ? RED : LEDOFF);
+        strip.setPixelColor(0, auxColor);
     }
 }
 
@@ -1408,6 +1495,13 @@ void OmxModeChords::updateLEDsChordEdit()
             auto valColor = chords_[selectedChord_].voicing == (i - 11) ? WHITE : GREEN;
             strip.setPixelColor(i, valColor);
         }
+    }
+
+    if (isSubmodeEnabled())
+    {
+        bool blinkStateSlow = omxLeds.getSlowBlinkState();
+        auto auxColor = (blinkStateSlow ? RED : LEDOFF);
+        strip.setPixelColor(0, auxColor);
     }
 }
 
@@ -1519,13 +1613,18 @@ void OmxModeChords::setupPageLegends()
 
 void OmxModeChords::onDisplayUpdate()
 {
+    // omxLeds.updateBlinkStates();
+
     if (isSubmodeEnabled())
     {
+        if (omxLeds.isDirty())
+        {
+            updateLEDs();
+        }
+
         activeSubmode->onDisplayUpdate();
         return;
     }
-
-    omxLeds.updateBlinkStates();
 
     if (omxLeds.isDirty())
     {

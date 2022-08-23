@@ -21,10 +21,10 @@ public:
     void onClockTick() override;
     void loopUpdate() override;
     void resync();
-    void updateLEDs() override;
+    bool updateLEDs() override;
     void onEncoderChanged(Encoder::Update enc);
     void onEncoderButtonDown() override;
-    void onKeyUpdate(OMXKeypadEvent e) override;
+    bool onKeyUpdate(OMXKeypadEvent e) override;
     void onDisplayUpdate() override;
 
     void setSelected(bool newSelected);
@@ -41,7 +41,10 @@ public:
     void toggleArpHold();
     bool isArpOn();
     bool isArpHoldOn();
+    void nextArpPattern();
+    void nextArpOctRange();
     void gotoArpParams();
+    uint8_t getArpOctaveRange();
 
     midifx::MidiFXArpeggiator *getArp(bool autoCreate);
 protected:
@@ -53,6 +56,8 @@ protected:
 private:
     bool selected_ = false;
     bool midiFXParamView_ = false; // If true, parameters adjust the selected midiFX slot. 
+    bool arpParamView_ = false; // If true, parameters adjust the selected midiFX slot. 
+
     uint8_t selectedMidiFX_ = 0; // Index of selected midiFX slot
 
     uint8_t funcKeyMode_ = 0;
@@ -76,6 +81,7 @@ private:
 
     midifx::MidiFXInterface *getMidiFX(uint8_t index);
     void setMidiFX(uint8_t index, midifx::MidiFXInterface* midifx);
+    uint8_t getArpIndex();
     void setupPageLegends();
 
     void updateFuncKeyMode();

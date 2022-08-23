@@ -54,6 +54,23 @@ SubModeMidiFxGroup::SubModeMidiFxGroup()
     }
 }
 
+uint8_t SubModeMidiFxGroup::getArpIndex()
+{
+    for (uint8_t i = 0; i < NUM_MIDIFX_SLOTS; i++)
+    {
+        auto mfx = getMidiFX(i);
+        if (mfx != nullptr)
+        {
+            if(mfx->getFXType() == MIDIFX_ARP)
+            {
+                return i;
+            }
+        }
+    }
+
+    return 255;
+}
+
 midifx::MidiFXArpeggiator *SubModeMidiFxGroup::getArp(bool autoCreate)
 {
     bool canAddArp = false;
@@ -84,7 +101,7 @@ midifx::MidiFXArpeggiator *SubModeMidiFxGroup::getArp(bool autoCreate)
     if(autoCreate && canAddArp)
     {
         changeMidiFXType(addArpIndex, MIDIFX_ARP, true);
-        return getArp();
+        return getArp(false);
     }
 
     return nullptr;
@@ -128,9 +145,51 @@ bool SubModeMidiFxGroup::isArpHoldOn()
     return false;
 }
 
+void SubModeMidiFxGroup::nextArpPattern()
+{
+    auto arp = getArp(true);
+
+    if(arp != nullptr)
+    {
+        arp->nextArpPattern();
+    }
+}
+
+void SubModeMidiFxGroup::nextArpOctRange()
+{
+    auto arp = getArp(true);
+
+    if(arp != nullptr)
+    {
+        arp->nextOctRange();
+    }
+}
+
 void SubModeMidiFxGroup::gotoArpParams()
 {
+    midiFXParamView_ = true;
+    arpParamView_ = true;
 
+    getArp(true); // Create arp if empty
+
+    uint8_t arpIndex = getArpIndex();
+
+    if(arpIndex < NUM_MIDIFX_SLOTS)
+    {
+        selectedMidiFX_ = arpIndex;
+    }
+}
+
+uint8_t SubModeMidiFxGroup::getArpOctaveRange()
+{
+    auto arp = getArp(false);
+
+    if(arp != nullptr)
+    {
+        return arp->getOctaveRange() + 1;
+    }
+
+    return 0;
 }
 
 void SubModeMidiFxGroup::onModeChanged()
@@ -161,7 +220,7 @@ void SubModeMidiFxGroup::setSelected(bool newSelected)
 
 void SubModeMidiFxGroup::onEnabled()
 {
-    params_.setSelPageAndParam(0, 0);
+    // params_.setSelPageAndParam(0, 0);
     encoderSelect_ = true;
     omxLeds.setDirty();
     omxDisp.setDirty();
@@ -266,7 +325,7 @@ void SubModeMidiFxGroup::loopUpdate()
     }
 }
 
-void SubModeMidiFxGroup::updateLEDs()
+bool SubModeMidiFxGroup::updateLEDs()
 {
     strip.clear();
 
@@ -276,6 +335,8 @@ void SubModeMidiFxGroup::updateLEDs()
     // Serial.println("MidiFX Leds");
     auto auxColor = midiFXParamView_ ? (blinkStateSlow ? ORANGE : LEDOFF) : RED;
     strip.setPixelColor(0, auxColor);
+
+    if(arpParamView_) return false;
 
     // for(uint8_t i = 1; i < 26; i++)
     // {
@@ -288,7 +349,7 @@ void SubModeMidiFxGroup::updateLEDs()
         if (mfx != nullptr && mfx->usesKeys())
         {
             mfx->updateLEDs(funcKeyMode_);
-            return;
+            return true;
         }
     }
 
@@ -317,7 +378,7 @@ void SubModeMidiFxGroup::updateLEDs()
         strip.setPixelColor(3 + i, fxColor);
     }
 
-    if (midiFXParamView_)
+    if (midiFXParamView_ && !arpParamView_)
     {
         uint8_t selFXType = 0;
 
@@ -334,6 +395,8 @@ void SubModeMidiFxGroup::updateLEDs()
             strip.setPixelColor(11 + i, fxColor);
         }
     }
+
+    return true;
 }
 
 void SubModeMidiFxGroup::onEncoderChanged(Encoder::Update enc)
@@ -389,9 +452,13 @@ void SubModeMidiFxGroup::onEncoderButtonDown()
     omxLeds.setDirty();
 }
 
-void SubModeMidiFxGroup::onKeyUpdate(OMXKeypadEvent e)
+bool SubModeMidiFxGroup::onKeyUpdate(OMXKeypadEvent e)
 {
-    if(e.held()) return;
+    if(e.held()) 
+    {
+        if(arpParamView_) return false;
+        return true;
+    }
 
     int thisKey = e.key();
 	// auto keyState = midiSettings.keyState;
@@ -408,6 +475,13 @@ void SubModeMidiFxGroup::onKeyUpdate(OMXKeypadEvent e)
     {
         if (thisKey == 0)
         {
+            if(arpParamView_)
+            {
+                arpParamView_ = false;
+                midiFXParamView_ = false;
+                setEnabled(false);
+                return true;
+            }
             // Exit MidiFX view
             if (midiFXParamView_)
             {
@@ -418,7 +492,13 @@ void SubModeMidiFxGroup::onKeyUpdate(OMXKeypadEvent e)
             else if (auxReleased_)
             {
                 setEnabled(false);
+                return true;
             }
+        }
+
+        if(arpParamView_)
+        {
+            return false;
         }
 
         if (mfxKeysActive == false)
@@ -451,7 +531,7 @@ void SubModeMidiFxGroup::onKeyUpdate(OMXKeypadEvent e)
             }
 
             // Change FX type
-            if (midiFXParamView_)
+            if (midiFXParamView_ && !arpParamView_)
             {
                 if (thisKey >= 11 && thisKey < 11 + 16)
                 {
@@ -472,6 +552,11 @@ void SubModeMidiFxGroup::onKeyUpdate(OMXKeypadEvent e)
         auxReleased_ = true;
     }
 
+    if (arpParamView_)
+    {
+        return false;
+    }
+
     if(mfxKeysActive)
     {
         mfx->onKeyUpdate(e, funcKeyMode_);
@@ -479,6 +564,8 @@ void SubModeMidiFxGroup::onKeyUpdate(OMXKeypadEvent e)
 
     omxDisp.setDirty();
     omxLeds.setDirty();
+
+    return true;
 }
 
 void SubModeMidiFxGroup::selectMidiFX(uint8_t fxIndex)
@@ -501,6 +588,8 @@ void SubModeMidiFxGroup::selectMidiFX(uint8_t fxIndex)
         {
             newMFX->setEnabled(true);
         }
+
+        arpParamView_ = false;
     }
 
     displayMidiFXName(fxIndex);
@@ -922,12 +1011,12 @@ void SubModeMidiFxGroup::onDisplayUpdateMidiFX()
 
 void SubModeMidiFxGroup::onDisplayUpdate()
 {
-    omxLeds.updateBlinkStates();
+    // omxLeds.updateBlinkStates();
 
-    if (omxLeds.isDirty())
-    {
-        updateLEDs();
-    }
+    // if (omxLeds.isDirty())
+    // {
+    //     updateLEDs();
+    // }
 
     if (omxDisp.isDirty())
     { 

@@ -39,6 +39,13 @@ void OmxLeds::updateBlinkStates()
     {
         blinkState = !blinkState;
         blink_msec = 0;
+
+        for (uint8_t i = 0; i < 10; i++)
+        {
+            uint8_t patMax = ((i + 1) * 2) + blinkPatternDelay_;
+            blinkPatPos[i] = (blinkPatPos[i] + 1) % patMax;
+        }
+
         setDirty();
     }
     if (slow_blink_msec >= slowBlinkInterval)
@@ -72,7 +79,7 @@ int OmxLeds::getKeyColor(MusicScales* scale, int pixel) {
 }
 
 void OmxLeds::drawMidiLeds(MusicScales* scale) {
-    updateBlinkStates();
+    // updateBlinkStates();
 	// blinkInterval = clockConfig.step_delay*2;
 
 	// if (blink_msec >= blinkInterval){
@@ -137,6 +144,33 @@ bool OmxLeds::getBlinkState()
 bool OmxLeds::getSlowBlinkState()
 {
     return slowBlinkState;
+}
+
+bool OmxLeds::getBlinkPattern(uint8_t numberOfBlinks)
+{
+    if(numberOfBlinks < 1 || numberOfBlinks > 10) return false;
+
+    // Serial.println("blinkPatPos: " + String(blinkPatPos[numberOfBlinks - 1]));
+
+    if(blinkPatPos[numberOfBlinks - 1] >= (numberOfBlinks * 2)) 
+    {
+        //  4 = x0x0x0x00000
+        // Serial.println("blinkPatPos delayed");
+        return false; // the delay
+    }
+
+    bool blink = (blinkPatPos[numberOfBlinks - 1] % 2 == 0); // the blink
+
+    // if(blink)
+    // {
+    //     Serial.println("Blink On");
+    // }
+    // else
+    // {
+    //     Serial.println("Blink Off");
+    // }
+
+    return blink;
 }
 
 void OmxLeds::setAllLEDS(int R, int G, int B)

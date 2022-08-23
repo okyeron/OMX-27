@@ -97,9 +97,13 @@ namespace midifx
         // Toggles between off and previous mode
         void toggleArp();
         void toggleHold();
+        void nextArpPattern();
+        void nextOctRange();
 
         bool isOn();
         bool isHoldOn();
+
+        uint8_t getOctaveRange();
 
     protected:
         void onEnabled() override;

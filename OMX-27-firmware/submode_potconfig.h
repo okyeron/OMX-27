@@ -12,10 +12,10 @@ public:
 
 // Interface methods
     void loopUpdate() override;
-    void updateLEDs() override;
+    bool updateLEDs() override;
     void onEncoderChanged(Encoder::Update enc);
     void onEncoderButtonDown() override;
-    void onKeyUpdate(OMXKeypadEvent e) override;
+    bool onKeyUpdate(OMXKeypadEvent e) override;
     void onDisplayUpdate() override;
 protected:
 // Interface methods

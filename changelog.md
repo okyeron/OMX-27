@@ -1,6 +1,21 @@
 # Change log
 
 ```
+### 1.12.3 arp preview
+*** Warning!!!: This will clear your global save state if FW < 1.12.2***
+- Adds Aux hotkeys for controlling the arp
+- Key 26: Toggles Arp On and Off
+- Key 25: Toggles Hold On and Off
+- Key 24: Changes the Arp Octave Range
+- Key 23: Changes the Arp Pattern
+- Key 22: Enters arp param view
+- Arp Param view lets you change the arp parameters and also play the keys
+- - Aux to go back to the normal params
+- Same hotkeys for Chords Mode and MI modes
+- If there is no arp in your current MidiFX slot and arp will be auto-added for you. 
+```
+
+```
 ### 1.12.2 arp preview
 *** Warning!!!: This will clear your global save state***
 - Saving and loading arpeggiator configs

@@ -308,7 +308,7 @@ namespace midimacro
 
     void MidiMacroM8::drawLEDs()
     {
-        omxLeds.updateBlinkStates();
+        // omxLeds.updateBlinkStates();
 
         if(omxLeds.isDirty() == false)
         {

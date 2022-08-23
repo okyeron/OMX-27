@@ -153,7 +153,7 @@ namespace midimacro
 
     void MidiMacroNorns::drawLEDs()
     {
-        omxLeds.updateBlinkStates();
+        // omxLeds.updateBlinkStates();
 
         if(omxLeds.isDirty() == false)
         {

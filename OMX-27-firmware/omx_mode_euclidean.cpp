@@ -677,21 +677,21 @@ void OmxModeEuclidean::onEncoderButtonDown()
         {
             encoderSelect_ = true;
 
-            polyRhythmMode = !polyRhythmMode;
+            // polyRhythmMode = !polyRhythmMode;
 
-            for (u_int8_t i = 0; i < kNumEuclids; i++)
-            {
-                euclids[i].setPolyRhythmMode(polyRhythmMode);
-            }
+            // for (u_int8_t i = 0; i < kNumEuclids; i++)
+            // {
+            //     euclids[i].setPolyRhythmMode(polyRhythmMode);
+            // }
 
-            if (polyRhythmMode)
-            {
-                omxDisp.displayMessage("PolyRhythm");
-            }
-            else
-            {
-                omxDisp.displayMessage("PolyMeter");
-            }
+            // if (polyRhythmMode)
+            // {
+            //     omxDisp.displayMessage("PolyRhythm");
+            // }
+            // else
+            // {
+            //     omxDisp.displayMessage("PolyMeter");
+            // }
         }
         else
         {
@@ -779,8 +779,7 @@ void OmxModeEuclidean::onKeyUpdate(OMXKeypadEvent e)
 
     if (isSubmodeEnabled())
     {
-        activeSubmode->onKeyUpdate(e);
-        return;
+        if(activeSubmode->onKeyUpdate(e)) return;
     }
 
     int thisKey = e.key();
@@ -919,11 +918,10 @@ void OmxModeEuclidean::selectEuclid(uint8_t euclidIndex)
 
 void OmxModeEuclidean::onKeyHeldUpdate(OMXKeypadEvent e)
 {
-    // if (isSubmodeEnabled())
-    // {
-    //     activeSubmode->onKeyHeldUpdate(e);
-    //     return;
-    // }
+    if (isSubmodeEnabled())
+    {
+        if(activeSubmode->onKeyHeldUpdate(e)) return;
+    }
 
     if (midiModeception)
     {
@@ -949,6 +947,11 @@ void OmxModeEuclidean::onKeyHeldUpdate(OMXKeypadEvent e)
 
 void OmxModeEuclidean::updateLEDs()
 {
+    if (isSubmodeEnabled())
+    {
+        if(activeSubmode->updateLEDs()) return;
+    }
+
     // Serial.println("Euclidean Leds");
 
     if (midiModeception)
@@ -1037,7 +1040,14 @@ void OmxModeEuclidean::updateLEDs()
             strip.setPixelColor(11 + i, saveColor);
         }
     }
-    
+
+    if (isSubmodeEnabled())
+    {
+        bool blinkStateSlow = omxLeds.getSlowBlinkState();
+
+        auto auxColor = (blinkStateSlow ? RED : LEDOFF);
+        strip.setPixelColor(0, auxColor);
+    }
 }
 
 void OmxModeEuclidean::updateLEDsFNone()
@@ -1222,6 +1232,11 @@ void OmxModeEuclidean::onDisplayUpdate()
 {
     if (isSubmodeEnabled())
     {
+        if (omxLeds.isDirty())
+        {
+            updateLEDs();
+        }
+
         activeSubmode->onDisplayUpdate();
         return;
     }
@@ -1238,7 +1253,7 @@ void OmxModeEuclidean::onDisplayUpdate()
         return;
     }
 
-    omxLeds.updateBlinkStates();
+    // omxLeds.updateBlinkStates();
 
     if (omxLeds.isDirty())
     {

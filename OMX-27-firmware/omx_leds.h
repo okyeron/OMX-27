@@ -27,6 +27,9 @@ public:
     bool getBlinkState();
     bool getSlowBlinkState();
 
+    // Blinks for numberOfBlinks then a delay
+    bool getBlinkPattern(uint8_t numberOfBlinks);
+
     // void setPixelColor(uint16_t n, uint8_t r, uint8_t g, uint8_t b);
 
     void setAllLEDS(int R, int G, int B);
@@ -57,6 +60,9 @@ private:
 
     elapsedMillis blink_msec = 0;
     elapsedMillis slow_blink_msec = 0;
+
+    uint8_t blinkPatPos[10];
+    const uint8_t blinkPatternDelay_ = 2;
 };
 
 extern OmxLeds omxLeds;

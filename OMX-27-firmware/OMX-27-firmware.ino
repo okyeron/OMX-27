@@ -1,6 +1,6 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
 
-// v1.12.2alpha
+// v1.12.3alpha
 
 //
 // Steven Noreyko, Last update: July 2022
@@ -494,6 +494,7 @@ void loop()
 
 	if (!sysSettings.screenSaverMode)
 	{
+		omxLeds.updateBlinkStates();
 		omxDisp.UpdateMessageTextTimer();
 		activeOmxMode->onDisplayUpdate();
 	}

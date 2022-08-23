@@ -1029,9 +1029,9 @@ void OmxModeSequencer::onKeyHeldUpdate(OMXKeypadEvent e)
 
 void OmxModeSequencer::showCurrentStepLEDs(int patternNum)
 {
-	if(sysSettings.screenSaverMode && !sequencer.playing) return; // Screensaver active and not playing, don't update sequencer LEDs. 
+    // omxLeds.updateBlinkStates();
 
-    omxLeds.updateBlinkStates();
+	if(sysSettings.screenSaverMode && !sequencer.playing) return; // Screensaver active and not playing, don't update sequencer LEDs. 
 
     bool blinkState = omxLeds.getBlinkState();
     bool slowBlinkState = omxLeds.getSlowBlinkState();

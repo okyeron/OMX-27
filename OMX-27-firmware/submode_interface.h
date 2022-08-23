@@ -18,14 +18,14 @@ public:
     virtual void onPotChanged(int potIndex, int prevValue, int newValue, int analogDelta) {}
     virtual void onClockTick() {}
     virtual void loopUpdate() {}
-    virtual void updateLEDs() {}
+    virtual bool updateLEDs() { return true;}
     virtual void onEncoderChanged(Encoder::Update enc);
     virtual void onEncoderButtonDown();
 
     virtual bool shouldBlockEncEdit() { return false; }
 
-    virtual void onKeyUpdate(OMXKeypadEvent e) {}
-    virtual void onKeyHeldUpdate(OMXKeypadEvent e) {}
+    virtual bool onKeyUpdate(OMXKeypadEvent e) { return true;}
+    virtual bool onKeyHeldUpdate(OMXKeypadEvent e) { return true;}
 
     virtual void onDisplayUpdate() = 0;
 

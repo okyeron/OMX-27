@@ -211,6 +211,9 @@ namespace midifx
 
     void MidiFXArpeggiator::toggleHold()
     {
+        Serial.println("Prev Arp Mode: " + String(prevArpMode_));
+        Serial.println("Arp Mode: " + String(arpMode_));
+
         if(arpMode_ == ARPMODE_OFF)
         {
             if(prevArpMode_ == ARPMODE_HOLD)
@@ -234,7 +237,6 @@ namespace midifx
                 {
                     changeArpMode(prevArpMode_);
                 }
-                changeArpMode(prevArpMode_);
                 prevArpMode_ = ARPMODE_HOLD;
             }
             else
@@ -243,6 +245,20 @@ namespace midifx
                 changeArpMode(ARPMODE_HOLD);
             }
         }
+    }
+
+    void MidiFXArpeggiator::nextArpPattern()
+    {
+        arpPattern_ = (arpPattern_ + 1) % ARPPAT_NUM_OF_PATS;
+        omxDisp.displayMessage(kPatMsg_[arpPattern_]);
+        sortNotes();
+    }
+
+    void MidiFXArpeggiator::nextOctRange()
+    {
+        octaveRange_ = (octaveRange_ + 1) % 4;
+
+        omxDisp.displayMessageTimed("OctRange: " + String(octaveRange_ + 1), 5);
     }
 
     bool MidiFXArpeggiator::isOn()
@@ -259,6 +275,11 @@ namespace midifx
         {
             return isModeHold(arpMode_);
         }
+    }
+
+    uint8_t MidiFXArpeggiator::getOctaveRange()
+    {
+        return octaveRange_;
     }
 
     bool MidiFXArpeggiator::isModeHold(uint8_t arpMode)
@@ -2056,7 +2077,6 @@ namespace midifx
 
         chancePerc_ = arpSave.chancePerc;
         arpMode_ = arpSave.arpMode;
-        changeArpMode(arpMode_);
         arpPattern_= arpSave.arpPattern;
         resetMode_= arpSave.resetMode;
         midiChannel_= arpSave.midiChannel;
@@ -2066,6 +2086,9 @@ namespace midifx
         gate= arpSave.gate;       
         modPatternLength_= arpSave.modPatternLength;
         transpPatternLength_= arpSave.transpPatternLength;
+
+        changeArpMode(arpMode_);
+        prevArpMode_ = arpMode_;
 
         for (uint8_t i = 0; i < 16; i++)
         {
