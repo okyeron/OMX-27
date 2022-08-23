@@ -82,7 +82,7 @@ private:
 
     uint32_t paramSelColors[4] = {MAGENTA, ORANGE, RED, RBLUE};
 
-    const char * rateNames[3] = {"1 / 2", "1", "2"};
+    const char * rateNames[3] = {"0.5x", "1x", "2x"};
 
     // If true, encoder selects param rather than modifies value
     bool encoderSelect = false;
@@ -98,6 +98,10 @@ private:
     // int gridsXY[4][2];
 
     bool gridsSelected[4] = {false,false,false,false};
+
+    // Implements threshold post load to prevent pots from changing until modified
+    bool potPostLoadThresh[5] = {false,false,false,false, false};
+
 
     bool gridsAUX = false;
 

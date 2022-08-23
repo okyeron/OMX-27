@@ -13,10 +13,10 @@
 // #include <cstdarg>
 
 /* * firmware metadata  */
-// OMX_VERSION = 1.12.3
+// OMX_VERSION = 1.12.4
 const int MAJOR_VERSION = 1;
 const int MINOR_VERSION = 12;
-const int POINT_VERSION = 3;
+const int POINT_VERSION = 4;
 
 const int DEVICE_ID     = 2;
 
@@ -113,6 +113,7 @@ struct PotSettings
 	int potbank = 0;
 	int analogValues[NUM_CC_POTS] = {0, 0, 0, 0, 0}; // default values
 	int potValues[NUM_CC_POTS] = {0, 0, 0, 0, 0};
+	int hiResPotVal[NUM_CC_POTS] = {0, 0, 0, 0, 0};
 	int potCC = pots[potbank][0];
 	int potVal = analogValues[0];
 	int potNum = 0;
@@ -120,6 +121,9 @@ struct PotSettings
 };
 // Put in global struct to share across classes
 extern PotSettings potSettings;
+
+extern int potMinVal;
+extern int potMaxVal;
 
 struct MidiConfig
 {

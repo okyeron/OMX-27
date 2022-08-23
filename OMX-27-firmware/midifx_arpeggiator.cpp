@@ -211,8 +211,8 @@ namespace midifx
 
     void MidiFXArpeggiator::toggleHold()
     {
-        Serial.println("Prev Arp Mode: " + String(prevArpMode_));
-        Serial.println("Arp Mode: " + String(arpMode_));
+        // Serial.println("Prev Arp Mode: " + String(prevArpMode_));
+        // Serial.println("Arp Mode: " + String(arpMode_));
 
         if(arpMode_ == ARPMODE_OFF)
         {
@@ -415,7 +415,7 @@ namespace midifx
 
             if(canInsert)
             {
-                Serial.println("Inserting pending note");
+                // Serial.println("Inserting pending note");
                 PendingArpNote pendingNote;
                 pendingNote.noteCache.setFromNoteGroup(note);
                 pendingNote.offTime = seqConfig.currentFrameMicros + (note.stepLength * clockConfig.step_micros);
@@ -444,7 +444,7 @@ namespace midifx
 
     void MidiFXArpeggiator::startArp()
     {
-        Serial.println("startArp");
+        // Serial.println("startArp");
         if(arpRunning_) return;
 
         pendingStart_ = true;
@@ -462,14 +462,14 @@ namespace midifx
 
     void MidiFXArpeggiator::stopArp()
     {
-        Serial.println("stopArp");
+        // Serial.println("stopArp");
         arpRunning_ = false;
         pendingStart_ = false;
     }
 
     bool MidiFXArpeggiator::insertMidiNoteQueue(MidiNoteGroup note)
     {
-        Serial.println("playedNoteQueue capacity: " + String(playedNoteQueue.capacity()));
+        // Serial.println("playedNoteQueue capacity: " + String(playedNoteQueue.capacity()));
         if(playedNoteQueue.capacity() > queueSize)
         {
             playedNoteQueue.shrink_to_fit();
@@ -869,7 +869,7 @@ namespace midifx
             // remove matching note numbers
             if(it->offTime <= now)
             {
-                Serial.println("Removing pending note");
+                // Serial.println("Removing pending note");
                 arpNoteOff(it->noteCache.toMidiNoteGroup());
                 // `erase()` invalidates the iterator, use returned iterator
                 it = pendingNotes.erase(it);
@@ -921,7 +921,7 @@ namespace midifx
 
     void MidiFXArpeggiator::resetArpSeq()
     {
-        Serial.println("resetArpSeq");
+        // Serial.println("resetArpSeq");
         // patPos_ = 0;
         transpPos_ = 0;
         modPos_ = 0;

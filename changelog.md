@@ -1,6 +1,16 @@
 # Change log
 
 ```
+### 1.12.4 arp preview
+*** Warning!!!: This will clear your global save state if FW < 1.12.2***
+- Makes grids pots less grainy
+- Grids pots now have high resolution. 
+- Girds Pots will stick around mid-point 127
+- Threshold needs to be met after loading grids settings to modify density values
+- - This is to prevent the values from randomly jumping to value of current pot position
+```
+
+```
 ### 1.12.3 arp preview
 *** Warning!!!: This will clear your global save state if FW < 1.12.2***
 - Adds Aux hotkeys for controlling the arp

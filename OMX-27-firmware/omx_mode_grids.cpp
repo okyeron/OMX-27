@@ -50,6 +50,10 @@ void OmxModeGrids::onModeActivated()
     sequencer.playing = false;
     grids_.stop();
     grids_.loadSnapShot(grids_.playingPattern);
+    for(uint8_t i = 0; i < NUM_CC_POTS; i++)
+    {
+        potPostLoadThresh[i] = true;
+    }
     gridsAUX = false;
 
     params.setSelPageAndParam(0,0);
@@ -68,31 +72,74 @@ void OmxModeGrids::onPotChanged(int potIndex, int prevValue, int newValue, int a
     }
     // Serial.println((String)"AnalogDelta: " + analogDelta);
 
+    // if (analogDelta < 3)
+    //         return;
+
+    // prevents values from being modified until pot is modified
+    if(potPostLoadThresh[potIndex])
+    {
+        if(analogDelta < 10)
+        {
+            return;
+        }
+        else
+        {
+            potPostLoadThresh[potIndex] = false;
+        }
+    }
+
     if (potIndex < 4)
     {
-        if (analogDelta >= 10)
-        {
-            grids_.setDensity(potIndex, newValue * 2);
+        const uint16_t magicPotNumber = 16383;
+        uint8_t singleHighresVal = 64; // magicPotNumber / 256
+        uint8_t prevDensity = grids_.getDensity(potIndex);
+        uint16_t hiResVal = map(potSettings.hiResPotVal[potIndex], potMinVal, potMaxVal, 0, magicPotNumber);
+        uint8_t newDensity = map(hiResVal, 0, magicPotNumber, 0, 255);
 
-            if (params.getSelPage() == GRIDS_DENSITY)
-            {
-                setParam(potIndex);
-                // setParam(GRIDS_DENSITY, potIndex + 1);
-            }
+        const uint8_t stickyRange = 12;
+
+        // Make value stick to center and sides
+        if(newDensity <= 127)
+        {
+            hiResVal = constrain(hiResVal, (singleHighresVal * 3), (magicPotNumber / 2) - (singleHighresVal * stickyRange));
+            newDensity = map(hiResVal, (singleHighresVal * 3), (magicPotNumber / 2) - (singleHighresVal * stickyRange), 0, 127);
+        }
+        else
+        {
+            hiResVal = constrain(hiResVal, (magicPotNumber / 2) + (singleHighresVal * stickyRange), magicPotNumber - (singleHighresVal * 3));
+            newDensity = map(hiResVal, (magicPotNumber / 2) + (singleHighresVal * stickyRange), magicPotNumber - (singleHighresVal * 3), 127, 255);
         }
 
-        omxDisp.setDirty();
+        if (newDensity != prevDensity)
+        {
+            grids_.setDensity(potIndex, newDensity);
+
+            if (analogDelta >= 10)
+            {
+                if (params.getSelPage() == GRIDS_DENSITY)
+                {
+                    setParam(potIndex);
+                    // setParam(GRIDS_DENSITY, potIndex + 1);
+                }
+            }
+
+            omxDisp.setDirty();
+        }
     }
     else if (potIndex == 4)
     {
-        int newres = (float(newValue) / 128.f) * 3;
+        int newres = map(newValue, 0, 127, 0, 2);
         grids_.setResolution(newres);
         if (newres != prevResolution_)
         {
-            String msg = String(rateNames[newres]);
-            omxDisp.displayMessageTimed(msg, 5);
+            omxDisp.displayMessage(rateNames[newres]);
         }
         prevResolution_ = newres;
+
+        // if (analogDelta >= 10)
+        // {
+            
+        // }
     }
 }
 
@@ -435,6 +482,11 @@ void OmxModeGrids::saveActivePattern(uint8_t pattIndex)
 void OmxModeGrids::loadActivePattern(uint8_t pattIndex)
 {
     grids_.loadSnapShot(pattIndex);
+
+    for(uint8_t i = 0; i < NUM_CC_POTS; i++)
+    {
+        potPostLoadThresh[i] = true;
+    }
 
     // // SELECT
     // grids_.playingPattern = pattIndex;

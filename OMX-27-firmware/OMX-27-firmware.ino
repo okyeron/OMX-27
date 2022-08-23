@@ -1,6 +1,6 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
 
-// v1.12.3alpha
+// v1.12.4alpha
 
 //
 // Steven Noreyko, Last update: July 2022
@@ -57,8 +57,7 @@ MusicScales globalScale;
 // storage of pot values; current is in the main loop; last value is for midi output
 int volatile currentValue[NUM_CC_POTS];
 int lastMidiValue[NUM_CC_POTS];
-int potMin = 0;
-int potMax = 8190;
+
 int temp;
 
 Micros lastProcessTime;
@@ -553,8 +552,9 @@ void readPotentimeters()
 
 		// read from the smoother, constrain (to account for tolerances), and map it
 		temp = potSettings.analog[k]->getValue();
-		temp = constrain(temp, potMin, potMax);
-		temp = map(temp, potMin, potMax, 0, 16383);
+		temp = constrain(temp, potMinVal, potMaxVal);
+		potSettings.hiResPotVal[k] = temp;
+		temp = map(temp, potMinVal, potMaxVal, 0, 16383);
 
 		// map and update the value
 		potSettings.analogValues[k] = temp >> 7;
