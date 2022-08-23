@@ -316,6 +316,11 @@ namespace midifx
 
         pendingStart_ = true;
 
+        if(sysSettings.omxMode == MODE_EUCLID)
+        {
+            onClockTick();
+        }
+
         // if(seqConfig.currentFrameMicros - seqConfig.lastClockMicros < 300)
         // {
         //     onClockTick();
