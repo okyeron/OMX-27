@@ -69,7 +69,7 @@ private:
 
     // If true, encoder selects param rather than modifies value
     bool encoderSelect = false;
-    void onEncoderChangedSelectParam(Encoder::Update enc);
+    // void onEncoderChangedSelectParam(Encoder::Update enc);
     ParamManager params;
 
     bool macroActive_ = false;

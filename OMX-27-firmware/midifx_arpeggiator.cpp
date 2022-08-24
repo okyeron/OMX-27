@@ -32,10 +32,10 @@ namespace midifx
         "Hi-UpDown",
         "Low-Up",
         "Low-UpDown",
-        "As Played",
         "Random",
         "Rand Other",
-        "Rand Once"};
+        "Rand Once",
+        "As Played"};
 
     const char *kResetMsg_[] = {
         "Normal",
@@ -65,10 +65,10 @@ namespace midifx
         "HI 2",
         "LO 1",
         "LO 2",
-        "ASP",
         "RAND",
         "ROTH",
-        "RONC"};
+        "RONC",
+        "ASP"};
 
     const char *kArpModDisp_[] = {
         "×",

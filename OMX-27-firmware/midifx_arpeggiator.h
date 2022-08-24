@@ -29,10 +29,10 @@ namespace midifx
         ARPPAT_HI_UP_DOWN,          // BGBEBCBE-BGBEBCBE
         ARPPAT_LOW_UP,              // Alternates between lowest note: CECGCB-CECGCB
         ARPPAT_LOW_UP_DOWN,         // CECGCBCG-CECGCBCG
-        ARPPAT_AS_PLAYED,           // Plays notes in the order they are played
         ARPPAT_RAND,                // Plays notes randomly, same note could get played twice: GGEGCBB-
         ARPPAT_RAND_OTHER,          // Plays notes randomly, but won't play same note in a row: EGEBCEB
         ARPPAT_RAND_ONCE,           // Plays notes randomly only once, so all notes get played: GCBE
+        ARPPAT_AS_PLAYED,           // Plays notes in the order they are played
         ARPPAT_NUM_OF_PATS
     };
 

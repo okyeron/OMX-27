@@ -324,7 +324,7 @@ void OmxModeChords::onEncoderChanged(Encoder::Update enc)
         return;
     }
 
-    if (encoderSelect_)
+    if (encoderSelect_ && !auxDown_)
     {
         params_.changeParam(enc.dir());
         omxDisp.setDirty();
@@ -1689,7 +1689,7 @@ void OmxModeChords::onDisplayUpdate()
             else
             {
                 setupPageLegends();
-                omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), encoderSelect_);
+                omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), encoderSelect_ && !auxDown_);
             }
         }
     }

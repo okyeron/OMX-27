@@ -1,16 +1,29 @@
+Bugs:
 Arps don't work in MidiModeception
 
+What's next:
+
+- Chord Split Mode
+- Midi Channels For Chords
+- Hold Chord Turn set chord
+- Chord Keyboard Display
+- Default chords to something playable. 
+
+
+
+Ideas:
+Aux + Encoder to quickly switch modes. Modular setup in which You can combine sequencers, keyboards etc. 
 
 
 "Was messing around with the Grids mode, and thought it would be nice if the four buttons that blink showing the different 'hits' could also act as mutes."
 
-- Move MidiFX easily rather than cut/paste
+- DONE - Move MidiFX easily rather than cut/paste
 
-- Quickkeys for arps. 
+- DONE -Quickkeys for arps. 
 
-- Way to adjust midifx and play keyboard at same time. 
+- DONE - Way to adjust midifx and play keyboard at same time. 
 
-"feedback dialogs when selecting FXgroup or FX-off might be nice"
+DONE - "feedback dialogs when selecting FXgroup or FX-off might be nice"
 
 - Save / recall arp settings. 
 
@@ -27,15 +40,15 @@ Arps don't work in MidiModeception
 
 - S1/S2 pattern gate feature
 
-- Arpegiator
+- DONE - Arpegiator
 
-- Chord Split Mode
+
 
 - Add MidiFX to Seq, Chord, and Grids Modes
 
 - Chord LED feedback
 
-- Auto strum
+- Auto strum - Does Arp MidiFX Accomplish this? Maybe a arp submode? 
 
 - Earthsea sequencer, add into midi and chord modes, simple records what you play then plays back in natural time or quantized. 
 
@@ -55,7 +68,7 @@ Arps don't work in MidiModeception
 
 - Add midi channels to chords
 
-- Default chords to something playable. 
+
 
 - Full manual chord note input
 

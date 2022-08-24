@@ -197,21 +197,21 @@ void OmxModeMidiKeyboard::loopUpdate(Micros elapsedTime)
 
 
 // Handles selecting params using encoder
-void OmxModeMidiKeyboard::onEncoderChangedSelectParam(Encoder::Update enc)
-{
-    if(enc.dir() == 0) return;
+// void OmxModeMidiKeyboard::onEncoderChangedSelectParam(Encoder::Update enc)
+// {
+//     if(enc.dir() == 0) return;
 
-    if (enc.dir() < 0) // if turn CCW
-    {
-        params.decrementParam();
-    }
-    else if (enc.dir() > 0) // if turn CW
-    {
-        params.incrementParam();
-    }
+//     if (enc.dir() < 0) // if turn CCW
+//     {
+//         params.decrementParam();
+//     }
+//     else if (enc.dir() > 0) // if turn CW
+//     {
+//         params.incrementParam();
+//     }
 
-    omxDisp.setDirty();
-}
+//     omxDisp.setDirty();
+// }
 
 void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
 {
@@ -234,9 +234,11 @@ void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
         return;
     }
 
-    if (encoderSelect)
+    if (encoderSelect && !midiSettings.midiAUX)
     {
-        onEncoderChangedSelectParam(enc);
+        // onEncoderChangedSelectParam(enc);
+        params.changeParam(enc.dir());
+        omxDisp.setDirty();
         return;
     }
 
@@ -258,23 +260,23 @@ void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
         omxDisp.setDirty();
     }
 
-    if (midiSettings.midiAUX)
-    {
-        // if (enc.dir() < 0)
-        // { // if turn ccw
-        //     setParam(midiPageParams.miparam - 1);
-        //     omxDisp.setDirty();
-        // }
-        // else if (enc.dir() > 0)
-        // { // if turn cw
-        //     setParam(midiPageParams.miparam + 1);
-        //     omxDisp.setDirty();
-        // }
+    // if (midiSettings.midiAUX)
+    // {
+    //     // if (enc.dir() < 0)
+    //     // { // if turn ccw
+    //     //     setParam(midiPageParams.miparam - 1);
+    //     //     omxDisp.setDirty();
+    //     // }
+    //     // else if (enc.dir() > 0)
+    //     // { // if turn cw
+    //     //     setParam(midiPageParams.miparam + 1);
+    //     //     omxDisp.setDirty();
+    //     // }
 
-        // change MIDI Background Color
-        // midiBg_Hue = constrain(midiBg_Hue + (amt * 32), 0, 65534); // 65535
-        return; // break;
-    }
+    //     // change MIDI Background Color
+    //     // midiBg_Hue = constrain(midiBg_Hue + (amt * 32), 0, 65534); // 65535
+    //     return; // break;
+    // }
 
     auto amt = enc.accel(5); // where 5 is the acceleration factor if you want it, 0 if you don't)
 
@@ -1157,7 +1159,7 @@ void OmxModeMidiKeyboard::onDisplayUpdate()
                     omxDisp.legendText[3] = "";
                 }
 
-                omxDisp.dispGenericMode2(params.getNumPages(), params.getSelPage(), params.getSelParam(), encoderSelect);
+                omxDisp.dispGenericMode2(params.getNumPages(), params.getSelPage(), params.getSelParam(), encoderSelect && !midiSettings.midiAUX);
             }
         }
     }
