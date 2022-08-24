@@ -28,8 +28,19 @@ struct ChordSettings
 {
     public:
     int color = 0xFFFFFF;
+    uint8_t type : 1;
+    int8_t midiFx : 4;
+    uint8_t mchan : 4;
+    uint8_t velocity : 7;
+
+    // Basic Type:
+    uint8_t note : 4;
+    int8_t basicOct : 4;
+    uint8_t chord;
+
+    // Interval Type:
     uint8_t numNotes : 3;
-    int8_t degree : 6; // degree from root note of scale, if scale is cmaj, degree of 0 = c, degree of 3 = e
+    uint8_t degree : 3; // degree from root note of scale, if scale is cmaj, degree of 0 = c, degree of 3 = e
     int8_t octave : 4; // transposes note by octave
     int8_t transpose : 5; // transposes note by semitone, can bump off scale
     int8_t spread : 4; // spreads chord notes over octave
@@ -78,6 +89,15 @@ struct ChordSettings
 
     ChordSettings()
     {
+        type = 0;
+        midiFx = 0;
+        mchan = 0;
+        velocity = 100;
+
+        note = 0;
+        // basicOct = 0;
+        chord = 0;
+        
         numNotes = 3;
         degree = 0;
         octave = 0;
@@ -152,15 +172,18 @@ private:
     bool auxDown_ = false;
     bool encoderSelect_ = false;
     bool chordEditMode_ = false;
+    // bool splitKeyboardMode_ = false;
 
     bool wrapManStrum_ = true;
     uint8_t incrementManStrum_ = 0;
     uint8_t manStrumSensit_ = 10;
 
-
     uint8_t selectedChord_ = 0;
+    int8_t heldChord_ = -1;
 
     uint8_t selectedSave_ = 0;
+
+    uint8_t uiMode_ = 0; // FULL, Split
 
     uint8_t mode_ = 0; // Play, Edit Chord, Presets, Manual Strum
 
@@ -194,11 +217,14 @@ private:
     // int chordSize = sizeof(chords_);
 
     void updateFuncKeyMode();
+    void onEncoderChangedEditParam(Encoder::Update* enc, uint8_t selectedParmIndex, uint8_t targetParamIndex, uint8_t paramType);
     void onEncoderChangedManStrum(Encoder::Update enc);
     void onKeyUpdateChordEdit(OMXKeypadEvent e);
     void enterChordEditMode();
     void updateLEDsChordEdit();
     void setupPageLegends();
+    void setupPageLegend(uint8_t index, uint8_t paramType);
+
 
     bool pasteSelectedChordTo(uint8_t chordIndex);
     bool loadPreset(uint8_t presetIndex);
@@ -211,6 +237,7 @@ private:
     void onChordEditOff();
 
     bool constructChord(uint8_t chordIndex);
+    bool constructChordBasic(uint8_t chordIndex);
 
     static int AddOctave(int note, int8_t octave);
     static int TransposeNote(int note, int8_t semitones);
@@ -219,6 +246,8 @@ private:
     void enableSubmode(SubmodeInterface* subMode);
     void disableSubmode();
     bool isSubmodeEnabled();
+
+    bool getEncoderSelect();
 
     void selectMidiFx(uint8_t mfxIndex, bool dispMsg);
     bool onKeyUpdateSelMidiFX(OMXKeypadEvent e);

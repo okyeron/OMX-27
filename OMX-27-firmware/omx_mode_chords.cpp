@@ -10,11 +10,61 @@
 
 enum ChordsModePage {
     CHRDPAGE_NOTES,
-    CHRDPAGE_1, // Root, Scale, Octave, Midi Channel
-    CHRDPAGE_2, // numNotes, degree, octave, transpose
-    CHRDPAGE_3, // spread, rotate, voicing
-    CHRDPAGE_4, // spreadUpDown, quartalVoicing
+    CHRDPAGE_GBL1, // UI Mode, Root, Scale, Octave
+    CHRDPAGE_GBL2, // Manual Strum, M-Chan, 
+    CHRDPAGE_1, // Chord Type, MidiFX, 0, Midi Channel
+    CHRDPAGE_2, // Note, Octave, Chord,         | numNotes, degree, octave, transpose
+    CHRDPAGE_3, //                              | spread, rotate, voicing
+    CHRDPAGE_4, //                              | spreadUpDown, quartalVoicing
 };
+
+enum ChordsModeParams {
+    CPARAM_UIMODE,
+    CPARAM_SCALE_ROOT,
+    CPARAM_SCALE_PAT,
+    CPARAM_GBL_OCT,
+    CPARAM_MAN_STRUM,
+    CPARAM_GBL_MCHAN,
+    CPARAM_CHORD_TYPE,
+    CPARAM_CHORD_MFX,
+    CPARAM_CHORD_VEL,
+    CPARAM_CHORD_MCHAN,
+    CPARAM_BAS_NOTE,
+    CPARAM_BAS_OCT,
+    CPARAM_BAS_CHORD,
+    CPARAM_INT_NUMNOTES,
+    CPARAM_INT_DEGREE,
+    CPARAM_INT_OCTAVE,
+    CPARAM_INT_TRANSPOSE,
+    CPARAM_INT_SPREAD,
+    CPARAM_INT_ROTATE,
+    CPARAM_INT_VOICING,
+    CPARAM_INT_SPRDUPDOWN,
+    CPARAM_INT_QUARTVOICE
+};
+
+// enum ChordsModeIntervalPage {
+//     CHRDINTPAGE_NOTES,
+//     CHRDINTPAGE_GBL1, // Root, Scale, Octave
+//     CHRDINTPAGE_1, // numNotes, degree, octave, transpose
+//     CHRDINTPAGE_2, // spread, rotate, voicing
+//     CHRDINTPAGE_3, // spreadUpDown, quartalVoicing
+// };
+
+// enum ChordsModeBasicPage {
+//     CHRDBASPAGE_NOTES,
+//     CHRDBASPAGE_GBL1, // Root, Scale, Octave
+//     CHRDBASPAGE_1, // numNotes, degree, octave, transpose
+//     CHRDBASPAGE_2, // spread, rotate, voicing
+//     CHRDBASPAGE_3, // spreadUpDown, quartalVoicing
+// };
+
+enum ChordsUIModes {
+    CUIMODE_FULL,
+    CUIMODE_SPLIT
+};
+
+const char* kUIModeDisp[8] = {"FULL", "SPLT"};
 
 enum ChordsMainMode {
     CHRDMODE_PLAY,
@@ -22,6 +72,13 @@ enum ChordsMainMode {
     CHRDMODE_PRESET,
     CHRDMODE_MANSTRUM,
 };
+
+enum ChordType {
+    CTYPE_INTERVAL,
+    CTYPE_BASIC
+};
+
+const char* kChordTypeDisp[8] = {"INTV", "BASC"};
 
 const char* kVoicingNames[8] = {"NONE", "POWR", "SUS2", "SUS4", "SU24", "+6", "+6+9", "KB11"};
 
@@ -46,6 +103,8 @@ const int kPresetColor = DKGREEN;
 OmxModeChords::OmxModeChords()
 {
     params_.addPage(1);
+    params_.addPage(4);
+    params_.addPage(4);
     params_.addPage(4);
     params_.addPage(4);
     params_.addPage(4);
@@ -93,6 +152,7 @@ void OmxModeChords::onModeActivated()
 {
     params_.setSelPageAndParam(0,0);
     encoderSelect_ = true;
+    heldChord_ = -1;
 
     sequencer.playing = false;
     stopSequencers();
@@ -324,7 +384,7 @@ void OmxModeChords::onEncoderChanged(Encoder::Update enc)
         return;
     }
 
-    if (encoderSelect_ && !auxDown_)
+    if (getEncoderSelect())
     {
         params_.changeParam(enc.dir());
         omxDisp.setDirty();
@@ -334,105 +394,235 @@ void OmxModeChords::onEncoderChanged(Encoder::Update enc)
     int8_t selPage = params_.getSelPage(); 
     int8_t selParam = params_.getSelParam() + 1; // Add one for readability
 
-    // PAGE ONE - Root, Scale, Octave, Midi Channel
-    if (selPage == CHRDPAGE_1)
+    // Global 1 - UI Mode, Root, Scale, Octave
+    if (selPage == CHRDPAGE_GBL1)
     {
-        auto amt = enc.accel(1); // where 5 is the acceleration factor if you want it, 0 if you don't)
-
-        // Root, Scale, Octave, Channel
-        if (selParam == 1)
-        {
-            int prevRoot = scaleConfig.scaleRoot;
-            scaleConfig.scaleRoot = constrain(scaleConfig.scaleRoot + amt, 0, 12 - 1);
-            if (prevRoot != scaleConfig.scaleRoot)
-            {
-                musicScale_->calculateScale(scaleConfig.scaleRoot, scaleConfig.scalePattern);
-            }
-        }
-        else if (selParam == 2)
-        {
-            int prevPat = scaleConfig.scalePattern;
-            scaleConfig.scalePattern = constrain(scaleConfig.scalePattern + amt, -1, musicScale_->getNumScales() - 1);
-            if (prevPat != scaleConfig.scalePattern)
-            {
-                omxDisp.displayMessage(musicScale_->getScaleName(scaleConfig.scalePattern));
-                musicScale_->calculateScale(scaleConfig.scaleRoot, scaleConfig.scalePattern);
-            }
-        }
-        else if (selParam == 3)
-        {
-            // set octave
-            midiSettings.newoctave = constrain(midiSettings.octave + amt, -5, 4);
-            if (midiSettings.newoctave != midiSettings.octave)
-            {
-                midiSettings.octave = midiSettings.newoctave;
-            }
-        }
-        else if (selParam == 4)
-        {
-            int newchan = constrain(sysSettings.midiChannel + amt, 1, 16);
-            if (newchan != sysSettings.midiChannel)
-            {
-                sysSettings.midiChannel = newchan;
-            }
-        }
+        onEncoderChangedEditParam(&enc, selParam, 1, CPARAM_UIMODE);
+        onEncoderChangedEditParam(&enc, selParam, 2, CPARAM_SCALE_ROOT);
+        onEncoderChangedEditParam(&enc, selParam, 3, CPARAM_SCALE_PAT);
+        onEncoderChangedEditParam(&enc, selParam, 4, CPARAM_GBL_OCT);
     }
-    // PAGE TWO - numNotes, degree, octave, transpose
+    // Global 2 - // Manual Strum, M-Chan
+    else if (selPage == CHRDPAGE_GBL2)
+    {
+        onEncoderChangedEditParam(&enc, selParam, 1, CPARAM_MAN_STRUM);
+        onEncoderChangedEditParam(&enc, selParam, 2, CPARAM_GBL_MCHAN);
+    }
+    // PAGE ONE - Chord Type, MidiFX, 0, Midi Channel
+    else if (selPage == CHRDPAGE_1)
+    {
+        onEncoderChangedEditParam(&enc, selParam, 1, CPARAM_CHORD_TYPE);
+        onEncoderChangedEditParam(&enc, selParam, 2, CPARAM_CHORD_MFX);
+        onEncoderChangedEditParam(&enc, selParam, 3, CPARAM_CHORD_VEL);
+        onEncoderChangedEditParam(&enc, selParam, 4, CPARAM_CHORD_MCHAN);
+    }
+    // PAGE TWO - Basic: Note, Octave, Chord    Interval: numNotes, degree, octave, transpose
     else if (selPage == CHRDPAGE_2)
     {
-        auto amt = enc.accel(1); // where 5 is the acceleration factor if you want it, 0 if you don't)
-
-        if (selParam == 1)
+        if (chords_[selectedChord_].type == CTYPE_INTERVAL)
         {
-            chords_[selectedChord_].numNotes = constrain(chords_[selectedChord_].numNotes + amt, 1, 4);
+            onEncoderChangedEditParam(&enc, selParam, 1, CPARAM_INT_NUMNOTES);
+            onEncoderChangedEditParam(&enc, selParam, 2, CPARAM_INT_DEGREE);
+            onEncoderChangedEditParam(&enc, selParam, 3, CPARAM_INT_OCTAVE);
+            onEncoderChangedEditParam(&enc, selParam, 4, CPARAM_INT_TRANSPOSE);
         }
-        else if (selParam == 2)
+        else if (chords_[selectedChord_].type == CTYPE_BASIC)
         {
-            chords_[selectedChord_].degree = constrain(chords_[selectedChord_].degree + amt, 0, 7);
-        }
-        else if (selParam == 3)
-        {
-            chords_[selectedChord_].octave = constrain(chords_[selectedChord_].octave + amt, -2, 2);
-        }
-        else if (selParam == 4)
-        {
-            chords_[selectedChord_].transpose = constrain(chords_[selectedChord_].transpose + amt, -7, 7);
+            onEncoderChangedEditParam(&enc, selParam, 1, CPARAM_BAS_NOTE);
+            onEncoderChangedEditParam(&enc, selParam, 2, CPARAM_BAS_OCT);
+            onEncoderChangedEditParam(&enc, selParam, 3, CPARAM_BAS_CHORD);
         }
     }
     // PAGE THREE - spread, rotate, voicing
     else if (selPage == CHRDPAGE_3)
     {
-        auto amt = enc.accel(1); // where 5 is the acceleration factor if you want it, 0 if you don't)
-
-        if (selParam == 1)
+        if (chords_[selectedChord_].type == CTYPE_INTERVAL)
         {
-            chords_[selectedChord_].spread = constrain(chords_[selectedChord_].spread + amt, -2, 2);
-        }
-        else if (selParam == 2)
-        {
-            chords_[selectedChord_].rotate = constrain(chords_[selectedChord_].rotate + amt, 0, 4);
-        }
-        else if (selParam == 3)
-        {
-            chords_[selectedChord_].voicing = constrain(chords_[selectedChord_].voicing + amt, 0, 7);
+            onEncoderChangedEditParam(&enc, selParam, 1, CPARAM_INT_SPREAD);
+            onEncoderChangedEditParam(&enc, selParam, 2, CPARAM_INT_ROTATE);
+            onEncoderChangedEditParam(&enc, selParam, 3, CPARAM_INT_VOICING);
         }
     }
     // PAGE FOUR - spreadUpDown, quartalVoicing
     else if (selPage == CHRDPAGE_4)
     {
-        auto amt = enc.accel(1); // where 5 is the acceleration factor if you want it, 0 if you don't)
-
-        if (selParam == 1)
+        if (chords_[selectedChord_].type == CTYPE_INTERVAL)
         {
-            chords_[selectedChord_].spreadUpDown = constrain(chords_[selectedChord_].spreadUpDown + amt, 0, 1);
-        }
-        else if (selParam == 2)
-        {
-            chords_[selectedChord_].quartalVoicing = constrain(chords_[selectedChord_].quartalVoicing + amt, 0, 1);
+            onEncoderChangedEditParam(&enc, selParam, 1, CPARAM_INT_SPRDUPDOWN);
+            onEncoderChangedEditParam(&enc, selParam, 2, CPARAM_INT_QUARTVOICE);
         }
     }
     
     omxDisp.setDirty();
+}
+
+// Put all params here to make it easy to switch order in pages
+void OmxModeChords::onEncoderChangedEditParam(Encoder::Update *enc, uint8_t selectedParmIndex, uint8_t targetParamIndex, uint8_t paramType)
+{
+    if (selectedParmIndex != targetParamIndex)
+        return;
+
+    auto amtSlow = enc->accel(1);
+    auto amtFast = enc->accel(5);
+
+    switch (paramType)
+    {
+    case CPARAM_UIMODE:
+    {
+        uiMode_ = constrain(uiMode_ + amtSlow, 0, 1);
+    }
+    break;
+    case CPARAM_SCALE_ROOT:
+    {
+        int prevRoot = scaleConfig.scaleRoot;
+        scaleConfig.scaleRoot = constrain(scaleConfig.scaleRoot + amtSlow, 0, 12 - 1);
+        if (prevRoot != scaleConfig.scaleRoot)
+        {
+            musicScale_->calculateScale(scaleConfig.scaleRoot, scaleConfig.scalePattern);
+        }
+    }
+    break;
+    case CPARAM_SCALE_PAT:
+    {
+        int prevPat = scaleConfig.scalePattern;
+        scaleConfig.scalePattern = constrain(scaleConfig.scalePattern + amtSlow, -1, musicScale_->getNumScales() - 1);
+        if (prevPat != scaleConfig.scalePattern)
+        {
+            omxDisp.displayMessage(musicScale_->getScaleName(scaleConfig.scalePattern));
+            musicScale_->calculateScale(scaleConfig.scaleRoot, scaleConfig.scalePattern);
+        }
+    }
+    break;
+    case CPARAM_GBL_OCT:
+    {
+        // set octave
+        midiSettings.newoctave = constrain(midiSettings.octave + amtSlow, -5, 4);
+        if (midiSettings.newoctave != midiSettings.octave)
+        {
+            midiSettings.octave = midiSettings.newoctave;
+        }
+    }
+    break;
+    case CPARAM_MAN_STRUM:
+    {
+        if (mode_ == CHRDMODE_MANSTRUM)
+        {
+            if (enc->dir() < 0)
+            {
+                mode_ = CHRDMODE_PLAY;
+            }
+        }
+        else
+        {
+            if (enc->dir() > 0)
+            {
+                mode_ = CHRDMODE_MANSTRUM;
+            }
+        }
+    }
+    break;
+    case CPARAM_GBL_MCHAN:
+    {
+        int newchan = constrain(sysSettings.midiChannel + amtSlow, 1, 16);
+        if (newchan != sysSettings.midiChannel)
+        {
+            sysSettings.midiChannel = newchan;
+        }
+    }
+    break;
+    case CPARAM_CHORD_TYPE:
+    {
+        uint8_t prevType = chords_[selectedChord_].type;
+        chords_[selectedChord_].type = constrain(chords_[selectedChord_].type + amtSlow, 0, 1);
+        if(chords_[selectedChord_].type != prevType)
+        {
+            if(chordEditMode_)
+            {
+                onChordEditOff();
+            }
+            else
+            {
+                onChordOff(selectedChord_);
+            }
+        }
+    }
+    break;
+    case CPARAM_CHORD_MFX:
+    {
+        chords_[selectedChord_].midiFx = constrain(chords_[selectedChord_].midiFx + amtSlow, -1, NUM_MIDIFX_GROUPS - 1);
+    }
+    break;
+    case CPARAM_CHORD_VEL:
+    {
+        chords_[selectedChord_].velocity = constrain(chords_[selectedChord_].velocity + amtFast, 0, 127);
+    }
+    break;
+    case CPARAM_CHORD_MCHAN:
+    {
+        chords_[selectedChord_].mchan = constrain(chords_[selectedChord_].mchan + amtSlow, 0, 15);
+    }
+    break;
+    case CPARAM_BAS_NOTE:
+    {
+        chords_[selectedChord_].note = constrain(chords_[selectedChord_].note + amtSlow, 0, 12);
+    }
+    break;
+    case CPARAM_BAS_OCT:
+    {
+        chords_[selectedChord_].basicOct = constrain(chords_[selectedChord_].basicOct + amtSlow, -5, 4);
+    }
+    break;
+    case CPARAM_BAS_CHORD:
+    {
+        chords_[selectedChord_].chord = constrain(chords_[selectedChord_].chord + amtSlow, 0, 20);
+    }
+    break;
+    case CPARAM_INT_NUMNOTES:
+    {
+        chords_[selectedChord_].numNotes = constrain(chords_[selectedChord_].numNotes + amtSlow, 1, 4);
+    }
+    break;
+    case CPARAM_INT_DEGREE:
+    {
+        chords_[selectedChord_].degree = constrain(chords_[selectedChord_].degree + amtSlow, 0, 7);
+    }
+    break;
+    case CPARAM_INT_OCTAVE:
+    {
+        chords_[selectedChord_].octave = constrain(chords_[selectedChord_].octave + amtSlow, -2, 2);
+    }
+    break;
+    case CPARAM_INT_TRANSPOSE:
+    {
+        chords_[selectedChord_].transpose = constrain(chords_[selectedChord_].transpose + amtSlow, -7, 7);
+    }
+    break;
+    case CPARAM_INT_SPREAD:
+    {
+        chords_[selectedChord_].spread = constrain(chords_[selectedChord_].spread + amtSlow, -2, 2);
+    }
+    break;
+    case CPARAM_INT_ROTATE:
+    {
+        chords_[selectedChord_].rotate = constrain(chords_[selectedChord_].rotate + amtSlow, 0, 4);
+    }
+    break;
+    case CPARAM_INT_VOICING:
+    {
+        chords_[selectedChord_].voicing = constrain(chords_[selectedChord_].voicing + amtSlow, 0, 7);
+    }
+    break;
+    case CPARAM_INT_SPRDUPDOWN:
+    {
+        chords_[selectedChord_].spreadUpDown = constrain(chords_[selectedChord_].spreadUpDown + amtSlow, 0, 1);
+    }
+    break;
+    case CPARAM_INT_QUARTVOICE:
+    {
+        chords_[selectedChord_].quartalVoicing = constrain(chords_[selectedChord_].quartalVoicing + amtSlow, 0, 1);
+    }
+    break;
+    }
 }
 
 void OmxModeChords::onEncoderChangedManStrum(Encoder::Update enc)
@@ -637,12 +827,14 @@ void OmxModeChords::onKeyUpdate(OMXKeypadEvent e)
                 {
                     mode_ = CHRDMODE_PLAY;
                     params_.setSelPageAndParam(CHRDPAGE_NOTES, 0);
+                    encoderSelect_ = true;
                     omxDisp.displayMessage("Play");
                 }
                 else if(thisKey == 4)
                 {
                     mode_ = CHRDMODE_EDIT;
-                    params_.setSelPageAndParam(CHRDPAGE_NOTES, 0);
+                    params_.setSelPageAndParam(CHRDPAGE_1, 0);
+                    encoderSelect_ = true;
                     omxDisp.displayMessage("Edit");
                 }
                 else if(thisKey == 5)
@@ -660,12 +852,14 @@ void OmxModeChords::onKeyUpdate(OMXKeypadEvent e)
                     if(mode_ == CHRDMODE_PLAY) // Play
                     {
                         selectedChord_ = thisKey - 11;
+                        heldChord_ = thisKey - 11;
                         onChordOn(thisKey - 11);
                     }
                     else if(mode_ == CHRDMODE_EDIT) // Edit
                     {
                         // Enter chord edit mode
                         selectedChord_ = thisKey - 11;
+                        heldChord_ = thisKey - 11;
                         enterChordEditMode();
                         return;
                     }
@@ -680,6 +874,7 @@ void OmxModeChords::onKeyUpdate(OMXKeypadEvent e)
                     {
                         // Enter chord edit mode
                         selectedChord_ = thisKey - 11;
+                        heldChord_ = thisKey - 11;
                         onManualStrumOn(selectedChord_);
                         return;
                     }
@@ -689,6 +884,11 @@ void OmxModeChords::onKeyUpdate(OMXKeypadEvent e)
             {
                 if (thisKey >= 11)
                 {
+                    if(thisKey - 11 == heldChord_)
+                    {
+                        heldChord_ = -1;
+                    }
+
                     onChordOff(thisKey - 11);
                 }
             }
@@ -779,7 +979,11 @@ void OmxModeChords::onKeyUpdateChordEdit(OMXKeypadEvent e)
         {
             // Exit Chord Edit Mode
             onChordEditOff();
-            params_.setSelPageAndParam(CHRDPAGE_NOTES, 0);
+            if(mode_ == CHRDMODE_PLAY)
+            {
+                params_.setSelPageAndParam(CHRDPAGE_NOTES, 0);
+            }
+            
             encoderSelect_ = true;
             chordEditMode_ = false;
         }
@@ -789,139 +993,159 @@ void OmxModeChords::onKeyUpdateChordEdit(OMXKeypadEvent e)
         return;
     }
 
-    if (e.down())
+    if (chords_[selectedChord_].type == CTYPE_INTERVAL)
     {
-        if (chordEditParam_ == 0)
+        if (e.down())
         {
-            if (thisKey == 1) // Select Root
+            if (chordEditParam_ == 0)
             {
-                params_.setSelPageAndParam(CHRDPAGE_1, 0);
-                encoderSelect_ = false;
+                if (thisKey == 1) // Select Root
+                {
+                    params_.setSelPageAndParam(CHRDPAGE_GBL1, 1);
+                    encoderSelect_ = false;
+                }
+                if (thisKey == 2) // Select Scale
+                {
+                    params_.setSelPageAndParam(CHRDPAGE_GBL1, 2);
+                    encoderSelect_ = false;
+                }
+                if (thisKey == 3) // Octave
+                {
+                    chordEditParam_ = 1;
+                    params_.setSelPageAndParam(CHRDPAGE_2, 2);
+                    encoderSelect_ = false;
+                }
+                else if (thisKey == 4) // Transpose
+                {
+                    chordEditParam_ = 2;
+                    params_.setSelPageAndParam(CHRDPAGE_2, 3);
+                    encoderSelect_ = false;
+                }
+                else if (thisKey == 5) // Spread
+                {
+                    chordEditParam_ = 3;
+                    params_.setSelPageAndParam(CHRDPAGE_3, 0);
+                    encoderSelect_ = false;
+                }
+                else if (thisKey == 6) // Rotate
+                {
+                    chordEditParam_ = 4;
+                    params_.setSelPageAndParam(CHRDPAGE_3, 1);
+                    encoderSelect_ = false;
+                }
+                else if (thisKey == 7) // Voicing
+                {
+                    chordEditParam_ = 5;
+                    params_.setSelPageAndParam(CHRDPAGE_3, 2);
+                    encoderSelect_ = false;
+                }
+                else if (thisKey == 10) // Show Chord Notes
+                {
+                    params_.setSelPageAndParam(CHRDPAGE_NOTES, 0);
+                    encoderSelect_ = true;
+                }
+                else if (thisKey >= 11 && thisKey < 15) // Num of Notes
+                {
+                    chords_[selectedChord_].numNotes = (thisKey - 11) + 1;
+                    params_.setSelPageAndParam(CHRDPAGE_2, 0);
+                    encoderSelect_ = false;
+                }
+                else if (thisKey == 15) // Spread Up Down
+                {
+                    chords_[selectedChord_].spreadUpDown = !chords_[selectedChord_].spreadUpDown;
+                    params_.setSelPageAndParam(CHRDPAGE_4, 0);
+                    encoderSelect_ = false;
+                    omxDisp.displayMessage(chords_[selectedChord_].spreadUpDown ? "SpdUpDn On" : "SpdUpDn Off");
+                }
+                else if (thisKey == 16) // Quartal Voicing
+                {
+                    chords_[selectedChord_].quartalVoicing = !chords_[selectedChord_].quartalVoicing;
+                    params_.setSelPageAndParam(CHRDPAGE_4, 1);
+                    encoderSelect_ = false;
+                    omxDisp.displayMessage(chords_[selectedChord_].quartalVoicing ? "Quartal On" : "Quartal Off");
+                }
+                else if (thisKey >= 19)
+                {
+                    chords_[selectedChord_].degree = thisKey - 19;
+                    // params_.setSelPageAndParam(CHRDPAGE_2, 1);
+                    // encoderSelect_ = false;
+                    onChordEditOff();
+                    onChordEditOn(selectedChord_);
+                    activeChordEditDegree_ = thisKey - 19;
+                }
             }
-            if (thisKey == 2) // Select Scale
+            else if (chordEditParam_ == 1) // Octave
             {
-                params_.setSelPageAndParam(CHRDPAGE_1, 1);
-                encoderSelect_ = false;
+                // chords_[selectedChord_].octave = constrain(chords_[selectedChord_].octave + amt, -2, 2);
+                if (thisKey >= 11 && thisKey <= 15)
+                {
+                    chords_[selectedChord_].octave = thisKey - 11 - 2;
+                }
             }
-            if (thisKey == 3) // Octave
+            else if (chordEditParam_ == 2) // Transpose
             {
-                chordEditParam_ = 1;
-                params_.setSelPageAndParam(CHRDPAGE_2, 2);
-                encoderSelect_ = false;
+                // chords_[selectedChord_].transpose = constrain(chords_[selectedChord_].transpose + amt, -7, 7);
+                if (thisKey >= 11 && thisKey <= 25)
+                {
+                    chords_[selectedChord_].transpose = thisKey - 11 - 7;
+                }
             }
-            else if (thisKey == 4) // Transpose
+            else if (chordEditParam_ == 3) // Spread
             {
-                chordEditParam_ = 2;
-                params_.setSelPageAndParam(CHRDPAGE_2, 3);
-                encoderSelect_ = false;
+                // chords_[selectedChord_].spread = constrain(chords_[selectedChord_].spread + amt, -2, 2);
+                if (thisKey >= 11 && thisKey <= 15)
+                {
+                    chords_[selectedChord_].spread = thisKey - 11 - 2;
+                }
             }
-            else if (thisKey == 5) // Spread
+            else if (chordEditParam_ == 4) // Rotate
             {
-                chordEditParam_ = 3;
-                params_.setSelPageAndParam(CHRDPAGE_3, 0);
-                encoderSelect_ = false;
+                // chords_[selectedChord_].rotate = constrain(chords_[selectedChord_].rotate + amt, 0, 4);
+                if (thisKey >= 11 && thisKey <= 15)
+                {
+                    chords_[selectedChord_].rotate = thisKey - 11;
+                }
             }
-            else if (thisKey == 6) // Rotate
+            else if (chordEditParam_ == 5) // Voicing
             {
-                chordEditParam_ = 4;
-                params_.setSelPageAndParam(CHRDPAGE_3, 1);
-                encoderSelect_ = false;
+                // chords_[selectedChord_].voicing = constrain(chords_[selectedChord_].octave + amt, 0, 7);
+                if (thisKey >= 11 && thisKey <= 18)
+                {
+                    chords_[selectedChord_].voicing = thisKey - 11;
+                }
             }
-            else if (thisKey == 7) // Voicing
+        }
+        else
+        {
+            if (thisKey >= 3 && thisKey <= 7)
             {
-                chordEditParam_ = 5;
-                params_.setSelPageAndParam(CHRDPAGE_3, 2);
-                encoderSelect_ = false;
-            }
-            else if (thisKey == 10) // Show Chord Notes
-            {
-                params_.setSelPageAndParam(CHRDPAGE_NOTES, 0);
-                encoderSelect_ = true;
-            }
-            else if (thisKey >= 11 && thisKey < 15)
-            {
-                chords_[selectedChord_].numNotes = (thisKey - 11) + 1;
-                params_.setSelPageAndParam(CHRDPAGE_2, 0);
-                encoderSelect_ = false;
-            }
-            else if (thisKey == 15)
-            {
-                chords_[selectedChord_].spreadUpDown = !chords_[selectedChord_].spreadUpDown;
-                params_.setSelPageAndParam(CHRDPAGE_4, 0);
-                encoderSelect_ = false;
-                omxDisp.displayMessage(chords_[selectedChord_].spreadUpDown ? "SpdUpDn On" : "SpdUpDn Off");
-            }
-            else if (thisKey == 16)
-            {
-                chords_[selectedChord_].quartalVoicing = !chords_[selectedChord_].quartalVoicing;
-                params_.setSelPageAndParam(CHRDPAGE_4, 1);
-                encoderSelect_ = false;
-                omxDisp.displayMessage(chords_[selectedChord_].quartalVoicing ? "Quartal On" : "Quartal Off");
+                chordEditParam_ = 0;
             }
             else if (thisKey >= 19)
             {
-                chords_[selectedChord_].degree = thisKey - 19;
-                // params_.setSelPageAndParam(CHRDPAGE_2, 1);
-                // encoderSelect_ = false;
-                onChordEditOff();
-                onChordEditOn(selectedChord_);
-                activeChordEditDegree_ = thisKey - 19;
-            }
-        }
-        else if(chordEditParam_ == 1) // Octave
-        {
-            // chords_[selectedChord_].octave = constrain(chords_[selectedChord_].octave + amt, -2, 2);
-            if(thisKey >= 11 && thisKey <= 15)
-            {
-                chords_[selectedChord_].octave = thisKey - 11 - 2;
-            }
-        }
-        else if(chordEditParam_ == 2) // Transpose
-        {
-            // chords_[selectedChord_].transpose = constrain(chords_[selectedChord_].transpose + amt, -7, 7);
-            if(thisKey >= 11 && thisKey <= 25)
-            {
-                chords_[selectedChord_].transpose = thisKey - 11 - 7;
-            }
-        }
-        else if(chordEditParam_ == 3) // Spread
-        {
-            // chords_[selectedChord_].spread = constrain(chords_[selectedChord_].spread + amt, -2, 2);
-            if(thisKey >= 11 && thisKey <= 15)
-            {
-                chords_[selectedChord_].spread = thisKey - 11 - 2;
-            }
-        }
-        else if(chordEditParam_ == 4) // Rotate
-        {
-            // chords_[selectedChord_].rotate = constrain(chords_[selectedChord_].rotate + amt, 0, 4);
-            if(thisKey >= 11 && thisKey <= 15)
-            {
-                chords_[selectedChord_].rotate = thisKey - 11;
-            }
-
-        }
-        else if(chordEditParam_ == 5) // Voicing
-        {
-            // chords_[selectedChord_].voicing = constrain(chords_[selectedChord_].octave + amt, 0, 7);
-            if(thisKey >= 11 && thisKey <= 18)
-            {
-                chords_[selectedChord_].voicing = thisKey - 11;
+                if (thisKey - 19 == activeChordEditDegree_)
+                {
+                    onChordEditOff();
+                }
             }
         }
     }
-    else
+    else if (chords_[selectedChord_].type == CTYPE_BASIC)
     {
-        if (thisKey >= 3 && thisKey <= 7)
+        if(e.down())
         {
-            chordEditParam_ = 0;
-        }
-        else if (thisKey >= 19)
-        {
-            if(thisKey - 19 == activeChordEditDegree_)
+            int adjnote = notes[thisKey] + (midiSettings.octave * 12);
+
+            if (adjnote >= 0 && adjnote <= 127)
             {
-                onChordEditOff();
+                chords_[selectedChord_].note = adjnote % 12;
+                chords_[selectedChord_].basicOct = (adjnote / 12) - 5;
+                onChordEditOn(selectedChord_);
             }
+        }
+        else
+        {
+            onChordEditOff();
         }
     }
 
@@ -933,6 +1157,8 @@ void OmxModeChords::enterChordEditMode()
 {
     chordEditMode_ = true;
     chordEditParam_ = 0;
+    params_.setSelPageAndParam(CHRDPAGE_1, 0);
+    encoderSelect_ = true;
     omxLeds.setDirty();
     omxDisp.setDirty();
 }
@@ -981,6 +1207,11 @@ bool OmxModeChords::isSubmodeEnabled()
     }
 
     return true;
+}
+
+bool OmxModeChords::getEncoderSelect()
+{
+    return encoderSelect_ && !auxDown_ && heldChord_ < 0;
 }
 
 bool OmxModeChords::onKeyUpdateSelMidiFX(OMXKeypadEvent e)
@@ -1505,6 +1736,162 @@ void OmxModeChords::updateLEDsChordEdit()
     }
 }
 
+void OmxModeChords::setupPageLegend(uint8_t index, uint8_t paramType)
+{
+    switch (paramType)
+    {
+    case CPARAM_UIMODE:
+    {
+        omxDisp.legends[index] = "UI";
+        omxDisp.legendText[index] = kUIModeDisp[uiMode_];
+    }
+    break;
+    case CPARAM_SCALE_ROOT:
+    {
+        omxDisp.legends[index] = "ROOT";
+        omxDisp.legendVals[index] = -127;
+        omxDisp.legendText[index] = musicScale_->getNoteName(scaleConfig.scaleRoot);
+    }
+    break;
+    case CPARAM_SCALE_PAT:
+    {
+        omxDisp.legends[index] = "SCALE";
+
+        if (scaleConfig.scalePattern < 0)
+        {
+            omxDisp.legendText[index] = "CHRM";
+        }
+        else
+        {
+            omxDisp.legendVals[index] = scaleConfig.scalePattern;
+        }
+    }
+    break;
+    case CPARAM_GBL_OCT:
+    {
+        omxDisp.legends[index] = "OCT";
+        omxDisp.legendVals[index] = (int)midiSettings.octave + 4;
+        ;
+    }
+    break;
+    case CPARAM_MAN_STRUM:
+    {
+        omxDisp.legends[index] = "STRUM";
+        omxDisp.legendText[index] = mode_ == CHRDMODE_MANSTRUM ? "ON" : "OFF";
+    }
+    break;
+    case CPARAM_GBL_MCHAN:
+    {
+        omxDisp.legends[index] = "CH";
+        omxDisp.legendVals[index] = sysSettings.midiChannel;
+    }
+    break;
+    case CPARAM_CHORD_TYPE:
+    {
+        omxDisp.legends[index] = "TYPE";
+        omxDisp.legendText[index] = kChordTypeDisp[chords_[selectedChord_].type];
+    }
+    break;
+    case CPARAM_CHORD_MFX:
+    {
+        omxDisp.legends[index] = "MIFX";
+        if (chords_[selectedChord_].midiFx >= 0)
+        {
+            omxDisp.legendVals[index] = chords_[selectedChord_].midiFx + 1;
+        }
+        else
+        {
+            omxDisp.legendText[index] = "OFF";
+        }
+    }
+    break;
+    case CPARAM_CHORD_VEL:
+    {
+        omxDisp.legends[index] = "VEL";
+        omxDisp.legendVals[index] = chords_[selectedChord_].velocity;
+    }
+    break;
+    case CPARAM_CHORD_MCHAN:
+    {
+        omxDisp.legends[index] = "MCHAN";
+        omxDisp.legendVals[index] = chords_[selectedChord_].mchan + 1;
+    }
+    break;
+    case CPARAM_BAS_NOTE:
+    {
+        omxDisp.legends[index] = "NOTE";
+        omxDisp.legendText[index] = MusicScales::getNoteName(chords_[selectedChord_].note);
+    }
+    break;
+    case CPARAM_BAS_OCT:
+    {
+        omxDisp.legends[index] = "C-OCT";
+        omxDisp.legendVals[index] = chords_[selectedChord_].basicOct + 4;
+    }
+    break;
+    case CPARAM_BAS_CHORD:
+    {
+        omxDisp.legends[index] = "CHRD";
+        omxDisp.legendVals[index] = chords_[selectedChord_].chord;
+    }
+    break;
+    case CPARAM_INT_NUMNOTES:
+    {
+        omxDisp.legends[index] = "#NTS";
+        omxDisp.legendVals[index] = chords_[selectedChord_].numNotes;
+    }
+    break;
+    case CPARAM_INT_DEGREE:
+    {
+        omxDisp.legends[index] = "DEG";
+        omxDisp.legendVals[index] = chords_[selectedChord_].degree;
+    }
+    break;
+    case CPARAM_INT_OCTAVE:
+    {
+        omxDisp.legends[index] = "OCT";
+        omxDisp.legendVals[index] = chords_[selectedChord_].octave;
+    }
+    break;
+    case CPARAM_INT_TRANSPOSE:
+    {
+        omxDisp.legends[index] = "TPS";
+        omxDisp.legendVals[index] = chords_[selectedChord_].transpose;
+    }
+    break;
+    case CPARAM_INT_SPREAD:
+    {
+        omxDisp.legends[index] = "SPRD";
+        omxDisp.legendVals[index] = chords_[selectedChord_].spread;
+    }
+    break;
+    case CPARAM_INT_ROTATE:
+    {
+        omxDisp.legends[index] = "ROT";
+        omxDisp.legendVals[index] = chords_[selectedChord_].rotate;
+    }
+    break;
+    case CPARAM_INT_VOICING:
+    {
+        omxDisp.legends[index] = "VOIC";
+        omxDisp.legendText[index] = kVoicingNames[chords_[selectedChord_].voicing];
+    }
+    break;
+    case CPARAM_INT_SPRDUPDOWN:
+    {
+        omxDisp.legends[index] = "UPDN";
+        omxDisp.legendText[index] = chords_[selectedChord_].spreadUpDown ? "ON" : "OFF";
+    }
+    break;
+    case CPARAM_INT_QUARTVOICE:
+    {
+        omxDisp.legends[index] = "QRTV";
+        omxDisp.legendText[index] = chords_[selectedChord_].quartalVoicing ? "ON" : "OFF";
+    }
+    break;
+    }
+}
+
 void OmxModeChords::setupPageLegends()
 {
     omxDisp.clearLegends();
@@ -1513,96 +1900,61 @@ void OmxModeChords::setupPageLegends()
 
     switch (page)
     {
+    case CHRDPAGE_GBL1:
+    {
+        setupPageLegend(0, CPARAM_UIMODE);
+        setupPageLegend(1, CPARAM_SCALE_ROOT);
+        setupPageLegend(2, CPARAM_SCALE_PAT);
+        setupPageLegend(3, CPARAM_GBL_OCT);
+    }
+    break;
+    case CHRDPAGE_GBL2:
+    {
+        setupPageLegend(0, CPARAM_MAN_STRUM);
+        setupPageLegend(1, CPARAM_GBL_MCHAN);
+    }
+    break;
     case CHRDPAGE_1:
     {
-        // Root, Scale, Octave, Midi Channel
-        omxDisp.legends[0] = "ROOT";
-        omxDisp.legendVals[0] = -127;
-        omxDisp.legendText[0] = musicScale_->getNoteName(scaleConfig.scaleRoot);
-        omxDisp.legends[1] = "SCALE";
-        
-        if (scaleConfig.scalePattern < 0)
-        {
-            omxDisp.legendVals[1] = -127;
-            omxDisp.legendText[1] = "CHRM";
-        }
-        else
-        {
-            omxDisp.legendVals[1] = scaleConfig.scalePattern;
-        }
-
-        omxDisp.legends[2] = "OCT";
-        omxDisp.legendVals[2] = (int)midiSettings.octave + 4;;
-        omxDisp.legends[3] = "CH";
-        omxDisp.legendVals[3] = sysSettings.midiChannel;
+        setupPageLegend(0, CPARAM_CHORD_TYPE);
+        setupPageLegend(1, CPARAM_CHORD_MFX);
+        setupPageLegend(2, CPARAM_CHORD_VEL);
+        setupPageLegend(3, CPARAM_CHORD_MCHAN);
     }
     break;
-    case CHRDPAGE_2: 
+    case CHRDPAGE_2:
     {
-        // numNotes, degree, octave, transpose
-        omxDisp.legends[0] = "#NTS";
-        omxDisp.legends[1] = "DEG";
-        omxDisp.legends[2] = "OCT";
-        omxDisp.legends[3] = "TPS";
-        if(selectedChord_ < 0)
+        if (chords_[selectedChord_].type == CTYPE_INTERVAL)
         {
-            omxDisp.legendText[0] = "-";
-            omxDisp.legendText[1] = "-";
-            omxDisp.legendText[2] = "-";
-            omxDisp.legendText[3] = "-";
+            setupPageLegend(0, CPARAM_INT_NUMNOTES);
+            setupPageLegend(1, CPARAM_INT_DEGREE);
+            setupPageLegend(2, CPARAM_INT_OCTAVE);
+            setupPageLegend(3, CPARAM_INT_TRANSPOSE);
         }
-        else
+        else if (chords_[selectedChord_].type == CTYPE_BASIC)
         {
-            omxDisp.legendVals[0] = chords_[selectedChord_].numNotes;
-            omxDisp.legendVals[1] = chords_[selectedChord_].degree;
-            omxDisp.legendVals[2] = chords_[selectedChord_].octave;
-            omxDisp.legendVals[3] = chords_[selectedChord_].transpose;
+            setupPageLegend(0, CPARAM_BAS_NOTE);
+            setupPageLegend(1, CPARAM_BAS_OCT);
+            setupPageLegend(2, CPARAM_BAS_CHORD);
         }
     }
     break;
-    case CHRDPAGE_3: 
+    case CHRDPAGE_3:
     {
-        // spread, rotate, voicing
-        omxDisp.legends[0] = "SPRD";
-        omxDisp.legends[1] = "ROT";
-        omxDisp.legends[2] = "VOIC";
-        omxDisp.legends[3] = "";
-        if(selectedChord_ < 0)
+        if (chords_[selectedChord_].type == CTYPE_INTERVAL)
         {
-            omxDisp.legendText[0] = "-";
-            omxDisp.legendText[1] = "-";
-            omxDisp.legendText[2] = "-";
-            omxDisp.legendText[3] = "-";
-        }
-        else
-        {
-            omxDisp.legendVals[0] = chords_[selectedChord_].spread;
-            omxDisp.legendVals[1] = chords_[selectedChord_].rotate;
-            omxDisp.legendText[2] = kVoicingNames[chords_[selectedChord_].voicing];
-            omxDisp.legendText[3] = "-";
+            setupPageLegend(0, CPARAM_INT_SPREAD);
+            setupPageLegend(1, CPARAM_INT_ROTATE);
+            setupPageLegend(2, CPARAM_INT_VOICING);
         }
     }
     break;
-    case CHRDPAGE_4: 
+    case CHRDPAGE_4:
     {
-        // spreadUpDown, quartalVoicing
-        omxDisp.legends[0] = "UPDN";
-        omxDisp.legends[1] = "QRTV";
-        omxDisp.legends[2] = "";
-        omxDisp.legends[3] = "";
-        if(selectedChord_ < 0)
+        if (chords_[selectedChord_].type == CTYPE_INTERVAL)
         {
-            omxDisp.legendText[0] = "-";
-            omxDisp.legendText[1] = "-";
-            omxDisp.legendText[2] = "-";
-            omxDisp.legendText[3] = "-";
-        }
-        else
-        {
-            omxDisp.legendText[0] = chords_[selectedChord_].spreadUpDown ? "ON" : "OFF";
-            omxDisp.legendText[1] = chords_[selectedChord_].quartalVoicing ? "ON" : "OFF";
-            omxDisp.legendText[2] = "-";
-            omxDisp.legendText[3] = "-";
+            setupPageLegend(0, CPARAM_INT_SPRDUPDOWN);
+            setupPageLegend(1, CPARAM_INT_QUARTVOICE);
         }
     }
     break;
@@ -1689,7 +2041,7 @@ void OmxModeChords::onDisplayUpdate()
             else
             {
                 setupPageLegends();
-                omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), encoderSelect_ && !auxDown_);
+                omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), getEncoderSelect());
             }
         }
     }
@@ -1786,8 +2138,8 @@ void OmxModeChords::onChordOn(uint8_t chordIndex)
     if(constructChord(chordIndex))
     {
         chordNotes_[chordIndex].active = true;
-        chordNotes_[chordIndex].channel = sysSettings.midiChannel;
-        uint8_t velocity = midiSettings.defaultVelocity;
+        chordNotes_[chordIndex].channel = chords_[chordIndex].mchan + 1;
+        uint8_t velocity = chords_[chordIndex].velocity;
 
         // uint32_t noteOnMicros = micros();
 
@@ -1846,8 +2198,8 @@ void OmxModeChords::onChordEditOn(uint8_t chordIndex)
     if(constructChord(chordIndex))
     {
         // chordNotes_[chordIndex].active = true;
-        chordNotes_[chordIndex].channel = sysSettings.midiChannel;
-        uint8_t velocity = midiSettings.defaultVelocity;
+        chordNotes_[chordIndex].channel = chords_[chordIndex].mchan + 1;
+        uint8_t velocity = chords_[chordIndex].velocity;
 
         chordEditNotes_.active = true;
         chordEditNotes_.channel = chordNotes_[chordIndex].channel;
@@ -1903,6 +2255,11 @@ bool OmxModeChords::constructChord(uint8_t chordIndex)
 {
     // Serial.println("Constructing Chord: " + String(chordIndex));
     auto chord = chords_[chordIndex];
+
+    if(chord.type == CTYPE_BASIC)
+    {
+        return constructChordBasic(chordIndex);
+    }
 
     int8_t octave = midiSettings.octave + chord.octave;
 
@@ -2109,6 +2466,30 @@ bool OmxModeChords::constructChord(uint8_t chordIndex)
     {
         chordNotes_[chordIndex].notes[i] = TransposeNote(chordNotes_[chordIndex].notes[i], chord.transpose);
     }
+
+    return true;
+}
+
+bool OmxModeChords::constructChordBasic(uint8_t chordIndex)
+{
+    auto chord = chords_[chordIndex];
+
+    // int8_t octave = midiSettings.octave + chord.octave;
+
+    // uint8_t numNotes = 0;
+
+    for(uint8_t i = 0; i < 6; i++)
+    {
+        chordNotes_[chordIndex].notes[i] = -1;
+    }
+
+    // int adjRoot = notes[thisKey] + (midiSettings.octave + 1 * 12);
+
+    int rootNote = chord.note + ((chord.basicOct + 5) * 12);
+
+    if(rootNote < 0 || rootNote > 127) return false;
+
+    chordNotes_[chordIndex].notes[0] = rootNote;
 
     return true;
 }
