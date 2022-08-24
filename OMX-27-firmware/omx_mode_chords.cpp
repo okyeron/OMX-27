@@ -74,11 +74,30 @@ enum ChordsMainMode {
 };
 
 enum ChordType {
-    CTYPE_INTERVAL,
-    CTYPE_BASIC
+    CTYPE_BASIC,
+    CTYPE_INTERVAL
 };
 
-const char* kChordTypeDisp[8] = {"INTV", "BASC"};
+const int chordPatterns[16][3] = {
+	{ -1, -1, -1 }, // 0:  N/A
+	{ 4, 7, -1 },   // 1:  MAJ
+	{ 3, 7, -1 },   // 2:  MIN
+	{ 4, 7, 11 },   // 3:  MAJ7
+	{ 3, 7, 10 },   // 4:  MIN7
+	{ 4, 7, 10 },   // 5:  7
+	{ 2, 7, -1 },   // 6:  SUS2
+	{ 5, 7, -1 },   // 7:  SUS4
+	{ 4, 8, -1 },   // 8:  AUG
+	{ 3, 6, -1 },   // 9:  DIM
+	{ 3, 6, 10 },   // 10: HDIM
+	{ 7, -1, -1 },  // 11: 5
+	{ 4, 11, 14 },  // 12: MAJ9
+	{ 3, 10, 14 },  // 13: MIN9
+	{ 4, 10, 14 },  // 14: 9
+	{ 5, 7, 11 },    // 15: 7SUS4
+};
+
+const char* kChordTypeDisp[8] = {"BASC", "INTV"};
 
 const char* kVoicingNames[8] = {"NONE", "POWR", "SUS2", "SUS4", "SU24", "+6", "+6+9", "KB11"};
 
@@ -128,6 +147,20 @@ OmxModeChords::OmxModeChords()
         else if(i >= 12)
         {
             chords_[i].color = 0xcfc08f; // Creme
+        }
+    }
+
+    for(uint8_t i = 0; i < 16; i++)
+    {
+        chords_[i].type = CTYPE_BASIC;
+        chords_[i].chord = 4;
+
+        int adjnote = notes[i + 11] + (midiSettings.octave * 12);
+
+        if (adjnote >= 0 && adjnote <= 127)
+        {
+            chords_[i].note = adjnote % 12;
+            chords_[i].basicOct = (adjnote / 12) - 5;
         }
     }
 
@@ -574,7 +607,7 @@ void OmxModeChords::onEncoderChangedEditParam(Encoder::Update *enc, uint8_t sele
     break;
     case CPARAM_BAS_CHORD:
     {
-        chords_[selectedChord_].chord = constrain(chords_[selectedChord_].chord + amtSlow, 0, 20);
+        chords_[selectedChord_].chord = constrain(chords_[selectedChord_].chord + amtSlow, 0, 15);
     }
     break;
     case CPARAM_INT_NUMNOTES:
@@ -2490,6 +2523,16 @@ bool OmxModeChords::constructChordBasic(uint8_t chordIndex)
     if(rootNote < 0 || rootNote > 127) return false;
 
     chordNotes_[chordIndex].notes[0] = rootNote;
+
+    auto pattern = chordPatterns[chord.chord];
+
+    for(uint8_t i = 0; i < 3; i++)
+    {
+        if(pattern[i] >= 0)
+        {
+            chordNotes_[chordIndex].notes[i + 1] = rootNote + pattern[i];
+        }
+    }
 
     return true;
 }

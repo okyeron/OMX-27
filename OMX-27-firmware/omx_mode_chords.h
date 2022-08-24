@@ -95,7 +95,7 @@ struct ChordSettings
         velocity = 100;
 
         note = 0;
-        // basicOct = 0;
+        basicOct = 0;
         chord = 0;
         
         numNotes = 3;
@@ -111,6 +111,16 @@ struct ChordSettings
 
     void CopySettingsFrom(ChordSettings other)
     {
+        this->type = other.type;
+        this->midiFx = other.midiFx;
+        this->mchan = other.mchan;
+        this->velocity = other.velocity;
+
+        // Basic Type:
+        this->note = other.note;
+        this->basicOct = other.basicOct;
+        this->chord = other.chord;
+
         this->numNotes = other.numNotes;
         this->degree = other.degree;
         this->octave = other.octave;
