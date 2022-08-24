@@ -1,6 +1,20 @@
 # Change log
 
 ```
+### 1.12.5 alpha
+*** Warning!!!: This will clear your global save state if FW < 1.12.2***
+- Improves the UI of the MidiFX
+- Jumps straight into midifx param view, gets rid of the confusion of two views
+- Prevents accidentally changing the type of the selected midifx slot
+- You now need to hold down the key for the slot in order to change the type
+- New UI when holding down a midi fx slot.
+- Holding down a midi fx slot and turning the encoder will move it around. 
+- Just hold down a midifx slot key
+- - You know you want to. 
+- LED Colors for the midifx slots now better represent which midifx are in the slots. 
+```
+
+```
 ### 1.12.4 arp preview
 *** Warning!!!: This will clear your global save state if FW < 1.12.2***
 - Makes grids pots less grainy
