@@ -61,6 +61,8 @@ private:
     uint8_t selectedMidiFX_ = 0; // Index of selected midiFX slot
 
     int8_t heldMidiFX_ = -1;
+    uint8_t heldAnimPos_ = 0;
+    Micros prevAnimTime_;
 
     uint8_t funcKeyMode_ = 0;
 
@@ -69,6 +71,8 @@ private:
     // typedef midifx::MidiFXInterface* MidiFXptr;
 
     std::vector<midifx::MidiFXInterface*> midifx_;
+
+    std::vector<midifx::MidiFXInterface*> tempMidiFX_;
 
     // midifx::MidiFXInterface* midiFX1_ = nullptr;
     // midifx::MidiFXInterface* midiFX2_ = nullptr;
@@ -100,6 +104,8 @@ private:
     void copyMidiFX(uint8_t fxIndex);
     void cutMidiFX(uint8_t fxIndex);
     void pasteMidiFX(uint8_t fxIndex);
+
+    void moveSelectedMidiFX(int8_t direction);
 
     midifx::MidiFXInterface * copyBuffer;
 

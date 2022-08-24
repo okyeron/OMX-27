@@ -963,11 +963,11 @@ void OmxModeMidiKeyboard::updateLEDs()
         }
 
         // MidiFX off
-        strip.setPixelColor(5, (mfxIndex_ >= NUM_MIDIFX_GROUPS ? colorConfig.selMidiFXOffColor : colorConfig.midiFXOffColor));
+        strip.setPixelColor(5, (mfxIndex_ >= NUM_MIDIFX_GROUPS ? colorConfig.selMidiFXGRPOffColor : colorConfig.midiFXGRPOffColor));
 
         for (uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
         {
-            auto mfxColor = (i == mfxIndex_) ? colorConfig.selMidiFXColor : colorConfig.midiFXColor;
+            auto mfxColor = (i == mfxIndex_) ? colorConfig.selMidiFXGRPColor : colorConfig.midiFXGRPColor;
 
             strip.setPixelColor(6 + i, mfxColor);
         }

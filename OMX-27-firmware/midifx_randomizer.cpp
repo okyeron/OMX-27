@@ -30,6 +30,11 @@ namespace midifx
         return "RAND";
     }
 
+    uint32_t MidiFXRandomizer::getColor()
+    {
+        return ORANGE;
+    }
+
     MidiFXInterface* MidiFXRandomizer::getClone()
     {
         auto clone = new MidiFXRandomizer();

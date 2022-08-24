@@ -572,7 +572,7 @@ void OmxDisp::dispValues16(int8_t valueArray[], uint8_t valueCount, int8_t minVa
     // }
 }
 
-void OmxDisp::dispSlots(const char* slotNames[], uint8_t slotCount, uint8_t selected, bool encSelActive, bool showLabels, const char* labels[], uint8_t labelCount)
+void OmxDisp::dispSlots(const char* slotNames[], uint8_t slotCount, uint8_t selected, uint8_t animPos, bool encSelActive, bool showLabels, const char* labels[], uint8_t labelCount)
 {
     // if (isMessageActive())
     // {
@@ -592,6 +592,18 @@ void OmxDisp::dispSlots(const char* slotNames[], uint8_t slotCount, uint8_t sele
 
     uint8_t rowCount = 4;// Selected slot will be raised
 
+    int8_t selYOffset = 0; // 14 to 0
+    int8_t horzOffset = 18; // 18 to 1, can reduce after selYOffset <= 1
+
+    if(animPos < 14)
+    {
+        selYOffset = 14 - animPos;
+    }
+
+    if(selYOffset <= 0)
+    {
+        horzOffset = map(constrain(animPos, 13, 26), 13, 26, 18, 2);
+    }
 
     uint8_t slotWidth = 128 / rowCount; 
     uint8_t slotHeight = 12;
@@ -609,16 +621,27 @@ void OmxDisp::dispSlots(const char* slotNames[], uint8_t slotCount, uint8_t sele
     int8_t slotIndex = selected - 2;
     uint8_t slotOffset = 0;
 
-    for(uint8_t i = slotIndex; i < slotCount; i++)
+    if(selected == 0)
+    {
+        slotOffset = 2;
+    }
+    else if(selected == 1)
+    {
+        slotOffset = 1;
+    }
+
+    for(int8_t i = slotIndex; i < slotCount; i++)
     {
         if(i != selected)
         {
             if (slotIndex >= 0 && slotIndex < slotCount)
             {
-                display.fillRect(slotOffset * slotWidth + slotPad, yPos, slotWidth - (slotPad * 2), slotHeight, WHITE);
-                display.fillRect(slotOffset * slotWidth + slotPad + 1, yPos + 1, slotWidth - 2 - (slotPad * 2), slotHeight - 2, BLACK);
+                int8_t hOff = slotOffset < 2 ? -horzOffset + 1 : horzOffset - 2;
+
+                display.fillRect(slotOffset * slotWidth + slotPad + 1 + hOff, yPos, slotWidth - (slotPad * 2) - 2, slotHeight, WHITE);
+                display.fillRect(slotOffset * slotWidth + slotPad + 2 + hOff, yPos + 1, slotWidth - 4 - (slotPad * 2), slotHeight - 2, BLACK);
                 invertColor(false);
-                u8g2centerText(slotNames[i], slotOffset * slotWidth + slotPad + 1, yPos + (slotHeight / 2) + 2, slotWidth - 2 - (slotPad * 2), 8);
+                u8g2centerText(slotNames[i], slotOffset * slotWidth + slotPad + 2 + hOff, yPos + (slotHeight / 2) + 2, slotWidth - 4 - (slotPad * 2), 8);
                 slotOffset++;
             }
             slotIndex++;
@@ -633,7 +656,7 @@ void OmxDisp::dispSlots(const char* slotNames[], uint8_t slotCount, uint8_t sele
     // Display selected slot
     slotWidth = 36; 
     slotHeight = 13;
-    yPos = 0; // 19
+    yPos = 0 + selYOffset; // 19
     uint8_t selectedStart = 64 - (slotWidth / 2);
 
     display.fillRect(selectedStart + slotPad, yPos, slotWidth - (slotPad * 2), slotHeight, WHITE);
@@ -641,6 +664,11 @@ void OmxDisp::dispSlots(const char* slotNames[], uint8_t slotCount, uint8_t sele
     invertColor(false);
     u8g2_display.setFont(FONT_CHAR16);
     u8g2centerText(slotNames[selected], selectedStart + slotPad + 1, yPos + (slotHeight / 2) + 3, slotWidth - 2 - (slotPad * 2), 8);
+
+    if(yPos + slotHeight < 25)
+    {
+        display.drawLine(63, yPos + slotHeight, 63, 25, WHITE);
+    }
 }
 
 

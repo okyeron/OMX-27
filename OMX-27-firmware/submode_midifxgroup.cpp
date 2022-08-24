@@ -13,9 +13,9 @@ using namespace midifx;
 
 SubModeMidiFxGroup subModeMidiFx[NUM_MIDIFX_GROUPS];
 
-const int kSelMFXColor = 0xFACAE2;
-const int kMFXColor = ROSE;
-const int kMFXEmptyColor = 0x600030;
+// const int kSelMFXColor = 0xFACAE2;
+// const int kMFXColor = ROSE;
+// const int kMFXEmptyColor = 0x600030;
 
 const int kSelMFXTypeColor = 0xE6FFCF;
 const int kMFXTypeColor = DKGREEN;
@@ -343,6 +343,17 @@ void SubModeMidiFxGroup::loopUpdate()
             mfx->loopUpdate();
         }
     }
+
+    // Animation
+    if (heldMidiFX_ >= 0 && heldAnimPos_ < 100)
+    {
+        if ((micros() - prevAnimTime_) > (1000 * 10))
+        {
+            heldAnimPos_ += 1;
+            prevAnimTime_ = micros();
+            omxDisp.setDirty();
+        }
+    }
 }
 
 bool SubModeMidiFxGroup::updateLEDs()
@@ -393,7 +404,14 @@ bool SubModeMidiFxGroup::updateLEDs()
     {
         // auto fxColor = midiFXParamView_ ? (i == selectedMidiFX_ ? WHITE : ORANGE) : BLUE;
 
-        auto fxColor = (i == selectedMidiFX_ ? kSelMFXColor : (getMidiFX(i) == nullptr ? kMFXEmptyColor : kMFXColor));
+        auto fxColor = getMidiFX(i) == nullptr ? colorConfig.midiFXEmptyColor : getMidiFX(i)->getColor();
+
+        if(i == selectedMidiFX_)
+        {
+            fxColor = blinkState ? fxColor : LEDOFF;
+        }
+
+        // auto fxColor = (i == selectedMidiFX_ ? kSelMFXColor : (getMidiFX(i) == nullptr ? kMFXEmptyColor : kMFXColor));
 
         strip.setPixelColor(3 + i, fxColor);
     }
@@ -420,10 +438,58 @@ bool SubModeMidiFxGroup::updateLEDs()
     return true;
 }
 
+void SubModeMidiFxGroup::moveSelectedMidiFX(int8_t direction)
+{
+    if(direction == 0) return;
+
+    uint8_t newIndex = (selectedMidiFX_ + direction + NUM_MIDIFX_SLOTS) % NUM_MIDIFX_SLOTS;
+
+    auto selMFX = getMidiFX(selectedMidiFX_);
+
+    tempMidiFX_.clear();
+
+    for (uint8_t i = 0; i < midifx_.size(); i++)
+    {
+        if (i != selectedMidiFX_)
+        {
+            tempMidiFX_.push_back(midifx_[i]);
+        }
+    }
+
+    tempMidiFX_.insert(tempMidiFX_.begin() + newIndex, selMFX);
+
+    midifx_.clear();
+
+    for (uint8_t i = 0; i < tempMidiFX_.size(); i++)
+    {
+        midifx_.push_back(tempMidiFX_[i]);
+    }
+
+    tempMidiFX_.clear();
+
+    if(midifx_.size() != NUM_MIDIFX_SLOTS)
+    {
+        Serial.println("ERROR: MidiFX size changed");
+    }
+
+    selectedMidiFX_ = newIndex;
+    reconnectInputsOutputs();
+}
+
 void SubModeMidiFxGroup::onEncoderChanged(Encoder::Update enc)
 {
     if (midiFXParamView_)
     {
+        if(heldMidiFX_ >= 0)
+        {
+            auto amt = constrain(enc.accel(1), -1, 1);
+
+            moveSelectedMidiFX(amt);
+            omxDisp.setDirty();
+            omxLeds.setDirty();
+            return;
+        }
+
         if (getMidiFX(selectedMidiFX_) != nullptr)
         {
             getMidiFX(selectedMidiFX_)->onEncoderChanged(enc);
@@ -532,6 +598,8 @@ bool SubModeMidiFxGroup::onKeyUpdate(OMXKeypadEvent e)
                 if (funcKeyMode_ == FUNCKEYMODE_NONE)
                 {
                     heldMidiFX_ = thisKey - 3;
+                    heldAnimPos_ = 0;
+                    prevAnimTime_ = micros();
                     selectMidiFX(thisKey - 3);
                 }
                 else if (funcKeyMode_ == FUNCKEYMODE_F1)
@@ -623,7 +691,7 @@ void SubModeMidiFxGroup::selectMidiFX(uint8_t fxIndex)
         arpParamView_ = false;
     }
 
-    displayMidiFXName(fxIndex);
+    // displayMidiFXName(fxIndex);
 }
 
 void SubModeMidiFxGroup::copyMidiFX(uint8_t fxIndex)
@@ -1043,23 +1111,36 @@ void SubModeMidiFxGroup::onDisplayUpdateMidiFX()
             }
         }
 
-        omxDisp.dispSlots(slotNames, NUM_MIDIFX_SLOTS, heldMidiFX_, encoderSelect_, false, nullptr, 0);
+        omxDisp.dispSlots(slotNames, NUM_MIDIFX_SLOTS, selectedMidiFX_, heldAnimPos_, encoderSelect_, false, nullptr, 0);
         return;
     }
 
-
-
-    MidiFXInterface* selFX = getMidiFX(selectedMidiFX_);
-
-    if(selFX == nullptr)
+    if (funcKeyMode_ == FUNCKEYMODE_F1)
     {
-        omxDisp.displayMessage("No FX");
+        omxDisp.dispGenericModeLabel("Copy", params_.getNumPages(), params_.getSelPage());
+    }
+    else if (funcKeyMode_ == FUNCKEYMODE_F2)
+    {
+        omxDisp.dispGenericModeLabel("Paste", params_.getNumPages(), params_.getSelPage());
+    }
+    else if (funcKeyMode_ == FUNCKEYMODE_F3)
+    {
+        omxDisp.dispGenericModeLabel("Cut", params_.getNumPages(), params_.getSelPage());
     }
     else
     {
-        // Serial.println("Selected MidiFX not null");
+        MidiFXInterface *selFX = getMidiFX(selectedMidiFX_);
 
-        selFX->onDisplayUpdate(funcKeyMode_);
+        if (selFX == nullptr)
+        {
+            omxDisp.displayMessage("No FX");
+        }
+        else
+        {
+            // Serial.println("Selected MidiFX not null");
+
+            selFX->onDisplayUpdate(funcKeyMode_);
+        }
     }
 }
 
@@ -1076,6 +1157,9 @@ void SubModeMidiFxGroup::onDisplayUpdate()
     { 
         if (!encoderConfig.enc_edit)
         {
+
+            
+
             if (midiFXParamView_)
             {
                 onDisplayUpdateMidiFX();

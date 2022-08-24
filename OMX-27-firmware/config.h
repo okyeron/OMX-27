@@ -242,10 +242,11 @@ struct ColorConfig
 	uint8_t midiBg_Sat = 255;
 	uint8_t midiBg_Brightness = 255;
 
-	uint32_t selMidiFXOffColor = SALMON;
-	uint32_t midiFXOffColor = RED;
-	uint32_t selMidiFXColor = LTCYAN;
-	uint32_t midiFXColor = BLUE;
+	uint32_t selMidiFXGRPOffColor = SALMON; // Color of FX Group key when selected
+	uint32_t midiFXGRPOffColor = RED; // Color of FX Group key to turn off MidiFX
+	uint32_t selMidiFXGRPColor = LTCYAN;
+	uint32_t midiFXGRPColor = BLUE;
+	uint32_t midiFXEmptyColor = 0x080808;
 
 	uint32_t arpOn = MINT;
 	uint32_t arpOff = DKCYAN;
