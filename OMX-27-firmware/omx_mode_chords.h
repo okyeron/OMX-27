@@ -36,7 +36,8 @@ struct ChordSettings
     // Basic Type:
     uint8_t note : 4;
     int8_t basicOct : 4;
-    uint8_t chord;
+    uint8_t chord : 6;
+    uint8_t balance : 8; // 0 - 23 * 10
 
     // Interval Type:
     uint8_t numNotes : 3;
@@ -97,6 +98,7 @@ struct ChordSettings
         note = 0;
         basicOct = 0;
         chord = 0;
+        balance = 40; // Four note chord
         
         numNotes = 3;
         degree = 0;
@@ -120,6 +122,7 @@ struct ChordSettings
         this->note = other.note;
         this->basicOct = other.basicOct;
         this->chord = other.chord;
+        this->balance = other.balance;
 
         this->numNotes = other.numNotes;
         this->degree = other.degree;
@@ -139,9 +142,16 @@ struct ChordNotes
     uint8_t channel = 0;
     // uint8_t velocity = 100;
     int notes[6] = {-1,-1,-1,-1,-1,-1};
+    uint8_t velocities[6] = {100, 100, 100, 100, 100, 100};
     int8_t strumPos = 0;
     int8_t encDelta = 0;
     int8_t octIncrement = 0;
+};
+
+struct ChordBalanceDetails
+{
+    int8_t type[4];
+    float velMult[4];
 };
 
 class OmxModeChords : public OmxModeInterface
@@ -251,6 +261,8 @@ private:
 
     static int AddOctave(int note, int8_t octave);
     static int TransposeNote(int note, int8_t semitones);
+
+    ChordBalanceDetails getChordBalanceDetatils(uint8_t balance);
 
 
     void enableSubmode(SubmodeInterface* subMode);

@@ -32,6 +32,7 @@ enum ChordsModeParams {
     CPARAM_BAS_NOTE,
     CPARAM_BAS_OCT,
     CPARAM_BAS_CHORD,
+    CPARAM_BAS_BALANCE,
     CPARAM_INT_NUMNOTES,
     CPARAM_INT_DEGREE,
     CPARAM_INT_OCTAVE,
@@ -78,24 +79,179 @@ enum ChordType {
     CTYPE_INTERVAL
 };
 
-const int chordPatterns[16][3] = {
-	{ -1, -1, -1 }, // 0:  N/A
-	{ 4, 7, -1 },   // 1:  MAJ
-	{ 3, 7, -1 },   // 2:  MIN
-	{ 4, 7, 11 },   // 3:  MAJ7
-	{ 3, 7, 10 },   // 4:  MIN7
-	{ 4, 7, 10 },   // 5:  7
-	{ 2, 7, -1 },   // 6:  SUS2
-	{ 5, 7, -1 },   // 7:  SUS4
-	{ 4, 8, -1 },   // 8:  AUG
-	{ 3, 6, -1 },   // 9:  DIM
-	{ 3, 6, 10 },   // 10: HDIM
-	{ 7, -1, -1 },  // 11: 5
-	{ 4, 11, 14 },  // 12: MAJ9
-	{ 3, 10, 14 },  // 13: MIN9
-	{ 4, 10, 14 },  // 14: 9
-	{ 5, 7, 11 },    // 15: 7SUS4
+// const int chordPatterns[16][3] = {
+// 	{ -1, -1, -1 }, // 0:  N/A
+// 	{ 4, 7, -1 },   // 1:  MAJ
+// 	{ 3, 7, -1 },   // 2:  MIN
+// 	{ 4, 7, 11 },   // 3:  MAJ7
+// 	{ 3, 7, 10 },   // 4:  MIN7
+// 	{ 4, 7, 10 },   // 5:  7
+// 	{ 2, 7, -1 },   // 6:  SUS2
+// 	{ 5, 7, -1 },   // 7:  SUS4
+// 	{ 4, 8, -1 },   // 8:  AUG
+// 	{ 3, 6, -1 },   // 9:  DIM
+// 	{ 3, 6, 10 },   // 10: HDIM
+// 	{ 7, -1, -1 },  // 11: 5
+// 	{ 4, 11, 14 },  // 12: MAJ9
+// 	{ 3, 10, 14 },  // 13: MIN9
+// 	{ 4, 10, 14 },  // 14: 9
+// 	{ 5, 7, 11 },    // 15: 7SUS4
+// };
+
+// minor
+// major
+// sus2
+// sus4
+// m7
+// M7
+// hMaj7
+// Maj7
+// 7sus4
+// dim7
+// madd9 or hadd9
+// Madd9
+// m6
+// M6
+// mb5
+// Mb5
+// m7b5
+// M7b5
+// M#5
+// m7#5
+// M7#5
+// mb6
+// m9nos
+// M9nos
+// Madd9b5
+// Maj7b5
+// M7b9nos
+// sus4#5b9
+// sus4add#5
+// Maddb5
+// M6add4nos
+// Maj7/6nos
+// Maj9nos
+// Fourths
+// Fifths
+// C C# D D# E F F# G G# A A# B  C  C# D  D# 
+// 0 1  2 3  4 5 6  7 8  9 10 11 12 13 14 15
+
+const uint8_t kNumChordPatterns = 37;
+
+const int8_t chordPatterns[kNumChordPatterns][3] = {
+    {4,  7,  -1},   // Major        C E G
+    {3,  7,  -1},   // minor        C Eb G
+    {2,  7,  -1},   // sus2         C D G
+    {5,  7,  -1},   // sus4         C F G
+    {3,  6,  -1},   // mb5          C Eb Gb
+    {4,  6,  -1},   // Mb5          C E Gb
+    {4,  8,  -1},   // M#5          C E G#
+    {4,  14, -1},   // M9no5        C E D2  no 5
+
+    {3,  6,  9},    // dim7         C Eb Gb A
+    {3,  6,  10},   // m7b5         C Eb Gb Bb
+    {3,  7,  8},    // mb6          C Eb G Ab
+    {3,  7,  9},    // m6           C Eb G A
+    {3,  7,  10},   // m7           C Eb G Bb
+    {3,  7,  11},   // mMaj7        C Eb G B
+    {3,  7,  14},   // madd9        C Eb G D
+    {3,  8,  10},   // m7#5         C Eb Ab Bb
+    {3,  10, 13},   // m7b9no5      C Eb Bb Db2
+    {3,  10, 14},   // m9no5        C Eb Bb D2
+
+    {4,  5,  9},    // M6add4no5    C E F A
+    {4,  6,  10},   // M7b5         C E Gb Bb
+    {4,  6,  11},   // Maj7b5       C E Gb B
+    {4,  6,  14},   // Madd9b5      C E Gb D2
+    {4,  7,  8},    // Maddb5       C E G Gb
+    {4,  7,  9},    // M6           C E G A
+    {4,  7,  10},   // M7           C E G Bb
+    {4,  7,  11},   // Maj7         C E G B
+    {4,  7,  14},   // Madd9        C E G D2
+    {4,  8,  10},   // M7#5         C E G# Bb
+    {4,  10, 13},   // M7b9no5      C E Bb Db2
+    {4,  11, 14},   // Maj9no5      C E B D2
+    {4,  11, 21},   // Maj7/6no5    C E B A2
+    {5,  7,  8},    // sus4add#5    C F G G#
+    {5,  7,  10},   // 7sus4        C F G Bb
+    {5,  8,  13},    // sus4#5b9     C F G# Db2
+    {5, -1, -1},    // Fourth       CF
+    {7, -1, -1}    // Fifth        CG
 };
+
+const char* kChordMsg[kNumChordPatterns] = {
+    "Major",
+    "Minor",
+    "sus2",
+    "sus4",
+    "mb5",
+    "Mb5",
+    "M#5",
+    "M9no5",
+
+    "dim7",
+    "m7b5",
+    "mb6",
+    "m6",
+    "m7",
+    "mMaj7",
+    "madd9",
+    "m7#5",
+    "m7b9no5",
+    "m9no5",
+
+    "M6add4no5",
+    "M7b5",
+    "Maj7b5",
+    "Madd9b5",
+    "Maddb5",
+    "M6",
+    "M7",
+    "Maj7",
+    "Madd9",
+    "M7#5",
+    "M7b9no5",
+    "Maj9no5",
+    "Maj7/6no5",
+    "sus4add#5",
+    "7sus4",
+    "sus4#5b9",
+
+    "Fourths",
+    "Fifth"
+};
+
+const uint8_t kNumChordBalance = 23;
+
+const int8_t chordBalance[kNumChordBalance][3] = {
+	{ -10, -10, -10 },  // 0 Single Note - 0
+    { 0, -10, -10 },    // 10 Power Chord - 10
+    { 0, 0, -10 },      // 20 Triad
+    { 0, 0, 0 },        // 30 Four notes - Root
+    { 0, 0, 0 },        // 32 Four notes - Root
+    { -10, 0, 0 },      // 37
+    { -1, 0, 0 },       // 42
+    { -1, -10, 0 },     // 47
+    { -1, -1, 0 },      // 52
+    { -1, -1, -10 },    // 57
+    { -1, -1, -1 },     // 62 - Inv 1
+    { -10, -1, -1 },    // 69
+    { 0, -1, -1 },      // 74 - Inv 2
+    { 0, -10, -1 },     // 79
+    { 0, 0, -1 },       // 84 - Inv 3
+    { 0, 0, -10 },      // 91
+    { 0, 0, 0 },        // 96
+    { -10, 0, 0 },      // 101
+    { 1, 0, 0 },        // 106
+    { 1, -10, 0 },      // 111
+    { 1, 1, 0 },        // 116
+    { 1, 1, -10 },      // 121
+    { 1, 1, 1 },        // 127
+};
+
+int balSize = sizeof(chordBalance);
+int patSize = sizeof(chordPatterns);
+
 
 const char* kChordTypeDisp[8] = {"BASC", "INTV"};
 
@@ -464,6 +620,7 @@ void OmxModeChords::onEncoderChanged(Encoder::Update enc)
             onEncoderChangedEditParam(&enc, selParam, 1, CPARAM_BAS_NOTE);
             onEncoderChangedEditParam(&enc, selParam, 2, CPARAM_BAS_OCT);
             onEncoderChangedEditParam(&enc, selParam, 3, CPARAM_BAS_CHORD);
+            onEncoderChangedEditParam(&enc, selParam, 4, CPARAM_BAS_BALANCE);
         }
     }
     // PAGE THREE - spread, rotate, voicing
@@ -607,7 +764,17 @@ void OmxModeChords::onEncoderChangedEditParam(Encoder::Update *enc, uint8_t sele
     break;
     case CPARAM_BAS_CHORD:
     {
-        chords_[selectedChord_].chord = constrain(chords_[selectedChord_].chord + amtSlow, 0, 15);
+        uint8_t prevChord = chords_[selectedChord_].chord;
+        chords_[selectedChord_].chord = constrain(chords_[selectedChord_].chord + amtSlow, 0, kNumChordPatterns - 1);
+        if(chords_[selectedChord_].chord != prevChord)
+        {
+            omxDisp.displayMessage(kChordMsg[chords_[selectedChord_].chord]);
+        }
+    }
+    break;
+    case CPARAM_BAS_BALANCE:
+    {
+        chords_[selectedChord_].balance = constrain(chords_[selectedChord_].balance + amtFast, 0, (kNumChordBalance - 1) * 10);
     }
     break;
     case CPARAM_INT_NUMNOTES:
@@ -1868,6 +2035,12 @@ void OmxModeChords::setupPageLegend(uint8_t index, uint8_t paramType)
         omxDisp.legendVals[index] = chords_[selectedChord_].chord;
     }
     break;
+    case CPARAM_BAS_BALANCE:
+    {
+        omxDisp.legends[index] = "BAL";
+        omxDisp.legendVals[index] = map(chords_[selectedChord_].balance, 0, (kNumChordBalance - 1) * 10, 0, 127);
+    }
+    break;
     case CPARAM_INT_NUMNOTES:
     {
         omxDisp.legends[index] = "#NTS";
@@ -1969,6 +2142,7 @@ void OmxModeChords::setupPageLegends()
             setupPageLegend(0, CPARAM_BAS_NOTE);
             setupPageLegend(1, CPARAM_BAS_OCT);
             setupPageLegend(2, CPARAM_BAS_CHORD);
+            setupPageLegend(3, CPARAM_BAS_BALANCE);
         }
     }
     break;
@@ -2161,7 +2335,7 @@ void OmxModeChords::onManualStrumOn(uint8_t chordIndex)
 
 void OmxModeChords::onChordOn(uint8_t chordIndex)
 {
-    // Serial.println("onChordOn: " + String(chordIndex));
+    Serial.println("onChordOn: " + String(chordIndex));
     if(chordNotes_[chordIndex].active) 
     {
         // Serial.println("chord already active");
@@ -2172,7 +2346,7 @@ void OmxModeChords::onChordOn(uint8_t chordIndex)
     {
         chordNotes_[chordIndex].active = true;
         chordNotes_[chordIndex].channel = chords_[chordIndex].mchan + 1;
-        uint8_t velocity = chords_[chordIndex].velocity;
+        // uint8_t velocity = chords_[chordIndex].velocity;
 
         // uint32_t noteOnMicros = micros();
 
@@ -2180,6 +2354,12 @@ void OmxModeChords::onChordOn(uint8_t chordIndex)
         for(uint8_t i = 0; i < 6; i++)
         {
             int note = chordNotes_[chordIndex].notes[i];
+            uint8_t velocity = chordNotes_[chordIndex].velocities[i];
+
+            Serial.print("Note: " + String(note));
+            Serial.print(" Vel: " + String(velocity));
+            Serial.print("\n");
+
 
             // if(note >= 0 && note <= 127)
             // {
@@ -2189,7 +2369,7 @@ void OmxModeChords::onChordOn(uint8_t chordIndex)
 
             doNoteOn(note, velocity, chordNotes_[chordIndex].channel);
         }
-        // Serial.print("\n");
+        Serial.print("\n");
     }
     else
     {
@@ -2232,7 +2412,7 @@ void OmxModeChords::onChordEditOn(uint8_t chordIndex)
     {
         // chordNotes_[chordIndex].active = true;
         chordNotes_[chordIndex].channel = chords_[chordIndex].mchan + 1;
-        uint8_t velocity = chords_[chordIndex].velocity;
+        // uint8_t velocity = chords_[chordIndex].velocity;
 
         chordEditNotes_.active = true;
         chordEditNotes_.channel = chordNotes_[chordIndex].channel;
@@ -2243,6 +2423,7 @@ void OmxModeChords::onChordEditOn(uint8_t chordIndex)
         for(uint8_t i = 0; i < 6; i++)
         {
             int note = chordNotes_[chordIndex].notes[i];
+            uint8_t velocity = chordNotes_[chordIndex].velocities[i];
 
             chordEditNotes_.notes[i] = note;
             // Serial.print(String(note) + " ");
@@ -2301,6 +2482,7 @@ bool OmxModeChords::constructChord(uint8_t chordIndex)
     for(uint8_t i = 0; i < 6; i++)
     {
         chordNotes_[chordIndex].notes[i] = -1;
+        chordNotes_[chordIndex].velocities[i] = chord.velocity;
     }
 
     if(chord.numNotes == 0)
@@ -2534,7 +2716,57 @@ bool OmxModeChords::constructChordBasic(uint8_t chordIndex)
         }
     }
 
+    auto balDetails = getChordBalanceDetatils(chord.balance);
+
+    for(uint8_t i = 0; i < 4; i++)
+    {
+        int pnote = chordNotes_[chordIndex].notes[i];
+
+        if(pnote >= 0 && pnote <= 127)
+        {
+            int bal = balDetails.type[i];
+
+            chordNotes_[chordIndex].notes[i] = (bal <= -10 ? -1 : (pnote + (12 * bal)));
+            chordNotes_[chordIndex].velocities[i] = chord.velocity * balDetails.velMult[i]; 
+        }
+    }
+
     return true;
+}
+
+ChordBalanceDetails OmxModeChords::getChordBalanceDetatils(uint8_t balance)
+{
+    ChordBalanceDetails bDetails;
+
+    bDetails.type[0] = 0;
+    bDetails.velMult[0] = 1.0f;
+
+    uint8_t balanceIndex = balance / 10;
+
+    auto balancePat = chordBalance[balanceIndex];
+
+    for(uint8_t i = 0; i < 3; i++)
+    {
+        int8_t bal = balancePat[i];
+
+        bDetails.type[i + 1] = bal;
+
+        if (balanceIndex < kNumChordBalance)
+        {
+            int8_t nextBal = chordBalance[balanceIndex + 1][i];
+
+            float v1 = bal <= -10 ? 0.0f : 1.0f;
+            float v2 = nextBal <= -10 ? 0.0f : 1.0f;
+
+            bDetails.velMult[i + 1] = map((float)balance, balanceIndex * 10.0f, (balanceIndex + 1) * 10.0f, v1, v2);
+        }
+        else
+        {
+            bDetails.velMult[i + 1] = 1.0f;
+        }
+    }
+
+    return bDetails;
 }
 
 int OmxModeChords::AddOctave(int note, int8_t octave)
