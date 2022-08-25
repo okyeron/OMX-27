@@ -262,7 +262,7 @@ private:
     static int AddOctave(int note, int8_t octave);
     static int TransposeNote(int note, int8_t semitones);
 
-    ChordBalanceDetails getChordBalanceDetatils(uint8_t balance);
+    ChordBalanceDetails getChordBalanceDetails(uint8_t balance);
 
 
     void enableSubmode(SubmodeInterface* subMode);

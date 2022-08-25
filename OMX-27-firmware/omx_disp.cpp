@@ -42,6 +42,7 @@ void OmxDisp::displayMessage(String msg)
 
 void OmxDisp::displayMessage(const char *msg)
 {
+    specialMsgType_ = 0;
     currentMsg = msg;
 
     display.fillRect(0, 0, 128, 32, BLACK);
@@ -57,6 +58,7 @@ void OmxDisp::displayMessage(const char *msg)
 
 void OmxDisp::displayMessagef(const char *fmt, ...)
 {
+    specialMsgType_ = 0;
     va_list args;
     va_start(args, fmt);
     char buf[24];
@@ -69,6 +71,35 @@ void OmxDisp::displayMessagef(const char *fmt, ...)
 void OmxDisp::displayMessageTimed(String msg, uint8_t secs)
 {
     currentMsg = msg;
+    specialMsgType_ = 0;
+
+    renderMessage();
+
+    messageTextTimer = secs * 100000;
+    dirtyDisplay = true;
+}
+
+void OmxDisp::displaySpecialMessage(uint8_t msgType, String msg, uint8_t secs)
+{
+    currentMsg = msg;
+    specialMsgType_ = msgType;
+
+    renderMessage();
+
+    messageTextTimer = secs * 100000;
+    dirtyDisplay = true;
+}
+
+void OmxDisp::chordBalanceMsg(int8_t balArray[], float velArray[], uint8_t secs)
+{
+    for (uint8_t i = 0; i < 4; i++)
+    {
+        chordBalArray_[i] = balArray[i];
+        chordVelArray_[i] = velArray[i];
+    }
+
+    currentMsg = "Balance";
+    specialMsgType_ = 1;
 
     renderMessage();
 
@@ -78,13 +109,20 @@ void OmxDisp::displayMessageTimed(String msg, uint8_t secs)
 
 void OmxDisp::renderMessage()
 {
-    display.fillRect(0, 0, 128, 32, BLACK);
-    u8g2_display.setFontMode(1);
-    u8g2_display.setFont(FONT_TENFAT);
-    u8g2_display.setForegroundColor(WHITE);
-    u8g2_display.setBackgroundColor(BLACK);
-    u8g2centerText(currentMsg.c_str(), 0, 10, 128, 32);
-    // dirtyDisplay = true;
+    if (specialMsgType_ == 0)
+    {
+        display.fillRect(0, 0, 128, 32, BLACK);
+        u8g2_display.setFontMode(1);
+        u8g2_display.setFont(FONT_TENFAT);
+        u8g2_display.setForegroundColor(WHITE);
+        u8g2_display.setBackgroundColor(BLACK);
+        u8g2centerText(currentMsg.c_str(), 0, 10, 128, 32);
+        // dirtyDisplay = true;
+    }
+    else if (specialMsgType_ == 1)
+    {
+        dispChordBalance();
+    }
 }
 
 bool OmxDisp::isMessageActive(){
@@ -669,6 +707,67 @@ void OmxDisp::dispSlots(const char* slotNames[], uint8_t slotCount, uint8_t sele
     {
         display.drawLine(63, yPos + slotHeight, 63, 25, WHITE);
     }
+}
+
+void OmxDisp::dispChordBalance()
+{
+    const uint8_t width = 10;
+    const uint8_t height = 16;
+    const uint8_t highHeight = 10;
+    const uint8_t space = 3;
+    const uint8_t totalWidth = width + space * 2;
+    const uint8_t startY = 5;
+    const uint8_t endY = startY + height;
+
+    const uint8_t startX = 64 - (((totalWidth) * 4) / 2);
+
+    display.fillRect(0, 0, 128, 32, BLACK);
+    
+    for(uint8_t i = 0; i < 4; i++)
+    {
+        uint8_t yPos = map(chordVelArray_[i], 0.0f, 1.0f, (float)endY, (float)startY);
+
+        Serial.println("ypos: " + String(yPos));
+
+        int bal = chordBalArray_[i];
+
+        Serial.println("bal: " + String(bal));
+
+        if(bal <= -10) continue;
+
+        if(bal == 0)
+        {
+            display.fillRect(startX + (totalWidth * i) + space, yPos, width, height, WHITE);
+
+            // Eyes
+            // xx xx xx xx xx
+            // xx oo xx oo xx
+            // xx oo xx oo xx
+            // xx xx xx xx xx
+            display.fillRect(startX + (totalWidth * i) + space + 2, yPos + 2, 2, 4, BLACK);
+            display.fillRect(startX + (totalWidth * i) + space + 6, yPos + 2, 2, 4, BLACK);
+        }
+        else if(bal < 0)
+        {
+            yPos += 1;
+            display.fillRect(startX + (totalWidth * i) + space - 2, yPos - 2, width + 4, height + 4, WHITE);
+            display.fillRect(startX + (totalWidth * i) + space, yPos, width, height, BLACK);
+            
+            display.fillRect(startX + (totalWidth * i) + space + 2, yPos + 2, 2, 4, WHITE);
+            display.fillRect(startX + (totalWidth * i) + space + 6, yPos + 2, 2, 4, WHITE);
+        }
+        else if(bal > 0)
+        {
+            display.fillRect(startX + (totalWidth * i) + space, yPos, width, highHeight, WHITE);
+
+            display.fillRect(startX + (totalWidth * i) + space + 2, yPos + 2, 2, 4, BLACK);
+            display.fillRect(startX + (totalWidth * i) + space + 6, yPos + 2, 2, 4, BLACK);
+        }
+    }
+
+     Serial.println("");
+
+    display.fillRect(0, endY, 128, 32, BLACK);
 }
 
 

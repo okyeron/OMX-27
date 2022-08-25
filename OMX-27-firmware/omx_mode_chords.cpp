@@ -775,6 +775,10 @@ void OmxModeChords::onEncoderChangedEditParam(Encoder::Update *enc, uint8_t sele
     case CPARAM_BAS_BALANCE:
     {
         chords_[selectedChord_].balance = constrain(chords_[selectedChord_].balance + amtFast, 0, (kNumChordBalance - 1) * 10);
+
+        ChordBalanceDetails balanceSetup = getChordBalanceDetails(chords_[selectedChord_].balance);
+
+        omxDisp.chordBalanceMsg(balanceSetup.type, balanceSetup.velMult, 10);
     }
     break;
     case CPARAM_INT_NUMNOTES:
@@ -2716,7 +2720,7 @@ bool OmxModeChords::constructChordBasic(uint8_t chordIndex)
         }
     }
 
-    auto balDetails = getChordBalanceDetatils(chord.balance);
+    auto balDetails = getChordBalanceDetails(chord.balance);
 
     for(uint8_t i = 0; i < 4; i++)
     {
@@ -2734,7 +2738,7 @@ bool OmxModeChords::constructChordBasic(uint8_t chordIndex)
     return true;
 }
 
-ChordBalanceDetails OmxModeChords::getChordBalanceDetatils(uint8_t balance)
+ChordBalanceDetails OmxModeChords::getChordBalanceDetails(uint8_t balance)
 {
     ChordBalanceDetails bDetails;
 
@@ -2754,6 +2758,14 @@ ChordBalanceDetails OmxModeChords::getChordBalanceDetatils(uint8_t balance)
         if (balanceIndex < kNumChordBalance)
         {
             int8_t nextBal = chordBalance[balanceIndex + 1][i];
+
+            if((balance % 10) != 0)
+            {
+                if(nextBal > -10)
+                {
+                    bDetails.type[i + 1] = nextBal;
+                }
+            }
 
             float v1 = bal <= -10 ? 0.0f : 1.0f;
             float v2 = nextBal <= -10 ? 0.0f : 1.0f;

@@ -24,6 +24,7 @@ public:
     void displayMessage(const char *msg);
     void displayMessagef(const char *fmt, ...);
     void displayMessageTimed(String msg, uint8_t secs);
+    void displaySpecialMessage(uint8_t msgType, String msg, uint8_t secs);
 
     bool isMessageActive();
 
@@ -47,6 +48,9 @@ public:
 
     // Displays slots for midifx or something else in future
     void dispSlots(const char* slotNames[], uint8_t slotCount, uint8_t selected, uint8_t animPos, bool encSelActive, bool showLabels, const char* labels[], uint8_t labelCount);
+
+    void chordBalanceMsg(int8_t balArray[], float velArray[], uint8_t secs);
+
 
 
     void dispLabelParams(int8_t selected, bool encSelActive, const char* labels[], uint8_t labelCount);
@@ -77,6 +81,10 @@ private:
     bool dirtyDisplay = false;
 
     String currentMsg;
+    uint8_t specialMsgType_ = 0;
+
+    int8_t chordBalArray_[4];
+    float chordVelArray_[4];
 
     elapsedMillis dirtyDisplayTimer = 0;
     unsigned long displayRefreshRate = 60;
@@ -85,6 +93,9 @@ private:
     void u8g2leftText(const char *s, int16_t x, int16_t y, uint16_t w, uint16_t h);
     void u8g2centerNumber(int n, uint16_t x, uint16_t y, uint16_t w, uint16_t h);
     void renderMessage();
+
+    void dispChordBalance();
+
 };
 
 extern OmxDisp omxDisp;
