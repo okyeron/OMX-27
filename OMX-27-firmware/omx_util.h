@@ -27,6 +27,8 @@ public:
     void midiNoteOn(MusicScales* scale, int notenum, int velocity, int channel);
     void midiNoteOff(int notenum, int channel);
 
+    void allOff();
+
     MidiNoteGroup midiNoteOn2(MusicScales* scale, int notenum, int velocity, int channel);
     MidiNoteGroup midiNoteOff2(int notenum, int channel);
 private:

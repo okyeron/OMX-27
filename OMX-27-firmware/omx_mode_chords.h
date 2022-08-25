@@ -146,6 +146,7 @@ struct ChordNotes
     int8_t strumPos = 0;
     int8_t encDelta = 0;
     int8_t octIncrement = 0;
+    uint8_t midifx;
 };
 
 struct ChordBalanceDetails
@@ -225,6 +226,8 @@ private:
     ChordNotes chordEditNotes_;
     int8_t activeChordEditDegree_;
     int8_t activeChordEditNoteKey_;
+    int8_t activeSplitKeyIndex_;
+
 
 
     ChordSettings chordSaves_[NUM_CHORD_SAVES][16];
@@ -245,6 +248,7 @@ private:
     // int chordSize = sizeof(chords_);
 
     ParamManager* getParams();
+    void setSelPageAndParam(int8_t newPage, int8_t newParam);
 
     void updateFuncKeyMode();
     void onEncoderChangedEditParam(Encoder::Update* enc, uint8_t selectedParmIndex, uint8_t targetParamIndex, uint8_t paramType);
@@ -285,8 +289,11 @@ private:
     bool onKeyUpdateSelMidiFX(OMXKeypadEvent e);
     bool onKeyHeldSelMidiFX(OMXKeypadEvent e);
 
-    void doNoteOn(int noteNumber, uint8_t velocity, uint8_t midiChannel);
-    void doNoteOff(int noteNumber, uint8_t midiChannel);
+    void doNoteOn(int noteNumber, uint8_t midifx, uint8_t velocity, uint8_t midiChannel);
+    void doNoteOff(int noteNumber, uint8_t midifx, uint8_t midiChannel);
+
+    void splitNoteOn(uint8_t keyIndex);
+    void splitNoteOff(uint8_t keyIndex);
 
     void stopSequencers();
 

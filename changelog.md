@@ -1,6 +1,53 @@
 # Change log
 
 ```
+### 1.12.7 alpha
+### EEPROM VERSION 25
+*** Warning!!!: This will clear your global save state if EEPROM version is different from your firmware***
+- Pots now send CC's in chord mode. 
+```
+
+```
+### 1.12.6 alpha
+*** Warning!!!: This will clear your global save state***
+- Improves chord mode
+- Split UI Mode: Enabled by default
+- Basic Chord Types
+- - Each chord can be either basic or interval
+- - Interval is like previous mode
+- - Basic is a root note, chord type, octave, and balance
+- - - Balance will change inversion of chord by either incrementing notes by octave, decrementing by an octave or playing all. 
+- - - Also changes the velocity of notes that are not the root note. 
+-
+- Split UI:
+- - Play normal keys on right side of keyboard
+- - Play chords on the left
+- - If the mode is in edit mode, you can quickly hold a basic chord and set the root note on the left. 
+- - - Only happens while holding the chord. 
+- - If in play mode, the right side does not modify the chord
+-
+- Each chord can have it's own Midi Channel and be set to a specific midi fx. 
+- Holding aux changes the MidiFX slot for the split keyboard. 
+- If you are wondering why the arpeggiator is not starting and stopping, it's because
+- the chord you are playing is set to a different midifx index than what is selected in aux
+- hold aux and select the midifx slot the chord is set to, then the arp hotkeys will work for
+- that chord. 
+-
+- The split keyboard can also have it's own midi channel. 
+-
+- Cute animations
+- 
+- Hold F1 + Chord to enter chord edit mode. 
+- This mode is different based on whether the chord is basic or an interval
+- In basic mode you can play root chord notes and will see the notes of the chord light up. 
+- 
+- Default chord config is set to basic chords that are mapped with the root notes in C Major. 
+-
+- While holding aux or a chord, the selected parameter can be quickly edited to avoid having to click encoder. 
+- - holding aux does the same in MI mode. 
+```
+
+```
 ### 1.12.5 alpha
 *** Warning!!!: This will clear your global save state if FW < 1.12.2***
 - Improves the UI of the MidiFX

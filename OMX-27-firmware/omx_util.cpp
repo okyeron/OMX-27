@@ -156,6 +156,17 @@ void OmxUtil::midiNoteOn(MusicScales* scale, int notenum, int velocity, int chan
     omxDisp.setDirty();
 }
 
+void OmxUtil::allOff()
+{
+    for(uint8_t i = 0; i < 27; i++)
+    {
+        if(midiSettings.midiKeyState[i] >= 0)
+        {
+            midiNoteOff(i, midiSettings.midiChannelState[i]);
+        }
+    }
+}
+
 void OmxUtil::midiNoteOff(int notenum, int channel)
 {
     // we use the key state captured at the time we pressed the key to send the correct note off message
