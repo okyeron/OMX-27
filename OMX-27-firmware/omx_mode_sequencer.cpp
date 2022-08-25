@@ -399,11 +399,7 @@ void OmxModeSequencer::onEncoderChangedStep(Encoder::Update enc)
         {
             if (selParam == 1) // OCTAVE SELECTION
             {
-                midiSettings.newoctave = constrain(midiSettings.octave + amt, -5, 4);
-                if (midiSettings.newoctave != midiSettings.octave)
-                {
-                    midiSettings.octave = midiSettings.newoctave;
-                }
+                midiSettings.octave = constrain(midiSettings.octave + amt, -5, 4);
             }
             if (selParam == 2) // STEP SELECTION
             {
@@ -462,11 +458,7 @@ void OmxModeSequencer::onEncoderChangedStep(Encoder::Update enc)
             }
             if (selParam == 2) // SET OCTAVE
             {
-                midiSettings.newoctave = constrain(midiSettings.octave + amt, -5, 4);
-                if (midiSettings.newoctave != midiSettings.octave)
-                {
-                    midiSettings.octave = midiSettings.newoctave;
-                }
+                midiSettings.octave = constrain(midiSettings.octave + amt, -5, 4);
             }
             if (selParam == 3) // SET VELOCITY
             {
@@ -582,11 +574,7 @@ void OmxModeSequencer::onKeyUpdate(OMXKeypadEvent e)
             if (thisKey == 11 || thisKey == 26)
             {
                 int amt = thisKey == 11 ? -1 : 1;
-                midiSettings.newoctave = constrain(midiSettings.octave + amt, -5, 4);
-                if (midiSettings.newoctave != midiSettings.octave)
-                {
-                    midiSettings.octave = midiSettings.newoctave;
-                }
+                midiSettings.octave = constrain(midiSettings.octave + amt, -5, 4);
                 // otherwise select the note
             }
             else

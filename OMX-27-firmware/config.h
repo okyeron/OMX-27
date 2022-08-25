@@ -129,7 +129,7 @@ struct MidiConfig
 {
     int defaultVelocity = 100;
     int octave = 0; // default C4 is 0 - range is -4 to +5
-    int newoctave = octave;
+    // int newoctave = octave;
     int transpose = 0;
     int rotationAmt = 0;
 
@@ -257,6 +257,8 @@ struct ColorConfig
 	uint32_t nextArpPattern = DKPURPLE;
 	uint32_t nextArpOctave = DKPURPLE;
 
+	uint32_t octDnColor = ORANGE;
+    uint32_t octUpColor = RBLUE;
 };
 
 extern ColorConfig colorConfig;

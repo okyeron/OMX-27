@@ -33,8 +33,6 @@ public:
     static const char* getScaleName(uint8_t scaleIndex);
     static const int8_t* getScalePattern(uint8_t noteIndex);
     int getScaleLength();
-
-
 private:
     bool scaleCalculated = false;
     int8_t scaleOffsets[12];

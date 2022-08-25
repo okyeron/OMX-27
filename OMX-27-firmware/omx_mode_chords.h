@@ -209,7 +209,10 @@ private:
 
     uint8_t manStrumNoteLength_ = 4;
 
-    ParamManager params_;
+    // ParamManager params_;
+    ParamManager basicParams_;
+    ParamManager intervalParams_;
+
     // ParamManager chordEditParams_;
     uint8_t funcKeyMode_ = 0;
     uint8_t chordEditParam_ = 0; // None, Octave, Transpose, Spread, Rotate, Voicing 
@@ -220,7 +223,9 @@ private:
     ChordNotes chordNotes_[16];
 
     ChordNotes chordEditNotes_;
-    uint8_t activeChordEditDegree_;
+    int8_t activeChordEditDegree_;
+    int8_t activeChordEditNoteKey_;
+
 
     ChordSettings chordSaves_[NUM_CHORD_SAVES][16];
 
@@ -232,9 +237,14 @@ private:
 
     uint8_t mfxIndex_ = 0;
 
+    bool lockScaleCache_ = false; // Cache value when entering mode, restore on exit
+    bool grp16ScaleCache_ = false;
+
 
 
     // int chordSize = sizeof(chords_);
+
+    ParamManager* getParams();
 
     void updateFuncKeyMode();
     void onEncoderChangedEditParam(Encoder::Update* enc, uint8_t selectedParmIndex, uint8_t targetParamIndex, uint8_t paramType);

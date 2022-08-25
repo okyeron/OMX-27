@@ -289,11 +289,7 @@ void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
         if (selParam == 1)
         {
             // set octave
-            midiSettings.newoctave = constrain(midiSettings.octave + amt, -5, 4);
-            if (midiSettings.newoctave != midiSettings.octave)
-            {
-                midiSettings.octave = midiSettings.newoctave;
-            }
+            midiSettings.octave = constrain(midiSettings.octave + amt, -5, 4);
         }
         else if (selParam == 2)
         {
@@ -584,11 +580,7 @@ void OmxModeMidiKeyboard::onKeyUpdate(OMXKeypadEvent e)
                 if (thisKey == 11 || thisKey == 12) // Change Octave
                 {
                     int amt = thisKey == 11 ? -1 : 1;
-                    midiSettings.newoctave = constrain(midiSettings.octave + amt, -5, 4);
-                    if (midiSettings.newoctave != midiSettings.octave)
-                    {
-                        midiSettings.octave = midiSettings.newoctave;
-                    }
+                    midiSettings.octave = constrain(midiSettings.octave + amt, -5, 4);
                 }
                 else if (thisKey == 1 || thisKey == 2) // Change Param selection
                 {

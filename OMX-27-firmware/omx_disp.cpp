@@ -749,12 +749,12 @@ void OmxDisp::dispChordBalance()
         }
         else if(bal < 0)
         {
-            yPos += 1;
+            yPos += 2;
             display.fillRect(startX + (totalWidth * i) + space - 2, yPos - 2, width + 4, height + 4, WHITE);
             display.fillRect(startX + (totalWidth * i) + space, yPos, width, height, BLACK);
             
-            display.fillRect(startX + (totalWidth * i) + space + 2, yPos + 2, 2, 4, WHITE);
-            display.fillRect(startX + (totalWidth * i) + space + 6, yPos + 2, 2, 4, WHITE);
+            display.fillRect(startX + (totalWidth * i) + space + 2, yPos + 2, 2, 2, WHITE);
+            display.fillRect(startX + (totalWidth * i) + space + 6, yPos + 2, 2, 2, WHITE);
         }
         else if(bal > 0)
         {
