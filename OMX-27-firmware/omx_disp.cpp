@@ -90,6 +90,8 @@ void OmxDisp::displaySpecialMessage(uint8_t msgType, String msg, uint8_t secs)
     dirtyDisplay = true;
 }
 
+
+
 void OmxDisp::chordBalanceMsg(int8_t balArray[], float velArray[], uint8_t secs)
 {
     for (uint8_t i = 0; i < 4; i++)
@@ -482,7 +484,7 @@ void OmxDisp::dispChar16(const char* charArray[], uint8_t charCount, uint8_t sel
     if(showLabels)
     {
         int8_t selIndex = constrain(selected - 16, -1, 127);
-        dispLabelParams(selIndex, encSelActive, labels, labelCount);
+        dispLabelParams(selIndex, encSelActive, labels, labelCount, false);
     }
 
     uint8_t charWidth = 128 / 16; // 8
@@ -542,7 +544,7 @@ void OmxDisp::dispValues16(int8_t valueArray[], uint8_t valueCount, int8_t minVa
     if(showLabels)
     {
         int8_t selIndex = constrain(selected - 16, -1, 127);
-        dispLabelParams(selIndex, encSelActive, labels, labelCount);
+        dispLabelParams(selIndex, encSelActive, labels, labelCount, false);
     }
 
     uint8_t boxWidth = 128 / 16; // 8
@@ -888,6 +890,76 @@ void OmxDisp::dispKeyboard(int rootNote, int noteNumbers[], bool showLabels, con
     }
 }
 
+void OmxDisp::dispChordBasicPage(uint8_t selected, bool encoderSelect, const char* noteName, const char* octaveName, const char* chordType, int8_t balArray[], float velArray[])
+{
+    display.fillRect(0, 0, 128, 32, BLACK);
+
+    dispParamLabel(0, 10, 32, 18, selected == 0, 1, encoderSelect, true, noteName, FONT_VALUES, 1, true);
+    dispParamLabel(32, 10, 32, 18, selected == 1, 1, encoderSelect, true, octaveName, FONT_VALUES, 1, true);
+    dispParamLabel(0, 0, 128, 10, selected == 3, 0, encoderSelect, true, chordType, FONT_LABELS, 1, true);
+
+    const uint8_t width = 10;
+    const uint8_t height = 16;
+    const uint8_t highHeight = 10;
+    const uint8_t space = 3;
+    const uint8_t totalWidth = width + space * 2;
+    const uint8_t startY = 11;
+    const uint8_t endY = startY + height; // 27
+
+    // const uint8_t startX = 64 - (((totalWidth) * 4) / 2); // 64 is width of duders
+
+    const uint8_t startX = 64; // 64 is width of duders
+    
+    for(uint8_t i = 0; i < 4; i++)
+    {
+        uint8_t yPos = map(velArray[i], 0.0f, 1.0f, (float)endY, (float)startY);
+
+        int bal = balArray[i];
+        if(bal <= -10) continue;
+
+        if(bal == 0)
+        {
+            display.fillRect(startX + (totalWidth * i) + space, yPos, width, height, WHITE);
+
+            // Eyes
+            // xx xx xx xx xx
+            // xx oo xx oo xx
+            // xx oo xx oo xx
+            // xx xx xx xx xx
+            display.fillRect(startX + (totalWidth * i) + space + 2, yPos + 2, 2, 4, BLACK);
+            display.fillRect(startX + (totalWidth * i) + space + 6, yPos + 2, 2, 4, BLACK);
+        }
+        else if(bal < 0)
+        {
+            yPos += 2;
+            display.fillRect(startX + (totalWidth * i) + space - 2, yPos - 2, width + 4, height + 4, WHITE);
+            display.fillRect(startX + (totalWidth * i) + space, yPos, width, height, BLACK);
+            
+            display.fillRect(startX + (totalWidth * i) + space + 2, yPos + 2, 2, 2, WHITE);
+            display.fillRect(startX + (totalWidth * i) + space + 6, yPos + 2, 2, 2, WHITE);
+        }
+        else if(bal > 0)
+        {
+            display.fillRect(startX + (totalWidth * i) + space, yPos, width, highHeight, WHITE);
+
+            display.fillRect(startX + (totalWidth * i) + space + 2, yPos + 2, 2, 4, BLACK);
+            display.fillRect(startX + (totalWidth * i) + space + 6, yPos + 2, 2, 4, BLACK);
+        }
+    }
+
+    display.fillRect(startX, 28, 64, 10, BLACK);
+
+    if (selected == 2 && encoderSelect)
+    {
+        display.fillRect(startX + 32 - 1, 28, 2, 4, WHITE);
+        display.fillRect(startX + 32 - 3, 28 + 2, 6, 2, WHITE);
+    }
+    else if (selected == 2 && !encoderSelect)
+    {
+        display.fillRect(startX + 2, 28, 64 - 4, 2, WHITE);
+    }
+}
+
 void OmxDisp::dispChordBalance()
 {
     const uint8_t width = 10;
@@ -984,6 +1056,54 @@ void OmxDisp::dispLabelParams(int8_t selected, bool encSelActive, const char *la
         else
         {
             u8g2leftText(labels[i], i * labelWidth + 2, hline - 2, labelWidth - 4, 10);
+        }
+    }
+}
+
+void OmxDisp::dispParamLabel(uint8_t x, uint8_t y, uint8_t width, uint8_t height, bool selected, uint8_t selectionType, bool encSelActive, bool showLabel, const char* label, const uint8_t* font, int8_t labelYOffset, bool centered)
+{
+    bool invert = false;
+    // Label Selected
+    if (selected && encSelActive)
+    {
+        if (selectionType == 0)
+        {
+            display.drawRect(x, y, width, height, WHITE);
+            // display.fillRect(x + 1, 0 + 1, width - 2, 10 - 2, BLACK);
+        }
+        else if (selectionType == 1)
+        {
+            display.fillRect(x + width / 2 - 1, y + height, 2, 4, WHITE);
+            display.fillRect(x + width / 2 - 3, y + height + 2, 6, 2, WHITE);
+        }
+    }
+    else if (selected && !encSelActive)
+    {
+        if (selectionType == 0)
+        {
+            display.fillRect(x, y, width, height, WHITE);
+            invert = true;
+        }
+        else if (selectionType == 1)
+        {
+            display.fillRect(x + 2, y + height, width - 4, 2, WHITE);
+        }
+    }
+
+    if (showLabel)
+    {
+        u8g2_display.setFontMode(1);
+        u8g2_display.setFont(font);
+        u8g2_display.setCursor(0, 0);
+
+        invertColor(invert);
+        if (centered)
+        {
+            u8g2centerText(label, x, y + height / 2 + labelYOffset, width, height);
+        }
+        else
+        {
+            u8g2leftText(label, x + 2, y + height / 2 + labelYOffset, width - 4, height);
         }
     }
 }

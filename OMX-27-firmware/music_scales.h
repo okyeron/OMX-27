@@ -28,7 +28,7 @@ public:
 
     int getGroup16Color(uint8_t keyNum);
 
-    static const char* getNoteName(uint8_t noteIndex);
+    static const char* getNoteName(uint8_t noteIndex, bool removeSpaces = false);
     static const char* getFullNoteName(uint8_t noteNumber);
     static const char* getScaleName(uint8_t scaleIndex);
     static const int8_t* getScalePattern(uint8_t noteIndex);

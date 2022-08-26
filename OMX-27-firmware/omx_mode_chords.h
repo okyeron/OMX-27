@@ -148,6 +148,22 @@ struct ChordNotes
     int8_t octIncrement = 0;
     uint8_t midifx;
     int rootNote;
+
+    void CopyFrom(ChordNotes other)
+    {
+        active = other.active;
+        channel = other.channel;
+        for (uint8_t i = 0; i < 6; i++)
+        {
+            notes[i] = other.notes[i];
+            velocities[i] = other.velocities[i];
+        }
+        strumPos = other.strumPos;
+        encDelta = other.encDelta;
+        octIncrement = other.octIncrement;
+        midifx = other.midifx;
+        rootNote = other.rootNote;
+    }
 };
 
 struct ChordBalanceDetails
@@ -224,10 +240,15 @@ private:
     ChordSettings chords_[16];
     ChordNotes chordNotes_[16];
 
+    ChordNotes playedChordNotes_[16];
+
+
     ChordNotes chordEditNotes_;
     int8_t activeChordEditDegree_;
     int8_t activeChordEditNoteKey_;
     int8_t activeSplitKeyIndex_;
+
+    ChordBalanceDetails activeChordBalance_;
 
 
 

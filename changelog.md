@@ -1,6 +1,23 @@
 # Change log
 
 ```
+### 1.12.9 alpha
+### EEPROM VERSION 25
+*** Warning!!!: This will clear your global save state if EEPROM version is different from your firmware***
+- Improves chord UI
+- Fixes notes sometimes getting stuck on if changing chord parameters while also playing a chord. 
+- Changing basic chord parameters in chord edit mode will now replay the chord with new params. 
+- Adjust params in play mode to silently adjust. 
+```
+
+```
+### 1.12.8 alpha
+### EEPROM VERSION 25
+*** Warning!!!: This will clear your global save state if EEPROM version is different from your firmware***
+- It's a surprise. 
+```
+
+```
 ### 1.12.7 alpha
 ### EEPROM VERSION 25
 *** Warning!!!: This will clear your global save state if EEPROM version is different from your firmware***

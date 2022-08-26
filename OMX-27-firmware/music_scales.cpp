@@ -154,16 +154,16 @@ const char *noteNames[] = {
 
 const char *noteNamesNoFormat[] = {
     "C",
-    "C^",
+    "C#",
     "D",
-    "D^",
+    "D#",
     "E",
     "F",
-    "F^",
+    "F#",
     "G",
-    "G^",
+    "G#",
     "A",
-    "A^",
+    "A#",
     "B",
 };
 
@@ -372,10 +372,14 @@ int MusicScales::getGroup16Color(uint8_t keyNum)
     return scaleColors[note];
 }
 
-const char *MusicScales::getNoteName(uint8_t noteIndex)
+const char *MusicScales::getNoteName(uint8_t noteIndex, bool removeSpaces)
 {
-    noteIndex = constrain(noteIndex, 0, 11);
-    return noteNames[noteIndex];
+    // noteIndex = constrain(noteIndex, 0, 11);
+    if(removeSpaces)
+    {
+        return noteNamesNoFormat[noteIndex % 12];
+    }
+    return noteNames[noteIndex % 12];
 }
 
 const char *MusicScales::getFullNoteName(uint8_t noteNumber)

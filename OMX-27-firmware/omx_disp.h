@@ -52,11 +52,15 @@ public:
     // noteNumbers should be array of 6
     void dispKeyboard(int rootNote, int noteNumbers[], bool showLabels, const char* labels[], uint8_t labelCount);
 
+    void dispChordBasicPage(uint8_t selected, bool encoderSelect, const char* noteName, const char* octaveName, const char* chordType, int8_t balArray[], float velArray[]);
     void chordBalanceMsg(int8_t balArray[], float velArray[], uint8_t secs);
 
 
 
-    void dispLabelParams(int8_t selected, bool encSelActive, const char* labels[], uint8_t labelCount, bool centered = false);
+    void dispLabelParams(int8_t selected, bool encSelActive, const char* labels[], uint8_t labelCount, bool centered);
+
+    
+
     void dispPageIndicators(int page, bool selected);
     void dispPageIndicators2(uint8_t numPages, int8_t selected);
     void dispMode();
@@ -91,6 +95,8 @@ private:
 
     elapsedMillis dirtyDisplayTimer = 0;
     unsigned long displayRefreshRate = 60;
+
+    void dispParamLabel(uint8_t x, uint8_t y, uint8_t width, uint8_t height, bool selected, uint8_t selectionType, bool encSelActive, bool showLabel, const char* label, const uint8_t* font, int8_t labelYOffset, bool centered);
 
     void u8g2centerText(const char *s, int16_t x, int16_t y, uint16_t w, uint16_t h);
     void u8g2leftText(const char *s, int16_t x, int16_t y, uint16_t w, uint16_t h);
