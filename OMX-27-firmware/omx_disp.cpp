@@ -709,6 +709,185 @@ void OmxDisp::dispSlots(const char* slotNames[], uint8_t slotCount, uint8_t sele
     }
 }
 
+void OmxDisp::dispKeyboard(int rootNote, int noteNumbers[], bool showLabels, const char* labels[], uint8_t labelCount)
+{
+    const uint8_t wkWidth = 7;
+    const uint8_t wkInc = 6;
+
+    const uint8_t wkHeight = 22;
+    const uint8_t wkStartX = 16;
+    const uint8_t wkStartY = 10;
+
+    const uint8_t bkWidth = 7;
+    const uint8_t bkInc = 6;
+
+    const uint8_t bkHeight = 16;
+    const uint8_t bkStartX = 13;
+    const uint8_t bkStartY = 9;
+
+    display.fillRect(0, 0, 128, 32, BLACK);
+
+    
+
+    // Find and split up black and white notes
+    bool blackNotes[10];
+    bool whiteNotes[16];
+
+    for(uint8_t i = 0; i < 16; i++)
+    {
+        if(i < 10)
+        {
+            blackNotes[i] = false;
+        }
+        whiteNotes[i] = false;
+    }
+
+    // int rootNote = -1;
+    
+    // // Find the lowest note
+    // for(uint8_t i = 0; i < 6; i++)
+    // {
+    //     if(noteNumbers[i] >= 0 && noteNumbers[i] <= 127)
+    //     {
+    //         if(rootNote < 0 || noteNumbers[i] < rootNote)
+    //         {
+    //             rootNote = noteNumbers[i];
+    //         }
+    //     }
+    // }
+
+    bool addOctave = rootNote % 24 >= 12;
+    
+    for(uint8_t i = 0; i < 6; i++)
+    {
+        int note = noteNumbers[i];
+
+        // If valid note
+        if(note >= 0 && note <= 127)
+        {
+            // uint8_t threeOctNote = (note + (addOctave ? 12 : 0)) % 36;
+
+            // C edge case if note is 2 octaves above root since there's
+            // one extra C
+            if(note - rootNote == 24)
+            {
+                whiteNotes[15] = true;
+                continue;
+            }
+
+            uint8_t twoOctNote = (note + (addOctave ? 12 : 0)) % 24;
+
+            for(uint8_t j = 1; j < 27; j++)
+            {
+                uint8_t stepNote = (notes[j] + 12) % 24; // Turn note lookup into 0-24 semitones
+
+                // B edge case
+                if(j == 11)
+                {
+                    // If note is b and less than root note
+                    if(note % 12 == 11 && note < rootNote)
+                    {
+                        whiteNotes[j-11] = true;
+                        break;
+                    }
+                }
+
+                if(twoOctNote == stepNote)
+                {
+                    if(j >= 11)
+                    {
+                        whiteNotes[j-11] = true;
+                    }
+                    else
+                    {
+                        blackNotes[j-1] = true;
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    // draw white keys
+    for(uint8_t i = 0; i < 16; i++)
+    {
+        if (whiteNotes[i] == false)
+        {
+            // display.fillRect(startX + (wkWidth * i), wkStartY, wkWidth, wkHeight, WHITE);
+            display.drawRect(wkStartX + (wkInc * i), wkStartY, wkWidth, wkHeight, WHITE);
+        }
+    }
+
+    for(uint8_t i = 0; i < 16; i++)
+    {
+        if (whiteNotes[i])
+        {
+            display.drawRect(wkStartX + (wkInc * i), wkStartY, wkWidth, wkHeight, BLACK);
+            display.fillRect(wkStartX + (wkInc * i) + 1, wkStartY, wkWidth - 2, wkHeight, WHITE);
+        }
+    }
+
+    uint8_t bOffset = 0;
+
+    // draw black keys
+    // Two additional keys for sides
+    for(uint8_t i = 0; i < 12; i++)
+    {
+        bool blackOn = false;
+
+        if(i == 1 || i == 3 || i == 6 || i == 8 || i == 11)
+        {
+            bOffset += 6;
+        }
+
+        uint8_t xStart = bkStartX + bOffset + (bkInc * i);
+
+        if( i >0 && i < 11)
+        {
+            blackOn = blackNotes[i - 1];
+        }
+        else
+        {
+            display.fillRect(xStart, bkStartY, bkWidth, bkHeight, BLACK);
+            display.drawRect(xStart + 1, bkStartY + 1, bkWidth - 2, bkHeight - 2, WHITE);
+            display.fillRect(xStart + 2, bkStartY, bkWidth - 4, bkHeight - 1, BLACK);
+            continue;;
+        }
+
+        if (blackOn)
+        {
+            display.fillRect(xStart, bkStartY, bkWidth, bkHeight, BLACK);
+            display.fillRect(xStart + 1, bkStartY + 1, bkWidth - 2, bkHeight - 2, WHITE);
+        }
+        else
+        {
+            // display.fillRect(startX + (wkWidth * i), wkStartY, wkWidth, wkHeight, WHITE);
+            display.fillRect(xStart, bkStartY, bkWidth, bkHeight, BLACK);
+            display.drawRect(xStart + 1, bkStartY + 1, bkWidth - 2, bkHeight - 2, WHITE);
+        }
+    }
+
+    display.fillRect(0, 10, 16, 32, BLACK); // trim left side
+    display.fillRect(113, 10, 15, 32, BLACK); // trim right side
+    display.drawLine(18, 10, 110, 10, WHITE); // Cap the top
+
+    if(!whiteNotes[0])
+    {
+        display.drawLine(16, 24, 16, 31, WHITE); // Left wall
+    }
+
+    if(!whiteNotes[15])
+    {
+        display.drawLine(112, 24, 112, 31, WHITE); // Right wall
+    }
+
+    if(showLabels)
+    {
+        // int8_t selIndex = constrain(selected - 16, -1, 127);
+        dispLabelParams(-1, true, labels, labelCount, true);
+    }
+}
+
 void OmxDisp::dispChordBalance()
 {
     const uint8_t width = 10;
@@ -727,11 +906,11 @@ void OmxDisp::dispChordBalance()
     {
         uint8_t yPos = map(chordVelArray_[i], 0.0f, 1.0f, (float)endY, (float)startY);
 
-        Serial.println("ypos: " + String(yPos));
+        // Serial.println("ypos: " + String(yPos));
 
         int bal = chordBalArray_[i];
 
-        Serial.println("bal: " + String(bal));
+        // Serial.println("bal: " + String(bal));
 
         if(bal <= -10) continue;
 
@@ -765,13 +944,13 @@ void OmxDisp::dispChordBalance()
         }
     }
 
-     Serial.println("");
+    //  Serial.println("");
 
     display.fillRect(0, endY, 128, 32, BLACK);
 }
 
 
-void OmxDisp::dispLabelParams(int8_t selected, bool encSelActive, const char *labels[], uint8_t labelCount)
+void OmxDisp::dispLabelParams(int8_t selected, bool encSelActive, const char *labels[], uint8_t labelCount, bool centered)
 {
     u8g2_display.setFontMode(1);
     u8g2_display.setFont(FONT_LABELS);
@@ -798,7 +977,14 @@ void OmxDisp::dispLabelParams(int8_t selected, bool encSelActive, const char *la
         }
 
         invertColor(invert);
-        u8g2leftText(labels[i], i * labelWidth + 2, hline - 2, labelWidth - 4, 10);
+        if (centered)
+        {
+            u8g2centerText(labels[i], i * labelWidth + 2, hline - 2, labelWidth - 4, 10);
+        }
+        else
+        {
+            u8g2leftText(labels[i], i * labelWidth + 2, hline - 2, labelWidth - 4, 10);
+        }
     }
 }
 

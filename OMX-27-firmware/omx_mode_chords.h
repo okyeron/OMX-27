@@ -147,6 +147,7 @@ struct ChordNotes
     int8_t encDelta = 0;
     int8_t octIncrement = 0;
     uint8_t midifx;
+    int rootNote;
 };
 
 struct ChordBalanceDetails
@@ -243,6 +244,7 @@ private:
     bool lockScaleCache_ = false; // Cache value when entering mode, restore on exit
     bool grp16ScaleCache_ = false;
 
+    int noNotes[6] = {-1,-1,-1,-1,-1,-1};
 
 
     // int chordSize = sizeof(chords_);

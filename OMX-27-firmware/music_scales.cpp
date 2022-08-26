@@ -154,16 +154,16 @@ const char *noteNames[] = {
 
 const char *noteNamesNoFormat[] = {
     "C",
-    "C#",
+    "C^",
     "D",
-    "D#",
+    "D^",
     "E",
     "F",
-    "F#",
+    "F^",
     "G",
-    "G#",
+    "G^",
     "A",
-    "A#",
+    "A^",
     "B",
 };
 

@@ -784,11 +784,9 @@ void OmxModeChords::onEncoderChangedEditParam(Encoder::Update *enc, uint8_t sele
     break;
     case CPARAM_CHORD_TYPE:
     {
-        uint8_t prevType = chords_[selectedChord_].type;
-        chords_[selectedChord_].type = constrain(chords_[selectedChord_].type + amtSlow, 0, 1);
-        if(chords_[selectedChord_].type != prevType)
+        if (amtSlow != 0)
         {
-            if(chordEditMode_)
+            if (chordEditMode_)
             {
                 onChordEditOff();
                 enterChordEditMode();
@@ -798,6 +796,8 @@ void OmxModeChords::onEncoderChangedEditParam(Encoder::Update *enc, uint8_t sele
                 onChordOff(selectedChord_);
             }
         }
+
+        chords_[selectedChord_].type = constrain(chords_[selectedChord_].type + amtSlow, 0, 1);
     }
     break;
     case CPARAM_CHORD_MFX:
@@ -1117,10 +1117,10 @@ void OmxModeChords::onKeyUpdate(OMXKeypadEvent e)
                         if (adjnote >= 0 && adjnote <= 127)
                         {
                             onChordOff(selectedChord_);
+                            onChordEditOff();
                             chords_[selectedChord_].note = adjnote % 12;
                             chords_[selectedChord_].basicOct = (adjnote / 12) - 5;
                             activeChordEditNoteKey_ = thisKey;
-                            onChordEditOff();
                             onChordEditOn(selectedChord_);
                         }
                     }
@@ -2554,42 +2554,67 @@ void OmxModeChords::onDisplayUpdate()
             }
             else if(params->getSelPage() == CHRDPAGE_NOTES)
             {
-                if(chordNotes_[selectedChord_].active)
+                if(chordNotes_[selectedChord_].active || chordEditNotes_.active)
                 {
                     notesString = "";
-                    notesString2 = "";
+                    // notesString2 = "";
 
                     for(uint8_t i = 0; i < 6; i++)
                     {
                         int8_t note = chordNotes_[selectedChord_].notes[i];
 
+                        if(chordEditNotes_.active)
+                        {
+                            note = chordEditNotes_.notes[i];
+                        }
+
                         if(note >= 0 && note <= 127)
                         {
-                            if(i < 4)
+                            if (i > 0)
                             {
-                                if (i > 0)
-                                {
-                                    notesString.append(" ");
-                                }
-                                notesString.append(musicScale_->getFullNoteName(note));
+                                notesString.append(" ");
                             }
-                            else
-                            {
-                                if (i > 4)
-                                {
-                                    notesString2.append(" ");
-                                }
-                                notesString2.append(musicScale_->getFullNoteName(note));
+                            notesString.append(musicScale_->getFullNoteName(note));
 
-                            }
+                            // if(i < 4)
+                            // {
+                            //     if (i > 0)
+                            //     {
+                            //         notesString.append(" ");
+                            //     }
+                            //     notesString.append(musicScale_->getFullNoteName(note));
+                            // }
+                            // else
+                            // {
+                            //     if (i > 4)
+                            //     {
+                            //         notesString2.append(" ");
+                            //     }
+                            //     notesString2.append(musicScale_->getFullNoteName(note));
+
+                            // }
                         }
                     }
 
-                    omxDisp.dispGenericModeLabelDoubleLine(notesString.c_str(), notesString2.c_str(), params->getNumPages(), params->getSelPage());
+                    const char* labels[1];
+                    labels[0] = notesString.c_str();
+                    // omxDisp.dispGenericModeLabelDoubleLine(notesString.c_str(), notesString2.c_str(), params->getNumPages(), params->getSelPage());
+                    if (chordEditNotes_.active)
+                    {
+                        // int rootNote = chords_[selectedChord_].note;
+                        omxDisp.dispKeyboard(chordEditNotes_.rootNote, chordEditNotes_.notes, true, labels, 1);
+                    }
+                    else
+                    {
+                        omxDisp.dispKeyboard(chordNotes_[selectedChord_].rootNote, chordNotes_[selectedChord_].notes, true, labels, 1);
+                    }
                 }
                 else{
-                    omxDisp.dispGenericModeLabel("-", params->getNumPages(), params->getSelPage());
+                    omxDisp.dispKeyboard(-1, noNotes, false, nullptr, 0);
+
+                    // omxDisp.dispGenericModeLabel("-", params->getNumPages(), params->getSelPage());
                 }
+
             }
             else
             {
@@ -2762,6 +2787,7 @@ void OmxModeChords::onChordEditOn(uint8_t chordIndex)
 
         chordEditNotes_.active = true;
         chordEditNotes_.channel = chordNotes_[chordIndex].channel;
+        chordEditNotes_.rootNote = chordNotes_[chordIndex].rootNote;
 
         // uint32_t noteOnMicros = micros();
 
@@ -2861,6 +2887,8 @@ bool OmxModeChords::constructChord(uint8_t chordIndex)
         chordNotes_[chordIndex].notes[3] = musicScale_->getNoteByDegree(chord.degree + 6, octave);
         numNotes = 4;
     }
+
+    chordNotes_[chordIndex].rootNote = chordNotes_[chordIndex].notes[0];
 
     // Serial.println("numNotes: " + String(numNotes));
 
@@ -3051,6 +3079,8 @@ bool OmxModeChords::constructChordBasic(uint8_t chordIndex)
     int rootNote = chord.note + ((chord.basicOct + 5) * 12);
 
     if(rootNote < 0 || rootNote > 127) return false;
+
+    chordNotes_[chordIndex].rootNote = rootNote;
 
     chordNotes_[chordIndex].midifx = chord.midiFx;
 
