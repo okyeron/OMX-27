@@ -1,6 +1,13 @@
 # Change log
 
 ```
+### 1.12.10 alpha
+### EEPROM VERSION 25
+*** Warning!!!: This will clear your global save state if EEPROM version is different from your firmware***
+- Quick arp fix
+```
+
+```
 ### 1.12.9 alpha
 ### EEPROM VERSION 25
 *** Warning!!!: This will clear your global save state if EEPROM version is different from your firmware***

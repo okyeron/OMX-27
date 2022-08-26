@@ -427,7 +427,7 @@ void OmxModeChords::selectMidiFx(uint8_t mfxIndex, bool dispMsg)
 
     for(uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
     {
-        // subModeMidiFx[i].setSelected(i == mfxIndex);
+        subModeMidiFx[i].setSelected(true);
     }
 
     if (dispMsg)
@@ -1079,6 +1079,12 @@ void OmxModeChords::onKeyUpdate(OMXKeypadEvent e)
         else
         {
             auxDown_ = false;
+
+            // Forces all arps to work. 
+            for(uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
+            {
+                subModeMidiFx[i].setSelected(true);
+            }
         }
         omxLeds.setDirty();
         omxDisp.setDirty();
