@@ -3,6 +3,7 @@
 #include "omx_util.h"
 #include "omx_leds.h"
 #include "colors.h"
+#include "sequencer.h"
 #include <algorithm>
 // #include <bits/stdc++.h>
 
@@ -450,9 +451,11 @@ namespace midifx
     void MidiFXArpeggiator::startArp()
     {
         // Serial.println("startArp");
-        if(arpRunning_) return;
+        if(arpRunning_ || pendingStart_) return;
 
         pendingStart_ = true;
+
+        pendingStartTime_ = micros();
 
         if(sysSettings.omxMode == MODE_EUCLID)
         {
@@ -467,9 +470,14 @@ namespace midifx
 
     void MidiFXArpeggiator::stopArp()
     {
-        // Serial.println("stopArp");
-        arpRunning_ = false;
         pendingStart_ = false;
+        pendingStop_ = false;
+        arpRunning_ = false;
+        pendingStopCount_ = 0;
+
+        // // Serial.println("stopArp");
+        // arpRunning_ = false;
+        // pendingStart_ = false;
     }
 
     bool MidiFXArpeggiator::insertMidiNoteQueue(MidiNoteGroup note)
@@ -756,11 +764,13 @@ namespace midifx
         // {
         //     startArp(); 
         // }
+        bool arpReset = false;
 
         if(!arpRunning_)
         {
             startArp();
             resetArpSeq();
+            arpReset = true;
         }
 
         if(hasMidiNotes() == false)
@@ -772,10 +782,12 @@ namespace midifx
             if(arpMode_ == ARPMODE_ON || arpMode_ == ARPMODE_ONCE)
             {
                 resetArpSeq();
+                arpReset = true;
             }
             else if(resetMode_ == ARPRESET_NOTE)
             {
                 resetArpSeq();
+                arpReset = true;
             }
 
             holdNoteQueue.clear();
@@ -790,12 +802,24 @@ namespace midifx
             if(resetMode_ == ARPRESET_NOTE)
             {
                 resetArpSeq();
+                arpReset = true;
             }
         }
 
         insertMidiNoteQueue(note);
         sortNotes();
         // generatePattern();
+
+        if(arpReset)
+        {
+            prevNotePos_ = notePos_;
+            prevQLength_ = sortedNoteQueue.size();
+        }
+
+        if(pendingStop_)
+        {
+            pendingStop_ = false;
+        }
     }
 
     void MidiFXArpeggiator::arpNoteOff(MidiNoteGroup note)
@@ -829,7 +853,7 @@ namespace midifx
 
     void MidiFXArpeggiator::onClockTick()
     {
-        if (pendingStart_)
+        if (pendingStart_ && sequencer.playing)
         {
             omxUtil.resetClocks();
             nextStepTimeP_ = seqConfig.currentFrameMicros;
@@ -850,6 +874,7 @@ namespace midifx
 
             // loopUpdate();
         }
+        
     }
 
     void MidiFXArpeggiator::loopUpdate()
@@ -891,6 +916,19 @@ namespace midifx
         //     patternDirty_ = false;
         // }
 
+        if (pendingStart_ && !sequencer.playing && micros() - pendingStartTime_ >= 10000)
+        {
+            omxUtil.resetClocks();
+            nextStepTimeP_ = seqConfig.currentFrameMicros;
+
+            nextStepTimeP_ = seqConfig.currentFrameMicros;
+            lastStepTimeP_ = seqConfig.currentFrameMicros;
+
+            arpRunning_ = true;
+            pendingStart_ = false;
+            pendingStop_ = false;
+        }
+
         if (!arpRunning_ || !selected_)
         {
             return;
@@ -921,6 +959,17 @@ namespace midifx
             nextStepTimeP_ = seqConfig.currentFrameMicros + stepMicroDelta_; // calc step based on rate
 
             arpNoteTrigger();
+
+            // Keeps arp running for a bit on stop so if you play new notes they will be in sync
+            if(pendingStop_)
+            {
+                pendingStopCount_--;
+                if (pendingStopCount_ == 0)
+                {
+                    arpRunning_ = false;
+                    pendingStop_ = false;
+                }
+            }
         }
     }
 
@@ -976,6 +1025,17 @@ namespace midifx
         int currentNotePos = notePos_;
         int nextNotePos = notePos_;
         int qLength = sortedNoteQueue.size();
+
+        // Attempt to keep position in similar place when number of notes change
+        // if(qLength != prevQLength_)
+        // {
+        //     notePos_ = map(prevNotePos_, 0, prevQLength_ - 1, 0, qLength - 1);
+        //     currentNotePos = notePos_;
+        // }
+        // Eh, not so good.
+
+        prevNotePos_ = notePos_;
+        prevQLength_ = qLength;
 
         switch (arpPattern_)
         {

@@ -46,4 +46,8 @@ private:
     int8_t selectedParam = 0;
     uint8_t numberOfPages = 0;
     PageConfig pageConfigs[kMaxPages];
+
+    bool isFirstPage(int8_t pageIndex);
+    bool isLastPage(int8_t pageIndex);
+
 };

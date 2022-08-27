@@ -26,7 +26,7 @@ enum ChordVoicing
 
 struct CustomChordNote
 {
-    int8_t note : 4; // Root NoteNumber Offset or degree
+    int8_t note : 7; // Root NoteNumber Offset or degree
 };
 
 // struct CustomChordDegree
@@ -266,7 +266,7 @@ private:
 
     ChordSettings chordSaves_[NUM_CHORD_SAVES][16];
 
-    int saveSize = sizeof(chordSaves_);
+    // int saveSize = sizeof(chordSaves_);
 
     String notesString = "";
     String notesString2 = "";

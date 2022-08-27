@@ -219,6 +219,10 @@ namespace midifx
         uint8_t randPrevNote_;
 
         bool pendingStart_ = false;
+        bool pendingStop_ = false;
+        Micros pendingStartTime_;
+        uint8_t pendingStopCount_ = 0;
+
         bool arpRunning_ = false;
 
         static const int queueSize = 8;
@@ -277,6 +281,8 @@ namespace midifx
         // Used for toggling arp
         uint8_t prevArpMode_ : 3;
 
+        int8_t prevNotePos_;
+        int8_t prevQLength_;
 
 
         bool insertMidiNoteQueue(MidiNoteGroup note);

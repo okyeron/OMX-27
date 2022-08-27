@@ -51,6 +51,34 @@ void ParamManager::changeParam(int8_t direction)
         decrementParam();
 }
 
+bool ParamManager::isFirstPage(int8_t pageIndex)
+{
+    if(pageIndex == 0) return true;
+
+    for (int8_t i = pageIndex - 1; i >= 0; i--)
+    {
+        if (pageConfigs[i].enabled)
+        {
+            return false;
+        }
+    }
+    return true; // no pages ahead of this one found
+}
+
+bool ParamManager::isLastPage(int8_t pageIndex)
+{
+    if(pageIndex == numberOfPages - 1) return true;
+
+    for (int8_t i = pageIndex + 1; i < numberOfPages; i++)
+    {
+        if (pageConfigs[i].enabled)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
 void ParamManager::incrementParam()
 {
     if (numberOfPages == 0)
@@ -59,7 +87,7 @@ void ParamManager::incrementParam()
     selectedParam++;
     if (selectedParam >= pageConfigs[selectedPage].numberOfParams)
     {
-        if (rollPages || selectedPage != numberOfPages -1) // Roll unless last page or roll pages
+        if (rollPages || !isLastPage(selectedPage)) // Roll unless last page or roll pages
         {
             selectedParam = 0;
         }
@@ -83,7 +111,7 @@ void ParamManager::decrementParam()
     selectedParam--;
     if (selectedParam < 0)
     {
-        if (rollPages || selectedPage != 0) // Roll unless first page or roll pages
+        if (rollPages || !isFirstPage(selectedPage)) // Roll unless first page or roll pages
         {
             selectedParam = max(pageConfigs[selectedPage].numberOfParams - 1, 0);
         }
@@ -105,8 +133,6 @@ void ParamManager::incrementPage()
 {
     if (numberOfPages == 0)
         return;
-
-    // selectedPage = selectedPage + 1;
 
     bool foundEnabledPage = false;
 

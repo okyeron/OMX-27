@@ -691,7 +691,8 @@ void OmxModeChords::onEncoderChanged(Encoder::Update enc)
         else if (chords_[selectedChord_].type == CTYPE_BASIC)
         {
             auto amtSlow = enc.accel(1);
-            chords_[selectedChord_].customNotes[selParam].note = constrain(chords_[selectedChord_].customNotes[selParam].note + amtSlow, -36, 36);
+            int8_t sel = params->getSelParam();
+            chords_[selectedChord_].customNotes[sel].note = constrain(chords_[selectedChord_].customNotes[sel].note + amtSlow, -48, 48);
 
             if (amtSlow != 0) // To see notes change on keyboard leds
             {
@@ -2663,6 +2664,7 @@ void OmxModeChords::onDisplayUpdate()
                 }
 
             }
+            // Chord page
             else if(params->getSelPage() == CHRDPAGE_2 && chords_[selectedChord_].type == CTYPE_BASIC)
             {
                 auto noteName = MusicScales::getNoteName(chords_[selectedChord_].note, true);
@@ -2674,6 +2676,7 @@ void OmxModeChords::onDisplayUpdate()
 
                 omxDisp.dispChordBasicPage(params->getSelParam(), getEncoderSelect(), noteName, notesString2.c_str(), chordType, activeChordBalance_.type, activeChordBalance_.velMult);
             }
+            // Custom Chord Notes
             else if(params->getSelPage() == CHRDPAGE_3 && chords_[selectedChord_].type == CTYPE_BASIC && chords_[selectedChord_].chord == kCustomChordPattern)
             {
                 const char* labels[6];
@@ -2710,7 +2713,7 @@ void OmxModeChords::onDisplayUpdate()
                     labels[i] = customNotesStrings[i].c_str();
                 }
 
-                omxDisp.dispCenteredSlots(labels, 6, params->getSelParam(), encoderSelect_, true, true, headers, 1);
+                omxDisp.dispCenteredSlots(labels, 6, params->getSelParam(), getEncoderSelect(), true, true, headers, 1);
             }
             else
             {

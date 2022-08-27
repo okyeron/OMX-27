@@ -1,6 +1,24 @@
 # Change log
 
 ```
+### 1.12.11 alpha
+### EEPROM VERSION 26
+*** Warning!!!: This will clear your global save state if EEPROM version is different from your firmware***
+- Adds custom chords to basic chords. 
+- - Change the chord type to the last one called "Custom"
+- - Now there will be an additional page
+- - Dial in up to 6 note offsets in semitones. Offset of "0" will play the Root Note of chord and will display as "R"
+- - You can only play the root note in the first slot, otherwise "0" disables the chord note. 
+- - The first 4 notes will be modified by the balance parameter. Set balance to 4 white dudes to play all 4 notes. 
+- - The keyboard view either by F1 + Chord or right side in split mode can help show which notes are playing. 
+-
+- Fixes display messages from aux quick-keys not displaying when in keyboard or basic chord pages. 
+-
+- Slight arp improvements
+```
+
+
+```
 ### 1.12.10 alpha
 ### EEPROM VERSION 25
 *** Warning!!!: This will clear your global save state if EEPROM version is different from your firmware***

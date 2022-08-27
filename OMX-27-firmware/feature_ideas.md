@@ -41,6 +41,24 @@ What's next:
 - Default chords to something playable. 
 
 
+Adafruit DMA neopixel 1.3.0
+Adafruit NeoPixel 1.10.5
+
+/Applications/Teensyduino.app/Contents/Java/hardware/tools/arm/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7e-m/libc_nano.a(lib_a-signalr.o): In function `_kill_r':
+Multiple libraries were found for "Adafruit_NeoPixel.h"
+signalr.c:(.text._kill_r+0xe): undefined reference to `_kill'
+ Used: /Users/quixotic7mini/Documents/Arduino/libraries/Adafruit_NeoPixel
+/Applications/Teensyduino.app/Contents/Java/hardware/tools/arm/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv7e-m/libc_nano.a(lib_a-signalr.o): In function `_getpid_r':
+ Not used: /Applications/Teensyduino.app/Contents/Java/hardware/teensy/avr/libraries/Adafruit_NeoPixel
+Multiple libraries were found for "MIDI.h"
+ Used: /Applications/Teensyduino.app/Contents/Java/hardware/teensy/avr/libraries/MIDI
+signalr.c:(.text._getpid_r+0x0): undefined reference to `_getpid'
+ Not used: /Users/quixotic7mini/Documents/Arduino/libraries/MIDI_Library
+Multiple libraries were found for "Adafruit_SSD1306.h"
+ Used: /Users/quixotic7mini/Documents/Arduino/libraries/Adafruit_SSD1306
+collect2: error: ld returned 1 exit status
+ Not used: /Users/quixotic7mini/Documents/Arduino/libraries/Adafruit_SSD1306_Wemos_Mini_OLED
+ 
 
 Ideas:
 Aux + Encoder to quickly switch modes. Modular setup in which You can combine sequencers, keyboards etc. 
