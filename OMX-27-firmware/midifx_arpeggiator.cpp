@@ -810,6 +810,33 @@ namespace midifx
         sortNotes();
         // generatePattern();
 
+        if(sortedNoteQueue.size() != prevSortedNoteQueue.size())
+        {
+            if(prevNotePos_ >= 0 && prevNotePos_ < prevSortedNoteQueue.size())
+            {
+                for (uint8_t q = prevNotePos_; q < prevNotePos_ + prevSortedNoteQueue.size(); q++)
+                {
+                    bool noteFound = false;
+                    uint8_t prevIndex = q % prevSortedNoteQueue.size();
+                    auto prevNote = prevSortedNoteQueue[prevIndex].noteNumber;
+
+                    for (uint8_t i = 0; i < sortedNoteQueue.size(); i++)
+                    {
+                        if (sortedNoteQueue[i].noteNumber == prevNote)
+                        {
+                            notePos_ = i;
+                            noteFound = true;
+                            break;;
+                        }
+                    }
+                    if(noteFound)
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+
         if(arpReset)
         {
             prevNotePos_ = notePos_;
@@ -1286,6 +1313,15 @@ namespace midifx
 
 
         // patPos_++;
+
+        prevNotePos_ = notePos_;
+
+        prevSortedNoteQueue.clear();
+
+        for (ArpNote a : sortedNoteQueue)
+        {
+            prevSortedNoteQueue.push_back(a);
+        }
     }
 
     int16_t MidiFXArpeggiator::applyModPattern(int16_t noteNumber)

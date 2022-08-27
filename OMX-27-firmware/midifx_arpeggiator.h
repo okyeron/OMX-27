@@ -232,6 +232,8 @@ namespace midifx
         std::vector<ArpNote> sortedNoteQueue; // Notes that are used in arp
         std::vector<ArpNote> tempNoteQueue; // Notes that are used in arp
 
+        std::vector<ArpNote> prevSortedNoteQueue;
+
         std::vector<PendingArpNote> pendingNotes; // Notes that are used in arp
 
         uint8_t modPatternLength_ : 4; // Max 15
