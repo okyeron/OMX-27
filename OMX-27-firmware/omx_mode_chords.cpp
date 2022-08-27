@@ -834,7 +834,7 @@ void OmxModeChords::onEncoderChangedEditParam(Encoder::Update *enc, uint8_t sele
     break;
     case CPARAM_BAS_NOTE:
     {
-        chords_[selectedChord_].note = constrain(chords_[selectedChord_].note + amtSlow, 0, 12);
+        chords_[selectedChord_].note = constrain(chords_[selectedChord_].note + amtSlow, 0, 11);
         triggerChord = amtSlow != 0;
     }
     break;
