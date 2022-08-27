@@ -138,9 +138,11 @@ enum ChordType {
 // C C# D D# E F F# G G# A A# B  C  C# D  D# 
 // 0 1  2 3  4 5 6  7 8  9 10 11 12 13 14 15
 
-const uint8_t kNumChordPatterns = 36;
+const uint8_t kNumChordPatterns = 37;
+const uint8_t kCustomChordPattern = kNumChordPatterns - 1;
 
-const int8_t chordPatterns[kNumChordPatterns][3] = {
+// Last pattern is custom
+const int8_t chordPatterns[kNumChordPatterns-1][3] = {
     {4,  7,  -1},   // Major        C E G
     {3,  7,  -1},   // minor        C Eb G
     {2,  7,  -1},   // sus2         C D G
@@ -220,7 +222,8 @@ const char* kChordMsg[kNumChordPatterns] = {
     "sus4#5b9",
 
     "Fourths",
-    "Fifth"
+    "Fifth",
+    "Custom"
 };
 
 const uint8_t kNumChordBalance = 23;
@@ -292,6 +295,7 @@ OmxModeChords::OmxModeChords()
     basicParams_.addPage(4);
     basicParams_.addPage(4);
     basicParams_.addPage(4);
+    basicParams_.addPage(6); // Custom chord notes
 
     intervalParams_.addPage(1);
     intervalParams_.addPage(4);
@@ -684,6 +688,16 @@ void OmxModeChords::onEncoderChanged(Encoder::Update enc)
             onEncoderChangedEditParam(&enc, selParam, 2, CPARAM_INT_ROTATE);
             onEncoderChangedEditParam(&enc, selParam, 3, CPARAM_INT_VOICING);
         }
+        else if (chords_[selectedChord_].type == CTYPE_BASIC)
+        {
+            auto amtSlow = enc.accel(1);
+            chords_[selectedChord_].customNotes[selParam].note = constrain(chords_[selectedChord_].customNotes[selParam].note + amtSlow, -36, 36);
+
+            if (amtSlow != 0) // To see notes change on keyboard leds
+            {
+                constructChord(selectedChord_);
+            }
+        }
     }
     // PAGE FOUR - spreadUpDown, quartalVoicing
     else if (selPage == CHRDPAGE_4)
@@ -836,6 +850,8 @@ void OmxModeChords::onEncoderChangedEditParam(Encoder::Update *enc, uint8_t sele
         if(chords_[selectedChord_].chord != prevChord)
         {
             triggerChord = true;
+
+            
             // constructChord(selectedChord_);
             // omxDisp.displayMessage(kChordMsg[chords_[selectedChord_].chord]);
         }
@@ -1606,6 +1622,7 @@ ParamManager* OmxModeChords::getParams()
 {
     if(chords_[selectedChord_].type == CTYPE_BASIC)
     {
+        basicParams_.setPageEnabled(CHRDPAGE_3, chords_[selectedChord_].chord == kCustomChordPattern);
         intervalParams_.setSelPageAndParam(basicParams_.getSelPage(), basicParams_.getSelParam());
 
         return &basicParams_;
@@ -2656,7 +2673,44 @@ void OmxModeChords::onDisplayUpdate()
                 activeChordBalance_ = getChordBalanceDetails(chords_[selectedChord_].balance);
 
                 omxDisp.dispChordBasicPage(params->getSelParam(), getEncoderSelect(), noteName, notesString2.c_str(), chordType, activeChordBalance_.type, activeChordBalance_.velMult);
+            }
+            else if(params->getSelPage() == CHRDPAGE_3 && chords_[selectedChord_].type == CTYPE_BASIC && chords_[selectedChord_].chord == kCustomChordPattern)
+            {
+                const char* labels[6];
+                const char* headers[1];
+                headers[0] = "Custom Chord";
 
+                for(uint8_t i = 0; i < 6; i++)
+                {
+                    int note = chords_[selectedChord_].customNotes[i].note;
+
+                    if (note == 0)
+                    {
+                        if (i == 0)
+                        {
+                            customNotesStrings[i] = "RT";
+                        }
+                        else
+                        {
+                            customNotesStrings[i] = "-";
+                        }
+                    }
+                    else
+                    {
+                        if (note > 0)
+                        {
+                            customNotesStrings[i] = "+" + String(note);
+                        }
+                        else
+                        {
+                            customNotesStrings[i] = "" + String(note);
+                        }
+                    }
+
+                    labels[i] = customNotesStrings[i].c_str();
+                }
+
+                omxDisp.dispCenteredSlots(labels, 6, params->getSelParam(), encoderSelect_, true, true, headers, 1);
             }
             else
             {
@@ -3136,13 +3190,29 @@ bool OmxModeChords::constructChordBasic(uint8_t chordIndex)
 
     chordNotes_[chordIndex].notes[0] = rootNote;
 
-    auto pattern = chordPatterns[chord.chord];
-
-    for(uint8_t i = 0; i < 3; i++)
+    if (chord.chord == kCustomChordPattern)
     {
-        if(pattern[i] >= 0)
+        for (uint8_t i = 0; i < 6; i++)
         {
-            chordNotes_[chordIndex].notes[i + 1] = rootNote + pattern[i];
+            int noteOffset = chord.customNotes[i].note;
+
+            if(noteOffset != 0 || (noteOffset == 0 && i == 0))
+            {
+                chordNotes_[chordIndex].notes[i] = rootNote + noteOffset;
+            }
+            // else offset is zero, do nothing. 
+        }
+    }
+    else
+    {
+        auto pattern = chordPatterns[chord.chord];
+
+        for (uint8_t i = 0; i < 3; i++)
+        {
+            if (pattern[i] >= 0)
+            {
+                chordNotes_[chordIndex].notes[i + 1] = rootNote + pattern[i];
+            }
         }
     }
 

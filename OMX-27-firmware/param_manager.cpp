@@ -7,9 +7,38 @@ int8_t ParamManager::addPage(uint8_t numberOfParams)
         return -1;
 
     uint8_t newPageIndex = numberOfPages;
-    pageConfigs[newPageIndex] = numberOfParams;
+    pageConfigs[newPageIndex].numberOfParams = numberOfParams;
+    pageConfigs[newPageIndex].enabled = true;
     numberOfPages = numberOfPages + 1;
     return newPageIndex;
+}
+
+void ParamManager::setPageEnabled(uint8_t pageIndex, bool enablePage)
+{
+    if(pageIndex < 0 || pageIndex > numberOfPages) return;
+
+    pageConfigs[pageIndex].enabled = enablePage;
+
+    if(!enablePage && selectedPage == pageIndex)
+    {
+        for(int8_t i = pageIndex - 1; i >= 0; i--)
+        {
+            if(pageConfigs[i].enabled)
+            {
+                selectedPage = i;
+                return;
+            }
+        }
+
+        for(int8_t i = pageIndex + 1; i < numberOfPages; i++)
+        {
+            if(pageConfigs[i].enabled)
+            {
+                selectedPage = i;
+                return;
+            }
+        }
+    }
 }
 
 void ParamManager::changeParam(int8_t direction)
@@ -28,7 +57,7 @@ void ParamManager::incrementParam()
         return;
 
     selectedParam++;
-    if (selectedParam >= pageConfigs[selectedPage])
+    if (selectedParam >= pageConfigs[selectedPage].numberOfParams)
     {
         if (rollPages || selectedPage != numberOfPages -1) // Roll unless last page or roll pages
         {
@@ -36,13 +65,13 @@ void ParamManager::incrementParam()
         }
         else
         {
-            selectedParam = max(min(selectedParam - 1, pageConfigs[selectedPage] - 1), 0);
+            selectedParam = max(min(selectedParam - 1, pageConfigs[selectedPage].numberOfParams - 1), 0);
         }
 
         if (!lockSelectedPage)
         {
             incrementPage();
-            selectedParam = constrain(selectedParam, 0, pageConfigs[selectedPage] - 1);
+            selectedParam = constrain(selectedParam, 0, pageConfigs[selectedPage].numberOfParams - 1);
         }
     }
 }
@@ -56,7 +85,7 @@ void ParamManager::decrementParam()
     {
         if (rollPages || selectedPage != 0) // Roll unless first page or roll pages
         {
-            selectedParam = max(pageConfigs[selectedPage] - 1, 0);
+            selectedParam = max(pageConfigs[selectedPage].numberOfParams - 1, 0);
         }
         else
         {
@@ -67,7 +96,7 @@ void ParamManager::decrementParam()
         {
             decrementPage();
 
-            selectedParam = constrain(selectedParam, 0, pageConfigs[selectedPage] - 1);
+            selectedParam = constrain(selectedParam, 0, pageConfigs[selectedPage].numberOfParams - 1);
         }
     }
 }
@@ -77,7 +106,24 @@ void ParamManager::incrementPage()
     if (numberOfPages == 0)
         return;
 
-    selectedPage = selectedPage + 1;
+    // selectedPage = selectedPage + 1;
+
+    bool foundEnabledPage = false;
+
+    for (int8_t i = selectedPage + 1; i < numberOfPages; i++)
+    {
+        if (pageConfigs[i].enabled)
+        {
+            selectedPage = i;
+            foundEnabledPage = true;
+            break;
+        }
+    }
+
+    if(!foundEnabledPage)
+    {
+        selectedPage = selectedPage + 1;
+    }
 
     if (selectedPage >= numberOfPages)
     {
@@ -96,7 +142,22 @@ void ParamManager::decrementPage()
     if (numberOfPages == 0)
         return;
 
-    selectedPage = selectedPage - 1;
+    bool foundEnabledPage = false;
+
+    for (int8_t i = selectedPage - 1; i >= 0; i--)
+    {
+        if (pageConfigs[i].enabled)
+        {
+            selectedPage = i;
+            foundEnabledPage = true;
+            break;
+        }
+    }
+
+    if (!foundEnabledPage)
+    {
+        selectedPage = selectedPage - 1;
+    }
 
     if (selectedPage < 0)
     {
@@ -138,7 +199,7 @@ void ParamManager::setSelParam(int8_t newParam)
 {
     if (numberOfPages == 0)
         return;
-    if (newParam < 0 || newParam >= pageConfigs[selectedPage])
+    if (newParam < 0 || newParam >= pageConfigs[selectedPage].numberOfParams)
         return;
 
     selectedParam = newParam;
@@ -154,5 +215,5 @@ uint8_t ParamManager::getNumOfParamsForPage(uint8_t pageIndex)
     if (numberOfPages == 0 || pageIndex < 0 || pageIndex >= numberOfPages)
         return 0;
 
-    return pageConfigs[pageIndex];
+    return pageConfigs[pageIndex].numberOfParams;
 }

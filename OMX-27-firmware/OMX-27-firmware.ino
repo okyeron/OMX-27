@@ -15,6 +15,8 @@
 #include <functional>
 #include <ResponsiveAnalogRead.h>
 
+
+
 #include "consts.h"
 #include "config.h"
 #include "colors.h"
@@ -37,7 +39,6 @@
 #include "music_scales.h"
 
 #define RAM_MONITOR 1
-
 #if RAM_MONITOR
 #include "RamMonitor.h"
 #endif
@@ -915,6 +916,7 @@ void loadPatterns(void)
 
 	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 5988
 
+	// with 8 note chords, 10929
 
 	// Pattern size = 715
 	// Pattern size eprom = 332
@@ -925,6 +927,12 @@ void loadPatterns(void)
 	// Eeprom rom can save 6 patterns, plus 56 bytes
 
 	// 2832 - size of 16 euclid patterns of 16 euclids
+
+	// no arps = 9905, 5 arps = 10105, 25 arps = 11505
+
+	// no arps = 10929, 5 arps = 11129, 25 arps = 12529
+	// 
+	
 }
 
 // currently saves everything ( mode + patterns )

@@ -48,6 +48,9 @@ public:
 
     // Displays slots for midifx or something else in future
     void dispSlots(const char* slotNames[], uint8_t slotCount, uint8_t selected, uint8_t animPos, bool encSelActive, bool showLabels, const char* labels[], uint8_t labelCount);
+    
+    // Displays multiple slots up to slotCount all centered
+    void dispCenteredSlots(const char* slotNames[], uint8_t slotCount, uint8_t selected, bool encoderSelect, bool showLabels, bool centerLabels, const char* labels[], uint8_t labelCount);
 
     // noteNumbers should be array of 6
     void dispKeyboard(int rootNote, int noteNumbers[], bool showLabels, const char* labels[], uint8_t labelCount);
@@ -55,9 +58,8 @@ public:
     void dispChordBasicPage(uint8_t selected, bool encoderSelect, const char* noteName, const char* octaveName, const char* chordType, int8_t balArray[], float velArray[]);
     void chordBalanceMsg(int8_t balArray[], float velArray[], uint8_t secs);
 
-
-
     void dispLabelParams(int8_t selected, bool encSelActive, const char* labels[], uint8_t labelCount, bool centered);
+
 
     
 

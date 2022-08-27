@@ -19,6 +19,7 @@ public:
     // Increment or decrement based on direction
     // < 0 == CCW   > 0 == CW   0 = do nothing
     void changeParam(int8_t direction);
+    void setPageEnabled(uint8_t pageIndex, bool enablePage);
     void incrementParam();
     void decrementParam();
 
@@ -35,8 +36,14 @@ public:
     uint8_t getNumOfParamsForPage(uint8_t pageIndex);
 
 private:
+    struct PageConfig
+    {
+        uint8_t numberOfParams : 6;
+        bool enabled;
+    };
+
     int8_t selectedPage = 0;
     int8_t selectedParam = 0;
     uint8_t numberOfPages = 0;
-    uint8_t pageConfigs[kMaxPages];
+    PageConfig pageConfigs[kMaxPages];
 };

@@ -711,6 +711,34 @@ void OmxDisp::dispSlots(const char* slotNames[], uint8_t slotCount, uint8_t sele
     }
 }
 
+void OmxDisp::dispCenteredSlots(const char* slotNames[], uint8_t slotCount, uint8_t selected, bool encoderSelect, bool showLabels, bool centerLabels, const char* labels[], uint8_t labelCount)
+{
+    if (isMessageActive())
+    {
+        renderMessage();
+        return;
+    }
+
+    display.fillRect(0, 0, 128, 32, BLACK);
+
+    uint8_t slotWidth = 128 / slotCount;
+
+    for(uint8_t i = 0; i < slotCount; i++)
+    {
+        dispParamLabel(i * slotWidth, 10, slotWidth, 18, selected == i, 1, encoderSelect, true, slotNames[i], FONT_VALUES, 1, true);
+    }
+
+    // dispParamLabel(32, 10, 32, 18, selected == 1, 1, encoderSelect, true, octaveName, FONT_VALUES, 1, true);
+    // dispParamLabel(0, 0, 128, 10, selected == 3, 0, encoderSelect, true, chordType, FONT_LABELS, 1, true);
+
+
+    if(showLabels)
+    {
+        int8_t selIndex = constrain(selected - slotCount, -1, 127);
+        dispLabelParams(selIndex, encoderSelect, labels, labelCount, centerLabels);
+    }
+}
+
 void OmxDisp::dispKeyboard(int rootNote, int noteNumbers[], bool showLabels, const char* labels[], uint8_t labelCount)
 {
     if (isMessageActive())
@@ -903,7 +931,7 @@ void OmxDisp::dispChordBasicPage(uint8_t selected, bool encoderSelect, const cha
         renderMessage();
         return;
     }
-    
+
     display.fillRect(0, 0, 128, 32, BLACK);
 
     dispParamLabel(0, 10, 32, 18, selected == 0, 1, encoderSelect, true, noteName, FONT_VALUES, 1, true);

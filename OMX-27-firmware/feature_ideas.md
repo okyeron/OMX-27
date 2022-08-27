@@ -1,3 +1,34 @@
+```
+// Memory
+// Clean slate no MidiFX
+```
+==== memory report ====
+free: 29 Kb (45.9%)
+stack: 1 Kb (1.6%)
+heap: 2 Kb (2.9%)
+``
+
+// 25 Arps
+```
+==== memory report ====
+free: 17 Kb (26.7%)
+stack: 2 Kb (3.1%)
+heap: 13 Kb (20.7%)
+```
+
+// 5 Arps
+==== memory report ====
+free: 26 Kb (40.3%)
+stack: 2 Kb (3.1%)
+heap: 13 Kb (20.7%)
+
+```
+==== memory report ====
+free: 27 Kb (42.3%)
+stack: 2 Kb (3.1%)
+heap: 13 Kb (20.7%)
+```
+
 Bugs:
 Arps don't work in MidiModeception
 

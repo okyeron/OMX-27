@@ -24,6 +24,17 @@ enum ChordVoicing
 
 #define NUM_CHORD_SAVES 8
 
+struct CustomChordNote
+{
+    int8_t note : 4; // Root NoteNumber Offset or degree
+};
+
+// struct CustomChordDegree
+// {
+//     uint8_t note : 3; // 0 - 7
+//     int8_t octave : 3; // Octave Offset -3 to +3
+// };
+
 struct ChordSettings
 {
     public:
@@ -38,6 +49,9 @@ struct ChordSettings
     int8_t basicOct : 4;
     uint8_t chord : 6;
     uint8_t balance : 8; // 0 - 23 * 10
+
+    CustomChordNote customNotes[6];
+    // CustomChordDegree customDegrees[6];
 
     // Interval Type:
     uint8_t numNotes : 3;
@@ -250,12 +264,14 @@ private:
 
     ChordBalanceDetails activeChordBalance_;
 
-
-
     ChordSettings chordSaves_[NUM_CHORD_SAVES][16];
+
+    int saveSize = sizeof(chordSaves_);
 
     String notesString = "";
     String notesString2 = "";
+
+    String customNotesStrings[6];
 
      // SubModes
     SubmodeInterface* activeSubmode = nullptr;
