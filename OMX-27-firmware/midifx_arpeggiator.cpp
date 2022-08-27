@@ -812,9 +812,11 @@ namespace midifx
 
         if(sortedNoteQueue.size() != prevSortedNoteQueue.size())
         {
-            if(prevNotePos_ >= 0 && prevNotePos_ < prevSortedNoteQueue.size())
+            int prevSize = prevSortedNoteQueue.size();
+
+            if(prevNotePos_ >= 0 && prevNotePos_ < prevSize)
             {
-                for (uint8_t q = prevNotePos_; q < prevNotePos_ + prevSortedNoteQueue.size(); q++)
+                for (uint8_t q = prevNotePos_; q < prevNotePos_ + prevSize; q++)
                 {
                     bool noteFound = false;
                     uint8_t prevIndex = q % prevSortedNoteQueue.size();
