@@ -713,6 +713,12 @@ void OmxDisp::dispSlots(const char* slotNames[], uint8_t slotCount, uint8_t sele
 
 void OmxDisp::dispKeyboard(int rootNote, int noteNumbers[], bool showLabels, const char* labels[], uint8_t labelCount)
 {
+    if (isMessageActive())
+    {
+        renderMessage();
+        return;
+    }
+
     const uint8_t wkWidth = 7;
     const uint8_t wkInc = 6;
 
@@ -892,6 +898,12 @@ void OmxDisp::dispKeyboard(int rootNote, int noteNumbers[], bool showLabels, con
 
 void OmxDisp::dispChordBasicPage(uint8_t selected, bool encoderSelect, const char* noteName, const char* octaveName, const char* chordType, int8_t balArray[], float velArray[])
 {
+    if (isMessageActive())
+    {
+        renderMessage();
+        return;
+    }
+    
     display.fillRect(0, 0, 128, 32, BLACK);
 
     dispParamLabel(0, 10, 32, 18, selected == 0, 1, encoderSelect, true, noteName, FONT_VALUES, 1, true);
