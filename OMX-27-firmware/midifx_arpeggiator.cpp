@@ -454,6 +454,8 @@ namespace midifx
         if(arpRunning_ || pendingStart_) return;
 
         pendingStart_ = true;
+        sortOrderChanged_ = false;
+        resetNextTrigger_ = false;
 
         pendingStartTime_ = micros();
 
@@ -461,6 +463,10 @@ namespace midifx
         {
             onClockTick();
         }
+
+        notePos_ = 0;
+        prevNotePos_ = 0;
+        nextNotePos_ = 0;
 
         // if(seqConfig.currentFrameMicros - seqConfig.lastClockMicros < 300)
         // {
@@ -779,16 +785,27 @@ namespace midifx
             sendMidi_ = note.sendMidi;
             sendCV_ = note.sendCV;
 
-            if(arpMode_ == ARPMODE_ON || arpMode_ == ARPMODE_ONCE)
-            {
-                resetArpSeq();
-                arpReset = true;
-            }
-            else if(resetMode_ == ARPRESET_NOTE)
-            {
-                resetArpSeq();
-                arpReset = true;
-            }
+            // if(arpMode_ == ARPMODE_ON || arpMode_ == ARPMODE_ONCE)
+            // {
+            //     resetArpSeq();
+            //     arpReset = true;
+            // }
+            // else if(resetMode_ == ARPRESET_NOTE)
+            // {
+            //     resetArpSeq();
+            //     arpReset = true;
+            // }
+
+            // if (arpMode_ != ARPMODE_HOLD)
+            // {
+            //     resetArpSeq();
+            //     // resetNextTrigger_ = true;
+            //     arpReset = true;
+            // }
+
+            resetArpSeq();
+            // resetNextTrigger_ = true;
+            arpReset = true;
 
             holdNoteQueue.clear();
 
@@ -801,53 +818,32 @@ namespace midifx
         {
             if(resetMode_ == ARPRESET_NOTE)
             {
+                // resetNextTrigger_ = true;
                 resetArpSeq();
                 arpReset = true;
             }
         }
-
+        
         insertMidiNoteQueue(note);
         sortNotes();
+
         // generatePattern();
-
-        if(sortedNoteQueue.size() != prevSortedNoteQueue.size())
-        {
-            int prevSize = prevSortedNoteQueue.size();
-
-            if(prevNotePos_ >= 0 && prevNotePos_ < prevSize)
-            {
-                for (uint8_t q = prevNotePos_; q < prevNotePos_ + prevSize; q++)
-                {
-                    bool noteFound = false;
-                    uint8_t prevIndex = q % prevSortedNoteQueue.size();
-                    auto prevNote = prevSortedNoteQueue[prevIndex].noteNumber;
-
-                    for (uint8_t i = 0; i < sortedNoteQueue.size(); i++)
-                    {
-                        if (sortedNoteQueue[i].noteNumber == prevNote)
-                        {
-                            notePos_ = i;
-                            noteFound = true;
-                            break;;
-                        }
-                    }
-                    if(noteFound)
-                    {
-                        break;
-                    }
-                }
-            }
-        }
 
         if(arpReset)
         {
-            prevNotePos_ = notePos_;
+            nextNotePos_ = notePos_;
             prevQLength_ = sortedNoteQueue.size();
         }
 
         if(pendingStop_)
         {
             pendingStop_ = false;
+        }
+
+        if(!arpReset && !pendingStart_)
+        {
+            // sortOrderChanged_ = true;
+            findIndexOfNextNotePos();
         }
     }
 
@@ -862,12 +858,76 @@ namespace midifx
         {
             stopArp();
         }
+        if(hasMidiNotes())
+        {
+            // sortOrderChanged_ = true;
+            findIndexOfNextNotePos();
+        }
     }
 
-    // MidiFXNoteFunction MidiFXChance::getInputFunc()
-    // {
-    //     return &MidiFXChance::noteInput;
-    // }
+    // compares the sortedNoteQueue from prev arp trigger
+    // to the current note queue. 
+    // Looks for the next note in pattern that matches between two
+    // and sets noteIndex_ to the index of that note. 
+    // Idea is to keep arp moving in expected way even when the
+    // held notes change. 
+    void MidiFXArpeggiator::findIndexOfNextNotePos()
+    {
+        int prevSize = prevSortedNoteQueue.size();
+        // int currentSize = sortedNoteQueue.size();
+
+        if(prevSize < 2) return;
+
+        // Look at what should have been the next note,
+        // see if this index exists in new sortedNote vector.
+        // if it does, set the notePos to the index of this.
+        // If not, we keep moving forward to next note after that
+        // and loop around until we find a note that matches
+        int newNotePos = notePos_;
+        int start = (nextNotePos_ + prevSize) % prevSize;
+        int q = start;
+        do
+        {
+            bool noteFound = false;
+            auto prevNote = prevSortedNoteQueue[q].noteNumber;
+
+            for (uint8_t i = 0; i < sortedNoteQueue.size(); i++)
+            {
+                if (sortedNoteQueue[i].noteNumber == prevNote)
+                {
+                    newNotePos = i;
+                    noteFound = true;
+                    q = start;
+                    break;
+                    ;
+                }
+            }
+
+            if (!noteFound)
+            {
+                q = goingUp_ ? (q + 1) : (q - 1);
+                if(q < 0 || q >= prevSize)
+                {
+                    q = start;
+                }
+                // q = (q + prevSize) % prevSize;
+            }
+
+        } while (q != start);
+
+        if(newNotePos == prevNotePos_) return;
+
+        notePos_ = newNotePos;
+
+        // if(goingUp_ && newNotePos >= notePos_)
+        // {
+        //     notePos_ = newNotePos;
+        // }
+        // else if(!goingUp_ && newNotePos <= notePos_)
+        // {
+        //     notePos_ = newNotePos;
+        // }
+    }
 
     // Used with stoping sequencers
     void MidiFXArpeggiator::resync()
@@ -945,7 +1005,7 @@ namespace midifx
         //     patternDirty_ = false;
         // }
 
-        if (pendingStart_ && !sequencer.playing && micros() - pendingStartTime_ >= 10000)
+        if (pendingStart_ && !sequencer.playing && micros() - pendingStartTime_ >= 15000)
         {
             omxUtil.resetClocks();
             nextStepTimeP_ = seqConfig.currentFrameMicros;
@@ -1017,6 +1077,10 @@ namespace midifx
         randPrevNote_ = 255;
 
         goingUp_ = true;
+        resetNextTrigger_ = false;
+
+        prevNotePos_ = 0;
+        nextNotePos_ = 0;
     }
 
     void MidiFXArpeggiator::arpNoteTrigger()
@@ -1027,6 +1091,17 @@ namespace midifx
         }
 
         uint32_t noteon_micros = seqConfig.currentFrameMicros;
+
+        if(resetNextTrigger_)
+        {
+            resetArpSeq();
+        }
+
+        // if (sortOrderChanged_)
+        // {
+        //     findIndexOfNextNotePos();
+        //     sortOrderChanged_ = false;
+        // }
 
         // if (swing_ > 0 && patPos_ % 2 == 0)
         // {
@@ -1055,6 +1130,8 @@ namespace midifx
         int nextNotePos = notePos_;
         int qLength = sortedNoteQueue.size();
 
+        prevNotePos_ = notePos_;
+
         // Attempt to keep position in similar place when number of notes change
         // if(qLength != prevQLength_)
         // {
@@ -1063,7 +1140,7 @@ namespace midifx
         // }
         // Eh, not so good.
 
-        prevNotePos_ = notePos_;
+        // prevNotePos_ = notePos_;
         prevQLength_ = qLength;
 
         switch (arpPattern_)
@@ -1309,14 +1386,13 @@ namespace midifx
         if(!seqReset)
         {
             notePos_ = nextNotePos;
+
+            nextNotePos_ = (notePos_ + qLength) % qLength;
         }
-
-        // playNote(noteon_micros, notePat_[patPos_]);
-
-
-        // patPos_++;
-
-        prevNotePos_ = notePos_;
+        else
+        {
+            nextNotePos_ = notePos_;
+        }
 
         prevSortedNoteQueue.clear();
 
@@ -1324,6 +1400,13 @@ namespace midifx
         {
             prevSortedNoteQueue.push_back(a);
         }
+
+        // playNote(noteon_micros, notePat_[patPos_]);
+
+
+        // patPos_++;
+
+        
     }
 
     int16_t MidiFXArpeggiator::applyModPattern(int16_t noteNumber)

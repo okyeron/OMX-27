@@ -207,7 +207,7 @@ namespace midifx
 
         uint8_t octaveRange_ : 4; // max 7, 0 = 1 octave
 
-        uint8_t gate = 100; // 0 - 200
+        uint8_t gate = 90; // 0 - 200
 
         // int arpSize = sizeof(ArpNote);
 
@@ -284,11 +284,18 @@ namespace midifx
         uint8_t prevArpMode_ : 3;
 
         int8_t prevNotePos_;
+        int8_t nextNotePos_;
         int8_t prevQLength_;
+
+        bool resetNextTrigger_;
+        bool sortOrderChanged_;
+
 
 
         bool insertMidiNoteQueue(MidiNoteGroup note);
         bool removeMidiNoteQueue(MidiNoteGroup note);
+
+        void findIndexOfNextNotePos();
 
         void sortNotes();
         // void generatePattern();
