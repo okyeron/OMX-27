@@ -266,9 +266,9 @@ MidiNoteGroup OmxUtil::midiNoteOff2(int notenum, int channel)
 
     if (adjnote >= 0 && adjnote < 128)
     {
-        MM::sendNoteOff(adjnote, 0, adjchan);
+        // MM::sendNoteOff(adjnote, 0, adjchan);
         // CV off
-        cvNoteOff();
+        // cvNoteOff();
         midiSettings.midiKeyState[notenum] = -1;
 
         noteGroup.noteNumber = adjnote;

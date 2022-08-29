@@ -1,6 +1,21 @@
 # Change log
 
 ```
+### 1.12.13 alpha
+### EEPROM VERSION 26
+*** Warning!!!: This will clear your global save state if EEPROM version is different from your firmware***
+- Overlapping chord notes will not send note offs until both chords are released. 
+- 
+- Arp Improvements
+- - Improves pattern playback while changing the held keys. 
+- - Default mode will work like Ableton or Matriarch arps. 
+- - Example, hold down CEGB, release G in second octave, will stay in second octave and play CEB. 
+- - If holding CEGB, and it plays C-E-G, then add an F, it will account for this and play B next
+- - Previously, the note index of held notes would not change in this scenario. 
+- - So if you're at index 3 of CEGB, and it changes to CEFGB, the index would not be advance, and pattern would go back to F
+```
+
+```
 ### 1.12.11 alpha
 ### EEPROM VERSION 26
 *** Warning!!!: This will clear your global save state if EEPROM version is different from your firmware***

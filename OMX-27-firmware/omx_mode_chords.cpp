@@ -408,6 +408,7 @@ void OmxModeChords::onModeDeactivated()
 {
     sequencer.playing = false;
     stopSequencers();
+    allNotesOff();
 
     for(uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
     {
@@ -578,6 +579,11 @@ void OmxModeChords::loopUpdate(Micros elapsedTime)
     }
 }
 
+void OmxModeChords::allNotesOff()
+{
+    omxUtil.allOff();
+}
+
 void OmxModeChords::updateFuncKeyMode()
 {
     auto keyState = midiSettings.keyState;
@@ -732,7 +738,8 @@ void OmxModeChords::onEncoderChangedEditParam(Encoder::Update *enc, uint8_t sele
         uiMode_ = constrain(uiMode_ + amtSlow, 0, 1);
         if(amtSlow != 0)
         {
-            omxUtil.allOff();
+            allNotesOff();
+            // omxUtil.allOff();
         }
     }
     break;
@@ -1215,19 +1222,19 @@ void OmxModeChords::onKeyUpdate(OMXKeypadEvent e)
                         setSelPageAndParam(CHRDPAGE_2, 0);
                         encoderSelect_ = true;
                         omxDisp.displayMessage("Edit");
-                        omxUtil.allOff();
+                        allNotesOff();
                     }
                     else if (thisKey == 5)
                     {
                         mode_ = CHRDMODE_PRESET;
                         omxDisp.displayMessage("Preset");
-                        omxUtil.allOff();
+                        allNotesOff();
                     }
                     else if (thisKey == 6)
                     {
                         mode_ = CHRDMODE_MANSTRUM;
                         omxDisp.displayMessage("Manual Strum");
-                        omxUtil.allOff();
+                        allNotesOff();
                     }
                     if (thisKey >= 11)
                     {
@@ -1550,7 +1557,7 @@ void OmxModeChords::enterChordEditMode()
 {
     constructChord(selectedChord_);
 
-    omxUtil.allOff();
+    allNotesOff();
 
     chordEditMode_ = true;
     chordEditParam_ = 0;
@@ -1777,6 +1784,33 @@ void OmxModeChords::doNoteOn(int noteNumber, uint8_t midifx, uint8_t velocity, u
 {
     if(noteNumber < 0 || noteNumber > 127) return;
 
+    bool trackerFound = false;
+
+    for(uint8_t i = 0; i < noteOffTracker.size(); i++)
+    {
+        if(noteOffTracker[i].noteNumber == noteNumber && noteOffTracker[i].midiChannel == midiChannel - 1)
+        {
+            // Serial.println("Tracker found " + String(noteNumber));
+            noteOffTracker[i].triggerCount = noteOffTracker[i].triggerCount + 1;
+            // Serial.println("triggerCount: " + String(noteOffTracker[i].triggerCount));
+            trackerFound = true;
+            break;
+        }
+    }
+
+    if(!trackerFound && noteOffTracker.size() == kMaxNoteTrackerSize) return; // Too many notes
+
+    if(!trackerFound)
+    {
+        // Serial.println("Tracker not found ");
+        NoteTracker tracker;
+        tracker.noteNumber = noteNumber;
+        tracker.midiChannel = midiChannel - 1;
+        tracker.triggerCount = 1;
+        noteOffTracker.push_back(tracker);
+        trackerFound = true;
+    }
+
     // MidiNoteGroup noteGroup = omxUtil.midiNoteOn2(musicScale, keyIndex, midiSettings.defaultVelocity, sysSettings.midiChannel);
     // if(noteGroup.noteNumber == 255) return;
 
@@ -1809,6 +1843,51 @@ void OmxModeChords::doNoteOn(int noteNumber, uint8_t midifx, uint8_t velocity, u
 void OmxModeChords::doNoteOff(int noteNumber, uint8_t midifx, uint8_t midiChannel)
 {
     if(noteNumber < 0 || noteNumber > 127) return;
+
+    bool trackerFound = false;
+    bool doNoteOff = false;
+
+    for(uint8_t i = 0; i < noteOffTracker.size(); i++)
+    {
+        if(noteOffTracker[i].noteNumber == noteNumber && noteOffTracker[i].midiChannel == midiChannel - 1)
+        {
+            // Serial.println("Tracker found " + String(noteNumber));
+            // Serial.println("triggerCount " + String(noteOffTracker[i].triggerCount));
+
+            noteOffTracker[i].triggerCount = noteOffTracker[i].triggerCount - 1;
+            if(noteOffTracker[i].triggerCount <= 0) 
+            {
+                // Serial.println("Do Note Off");
+                doNoteOff = true;
+            }
+            trackerFound = true;
+
+            // Serial.println("triggerCount " + String(noteOffTracker[i].triggerCount));
+            break;
+        }
+    }
+
+    if (doNoteOff)
+    {
+        auto it = noteOffTracker.begin();
+        while (it != noteOffTracker.end())
+        {
+            // remove matching note numbers
+            if (it->triggerCount <= 0)
+            {
+                // Serial.println("Erasing");
+                it = noteOffTracker.erase(it);
+            }
+            else
+            {
+                ++it;
+            }
+        }
+    }
+
+    if(!trackerFound || !doNoteOff) return; // No note off tracker found. 
+
+    // Serial.println("Doing Note Off");
 
     // MidiNoteGroup noteGroup = omxUtil.midiNoteOff2(keyIndex, sysSettings.midiChannel);
 
@@ -1846,38 +1925,64 @@ void OmxModeChords::doNoteOff(int noteNumber, uint8_t midifx, uint8_t midiChanne
 void OmxModeChords::splitNoteOn(uint8_t keyIndex)
 {
     MidiNoteGroup noteGroup = omxUtil.midiNoteOn2(musicScale_, keyIndex, midiSettings.defaultVelocity, sysSettings.midiChannel);
+    doNoteOn(noteGroup.noteNumber, mfxIndex_, noteGroup.velocity, noteGroup.channel);
 
-    if(noteGroup.noteNumber == 255) return;
+    // if(noteGroup.noteNumber > 127) return;
 
-    noteGroup.unknownLength = true;
-    noteGroup.prevNoteNumber = noteGroup.noteNumber;
+    // bool trackerFound = false;
 
-    if (mfxIndex_ < NUM_MIDIFX_GROUPS)
-    {
-        subModeMidiFx[mfxIndex_].noteInput(noteGroup);
-    }
-    else
-    {
-        onNotePostFX(noteGroup);
-    }
+    // for(uint8_t i = 0; i < noteOffTracker.size(); i++)
+    // {
+    //     if(noteOffTracker[i].noteNumber == noteGroup.noteNumber && noteOffTracker[i].midiChannel == noteGroup.channel - 1)
+    //     {
+    //         noteOffTracker[i].triggerCount++;
+    //         trackerFound = true;
+    //         break;
+    //     }
+    // }
+
+    // if(!trackerFound && noteOffTracker.size() == kMaxNoteTrackerSize) return; // Too many notes
+
+    // if(!trackerFound)
+    // {
+    //     NoteTracker tracker;
+    //     tracker.noteNumber = noteGroup.noteNumber;
+    //     tracker.midiChannel = noteGroup.channel - 1;
+    //     tracker.triggerCount = 1;
+    //     noteOffTracker.push_back(tracker);
+    //     trackerFound = true;
+    // }
+
+    // noteGroup.unknownLength = true;
+    // noteGroup.prevNoteNumber = noteGroup.noteNumber;
+
+    // if (mfxIndex_ < NUM_MIDIFX_GROUPS)
+    // {
+    //     subModeMidiFx[mfxIndex_].noteInput(noteGroup);
+    // }
+    // else
+    // {
+    //     onNotePostFX(noteGroup);
+    // }
 }
 void OmxModeChords::splitNoteOff(uint8_t keyIndex)
 {
     MidiNoteGroup noteGroup = omxUtil.midiNoteOff2(keyIndex, sysSettings.midiChannel);
+    doNoteOff(noteGroup.noteNumber, mfxIndex_, noteGroup.channel);
 
-    if(noteGroup.noteNumber == 255) return;
+    // if(noteGroup.noteNumber > 127) return;
 
-    noteGroup.unknownLength = true;
-    noteGroup.prevNoteNumber = noteGroup.noteNumber;
+    // noteGroup.unknownLength = true;
+    // noteGroup.prevNoteNumber = noteGroup.noteNumber;
 
-    if (mfxIndex_ < NUM_MIDIFX_GROUPS)
-    {
-        subModeMidiFx[mfxIndex_].noteInput(noteGroup);
-    }
-    else
-    {
-        onNotePostFX(noteGroup);
-    }
+    // if (mfxIndex_ < NUM_MIDIFX_GROUPS)
+    // {
+    //     subModeMidiFx[mfxIndex_].noteInput(noteGroup);
+    // }
+    // else
+    // {
+    //     onNotePostFX(noteGroup);
+    // }
 }
 
 void OmxModeChords::onNotePostFX(MidiNoteGroup note)

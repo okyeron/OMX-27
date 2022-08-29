@@ -220,6 +220,13 @@ public:
     int saveToDisk(int startingAddress, Storage *storage);
     int loadFromDisk(int startingAddress, Storage *storage);
 private:
+    struct NoteTracker
+    {
+        int8_t triggerCount;
+        uint8_t noteNumber : 7;
+        uint8_t midiChannel : 4;
+    };
+
     // If true, encoder selects param rather than modifies value
     bool auxDown_ = false;
     bool encoderSelect_ = false;
@@ -283,12 +290,17 @@ private:
 
     int noNotes[6] = {-1,-1,-1,-1,-1,-1};
 
+    const uint8_t kMaxNoteTrackerSize = 32;
+
+    std::vector<NoteTracker> noteOffTracker;
+
 
     // int chordSize = sizeof(chords_);
 
     ParamManager* getParams();
     void setSelPageAndParam(int8_t newPage, int8_t newParam);
 
+    void allNotesOff();
     void updateFuncKeyMode();
     void onEncoderChangedEditParam(Encoder::Update* enc, uint8_t selectedParmIndex, uint8_t targetParamIndex, uint8_t paramType);
     void onEncoderChangedManStrum(Encoder::Update enc);
