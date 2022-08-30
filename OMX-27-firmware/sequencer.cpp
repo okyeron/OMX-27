@@ -680,14 +680,16 @@ void seqReset() {
 				sequencer.lastSeqPos[k] = sequencer.seqPos[k];
 			}
 		}
-		MM::stopClock();
-		MM::startClock();
+		omxUtil.stopClocks();
+		omxUtil.startClocks();
+		// MM::stopClock();
+		// MM::startClock();
 		sequencer.seqResetFlag = false;
 	}
 }
 
 void seqStart() {
-	sequencer.playing = 1;
+	sequencer.playing = true;
 
 	for (int x=0; x<NUM_SEQ_PATTERNS; x++){
 		sequencer.timePerPattern[x].nextStepTimeP = micros();
@@ -695,7 +697,8 @@ void seqStart() {
 	}
 
 	if (!sequencer.seqResetFlag) {
-		MM::continueClock();
+		omxUtil.resumeClocks();
+		// MM::continueClock();
 //	} else if (seqPos[sequencer.playingPattern]==0) {
 //		MM::startClock();
 	}
@@ -703,13 +706,14 @@ void seqStart() {
 
 void seqStop() {
 	sequencer.ticks = 0;
-	sequencer.playing = 0;
-	MM::stopClock();
+	sequencer.playing = false;
+	omxUtil.stopClocks();
+	// MM::stopClock();
 	allNotesOff();
 }
 
 void seqContinue() {
-	sequencer.playing = 1;
+	sequencer.playing = true;
 }
 
 int getPatternPage(int position){

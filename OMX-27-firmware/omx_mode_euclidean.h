@@ -79,6 +79,8 @@ private:
 
     bool initSetup = false;
 
+    bool isPlaying_ = false;
+
     String tempString;
 
     static const uint8_t kNumPages = 4;

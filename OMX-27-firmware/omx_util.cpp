@@ -23,24 +23,30 @@ void OmxUtil::sendPots(int val, int channel)
 
 void OmxUtil::advanceClock(OmxModeInterface* activeOmxMode, Micros advance)
 {
-	static Micros timeToNextClock = 0;
-	while (advance >= timeToNextClock)
-	{
-		advance -= timeToNextClock;
+    activeOmxMode_ = activeOmxMode;
 
-		MM::sendClock();
+    signed long long adv = advance;
+
+	while (adv >= timeToNextClock)
+	{
+		adv -= timeToNextClock;
+
+        if(sendClocks_)
+        {
+		    MM::sendClock();
+        }
 
         seqConfig.currentFrameMicros = micros();
         seqConfig.lastClockMicros = micros();
 
-        if (activeOmxMode != nullptr)
+        if (activeOmxMode_ != nullptr)
         {
-            activeOmxMode->onClockTick();
+            activeOmxMode_->onClockTick();
         }
 
         timeToNextClock = clockConfig.ppqInterval * (PPQ / 24);
 	}
-	timeToNextClock -= advance;
+	timeToNextClock = timeToNextClock - adv;
 }
 
 void OmxUtil::advanceSteps(Micros advance)
@@ -81,6 +87,37 @@ void OmxUtil::resetClocks()
 
 	// 16th note step length in milliseconds
 	clockConfig.step_delay = clockConfig.step_micros * 0.001; // ppqInterval * 0.006; // 60000 / clockbpm / 4;
+}
+
+void OmxUtil::restartClocks()
+{
+    resetClocks();
+    timeToNextClock = 0;
+    seqConfig.currentFrameMicros = micros();
+    seqConfig.lastClockMicros = seqConfig.currentFrameMicros;
+}
+
+void OmxUtil::startClocks()
+{
+    sendClocks_ = true;
+    MM::startClock();
+}
+
+void OmxUtil::resumeClocks()
+{
+    sendClocks_ = true;
+    MM::continueClock();
+}
+
+void OmxUtil::stopClocks()
+{
+    sendClocks_ = false;
+	MM::stopClock();
+}
+
+bool OmxUtil::areClocksRunning()
+{
+    return sendClocks_;
 }
 
 void OmxUtil::cvNoteOn(int notenum)

@@ -7,7 +7,7 @@
 #include "MM.h"
 #include "music_scales.h"
 #include "noteoffs.h"
-#include "sequencer.h"
+// #include "sequencer.h"
 
 // const int kSelMidiFXOffColor = SALMON;
 // const int kMidiFXOffColor = RED;
@@ -45,7 +45,7 @@ void OmxModeMidiKeyboard::onModeActivated()
         InitSetup();
     }
 
-    sequencer.playing = false;
+    // sequencer.playing = false;
     stopSequencers();
 
     omxLeds.setDirty();
@@ -68,7 +68,7 @@ void OmxModeMidiKeyboard::onModeActivated()
 
 void OmxModeMidiKeyboard::onModeDeactivated()
 {
-    sequencer.playing = false;
+    // sequencer.playing = false;
     stopSequencers();
 
     for(uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
@@ -80,7 +80,8 @@ void OmxModeMidiKeyboard::onModeDeactivated()
 
 void OmxModeMidiKeyboard::stopSequencers()
 {
-	MM::stopClock();
+    omxUtil.stopClocks();
+	// MM::stopClock();
     pendingNoteOffs.allOff();
 }
 
@@ -174,20 +175,24 @@ void OmxModeMidiKeyboard::onClockTick() {
 
 void OmxModeMidiKeyboard::loopUpdate(Micros elapsedTime)
 {
-    if (elapsedTime > 0)
-	{
-		if (!sequencer.playing)
-		{
-            // Needed to make pendingNoteOns/pendingNoteOffs work
-			omxUtil.advanceSteps(elapsedTime);
-		}
-	}
+
+    // if (elapsedTime > 0)
+	// {
+	// 	if (!sequencer.playing)
+	// 	{
+    //         // Needed to make pendingNoteOns/pendingNoteOffs work
+	// 		omxUtil.advanceSteps(elapsedTime);
+	// 	}
+	// }
 
     for(uint8_t i = 0; i < 5; i++)
     {
         // Lets them do things in background
         subModeMidiFx[i].loopUpdate();
     }
+
+    // Can be modified by scale MidiFX
+    musicScale->calculateScaleIfModified(scaleConfig.scaleRoot, scaleConfig.scalePattern);
 
     // if (isSubmodeEnabled())
     // {

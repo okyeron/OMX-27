@@ -167,8 +167,17 @@ const char *noteNamesNoFormat[] = {
     "B",
 };
 
+void MusicScales::calculateScaleIfModified(uint8_t scaleRoot, uint8_t scalePattern)
+{
+    if(scaleRoot == rootNote && scalePattern == scaleIndex) return;
+
+    calculateScale(scaleRoot, scalePattern);
+}
+
 void MusicScales::calculateScale(uint8_t scaleRoot, uint8_t scalePattern)
 {
+    
+
     rootNote = scaleRoot;
     scaleIndex = scalePattern;
     auto pattern = getScalePattern(scalePattern);

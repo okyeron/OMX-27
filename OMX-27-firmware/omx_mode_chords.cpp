@@ -4,7 +4,7 @@
 #include "omx_util.h"
 #include "omx_disp.h"
 #include "omx_leds.h"
-#include "sequencer.h"
+// #include "sequencer.h"
 #include "MM.h"
 #include "noteoffs.h"
 
@@ -385,7 +385,7 @@ void OmxModeChords::onModeActivated()
     scaleConfig.lockScale = false;
     scaleConfig.group16 = false;
 
-    sequencer.playing = false;
+    // sequencer.playing = false;
     stopSequencers();
 
     omxLeds.setDirty();
@@ -406,7 +406,7 @@ void OmxModeChords::onModeActivated()
 
 void OmxModeChords::onModeDeactivated()
 {
-    sequencer.playing = false;
+    // sequencer.playing = false;
     stopSequencers();
     allNotesOff();
 
@@ -422,7 +422,8 @@ void OmxModeChords::onModeDeactivated()
 
 void OmxModeChords::stopSequencers()
 {
-	MM::stopClock();
+    omxUtil.stopClocks();
+	// MM::stopClock();
     pendingNoteOffs.allOff();
 }
 
@@ -563,20 +564,23 @@ void OmxModeChords::loopUpdate(Micros elapsedTime)
 {
     updateFuncKeyMode();
 
-    if (elapsedTime > 0)
-	{
-		if (!sequencer.playing)
-		{
-            // Needed to make pendingNoteOns/pendingNoteOffs work
-			omxUtil.advanceSteps(elapsedTime);
-		}
-	}
+    // if (elapsedTime > 0)
+	// {
+	// 	if (!sequencer.playing)
+	// 	{
+    //         // Needed to make pendingNoteOns/pendingNoteOffs work
+	// 		omxUtil.advanceSteps(elapsedTime);
+	// 	}
+	// }
 
     for(uint8_t i = 0; i < 5; i++)
     {
         // Lets them do things in background
         subModeMidiFx[i].loopUpdate();
     }
+
+    // Can be modified by scale MidiFX
+    musicScale_->calculateScaleIfModified(scaleConfig.scaleRoot, scaleConfig.scalePattern);
 }
 
 void OmxModeChords::allNotesOff()

@@ -3,7 +3,7 @@
 #include "omx_util.h"
 #include "omx_disp.h"
 #include "omx_leds.h"
-#include "sequencer.h"
+// #include "sequencer.h"
 #include "euclidean_sequencer.h"
 // #include "ClearUI.h"
 #include "noteoffs.h"
@@ -104,8 +104,10 @@ void OmxModeEuclidean::onModeActivated()
         InitSetup();
     }
 
-    sequencer.playing = false;
-    stopSequencers();
+    isPlaying_ = false;
+
+    // sequencer.playing = false;
+    // stopSequencers();
     aux_ = false;
     f1_ = false;
     f2_ = false;
@@ -133,7 +135,8 @@ void OmxModeEuclidean::onModeActivated()
 
 void OmxModeEuclidean::onModeDeactivated()
 {
-    sequencer.playing = false;
+    isPlaying_ = false;
+    // sequencer.playing = false;
     stopSequencers();
 
     for(uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
@@ -156,18 +159,34 @@ void OmxModeEuclidean::selectMidiFx(uint8_t mfxIndex)
 
 void OmxModeEuclidean::startSequencers()
 {
-    pendingStart_ = true;
-    
+    // pendingStart_ = true;
+    isPlaying_ = true;
+    omxUtil.startClocks();
+
+    for (u_int8_t i = 0; i < kNumEuclids; i++)
+    {
+        euclids[i].start();
+    }
+
+    for (uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
+    {
+        subModeMidiFx[i].setSelected(true);
+    }
+    // MM::startClock();
+
+    pendingStart_ = false;
 }
 void OmxModeEuclidean::stopSequencers()
 {
+    isPlaying_ = false;
     pendingStart_ = false;
 
     for (u_int8_t i = 0; i < kNumEuclids; i++)
     {
         euclids[i].stop();
     }
-	MM::stopClock();
+    omxUtil.stopClocks();
+	// MM::stopClock();
     pendingNoteOffs.allOff();
 
     for(uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
@@ -178,21 +197,21 @@ void OmxModeEuclidean::stopSequencers()
 
 void OmxModeEuclidean::onClockTick()
 {
-    if (pendingStart_)
-    {
-        for (u_int8_t i = 0; i < kNumEuclids; i++)
-        {
-            euclids[i].start();
-        }
+    // if (pendingStart_)
+    // {
+    //     for (u_int8_t i = 0; i < kNumEuclids; i++)
+    //     {
+    //         euclids[i].start();
+    //     }
 
-        for (uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
-        {
-            subModeMidiFx[i].setSelected(true);
-        }
-        MM::startClock();
+    //     for (uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
+    //     {
+    //         subModeMidiFx[i].setSelected(true);
+    //     }
+    //     MM::startClock();
 
-        pendingStart_ = false;
-    }
+    //     pendingStart_ = false;
+    // }
 
 
     for(uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
@@ -812,17 +831,17 @@ void OmxModeEuclidean::onKeyUpdate(OMXKeypadEvent e)
         if (e.down() && thisKey == 0) // Aux key down
         {
             // Sequencer shouldn't be a dependancy here but current is used to advance clocks. 
-            if (sequencer.playing && aux_)
+            if (isPlaying_ && aux_)
             {
                 aux_ = false;
                 stopSequencers();
-                sequencer.playing = false;
+                // sequencer.playing = false;
             }
             else
             {
                 aux_ = true;
                 startSequencers();
-                sequencer.playing = true;
+                // sequencer.playing = true;
             }
         }
         // else if (e.down() && e.clicks() == 0 && (thisKey > 2 && thisKey < 11))
@@ -970,7 +989,7 @@ void OmxModeEuclidean::updateLEDs()
         strip.setPixelColor(i, LEDOFF);
     }
 
-    if (sequencer.playing)
+    if (isPlaying_)
     {
         // Blink left/right keys for octave select indicators.
         auto color1 = blinkState ? LIME : LEDOFF;
@@ -1143,6 +1162,7 @@ void OmxModeEuclidean::onNoteTriggered(uint8_t euclidIndex, MidiNoteGroup note)
     subModeMidiFx[mfxIndex].noteInput(note);
 
     omxDisp.setDirty();
+    omxLeds.setDirty();
 }
 
 // Called by the midiFX group when a note exits it's FX Pedalboard
@@ -1267,11 +1287,10 @@ void OmxModeEuclidean::onDisplayUpdate()
             auto params = getSelectedParamMode();
             if (params->getSelPage() == SELEUCLID_PAT)
             {
-
-                if (sequencer.playing)
-                {
-                    omxDisp.setDirty();
-                }
+                // if (isPlaying_)
+                // {
+                //     omxDisp.setDirty();
+                // }
 
                 // for (uint8_t i = 0; i < 4; i++)
                 // {

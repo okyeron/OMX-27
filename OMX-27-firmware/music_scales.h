@@ -10,6 +10,7 @@ public:
     // const char* noteNames[];
     // const int scalePatterns[][7];
 
+    void calculateScaleIfModified(uint8_t scaleRoot, uint8_t scalePattern);
     void calculateScale(uint8_t scaleRoot, uint8_t scalePattern);
     static uint8_t getNumScales();
     // int scaleLength;

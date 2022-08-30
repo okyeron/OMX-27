@@ -174,6 +174,7 @@ namespace midifx
             uint8_t swing : 7;       // max 100
             uint8_t rateIndex : 4;   // max 15
             uint8_t octaveRange : 4; // max 7, 0 = 1 octave
+            int8_t octDistance_ : 6; // -24 to 24
             uint8_t gate : 7;       // 0 - 200
 
             uint8_t modPatternLength : 4; // Max 15
@@ -206,6 +207,8 @@ namespace midifx
         uint8_t rateIndex_ : 4; // max 15
 
         uint8_t octaveRange_ : 4; // max 7, 0 = 1 octave
+        int8_t octDistance_ : 6; // -24 to 24
+
 
         uint8_t gate = 90; // 0 - 200
 
@@ -269,6 +272,8 @@ namespace midifx
         Micros lastStepTimeP_ = 32;
         uint32_t stepMicroDelta_ = 0;
 
+        
+
         float multiplier_ = 1;
 
         String tempString_;
@@ -278,7 +283,6 @@ namespace midifx
         String headerMessage_;
 
         int messageTextTimer = 0;
-
 
         // Used for toggling arp
         uint8_t prevArpMode_ : 3;
@@ -306,7 +310,9 @@ namespace midifx
         void arpNoteOff(MidiNoteGroup note);
 
         void startArp();
+        void doPendingStart();
         void stopArp();
+        void doPendingStop();
         void resetArpSeq();
 
         void arpNoteTrigger();

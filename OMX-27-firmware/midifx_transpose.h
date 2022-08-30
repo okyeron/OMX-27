@@ -5,11 +5,11 @@
 namespace midifx
 {
 
-    class MidiFXScaler : public MidiFXInterface
+    class MidiFXTranspose : public MidiFXInterface
     {
     public:
-        MidiFXScaler();
-        ~MidiFXScaler() {}
+        MidiFXTranspose();
+        ~MidiFXTranspose() {}
 
         int getFXType() override;
         const char* getName() override;
@@ -32,21 +32,16 @@ namespace midifx
         void onDisabled() override;
 
         void onEncoderChangedEditParam(Encoder::Update enc) override;
-
     private:
-        // std::vector<MidiNoteGroup> triggeredNotes; 
+        struct TransposeSave
+        {
+            int8_t transpose : 6;
+            int8_t octave : 4;
+        };
+
+        int8_t transpose_ : 6;
+        int8_t octave_ : 4;
 
         uint8_t chancePerc_ = 100;
-
-        bool useGlobalScale_ = true;
-
-        int8_t rootNote_ = 0;
-        int8_t scaleIndex_ = 0;
-
-        int8_t scaleRemapper[12];
-
-        void calculateRemap();
-
-        // MidiNoteGroup findTriggeredNote(uint8_t noteNumber);
     };
 }

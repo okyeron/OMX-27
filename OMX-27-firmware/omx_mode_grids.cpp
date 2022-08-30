@@ -3,7 +3,7 @@
 #include "omx_util.h"
 #include "omx_disp.h"
 #include "omx_leds.h"
-#include "sequencer.h"
+// #include "sequencer.h"
 #include "noteoffs.h"
 
 using namespace grids;
@@ -47,7 +47,8 @@ void OmxModeGrids::onModeActivated()
         InitSetup();
     }
 
-    sequencer.playing = false;
+    isPlaying_ = false;
+    // sequencer.playing = false;
     grids_.stop();
     grids_.loadSnapShot(grids_.playingPattern);
     for(uint8_t i = 0; i < NUM_CC_POTS; i++)
@@ -58,6 +59,11 @@ void OmxModeGrids::onModeActivated()
 
     params.setSelPageAndParam(0,0);
     encoderSelect = true;
+}
+
+void OmxModeGrids::onModeDeactivated()
+{
+    stopPlayback();
 }
 
 void OmxModeGrids::onClockTick() {
@@ -511,14 +517,19 @@ void OmxModeGrids::startPlayback()
 {
     gridsAUX = true;
     grids_.start();
-    sequencer.playing = true;
+    omxUtil.resetClocks();
+    omxUtil.startClocks();
+    // sequencer.playing = true;
+    isPlaying_ = true;
 }
 void OmxModeGrids::stopPlayback()
 {
     gridsAUX = false;
     grids_.stop();
-    sequencer.playing = false;
+    omxUtil.stopClocks();
+    // sequencer.playing = false;
     pendingNoteOffs.allOff();
+    isPlaying_ = false;
 }
 
 // Called by a grids sequencer when it triggers a note
@@ -591,7 +602,7 @@ void OmxModeGrids::onKeyUpdate(OMXKeypadEvent e)
         if (e.down() && thisKey == 0) // Aux key down
         {
             // Sequencer shouldn't be a dependancy here but current is used to advance clocks. 
-            if (sequencer.playing && gridsAUX)
+            if (isPlaying_ && gridsAUX)
             {
                 stopPlayback();
             }
@@ -899,7 +910,7 @@ void OmxModeGrids::updateLEDs()
         // auto color1 = blinkState ? instLockColor : LEDOFF;
         // strip.setPixelColor(0, color1);
 
-        if (sequencer.playing)
+        if (isPlaying_)
         {
             // Blink left/right keys for octave select indicators.
             auto color1 = blinkState ? instLockColor : LEDOFF;
@@ -912,7 +923,7 @@ void OmxModeGrids::updateLEDs()
     }
     else
     {
-        if (sequencer.playing)
+        if (isPlaying_)
         {
             // Blink left/right keys for octave select indicators.
             auto color1 = blinkState ? LIME : LEDOFF;
@@ -1040,7 +1051,7 @@ void OmxModeGrids::updateLEDsChannelView()
 
     int seqPos = 0;
 
-    if (sequencer.playing)
+    if (isPlaying_)
     {
         seqPos = grids_.getSeqPos();
     }
@@ -1114,7 +1125,7 @@ void OmxModeGrids::updateLEDsChannelView()
             strip.setPixelColor(k + 11, kColor);
         }
 
-        if(sequencer.playing)
+        if(isPlaying_)
         {
             auto seq16 = seqPos % 16;
             strip.setPixelColor(seq16 + 11, HALFWHITE);

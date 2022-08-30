@@ -17,6 +17,7 @@ public:
     void InitSetup() override;
 
     void onModeActivated() override;
+    void onModeDeactivated() override;
 
     void onClockTick() override;
 
@@ -102,6 +103,7 @@ private:
     // Implements threshold post load to prevent pots from changing until modified
     bool potPostLoadThresh[5] = {false,false,false,false, false};
 
+    bool isPlaying_ = false;
 
     bool gridsAUX = false;
 

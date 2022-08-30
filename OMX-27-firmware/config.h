@@ -13,10 +13,10 @@
 // #include <cstdarg>
 
 /* * firmware metadata  */
-// OMX_VERSION = 1.12.12
+// OMX_VERSION = 1.12.14
 const int MAJOR_VERSION = 1;
 const int MINOR_VERSION = 12;
-const int POINT_VERSION = 12;
+const int POINT_VERSION = 14;
 
 const int DEVICE_ID     = 2;
 
@@ -37,6 +37,7 @@ enum MIDIFXTYPE
 {
 	MIDIFX_NONE,
 	MIDIFX_CHANCE,
+	MIDIFX_TRANSPOSE,
 	MIDIFX_RANDOMIZER,
 	MIDIFX_HARMONIZER,
 	MIDIFX_SCALER,
@@ -205,6 +206,8 @@ struct SequencerConfig {
 
 	uint32_t currentFrameMicros;
 	uint32_t lastClockMicros;
+
+	int numOfActiveArps = 0;
 
 
     // bool noteSelect = false;

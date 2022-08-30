@@ -1,6 +1,26 @@
 # Change log
 
 ```
+### 1.12.14 alpha
+### EEPROM VERSION 27
+*** Warning!!!: This will clear your global save state if EEPROM version is different from your firmware***
+-
+- Adds Transpose MidiFX
+-
+- Adds octave distance param to arp. Determines how many semitones range should consider an octave. 
+- - Set to -12 to make the arp go fully downward. 
+- - Try using a small amount like +3 semitones combined with a scaler MidiFX after arp
+-
+- Scaler MidiFX now defaults to using the global scale. If Global Scale is enabled, changing the root and scale in params
+- - changes the global ones. 
+- - Set Global Scale to false to force to a different scale. 
+-
+- Arps will now send clock when started and stop clock once stopped. 
+- - If multiple arps are active, clock will be started with first arp and stopped with last arp. 
+- - Multiple arps will be synced to each other. 
+```
+
+```
 ### 1.12.13 alpha
 ### EEPROM VERSION 26
 *** Warning!!!: This will clear your global save state if EEPROM version is different from your firmware***

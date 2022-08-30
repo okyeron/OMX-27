@@ -7,6 +7,7 @@
 #include "midifx_scaler.h"
 #include "midifx_monophonic.h"
 #include "midifx_harmonizer.h"
+#include "midifx_transpose.h"
 // #include "midifx_arpeggiator.h"
 
 using namespace midifx;
@@ -81,6 +82,7 @@ midifx::MidiFXArpeggiator *SubModeMidiFxGroup::getArp(bool autoCreate)
         auto mfx = getMidiFX(i);
         if (mfx != nullptr)
         {
+            mfx->setSelected(selected_);
             if(mfx->getFXType() == MIDIFX_ARP)
             {
                 return static_cast<midifx::MidiFXArpeggiator*>(mfx);
@@ -811,6 +813,16 @@ void SubModeMidiFxGroup::changeMidiFXType(uint8_t slotIndex, uint8_t typeIndex, 
 
     switch (typeIndex)
     {
+    case MIDIFX_CHANCE:
+    {
+        setMidiFX(slotIndex, new MidiFXChance());
+    }
+    break;
+    case MIDIFX_TRANSPOSE:
+    {
+        setMidiFX(slotIndex, new MidiFXTranspose());
+    }
+    break;
     case MIDIFX_RANDOMIZER:
     {
         setMidiFX(slotIndex, new MidiFXRandomizer());
@@ -819,11 +831,6 @@ void SubModeMidiFxGroup::changeMidiFXType(uint8_t slotIndex, uint8_t typeIndex, 
     case MIDIFX_HARMONIZER:
     {
         setMidiFX(slotIndex, new MidiFXHarmonizer());
-    }
-    break;
-    case MIDIFX_CHANCE:
-    {
-        setMidiFX(slotIndex, new MidiFXChance());
     }
     break;
     case MIDIFX_SCALER:
@@ -845,14 +852,14 @@ void SubModeMidiFxGroup::changeMidiFXType(uint8_t slotIndex, uint8_t typeIndex, 
         break;
     }
 
+    auto mfx = getMidiFX(slotIndex);
+    if (mfx != nullptr)
+    {
+        mfx->setSelected(selected_);
+    }
+
     if (!fromLoad)
     {
-        auto mfx = getMidiFX(slotIndex);
-        if(mfx != nullptr)
-        {
-            mfx->setSelected(true);
-        }
-
         displayMidiFXName(slotIndex);
     }
 

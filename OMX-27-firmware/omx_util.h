@@ -6,7 +6,9 @@
 class OmxUtil
 {
 public:
-    OmxUtil() {}
+    OmxUtil() 
+    {
+    }
 
     void setup();
 
@@ -17,6 +19,13 @@ public:
     void advanceSteps(Micros advance);
     void setGlobalSwing(int swng_amt);
     void resetClocks();
+    void restartClocks();
+
+    void startClocks();
+    void resumeClocks();
+    void stopClocks();
+
+    bool areClocksRunning();
 
     // #### Outbound CV note on/off
     void cvNoteOn(int notenum);
@@ -37,6 +46,12 @@ private:
     // int potValues[5] = {0,0,0,0,0};
     // int potCC = pots[potbank][0];
     // int potVal = analogValues[0];
+
+    // signed to avoid rollover
+    signed long long timeToNextClock = 0;
+
+    bool sendClocks_ = false;
+    OmxModeInterface* activeOmxMode_;
 };
 
 extern OmxUtil omxUtil;

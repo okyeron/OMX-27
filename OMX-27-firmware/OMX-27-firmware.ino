@@ -1,6 +1,6 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
 
-// v1.12.12alpha
+// v1.12.14alpha
 
 //
 // Steven Noreyko, Last update: July 2022
@@ -640,7 +640,7 @@ void loop()
 
 	if (passed > 0)
 	{
-		if (sequencer.playing)
+		if (sequencer.playing || omxUtil.areClocksRunning())
 		{
 			omxScreensaver.resetCounter(); // screenSaverCounter = 0;
 		}
