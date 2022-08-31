@@ -40,7 +40,9 @@ namespace midifx
 
         uint8_t chancePerc_ = 100;
 
-        String tempString_ = "12345";
+        // String tempString_ = "12345";
+        // String tempStrings_[4] = {"12345", "12345","12345","12345"};
+
         // String tempStringVal_ = "12345";
 
     };

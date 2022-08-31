@@ -312,6 +312,7 @@ extern const char* macromodes[];
 extern const int nummacromodes;
 extern const char* infoDialogText[];
 
+extern String tempString;
 extern String tempStrings[];
 
 enum multDiv

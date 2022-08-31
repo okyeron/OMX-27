@@ -2243,7 +2243,7 @@ namespace midifx
 
         if (messageTextTimer > 0)
         {
-            tempString_ = headerMessage_;
+            tempStrings[0] = headerMessage_;
             useLabelHeader = true;
         }
 
@@ -2252,17 +2252,17 @@ namespace midifx
             useLabelHeader = true;
             if (funcKeyMode == FUNCKEYMODE_F1)
             {
-                tempString_ = "Reset";
+                tempStrings[0] = "Reset";
                 // omxDisp.dispGenericModeLabel("Reset", params_.getNumPages(), params_.getSelPage());
             }
             else if (funcKeyMode == FUNCKEYMODE_F2)
             {
-                tempString_ = "Paste";
+                tempStrings[0] = "Paste";
                 // omxDisp.dispGenericModeLabel("Paste", params_.getNumPages(), params_.getSelPage());
             }
             else if (funcKeyMode == FUNCKEYMODE_F3)
             {
-                tempString_ = "Random";
+                tempStrings[0] = "Random";
                 // omxDisp.dispGenericModeLabel("Random", params_.getNumPages(), params_.getSelPage());
             }
         }
@@ -2278,7 +2278,7 @@ namespace midifx
             if(useLabelHeader)
             {
                 const char *labels[1];
-                labels[0] = tempString_.c_str();
+                labels[0] = tempStrings[0].c_str();
 
                 omxDisp.dispChar16(modChars, modPatternLength_ + 1, constrain(params_.getSelParam(), 0, 15), params_.getNumPages(), params_.getSelPage(), getEncoderSelect(), true, labels, 1);
             }
@@ -2286,22 +2286,22 @@ namespace midifx
             {
                 const char *labels[3];
 
-                tempString_ = "LEN: " + String(modPatternLength_ + 1);
+                tempStrings[0] = "LEN: " + String(modPatternLength_ + 1);
 
                 if (params_.getSelParam() < 16)
                 {
-                    tempString2_ = "SEL: " + String(params_.getSelParam() + 1);
-                    tempString3_ = "MOD: " + String(kArpModDisp_[modPattern_[params_.getSelParam()].mod]);
+                    tempStrings[1] = "SEL: " + String(params_.getSelParam() + 1);
+                    tempStrings[2] = "MOD: " + String(kArpModDisp_[modPattern_[params_.getSelParam()].mod]);
                 }
                 else
                 {
-                    tempString2_ = "SEL: -";
-                    tempString3_ = "MOD: -";
+                    tempStrings[1] = "SEL: -";
+                    tempStrings[2] = "MOD: -";
                 }
 
-                labels[0] = tempString_.c_str();
-                labels[1] = tempString2_.c_str();
-                labels[2] = tempString3_.c_str();
+                labels[0] = tempStrings[0].c_str();
+                labels[1] = tempStrings[1].c_str();
+                labels[2] = tempStrings[2].c_str();
                 omxDisp.dispChar16(modChars, modPatternLength_ + 1, params_.getSelParam(), params_.getNumPages(), params_.getSelPage(), getEncoderSelect(), true, labels, 3);
             }
 
@@ -2312,7 +2312,7 @@ namespace midifx
             if (useLabelHeader)
             {
                 const char *labels[1];
-                labels[0] = tempString_.c_str();
+                labels[0] = tempStrings[0].c_str();
 
                 omxDisp.dispValues16(transpPattern_, transpPatternLength_ + 1, -10, 10, true, constrain(params_.getSelParam(), 0, 15), params_.getNumPages(), params_.getSelPage(), getEncoderSelect(), true, labels, 1);
             }
@@ -2320,22 +2320,22 @@ namespace midifx
             {
                 const char *labels[3];
 
-                tempString_ = "LEN: " + String(transpPatternLength_ + 1);
+                tempStrings[0] = "LEN: " + String(transpPatternLength_ + 1);
 
                 if (params_.getSelParam() < 16)
                 {
-                    tempString2_ = "SEL: " + String(params_.getSelParam() + 1);
-                    tempString3_ = "OFS: " + String(transpPattern_[params_.getSelParam()]);
+                    tempStrings[1] = "SEL: " + String(params_.getSelParam() + 1);
+                    tempStrings[2] = "OFS: " + String(transpPattern_[params_.getSelParam()]);
                 }
                 else
                 {
-                    tempString2_ = "SEL: -";
-                    tempString3_ = "OFS: -";
+                    tempStrings[1] = "SEL: -";
+                    tempStrings[2] = "OFS: -";
                 }
 
-                labels[0] = tempString_.c_str();
-                labels[1] = tempString2_.c_str();
-                labels[2] = tempString3_.c_str();
+                labels[0] = tempStrings[0].c_str();
+                labels[1] = tempStrings[1].c_str();
+                labels[2] = tempStrings[2].c_str();
 
                 omxDisp.dispValues16(transpPattern_, transpPatternLength_ + 1, -10, 10, true, params_.getSelParam(), params_.getNumPages(), params_.getSelPage(), getEncoderSelect(), true, labels, 3);
             }

@@ -62,7 +62,8 @@ const uint8_t kNumNoteLengths = 10;
 const uint8_t kArpRates[] = {1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, 32, 40, 48, 64};
 const uint8_t kNumArpRates = 16;
 
-String tempStrings[16];
+String tempString = "12345";
+String tempStrings[8] = {"12345", "12345", "12345", "12345", "12345", "12345", "12345", "12345"};
 
 // KEY SWITCH ROWS/COLS
 

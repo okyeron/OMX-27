@@ -84,7 +84,7 @@ private:
 
     bool isPlaying_ = false;
 
-    String tempString;
+    // String tempString;
 
     static const uint8_t kNumPages = 4;
     static const uint8_t kNumParams = kNumPages * NUM_DISP_PARAMS;

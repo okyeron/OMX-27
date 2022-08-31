@@ -15,7 +15,7 @@ enum SequencerMode
 };
 
 StepNote stepCopyBuffer_;
-String tempString_;
+// String tempString_;
 
 OmxModeSequencer::OmxModeSequencer() {
     // seq params
@@ -819,15 +819,15 @@ void OmxModeSequencer::onKeyUpdate(OMXKeypadEvent e)
                         if(selectedStep->trig == TRIGTYPE_MUTE) // paste copied note to current if trig is off
                         {
                             selectedStep->CopyFrom(&stepCopyBuffer_);
-                            tempString_ = "Paste " + String(seqConfig.selectedStep);
-                            omxDisp.displayMessage(tempString_.c_str());
+                            tempString = "Paste " + String(seqConfig.selectedStep);
+                            omxDisp.displayMessage(tempString.c_str());
                         }
                         else // Cut - copy and turn trig off if trig on
                         {
                             stepCopyBuffer_.CopyFrom(selectedStep);
                             selectedStep->trig = TrigType::TRIGTYPE_MUTE;
-                            tempString_ = "Cut " + String(seqConfig.selectedStep);
-                            omxDisp.displayMessage(tempString_.c_str());
+                            tempString = "Cut " + String(seqConfig.selectedStep);
+                            omxDisp.displayMessage(tempString.c_str());
                         }
                     }
                     else

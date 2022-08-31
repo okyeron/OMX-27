@@ -222,8 +222,8 @@ namespace midifx
 
                 // char ch = static_cast<char>(starti + 2);
 
-                tempString_ = "NT " + String(starti + 2);
-                omxDisp.legends[i] = tempString_.c_str();
+                tempStrings[i] = "NT " + String(starti + 2);
+                omxDisp.legends[i] = tempStrings[i].c_str();
                 if (notes_[starti] == 0)
                 {
                     // omxDisp.legendVals[i] = -127;

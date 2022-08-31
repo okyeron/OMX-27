@@ -276,9 +276,9 @@ namespace midifx
 
         float multiplier_ = 1;
 
-        String tempString_;
-        String tempString2_;
-        String tempString3_;
+        // String tempString_;
+        // String tempString2_;
+        // String tempString3_;
 
         String headerMessage_;
 
