@@ -120,11 +120,11 @@ namespace midifx
         // }
 
     protected:
-        bool enabled_;
-        bool selected_;
-        bool auxDown_;
+        bool enabled_ = false;
+        bool selected_ = false;
+        bool auxDown_ = false;
 
-        bool encoderSelect_;
+        bool encoderSelect_ = true;
         ParamManager params_;
 
         // std::vector<MidiNoteGroup> triggeredNotes; 
