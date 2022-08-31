@@ -2,7 +2,7 @@
 #include "consts.h"
 
 const OMXMode DEFAULT_MODE = MODE_MIDI;
-const uint8_t EEPROM_VERSION = 27;
+const uint8_t EEPROM_VERSION = 28;
 
 // DEFINE CC NUMBERS FOR POTS // CCS mapped to Organelle Defaults
 const int CC1 = 21;
@@ -61,6 +61,8 @@ const uint8_t kNumNoteLengths = 10;
 
 const uint8_t kArpRates[] = {1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, 32, 40, 48, 64};
 const uint8_t kNumArpRates = 16;
+
+String tempStrings[16];
 
 // KEY SWITCH ROWS/COLS
 

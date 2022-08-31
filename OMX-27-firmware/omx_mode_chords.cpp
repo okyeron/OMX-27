@@ -1077,6 +1077,8 @@ bool OmxModeChords::shouldBlockEncEdit()
 
 void OmxModeChords::onKeyUpdate(OMXKeypadEvent e)
 {
+    uint8_t thisKey = e.key();
+
     if (isSubmodeEnabled())
     {
         if(activeSubmode->onKeyUpdate(e)) return;
@@ -1092,7 +1094,7 @@ void OmxModeChords::onKeyUpdate(OMXKeypadEvent e)
 
     if(e.held()) return;
 
-    uint8_t thisKey = e.key();
+    
 	// auto keyState = midiSettings.keyState;
 
     auto params = getParams();
@@ -1614,6 +1616,7 @@ bool OmxModeChords::isSubmodeEnabled()
 
     if(activeSubmode->isEnabled() == false){
         disableSubmode();
+        auxDown_ = false;
         return false;
     }
 
@@ -1661,6 +1664,15 @@ bool OmxModeChords::onKeyUpdateSelMidiFX(OMXKeypadEvent e)
 
     if (!e.held())
     { 
+        if (!e.down() && e.clicks() == 2 && thisKey >= 6 && thisKey < 11)
+        {
+            if (auxDown_) // Aux mode
+            {
+                enableSubmode(&subModeMidiFx[thisKey - 6]);
+                keyConsumed = true;
+            }
+        }
+
         if (e.down() && thisKey != 0)
         {
             if (auxDown_) // Aux mode
@@ -1686,6 +1698,7 @@ bool OmxModeChords::onKeyUpdateSelMidiFX(OMXKeypadEvent e)
                     {
                         enableSubmode(&subModeMidiFx[mfxIndex_]);
                         subModeMidiFx[mfxIndex_].gotoArpParams();
+                        auxDown_ = false;
                     }
                     else
                     {

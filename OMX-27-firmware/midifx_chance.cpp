@@ -121,7 +121,7 @@ namespace midifx
             break;
         }
 
-        omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), encoderSelect_);
+        omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), getEncoderSelect());
     }
 
     int MidiFXChance::saveToDisk(int startingAddress, Storage *storage) 

@@ -21,6 +21,9 @@ namespace euclidean
         uint8_t swing_ : 7;
 
         uint8_t noteLength_ : 4;
+        int8_t midifx : 4;
+
+        bool muted = false;
 
         bool polyRhythmMode_ = true;
 
@@ -29,10 +32,17 @@ namespace euclidean
 
         EuclidSave()
         {
-            noteNumber_ = 16;
-            midiChannel_ = 1;
+            rotation_ = 0;
+            events_ = 0;
+            steps_ = 0;
+
+            noteNumber_ = 60;
+            midiChannel_ = 0;
             velocity_ = 100;
+            swing_ = 0;
             noteLength_ = 1;
+            midifx = 0;
+            muted = false;
             polyRhythmMode_ = false;
             clockDivMultP_ = 4;
             polyRClockDivMultP_ = 4;
@@ -133,6 +143,12 @@ namespace euclidean
 
         void setNoteOutputFunc(void (*fptr)(void *, uint8_t, MidiNoteGroup), void *context, u_int8_t euclidIndex);
 
+        void setMute(bool mute);
+        bool getMute();
+
+        bool getTriggered();
+        bool getClockAdvanced();
+
         void setClockDivMult(uint8_t m);
         uint8_t getClockDivMult();
 
@@ -196,6 +212,7 @@ namespace euclidean
         // uint8_t triggeredNotes_[num_notes]; // Keep track of triggered notes to avoid stuck notes
         // uint8_t resolution_;
         bool running_;
+        bool muted_ = false;
 
         // Note On pointers
         uint8_t euclidIndex_;
@@ -221,6 +238,9 @@ namespace euclidean
 
         bool patternDirty_ = false;
 
+        bool triggered_ = false;
+        bool clockAdvanced_ = false;
+
         // Clock timings
         Micros lastProcessTimeP_ = 32;
         Micros nextStepTimeP_ = 32;
@@ -229,14 +249,13 @@ namespace euclidean
         uint8_t clockDivMultP_ = 4;
         uint8_t polyRClockDivMultP_ = 4;
 
-
         uint8_t seqPos_ = 0;
         uint8_t lastSeqPos_ = 0;
-
 
         float seqPerc_ = 0;
         uint32_t stepMicroDelta_ = 0;
         uint32_t startMicros = 0;
+        uint32_t triggerOffMicros_ = 0;
 
 
         bool pattern_[EuclideanMath::kPatternSize];

@@ -221,6 +221,19 @@ void SubModeMidiFxGroup::setSelected(bool newSelected)
     }
 }
 
+void SubModeMidiFxGroup::setAuxDown(bool auxDown)
+{
+    auxDown_ = auxDown;
+
+    for (uint8_t i = 0; i < midifx_.size(); i++)
+    {
+        if (midifx_[i] != nullptr)
+        {
+            midifx_[i]->setAuxDown(auxDown_);
+        }
+    }
+}
+
 void SubModeMidiFxGroup::onEnabled()
 {
     // params_.setSelPageAndParam(0, 0);
@@ -248,6 +261,9 @@ void SubModeMidiFxGroup::onEnabled()
     omxDisp.setDirty();
 
     auxReleased_ = !midiSettings.keyState[0];
+    setAuxDown(false);
+
+    
 
     // for (uint8_t i = 0; i < NUM_MIDIFX_SLOTS; i++)
     // {
@@ -545,11 +561,52 @@ bool SubModeMidiFxGroup::onKeyUpdate(OMXKeypadEvent e)
 {
     if(e.held()) 
     {
-        if(arpParamView_) return false; // Don't consume key update
+        // if(arpParamView_) return false; // Don't consume key update
         return true;
     }
 
     int thisKey = e.key();
+
+    // Aux logic
+    if(thisKey == 0)
+    {
+        omxDisp.setDirty();
+        omxLeds.setDirty();
+
+        if (!auxReleased_)
+        {
+            if (!e.down())
+            {
+                // Used to prevent quickly exiting if entered through aux shortcut.
+                auxReleased_ = true;
+            }
+        }
+        else
+        {
+            if (e.down())
+            {
+                setAuxDown(true);
+            }
+            else
+            {
+                setAuxDown(false);
+            }
+
+            // exit
+            // if(!e.down() && e.clicks() == 2)
+            if(e.quickClicked())
+            {
+                arpParamView_ = false;
+                midiFXParamView_ = false;
+                setEnabled(false);
+                return true;
+            }
+        }
+
+        if(arpParamView_) return false; // Don't consume key update
+        return true; // Consume key
+    }
+
 	// auto keyState = midiSettings.keyState;
 
     bool mfxKeysActive = false;
@@ -562,30 +619,30 @@ bool SubModeMidiFxGroup::onKeyUpdate(OMXKeypadEvent e)
 
     if(e.down())
     {
-        if (thisKey == 0)
-        {
-            if(arpParamView_)
-            {
-                arpParamView_ = false;
-                midiFXParamView_ = false;
-                setEnabled(false);
-                return true;
-            }
-            // // Exit MidiFX view
-            // if (midiFXParamView_)
-            // {
-            //     midiFXParamView_ = false;
-            //     encoderSelect_ = true;
-            // }
-            // // Exit submode
-            // else 
+        // if (thisKey == 0)
+        // {
+        //     if(arpParamView_)
+        //     {
+        //         arpParamView_ = false;
+        //         midiFXParamView_ = false;
+        //         setEnabled(false);
+        //         return true;
+        //     }
+        //     // // Exit MidiFX view
+        //     // if (midiFXParamView_)
+        //     // {
+        //     //     midiFXParamView_ = false;
+        //     //     encoderSelect_ = true;
+        //     // }
+        //     // // Exit submode
+        //     // else 
             
-            if (auxReleased_)
-            {
-                setEnabled(false);
-                return true;
-            }
-        }
+        //     if (auxReleased_)
+        //     {
+        //         setEnabled(false);
+        //         return true;
+        //     }
+        // }
 
         if(arpParamView_)
         {
@@ -640,11 +697,11 @@ bool SubModeMidiFxGroup::onKeyUpdate(OMXKeypadEvent e)
         }
     }
 
-    if(!e.down() && thisKey == 0)
-    {
-        // Used to prevent quickly exiting if entered through aux shortcut. 
-        auxReleased_ = true;
-    }
+    // if(!e.down() && thisKey == 0)
+    // {
+    //     // Used to prevent quickly exiting if entered through aux shortcut. 
+    //     auxReleased_ = true;
+    // }
 
     // release held midiFX whenever a midifx key is released. 
     if(!e.down() && thisKey >= 3 && thisKey < 3 + NUM_MIDIFX_SLOTS)
@@ -776,6 +833,11 @@ const char* SubModeMidiFxGroup::getMFXDispName(uint8_t index)
         return mfx->getDispName();
     }
     return "-";
+}
+
+bool SubModeMidiFxGroup::getEncoderSelect()
+{
+    return encoderSelect_ && !auxDown_;
 }
 
 midifx::MidiFXInterface *SubModeMidiFxGroup::getMidiFX(uint8_t index)
@@ -973,6 +1035,7 @@ void SubModeMidiFxGroup::onPendingNoteOff(int note, int channel)
     }
 }
 
+// Notes come here after passing through midifx
 void SubModeMidiFxGroup::noteOutputFunc(MidiNoteGroup note)
 {
     if(note.noteOff)
@@ -1118,7 +1181,7 @@ void SubModeMidiFxGroup::onDisplayUpdateMidiFX()
             }
         }
 
-        omxDisp.dispSlots(slotNames, NUM_MIDIFX_SLOTS, selectedMidiFX_, heldAnimPos_, encoderSelect_, false, nullptr, 0);
+        omxDisp.dispSlots(slotNames, NUM_MIDIFX_SLOTS, selectedMidiFX_, heldAnimPos_, getEncoderSelect(), false, nullptr, 0);
         return;
     }
 
@@ -1174,7 +1237,7 @@ void SubModeMidiFxGroup::onDisplayUpdate()
             else
             {
                 setupPageLegends();
-                omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), encoderSelect_);
+                omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), getEncoderSelect());
             }
         }
     }

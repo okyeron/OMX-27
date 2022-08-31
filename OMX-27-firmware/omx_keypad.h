@@ -23,6 +23,7 @@ class OMXKeypad {
         uint8_t key;
         bool held;
         bool down;
+        bool quickClicked;
         uint8_t clicks = 0;
         uint32_t lastClickedAt;
         uint32_t releasedAt;
@@ -50,11 +51,12 @@ class OMXKeypad {
 
 
 struct OMXKeypadEvent {
-    OMXKeypadEvent(uint8_t key, uint8_t clicks, bool held, bool down):
+    OMXKeypadEvent(uint8_t key, uint8_t clicks, bool held, bool down, bool quickClicked):
         _key(key),
         _clicks(clicks),
         _held(held),
-        _down(down)
+        _down(down),
+        _quickClicked(quickClicked)
     {}
 
     private:
@@ -62,10 +64,12 @@ struct OMXKeypadEvent {
     uint8_t _clicks;
     bool _held;
     bool _down;
+    bool _quickClicked;
 
     public:
     inline uint8_t key() { return _key; }
     inline bool down() { return _down; }
     inline bool held() { return _held; }
+    inline bool quickClicked() { return _quickClicked; }
     inline uint8_t clicks() { return _clicks; }
 };

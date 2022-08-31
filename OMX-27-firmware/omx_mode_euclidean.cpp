@@ -34,12 +34,18 @@ enum SelEucModePage {
 
 const int kSelMixColor = WHITE;
 const int kMixColor = ORANGE;
+const int kMixTrigger = 0xFCD0A4;
+const int kMixMuteColor = 0x080808; // 0x1f1001;
 
 const int kSelSaveColor = WHITE;
 const int kSaveColor = DKGREEN;
 
-const int kSelEuclidColor = WHITE;
+const int kSelEuclidColor = LBLUE;
+const int kSelEuclidTriggerColor = AMBER;
+const int kSelEuclidMuteColor = DKBLUE;
 const int kEuclidColor = DKRED;
+const int kEuclidTrigger = AMBER;
+const int kEuclidMuteColor = 0x080808; //0x240000;
 
 const int kSelMidiFXColor = LTCYAN;
 const int kMidiFXColor = BLUE;
@@ -61,6 +67,9 @@ OmxModeEuclidean::OmxModeEuclidean()
         euclids[i].setPolyRhythmMode(polyRhythmMode);
         euclids[i].setClockDivMult(3);
         euclids[i].setPolyRClockDivMult(3);
+
+        initEuclid_.polyRhythmMode_ = polyRhythmMode;
+        initEuclid_.polyRClockDivMultP_ = 3;
     }
 
     paramMode_ = PARAMMODE_EDIT;
@@ -400,6 +409,7 @@ void OmxModeEuclidean::onPotChanged(int potIndex, int prevValue, int newValue, i
                 {
                     euclids[i].setPolyRClockDivMult(newres);
                 }
+                initEuclid_.polyRClockDivMultP_ = newres;
             }
             else
             {
@@ -455,9 +465,22 @@ void OmxModeEuclidean::loopUpdate(Micros elapsedTime)
 
     uint32_t playstepmicros = seqConfig.currentFrameMicros;
 
+    bool clockAdvanced = false;
+
     for (u_int8_t i = 0; i < kNumEuclids; i++)
     {
         euclids[i].clockTick(playstepmicros, clockConfig.step_micros);
+
+        if(euclids[i].getClockAdvanced())
+        {
+            clockAdvanced = true;
+        }
+    }
+
+    if(clockAdvanced)
+    {
+        omxDisp.setDirty();
+        omxLeds.setDirty();
     }
 
     for(uint8_t i = 0; i < 5; i++)
@@ -595,6 +618,8 @@ void OmxModeEuclidean::onEncoderChanged(Encoder::Update enc)
                     {
                         euclids[i].setPolyRhythmMode(polyRhythmMode);
                     }
+
+                    initEuclid_.polyRhythmMode_ = polyRhythmMode;
 
                     if (polyRhythmMode)
                     {
@@ -872,7 +897,6 @@ void OmxModeEuclidean::onKeyUpdate(OMXKeypadEvent e)
         setParamMode(PARAMMODE_PATTERN);
     }
 
-
     // --- EDIT MODE ---
     if (paramMode_ == PARAMMODE_EDIT || paramMode_ == PARAMMODE_MIX)
     {
@@ -881,12 +905,49 @@ void OmxModeEuclidean::onKeyUpdate(OMXKeypadEvent e)
             if (e.down() && (thisKey > 10) && thisKey < 19)
             {
                 selectEuclid(thisKey - 11);
+
+                if(paramMode_ == PARAMMODE_MIX)
+                {
+                    toggleMute(thisKey - 11);
+                }
+
+                copiedEuclid_ = euclids[thisKey - 11].getSave();
             }
 
             if (e.down() && thisKey >= 6 && thisKey < 11)
             {
                 activeEuclid->midiFXGroup = thisKey - 6;
                 // enableSubmode(&subModeMidiFx[thisKey - 8]);
+            }
+
+            if (!e.down() && e.clicks() == 2 && thisKey >= 6 && thisKey < 11)
+            {
+                enableSubmode(&subModeMidiFx[thisKey - 6]);
+            }
+        }
+        else if(f1_) // Mute
+        {
+            if (e.down() && (thisKey > 10) && thisKey < 19)
+            {
+                toggleMute(thisKey - 11);
+            }
+        }
+        else if(f2_) // Paste
+        {
+            if (e.down() && (thisKey > 10) && thisKey < 19)
+            {
+                euclids[thisKey - 11].loadSave(copiedEuclid_);
+                omxDisp.displayMessageTimed("Paste: " + String(thisKey - 11 + 1), 5);
+            }
+        }
+        else if(f3_) // Cut
+        {
+            if (e.down() && (thisKey > 10) && thisKey < 19)
+            {
+                selectEuclid(thisKey - 11);
+                copiedEuclid_ = euclids[thisKey - 11].getSave();
+                euclids[thisKey -11].loadSave(initEuclid_);
+                omxDisp.displayMessageTimed("Cut: " + String(thisKey - 11 + 1), 5);
             }
         }
     }
@@ -912,6 +973,17 @@ void OmxModeEuclidean::onKeyUpdate(OMXKeypadEvent e)
             }
         }
     }
+    omxDisp.setDirty();
+}
+
+void OmxModeEuclidean::toggleMute(uint8_t euclidIndex)
+{
+    bool muted = !euclids[euclidIndex].getMute();
+    euclids[euclidIndex].setMute(muted);
+
+    omxDisp.displayMessageTimed(String(euclidIndex + 1) + (muted ? " Muted" : " Unmuted"), 5);
+
+    omxLeds.setDirty();
     omxDisp.setDirty();
 }
 
@@ -951,7 +1023,7 @@ void OmxModeEuclidean::onKeyHeldUpdate(OMXKeypadEvent e)
     int thisKey = e.key();
 
     // --- EDIT MODE ---
-    if (paramMode_ == PARAMMODE_EDIT)
+    if (paramMode_ == PARAMMODE_EDIT || paramMode_ == PARAMMODE_MIX)
     {
         // Enter MidiFX mode
         if (thisKey >= 6 && thisKey < 11)
@@ -1032,7 +1104,11 @@ void OmxModeEuclidean::updateLEDs()
 
         for (uint8_t i = 0; i < kNumEuclids; i++)
         {
-            auto eucColor = (i == selectedEuclid_) ? kSelMixColor : kMixColor;
+            auto eucColor = euclids[i].getMute() ? kMixMuteColor : kMixColor;
+            if(isPlaying_)
+            {
+                eucColor = euclids[i].getTriggered() ? kMixTrigger : eucColor;
+            }
             strip.setPixelColor(11 + i, eucColor);
         }
     }
@@ -1047,7 +1123,16 @@ void OmxModeEuclidean::updateLEDs()
 
         for (uint8_t i = 0; i < kNumEuclids; i++)
         {
-            auto eucColor = (i == selectedEuclid_) ? kSelEuclidColor : kEuclidColor;
+            auto eucColor = euclids[i].getMute() ? kEuclidMuteColor : kEuclidColor;
+            if(isPlaying_)
+            {
+                eucColor = euclids[i].getTriggered() ? kEuclidTrigger : eucColor;
+            }
+            if(i == selectedEuclid_)
+            {
+                eucColor = euclids[i].getMute() ? kSelEuclidMuteColor : kSelEuclidColor;
+                eucColor = euclids[i].getTriggered() ? kSelEuclidTriggerColor : eucColor;
+            }
             strip.setPixelColor(11 + i, eucColor);
         }
     }
@@ -1285,43 +1370,73 @@ void OmxModeEuclidean::onDisplayUpdate()
         if (!encoderConfig.enc_edit)
         {
             auto params = getSelectedParamMode();
-            if (params->getSelPage() == SELEUCLID_PAT)
+
+            if (!fNone_ && (paramMode_ == PARAMMODE_EDIT || paramMode_ == PARAMMODE_MIX))
             {
-                // if (isPlaying_)
-                // {
-                //     omxDisp.setDirty();
-                // }
-
-                // for (uint8_t i = 0; i < 4; i++)
-                // {
-                //     uint8_t ypos = 7 * (i + 1);
-                //     bool selected = i == selectedEuclid_;
-                //     omxDisp.drawEuclidPattern(euclids[i].getPattern(), euclids[i].getSteps(), ypos, selected, euclids[i].isRunning(), euclids[i].getLastSeqPos());
-                // }
-
-                EuclideanSequencer* activeEuclid = &euclids[selectedEuclid_];
-
-                uint8_t ypos = 20;
-
-                omxDisp.drawEuclidPattern(true, activeEuclid->getPattern(), activeEuclid->getSteps(), ypos, false, activeEuclid->isRunning(), activeEuclid->getLastSeqPos());
-
-                omxDisp.dispPageIndicators2(params->getNumPages(), 0);
-
-                // for(int i = 0; i < 4; i++){
-
-                //     bool selected = i == 0;
-
-                //     omxDisp.dispPageIndicators(i, selected);
-                // }
-
-                // int pselected = param % NUM_DISP_PARAMS;
-                // setupPageLegends();
-                // omxDisp.dispGenericMode(pselected);
+                if(f1_)
+                {
+                    omxDisp.dispGenericModeLabel("Mute", params->getNumPages(), params->getSelPage());
+                }
+                else if(f2_)
+                {
+                    omxDisp.dispGenericModeLabel("Paste", params->getNumPages(), params->getSelPage());
+                }
+                else if(f3_)
+                {
+                    omxDisp.dispGenericModeLabel("Cut", params->getNumPages(), params->getSelPage());
+                }
+            }
+            else if(paramMode_ == PARAMMODE_PATTERN)
+            {
+                if(f2_)
+                {
+                    omxDisp.dispGenericModeLabel("Save To", 0,0);
+                }
+                else
+                {
+                    omxDisp.dispGenericModeLabel("Load From", 0,0);
+                }
             }
             else
             {
-                setupPageLegends();
-                omxDisp.dispGenericMode2(params->getNumPages(), params->getSelPage(), params->getSelParam(), encoderSelect_);
+                if (params->getSelPage() == SELEUCLID_PAT)
+                {
+                    // if (isPlaying_)
+                    // {
+                    //     omxDisp.setDirty();
+                    // }
+
+                    // for (uint8_t i = 0; i < 4; i++)
+                    // {
+                    //     uint8_t ypos = 7 * (i + 1);
+                    //     bool selected = i == selectedEuclid_;
+                    //     omxDisp.drawEuclidPattern(euclids[i].getPattern(), euclids[i].getSteps(), ypos, selected, euclids[i].isRunning(), euclids[i].getLastSeqPos());
+                    // }
+
+                    EuclideanSequencer *activeEuclid = &euclids[selectedEuclid_];
+
+                    uint8_t ypos = 20;
+
+                    omxDisp.drawEuclidPattern(true, activeEuclid->getPattern(), activeEuclid->getSteps(), ypos, false, activeEuclid->isRunning(), activeEuclid->getLastSeqPos());
+
+                    omxDisp.dispPageIndicators2(params->getNumPages(), 0);
+
+                    // for(int i = 0; i < 4; i++){
+
+                    //     bool selected = i == 0;
+
+                    //     omxDisp.dispPageIndicators(i, selected);
+                    // }
+
+                    // int pselected = param % NUM_DISP_PARAMS;
+                    // setupPageLegends();
+                    // omxDisp.dispGenericMode(pselected);
+                }
+                else
+                {
+                    setupPageLegends();
+                    omxDisp.dispGenericMode2(params->getNumPages(), params->getSelPage(), params->getSelParam(), encoderSelect_);
+                }
             }
         }
     }

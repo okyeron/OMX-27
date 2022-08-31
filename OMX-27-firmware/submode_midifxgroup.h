@@ -26,6 +26,7 @@ public:
     void onEncoderButtonDown() override;
     bool onKeyUpdate(OMXKeypadEvent e) override;
     void onDisplayUpdate() override;
+    bool getEncoderSelect() override;
 
     void setSelected(bool newSelected);
 
@@ -66,6 +67,8 @@ private:
 
     uint8_t funcKeyMode_ = 0;
 
+    bool auxDown_ = false; // set to aux state onEnable, must be true to exit mode with aux. 
+
     bool auxReleased_ = false; // set to aux state onEnable, must be true to exit mode with aux. 
 
     // typedef midifx::MidiFXInterface* MidiFXptr;
@@ -89,6 +92,7 @@ private:
     void setMidiFX(uint8_t index, midifx::MidiFXInterface* midifx);
     uint8_t getArpIndex();
     void setupPageLegends();
+    void setAuxDown(bool auxDown);
 
     void updateFuncKeyMode();
 

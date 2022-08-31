@@ -253,7 +253,7 @@ namespace midifx
             }
         }
 
-        omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), encoderSelect_);
+        omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), getEncoderSelect());
     }
 
     int MidiFXHarmonizer::saveToDisk(int startingAddress, Storage *storage)

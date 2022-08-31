@@ -123,6 +123,8 @@ namespace euclidean
     void EuclideanSequencer::stop()
     {
         running_ = false;
+        triggered_ = false;
+        clockAdvanced_ = false;
         pendingNoteOffs.allOff();
     }
 
@@ -162,7 +164,30 @@ namespace euclidean
         noteGroup.sendCV = sendCV;
         noteGroup.noteonMicros = noteOnMicros;
 
+        triggered_ = true;
+        triggerOffMicros_ = noteOnMicros + (stepLength * clockConfig.step_micros);
+
         onNoteOnFuncPtr_(onNoteOnFuncPtrContext_, euclidIndex_, noteGroup);
+    }
+
+    void EuclideanSequencer::setMute(bool mute)
+    {
+        muted_ = mute;
+    }
+
+    bool EuclideanSequencer::getMute()
+    {
+        return muted_;
+    }
+
+    bool EuclideanSequencer::getTriggered()
+    {
+        return triggered_;
+    }
+
+    bool EuclideanSequencer::getClockAdvanced()
+    {
+        return clockAdvanced_;
     }
 
     void EuclideanSequencer::setClockDivMult(uint8_t m)
@@ -328,6 +353,8 @@ namespace euclidean
         save.clockDivMultP_ = clockDivMultP_;
         save.polyRClockDivMultP_ = polyRClockDivMultP_;
         save.polyRhythmMode_ = polyRhythmMode_;
+        save.midifx = midiFXGroup;
+        save.muted = muted_;
         return save;
     }
 
@@ -342,6 +369,8 @@ namespace euclidean
         swing_ = save.swing_;
         noteLength_ = save.noteLength_;
         polyRhythmMode_ = save.polyRhythmMode_;
+        midiFXGroup = save.midifx;
+        muted_ = save.muted;
 
         setClockDivMult(save.clockDivMultP_);
         setPolyRClockDivMult(save.polyRClockDivMultP_);
@@ -358,6 +387,7 @@ namespace euclidean
 
     void EuclideanSequencer::clockTick(uint32_t stepmicros, uint32_t microsperstep)
     {
+        clockAdvanced_ = false;
         if (patternDirty_)
         {
             regeneratePattern();
@@ -366,6 +396,14 @@ namespace euclidean
 
         if (!running_)
             return;
+
+        if(triggered_)
+        {
+            if(stepmicros >= triggerOffMicros_)
+            {
+                triggered_ = false;
+            }
+        }
 
         //   seqPerc_ = (stepmicros - startMicros) / ((float)max(stepMicroDelta_, 1) * (steps_ + 1));
 
@@ -382,6 +420,8 @@ namespace euclidean
         {
             lastStepTimeP_ = nextStepTimeP_;
 
+            clockAdvanced_ = true;
+
             if (polyRhythmMode_) // Space all triggers across a bar
             {
                 //   stepMicroDelta_ = ((microsperstep * (16 * multiplierPR_)) / steps_) * multiplier_;
@@ -397,7 +437,7 @@ namespace euclidean
 
             bool trigger = pattern_[seqPos_];
 
-            if (trigger)
+            if (trigger && !muted_)
             {
                 playNote();
                 // pendingNoteOns.insert(60, 100, 1, stepmicros, false);
@@ -405,6 +445,7 @@ namespace euclidean
             }
             else
             {
+                triggered_ = false;
                 //   Serial.print((String) "-  ");
             }
 

@@ -45,9 +45,14 @@ namespace midifx
         return enabled_;
     }
 
+    bool MidiFXInterface::getEncoderSelect()
+    {
+        return encoderSelect_ && !auxDown_;
+    }
+
     void MidiFXInterface::onEncoderChanged(Encoder::Update enc)
     {
-        if (encoderSelect_)
+        if (getEncoderSelect())
         {
             onEncoderChangedSelectParam(enc);
         }
@@ -55,6 +60,11 @@ namespace midifx
         {
             onEncoderChangedEditParam(enc);
         }
+    }
+
+    void MidiFXInterface::setAuxDown(bool auxDown)
+    {
+        auxDown_ = auxDown;
     }
 
     // Handles selecting params using encoder

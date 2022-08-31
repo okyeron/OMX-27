@@ -86,10 +86,14 @@ namespace midifx
         virtual void setEnabled(bool newEnabled);
         virtual bool getEnabled();
 
+        virtual void setAuxDown(bool auxDown);
+
         virtual void loopUpdate() {}
         virtual void onClockTick() {}
 
         virtual void resync() {}
+
+        virtual bool getEncoderSelect();
 
         virtual void onEncoderChanged(Encoder::Update enc);
         virtual void onEncoderButtonDown();
@@ -118,6 +122,7 @@ namespace midifx
     protected:
         bool enabled_;
         bool selected_;
+        bool auxDown_;
 
         bool encoderSelect_;
         ParamManager params_;

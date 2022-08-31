@@ -13,10 +13,10 @@
 // #include <cstdarg>
 
 /* * firmware metadata  */
-// OMX_VERSION = 1.12.14
+// OMX_VERSION = 1.12.15
 const int MAJOR_VERSION = 1;
 const int MINOR_VERSION = 12;
-const int POINT_VERSION = 14;
+const int POINT_VERSION = 15;
 
 const int DEVICE_ID     = 2;
 
@@ -312,7 +312,7 @@ extern const char* macromodes[];
 extern const int nummacromodes;
 extern const char* infoDialogText[];
 
-
+extern String tempStrings[];
 
 enum multDiv
 {

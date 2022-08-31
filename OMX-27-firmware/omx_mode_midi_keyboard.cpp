@@ -482,7 +482,7 @@ void OmxModeMidiKeyboard::onKeyUpdate(OMXKeypadEvent e)
     // }
 
     // Aux double click toggle macro
-    if (midiMacroConfig.midiMacro > 0)
+    if (!isSubmodeEnabled() && midiMacroConfig.midiMacro > 0)
     {
         if (!macroActive_)
         {
@@ -730,7 +730,16 @@ bool OmxModeMidiKeyboard::onKeyUpdateSelMidiFX(OMXKeypadEvent e)
     bool keyConsumed = false;
 
     if (!e.held())
-    { 
+    {
+        if (!e.down() && e.clicks() == 2 && thisKey >= 6 && thisKey < 11)
+        {
+            if (midiSettings.midiAUX) // Aux mode
+            {
+                enableSubmode(&subModeMidiFx[thisKey - 6]);
+                keyConsumed = true;
+            }
+        }
+
         if (e.down() && thisKey != 0)
         {
             if (midiSettings.midiAUX) // Aux mode
@@ -756,6 +765,7 @@ bool OmxModeMidiKeyboard::onKeyUpdateSelMidiFX(OMXKeypadEvent e)
                     {
                         enableSubmode(&subModeMidiFx[mfxIndex_]);
                         subModeMidiFx[mfxIndex_].gotoArpParams();
+                        midiSettings.midiAUX = false;
                     }
                     else
                     {
@@ -1277,6 +1287,7 @@ bool OmxModeMidiKeyboard::isSubmodeEnabled()
 
     if(activeSubmode->isEnabled() == false){
         disableSubmode();
+        midiSettings.midiAUX = false;
         return false;
     }
 

@@ -67,7 +67,7 @@ namespace midifx
 
         int8_t origNote = note.noteNumber;
 
-        int newNoteNumber = origNote + transpose_;
+        int newNoteNumber = origNote + transpose_ + (octave_ * 12);
 
         if(newNoteNumber >= 0 && newNoteNumber <= 127)
         {
@@ -134,7 +134,7 @@ namespace midifx
             break;
         }
 
-        omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), encoderSelect_);
+        omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), getEncoderSelect());
     }
 
     int MidiFXTranspose::saveToDisk(int startingAddress, Storage *storage)

@@ -50,6 +50,7 @@ void OMXKeypad::tick() {
                 key->lastClickedAt = now;
                 key->down = true;
                 key->held = false;
+                key->quickClicked = false;
                 // "press" is always available
                 _available.push_back(key); // this is what triggers the key to show up with a state change
                 break;
@@ -62,6 +63,7 @@ void OMXKeypad::tick() {
                     // hold release event.
                     key->held = false;
                 }
+                key->quickClicked = (now - key->lastClickedAt) <= clickWindow;
                 _available.push_back(key);	// on key release, this is the only event added.
                 break;
             default:
@@ -97,7 +99,7 @@ void OMXKeypad::tick() {
 
 OMXKeypadEvent OMXKeypad::next() {
     if (!available()) {
-        return OMXKeypadEvent{0, 0, false, false};
+        return OMXKeypadEvent{0, 0, false, false, false};
     }
 
     auto key = _available.back();
@@ -105,11 +107,11 @@ OMXKeypadEvent OMXKeypad::next() {
 
     // Simple press event.
     if (key->down && !key->held) {
-        return OMXKeypadEvent{key->key, key->clicks, false, true};
+        return OMXKeypadEvent{key->key, key->clicks, false, true, false};
     } 
 
 	// Click or hold event
 	key->lastClickedAt = 0;
-	return OMXKeypadEvent{key->key, key->clicks, key->held, key->down};
+	return OMXKeypadEvent{key->key, key->clicks, key->held, key->down, key->quickClicked};
 
 }

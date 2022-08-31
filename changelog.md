@@ -1,6 +1,47 @@
 # Change log
 
 ```
+### 1.12.15 beta
+### EEPROM VERSION 28
+*** Warning!!!: This will clear your global save state if EEPROM version is different from your firmware***
+-
+- Moving to beta! Only bugfixes and very small features to be added.
+-
+- BugFix: Fixes crash when changing the arp pattern
+-
+- Euclidean Mode:
+- - Mix page now quickly mutes/unmutes euclidean sequencers
+- - Euclidean triggers now rendered to LEDs
+- - Better display rendering while playing
+- - Euclidean mutes and midifx slots now get saved/loaded
+- - UI Messages for F1/F2 keys
+- - Mix and Edit Modes:
+- - - Hold F1: Mute Euclidean Sequencer
+- - - Hold F2: Paste Euclidean Sequencer
+- - - Hold F3: Cut Euclidean Seuqncer
+- - - Euclidean Sequencer is automatically copied from last selected Euclidean Sequencer
+-
+- Arpeggiator:
+- - Now keeps track of modified notes, so you can move the arp midifx to any position
+- - Add MidiFX in front of it without stuck notes. 
+- - Arps all properly are syncing in Euclidean mode. 
+- - - Try using multiple arps on different Euclidean sequencers, change their parameters,
+- - - mod & transpose patterns, rates, for fun and profit. 
+- - - works best if you set them to hold.
+- - - Try putting a randomize midifx in front of arps and a scaler midifx after
+-
+- Transpose MidiFX:
+- - Octave parameter now does stuff. 
+-
+- MidiFX Mode:
+- - Holding Aux now works in MidiFX mode. 
+- - Hold aux to quickly edit parameters
+- - quick click the aux to exit MidiFX mode. 
+- - Double clicking a MidiFX slot can now be used to enter the MidiFX mode
+- - - This is faster than holding(Which also still works)
+```
+
+```
 ### 1.12.14 alpha
 ### EEPROM VERSION 27
 *** Warning!!!: This will clear your global save state if EEPROM version is different from your firmware***

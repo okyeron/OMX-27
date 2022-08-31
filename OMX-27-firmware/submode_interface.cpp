@@ -18,9 +18,14 @@ bool SubmodeInterface::isEnabled()
     return enabled_;
 }
 
+bool SubmodeInterface::getEncoderSelect()
+{
+    return encoderSelect_;
+}
+
 void SubmodeInterface::onEncoderChanged(Encoder::Update enc)
 {
-    if (encoderSelect_)
+    if (getEncoderSelect())
     {
         onEncoderChangedSelectParam(enc);
     }

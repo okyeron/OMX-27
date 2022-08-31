@@ -31,6 +31,8 @@ public:
 
     virtual bool usesPots() { return false; } // return true if submode uses pots
 
+    virtual bool getEncoderSelect();
+
 protected:
     bool enabled_;
     bool encoderSelect_;

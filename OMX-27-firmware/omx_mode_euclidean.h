@@ -55,6 +55,8 @@ public:
     int saveToDisk(int startingAddress, Storage *storage);
     int loadFromDisk(int startingAddress, Storage *storage);
 
+    
+
 
     // static int serializedPatternSize(bool eeprom);
     // static inline int getNumPatterns() { return 8; }
@@ -75,6 +77,7 @@ private:
     void saveActivePattern(uint8_t pattIndex, bool showMsg = true);
     void loadActivePattern(uint8_t pattIndex);
 
+    void toggleMute(uint8_t euclidIndex);
     void selectEuclid(uint8_t euclidIndex);
 
     bool initSetup = false;
@@ -108,6 +111,8 @@ private:
     uint8_t selectedEuclid_ = 0;
 
     EuclidPatternSave saveSlots_[kNumSaves];
+    euclidean::EuclidSave copiedEuclid_;
+    euclidean::EuclidSave initEuclid_;
 
     uint8_t selectedSave_ = 0;
 
