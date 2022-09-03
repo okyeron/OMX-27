@@ -8,64 +8,128 @@ Sequencer modes have 8 patterns (tracks). Sequencer modes currently send MIDI cl
 
 CV pitch output is limited to about 4.3 octaves.
 
-USBMIDI should be plug-and-play with any USBMIDI compatible host. iPad works great with the camera connection kit. Hardware MIDI TRS output jack is switchable between Type-A and Type-B.
+USBMIDI should be plug-and-play with any USBMIDI compatible host. iPad works great with the camera connection kit or a [lightning to usb micro cable](https://www.amazon.com/gp/product/B09KLXNYHL). Hardware MIDI TRS output jack is switchable between Type-A and Type-B.
+
+### Modes
+
+The OMX-27 has many different modes. Each mode is it's own beast and only one mode can be used at a given time. 
+
+The current modes available are:
+MI - Midi Keyboard Mode
+CHOR - Chord Mode
+S1 - A Elektron style step sequencer with 8 patterns that can be up to 64 steps. Only 1 pattern can be active at a time in this mode. 
+S2 - The same as S1 but multiple patterns can run at once. 
+OM - Organelle Mode
+GR - Grids Mode. A fun rhythm sequencer based on Mutable Instruments Grids. 
+EL - Euclidean Sequencer Mode.
+
+Long press the encoder to change modes. 
 
 
 ## Layout
 
 <img src="images/omx27_layout4.png" alt="omx27_layout3" width="1045" height="425" />
 
-Top left key = AUX Key.
-
-Potentiometers are mapped by default to CCs 21, 22, 23, 24 and 7 (volume). These can be changed in the firmware. Hopefully this will be configurable from a device menu or a web-MIDI interface in future.
 
 ### Encoder
 
-Long press encoder to enable mode change. Turn to change modes, short-press to enter mode.
+The encoder is directly next to the screen of the OMX-27. 
 
-Within the modes a short press on the encoder will select a parameter to edit.
+You can use the encoder to modify parameters and change the selected parameter and page. 
+
+Short press the encoder to toggle between selecting parameters and editing them. The selected parameter will be highlighted to reflect which mode you are in. 
+
+Long press the encoder to change to a different mode. Once in mode selection, turn the encoder, then short-press to enter the selected mode.
+
+### AUX Key
+
+The top left key is the AUX Key. 
+
+In the MIDI Keyboard and Chord modes, holding this key will give you access to shortcuts. 
+
+In the sequencer modes, this key is a dedicated start stop button. 
+
+This key is also used in many places to quickly edit a parameter. 
+
+If you are in a submode, the AUX Key can be used to exit out to the main mode. 
+
+### Potentiometers
+
+The OMX-27 has 5 potentiometers, by default these are set to bank A and send CCs 21, 22, 23, 24 and 7 (volume). 
+
+There are 5 banks of CC's available. You can switch banks using the PBNK parameter in MI Mode. 
+
+The CC's can also be reconfigured by going into the CC Config submode, which is found on the last page of the MI Mode. 
 
 
 ### Key Switches
 
-In MIDI modes the key switches work as a normal MIDI keyboard.
+The functions of the key switches will change depending on which mode you are in. 
 
-In sequencer modes the switches are broken into groups - Function Keys, Pattern Keys and Step Keys.
+In MI Mode, the key switches work like a normal MIDI keyboard. 
 
+In other modes, the keys will have specific functions depending on the mode or submode.
 
-__"Black keys" (sharp/flat keyboard keys)__
+Keys in this documentation will be refered to by number, from left to right and position, top or bottom.
+
+The top black keys will be referenced as top 1-10.
+
+The bottom white keys will be referenced as bottom 1-16.
+
+### "Black keys" (sharp/flat keyboard keys)
 
 The first 2 black keys are Function Keys (FUNC)
-- F1
-- F2
+- F1 - First black key
+- F2 - Second black key
+- F3 - Hold both F1 and F2
 
-The next 8 are Pattern Keys and they select the active sequence pattern (P1-P8).
-
-Hold a key (long press) to access parameters for that pattern. This is "Pattern Params".
+These are used to perform various shortcuts depending on the mode. 
 
 
-__"White keys" (bottom row)__
 
-Sequencer Step Keys - These are your sequencer step on/off keys.
 
-Hold a key (long press) to access parameters for that step. This is "Note Select / Step Parameters". F1 + Step Key is also a quick shortcut.
+
+// The next 8 are Pattern Keys and they select the active sequence pattern (P1-P8).
+
+// Hold a key (long press) to access parameters for that pattern. This is "Pattern Params".
+
+
+// __"White keys" (bottom row)__
+
+// Sequencer Step Keys - These are your sequencer step on/off keys.
+
+// Hold a key (long press) to access parameters for that step. This is "Note Select / Step Parameters". F1 + Step Key is also a quick shortcut.
 
 
 ---
 
-## Modes
+### Saving
 
-Long-press the encoder to enter Mode Select. Short-press to enter that mode.
+To save your current OMX session to ROM, first enter Mode Select by holding the encoder. While this is active press AUX to save. 
 
-While in Mode Select (before you short-press), you can save the state of the sequencer and settings to memory by hitting the AUX key.
+The next time you restart your OMX, your last active mode will be loaded, and saved patterns and settings will be recalled. 
 
-### MI - MIDI
+Saving is a long operation and not recommended to do while in the middle of a performance. 
+
+
+## MODE MI - MIDI
 
 MIDI Keyboard. 
 
-Quick Keys - Hold AUX  
+AUX Shortcut keys: 
+- Holding AUX will let you quickly edit the selected parameter.
 - first 2 "white keys" are octave up/down  
 - first 2 "black keys" cycle through the selected parameter on the display  
+- Top key 5 will disable MidiFX
+- Top keys 6-10 will select a MidiFX Group to use. 
+   - Double click or long hold a MidiFX Group to enter the MidiFX submode.
+- Bottom key 12 will enter the arpeggiator pass-through submode. 
+   - This mode will allow you to edit the parameters of the arpeggiator while also still using
+   - the keyboard to play notes. 
+- Bottom key 13 will cycle through arpeggiator patterns.
+- Bottom key 14 will cycle through arpeggiator octave ranges.
+- Bottom key 15 will toggle the arpeggiator hold function. 
+- Bottom key 16 will toggle the arpeggiator on and off. 
 
 Parameters:
 
@@ -82,7 +146,7 @@ Page 2:
 - `BNK`: MIDI bank select.
 
 Page 3:
-- `PBNK`: Potentiometer bank select (CC assignments are still hard coded)  
+- `PBNK`: Potentiometer bank select
 - `THRU`: when "On" incoming USBMIDI will be passed to TRS MIDI Out.
 - `MCRO`: MIDI Macro Mode Select (default is OFF)
 - `M-CH`: MIDI Macro Mode Channel
@@ -93,19 +157,49 @@ Page 4:
 - `LOCK` : locks to the active scale. If this is enabled, you will only be able to play notes in the scale
 - `GROUP` : groups all the notes of the scale across the lower row of 16 keys. 
 
+Page 5:
+- `CC` : press the encoder to enter the CC configuration submode.
+
+
 #### Musical Scales
 
-Scales can be turned on using the 4th parameter page. When a scale is enabled, the keys in the scale will light up, and the root notes will light up a brighter color. You can still play chromatically and out of key. Enabling the 'LOCK' param will make it so only the notes in the scale will send midi notes out. Turning on the 'GROUP' parameter will map the scale across the lower row of 16 keys. The root note will start one key in on what would normally be a C in chromatic mode. 
+Scales can be turned on using the 4th parameter page. When a scale is enabled, the keys in the scale will light up, and the root notes will light up a brighter color. You can still play chromatically and out of key. 
+
+Enabling the 'LOCK' param will make it so only the notes in the scale will send midi notes out. 
+
+Turning on the 'GROUP' parameter will map the scale across the lower row of 16 keys. The root note will start on bottom key 2 which would normally be a C in chromatic mode. 
+
+These scale settings will also control the scale of the Scaler MidiFX when they are set to use the global scale. 
+
+#### CC Configuration Submode
+
+This mode will let you change the CC values that the potentiometers send out. 
+
+Bottom Keys 1-5 will let you quickly change which bank is selected. 
+
+Press the AUX key to exit. 
+
 
 #### MIDI Macro Modes
 
-__M8 Macro Mode__
+Midi macro modes are specialized Midi controller modes designed to be used with specific hardware that can be controlled via Midi. 
+
+If a midi macro is selected, you can double click the AUX key to enter the midi macro mode, and double click the AUX key to exit the macro mode.
+
+Midi macro modes will send out control midi commands on the Midi Macro channel, which is `M-CH` in the parameters.
+
+
+##### M8 Macro Mode
 
 From MI Mode, be sure `M8` is selected from the `MCRO` parameter and then double click the AUX button to enter Macro Mode.
 
 `M-CH` should be set to the same value as the Control Map Channel in the M8 MIDI settings screen. Default is set to channel 10.  
 
 Double click the AUX button again to exit Macro Mode.
+
+The M8 macro mode has two pages, which change what the Keys do.
+
+* Mute Solo Page:
 
 The bottom row of keys correspond to mutes (orange) and solos (red). The top "black keys" are as follows:  
 
@@ -127,8 +221,123 @@ When M8 is selected from the `MCRO` parameter - potentiometers will send on the 
 * Snapshot Load uses the M8 key combo [SHIFT]+[OPTION]. On any view with a grid (song, chain, phrase, table, etc.) this key enters selection mode.  
 * Snapshot Save uses the M8 key combo [SHIFT]+[EDIT]. On any view with a grid this key pastes the copied contents from selection mode.  
 
+* Control Page:
+
+This page will let you navigate the M8 using the keys on the OMX instead of the keys on the M8.
+
+Top Key 1 and Bottoms Keys 1-3: These correspond to the directional arrow keys. 
+
+Top Key 4: Option Key
+Top Key 5: Edit Key
+Bottom Key 6: Shift Key
+Bottom Key 7: Play Key
+
+The right half of the Keyboard is a 1-octave midi keyboard that sends notes on the same midi channel as when not in macro mode. 
+
+### MidiFX
+
+MidiFX are effects that can be applied after midi data is generated by playing keys or a sequencer and before any midi data goes out of the OMX. 
+
+MidiFX can currently only be used within the: MI Mode, CHOR Mode, and EL Mode. 
+
+MidiFX currently only work on internally generated midi, but may support external midi coming in from USB in the future. 
+
+MidiFX are arranged in groups of 8 MidiFX. A group of 8 is called a MidiFX Group. In the MI Mode, midi notes generated by playing the keyboard can only be routed to one MidiFX Group. In the sequencer modes, midi notes can be routed to different MidiFX groups by track. 
+
+Think of a MidiFX group as a pedalboard for Midi. Midi data will come in from the left and go to MidiFX slot 1, then out of slot 1 to slot 2, until slot 8, then out of the OMX. 
+
+You can change the active MidiFX group in the MI Mode and the Chord modes by holding aux and pressing one of the Top Keys 6-10. 
+
+To enter the MidiFX submode, hold AUX, then hold or double click on a MidiFX Key(Top Keys 6-10). 
+
+Top Key 1: Copy
+Top Key 2: Paste
+Top Key 1 + 2: Cut
+Top Keys 3 - 10: Select a MidiFX slot
+Bottom Keys: Add or change the type of MidiFX for a slot. You must hold down the MidiFX slot key in order to change. 
+
+To move a MidiFX slot around, you can either cut and paste, or you can hold a MidiFX slot key and turn the encoder.
+
+There are several different MidiFX available for each slot. Select a MidiFX slot, and you can edit the parameters for that instance of a MidiFX. 
+
+Each MidiFX type will have a chance parameter. If this is less than 100%, than there is a chance this effect will not be applied. 
+
+Available MidiFX:
+- Chance: Uses randomness to determine if a note passes through: 100% or gets killed: 0%
+- Transpose: Transpose midi notes by semitones or octaves
+- Randomizer: Randomize notes by range, octaves, velocities, and note lengths. 
+- Harmonizer: Generate multiple notes from a single note. Great for 1 key chords, or to randomly play chords by setting it's chance parameter to less than 100%
+- Scaler: This forces notes into a specific scale. 
+   - By default this will use the global scale. Modifying the root and scale pattern parameters will change the global scale. 
+   - You can turn 'GLBL' to off to make this MidiFX instance use it's own unique root and scale pattern. 
+- Make Mono: This will force polyphonic midi notes into monophonic. 
+- Arpeggiator: This is an advanced arpeggiator. An arpeggiator MidiFX will automatically be added to a MidiFX group if you use any of the arpeggiator AUX quick keys. 
+   - Try combining the arpeggiator with other MidiFX either before or after the arpeggiator for interesting effects. 
+   - Arpeggiators are reasonably resource intensive, try to avoid using more than 3 of them in a MidiFX group for optimal performance. 
+
+### Arpeggiator
+
+The arpeggiator is an advanced arpeggiator with many different combinations of patterns, Mod Patterns, and Transpose patterns. 
+
+The arpeggiator is actually a MidiFX and is only available in the modes that support MidiFX: MI Mode, CHOR Mode, and EL Mode.
+
+In MI Mode and CHOR Mode, holding AUX will allow you to quickly change some basic settings of the arpeggiator. In order to access
+the more advanced functionalities, you will need to access the arpeggiator parameters by either entering the MidiFX Group submode or
+by accessing the Arpeggiator pass-through mode by using AUX + Bottom Key 12.
+
+The arpeggiator will send clock when in use.
+
+Parameters:
+
+Page 1:
+- `MODE`: Arpeggiator mode: On, 1-Shot, Once, Hold
+- `PAT`: The pattern of the arpeggiator
+- `RSET`: Determines what will cause the arpeggiator to reset. 
+- `CHC%`: How likely an incoming note will be used with the arpeggiator. This is fun to play with in the euclidean sequencer mode.
+
+Page 2:
+- `RATE`: How fast the arpeggiator plays
+- `RANG`: How many octaves to advance through
+- `GATE`: How long a note coming out of the arpeggiator is
+- `BPM`: Controls the master tempo.
+
+Page 3:
+- `ODIST`: How many semitones to consider an octave. Set to -12 to make the arpeggiator go downwards. Set to a semitone offset if you like to get weird. 
+
+Page 4:
+These are not modifyable. 
+- `VEL` : Velocity based on first notes that turn on the arp.
+- `CHAN` : First note that starts the arp sets the channel. 
+- `MIDI` : If midi data is output
+- `CV` : If CV data is output. 
+
+Page 5 - Mod Pattern:
+- Each of the 16 steps can be used to modify the arp pattern in various ways. 
+
+Page 6 - Transpose Pattern:
+- Each of the 16 steps can be used to transpose notes in semitones. 
+- Recommend trying to use for some cool one key bass patterns. 
+
 
 ### S1 - Sequencer 1
+
+#### "Black keys" (sharp/flat keyboard keys)
+
+The first 2 black keys are Function Keys (FUNC)
+- F1 - First black key
+- F2 - Second black key
+- F3 - Hold both F1 and F2
+
+The next 8 are Pattern Keys and they select the active sequence pattern (P1-P8).
+
+Hold a key (long press) to access parameters for that pattern. This is "Pattern Params".
+
+
+#### "White keys" (bottom row)
+
+Sequencer Step Keys - These are your sequencer step on/off keys.
+
+Hold a key (long press) to access parameters for that step. This is "Note Select / Step Parameters". F1 + Step Key is also a quick shortcut.
 
 Step sequencer - One pattern active at a time.
 
