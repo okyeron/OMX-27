@@ -416,10 +416,10 @@ Products That Use Type-A mini TRS Jack Connections
 
 Products That Use Type-B mini TRS Jack Connections
 - Arturia BeatStep Pro
+- Faderfox products
 - Novation products
 - Polyend products
 - 1010music Original Series 1 modules, Series 2 modules, Blackbox, MX4 and Euroshield
-- Faderfox products
 
 See https://1010music.com/stereo-minijacks-midi-connections-compatibility-guide for more information
 
