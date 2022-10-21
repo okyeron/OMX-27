@@ -101,19 +101,19 @@ void setup()
 	randomSeed(analogRead(13));
 	srand(analogRead(13));
 
-	// SET ANALOG READ resolution to teensy's 13 usable bits
-	analogReadResolution(13);
-
+	// SET ANALOG READ resolution Teensy 4 = 10 bits
+	analogReadResolution(10);
+	
 	// initialize ResponsiveAnalogRead
 	for (int i = 0; i < potCount; i++)
 	{
 		potSettings.analog[i] = new ResponsiveAnalogRead(0, true, .001);
-		potSettings.analog[i]->setAnalogResolution(1 << 13);
+//		potSettings.analog[i]->setAnalogResolution(10);
 
 		// ResponsiveAnalogRead is designed for 10-bit ADCs
 		// meanining its threshold defaults to 4. Let's bump that for
 		// our 13-bit adc by setting it to 4 << (13-10)
-		potSettings.analog[i]->setActivityThreshold(32);
+//		potSettings.analog[i]->setActivityThreshold(8);
 
 		currentValue[i] = 0;
 		lastMidiValue[i] = 0;
@@ -436,6 +436,7 @@ void readPotentimeters()
 		int prevValue = potSettings.analogValues[k];
 		int prevAnalog = potSettings.analog[k]->getValue();
 		temp = analogRead(analogPins[k]);
+		Serial.println(temp);
 		potSettings.analog[k]->update(temp);
 
 		// read from the smoother, constrain (to account for tolerances), and map it

@@ -2,7 +2,7 @@
 #include "consts.h"
 
 const OMXMode DEFAULT_MODE = MODE_MIDI;
-const uint8_t EEPROM_VERSION = 11;
+const uint8_t EEPROM_VERSION = 1;
 
 // DEFINE CC NUMBERS FOR POTS // CCS mapped to Organelle Defaults
 const int CC1 = 21;
@@ -26,6 +26,8 @@ const int LED_COUNT = 27;
 	const int analogPins[] = {23,22,21,20,16};  // DEV/beta boards
 #elif MIDIONLY
 	const int analogPins[] = {23,22,21,20,16};  // on MIDI only boards - {23,A10,21,20,16} on Bodged MIDI boards
+#elif T4
+	const int analogPins[] = {23,22,21,20,16};  // 
 #else
 	const int analogPins[] = {A10,22,21,20,16}; // on 1.0
 #endif
