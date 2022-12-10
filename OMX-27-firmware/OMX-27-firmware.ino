@@ -48,7 +48,7 @@ MusicScales globalScale;
 int volatile currentValue[NUM_CC_POTS];
 int lastMidiValue[NUM_CC_POTS];
 int potMin = 0;
-int potMax = 8190;
+int potMax = 1019; //8190;
 int temp;
 
 Micros lastProcessTime;
@@ -59,7 +59,10 @@ int V_scale;
 
 // ENCODER
 Encoder myEncoder(12, 11); // encoder pins on hardware
-Button encButton(0);	   // encoder button pin on hardware
+const int buttonPin = 0;    
+int buttonState = 1; 
+Button encButton(buttonPin);	   // encoder button pin on hardware
+
 // long newPosition = 0;
 // long oldPosition = -999;
 
@@ -79,9 +82,9 @@ void setup()
 {
 	Serial.begin(115200);
 	//	while( !Serial );
-	Serial.println("DAC Start!");
+//	Serial.println("DAC Start!");
 	dac.begin(0x62);
-	
+
 	storage = Storage::initStorage();
 	sysEx = new SysEx(storage, &sysSettings);
 
@@ -98,16 +101,25 @@ void setup()
 	lastProcessTime = micros();
 	omxUtil.resetClocks();
 
+	// HW MIDI
+	MM::begin();
+
 	randomSeed(analogRead(13));
 	srand(analogRead(13));
 
 	// SET ANALOG READ resolution Teensy 4 = 10 bits
 	analogReadResolution(10);
 	
-	// initialize ResponsiveAnalogRead
+	// CV GATE pin
+	pinMode(CVGATE_PIN, OUTPUT);
+	// ENCODER BUTTON pin
+	pinMode(buttonPin, INPUT_PULLUP);
+
+	// initialize ANALOG INPUTS and ResponsiveAnalogRead
 	for (int i = 0; i < potCount; i++)
 	{
-		potSettings.analog[i] = new ResponsiveAnalogRead(0, true, .001);
+		pinMode(analogPins[i], INPUT);
+		potSettings.analog[i] = new ResponsiveAnalogRead(analogPins[i], true, .001);
 //		potSettings.analog[i]->setAnalogResolution(10);
 
 		// ResponsiveAnalogRead is designed for 10-bit ADCs
@@ -119,12 +131,6 @@ void setup()
 		lastMidiValue[i] = 0;
 	}
 
-
-	// HW MIDI
-	MM::begin();
-
-	// CV gate pin
-	pinMode(CVGATE_PIN, OUTPUT);
 
 	// set DAC Resolution CV/GATE
 	RES = 12;
@@ -435,12 +441,11 @@ void readPotentimeters()
 	{
 		int prevValue = potSettings.analogValues[k];
 		int prevAnalog = potSettings.analog[k]->getValue();
-		temp = analogRead(analogPins[k]);
-		Serial.println(temp);
-		potSettings.analog[k]->update(temp);
+//		temp = analogRead(analogPins[k]);
+		potSettings.analog[k]->update(); // potSettings.analog[k]->update(temp);
 
 		// read from the smoother, constrain (to account for tolerances), and map it
-		temp = potSettings.analog[k]->getValue();
+		temp = potSettings.analog[k]->getValue();	
 		temp = constrain(temp, potMin, potMax);
 		temp = map(temp, potMin, potMax, 0, 16383);
 

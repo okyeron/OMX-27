@@ -82,14 +82,18 @@ Button::State Button::update()
 
 	switch (state) {
 		case Up:
+// 			Serial.println("button up");
 		case UpLong:
+// 			Serial.println("button up long");
 			if (lastRead == LOW) {
 				state = Down;
 				longAtTime = now + longDownTimeout;
+			
 			}
 			break;
 
 		case Down:
+// 			Serial.println("button down");
 			if (lastRead == LOW) {  // still down?
 				if (now > longAtTime) {
 					state = DownLong;
@@ -99,6 +103,7 @@ Button::State Button::update()
 			// fall through
 
 		case DownLong:
+// 			Serial.println("button down");
 			if (lastRead == HIGH) {
 				state = (prevState == DownLong) ? UpLong : Up;
 			}
