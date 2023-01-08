@@ -8,6 +8,9 @@
 #define NUM_STEPS 64
 #define NUM_STEPKEYS 16
 
+const uint8_t defaultNoteLength = 3; // index from kNoteLengths[] = {0.10, 0.25, 0.5, 0.75, 1, 1.5, 2, 4, 8, 16};
+// see config.cpp 
+
 struct TimePerPattern {
 	Micros lastProcessTimeP : 32;
 	Micros nextStepTimeP : 32;

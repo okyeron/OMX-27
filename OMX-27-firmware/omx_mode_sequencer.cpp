@@ -1585,7 +1585,7 @@ void OmxModeSequencer::initPatterns()
     //		49,
     //		51 };
 
-    StepNote stepNote = {0, 100, 0, TRIGTYPE_MUTE, {-1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE};
+    StepNote stepNote = {0, 100, defaultNoteLength, TRIGTYPE_MUTE, {-1, -1, -1, -1, -1}, 100, 0, STEPTYPE_NONE};
     // {note, vel, len, TRIGTYPE, {params0, params1, params2, params3, params4}, prob, condition, STEPTYPE}
 
     for (int i = 0; i < NUM_SEQ_PATTERNS; i++)
