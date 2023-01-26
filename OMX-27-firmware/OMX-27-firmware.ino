@@ -83,7 +83,7 @@ void setup()
 	Serial.begin(115200);
 	//	while( !Serial );
 //	Serial.println("DAC Start!");
-	dac.begin(0x62);
+	dac.begin(DAC_ADDR);
 
 	storage = Storage::initStorage();
 	sysEx = new SysEx(storage, &sysSettings);

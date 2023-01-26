@@ -67,6 +67,8 @@ extern const int LED_BRIGHTNESS;
 extern const int LED_PIN;
 extern const int LED_COUNT;
 
+extern const byte DAC_ADDR;
+
 // POTS/ANALOG INPUTS - teensy pins for analog inputs
 extern const int analogPins[];
 
