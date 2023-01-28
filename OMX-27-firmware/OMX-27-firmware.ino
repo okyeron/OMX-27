@@ -1,9 +1,9 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
 
-// v 1.7.7
+// v 1.7.8
 
 //
-// Steven Noreyko, Last update: July 2022
+// Steven Noreyko, Last update: January 2023
 //
 //
 //	Big thanks to:
