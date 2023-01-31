@@ -64,9 +64,9 @@ After you're happy with the LEDs being in the proper positions - solder the rest
 
 For the keyplate to fit properly, the Teensy MUST be flush-mounted to the top of the main PCB.
 
-An insulating kapton spacer is included with your kit. Use this between the bottom of the teensy and the main PCB to reduce the chances of unintended shorts.
+(Teensy 3.2 and PCB v1.5 only) An insulating kapton spacer is included with your kit . Use this between the bottom of the teensy and the main PCB to reduce the chances of unintended shorts.
 
-__Teensy jig__
+__Teensy 3.2 jig__
 
 Use the included acrylic jig to set up your teensy like the following for soldering.  
 
@@ -89,7 +89,19 @@ Drop the Teensy into place. There should just be a small amount of header sticki
 
 DON'T SOLDER A HEADER TO THE VUSB PIN - it's not used. This is the 1x1 pin/hole right next to the USB jack on the Teensy (on the inside row).
 
-(PIC NEEDED) 
+
+
+__Teensy 4.0 jig__
+
+The Teensy 4.0 version only uses the 2 outer rows of pins. (4 less pins to solder!)
+
+Note the plastic parts of the jig have an etched out area - this is to allow space for the components on the underside of the Teensy 4.0.  
+
+<img src="buildpix/T4-jig.jpg" alt="LEDs" width="720" height="540" />
+
+<img src="buildpix/T4-jig2.jpg" alt="LEDs" width="720" height="540" />
+
+
 
 Solder the pins to the Teensy first.
 
