@@ -93,7 +93,7 @@ DON'T SOLDER A HEADER TO THE VUSB PIN - it's not used. This is the 1x1 pin/hole 
 
 __Teensy 4.0 jig__
 
-The Teensy 4.0 version only uses the 2 outer rows of pins. (4 less pins to solder!)
+The Teensy 4.0 version (board v2.0) only uses the 2 outer rows of pins. (4 less pins to solder!)
 
 Note the plastic parts of the jig have an etched out area - this is to allow space for the components on the underside of the Teensy 4.0.  
 
@@ -102,6 +102,7 @@ Note the plastic parts of the jig have an etched out area - this is to allow spa
 <img src="buildpix/T4-jig2.jpg" alt="LEDs" width="720" height="540" />
 
 
+__Soldering__
 
 Solder the pins to the Teensy first.
 
