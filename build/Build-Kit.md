@@ -66,6 +66,8 @@ For the keyplate to fit properly, the Teensy MUST be flush-mounted to the top of
 
 (Teensy 3.2 and PCB v1.5 only) An insulating kapton spacer is included with your kit . Use this between the bottom of the teensy and the main PCB to reduce the chances of unintended shorts.
 
+See below for Teensy 4.0 instructions.  
+
 __Teensy 3.2 jig__  
 
 Use the included acrylic jig to set up your teensy like the following for soldering.  
