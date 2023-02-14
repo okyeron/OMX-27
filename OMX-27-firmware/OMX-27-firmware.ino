@@ -47,8 +47,8 @@ MusicScales globalScale;
 // storage of pot values; current is in the main loop; last value is for midi output
 int volatile currentValue[NUM_CC_POTS];
 int lastMidiValue[NUM_CC_POTS];
-int potMin = 0;
-int potMax = 1019; //8190;
+//int potMin = 0;
+//int potMax = 1019; //8190;
 int temp;
 
 Micros lastProcessTime;
@@ -82,9 +82,10 @@ void setup()
 {
 	Serial.begin(115200);
 	//	while( !Serial );
+#if T4
 //	Serial.println("DAC Start!");
 	dac.begin(DAC_ADDR);
-
+#endif
 	storage = Storage::initStorage();
 	sysEx = new SysEx(storage, &sysSettings);
 
@@ -107,9 +108,13 @@ void setup()
 	randomSeed(analogRead(13));
 	srand(analogRead(13));
 
-	// SET ANALOG READ resolution Teensy 4 = 10 bits
-	analogReadResolution(10);
-	
+	// SET ANALOG READ resolution 
+#if T4
+	analogReadResolution(10); // Teensy 4 = 10 bits
+#else
+	analogReadResolution(13); // Teensy 3.x = 13 bits
+#endif	
+
 	// CV GATE pin
 	pinMode(CVGATE_PIN, OUTPUT);
 	// ENCODER BUTTON pin
@@ -120,25 +125,30 @@ void setup()
 	{
 		pinMode(analogPins[i], INPUT);
 		potSettings.analog[i] = new ResponsiveAnalogRead(analogPins[i], true, .001);
-//		potSettings.analog[i]->setAnalogResolution(10);
 
-		// ResponsiveAnalogRead is designed for 10-bit ADCs
-		// meanining its threshold defaults to 4. Let's bump that for
-		// our 13-bit adc by setting it to 4 << (13-10)
-//		potSettings.analog[i]->setActivityThreshold(8);
+		#if T4
+//			potSettings.analog[i]->setAnalogResolution(10);
+//			potSettings.analog[i]->setActivityThreshold(8);
+		#else
+			potSettings.analog[i]->setAnalogResolution(1 << 13);
+			potSettings.analog[i]->setActivityThreshold(32);
+		#endif
 
 		currentValue[i] = 0;
 		lastMidiValue[i] = 0;
 	}
 
-
 	// set DAC Resolution CV/GATE
 	RES = 12;
-//	analogWriteResolution(RES); // set resolution for DAC
 	AMAX = pow(2, RES);
 	V_scale = 64; // pow(2,(RES-7)); 4095 max
-//	analogWrite(CVPITCH_PIN, 0);
+
+#if T4
 	dac.setVoltage(0, false);
+#else
+	analogWriteResolution(RES); // set resolution for DAC
+	analogWrite(CVPITCH_PIN, 0);
+#endif
 
 	globalScale.calculateScale(scaleConfig.scaleRoot, scaleConfig.scalePattern);
 	omxModeMidi.SetScale(&globalScale);
@@ -441,8 +451,9 @@ void readPotentimeters()
 	{
 		int prevValue = potSettings.analogValues[k];
 		int prevAnalog = potSettings.analog[k]->getValue();
-//		temp = analogRead(analogPins[k]);
-		potSettings.analog[k]->update(); // potSettings.analog[k]->update(temp);
+		temp = analogRead(analogPins[k]);
+		potSettings.analog[k]->update(temp);
+//		potSettings.analog[k]->update();
 
 		// read from the smoother, constrain (to account for tolerances), and map it
 		temp = potSettings.analog[k]->getValue();	
@@ -451,7 +462,7 @@ void readPotentimeters()
 
 		// map and update the value
 		potSettings.analogValues[k] = temp >> 7;
-
+		
 		int newAnalog = potSettings.analog[k]->getValue();
 
 		int analogDelta = abs(newAnalog - prevAnalog);

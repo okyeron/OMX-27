@@ -17,10 +17,10 @@
 //const int OMX_VERSION = 1.7.8;
 
 /* * firmware metadata  */
-// OMX_VERSION = 1.7.8
+// OMX_VERSION = 1.7.9
 const int MAJOR_VERSION = 1;
 const int MINOR_VERSION = 7;
-const int POINT_VERSION = 8;
+const int POINT_VERSION = 9;
 
 const int DEVICE_ID     = 2;
 

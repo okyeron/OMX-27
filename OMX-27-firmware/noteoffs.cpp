@@ -2,6 +2,7 @@
 
 #include <Arduino.h>
 #include "consts.h"
+#include "config.h"
 #include "MM.h"
 
 
@@ -72,9 +73,13 @@ void PendingNoteOns::play(uint32_t now) {
 
 		if (queue[i].sendCV){
 			if (queue[i].note>=midiLowestNote && queue[i].note <midiHightestNote){
-				pCV = static_cast<int>(roundf( (queue[i].note - midiLowestNote) * stepsPerSemitone));
+				pCV = static_cast<int>(roundf( (queue[i].note - midiLowestNote) * stepsPerSemitone)); // map (adjnote, 36, 91, 0, 4080);
 				digitalWrite(CVGATE_PIN, HIGH);
-// 				analogWrite(CVPITCH_PIN, pCV);
+				#if T4
+					dac.setVoltage(pCV, false);
+				#else		
+					analogWrite(CVPITCH_PIN, pCV);
+				#endif
 			}
 		}
 		queue[i].inUse = false;

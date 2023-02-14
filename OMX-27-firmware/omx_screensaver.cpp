@@ -1,4 +1,5 @@
 #include "omx_screensaver.h"
+#include "consts.h"
 #include "config.h"
 #include "omx_util.h"
 #include "omx_disp.h"
@@ -6,8 +7,9 @@
 
 void OmxScreensaver::onPotChanged(int potIndex, int prevValue, int newValue, int analogDelta)
 {
-    colorConfig.screensaverColor = potSettings.analog[4]->getValue() * 4; // value is 0-32764 for strip.ColorHSV
-
+	int pot_temp = map(potSettings.analog[4]->getValue(), potMin, potMax, 0, 32764);
+    colorConfig.screensaverColor = pot_temp; // value is 0-32764 for strip.ColorHSV
+	Serial.println(colorConfig.screensaverColor);
     // reset screensaver
     if (potSettings.analog[0]->hasChanged() || potSettings.analog[1]->hasChanged() || potSettings.analog[2]->hasChanged() || potSettings.analog[3]->hasChanged())
     {

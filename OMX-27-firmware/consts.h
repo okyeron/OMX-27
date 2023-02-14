@@ -18,7 +18,14 @@
 	const int CVGATE_PIN = 23;  // 13 on beta1 boards, 22 on test, 23 on 1.0
 #endif
 
+#if T4
 // const int CVPITCH_PIN = A14;
+#else
+	const int CVPITCH_PIN = A14;
+#endif
+
+const int potMin = 0;
+const int potMax = 1019; //8190;
 
 const int loSkip = 0;
 const int hiSkip = 0;
