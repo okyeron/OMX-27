@@ -14,14 +14,14 @@ USBMIDI should be plug-and-play with any USBMIDI compatible host. iPad works gre
 
 The OMX-27 has multiple modes. Each is independent - only one mode can be used at a time. 
 
-The current modes are:
-MI - Midi Keyboard  
-CH - Chords  
-S1 - A step sequencer with 8 patterns that can be up to 64 steps. Only one pattern can be active at a time  
-S2 - The same as S1 but all 8 patterns are active  
-GR - Grids Sequencer  (A rhythm sequencer based on Mutable Instruments Grids)  
-EL - Euclidean Sequencer   
-OM - Organelle Mother  
+The current modes are:  
+- MI - Midi Keyboard  
+- CH - Chords  
+- S1 - A step sequencer with 8 patterns that can be up to 64 steps. Only one pattern can be active at a time  
+- S2 - The same as S1 but all 8 patterns are active  
+- GR - Grids Sequencer  (A rhythm sequencer based on Mutable Instruments Grids)  
+- EL - Euclidean Sequencer   
+- OM - Organelle Mother  
 
 Long press the encoder to change modes. 
 
@@ -101,7 +101,7 @@ The next time you restart your device, your last active mode will be loaded, and
 Saving is a long operation and not recommended to do while in the middle of a performance. 
 
 # Modes
-
+---
 ## MI - MIDI
 
 MIDI Keyboard. 
@@ -598,7 +598,7 @@ Settings:
 
 NOTE: Setting STEP = 0 and PROB = 1 dictates random trigger steps which can lead to interesting results by jumping to random position/step.
 
-
+---
 
 # MIDI Switch for the mini TRS output jack connection
 
