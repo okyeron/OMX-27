@@ -6,6 +6,8 @@ Mechanical key switch midi keyboard and sequencer. Based on Teensy 3.2 and Cherr
 
 Full kits and partial kits are [available for sale here](https://denki-oto.weebly.com/#/).
 
+Dimensions:  313mm x 65mm  
+
 ## Firmware 
 
 Kits are shipped with a blank Teensy. You will need to flash the firmware to the device.
