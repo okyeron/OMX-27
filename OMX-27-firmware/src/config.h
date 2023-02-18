@@ -1,7 +1,7 @@
 #pragma once
 
 #ifndef OMX_CONFIG_DONE
-#define OMX_CONFIG_DONE // prevent redifinition pragma once should handle though. 
+#define OMX_CONFIG_DONE // prevent redifinition pragma once should handle though.
 
 #include <Arduino.h>
 #include <stdio.h>
@@ -26,9 +26,9 @@ enum OMXMode
 	MODE_CHORDS,
 	MODE_S1,
 	MODE_S2,
-	MODE_OM,
 	MODE_GRIDS,
 	MODE_EUCLID,
+	MODE_OM,
 
 	NUM_OMX_MODES
 };
@@ -118,7 +118,7 @@ struct PotSettings
 	int potCC = pots[potbank][0];
 	int potVal = analogValues[0];
 	int potNum = 0;
-	
+
 };
 // Put in global struct to share across classes
 extern PotSettings potSettings;
@@ -270,11 +270,11 @@ struct ScaleConfig
 {
 	int scaleRoot = 0;
 	int scalePattern = -1;
-	bool lockScale = false; // If Scale is locked you will be unable to play notes out of the scale. 
-	bool group16 = false; // If group16 is active, all notes in scale will be grouped into lower 16 notes. 
+	bool lockScale = false; // If Scale is locked you will be unable to play notes out of the scale.
+	bool group16 = false; // If group16 is active, all notes in scale will be grouped into lower 16 notes.
 	bool scaleSelectHold;
 	bool showScaleInSeq = false;
-}; 
+};
 
 extern ScaleConfig scaleConfig;
 
