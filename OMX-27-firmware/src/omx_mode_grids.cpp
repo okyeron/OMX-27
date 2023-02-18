@@ -144,7 +144,7 @@ void OmxModeGrids::onPotChanged(int potIndex, int prevValue, int newValue, int a
 
         // if (analogDelta >= 10)
         // {
-            
+
         // }
     }
 }
@@ -240,12 +240,12 @@ void OmxModeGrids::onEncoderChanged(Encoder::Update enc)
     {
         // // Change selected param while holding F1
         // if (enc.dir() < 0) // if turn CCW
-        // { 
+        // {
         //     setParam(param - 1);
         //     omxDisp.setDirty();
         // }
         // else if (enc.dir() > 0) // if turn CW
-        // { 
+        // {
         //     setParam(param + 1);
         //     omxDisp.setDirty();
         // }
@@ -257,7 +257,7 @@ void OmxModeGrids::onEncoderChanged(Encoder::Update enc)
 
     // int paramStep = param % 5;
 
-    int8_t selPage = params.getSelPage(); 
+    int8_t selPage = params.getSelPage();
     int8_t selParam = params.getSelParam() + 1; // Add one for readability
 
     // if (paramStep != 0) // Page select mode if 0
@@ -450,7 +450,7 @@ void OmxModeGrids::onEncoderButtonDownLong()
         midiKeyboard.onEncoderButtonDownLong();
         return;
     }
-    
+
 }
 
 bool OmxModeGrids::shouldBlockEncEdit()
@@ -538,7 +538,7 @@ void OmxModeGrids::onNoteTriggered(uint8_t gridsChannel, MidiNoteGroup note)
     // Serial.println("OmxModeEuclidean::onNoteTriggered " + String(euclidIndex) + " note: " + String(note.noteNumber));
 
     // uint8_t mfxIndex = euclids[euclidIndex].midiFXGroup;
-    
+
     // subModeMidiFx[mfxIndex].noteInput(note);
 
     // omxDisp.setDirty();
@@ -575,7 +575,7 @@ void OmxModeGrids::onKeyUpdate(OMXKeypadEvent e)
 {
     int thisKey = e.key();
 	auto keyState = midiSettings.keyState;
-	
+
     if (midiModeception)
     {
         midiKeyboard.onKeyUpdate(e);
@@ -596,12 +596,12 @@ void OmxModeGrids::onKeyUpdate(OMXKeypadEvent e)
         onKeyUpdateChanLock(e);
         return;
     }
-   
+
     if (!e.held())
     {
         if (e.down() && thisKey == 0) // Aux key down
         {
-            // Sequencer shouldn't be a dependancy here but current is used to advance clocks. 
+            // Sequencer shouldn't be a dependancy here but current is used to advance clocks.
             if (isPlaying_ && gridsAUX)
             {
                 stopPlayback();
@@ -614,9 +614,9 @@ void OmxModeGrids::onKeyUpdate(OMXKeypadEvent e)
         else if (e.down() && e.clicks() == 0 && (thisKey > 2 && thisKey < 11))
         {
             int patt = thisKey - 3;
-            
+
             if (f2_)
-            { 
+            {
                 saveActivePattern(patt);
             }
             else if(fNone_)
@@ -701,7 +701,7 @@ void OmxModeGrids::onKeyUpdate(OMXKeypadEvent e)
         // }
         // else if (!e.down() && (thisKey > 14 && thisKey < 19))
         // {
-            
+
         // }
     }
     // RANDOM X or Y with bottom key + F2
@@ -711,7 +711,7 @@ void OmxModeGrids::onKeyUpdate(OMXKeypadEvent e)
     	{
 			if (e.down() && (thisKey == 2))
 			{
-				if (j < 15) 
+				if (j < 15)
 				{
 					int whichX = j - 11;
 					int newX = random(0, 255);
@@ -731,7 +731,7 @@ void OmxModeGrids::onKeyUpdate(OMXKeypadEvent e)
 			}
     	}
     }
-    
+
 }
 
 void OmxModeGrids::onKeyUpdateChanLock(OMXKeypadEvent e)
@@ -752,9 +752,9 @@ void OmxModeGrids::onKeyUpdateChanLock(OMXKeypadEvent e)
         // else if (e.down() && e.clicks() == 0 && (thisKey > 2 && thisKey < 11))
         // {
         //     int patt = thisKey - 3;
-            
+
         //     if (f2_)
-        //     { 
+        //     {
         //         saveActivePattern(patt);
         //     }
         //     else if(fNone_)
@@ -960,7 +960,7 @@ void OmxModeGrids::updateLEDs()
     {
         updateLEDsPatterns();
 
-        // Set 16 key leds to off to prevent them from sticking on after screensaver. 
+        // Set 16 key leds to off to prevent them from sticking on after screensaver.
         for (int k = 0; k < 16; k++)
         {
             strip.setPixelColor(k + 11, LEDOFF);
@@ -1359,7 +1359,7 @@ void OmxModeGrids::onDisplayUpdate()
         {
             setupPageLegends();
             omxDisp.dispGenericMode2(params.getNumPages(), params.getSelPage(), params.getSelParam(), encoderSelect);
-            
+
             // int pselected = param % NUM_DISP_PARAMS;
             // omxDisp.dispGenericMode(pselected);
         }

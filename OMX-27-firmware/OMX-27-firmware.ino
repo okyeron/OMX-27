@@ -1,38 +1,42 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
 
-// v1.12.15alpha
-
+//	v1.12.15
+//	Last update: February 2023
 //
-// Steven Noreyko, Last update: July 2022
-//
+//	Original concept and initial code by Steven Noreyko
+//  Additional code contributions:
+// 		Matt Boone, Steven Zydek,
+// 		Chris Atkins, Will Winder,
+// 		Michael P Jones
 //
 //	Big thanks to:
 //	John Park and Gerald Stevens for initial testing and feature ideas
 //	mzero for immense amounts of code coaching/assistance
 //	drjohn for support
-//  Additional code contributions: Matt Boone, Steven Zydek, Chris Atkins, Will Winder, Michael P Jones
+//
+
 #include <functional>
 #include <ResponsiveAnalogRead.h>
-#include "consts.h"
-#include "config.h"
-#include "colors.h"
-#include "MM.h"
-#include "ClearUI.h"
-#include "sequencer.h"
-#include "noteoffs.h"
-#include "storage.h"
-#include "sysex.h"
-#include "omx_keypad.h"
-#include "omx_util.h"
-#include "omx_disp.h"
-#include "omx_mode_midi_keyboard.h"
-#include "omx_mode_sequencer.h"
-#include "omx_mode_grids.h"
-#include "omx_mode_euclidean.h"
-#include "omx_mode_chords.h"
-#include "omx_screensaver.h"
-#include "omx_leds.h"
-#include "music_scales.h"
+#include "src/consts.h"
+#include "src/config.h"
+#include "src/colors.h"
+#include "src/MM.h"
+#include "src/ClearUI.h"
+#include "src/sequencer.h"
+#include "src/noteoffs.h"
+#include "src/storage.h"
+#include "src/sysex.h"
+#include "src/omx_keypad.h"
+#include "src/omx_util.h"
+#include "src/omx_disp.h"
+#include "src/omx_mode_midi_keyboard.h"
+#include "src/omx_mode_sequencer.h"
+#include "src/omx_mode_grids.h"
+#include "src/omx_mode_euclidean.h"
+#include "src/omx_mode_chords.h"
+#include "src/omx_screensaver.h"
+#include "src/omx_leds.h"
+#include "src/music_scales.h"
 
 // Allows code to compile with smallest code LTO
 extern "C"{
@@ -232,7 +236,7 @@ void readPotentimeters()
 			}
 			// don't send pots in screensaver
 			else
-			{ 
+			{
 				activeOmxMode->onPotChanged(k, prevValue, potSettings.analogValues[k], analogDelta);
 			}
 		}
@@ -284,7 +288,7 @@ void handleControlChange(byte channel, byte control, byte value)
 void OnNoteOn(byte channel, byte note, byte velocity)
 {
 	handleNoteOn(channel, note, velocity);
-	
+
 }
 void OnNoteOff(byte channel, byte note, byte velocity)
 {
@@ -467,7 +471,7 @@ void savePatterns(void)
 	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 6321
 
 	Serial.println("Saving MidiFX");
-	
+
 	for(uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
 	{
 		nLocalAddress = subModeMidiFx[i].saveToDisk(nLocalAddress, storage);
@@ -555,7 +559,7 @@ void loadPatterns(void)
 	// Serial.println((String)"nLocalAddress: " + nLocalAddress); // 5968
 
 	Serial.println("Loading MidiFX");
-	
+
 	for(uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
 	{
 		nLocalAddress = subModeMidiFx[i].loadFromDisk(nLocalAddress, storage);
@@ -580,8 +584,8 @@ void loadPatterns(void)
 	// no arps = 9905, 5 arps = 10105, 25 arps = 11505
 
 	// no arps = 10929, 5 arps = 11129, 25 arps = 12529
-	// 
-	
+	//
+
 }
 
 // currently saves everything ( mode + patterns )
@@ -847,7 +851,7 @@ void loop()
 	// 	// report_ram();
 	// };
 
-	
+
 
 #ifdef RAM_MONITOR
 	uint32_t time = millis();
