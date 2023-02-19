@@ -3,7 +3,7 @@
 // OMX-27 shared constants
 
 // HW_VERSIONS
-#define DEV         1
+#define DEV         0
 #define T4          1
 #define MIDIONLY    0
 
