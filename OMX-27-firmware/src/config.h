@@ -8,6 +8,8 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <ResponsiveAnalogRead.h>
+#include <Wire.h>
+#include <Adafruit_MCP4725.h>
 #include "colors.h"
 
 // #include <cstdarg>
@@ -19,6 +21,9 @@ const int MINOR_VERSION = 12;
 const int POINT_VERSION = 15;
 
 const int DEVICE_ID     = 2;
+
+// DAC
+extern Adafruit_MCP4725 dac;
 
 enum OMXMode
 {
@@ -64,6 +69,8 @@ extern const uint8_t EEPROM_VERSION;
 #define EEPROM_PATTERN_ADDRESS           64
 
 // next address 1104 (was 1096 before clock)
+
+extern const byte DAC_ADDR;
 
 // DEFINE CC NUMBERS FOR POTS // CCS mapped to Organelle Defaults
 extern const int CC1;

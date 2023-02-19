@@ -76,7 +76,10 @@ int V_scale;
 
 // ENCODER
 Encoder myEncoder(12, 11); // encoder pins on hardware
-Button encButton(0);	   // encoder button pin on hardware
+const int buttonPin = 0;
+int buttonState = 1;
+Button encButton(buttonPin);
+
 // long newPosition = 0;
 // long oldPosition = -999;
 
@@ -873,6 +876,10 @@ void setup()
 {
 	Serial.begin(115200);
 	//	while( !Serial );
+#if T4
+//	Serial.println("DAC Start!");
+	dac.begin(DAC_ADDR);
+#endif
 	storage = Storage::initStorage();
 	sysEx = new SysEx(storage, &sysSettings);
 
@@ -893,40 +900,55 @@ void setup()
 	lastProcessTime = micros();
 	omxUtil.resetClocks();
 
+	// HW MIDI
+	MM::begin();
+
 	randomSeed(analogRead(13));
 	srand(analogRead(13));
 
 	// SET ANALOG READ resolution to teensy's 13 usable bits
-	analogReadResolution(13);
+#if T4
+	analogReadResolution(10); // Teensy 4 = 10 bits
+#else
+	analogReadResolution(13); // Teensy 3.x = 13 bits
+#endif
 
-	// initialize ResponsiveAnalogRead
+	// CV GATE pin
+	pinMode(CVGATE_PIN, OUTPUT);
+	// ENCODER BUTTON pin
+	pinMode(buttonPin, INPUT_PULLUP);
+
+// initialize ANALOG INPUTS and ResponsiveAnalogRead
 	for (int i = 0; i < potCount; i++)
 	{
-		potSettings.analog[i] = new ResponsiveAnalogRead(0, true, .001);
-		potSettings.analog[i]->setAnalogResolution(1 << 13);
+// 		potSettings.analog[i] = new ResponsiveAnalogRead(0, true, .001);
+// 		potSettings.analog[i]->setAnalogResolution(1 << 13);
+		pinMode(analogPins[i], INPUT);
+		potSettings.analog[i] = new ResponsiveAnalogRead(analogPins[i], true, .001);
 
-		// ResponsiveAnalogRead is designed for 10-bit ADCs
-		// meanining its threshold defaults to 4. Let's bump that for
-		// our 13-bit adc by setting it to 4 << (13-10)
-		potSettings.analog[i]->setActivityThreshold(32);
+		#if T4
+//			potSettings.analog[i]->setAnalogResolution(10);
+//			potSettings.analog[i]->setActivityThreshold(8);
+		#else
+			potSettings.analog[i]->setAnalogResolution(1 << 13);
+			potSettings.analog[i]->setActivityThreshold(32);
+		#endif
 
 		currentValue[i] = 0;
 		lastMidiValue[i] = 0;
 	}
 
-
-	// HW MIDI
-	MM::begin();
-
-	// CV gate pin
-	pinMode(CVGATE_PIN, OUTPUT);
-
 	// set DAC Resolution CV/GATE
 	RES = 12;
-	analogWriteResolution(RES); // set resolution for DAC
 	AMAX = pow(2, RES);
 	V_scale = 64; // pow(2,(RES-7)); 4095 max
+
+#if T4
+	dac.setVoltage(0, false);
+#else
+	analogWriteResolution(RES); // set resolution for DAC
 	analogWrite(CVPITCH_PIN, 0);
+#endif
 
 	globalScale.calculateScale(scaleConfig.scaleRoot, scaleConfig.scalePattern);
 	omxModeMidi.SetScale(&globalScale);

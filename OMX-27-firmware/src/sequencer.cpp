@@ -405,7 +405,7 @@ void doStepS1()
 						}
 					}
 				}
-				// No need to have this function call in here. 
+				// No need to have this function call in here.
 				// Can put into omx_mode_sequencer and remove extern function
 				// if (j == sequencer.playingPattern)
 				// { // only show selected pattern
@@ -609,7 +609,7 @@ void playNote(int patternNum) {
 
 		} else {
 			seqConfig.noteon_micros = micros();
-			
+
 		}
 
 		if(pendingNoteOffs.sendOffIfPresent(steps[sequencer.seqPos[patternNum]].note, sequencer.getPatternChannel(patternNum), sendnoteCV))
@@ -650,7 +650,11 @@ void allNotesOff() {
 }
 
 void allNotesOffPanic() {
-	analogWrite(CVPITCH_PIN, 0);
+	#if T4
+		dac.setVoltage(0, false);
+	#else
+		analogWrite(CVPITCH_PIN, 0);
+	#endif
 	digitalWrite(CVGATE_PIN, LOW);
 	for (int j=0; j<128; j++){
 		MM::sendNoteOff(j, 0, sysSettings.midiChannel); // NEEDS FIXING

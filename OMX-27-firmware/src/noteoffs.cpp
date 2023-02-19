@@ -2,6 +2,7 @@
 
 #include <Arduino.h>
 #include "consts.h"
+#include "config.h"
 #include "MM.h"
 
 PendingNoteHistory::PendingNoteHistory()
@@ -124,7 +125,7 @@ bool PendingNoteOffs::sendOffIfPresent(int note, int channel, bool sendCV)
 		if (queue[i].inUse && queue[i].channel == channel && queue[i].note == note)
 		{
 			// Send note off event for first note found
-			// Other pending note offs just get set to not in use. 
+			// Other pending note offs just get set to not in use.
 			if (!noteOffSent)
 			{
 				pendingNoteHistory.insert(queue[i].note, queue[i].channel);
@@ -194,7 +195,7 @@ PendingNoteOns::PendingNoteOns() {
 }
 
 bool PendingNoteOns::insert(int note, int velocity, int channel, uint32_t time, bool sendCV) {
-	
+
 	// pendingNoteOffs.sendOffIfPresent(note, channel, sendCV);
 
 	for (int i = 0; i < queueSize; ++i) {
@@ -241,8 +242,13 @@ void PendingNoteOns::play(uint32_t now)
 				if (queue[i].note >= midiLowestNote && queue[i].note < midiHightestNote)
 				{
 					pCV = static_cast<int>(roundf((queue[i].note - midiLowestNote) * stepsPerSemitone));
+					// map (adjnote, 36, 91, 0, 4080);
 					digitalWrite(CVGATE_PIN, HIGH);
-					analogWrite(CVPITCH_PIN, pCV);
+					#if T4
+						dac.setVoltage(pCV, false);
+					#else
+						analogWrite(CVPITCH_PIN, pCV);
+					#endif
 				}
 			}
 			queue[i].inUse = false;

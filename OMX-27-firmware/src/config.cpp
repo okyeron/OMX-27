@@ -24,10 +24,16 @@ const int LED_COUNT = 27;
 
 #if DEV
 	const int analogPins[] = {23,22,21,20,16};  // DEV/beta boards
+	const byte DAC_ADDR = 0x62;
 #elif MIDIONLY
 	const int analogPins[] = {23,22,21,20,16};  // on MIDI only boards - {23,A10,21,20,16} on Bodged MIDI boards
+	const byte DAC_ADDR = 0x60;
+#elif T4
+	const int analogPins[] = {23,22,21,20,16};  // on 2.0
+	const byte DAC_ADDR = 0x60;
 #else
 	const int analogPins[] = {34,22,21,20,16}; // on 1.0
+	const byte DAC_ADDR = 0x60;
 #endif
 
 const int potCount = NUM_CC_POTS;
@@ -41,7 +47,11 @@ int pots[NUM_CC_BANKS][NUM_CC_POTS] = {
 };          // the MIDI CC (continuous controller) for each analog input
 
 int potMinVal = 0;
-int potMaxVal = 8190;
+#if T4
+	int potMaxVal = 1019;  // T4 = 1019 // T3.2 = 8190;
+#else
+	int potMaxVal = 8190;  // T4 = 1019 // T3.2 = 8190;
+#endif
 
 const int gridh = 32;
 const int gridw = 128;
@@ -89,8 +99,7 @@ const int steps[] = {0,
 
 const int midiKeyMap[] = {12,1,13,2,14,15,3,16,4,17,5,18,19,6,20,7,21,22,8,23,9,24,10,25,26};
 
-
-
+Adafruit_MCP4725 dac;
 SysSettings sysSettings;
 PotSettings potSettings;
 MidiConfig midiSettings;
@@ -103,4 +112,3 @@ ScaleConfig scaleConfig;
 
 // MidiPage midiPageParams;
 // SequencerPage seqPageParams;
-
