@@ -204,6 +204,7 @@ void readPotentimeters()
 	{
 		int prevValue = potSettings.analogValues[k];
 		int prevAnalog = potSettings.analog[k]->getValue();
+
 		temp = analogRead(analogPins[k]);
 		potSettings.analog[k]->update(temp);
 
@@ -217,8 +218,12 @@ void readPotentimeters()
 		potSettings.analogValues[k] = temp >> 7;
 
 		int newAnalog = potSettings.analog[k]->getValue();
-
-		int analogDelta = abs(newAnalog - prevAnalog);
+		// delta is way smaller on T4
+		#if T4
+			int analogDelta = abs(newAnalog - prevAnalog)*5;
+		#else
+			int analogDelta = abs(newAnalog - prevAnalog);
+		#endif
 
 		// if (k == 1)
 		// {

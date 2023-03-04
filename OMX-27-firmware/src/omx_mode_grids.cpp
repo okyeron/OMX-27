@@ -76,7 +76,7 @@ void OmxModeGrids::onPotChanged(int potIndex, int prevValue, int newValue, int a
         midiKeyboard.onPotChanged(potIndex, prevValue, newValue, analogDelta);
         return;
     }
-    // Serial.println((String)"AnalogDelta: " + analogDelta);
+//     Serial.println((String)"AnalogDelta: " + analogDelta);
 
     // if (analogDelta < 3)
     //         return;
@@ -84,7 +84,7 @@ void OmxModeGrids::onPotChanged(int potIndex, int prevValue, int newValue, int a
     // prevents values from being modified until pot is modified
     if(potPostLoadThresh[potIndex])
     {
-        if(analogDelta < 10)
+        if(analogDelta < 8)
         {
             return;
         }
@@ -120,7 +120,7 @@ void OmxModeGrids::onPotChanged(int potIndex, int prevValue, int newValue, int a
         {
             grids_.setDensity(potIndex, newDensity);
 
-            if (analogDelta >= 10)
+            if (analogDelta >= 8)
             {
                 if (params.getSelPage() == GRIDS_DENSITY)
                 {
