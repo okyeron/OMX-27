@@ -126,7 +126,13 @@ void OmxUtil::cvNoteOn(int notenum)
     {
         midiSettings.pitchCV = static_cast<int>(roundf((notenum - midiLowestNote) * stepsPerSemitone)); // map (adjnote, 36, 91, 0, 4080);
         digitalWrite(CVGATE_PIN, HIGH);
-        analogWrite(CVPITCH_PIN, midiSettings.pitchCV);
+//         analogWrite(CVPITCH_PIN, midiSettings.pitchCV);
+		#if T4
+			dac.setVoltage(midiSettings.pitchCV, false);
+		#else
+			analogWrite(CVPITCH_PIN, midiSettings.pitchCV);
+		#endif
+
     }
 }
 void OmxUtil::cvNoteOff()
