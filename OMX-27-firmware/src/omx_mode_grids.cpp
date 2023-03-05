@@ -72,6 +72,12 @@ void OmxModeGrids::onClockTick() {
 
 void OmxModeGrids::onPotChanged(int potIndex, int prevValue, int newValue, int analogDelta)
 {
+	#if T4
+		int deltaTheshold = 1;
+	#else
+		int deltaTheshold = 6;
+	#endif
+
     if(midiModeception){
         midiKeyboard.onPotChanged(potIndex, prevValue, newValue, analogDelta);
         return;
@@ -84,7 +90,7 @@ void OmxModeGrids::onPotChanged(int potIndex, int prevValue, int newValue, int a
     // prevents values from being modified until pot is modified
     if(potPostLoadThresh[potIndex])
     {
-        if(analogDelta < 8)
+        if(analogDelta < deltaTheshold)
         {
             return;
         }
@@ -99,7 +105,8 @@ void OmxModeGrids::onPotChanged(int potIndex, int prevValue, int newValue, int a
         const uint16_t magicPotNumber = 16383;
         uint8_t singleHighresVal = 64; // magicPotNumber / 256
         uint8_t prevDensity = grids_.getDensity(potIndex);
-        uint16_t hiResVal = map(potSettings.hiResPotVal[potIndex], potMinVal, potMaxVal, 0, magicPotNumber);
+//         uint16_t hiResVal = map(potSettings.hiResPotVal[potIndex], potMinVal, potMaxVal, 0, magicPotNumber);
+        uint16_t hiResVal = potSettings.hiResPotVal[potIndex];
         uint8_t newDensity = map(hiResVal, 0, magicPotNumber, 0, 255);
 
         const uint8_t stickyRange = 12;
@@ -120,7 +127,7 @@ void OmxModeGrids::onPotChanged(int potIndex, int prevValue, int newValue, int a
         {
             grids_.setDensity(potIndex, newDensity);
 
-            if (analogDelta >= 8)
+            if (analogDelta >= deltaTheshold)
             {
                 if (params.getSelPage() == GRIDS_DENSITY)
                 {

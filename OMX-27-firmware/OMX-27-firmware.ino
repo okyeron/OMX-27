@@ -211,19 +211,17 @@ void readPotentimeters()
 		// read from the smoother, constrain (to account for tolerances), and map it
 		temp = potSettings.analog[k]->getValue();
 		temp = constrain(temp, potMinVal, potMaxVal);
-		potSettings.hiResPotVal[k] = temp;
 		temp = map(temp, potMinVal, potMaxVal, 0, 16383);
+		potSettings.hiResPotVal[k] = temp;
 
 		// map and update the value
 		potSettings.analogValues[k] = temp >> 7;
 
 		int newAnalog = potSettings.analog[k]->getValue();
-		// delta is way smaller on T4
-		#if T4
-			int analogDelta = abs(newAnalog - prevAnalog)*5;
-		#else
-			int analogDelta = abs(newAnalog - prevAnalog);
-		#endif
+
+		// delta is way smaller on T4 - what to do??
+		int analogDelta = abs(newAnalog - prevAnalog);
+
 
 		// if (k == 1)
 		// {
@@ -391,7 +389,7 @@ bool loadHeader(void)
 	uint8_t unMidiChannel = storage->read(EEPROM_HEADER_ADDRESS + 3);
 	sysSettings.midiChannel = unMidiChannel + 1;
 
-	Serial.println( "loading banks" );
+	Serial.println( "Loading banks" );
 	for (int b = 0; b < NUM_CC_BANKS; b++)
 	{
 		for (int i = 0; i < NUM_CC_POTS; i++)
@@ -448,7 +446,6 @@ void savePatterns(void)
 	{
 		return;
 	}
-
 	Serial.println((String)"nLocalAddress: " + nLocalAddress);
 
 	// Grids patterns
@@ -468,25 +465,23 @@ void savePatterns(void)
 
 		nLocalAddress += patternSize;
 	}
-
 	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 5968
 
 	Serial.println("Saving Euclidean");
 	nLocalAddress = omxModeEuclid.saveToDisk(nLocalAddress, storage);
 	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 6321
+
 	Serial.println("Saving Chords");
 	nLocalAddress = omxModeChords.saveToDisk(nLocalAddress, storage);
 	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 6321
 
 	Serial.println("Saving MidiFX");
-
 	for(uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
 	{
 		nLocalAddress = subModeMidiFx[i].saveToDisk(nLocalAddress, storage);
 		// Serial.println((String)"Saved: " + i);
 		// Serial.println((String)"nLocalAddress: " + nLocalAddress);
 	}
-
 	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 6321
 
 	// Seq patternSize: 715
@@ -506,7 +501,7 @@ void loadPatterns(void)
 	int patternSize = serializedPatternSize(isEeprom);
 	int nLocalAddress = EEPROM_PATTERN_ADDRESS;
 
-	Serial.println( "seq patterns nLocalAddress" );
+	Serial.print( "Seq patterns - nLocalAddress: " );
 	Serial.println( nLocalAddress );
 
 	int seqPatternNum = isEeprom ? NUM_SEQ_PATTERNS_EEPROM : NUM_SEQ_PATTERNS;
@@ -530,7 +525,7 @@ void loadPatterns(void)
 		return;
 	}
 
-	Serial.println( "grids patterns nLocalAddress" );
+	Serial.print( "Grids patterns - nLocalAddress: " );
 	Serial.println( nLocalAddress );
 	// 332 - eeprom size
 	// 332 * 8 = 2656
@@ -552,29 +547,29 @@ void loadPatterns(void)
 		nLocalAddress += patternSize;
 	}
 
-	Serial.println( "Pattern size" );
-	Serial.println( patternSize );
-	Serial.println( "nLocalAddress" );
+	Serial.print( "Pattern size: " );
+	Serial.print( patternSize );
+
+	Serial.print( " - nLocalAddress: " );
 	Serial.println( nLocalAddress );
 
-	Serial.println("Loading Euclidean");
+	Serial.print("Loading Euclidean - ");
 	nLocalAddress = omxModeEuclid.loadFromDisk(nLocalAddress, storage);
 	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 5988
-	Serial.println("Loading Chords");
+
+	Serial.print("Loading Chords - ");
 	nLocalAddress = omxModeChords.loadFromDisk(nLocalAddress, storage);
 	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 5988
 
 	// Serial.println((String)"nLocalAddress: " + nLocalAddress); // 5968
 
-	Serial.println("Loading MidiFX");
-
+	Serial.print("Loading MidiFX - ");
 	for(uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
 	{
 		nLocalAddress = subModeMidiFx[i].loadFromDisk(nLocalAddress, storage);
 		// Serial.println((String)"Loaded: " + i);
 		// Serial.println((String)"nLocalAddress: " + nLocalAddress);
 	}
-
 	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 5988
 
 	// with 8 note chords, 10929
@@ -610,12 +605,12 @@ bool loadFromStorage(void)
 	// This load can happen soon after Serial.begin - enable this 'wait for Serial' if you need to Serial.print during loading
 	// while( !Serial );
 
-	Serial.println( "read the header" );
+	Serial.println( "Read the header" );
 	bool bContainedData = loadHeader();
 
 	if (bContainedData)
 	{
-		Serial.println( "loading patterns" );
+		Serial.println( "Loading patterns" );
 		loadPatterns();
 		changeOmxMode(sysSettings.omxMode);
 
@@ -624,7 +619,7 @@ bool loadFromStorage(void)
 		return true;
 	}
 
-	Serial.println( "failed to load" );
+	Serial.println( "-- Failed to load --" );
 
 	omxDisp.isDirty();
 	omxLeds.isDirty();
