@@ -97,6 +97,10 @@ Note: when making changes using the PlatformIO toolchain, please ensure the sket
 
 [Documentation](<Docs.md>)
 
+## Web Configurator
+
+[Online Configurator](https://okyeron.github.io/OMX-27/webconfig/index.html)
+
 ## FAQ
 
 Q: What key switches are recommended?  

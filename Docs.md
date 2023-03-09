@@ -59,7 +59,7 @@ The OMX-27 has 5 potentiometers which are mapped to send continuous controller M
 
 Bank A is selected by default with the CCs set to controller numbers 21, 22, 23, 24 and 7 (volume). 
 
-The CC's can also be reconfigured on device in the CC Config page, which is found on the last page of the MI Mode parameters. You can also configure the CC banks all at once via the web editor.
+The CC's can also be reconfigured on device in the CC Config page, which is found on the last page of the MI Mode parameters. You can also configure the CC banks all at once via the [web configurator](https://okyeron.github.io/OMX-27/webconfig/index.html).
 
 
 ### Key Switches
