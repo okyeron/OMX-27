@@ -83,7 +83,9 @@ void OmxUtil::resetClocks()
 {
 	// BPM tempo to step_delay calculation
 	clockConfig.ppqInterval = 60000000 / (PPQ * clockConfig.clockbpm); // ppq interval is in microseconds
+// 	Serial.println(clockConfig.ppqInterval);
 	clockConfig.step_micros = clockConfig.ppqInterval * (PPQ / 4);				   // 16th note step in microseconds (quarter of quarter note)
+// 	Serial.println(clockConfig.step_micros);
 
 	// 16th note step length in milliseconds
 	clockConfig.step_delay = clockConfig.step_micros * 0.001; // ppqInterval * 0.006; // 60000 / clockbpm / 4;

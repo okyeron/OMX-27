@@ -37,6 +37,7 @@
 #include "src/omx_screensaver.h"
 #include "src/omx_leds.h"
 #include "src/music_scales.h"
+#include "src/peaks_pattern_predictor.h"
 
 // Allows code to compile with smallest code LTO
 extern "C"{
@@ -61,6 +62,8 @@ OmxModeInterface *activeOmxMode;
 OmxScreensaver omxScreensaver;
 
 MusicScales globalScale;
+
+PatternPredictor<32, 8> predictor;
 
 // storage of pot values; current is in the main loop; last value is for midi output
 int volatile currentValue[NUM_CC_POTS];
@@ -309,6 +312,62 @@ void OnSysEx(const uint8_t *data, uint16_t length, bool complete)
 {
 	sysEx->processIncomingSysex(data, length);
 }
+
+int count;
+void OnStart()
+{
+	count = 0;
+    omxUtil.resetClocks();
+    omxUtil.startClocks();
+    // if seq mode
+    seqStart();
+	Serial.println("MIDI Start");
+}
+void OnStop()
+{
+	omxUtil.stopClocks();
+	// if seq mode
+	seqStop();
+	Serial.println("MIDI Stop");
+}
+void OnContinue()
+{
+	Serial.println("MIDI Continue");
+}
+
+Micros lastProcessTime1;
+uint32_t period_prediction;
+
+void OnClock()
+{
+	Micros now1 = micros();
+	Micros passed1 = now1 - lastProcessTime1;
+	lastProcessTime1 = now1;
+
+	period_prediction = predictor.Predict(passed1);
+// 	Serial.print("clock delta: ");
+//	Serial.println(period_prediction);
+
+	if (count >= 12){
+		Serial.println(period_prediction);
+		count = 0;
+	} else {
+		count = count + 1;
+	}
+	// clock is 24 ppq
+// 	clockConfig.step_micros = period_prediction * 6;
+// 	clockConfig.step_delay = clockConfig.step_micros * 0.001; // ppqInterval * 0.006; // 60000 / clockbpm / 4;
+//
+// 	float newtempo1 = 10000 / (passed1 * 0.004);
+
+
+
+	// SET TEMPO HERE?
+// 	clockConfig.clockbpm = constrain(clockConfig.clockbpm + amt, 40, 300);
+
+
+}
+
 
 void saveHeader()
 {
@@ -887,11 +946,19 @@ void setup()
 	ram.initialize();
 #endif
 
+	predictor.Init();
+
 	// incoming usbMIDI callbacks
 	usbMIDI.setHandleNoteOff(OnNoteOff);
 	usbMIDI.setHandleNoteOn(OnNoteOn);
 	usbMIDI.setHandleControlChange(OnControlChange);
 	usbMIDI.setHandleSystemExclusive(OnSysEx);
+
+	usbMIDI.setHandleStart(OnStart);
+	usbMIDI.setHandleStop(OnStop);
+	usbMIDI.setHandleContinue(OnContinue);
+  	usbMIDI.setHandleClock(OnClock);
+
 
 	// clksTimer = 0; // TODO - didn't see this used anywhere
 	omxScreensaver.resetCounter();

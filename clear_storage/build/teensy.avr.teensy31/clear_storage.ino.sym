@@ -1,0 +1,585 @@
+
+/private/var/folders/yr/s09md3pj6rnb8t8j8h_nm_rw0000gn/T/arduino/sketches/CB151FAAEB3C6F95ACDCB9E91B0BB03A/clear_storage.ino.elf:     file format elf32-littlearm
+
+SYMBOL TABLE:
+00000000 l    d  .text	00000000 .text
+00009d44 l    d  .fini	00000000 .fini
+00009d48 l    d  .ARM.exidx	00000000 .ARM.exidx
+1fff8000 l    d  .usbdescriptortable	00000000 .usbdescriptortable
+1fff8200 l    d  .dmabuffers	00000000 .dmabuffers
+1fff83bc l    d  .usbbuffers	00000000 .usbbuffers
+1fff8840 l    d  .data	00000000 .data
+1fff9648 l    d  .bss	00000000 .bss
+00000000 l    d  .ARM.attributes	00000000 .ARM.attributes
+00000000 l    d  .comment	00000000 .comment
+00000000 l    d  .debug_info	00000000 .debug_info
+00000000 l    d  .debug_abbrev	00000000 .debug_abbrev
+00000000 l    d  .debug_loc	00000000 .debug_loc
+00000000 l    d  .debug_aranges	00000000 .debug_aranges
+00000000 l    d  .debug_ranges	00000000 .debug_ranges
+00000000 l    d  .debug_line	00000000 .debug_line
+00000000 l    d  .debug_str	00000000 .debug_str
+00000000 l    d  .debug_frame	00000000 .debug_frame
+00000000 l    df *ABS*	00000000 mk20dx128.c
+00002c2c l     F .text	0000000c startup_default_early_hook
+00002c38 l     F .text	00000002 startup_default_late_hook
+00000000 l    df *ABS*	00000000 crtstuff.c
+00000410 l     F .text	00000000 __do_global_dtors_aux
+1fff9648 l       .bss	00000000 completed.8603
+00000434 l     F .text	00000000 frame_dummy
+1fff964c l       .bss	00000000 object.8608
+00009d3c l     O .text	00000000 __frame_dummy_init_array_entry
+00000000 l    df *ABS*	00000000 clear_storage.ino.cpp
+0000046c l     F .text	00000074 printProgressUpdate(int, int) [clone .part.4]
+000005e4 l     F .text	00000058 _GLOBAL__sub_I_fram
+00000000 l    df *ABS*	00000000 Adafruit_EEPROM_I2C.cpp
+00000000 l    df *ABS*	00000000 Adafruit_FRAM_I2C.cpp
+00000000 l    df *ABS*	00000000 Adafruit_I2CDevice.cpp
+00000870 l     F .text	00000028 Adafruit_I2CDevice::write(unsigned char const*, unsigned int, bool, unsigned char const*, unsigned int) [clone .part.2]
+00000000 l    df *ABS*	00000000 WireKinetis.cpp
+00000df6 l       .text	00000000 L_1480_delayMicroseconds
+00000e04 l       .text	00000000 L_1494_delayMicroseconds
+00000e4a l       .text	00000000 L_1545_delayMicroseconds
+0000117e l       .text	00000000 L_3073_delayMicroseconds
+1fff96dc l     O .bss	00000001 TwoWire::isr()::receiving
+00000000 l    df *ABS*	00000000 Adafruit_SSD1306.cpp
+000011b8 l     F .text	00000092 Adafruit_SSD1306::drawFastHLineInternal(short, short, short, unsigned short) [clone .part.8] [clone .constprop.9]
+00008e5c l     O .text	00000008 Adafruit_SSD1306::drawFastVLineInternal(short, short, short, unsigned short)::postmask
+00008e64 l     O .text	00000005 Adafruit_SSD1306::display()::dlist1
+00008e6c l     O .text	00000008 Adafruit_SSD1306::drawFastVLineInternal(short, short, short, unsigned short)::premask
+00008ecc l     O .text	000001e0 splash2_data
+000090ac l     O .text	00000004 Adafruit_SSD1306::begin(unsigned char, unsigned char, bool, bool)::init1
+000090b0 l     O .text	00000004 Adafruit_SSD1306::begin(unsigned char, unsigned char, bool, bool)::init2
+000090b4 l     O .text	00000004 Adafruit_SSD1306::begin(unsigned char, unsigned char, bool, bool)::init3
+000090b8 l     O .text	00000006 Adafruit_SSD1306::begin(unsigned char, unsigned char, bool, bool)::init5
+000090c0 l     O .text	000002c0 splash1_data
+00000000 l    df *ABS*	00000000 Adafruit_GFX.cpp
+000093d8 l     O .text	00000500 font
+00000000 l    df *ABS*	00000000 SPI.cpp
+00000000 l    df *ABS*	00000000 EventResponder.cpp
+00000000 l    df *ABS*	00000000 Print.cpp
+00000000 l    df *ABS*	00000000 eeprom.c
+00000000 l    df *ABS*	00000000 main.cpp
+00000000 l    df *ABS*	00000000 memcpy-armv7m.S.o
+00000000 l    df *ABS*	00000000 new.cpp
+00000000 l    df *ABS*	00000000 nonstd.c
+00000000 l    df *ABS*	00000000 pins_teensy.c
+00002cbc l     F .text	00000002 dummy_isr
+1fff8840 l     F .data	0000002c port_E_isr
+1fff886c l     F .data	0000002c port_D_isr
+1fff8898 l     F .data	0000002c port_C_isr
+1fff88c4 l     F .data	0000002c port_B_isr
+1fff88f0 l     F .data	0000002c port_A_isr
+00002cc0 l     F .text	00000044 digitalWrite.part.1
+00002d04 l     F .text	00000078 pinMode.part.2
+00002f20 l     F .text	00000002 startup_default_middle_hook
+00000000 l    df *ABS*	00000000 usb_dev.c
+1fff96f8 l     O .bss	00000004 ep0_tx_ptr
+1fff96fc l     O .bss	00000010 rx_last
+1fff970c l     O .bss	00000002 ep0_tx_len
+1fff9710 l     O .bss	00000040 ep0_rx0_buf
+1fff9750 l     O .bss	00000010 rx_first
+1fff9760 l     O .bss	00000001 ep0_tx_data_toggle
+1fff9764 l     O .bss	00000040 ep0_rx1_buf
+1fff97a4 l     O .bss	00000010 tx_first
+1fff8000 l     O .usbdescriptortable	000000a0 table
+1fff97b4 l     O .bss	00000010 tx_last
+1fff97c4 l     O .bss	00000008 setup
+1fff97cc l     O .bss	00000001 ep0_tx_bdt_bank
+1fff97d0 l     O .bss	00000008 reply_buffer
+1fff97dc l     O .bss	00000004 tx_state
+00000000 l    df *ABS*	00000000 usb_inst.cpp
+00000000 l    df *ABS*	00000000 usb_mem.c
+1fff8b8c l     O .data	00000004 usb_buffer_available
+00000000 l    df *ABS*	00000000 usb_midi.c
+1fff97e0 l     O .bss	00000001 tx_noautoflush
+1fff97e4 l     O .bss	00000004 tx_packet
+00000000 l    df *ABS*	00000000 usb_seremu.c
+1fff97e8 l     O .bss	00000001 tx_noautoflush
+1fff97ec l     O .bss	00000004 tx_packet
+1fff97f0 l     O .bss	00000001 transmit_previous_timeout
+1fff97f4 l     O .bss	00000004 rx_packet
+00000000 l    df *ABS*	00000000 yield.cpp
+1fff97f9 l     O .bss	00000001 yield::running
+00000000 l    df *ABS*	00000000 analog.c
+1fff9809 l     O .bss	00000001 calibrating
+1fff8b91 l     O .data	00000001 analog_config_bits
+1fff980a l     O .bss	00000001 analog_reference_internal
+1fff8b92 l     O .data	00000001 analog_num_average
+00000000 l    df *ABS*	00000000 serialEvent.cpp
+00000000 l    df *ABS*	00000000 usb_desc.c
+1fff8b94 l     O .data	00000012 device_descriptor
+1fff8bc0 l     O .data	00000073 config_descriptor
+1fff8c34 l     O .data	00000021 seremu_report_desc
+00000000 l    df *ABS*	00000000 atexit_arm.cc
+00000000 l    df *ABS*	00000000 _arm_addsubdf3.o
+00000000 l    df *ABS*	00000000 _arm_muldivdf3.o
+00000000 l    df *ABS*	00000000 _arm_cmpdf2.o
+00000000 l    df *ABS*	00000000 _arm_unorddf2.o
+00000000 l    df *ABS*	00000000 _aeabi_uldivmod.o
+00000000 l    df *ABS*	00000000 libgcc2.c
+00000000 l    df *ABS*	00000000 _dvmd_tls.o
+00000000 l    df *ABS*	00000000 mallocr.c
+00000000 l    df *ABS*	00000000 cxa_atexit.c
+00000000 l    df *ABS*	00000000 errno.c
+00000000 l    df *ABS*	00000000 init.c
+00000000 l    df *ABS*	00000000 malloc.c
+00000000 l    df *ABS*	00000000 mallocr.c
+00000000 l    df *ABS*	00000000 mbtowc_r.c
+00000000 l    df *ABS*	00000000 memmove.c
+00000000 l    df *ABS*	00000000 memset.c
+00000000 l    df *ABS*	00000000 mlock.c
+00000000 l    df *ABS*	00000000 mallocr.c
+00000000 l    df *ABS*	00000000 sbrkr.c
+00000000 l    df *ABS*	00000000 lib_a-strlen.o
+00000000 l    df *ABS*	00000000 vdprintf.c
+00000000 l    df *ABS*	00000000 wctomb_r.c
+00000000 l    df *ABS*	00000000 writer.c
+00000000 l    df *ABS*	00000000 __atexit.c
+00000000 l    df *ABS*	00000000 __call_atexit.c
+00005bec l     F .text	00000014 register_fini
+00000000 l    df *ABS*	00000000 atexit.c
+00000000 l    df *ABS*	00000000 fini.c
+00000000 l    df *ABS*	00000000 mallocr.c
+00000000 l    df *ABS*	00000000 localeconv.c
+00000000 l    df *ABS*	00000000 lib_a-memchr.o
+00000000 l    df *ABS*	00000000 mprec.c
+00009c80 l     O .text	0000000c p05.6085
+00000000 l    df *ABS*	00000000 vasnprintf.c
+00000000 l    df *ABS*	00000000 dtoa.c
+000065dc l     F .text	00000128 quorem
+00000000 l    df *ABS*	00000000 vfprintf.c
+00009ccc l     O .text	00000010 zeroes.7256
+00009d1c l     O .text	00000010 blanks.7255
+00000000 l    df *ABS*	00000000 vfprintf.c
+00000000 l    df *ABS*	00000000 _arm_fixdfsi.o
+00000000 l    df *ABS*	00000000 impure.c
+1fff8ca0 l     O .data	00000428 impure_data
+00000000 l    df *ABS*	00000000 locale.c
+00000000 l    df *ABS*	00000000 ctype_.c
+00000000 l    df *ABS*	00000000 /Users/nevetsokyeron/Library/Arduino15/packages/teensy/tools/teensy-compile/5.4.1/arm/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7e-m/crti.o
+00000000 l    df *ABS*	00000000 /Users/nevetsokyeron/Library/Arduino15/packages/teensy/tools/teensy-compile/5.4.1/arm/bin/../lib/gcc/arm-none-eabi/5.4.1/armv7e-m/crtn.o
+00000000 l    df *ABS*	00000000 HardwareSerial.cpp
+00000000 l    df *ABS*	00000000 reent.c
+00000000 l    df *ABS*	00000000 
+1fff9648 l       .bss	00000000 __bss_start__
+1fff984c l       .bss	00000000 __bss_end__
+00000000 l       *UND*	00000000 software_init_hook
+00000000 l       *UND*	00000000 hardware_init_hook
+00000000 l       *UND*	00000000 __stack
+00002c24  w    F .text	00000006 adc0_isr
+00004a74 g     F .text	0000002c .hidden __aeabi_dcmpun
+00004a38 g     F .text	00000012 .hidden __aeabi_dcmple
+00003d08 g     F .text	0000006c usb_seremu_available
+00004974 g     F .text	0000007a .hidden __cmpdf2
+00003f70  w    F .text	000000ec yield
+00001f30 g     F .text	0000001e Adafruit_GFX::fillScreen(unsigned short)
+00004974 g     F .text	0000007a .hidden __eqdf2
+1fff8ba8 g     O .data	00000018 usb_string_manufacturer_name_default
+00001f00 g     F .text	00000012 Adafruit_GFX::writeFastHLine(short, short, short, unsigned short)
+1fff89dc g     O .data	000000bc Wire1
+000044e4 g     F .text	0000005a .hidden __floatdidf
+00002bdc  w    F .text	00000048 hard_fault_isr
+00003b90  w    F .text	00000004 usb_seremu_class::peek()
+00002c24  w    F .text	00000006 dma_ch6_isr
+000004e4 g     F .text	00000084 clearFRAM()
+00002840 g     F .text	00000028 Print::println()
+00000bd8 g     F .text	00000130 TwoWire::isr()
+00002c24  w    F .text	00000006 uart0_lon_isr
+00003138 g     F .text	00000084 usb_rx_memory
+000006d0 g     F .text	00000008 Adafruit_EEPROM_I2C::Adafruit_EEPROM_I2C()
+00002c24  w    F .text	00000006 dma_ch8_isr
+000055a4 g     F .text	00000002 __malloc_unlock
+1fff8a9c g     O .data	00000038 isr_table_portA
+00008e74 g     O .text	00000058 vtable for Adafruit_SSD1306
+1fff9664 g     O .bss	00000001 usingFram
+0000405c g     F .text	000000e0 analog_init
+000031bc g     F .text	00000084 usb_tx
+00002c24  w    F .text	00000006 portcd_isr
+00005a9c g     F .text	0000004a _vdprintf_r
+00002914 g     F .text	0000008c eeprom_initialize
+00000960 g     F .text	0000007c Adafruit_I2CDevice::_read(unsigned char*, unsigned int, bool)
+0000543c g     F .text	000000c6 memmove
+1fff96cc g     O .bss	00000010 fram
+00005f60 g     F .text	0000004c _Balloc
+00002c24  w    F .text	00000006 can1_rx_warn_isr
+00009d50 g       .ARM.exidx	00000000 __exidx_end
+00002c24  w    F .text	00000006 dma_error_isr
+1fff96f0 g     O .bss	00000001 EventResponder::runningFromYield
+0000119c g     F .text	0000000c i2c0_isr
+00002814 g     F .text	0000002c Print::write(unsigned char const*, unsigned int)
+00004964 g     F .text	0000008a .hidden __gtdf2
+00004e24 g     F .text	0000000c __errno
+00002c24  w    F .text	00000006 portd_isr
+00003b94  w    F .text	00000004 usb_seremu_class::read()
+00002c24  w    F .text	00000006 enet_error_isr
+1fff96e0 g     O .bss	00000004 EventResponder::firstInterrupt
+00000d74 g     F .text	0000000c sda_rising_isr1()
+00001dfc g     F .text	000000e2 Adafruit_GFX::writeLine(short, short, short, short, unsigned short)
+00002c24  w    F .text	00000006 tpm1_isr
+000019f8 g     F .text	00000130 Adafruit_SSD1306::drawFastVLineInternal(short, short, short, unsigned short)
+00003ee4 g     F .text	0000004c usb_seremu_flush_output
+00003e84 g     F .text	00000018 usb_seremu_putchar
+000098ec g     O .text	00000110 digital_pin_to_info_PGM
+1fff9848 g     O .bss	00000004 errno
+00009d50 g       .ARM.exidx	00000000 _etext
+1fff9648 g       .bss	00000000 _sbss
+00004a00 g     F .text	00000010 .hidden __aeabi_cdcmple
+00001528 g     F .text	00000102 Adafruit_SSD1306::ssd1306_commandList(unsigned char const*, unsigned char)
+00002088 g     F .text	000000a0 Adafruit_GFX::drawLine(short, short, short, short, unsigned short)
+00003e9c g     F .text	00000048 usb_seremu_write_buffer_free
+00002c24  w    F .text	00000006 porte_isr
+000004e0 g     F .text	00000002 loop
+00002c24  w    F .text	00000006 portb_isr
+00003c40 g     F .text	00000034 usb_midi_flush_output
+00002c24  w    F .text	00000006 spi1_isr
+00002c24  w    F .text	00000006 uart3_status_isr
+00002c24  w    F .text	00000006 mcm_isr
+00003ba4  w    F .text	00000008 usb_seremu_class::write(unsigned char const*, unsigned int)
+000021c8 g     F .text	00000034 Adafruit_GFX::Adafruit_GFX(short, short)
+00000e6c g     F .text	00000114 TwoWire::endTransmission(unsigned char)
+00001380 g     F .text	00000018 Adafruit_SSD1306::~Adafruit_SSD1306()
+1fff96e4 g     O .bss	00000004 EventResponder::lastInterrupt
+00002c24  w    F .text	00000006 uart1_status_isr
+00002a34 g     F .text	000001a6 memcpy
+00002c24  w    F .text	00000006 randnum_isr
+000049f0 g     F .text	00000020 .hidden __aeabi_cdrcmple
+00007560 g     F .text	000016b0 _svfprintf_r
+00004474 g     F .text	00000022 .hidden __floatsidf
+1fff8b24 g     O .data	00000030 isr_table_portC
+1fff96f4 g     O .bss	00000004 systick_millis_count
+0000496c g     F .text	00000082 .hidden __ltdf2
+00002bdc  w    F .text	00000048 bus_fault_isr
+00000d80 g     F .text	000000ec TwoWire::wait_idle()
+00002c24  w    F .text	00000006 watchdog_isr
+00004aa0 g     F .text	00000000 .hidden __aeabi_uldivmod
+0000162c g     F .text	000003ac Adafruit_SSD1306::begin(unsigned char, unsigned char, bool, bool)
+000011a8 g     F .text	0000000c i2c1_isr
+1fff97d8 g     O .bss	00000001 usb_configuration
+00002c24  w    F .text	00000006 dma_ch11_isr
+000008e4 g     F .text	0000001e Adafruit_I2CDevice::begin(bool)
+00000000  w      *UND*	00000000 __fini_array_end
+00002c24  w    F .text	00000006 i2c2_isr
+1fff8ba8  w    O .data	00000018 usb_string_manufacturer_name
+1fff9840 g     O .bss	00000008 usb_rx_byte_count_data
+00002c24  w    F .text	00000006 pit1_isr
+00004e80 g     F .text	00000010 malloc
+00001398 g     F .text	000000a0 Adafruit_SSD1306::ssd1306_command1(unsigned char)
+00002c24  w    F .text	00000006 dma_ch4_isr
+00008e18 g     O .text	00000020 TwoWire::i2c1_hardware
+00002c24  w    F .text	00000006 software_isr
+00002c24  w    F .text	00000006 dma_ch7_isr
+00000850  w    F .text	0000001e TwoWire::read()
+00009bb8 g     O .text	000000c8 __mprec_tens
+00003adc g     F .text	000000b4 usb_init
+00001f50 g     F .text	00000002 Adafruit_GFX::invertDisplay(bool)
+00002c24  w    F .text	00000006 lptmr_isr
+1fff9814 g     O .bss	00000004 __malloc_top_pad
+00002efc g     F .text	00000024 rtc_set
+1fff891c g     O .data	00000000 .hidden __dso_handle
+00004454 g     F .text	0000001e .hidden __aeabi_ui2d
+00005ea0 g     F .text	0000001c _localeconv_r
+000060dc g     F .text	00000012 __i2b
+1fff8840 g       .data	00000000 _sdata
+00008df8 g     O .text	00000020 TwoWire::i2c0_hardware
+00003bac  w    F .text	00000006 usb_seremu_class::write(unsigned char)
+00004ad0 g     F .text	000002e2 .hidden __udivmoddi4
+000041d0 g     F .text	00000000 .hidden __aeabi_drsub
+00005988 g     F .text	00000024 _sbrk_r
+00000a28 g     F .text	00000050 Adafruit_I2CDevice::write_then_read(unsigned char const*, unsigned int, unsigned char*, unsigned int, bool)
+0000124c g     F .text	000000dc Adafruit_SSD1306::drawPixel(short, short, unsigned short)
+000001bc g     F .text	000001d4 ResetHandler
+00002c24  w    F .text	00000006 can1_bus_off_isr
+00002c24  w    F .text	00000006 ftm2_isr
+0000301c g     F .text	0000000a digitalWrite
+00001bf0 g     F .text	0000020c Adafruit_SSD1306::display()
+00002c24  w    F .text	00000006 uart5_status_isr
+00002c24  w    F .text	00000006 lpuart0_status_isr
+1fff96e8 g     O .bss	00000004 EventResponder::lastYield
+00009a20 g     O .text	00000004 usb_endpoint_config_table
+00002c24  w    F .text	00000006 dma_ch9_isr
+00002c24  w    F .text	00000006 pit2_isr
+00004a24 g     F .text	00000012 .hidden __aeabi_dcmplt
+1fff9810 g     O .bss	00000004 __malloc_max_sbrked_mem
+00003028 g     F .text	0000000a pinMode
+00003bf4 g     F .text	0000004c usb_free
+00002c24  w    F .text	00000006 i2c3_isr
+00004498 g     F .text	0000003a .hidden __extendsfdf2
+00004794 g     F .text	000001d0 .hidden __aeabi_ddiv
+000041dc g     F .text	00000276 .hidden __adddf3
+00000750 g     F .text	00000012 Adafruit_FRAM_I2C::Adafruit_FRAM_I2C()
+00009d48 g       .ARM.exidx	00000000 __exidx_start
+00004540 g     F .text	00000254 .hidden __aeabi_dmul
+00002c24  w    F .text	00000006 pit0_isr
+1fff96ec g     O .bss	00000004 EventResponder::firstYield
+00009a9c g     O .text	00000004 _global_impure_ptr
+00001f14 g     F .text	00000018 Adafruit_GFX::writeFillRect(short, short, short, short, unsigned short)
+00002c24  w    F .text	00000006 can1_error_isr
+000055a8 g     F .text	000003de _realloc_r
+00004e30 g     F .text	00000050 __libc_init_array
+1fff984c g       .bss	00000000 __bss_end
+00000a7c  w    F .text	0000000c TwoWire::available()
+1fff9668 g     O .bss	00000064 display
+00002c24  w    F .text	00000006 can0_wakeup_isr
+00003b9c  w    F .text	00000004 usb_seremu_class::flush()
+00002c24  w    F .text	00000006 flash_cmd_isr
+00009c90 g     O .text	00000028 __mprec_bigtens
+00000f80 g     F .text	0000021c TwoWire::requestFrom(unsigned char, unsigned char, unsigned char)
+00004454 g     F .text	0000001e .hidden __floatunsidf
+00002c24  w    F .text	00000006 uart2_status_isr
+00002c3c g     F .text	0000002c _sbrk
+00006370 g     F .text	0000003e __mcmp
+00002d7c g     F .text	000000f8 attachInterrupt
+1fff8a98 g     O .data	00000004 __brkval
+00000750 g     F .text	00000012 Adafruit_FRAM_I2C::Adafruit_FRAM_I2C()
+00009d2c g     F .text	00000000 _init
+00002c24  w    F .text	00000006 svcall_isr
+000029d4 g     F .text	00000050 eeprom_write_byte
+00002c24  w    F .text	00000006 dma_ch15_isr
+00003d74 g     F .text	00000110 usb_seremu_write
+00008e38 g     O .text	00000024 vtable for TwoWire
+00002c24  w    F .text	00000006 uart1_error_isr
+00005c0c g     F .text	00000028 __libc_fini_array
+00002c24  w    F .text	00000006 usbhs_phy_isr
+1fff984c g       .bss	00000000 _ebss
+00001ee0 g     F .text	0000000c Adafruit_GFX::writePixel(short, short, unsigned short)
+00000898 g     F .text	00000012 Adafruit_I2CDevice::Adafruit_I2CDevice(unsigned char, TwoWire*)
+00002604 g     F .text	0000013a Adafruit_GFX::write(unsigned char)
+00006040 g     F .text	00000040 __hi0bits
+00008d10 g     F .text	0000004e .hidden __fixdfsi
+00002c24 g     F .text	00000006 unused_isr
+00001b28 g     F .text	00000062 Adafruit_SSD1306::drawFastHLine(short, short, short, unsigned short)
+00002c24  w    F .text	00000006 spi0_isr
+00002c24  w    F .text	00000006 dma_ch3_isr
+00002c24  w    F .text	00000006 flash_error_isr
+000008ac g     F .text	00000036 Adafruit_I2CDevice::detected()
+000041dc g     F .text	00000276 .hidden __aeabi_dadd
+0000496c g     F .text	00000082 .hidden __ledf2
+00002c24  w    F .text	00000006 uart5_error_isr
+00001eec g     F .text	00000012 Adafruit_GFX::writeFastVLine(short, short, short, unsigned short)
+00002c24  w    F .text	00000006 rtc_seconds_isr
+00002c24  w    F .text	00000006 pdb_isr
+00006220 g     F .text	000000a0 __pow5mult
+000044d4 g     F .text	0000006a .hidden __aeabi_ul2d
+00002bdc  w    F .text	00000048 usage_fault_isr
+00002c24  w    F .text	00000006 dac1_isr
+00000000 g     O .text	000001bc _VectorsFlash
+00002c24  w    F .text	00000006 dma_ch14_isr
+000009dc g     F .text	0000004a Adafruit_I2CDevice::read(unsigned char*, unsigned int, bool)
+00002e74 g     F .text	00000088 detachInterrupt
+00000000  w      *UND*	00000000 __deregister_frame_info
+00002804 g     F .text	00000010 systick_isr
+00002c24  w    F .text	00000006 rtc_alarm_isr
+00002c24  w    F .text	00000006 dma_ch2_isr
+1fff8b7c g     O .data	00000010 Serial
+00002c24  w    F .text	00000006 ftm1_isr
+00002c2c  w    F .text	0000000c startup_early_hook
+00002c24  w    F .text	00000006 dma_ch13_isr
+00003f30 g     F .text	00000040 usb_seremu_flush_callback
+00002c24  w    F .text	00000006 uart2_error_isr
+00004a60 g     F .text	00000012 .hidden __aeabi_dcmpgt
+00003ba0  w    F .text	00000004 usb_seremu_class::availableForWrite()
+00005ec0 g     F .text	00000000 memchr
+1fff8c84 g     O .data	00000016 usb_string_serial_number_default
+00002bdc g     F .text	00000048 fault_isr
+00005cd0 g     F .text	000001d0 _free_r
+00004a4c g     F .text	00000012 .hidden __aeabi_dcmpge
+00002c24  w    F .text	00000006 usb_charge_isr
+00002c24  w    F .text	00000006 cmt_isr
+000041d8 g     F .text	0000027a .hidden __aeabi_dsub
+00002c24  w    F .text	00000006 usbhs_isr
+1fff9644 g     O .data	00000004 __malloc_sbrk_base
+00002c24  w    F .text	00000006 ftm3_isr
+00002c24  w    F .text	00000006 tsi0_isr
+000044d4 g     F .text	0000006a .hidden __floatundidf
+00002024 g     F .text	00000064 Adafruit_GFX::fillRect(short, short, short, short, unsigned short)
+00002c68  w    F .text	00000002 __cxa_pure_virtual
+000062c0 g     F .text	000000ae __lshift
+00002c24  w    F .text	00000006 spi2_isr
+00008c10 g     F .text	00000100 __ssprint_r
+0000657c g     F .text	0000005e _vasnprintf_r
+0000413c  w    F .text	00000002 serialEvent()
+1fff9761 g     O .bss	00000001 usb_reboot_timer
+00005b48 g     F .text	000000a4 __register_exitproc
+000029a0 g     F .text	00000034 eeprom_read_byte
+000060f0 g     F .text	00000130 __multiply
+1fff8b74 g     O .data	00000008 isr_table_portE
+00000021 g       *ABS*	00000000 _teensy_model_identifier
+1fff9818 g     O .bss	00000028 __malloc_current_mallinfo
+00003c74 g     F .text	00000054 usb_seremu_getchar
+000064c4 g     F .text	000000b6 __d2b
+00001f2c g     F .text	00000002 Adafruit_GFX::endWrite()
+1fff97fc g     O .bss	0000000c HardwareSerial::s_serials_with_serial_events
+00002c24  w    F .text	00000006 can0_bus_off_isr
+1fff97cd g     O .bss	00000001 usb_rx_memory_needed
+00003240 g     F .text	0000089c usb_isr
+00004e18 g     F .text	0000000c __cxa_atexit
+00004474 g     F .text	00000022 .hidden __aeabi_i2d
+000022d8 g     F .text	0000001a Adafruit_GFX::drawBitmap(short, short, unsigned char const*, short, short, unsigned short)
+00001438 g     F .text	000000f0 Adafruit_SSD1306::invertDisplay(bool)
+00002c24  w    F .text	00000006 uart3_error_isr
+00004db4  w    F .text	00000002 .hidden __aeabi_ldiv0
+00002c24  w    F .text	00000006 porta_isr
+00009380 g     O .text	00000058 vtable for Adafruit_GFX
+00004794 g     F .text	000001d0 .hidden __divdf3
+00003cc8 g     F .text	00000040 usb_seremu_peekchar
+00001fd0 g     F .text	00000054 Adafruit_GFX::drawFastHLine(short, short, short, unsigned short)
+1fff83bc g     O .usbbuffers	00000480 usb_buffer_memory
+00002c24  w    F .text	00000006 low_voltage_isr
+1fff9238 g     O .data	00000408 __malloc_av_
+00002c24  w    F .text	00000006 can0_error_isr
+00002f24 g     F .text	000000f8 _init_Teensyduino_internal_
+00004540 g     F .text	00000254 .hidden __muldf3
+00000d08 g     F .text	0000005e TwoWire::sda_rising_isr()
+00002c24  w    F .text	00000006 dma_ch12_isr
+000055a0 g     F .text	00000002 __malloc_lock
+00000000  w      *UND*	00000000 __fini_array_start
+00002c24  w    F .text	00000006 can1_wakeup_isr
+1fff8200 g     O .dmabuffers	000001bc _VectorsRam
+1fff97f8 g     O .bss	00000001 usb_seremu_transmit_flush_timer
+00004db8 g     F .text	0000005e _calloc_r
+00002c24  w    F .text	00000006 pit3_isr
+00002740 g     F .text	0000007c SPIClass::begin()
+1fff8b90 g     O .data	00000001 yield_active_check_flags
+00002c24  w    F .text	00000006 enet_rx_isr
+00002c24  w    F .text	00000006 portc_isr
+00005504 g     F .text	0000009a memset
+000099fc  w    O .text	00000024 vtable for usb_seremu_class
+00002a24 g     F .text	00000010 main
+00001f78 g     F .text	00000058 Adafruit_GFX::drawFastVLine(short, short, short, unsigned short)
+1fff980c g     O .bss	00000004 __malloc_max_total_mem
+00000764 g     F .text	0000004e Adafruit_FRAM_I2C::getDeviceID(unsigned short*, unsigned short*)
+000006d8 g     F .text	00000028 Adafruit_EEPROM_I2C::begin(unsigned char, TwoWire*)
+00002bdc  w    F .text	00000048 memmanage_fault_isr
+00004140 g     F .text	00000084 usb_init_serialnumber
+00001f2c g     F .text	00000002 Adafruit_GFX::startWrite()
+00009d44 g       .text	00000000 __init_array_end
+00006708 g     F .text	00000e56 _dtoa_r
+00004ea0 g     F .text	00000570 _malloc_r
+1fff9808 g     O .bss	00000001 HardwareSerial::s_count_serials_with_serial_events
+00002c24  w    F .text	00000006 debugmonitor_isr
+00005b00 g     F .text	0000001a __ascii_wctomb
+00000700 g     F .text	00000050 Adafruit_EEPROM_I2C::write(unsigned short, unsigned char)
+000044e4 g     F .text	0000005a .hidden __aeabi_l2d
+1fff8b54 g     O .data	00000020 isr_table_portD
+00000898 g     F .text	00000012 Adafruit_I2CDevice::Adafruit_I2CDevice(unsigned char, TwoWire*)
+64105f0a g       *ABS*	00000000 __rtc_localtime
+00000000  w      *UND*	00000000 __libc_fini
+00000d68 g     F .text	0000000c sda_rising_isr0()
+00002c24  w    F .text	00000006 cmp1_isr
+00002c24  w    F .text	00000006 ftm0_isr
+00000ba0 g     F .text	00000038 TwoWire::setClock(unsigned long)
+00005c34 g     F .text	0000009c _malloc_trim_r
+1fff8c80 g     O .data	00000004 string0
+00002c38  w    F .text	00000002 startup_late_hook
+00001380 g     F .text	00000018 Adafruit_SSD1306::~Adafruit_SSD1306()
+1fff8b93 g     O .data	00000001 _serialEvent_default
+1fff8c70 g     O .data	0000000e usb_string_midi_port1_default
+1fff8c58  w    O .data	00000018 usb_string_product_name
+00000568 g     F .text	0000007c clearEEPROM()
+00000904 g     F .text	0000005c Adafruit_I2CDevice::write(unsigned char const*, unsigned int, bool, unsigned char const*, unsigned int)
+00003034 g     F .text	0000009c delay
+00004974 g     F .text	0000007a .hidden __nedf2
+00002c24  w    F .text	00000006 tpm0_isr
+00009d44 g     F .fini	00000000 _fini
+00000ae0 g     F .text	00000026 TwoWire::write(unsigned char)
+00002878 g     F .text	0000001c Print::printf(char const*, ...)
+00002c24  w    F .text	00000006 i2s0_rx_isr
+00002c24  w    F .text	00000006 uart4_error_isr
+00005c00 g     F .text	0000000c atexit
+00005b1c g     F .text	0000002c _write_r
+00002128 g     F .text	000000a0 Adafruit_GFX::drawRect(short, short, short, short, unsigned short)
+00003b98  w    F .text	00000004 usb_seremu_class::available()
+00002c24  w    F .text	00000006 can0_message_isr
+1fff90c8 g     O .data	00000004 _impure_ptr
+00002c24  w    F .text	00000006 can1_message_isr
+00002c24  w    F .text	00000006 nmi_isr
+1fff8920 g     O .data	000000bc Wire
+00009d38 g       .text	00000000 __preinit_array_end
+00001328 g     F .text	00000058 Adafruit_SSD1306::Adafruit_SSD1306(unsigned char, unsigned char, TwoWire*, signed char, unsigned long, unsigned long)
+00002c24  w    F .text	00000006 sdhc_isr
+00005410 g     F .text	0000002a __ascii_mbtowc
+00000a88  w    F .text	00000016 TwoWire::peek()
+00000aa0  w    F .text	00000002 TwoWire::flush()
+00000678 g     F .text	00000058 setup
+00009a24 g     O .text	00000078 usb_descriptor_list
+000030d0 g     F .text	0000003c usb_rx
+00002c24  w    F .text	00000006 dma_ch10_isr
+000011b4  w    F .text	00000002 Print::flush()
+000022f4 g     F .text	00000310 Adafruit_GFX::drawChar(short, short, unsigned char, unsigned short, unsigned short, unsigned char, unsigned char)
+00002c24  w    F .text	00000006 uart0_error_isr
+000006d0 g     F .text	00000008 Adafruit_EEPROM_I2C::Adafruit_EEPROM_I2C()
+00003bb4 g     F .text	00000040 usb_malloc
+00002c24  w    F .text	00000006 i2s0_isr
+20008000 g       .bss	00000000 _estack
+00002c24  w    F .text	00000006 enet_timer_isr
+00004a10 g     F .text	00000012 .hidden __aeabi_dcmpeq
+00000aa4 g     F .text	0000003a TwoWire::write(unsigned char const*, unsigned int)
+00002868  w    F .text	0000000e _write
+1fff9648 g       .data	00000000 _edata
+00002c24  w    F .text	00000006 i2s0_tx_isr
+00002c24  w    F .text	00000006 adc1_isr
+1fff8c70  w    O .data	0000000e usb_string_midi_port1
+00002c24  w    F .text	00000006 cmp0_isr
+00002c70 g     F .text	0000004c ultoa
+00000b08 g     F .text	00000098 TwoWire::begin()
+00001b8c g     F .text	00000062 Adafruit_SSD1306::drawFastVLine(short, short, short, unsigned short)
+00002c6c g     F .text	00000004 operator new(unsigned int)
+000027bc g     F .text	00000044 EventResponder::runFromInterrupt()
+1fff9640 g     O .data	00000004 __malloc_trim_threshold
+0000063c g     F .text	0000003c setupDisplay()
+000063b0 g     F .text	00000114 __mdiff
+00008d10 g     F .text	0000004e .hidden __aeabi_d2iz
+000019d8 g     F .text	0000001e Adafruit_SSD1306::clearDisplay()
+00002c24  w    F .text	00000006 pit_isr
+00001328 g     F .text	00000058 Adafruit_SSD1306::Adafruit_SSD1306(unsigned char, unsigned char, TwoWire*, signed char, unsigned long, unsigned long)
+00009ab0 g     O .text	00000101 _ctype_
+00002c24  w    F .text	00000006 dac0_isr
+00009d38 g       .text	00000000 __init_array_start
+00004db4  w    F .text	00000002 .hidden __aeabi_idiv0
+00002c24  w    F .text	00000006 can1_tx_warn_isr
+00004a74 g     F .text	0000002c .hidden __unorddf2
+00002c24  w    F .text	00000006 uart0_status_isr
+00002c24  w    F .text	00000006 mcg_isr
+00000400 g     O .text	00000010 flashconfigbytes
+000059c0 g     F .text	000000dc strlen
+000021fc g     F .text	000000dc Adafruit_GFX::drawBitmap(short, short, unsigned char*, short, short, unsigned short)
+00004a00 g     F .text	00000010 .hidden __aeabi_cdcmpeq
+00004964 g     F .text	0000008a .hidden __gedf2
+1fff97e9 g     O .bss	00000001 usb_seremu_online
+1fff8c58 g     O .data	00000018 usb_string_product_name_default
+00002c24  w    F .text	00000006 dma_ch1_isr
+00005ae8 g     F .text	00000018 vdprintf
+0000310c g     F .text	0000002c usb_tx_packet_count
+000007b4 g     F .text	0000009c Adafruit_FRAM_I2C::begin(unsigned char, TwoWire*)
+00002f20  w    F .text	00000002 startup_middle_hook
+00004498 g     F .text	0000003a .hidden __aeabi_f2d
+00002c24  w    F .text	00000006 dma_ch5_isr
+00002c24  w    F .text	00000006 can0_rx_warn_isr
+00002c24  w    F .text	00000006 can0_tx_warn_isr
+00002c24  w    F .text	00000006 uart4_status_isr
+00000000  w      *UND*	00000000 _Jv_RegisterClasses
+000041d8 g     F .text	0000027a .hidden __subdf3
+00009d38 g       .text	00000000 __preinit_array_start
+00006080 g     F .text	0000005a __lo0bits
+000021c8 g     F .text	00000034 Adafruit_GFX::Adafruit_GFX(short, short)
+000041c4 g     F .text	0000000a __aeabi_atexit
+00000000  w      *UND*	00000000 __register_frame_info
+00002c24  w    F .text	00000006 cmp2_isr
+00002800 g     F .text	00000004 pendablesrvreq_isr
+00000a78  w    F .text	00000004 Print::availableForWrite()
+1fff90cc g     O .data	0000016c __global_locale
+1fff8ad4 g     O .data	00000050 isr_table_portB
+00002c24  w    F .text	00000006 wakeup_isr
+00001f54 g     F .text	00000022 Adafruit_GFX::setRotation(unsigned char)
+00002c24  w    F .text	00000006 cmp3_isr
+00002894 g     F .text	0000007e Print::printNumber(unsigned long, unsigned char, unsigned char)
+00004e90 g     F .text	00000010 free
+00002c24  w    F .text	00000006 tpm2_isr
+00005fc0 g     F .text	00000080 __multadd
+00005fac g     F .text	00000012 _Bfree
+00002c24  w    F .text	00000006 dma_ch0_isr
+1fff8c84  w    O .data	00000016 usb_string_serial_number
+00002c24  w    F .text	00000006 enet_tx_isr
+
+

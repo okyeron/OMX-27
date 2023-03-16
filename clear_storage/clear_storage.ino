@@ -5,6 +5,8 @@
  *
  */
 
+#define T4          0	// 1 for T4, 0 for T32
+
 #include <EEPROM.h>
 #include <Adafruit_FRAM_I2C.h>
 #include <string>
@@ -26,8 +28,15 @@ Adafruit_FRAM_I2C fram = Adafruit_FRAM_I2C();
 Adafruit_SSD1306 display = Adafruit_SSD1306(DISPLAY_WIDTH, DISPLAY_HEIGHT, &Wire, OLED_RST, CLKDURING, CLKAFTER);
 
 const int framCapacity = 32000;
-const int eepromCapacity = 2048;	// 2048; 3.2
-// const int eepromCapacity = 1080; 	// 1080; 4.0
+
+#if T4
+	const int eepromCapacity = 1080; 	// 1080; 4.0
+#else
+	const int eepromCapacity = 2048;	// 2048; 3.2
+#endif
+
+
+
 
 bool usingFram = false;
 
@@ -37,6 +46,7 @@ void setup() {
 
 	if (fram.begin()) {
 		clearFRAM();
+		clearEEPROM();
 	} else {
 		clearEEPROM();
 	}
@@ -54,6 +64,12 @@ void loop() {
 void clearFRAM() {
 	usingFram = true;
 
+	display.clearDisplay();
+	display.setCursor(20, 8);
+	display.printf("FRAM FOUND");
+	display.display();
+	delay(2000);
+
 	for (int address = 0; address < framCapacity; address++) {
 		fram.write(address, 0x0);
 
@@ -62,6 +78,13 @@ void clearFRAM() {
 }
 
 void clearEEPROM() {
+
+	display.clearDisplay();
+	display.setCursor(20, 8);
+	display.printf("EEPROM FOUND");
+	display.display();
+	delay(2000);
+
 	for (int address = 0; address < eepromCapacity; address++) {
 		EEPROM.update(address, 0x0);
 

@@ -9,7 +9,7 @@
 #define NUM_STEPKEYS 16
 
 const uint8_t defaultNoteLength = 3; // index from kNoteLengths[] = {0.10, 0.25, 0.5, 0.75, 1, 1.5, 2, 4, 8, 16};
-// see config.cpp 
+// see config.cpp
 
 struct TimePerPattern {
 	Micros lastProcessTimeP : 32;
@@ -164,10 +164,10 @@ void seqNoteOff(int notenum, int patternNum);
 void allNotesOff();
 void allNotesOffPanic(); // TODO us this used?
 
-void seqStart();
-void seqStop();
-void seqContinue();
-void seqReset();
+extern void seqStart();
+extern void seqStop();
+extern void seqContinue();
+extern void seqReset();
 
 void changeStepType(int amount);
 void resetPatternDefaults(int patternNum);
