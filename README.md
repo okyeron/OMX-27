@@ -46,7 +46,7 @@ Also check to be sure MIDI Library (by Francois Best / fortyseveneffects) is upd
 
 Set the following for the Teensy under the Tools menu:
 
-__Board:  Teensy 3.2/3.1__  
+__Board:  Teensy 3.2/3.1__  or __Board:  Teensy 4.0__  
 __USB Type: MIDI__  
 __CPU Speed: 120 MHz (overclock)__  
 
