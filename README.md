@@ -10,11 +10,12 @@ Dimensions:  313mm x 65mm
 
 ## Firmware 
 
+
 Kits are shipped with a blank Teensy. You will need to flash the firmware to the device.
 
 ### Load pre-compiled firmware w/ TyUpdater
 
-Download the correct OMX-27 firmware "hex" file from https://github.com/okyeron/OMX-27/releases or the Firmware-Hexes directory in this repo.
+Download the correct OMX-27 firmware "hex" file from the [GitHub Releases page](https://github.com/okyeron/OMX-27/releases) page or the Firmware-Hexes directory in this repo.
 
 NOTE - 2023 boards with Teensy 4.0 have a different firmware and will have a "T4" suffix.
 
