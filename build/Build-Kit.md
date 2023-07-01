@@ -20,7 +20,7 @@ Ideally you want to be able to test all the LEDs, the OLED, and the pots/encoder
 
 I'd also suggest testing each switch connection with a piece of wire or tweezers so you can confirm the diodes/LEDs/caps are all soldered correctly.
 
-Follow the order of operations here to make your life easier. __NOTE - the keyswitches are  absolutely the last thing you solder.__ Make sure everything else looks good before you do the switches.
+Follow the order of operations here to make your life easier. __NOTE - the keyswitches are absolutely the last thing you solder.__ Make sure everything else looks good before you do the switches.
 
 Also important - Keyswitches are snapped into the keyplate first (before soldering them). 
 
@@ -46,7 +46,7 @@ Nice to have tools:
 
 The LEDs are __Reverse Mount__ and are soldered to the back-side of the PCB with the LED facing towards the top of the PCB. When looking at the back of the PCB as in the picture, the GND leg is the top right pad for each one (marked with a red triangle in the picture below). The LED itself has a "notched" leg for GND.
 
-<img src="buildpix/OMX-27-build-leds.png" alt="LEDs" width="1080" height="237" />
+![led board locations](buildpix/OMX-27-build-leds.png)
 
 Set each LED into position (tweezers are handy for this) and __then double check the ground pin is in the right position__.  
 
@@ -54,11 +54,9 @@ Set each LED into position (tweezers are handy for this) and __then double check
 <img src="buildpix/leds1.png" alt="LEDs" width="360" height="275" />
 <img src="buildpix/leds2.png" alt="LEDs" width="360" height="275" />
 
-
 Solder/tack the bottom right corner pad of each LED to hold each one in place. Then check the orientation of each LED to be sure they're nice and square in the hole. If not, warm up the solder there and reposition as needed.
 
 After you're happy with the LEDs being in the proper positions - solder the rest of the pads.
-
 
 ### TEENSY
 
@@ -74,24 +72,22 @@ Use the included acrylic jig to set up your Teensy like the following for solder
 
 Short side of the headers goes down to the jig and the long side up.  
 
-<img src="buildpix/teensy_jig_1.jpg" alt="LEDs" width="720" height="416" />
+![teensy 3.2 jig](buildpix/teensy_jig_1.jpg)
 
 Add a 1x3 and 1x1 in the appropriate places. The 1x1 directly next to the 1x3 is not connected to anything so you can solder that or not (your choice).  
 
-<img src="buildpix/teensy_jig_2.jpg" alt="LEDs" width="720" height="416" />
-<img src="buildpix/teensy_jig_3.jpg" alt="LEDs" width="720" height="416" />
+![teensy 3.2 jig](buildpix/teensy_jig_2.jpg)
+![teensy 3.2 jig](buildpix/teensy_jig_3.jpg)
 
 Add the two spacers  (maybe even tape those two together so they don't wiggle around.
 
-<img src="buildpix/teensy_jig_4.jpg" alt="LEDs" width="720" height="416" />
+![teensy 3.2 jig](buildpix/teensy_jig_4.jpg)
 
 Drop the Teensy into place. There should just be a small amount of header sticking up from the Teensy at this point.  
 
-<img src="buildpix/teensy_jig_5.jpg" alt="LEDs" width="720" height="416" />
+![teensy 3.2 jig](buildpix/teensy_jig_5.jpg)
 
 DON'T SOLDER A HEADER TO THE VUSB PIN - it's not used. This is the 1x1 pin/hole right next to the USB jack on the Teensy (on the inside row).
-
-
 
 __Teensy 4.0 jig__  
 
@@ -99,10 +95,8 @@ The Teensy 4.0 version (board v2.0) only uses the 2 outer rows of pins. (4 less 
 
 Note the plastic parts of the jig have an etched out area - this is to allow space for the components on the underside of the Teensy 4.0.  
 
-<img src="buildpix/T4-jig.jpg" alt="LEDs" width="720" height="540" />
-
-<img src="buildpix/T4-jig2.jpg" alt="LEDs" width="720" height="540" />
-
+![teensy 4 jig](buildpix/T4-jig.jpg)
+![teensy 4 jig](buildpix/T4-jig2.jpg)
 
 __Soldering__  
 
@@ -112,29 +106,36 @@ Then remove the jig and carefully remove the black plastic from the headers. __H
 
 After you've removed the plastic, slide the thin yellow kapton spacer thingy onto the bottom of the teensy - this should end up between the teensy and the main board as an insulator. Then drop the Teensy onto the main board so it sits nice and flat. 
 
+![teensy flush](buildpix/teensy-flush.jpg)
+
 To keep the pins from wiggling around while soldering the bottom, either 
 
  * Put a big piece of tape over the whole teensy to keep it in place and to keep the pins from getting pushed out
  
- * Or push the black pastic bits from the headers onto the pins to hold them in place while soldering
+ * Or push the black plastic bits from the headers onto the pins to hold them in place while soldering
  
  * Or both
+
+![teensy reverse](buildpix/teensy-reverse.jpg)
 
 Flip the board over and solder the pins to the bottom. Try to tack/solder one pin on either side in place while pushing your finger against the teensy to make sure it's absolutely flat against the main pcb.
 
 Once you're happy with the flatness - solder the rest of the pins. Be careful not to push down on the pins while soldering.
 
-Using flush cutters, trim the pins away. Be carefull not to nick/scratch the pcb.
+Using flush cutters, trim the pins away. Be careful not to nick/scratch the pcb.
 
+![teensy soldered](buildpix/teensy-soldered.jpg)
 
 ### OLED
 
-The OLED display sits on a regular header (not flush like the Teensy)> the display should be close to level with the keyplate (the OLED glass will be about 0.5-1mm higher than the keyplate).
+The OLED display sits on a regular header (not flush like the Teensy) the display should be close to level with the keyplate (the OLED glass will be about 0.5-1mm higher than the keyplate).
 
 __TIP:__ I suggest using a section of the header plastic you removed from the Teensy headers as a spacer to hold up the other side of the OLED PCB. Glue or tape a 1x4 chunk of the header plastic to the back of the OLED pcb and this will keep it level and support it while you solder (and after).
 
-Trim the headers on the top side of the OLED if you're worried about something shorting there.
+![oled plastic header](buildpix/oled-plastic.jpg)
+![oled soldered](buildpix/oled-soldered.jpg)
 
+Trim the headers on the top side of the OLED if you're worried about something shorting there.
 
 ### JACKS, POTS, ENCODER, ETC.
 
@@ -142,8 +143,11 @@ Snap pots and encoders into place and solder.
 
 You may need to gently squeeze the snap-in mounting pins together a tiny bit to get the pots to snap into place.
 
+![pots soldered](buildpix/pots-soldered.jpg)
 
-# STOP HERE AND TEST THINGS
+---
+
+# __STOP HERE AND TEST THINGS__
 
 At this point you can flash the firmware and do some testing.  
 
@@ -161,18 +165,21 @@ If your LEDs work up to a certain point (e.g. LEDs 1-7 work, LED 8-27 don't):
 
 - Check that the orientation of the LED is correct (see pictures above)
 
+![startup leds](buildpix/startup-leds.jpg)
 
 ### Switch contact test - AKA "the tweezer test"
 
 You will want to test the pads for each keyswitch on the PCB using tweezers or a piece of wire (a piece of wire will work much better than tweezers!). This is also a second check that the LED for that switch is working correctly.
 
+![switch-test](buildpix/switch-test.jpg)
+
 When you test the AUX key (top left-most key) - this will light up a total of 5 LEDs on the left side of the board. This is normal. 
 
-If the LEDs do not light up for each switch contact, check the LEDs again first. A good test is to temove power and re-plug to see if the rainbow LED pattern shows on startup. If all the LEDs are working OK examine the diode adjacent to that switch position and be sure the soldering looks OK.
+![switch test aux](buildpix/switch-test-aux.jpg)
+
+If the LEDs do not light up for each switch contact, check the LEDs again first. A good test is to remove power and re-plug to see if the rainbow LED pattern shows on startup. If all the LEDs are working OK examine the diode adjacent to that switch position and be sure the soldering looks OK.
 
 Note - There are groups of Rows and Columns for sets of switches. If you get a group lighting up, it may be a corresponding pin on the Teensy for that row or column. Ask on Discord if you're stuck here.  
-
-(PIC NEEDED) 
 
 
 ### MIDI test
@@ -192,28 +199,53 @@ __Carefully__ remove the paper backing from the acrylic parts - the spacer and t
 The spacer layer is pretty fragile - try not to break it. However, even if it does break, it might be fine since this sits in-between the other layers.
 
 
-### KEY SWITCHES
+### Key Switches
 
 Check the orientation of the switches. The pins go towards the bottom-half and the LED window at the top.  
 
+![keyswitch single](buildpix/keyswitch-single.jpg)
+
 Snap all the key-switches into the keyplate (from the top). 
 
-(PIC NEEDED)  
+![keyswitchs front](buildpix/keyswitch-front.jpg)
 
 The switches may be a tight fit. Be sure they are snapped all the way into place.
 
-(PIC NEEDED)  
-
 Set the black acrylic spacer layer on the main PCB and align it around the various components. Then set the keyplate with switches into place to be sure all the pins line up and everything is nice and flat. You may need to gently bend key-switch pins into place if they got slightly bent in transport.
 
+![acrylic-spacer](buildpix/acrylic-spacer.jpg)
+![keyswitches assemble](buildpix/keyswitches-assemble-1.jpg)
+
 Use the included case screws/nuts to fix everything together for soldering. I suggest using the holes down the middle of the case. This will ensure the key switches are held in place for soldering and that everything will remain flat.
+
+![keyswitches assemble](buildpix/keyswitches-assemble-2.jpg)
 
 Solder all the switches.
 
 ### Bottom Plate
 
-Then remove the screws/nuts and then reassemble with the back plate.
+Then remove the screws/nuts and then reassemble with the bottom plate.
 
 The nuts fit into the captive cutouts on the bottom plate.
 
-(PIC NEEDED)  
+![bottom plate](buildpix/bottom-plate-nocover.jpg)
+
+![top plate](buildpix/top-plate-nocover.jpg)
+
+### Teensy Cover
+
+Add the teensy cover plate with the two remaining screws/nuts.
+
+![top plate cover](buildpix/top-plate-cover.jpg)
+
+### Pot Knobs
+
+Push the knobs onto the pots, make sure the marking on the knob aligns with the marking on the pot.
+
+![pots closeup](buildpix/pots-closeup.jpg)
+
+### Keycaps
+
+Then install the keycaps with the window on the top for the LEDs.
+
+![keycap-install](buildpix/keycap-install.jpg)
