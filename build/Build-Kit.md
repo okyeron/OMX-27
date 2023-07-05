@@ -173,7 +173,7 @@ You will want to test the pads for each keyswitch on the PCB using tweezers or a
 
 ![switch-test](buildpix/switch-test.jpg)
 
-When you test the AUX key (top left-most key) - this will light up a total of 5 LEDs on the left side of the board. This is normal. 
+When you test the AUX key (top left-most key) - this will light up a total of 15 LEDs on the board. This is normal. 
 
 ![switch test aux](buildpix/switch-test-aux.jpg)
 
