@@ -1,7 +1,7 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
 
-//	v1.12.16
-//	Last update: March 2023
+//	v1.12.17
+//	Last update: August 2023
 //
 //	Original concept and initial code by Steven Noreyko
 //  Additional code contributions:
@@ -877,8 +877,11 @@ void setup()
 	Serial.begin(115200);
 	//	while( !Serial );
 #if T4
-//	Serial.println("DAC Start!");
+	Serial.println("Teensy 4.0");
+// 	Serial.println("DAC Start!");
 	dac.begin(DAC_ADDR);
+#else
+	Serial.println("Teensy 3.2");
 #endif
 	storage = Storage::initStorage();
 	sysEx = new SysEx(storage, &sysSettings);

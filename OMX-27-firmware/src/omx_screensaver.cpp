@@ -60,27 +60,33 @@ void OmxScreensaver::updateLEDs()
 		for (int z=1; z<11; z++){
 			strip.setPixelColor(z, 0);
 		}
-		if (!ssreverse) {
-			// turn off all leds
-			for (int x=0; x<16; x++){
-				if (i < j){
-					strip.setPixelColor(x+11, 0);
+		if (colorConfig.screensaverColor != 0) {
+			if (!ssreverse) {
+				// turn off all leds
+				for (int x=0; x<16; x++){
+					if (i < j){
+						strip.setPixelColor(x+11, 0);
+					}
+					if (x+11 > j){
+						strip.setPixelColor(x+11, strip.gamma32(strip.ColorHSV(colorConfig.screensaverColor)));
+					}
 				}
-				if (x+11 > j){
-					strip.setPixelColor(x+11, strip.gamma32(strip.ColorHSV(colorConfig.screensaverColor)));
+				strip.setPixelColor(i+1, strip.gamma32(strip.ColorHSV(colorConfig.screensaverColor)));
+			} else {
+				for (int y=0; y<16; y++){
+					if (i >= j){
+						strip.setPixelColor(y+11, 0);
+					}
+					if (y+11 < j){
+						strip.setPixelColor(y+11, strip.gamma32(strip.ColorHSV(colorConfig.screensaverColor)));
+					}
 				}
+				strip.setPixelColor(i+1, strip.gamma32(strip.ColorHSV(colorConfig.screensaverColor)));
 			}
-			strip.setPixelColor(i+1, strip.gamma32(strip.ColorHSV(colorConfig.screensaverColor)));
 		} else {
-			for (int y=0; y<16; y++){
-				if (i >= j){
-					strip.setPixelColor(y+11, 0);
-				}
-				if (y+11 < j){
-					strip.setPixelColor(y+11, strip.gamma32(strip.ColorHSV(colorConfig.screensaverColor)));
-				}
+			for (int w=0; w<27; w++){
+				strip.setPixelColor(w, 0);
 			}
-			strip.setPixelColor(i+1, strip.gamma32(strip.ColorHSV(colorConfig.screensaverColor)));
 		}
 		ssstep++;
 		if (ssstep == 16){

@@ -3,8 +3,15 @@
 // OMX-27 shared constants
 
 // HW_VERSIONS
+
+// AUTOMATICALLY GET BOARD TYPE - DO NOT MODIFY
+#ifdef ARDUINO_TEENSY40
+	#define T4          1
+#else
+	#define T4          0
+#endif
+
 #define DEV         0
-#define T4          1
 #define MIDIONLY    0
 
 // HARDWARE Pin for CVGATE_PIN = 13 on beta1 boards, 22 on bodge/midi, 23 on 1.0
