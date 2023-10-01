@@ -37,7 +37,7 @@ namespace midimacro
     void MidiMacroM8::onDisabled()
     {
     }
-   
+
     void MidiMacroM8::loopUpdate()
     {
     }
@@ -63,6 +63,19 @@ namespace midimacro
 
         if (page == M8PAGE_MUTESOLO)
         {
+            if (!e.held())
+            {
+                if (thisKey == 8)
+                {
+                	if (e.down())
+                	{
+						omxDisp.displayMessage("Shift");
+						MM::sendNoteOn(1, 1, midiMacroConfig.midiMacroChan); // Shift
+					} else {
+						MM::sendNoteOff(1, 0, midiMacroConfig.midiMacroChan); // Shift
+					}
+				}
+            }
             if (!e.held())
             {
                 if (e.down() && (thisKey > 10 && thisKey < 27))
@@ -200,7 +213,8 @@ namespace midimacro
                 }
                 else if (e.down() && (thisKey == 8))
                 {
-                    // ??
+//                 	omxDisp.displayMessage("Reset Pat");
+// 					MM::sendNoteOn(1, 1, midiMacroConfig.midiMacroChan); // Shift
                     return; // break;
                 }
                 else if (e.down() && (thisKey == 9))
@@ -358,7 +372,8 @@ namespace midimacro
             }
             strip.setPixelColor(2, LEDOFF);
             strip.setPixelColor(7, LEDOFF);
-            strip.setPixelColor(8, LEDOFF);
+//             strip.setPixelColor(8, LEDOFF);
+            strip.setPixelColor(8, PINK); // snap save
 
             strip.setPixelColor(9, YELLOW); // WAVES
             strip.setPixelColor(10, BLUE);  // PLAY
@@ -410,8 +425,8 @@ namespace midimacro
         // int8_t page = params_.getSelPage();
         // int8_t param = params_.getSelParam();
 
-        // auto amt = enc.accel(5); 
-        
+        // auto amt = enc.accel(5);
+
         omxDisp.setDirty();
     }
 

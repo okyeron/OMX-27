@@ -31,7 +31,7 @@ namespace midimacro
     private:
         bool m8mutesolo_[16];
 
-        // Control key mappings
+        // M8PAGE_CONTROL key mappings
         uint8_t keyUp_ = 1;
         uint8_t keyDown_ = 12;
         uint8_t keyLeft_ = 11;

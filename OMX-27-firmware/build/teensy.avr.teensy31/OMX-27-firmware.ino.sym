@@ -1,0 +1,2170 @@
+
+/private/var/folders/yr/s09md3pj6rnb8t8j8h_nm_rw0000gn/T/arduino/sketches/398372C76D3828057F9BC5FFDF31A16D/OMX-27-firmware.ino.elf:     file format elf32-littlearm
+
+SYMBOL TABLE:
+00000000 l    d  .text	00000000 .text
+0003aa8c l    d  .fini	00000000 .fini
+0003aa90 l    d  .ARM.extab.text.unlikely._ZSt17__throw_bad_allocv	00000000 .ARM.extab.text.unlikely._ZSt17__throw_bad_allocv
+0003aa9c l    d  .ARM.extab.text.unlikely._ZSt19__throw_logic_errorPKc	00000000 .ARM.extab.text.unlikely._ZSt19__throw_logic_errorPKc
+0003aab0 l    d  .ARM.extab.text.unlikely._ZSt20__throw_length_errorPKc	00000000 .ARM.extab.text.unlikely._ZSt20__throw_length_errorPKc
+0003aac4 l    d  .ARM.extab.text._ZL21base_of_encoded_valuehP15_Unwind_Context	00000000 .ARM.extab.text._ZL21base_of_encoded_valuehP15_Unwind_Context
+0003aad0 l    d  .ARM.extab.text.__gxx_personality_v0	00000000 .ARM.extab.text.__gxx_personality_v0
+0003aaf4 l    d  .ARM.extab.text._ZN10__cxxabiv111__terminateEPFvvE	00000000 .ARM.extab.text._ZN10__cxxabiv111__terminateEPFvvE
+0003ab10 l    d  .ARM.extab.text._ZN10__cxxabiv112__unexpectedEPFvvE	00000000 .ARM.extab.text._ZN10__cxxabiv112__unexpectedEPFvvE
+0003ab1c l    d  .ARM.extab.text._ZSt10unexpectedv	00000000 .ARM.extab.text._ZSt10unexpectedv
+0003ab28 l    d  .ARM.extab.text._ZN9__gnu_cxx27__verbose_terminate_handlerEv	00000000 .ARM.extab.text._ZN9__gnu_cxx27__verbose_terminate_handlerEv
+0003ab5c l    d  .ARM.extab.text._ZNSt11logic_errorC2EPKc	00000000 .ARM.extab.text._ZNSt11logic_errorC2EPKc
+0003ab70 l    d  .ARM.extab.text.unlikely.__cxa_call_unexpected	00000000 .ARM.extab.text.unlikely.__cxa_call_unexpected
+0003ab94 l    d  .ARM.extab.text.__cxa_begin_catch	00000000 .ARM.extab.text.__cxa_begin_catch
+0003aba0 l    d  .ARM.extab.text._Unwind_GetRegionStart	00000000 .ARM.extab.text._Unwind_GetRegionStart
+0003abac l    d  .ARM.extab.text._Unwind_GetLanguageSpecificData	00000000 .ARM.extab.text._Unwind_GetLanguageSpecificData
+0003abb8 l    d  .ARM.exidx	00000000 .ARM.exidx
+1fff8000 l    d  .usbdescriptortable	00000000 .usbdescriptortable
+1fff8200 l    d  .dmabuffers	00000000 .dmabuffers
+1fff83bc l    d  .usbbuffers	00000000 .usbbuffers
+1fff8840 l    d  .data	00000000 .data
+1fff9c80 l    d  .bss	00000000 .bss
+00000000 l    d  .ARM.attributes	00000000 .ARM.attributes
+00000000 l    d  .comment	00000000 .comment
+00000000 l    d  .debug_info	00000000 .debug_info
+00000000 l    d  .debug_abbrev	00000000 .debug_abbrev
+00000000 l    d  .debug_loclists	00000000 .debug_loclists
+00000000 l    d  .debug_aranges	00000000 .debug_aranges
+00000000 l    d  .debug_rnglists	00000000 .debug_rnglists
+00000000 l    d  .debug_line	00000000 .debug_line
+00000000 l    d  .debug_str	00000000 .debug_str
+00000000 l    d  .debug_frame	00000000 .debug_frame
+00000000 l    d  .debug_line_str	00000000 .debug_line_str
+00000000 l    df *ABS*	00000000 mk20dx128.c
+0001e7fc l     F .text	0000000c startup_default_early_hook
+0001e808 l     F .text	00000002 startup_default_late_hook
+00000000 l    df *ABS*	00000000 crtstuff.c
+00000410 l     F .text	00000000 register_tm_clones
+00000434 l     F .text	00000000 frame_dummy
+1fff9c80 l     O .bss	00000000 object.0
+0003aa50 l     O .text	00000000 __frame_dummy_init_array_entry
+00000000 l    df *ABS*	00000000 OMX-27-firmware.ino.cpp
+000017c0 l     F .text	00000140 _GLOBAL__sub_I__getpid
+00000000 l    df *ABS*	00000000 ClearUI_Display.cpp
+00001900 l     F .text	00000048 _GLOBAL__sub_I_display
+00000000 l    df *ABS*	00000000 ClearUI_Input.cpp
+00000000 l    df *ABS*	00000000 MM.cpp
+00002688 l     F .text	00000098 _GLOBAL__sub_I__ZN2MM5beginEv
+1fffc2b8 l     O .bss	00000004 (anonymous namespace)::theSerialInstance
+1fffc2bc l     O .bss	00000110 (anonymous namespace)::HWMIDI
+00000000 l    df *ABS*	00000000 config.cpp
+00002720 l     F .text	0000001c __tcf_0
+0000273c l     F .text	00000184 _GLOBAL__sub_I_DEFAULT_MODE
+00000000 l    df *ABS*	00000000 euclidean_sequencer.cpp
+00000000 l    df *ABS*	00000000 midifx_arpeggiator.cpp
+00003cb8 l     F .text	000000a4 midifx::MidiFXArpeggiator::playNote(unsigned long, short, unsigned char) [clone .part.0]
+00000000 l    df *ABS*	00000000 midifx_chance.cpp
+00000000 l    df *ABS*	00000000 midifx_harmonizer.cpp
+00000000 l    df *ABS*	00000000 midifx_interface.cpp
+00000000 l    df *ABS*	00000000 midifx_monophonic.cpp
+00000000 l    df *ABS*	00000000 midifx_randomizer.cpp
+00000000 l    df *ABS*	00000000 midifx_scaler.cpp
+00000000 l    df *ABS*	00000000 midifx_transpose.cpp
+00000000 l    df *ABS*	00000000 midimacro_interface.cpp
+00000000 l    df *ABS*	00000000 midimacro_m8.cpp
+00000000 l    df *ABS*	00000000 midimacro_norns.cpp
+00000000 l    df *ABS*	00000000 music_scales.cpp
+000091b0 l     F .text	00000028 _GLOBAL__sub_I_tempFullNoteName
+00032260 l     O .text	000000f5 scalePatterns
+00000000 l    df *ABS*	00000000 noteoffs.cpp
+000094f8 l     F .text	0000003c _GLOBAL__sub_I__ZN18PendingNoteHistoryC2Ev
+00000000 l    df *ABS*	00000000 omx_disp.cpp
+00009be4 l     F .text	0000004c _GLOBAL__sub_I_u8g2_display
+00009e58 l     F .text	0000006c OmxDisp::renderMessage() [clone .part.0]
+00000000 l    df *ABS*	00000000 omx_keypad.cpp
+00000000 l    df *ABS*	00000000 omx_leds.cpp
+0000bcf8 l     F .text	00000074 _GLOBAL__sub_I_strip
+00000000 l    df *ABS*	00000000 omx_mode_chords.cpp
+0000be38 l     F .text	000000cc OmxModeChords::loadPreset(unsigned char) [clone .part.0]
+0000bf04 l     F .text	000000c4 OmxModeChords::savePreset(unsigned char) [clone .part.0]
+0000ceb0 l     F .text	0000002a OmxModeChords::onChordEditOff() [clone .part.0]
+0000f13c l     F .text	000004ec OmxModeChords::onEncoderChangedEditParam(Encoder::Update*, unsigned char, unsigned char, unsigned char) [clone .part.0]
+00032718 l     O .text	00000045 chordBalance
+00032760 l     O .text	0000006c chordPatterns
+00000000 l    df *ABS*	00000000 omx_mode_euclidean.cpp
+00000000 l    df *ABS*	00000000 omx_mode_grids.cpp
+00012fd8 l     F .text	00000180 OmxModeGrids::updateLEDs() [clone .part.0]
+000329f0 l     O .text	00000020 seqColors
+00000000 l    df *ABS*	00000000 omx_mode_midi_keyboard.cpp
+00032aac l     O .text	0000001c CSWTCH.156
+00000000 l    df *ABS*	00000000 omx_mode_sequencer.cpp
+00032c2c l     O .text	00000020 muteColors
+00032c4c l     O .text	00000010 sequencePageColors
+00032c5c l     O .text	00000020 seqColors
+00000000 l    df *ABS*	00000000 omx_screensaver.cpp
+000167f4 l     F .text	00000154 OmxScreensaver::updateLEDs() [clone .part.0]
+00000000 l    df *ABS*	00000000 omx_util.cpp
+00016fc4 l     F .text	00000014 _GLOBAL__sub_I__ZN7OmxUtil5setupEv
+1fffcdcc l     O .bss	00000004 OmxUtil::advanceSteps(unsigned long)::timeToNextStep
+00000000 l    df *ABS*	00000000 param_manager.cpp
+000170d8 l     F .text	00000088 ParamManager::incrementParam() [clone .part.0]
+00000000 l    df *ABS*	00000000 retro_grids.cpp
+0001758c l     F .text	00000280 grids::GridsWrapper::gridsTick() [clone .part.0]
+00032d60 l     O .text	00000060 grids::node_0
+00032dc0 l     O .text	00000060 grids::node_1
+00032e20 l     O .text	00000060 grids::node_2
+00032e80 l     O .text	00000060 grids::node_3
+00032ee0 l     O .text	00000060 grids::node_4
+00032f40 l     O .text	00000060 grids::node_5
+00032fa0 l     O .text	00000060 grids::node_6
+00033000 l     O .text	00000060 grids::node_7
+00033060 l     O .text	00000060 grids::node_8
+000330c0 l     O .text	00000060 grids::node_9
+00033120 l     O .text	00000060 grids::node_10
+00033180 l     O .text	00000060 grids::node_11
+000331e0 l     O .text	00000060 grids::node_12
+00033240 l     O .text	00000060 grids::node_13
+000332a0 l     O .text	00000060 grids::node_14
+00033300 l     O .text	00000060 grids::node_15
+00033360 l     O .text	00000060 grids::node_16
+000333c0 l     O .text	00000060 grids::node_17
+00033420 l     O .text	00000060 grids::node_18
+00033480 l     O .text	00000060 grids::node_19
+000334e0 l     O .text	00000060 grids::node_20
+00033540 l     O .text	00000060 grids::node_21
+000335a0 l     O .text	00000060 grids::node_22
+00033600 l     O .text	00000060 grids::node_23
+00033660 l     O .text	00000060 grids::node_24
+000336c0 l     O .text	00000064 grids::drum_map
+00000000 l    df *ABS*	00000000 sequencer.cpp
+00017b74 l     F .text	00000060 seqReset() [clone .part.0]
+00018c38 l     F .text	00000010 _GLOBAL__sub_I_lastNote
+00000000 l    df *ABS*	00000000 storage.cpp
+00018d50 l     F .text	00000004 _GLOBAL__sub_I__ZN7Storage11initStorageEv
+00000000 l    df *ABS*	00000000 submode_interface.cpp
+00000000 l    df *ABS*	00000000 submode_midifxgroup.cpp
+000190d4 l     F .text	0000005c __tcf_0
+00019f84 l     F .text	00000164 SubModeMidiFxGroup::moveSelectedMidiFX(signed char) [clone .part.0]
+0001a344 l     F .text	00000030 _GLOBAL__sub_I_subModeMidiFx
+00000000 l    df *ABS*	00000000 submode_potconfig.cpp
+00000000 l    df *ABS*	00000000 sysex.cpp
+00000000 l    df *ABS*	00000000 ResponsiveAnalogRead.cpp
+00000000 l    df *ABS*	00000000 WireKinetis.cpp
+0001ae3a l       .text	00000000 L_1991_delayMicroseconds
+0001ae48 l       .text	00000000 L_2010_delayMicroseconds
+0001ae8e l       .text	00000000 L_2074_delayMicroseconds
+0001b168 l       .text	00000000 L_3409_delayMicroseconds
+1ffffdd0 l     O .bss	00000001 TwoWire::isr()::receiving
+00000000 l    df *ABS*	00000000 Adafruit_MCP4725.cpp
+00000000 l    df *ABS*	00000000 Adafruit_I2CDevice.cpp
+00000000 l    df *ABS*	00000000 SPI.cpp
+0001b574 l     F .text	00000038 _GLOBAL__sub_I__Z15_spi_dma_rxISR0v
+00000000 l    df *ABS*	00000000 Adafruit_SSD1306.cpp
+0001b6a0 l     F .text	00000086 Adafruit_SSD1306::drawFastHLineInternal(short, short, short, unsigned short) [clone .part.0]
+0001b728 l     F .text	00000150 Adafruit_SSD1306::drawFastVLineInternal(short, short, short, unsigned short) [clone .part.0]
+00033a2c l     O .text	000002c0 splash1_data
+00033cec l     O .text	000001e0 splash2_data
+00033f24 l     O .text	00000008 Adafruit_SSD1306::drawFastVLineInternal(short, short, short, unsigned short)::premask
+00033f2c l     O .text	00000008 Adafruit_SSD1306::drawFastVLineInternal(short, short, short, unsigned short)::postmask
+00033f34 l     O .text	00000004 Adafruit_SSD1306::begin(unsigned char, unsigned char, bool, bool)::init1
+00033f38 l     O .text	00000004 Adafruit_SSD1306::begin(unsigned char, unsigned char, bool, bool)::init2
+00033f3c l     O .text	00000004 Adafruit_SSD1306::begin(unsigned char, unsigned char, bool, bool)::init3
+00033f40 l     O .text	00000006 Adafruit_SSD1306::begin(unsigned char, unsigned char, bool, bool)::init5
+00033f48 l     O .text	00000005 Adafruit_SSD1306::display()::dlist1
+00000000 l    df *ABS*	00000000 Adafruit_GFX.cpp
+00033f50 l     O .text	00000500 font
+00000000 l    df *ABS*	00000000 Adafruit_EEPROM_I2C.cpp
+00000000 l    df *ABS*	00000000 Adafruit_FRAM_I2C.cpp
+00000000 l    df *ABS*	00000000 Adafruit_Keypad.cpp
+0001cec4 l       .text	00000000 L_314_delayMicroseconds
+00000000 l    df *ABS*	00000000 Adafruit_NeoPixel.cpp
+0001d0f0 l     F .text	00000076 Adafruit_NeoPixel::setPixelColor(unsigned short, unsigned long) [clone .part.0]
+000344e4 l     O .text	00000100 _NeoPixelGammaTable
+00000000 l    df *ABS*	00000000 U8g2_for_Adafruit_GFX.cpp
+0001d580 l     F .text	0000000e u8g2_font_get_word(unsigned char const*, unsigned char)
+0001d590 l     F .text	0000005a u8g2_font_decode_get_unsigned_bits(_u8g2_font_decode_t*, unsigned char)
+0001d5ec l     F .text	00000014 u8g2_font_decode_get_signed_bits(_u8g2_font_decode_t*, unsigned char)
+0001d600 l     F .text	00000022 u8g2_add_vector_y(short, signed char, signed char, unsigned char)
+0001d624 l     F .text	00000022 u8g2_add_vector_x(short, signed char, signed char, unsigned char)
+0001d698 l     F .text	000000b8 u8g2_font_decode_len(_u8g2_font_t*, unsigned char, unsigned char)
+0001d750 l     F .text	000000d0 u8g2_font_decode_glyph(_u8g2_font_t*, unsigned char const*)
+00000000 l    df *ABS*	00000000 EventResponder.cpp
+00000000 l    df *ABS*	00000000 HardwareSerial1.cpp
+00000000 l    df *ABS*	00000000 Print.cpp
+0001dd20 l     F .text	00000082 Print::printNumber(unsigned long, unsigned char, unsigned char) [clone .part.0]
+00000000 l    df *ABS*	00000000 WMath.cpp
+1ffffe20 l     O .bss	00000004 seed
+00000000 l    df *ABS*	00000000 WString.cpp
+00000000 l    df *ABS*	00000000 analog.c
+0001e204 l     F .text	000000b8 wait_for_cal
+1ffffe24 l     O .bss	00000001 analogReadBusyADC0
+1ffffe25 l     O .bss	00000001 analogReadBusyADC1
+1ffffe26 l     O .bss	00000001 analog_reference_internal
+1ffffe27 l     O .bss	00000001 analog_right_shift
+1ffffe28 l     O .bss	00000001 calibrating
+1fff93d8 l     O .data	00000001 analog_config_bits
+1fff93d9 l     O .data	00000001 analog_num_average
+00039058 l     O .text	00000029 pin2sc1a
+00000000 l    df *ABS*	00000000 eeprom.c
+00000000 l    df *ABS*	00000000 main.cpp
+00000000 l    df *ABS*	00000000 memcpy-armv7m.S.o
+00000000 l    df *ABS*	00000000 new.cpp
+00000000 l    df *ABS*	00000000 nonstd.c
+00000000 l    df *ABS*	00000000 pins_teensy.c
+0001ec8c l     F .text	00000002 dummy_isr
+1fff8840 l     F .data	00000034 port_E_isr
+1fff8874 l     F .data	00000034 port_D_isr
+1fff88a8 l     F .data	00000034 port_C_isr
+1fff88dc l     F .data	00000034 port_B_isr
+1fff8910 l     F .data	00000034 port_A_isr
+0001ec90 l     F .text	00000044 digitalWrite.part.0
+0001ee58 l     F .text	00000002 startup_default_middle_hook
+1fff93e0 l     O .data	00000001 analog_write_res
+00039098 l     O .text	00000014 CSWTCH.39
+00000000 l    df *ABS*	00000000 serial1.c
+0001f2f8 l     F .text	000000ec serial_putchar.part.0
+1ffffe30 l     O .bss	00000004 rts_pin
+1ffffe34 l     O .bss	00000040 rx_buffer
+1ffffe74 l     O .bss	00000001 rx_buffer_head
+1ffffe78 l     O .bss	00000004 rx_buffer_storage_
+1ffffe7c l     O .bss	00000001 rx_buffer_tail
+1ffffe7d l     O .bss	00000001 rx_pin_num
+1ffffe80 l     O .bss	00000004 transmit_pin
+1ffffe84 l     O .bss	00000001 transmitting
+1ffffe88 l     O .bss	00000040 tx_buffer
+1ffffec8 l     O .bss	00000001 tx_buffer_head
+1ffffecc l     O .bss	00000004 tx_buffer_storage_
+1ffffed0 l     O .bss	00000001 tx_buffer_tail
+1fff94c4 l     O .data	00000004 rts_high_watermark_
+1fff94c8 l     O .data	00000004 rts_low_watermark_
+1fff94cc l     O .data	00000004 rx_buffer_total_size_
+1fff94d0 l     O .data	00000004 tx_buffer_total_size_
+1fff94d4 l     O .data	00000001 tx_pin_num
+00000000 l    df *ABS*	00000000 serialEvent1.cpp
+00000000 l    df *ABS*	00000000 usb_dev.c
+1ffffed4 l     O .bss	00000040 ep0_rx0_buf
+1fffff14 l     O .bss	00000040 ep0_rx1_buf
+1fffff54 l     O .bss	00000001 ep0_tx_bdt_bank
+1fffff55 l     O .bss	00000001 ep0_tx_data_toggle
+1fffff56 l     O .bss	00000002 ep0_tx_len
+1fffff58 l     O .bss	00000004 ep0_tx_ptr
+1fffff5c l     O .bss	00000008 reply_buffer
+1fffff64 l     O .bss	00000010 rx_first
+1fffff74 l     O .bss	00000010 rx_last
+1fffff84 l     O .bss	00000008 setup
+1fffff8c l     O .bss	00000010 tx_first
+1fffff9c l     O .bss	00000010 tx_last
+1fffffac l     O .bss	00000004 tx_state
+1fff8000 l     O .usbdescriptortable	000000a0 table
+00000000 l    df *ABS*	00000000 usb_inst.cpp
+00000000 l    df *ABS*	00000000 usb_mem.c
+1fff94e8 l     O .data	00000004 usb_buffer_available
+00000000 l    df *ABS*	00000000 usb_midi.c
+000206bc l     F .text	00000040 sysex_byte
+1fffffc0 l     O .bss	00000004 rx_packet
+1fffffc4 l     O .bss	00000001 transmit_previous_timeout
+1fffffc5 l     O .bss	00000001 tx_noautoflush
+1fffffc8 l     O .bss	00000004 tx_packet
+00000000 l    df *ABS*	00000000 usb_seremu.c
+20000148 l     O .bss	00000004 rx_packet
+2000014c l     O .bss	00000001 transmit_previous_timeout
+2000014d l     O .bss	00000001 tx_noautoflush
+20000150 l     O .bss	00000004 tx_packet
+00000000 l    df *ABS*	00000000 yield.cpp
+20000156 l     O .bss	00000001 yield::running
+00000000 l    df *ABS*	00000000 HardwareSerial.cpp
+00000000 l    df *ABS*	00000000 serialEvent.cpp
+00000000 l    df *ABS*	00000000 usb_desc.c
+1fff94f0 l     O .data	00000073 config_descriptor
+1fff9564 l     O .data	00000012 device_descriptor
+1fff9578 l     O .data	00000021 seremu_report_desc
+00000000 l    df *ABS*	00000000 libm_a-sf_round.o
+00000000 l    df *ABS*	00000000 atexit_arm.o
+00000000 l    df *ABS*	00000000 functexcept.o
+00000000 l    df *ABS*	00000000 bad_alloc.o
+00000000 l    df *ABS*	00000000 eh_alloc.o
+0002130c l     F .text	00000088 (anonymous namespace)::pool::free(void*) [clone .constprop.0]
+00021394 l     F .text	00000058 (anonymous namespace)::pool::allocate(unsigned int) [clone .constprop.0]
+0002143c l     F .text	00000028 _GLOBAL__sub_I__ZN9__gnu_cxx9__freeresEv
+00000000 l    df *ABS*	00000000 eh_arm.o
+00000000 l    df *ABS*	00000000 eh_exception.o
+00000000 l    df *ABS*	00000000 eh_globals.o
+00000000 l    df *ABS*	00000000 eh_personality.o
+00021624 l     F .text	000000c0 read_encoded_value_with_base(unsigned char, unsigned int, unsigned char const*, unsigned int*)
+000216e4 l     F .text	00000048 base_of_encoded_value(unsigned char, _Unwind_Context*)
+0002172c l     F .text	00000090 parse_lsda_header(_Unwind_Context*, unsigned char const*, lsda_header_info*)
+00000000 l    df *ABS*	00000000 eh_terminate.o
+00000000 l    df *ABS*	00000000 eh_throw.o
+00021cb0 l     F .text	00000044 __gxx_exception_cleanup(_Unwind_Reason_Code, _Unwind_Control_Block*)
+00000000 l    df *ABS*	00000000 si_class_type_info.o
+00000000 l    df *ABS*	00000000 tinfo.o
+00000000 l    df *ABS*	00000000 vterminate.o
+00000000 l    df *ABS*	00000000 stdexcept.o
+00000000 l    df *ABS*	00000000 cow-stdexcept.o
+00000000 l    df *ABS*	00000000 cow-string-inst.o
+00000000 l    df *ABS*	00000000 class_type_info.o
+00000000 l    df *ABS*	00000000 cp-demangle.o
+00022368 l     F .text	000000f0 d_make_comp
+00022458 l     F .text	00000074 d_number
+000224cc l     F .text	00000046 d_call_offset
+00022514 l     F .text	00000032 d_ref_qualifier
+00022548 l     F .text	000000d4 d_count_templates_scopes
+0002261c l     F .text	00000020 d_pack_length
+0002263c l     F .text	00000048 d_discriminator
+00022684 l     F .text	0000001c d_index_template_argument.part.0
+000226a0 l     F .text	00000078 d_growable_string_callback_adapter
+00022718 l     F .text	00000030 next_is_type_qual.isra.0
+00022748 l     F .text	00000044 d_append_char
+0002278c l     F .text	00000036 d_lookup_template_argument
+000227c4 l     F .text	00000094 d_find_pack
+00022858 l     F .text	00000066 d_append_string
+000228c0 l     F .text	0000005e d_template_param
+00022920 l     F .text	00000078 d_append_num
+00022998 l     F .text	000000e0 d_source_name
+00022a78 l     F .text	00000194 d_substitution
+00022c0c l     F .text	0000086e d_type
+0002429c l     F .text	00000152 d_cv_qualifiers
+00023544 l     F .text	0000006a d_function_type
+000248ec l     F .text	0000029c d_name
+00023b70 l     F .text	00000064 d_template_args_1
+00023d00 l     F .text	00000528 d_expression_1
+0002347c l     F .text	00000080 d_parmlist
+000234fc l     F .text	00000048 d_bare_function_type
+000235b0 l     F .text	00000108 d_operator_name
+000236b8 l     F .text	00000340 d_unqualified_name
+000239f8 l     F .text	00000120 d_expr_primary
+00024b88 l     F .text	000000f6 d_encoding.part.0
+000243f0 l     F .text	000004fc d_special_name
+00023b18 l     F .text	00000058 d_template_arg
+00023bd4 l     F .text	0000012a d_prefix
+00024228 l     F .text	00000072 d_exprlist
+00024c80 l     F .text	000020ec d_print_comp_inner
+00026d6c l     F .text	0000005a d_print_comp
+00027400 l     F .text	000001d8 d_print_function_type
+00027eb0 l     F .text	00000254 d_maybe_print_fold_expression
+00028104 l     F .text	000001e4 d_maybe_print_designated_init
+00027dd4 l     F .text	000000da d_print_subexpr
+000279e8 l     F .text	00000076 d_print_expr_op
+00026dc8 l     F .text	00000638 d_print_mod
+00027820 l     F .text	000001c8 d_print_array_type
+000275d8 l     F .text	00000248 d_print_mod_list
+00027a60 l     F .text	00000372 d_demangle_callback.constprop.0
+00000000 l    df *ABS*	00000000 eh_call.o
+000283ac l     F .text	0000003a __cxxabiv1::__is_gxx_exception_class(char*)
+00000000 l    df *ABS*	00000000 eh_catch.o
+00000000 l    df *ABS*	00000000 eh_type.o
+00000000 l    df *ABS*	00000000 _arm_addsubdf3.o
+00000000 l    df *ABS*	00000000 _arm_cmpdf2.o
+00000000 l    df *ABS*	00000000 _arm_unorddf2.o
+00000000 l    df *ABS*	00000000 _arm_addsubsf3.o
+00000000 l    df *ABS*	00000000 _arm_muldivsf3.o
+00000000 l    df *ABS*	00000000 _arm_cmpsf2.o
+00000000 l    df *ABS*	00000000 _arm_unordsf2.o
+00000000 l    df *ABS*	00000000 _arm_fixsfsi.o
+00000000 l    df *ABS*	00000000 _arm_fixunssfsi.o
+00000000 l    df *ABS*	00000000 unwind-arm.o
+00029124 l     F .text	00000012 selfrel_offset31
+00029138 l     F .text	0000005c search_EIT_table
+00029194 l     F .text	00000028 __gnu_unwind_get_pr_addr
+000291bc l     F .text	00000098 get_eit_entry
+00029254 l     F .text	00000058 restore_non_core_regs
+000292ac l     F .text	0000000a _Unwind_decode_typeinfo_ptr.constprop.0
+000292b8 l     F .text	00000002 _Unwind_DebugHook
+000292bc l     F .text	0000003a unwind_phase2
+000292f8 l     F .text	000000ca unwind_phase2_forced
+000294d4 l     F .text	0000001a _Unwind_GetGR
+00029520 l     F .text	00000018 _Unwind_SetGR
+000295bc l     F .text	000002a8 __gnu_unwind_pr_common
+00000000 l    df *ABS*	00000000 libunwind.o
+00000000 l    df *ABS*	00000000 pr-support.o
+00029cd8 l     F .text	00000038 next_unwind_byte
+00029d10 l     F .text	0000001a _Unwind_GetGR.constprop.0
+00029d2c l     F .text	00000004 unwind_UCB_from_context
+00000000 l    df *ABS*	00000000 libc_a-calloc.o
+00000000 l    df *ABS*	00000000 libc_a-callocr.o
+00000000 l    df *ABS*	00000000 libc_a-itoa.o
+00000000 l    df *ABS*	00000000 libc_a-malloc.o
+00000000 l    df *ABS*	00000000 libc_a-mallocr.o
+00000000 l    df *ABS*	00000000 libc_a-mlock.o
+00000000 l    df *ABS*	00000000 libc_a-rand.o
+00000000 l    df *ABS*	00000000 libc_a-realloc.o
+00000000 l    df *ABS*	00000000 libc_a-reallocr.o
+00000000 l    df *ABS*	00000000 libc_a-snprintf.o
+00000000 l    df *ABS*	00000000 libc_a-utoa.o
+00000000 l    df *ABS*	00000000 libc_a-sprintf.o
+00000000 l    df *ABS*	00000000 libc_a-findfp.o
+0002ac08 l     F .text	00000018 stdio_exit_handler
+0002ac20 l     F .text	00000040 cleanup_stdio
+0002ac60 l     F .text	000000d4 global_stdio_init.part.0
+00000000 l    df *ABS*	00000000 libc_a-fputc.o
+00000000 l    df *ABS*	00000000 libc_a-fputs.o
+00000000 l    df *ABS*	00000000 libc_a-vsnprintf.o
+00000000 l    df *ABS*	00000000 libc_a-fvwrite.o
+00000000 l    df *ABS*	00000000 libc_a-fwalk.o
+00000000 l    df *ABS*	00000000 libc_a-fwrite.o
+00000000 l    df *ABS*	00000000 libc_a-wsetup.o
+00000000 l    df *ABS*	00000000 libc_a-memcmp.o
+00000000 l    df *ABS*	00000000 libc_a-memmove.o
+00000000 l    df *ABS*	00000000 libc_a-memset.o
+00000000 l    df *ABS*	00000000 libc_a-strncmp.o
+00000000 l    df *ABS*	00000000 libc_a-strncpy.o
+00000000 l    df *ABS*	00000000 libc_a-locale.o
+00000000 l    df *ABS*	00000000 libc_a-cxa_atexit.o
+00000000 l    df *ABS*	00000000 libc_a-efgcvt.o
+00000000 l    df *ABS*	00000000 libc_a-sbrkr.o
+00000000 l    df *ABS*	00000000 libc_a-writer.o
+00000000 l    df *ABS*	00000000 libc_a-errno.o
+00000000 l    df *ABS*	00000000 libc_a-strcmp.o
+00000000 l    df *ABS*	00000000 libc_a-strcpy.o
+00000000 l    df *ABS*	00000000 libc_a-init.o
+00000000 l    df *ABS*	00000000 libc_a-lock.o
+00000000 l    df *ABS*	00000000 libc_a-memchr.o
+00000000 l    df *ABS*	00000000 libc_a-strlen.o
+00000000 l    df *ABS*	00000000 libc_a-__atexit.o
+00000000 l    df *ABS*	00000000 libc_a-__call_atexit.o
+0002bd64 l     F .text	00000014 register_fini
+00000000 l    df *ABS*	00000000 libc_a-atexit.o
+00000000 l    df *ABS*	00000000 libc_a-freer.o
+00000000 l    df *ABS*	00000000 libc_a-mbtowc_r.o
+00000000 l    df *ABS*	00000000 libc_a-svfprintf.o
+00000000 l    df *ABS*	00000000 libc_a-makebuf.o
+00000000 l    df *ABS*	00000000 libc_a-putc.o
+00000000 l    df *ABS*	00000000 libc_a-mprec.o
+00000000 l    df *ABS*	00000000 libc_a-fclose.o
+00000000 l    df *ABS*	00000000 libc_a-fflush.o
+00000000 l    df *ABS*	00000000 libc_a-stdio.o
+00000000 l    df *ABS*	00000000 libc_a-wctomb_r.o
+00000000 l    df *ABS*	00000000 libc_a-wbuf.o
+00000000 l    df *ABS*	00000000 libc_a-localeconv.o
+00000000 l    df *ABS*	00000000 libc_a-closer.o
+00000000 l    df *ABS*	00000000 libc_a-fstatr.o
+00000000 l    df *ABS*	00000000 libc_a-isattyr.o
+00000000 l    df *ABS*	00000000 libc_a-lseekr.o
+00000000 l    df *ABS*	00000000 libc_a-readr.o
+00000000 l    df *ABS*	00000000 libc_a-ecvtbuf.o
+00000000 l    df *ABS*	00000000 libc_a-fini.o
+00000000 l    df *ABS*	00000000 libc_a-wcrtomb.o
+00000000 l    df *ABS*	00000000 libc_a-wcsrtombs.o
+00000000 l    df *ABS*	00000000 libm_a-s_frexp.o
+00000000 l    df *ABS*	00000000 libc_a-assert.o
+00000000 l    df *ABS*	00000000 libc_a-dtoa.o
+0002eaf8 l     F .text	00000128 quorem
+00000000 l    df *ABS*	00000000 libc_a-fiprintf.o
+00000000 l    df *ABS*	00000000 libc_a-svfiprintf.o
+00000000 l    df *ABS*	00000000 libc_a-vfiprintf.o
+0002fc00 l     F .text	00000076 __sprint_r.part.0
+00030bfc l     F .text	00000080 __sbprintf
+00000000 l    df *ABS*	00000000 libc_a-fputwc.o
+00000000 l    df *ABS*	00000000 libc_a-wcsnrtombs.o
+00000000 l    df *ABS*	00000000 _arm_muldivdf3.o
+00000000 l    df *ABS*	00000000 _arm_fixdfsi.o
+00000000 l    df *ABS*	00000000 u8g2_fonts.c
+00000000 l    df *ABS*	00000000 libc_a-ctype_.o
+00000000 l    df *ABS*	00000000 crti.o
+00000000 l    df *ABS*	00000000 crtn.o
+00000000 l    df *ABS*	00000000 usb_names.c
+00000000 l    df *ABS*	00000000 eh_unex_handler.o
+00000000 l    df *ABS*	00000000 eh_term_handler.o
+00000000 l    df *ABS*	00000000 libc_a-impure.o
+000212a4 g     F .text	00000030 std::__throw_length_error(char const*)
+000392d4 g     O .text	00000020 typeinfo name for __cxxabiv1::__forced_unwind
+0002204c g     F .text	00000040 std::logic_error::~logic_error()
+0001e5f8 g     F .text	00000010 main
+0000b61c g     F .text	00000056 OMXKeypad::next()
+0002891c g     F .text	0000006a .hidden __aeabi_ul2d
+0001e7f4  w    F .text	00000006 cmp2_isr
+00039384 g     O .text	0000002c vtable for __cxxabiv1::__si_class_type_info
+00021274 g     F .text	00000030 std::__throw_logic_error(char const*)
+000221dc g     F .text	00000014 std::length_error::length_error(char const*)
+0002b6e0 g     F .text	00000024 _sbrk_r
+00020d5c g     F .text	00000058 usb_seremu_getchar
+00030e88 g     F .text	00000024 _wcsnrtombs_r
+0000ad78 g     F .text	00000134 OmxDisp::dispChar16(char const**, unsigned char, unsigned char, unsigned char, signed char, bool, bool, char const**, unsigned char)
+0002b704 g     F .text	0000002c _write_r
+000392b0 g     O .text	00000008 typeinfo for __cxxabiv1::__forced_unwind
+0001e864 g     F .text	00000044 nvic_execution_priority
+00002b98 g     F .text	00000006 euclidean::EuclideanSequencer::getMidiChannel()
+0003158d g     O .text	00000001 EEPROM_VERSION
+1fffcd8c g     O .bss	0000001c omxLeds
+0001df08 g     F .text	0000003a String::String(String const&)
+0000edd8 g     F .text	00000154 OmxModeChords::doNoteOn(int, unsigned char, unsigned char, unsigned char)
+0002892c g     F .text	0000005a .hidden __floatdidf
+0000926c g     F .text	0000005e PendingNoteOffs::play(unsigned long)
+0002b3b8 g     F .text	00000064 memcmp
+000064f4 g     F .text	00000030 midifx::MidiFXChance::MidiFXChance()
+0001d55c g     F .text	00000024 Adafruit_NeoPixel::gamma32(unsigned long)
+1ffffe0c g     O .bss	00000004 EventResponder::firstYield
+00009b78 g     F .text	0000004c OmxDisp::showDisplay()
+0001e7f4  w    F .text	00000006 dma_ch1_isr
+1fff8ccc g     O .data	00000094 kChordMsg
+00017504 g     F .text	00000088 grids::GridsWrapper::onNoteOn(unsigned char, unsigned char, unsigned char, unsigned char, float, bool, bool, unsigned long)
+0002e8e8 g     F .text	0000002c _read_r
+000092cc g     F .text	000000b8 PendingNoteOffs::sendOffIfPresent(int, int, bool)
+20000020 g     O .bss	00000122 usb_midi_msg_sysex
+0002b730 g     F .text	0000000c __errno
+00004a7c  w    F .text	00000020 std::vector<midifx::MidiFXArpeggiator::ArpNote, std::allocator<midifx::MidiFXArpeggiator::ArpNote> >::_M_erase(__gnu_cxx::__normal_iterator<midifx::MidiFXArpeggiator::ArpNote*, std::vector<midifx::MidiFXArpeggiator::ArpNote, std::allocator<midifx::MidiFXArpeggiator::ArpNote> > >)
+00006cf4 g     F .text	00000008 midifx::MidiFXMonophonic::getColor()
+00006eac g     F .text	000000b0 midifx::MidiFXMonophonic::onDisplayUpdate(unsigned char)
+0002e298 g     F .text	00000154 __mdiff
+0001b564 g     F .text	00000010 _spi_dma_rxISR0()
+00000960 g     F .text	00000004 OnNoteOn
+0001e160 g     F .text	0000001c String::append(char const*)
+0002082c g     F .text	000000cc usb_midi_send_sysex_add_term_bytes
+0000eba0 g     F .text	0000004c OmxModeChords::onManualStrumOn(unsigned char)
+000392c0 g     O .text	0000000c typeinfo for std::bad_exception
+6514a8b3 g       *ABS*	00000000 __rtc_localtime
+1fff894c g     O .data	00000004 longPressInterval
+0002ec20 g     F .text	00000eb8 _dtoa_r
+00004278 g     F .text	00000008 midifx::MidiFXArpeggiator::getOctaveRange()
+000394ac g     O .text	00000014 vtable for std::length_error
+0002a008 g     F .text	00000006 .hidden _Unwind_GetDataRelBase
+00028a24 g     F .text	00000010 .hidden __aeabi_cdcmple
+000062b0 g     F .text	00000002 midifx::MidiFXChance::onEnabled()
+0001392c g     F .text	0000002c OmxModeMidiKeyboard::enableSubmode(SubmodeInterface*)
+0001dce0  w    F .text	00000004 HardwareSerial::read()
+0001fca0 g     F .text	0000002c usb_tx_packet_count
+0001e860  w    F .text	00000002 abort
+0001e7f4  w    F .text	00000006 flash_error_isr
+200004a8 g     O .bss	00000004 errno
+0000b750  w    F .text	00000020 std::vector<OMXKeypad::keystate*, std::allocator<OMXKeypad::keystate*> >::_M_erase(__gnu_cxx::__normal_iterator<OMXKeypad::keystate**, std::vector<OMXKeypad::keystate*, std::allocator<OMXKeypad::keystate*> > >)
+00032c7c g     O .text	0000005c vtable for OmxModeSequencer
+0002e258 g     F .text	0000003e __mcmp
+0001c034 g     F .text	00000218 Adafruit_SSD1306::display()
+0002c05c g     F .text	00001ba4 _svfprintf_r
+00020624  w    F .text	00000006 usb_seremu_class::write(unsigned char)
+00007f6c g     F .text	00000006 midimacro::MidiMacroInterface::setDoNoteOff(void (*)(void*, unsigned char), void*)
+0002a6b0 g     F .text	00000018 realloc
+0001e7f4  w    F .text	00000006 dma_ch7_isr
+00008074 g     F .text	00000010 midimacro::MidiMacroM8::onEncoderChangedEditParam(Encoder::Update)
+00017b6c g     F .text	00000006 grids::GridsWrapper::getSwing()
+00039534 g     O .text	0000002c vtable for __cxxabiv1::__class_type_info
+00021614 g     F .text	00000008 __cxa_get_globals_fast
+000208f8 g     F .text	00000038 usb_midi_flush_output
+0003aa8c g       .text	00000000 __init_array_end
+0002e86c g     F .text	0000002c _fstat_r
+00012698 g     F .text	000000b0 OmxModeGrids::onNoteTriggered(unsigned char, MidiNoteGroup)
+0001e7f4  w    F .text	00000006 usbhs_phy_isr
+00006cec g     F .text	00000008 midifx::MidiFXMonophonic::getDispName()
+0001a5c8 g     F .text	000000d0 SubModePotConfig::setupPageLegends()
+00018290 g     F .text	00000480 playNote(int)
+0001e7f4  w    F .text	00000006 svcall_isr
+00013164 g     F .text	000002d0 OmxModeGrids::setupPageLegends()
+00006cdc g     F .text	00000002 midifx::MidiFXInterface::~MidiFXInterface()
+0002901c g     F .text	00000012 .hidden __aeabi_fcmplt
+00028ad0 g     F .text	00000160 .hidden __aeabi_fadd
+00028c30 g     F .text	00000024 .hidden __aeabi_ui2f
+0000cedc g     F .text	000000d8 OmxModeChords::onNotePostFX(MidiNoteGroup)
+00006544 g     F .text	0000004c midifx::MidiFXHarmonizer::saveToDisk(int, Storage*)
+00008034  w    F .text	00000004 midimacro::MidiMacroM8::consumesDisplay()
+1fffc24c g     O .bss	00000004 temp
+00011eb4 g     F .text	0000001c OmxModeGrids::onEncoderButtonDown()
+00028894 g     F .text	0000001e .hidden __aeabi_ui2d
+00021584 g     F .text	00000070 __gnu_end_cleanup
+0001dbe0  w    F .text	00000008 HardwareSerial::write(unsigned long)
+000178e4 g     F .text	0000000a grids::GridsWrapper::getSnapShot(unsigned char)
+00007abc g     F .text	00000004 midifx::MidiFXTranspose::getFXType()
+0001dbe8  w    F .text	00000008 HardwareSerial::write(long)
+00028618 g     F .text	0000027a .hidden __aeabi_dsub
+00017368 g     F .text	0000015c grids::GridsWrapper::GridsWrapper()
+00016a68 g     F .text	000000ac OmxUtil::advanceClock(OmxModeInterface*, unsigned long)
+00021d4c g     F .text	00000034 __cxa_throw
+0002e9e0 g     F .text	0000004c _wcrtomb_r
+00028f88 g     F .text	00000066 .hidden __ltsf2
+0001e7f4  w    F .text	00000006 uart3_error_isr
+1fff897c g     O .data	00000048 colorConfig
+000169b0 g     F .text	00000058 OmxScreensaver::updateScreenSaverState()
+0001f1a8 g     F .text	00000078 pinMode
+00018c58  w    F .text	00000006 FRAMStorage::capacity()
+200004ac g       .bss	00000000 _ebss
+00018e94 g     F .text	00000020 SubModeMidiFxGroup::onEncoderChangedEditParam(Encoder::Update)
+0001e7f4  w    F .text	00000006 tsi0_isr
+0002bb2c g     F .text	00000002 __retarget_lock_release_recursive
+00029bb8 g     F .text	00000000 .hidden __gnu_Unwind_Save_WMMXD
+00017b10 g     F .text	00000008 grids::GridsWrapper::setY(unsigned char, unsigned char)
+1fff912c g     O .data	00000120 trigConditionsAB
+1fffc3cc g     O .bss	00000020 clockConfig
+00014734 g     F .text	00000074 OmxModeMidiKeyboard::doNoteOff(unsigned char)
+000172c4 g     F .text	000000a4 grids::GridsChannel::ReadDrumMap(unsigned char, unsigned char, unsigned char, unsigned char)
+00017270 g     F .text	00000028 ParamManager::setSelPageAndParam(signed char, signed char)
+0001ce74 g     F .text	00000010 Adafruit_Keypad::~Adafruit_Keypad()
+0001d168 g     F .text	0000001e Adafruit_NeoPixel::~Adafruit_NeoPixel()
+1fff9cd4 g     O .bss	00000090 globalScale
+0000734c  w    F .text	0000001c midifx::MidiFXRandomizer::~MidiFXRandomizer()
+000294f0 g     F .text	0000002e .hidden _Unwind_VRS_Set
+000178f0 g     F .text	00000022 grids::GridsWrapper::setSnapShot(unsigned char, grids::SnapShotSettings)
+0001dcb8  w    F .text	00000004 HardwareSerial::end()
+1fff8c10 g     O .data	00000030 noteNamesNoFormat
+0000e564 g     F .text	000005e2 OmxModeChords::constructChord(unsigned char)
+0001f9e8 g     F .text	0000004c serial_peek
+0001e7f4  w    F .text	00000006 can1_tx_warn_isr
+00028f90 g     F .text	0000005e .hidden __eqsf2
+0001e7f4  w    F .text	00000006 porta_isr
+000029d0 g     F .text	0000001c euclidean::EuclideanSequencer::start()
+0001d1e0 g     F .text	00000076 Adafruit_NeoPixel::Adafruit_NeoPixel(unsigned short, short, unsigned short)
+00006cfc g     F .text	00000002 midifx::MidiFXMonophonic::onDisabled()
+1fff9080 g     O .data	0000001c stepTypes
+1ffffffc g     O .bss	00000004 usb_midi_handleStart
+00006fd8 g     F .text	0000001c midifx::MidiFXMonophonic::getClone()
+0001e7f4  w    F .text	00000006 ftm0_isr
+1fffc708 g     O .bss	00000288 pendingNoteOffs
+00006ff4 g     F .text	00000004 midifx::MidiFXRandomizer::getFXType()
+00010600 g     F .text	00000274 OmxModeEuclidean::onPotChanged(int, int, int, int)
+0001932c g     F .text	0000003e SubModeMidiFxGroup::selectMidiFX(unsigned char)
+00009414 g     F .text	0000003e PendingNoteOns::insert(int, int, int, unsigned long, bool)
+0002e840 g     F .text	00000008 _localeconv_r
+00006acc g     F .text	00000014 midifx::MidiFXInterface::onEncoderButtonDown()
+0002891c g     F .text	0000006a .hidden __floatundidf
+00004db4 g     F .text	000004d4 midifx::MidiFXArpeggiator::sortNotes()
+0002ea48 g     F .text	00000070 frexp
+1fffc528 g     O .bss	00000004 potMinVal
+0000a588 g     F .text	00000250 OmxDisp::dispParamLabel(unsigned char, unsigned char, unsigned char, unsigned char, bool, unsigned char, bool, bool, char const*, unsigned char const*, signed char, bool)
+0000045c  w    F .text	00000002 OmxModeInterface::inMidiControlChange(unsigned char, unsigned char, unsigned char)
+1fff9eb8 g     O .bss	00000014 lastMidiValue
+00003d5c  w    F .text	00000068 midifx::MidiFXArpeggiator::~MidiFXArpeggiator()
+00021e20 g     F .text	0000003a __cxxabiv1::__si_class_type_info::__do_find_public_src(int, void const*, __cxxabiv1::__class_type_info const*, void const*) const
+00008064 g     F .text	00000010 midimacro::MidiMacroM8::onEncoderButtonDown()
+0000c5b0 g     F .text	000001d0 OmxModeChords::onEncoderChangedManStrum(Encoder::Update)
+00001bd8 g     F .text	00000044 MM::sendNoteOnHW(int, int, int)
+0001e7f4  w    F .text	00000006 ftm3_isr
+1fffffb4 g     O .bss	00000008 usb_rx_byte_count_data
+0001f8ec g     F .text	00000018 serial_flush
+00012570 g     F .text	0000004c OmxModeGrids::setPageAndParam(unsigned char, unsigned char)
+0001010c g     F .text	00000020 OmxModeEuclidean::onClockTick()
+00008050 g     F .text	00000014 midimacro::MidiMacroM8::onPotChanged(int, int, int, int)
+000172c0 g     F .text	00000004 ParamManager::getNumPages()
+00028c38 g     F .text	0000001c .hidden __floatsisf
+000392b8 g     O .text	00000008 typeinfo for __cxxabiv1::__foreign_exception
+0000de80 g     F .text	00000140 OmxModeChords::getChordBalanceDetails(unsigned char)
+0001ce3c g     F .text	00000038 Adafruit_Keypad::Adafruit_Keypad(unsigned char*, unsigned char*, unsigned char*, int, int)
+1fff9ca4 g     O .bss	00000014 currentValue
+0001e7f4  w    F .text	00000006 rtc_alarm_isr
+0001d3e4 g     F .text	0000010c Adafruit_NeoPixel::ColorHSV(unsigned short, unsigned char, unsigned char)
+0002a668 g     F .text	00000010 srand
+0000803c g     F .text	00000014 midimacro::MidiMacroM8::getName()
+0001a580  w    F .text	0000000e SubModePotConfig::~SubModePotConfig()
+00009098 g     F .text	0000004c MusicScales::getGroup16Color(unsigned char)
+0001e7f4  w    F .text	00000006 can0_tx_warn_isr
+000062e4 g     F .text	00000084 midifx::MidiFXChance::noteInput(MidiNoteGroup)
+00009b54 g     F .text	00000024 OmxDisp::UpdateMessageTextTimer()
+0001e7f4  w    F .text	00000006 i2c3_isr
+0001db88 g     F .text	00000044 EventResponder::runFromInterrupt()
+00009230 g     F .text	0000003a PendingNoteOffs::insert(int, int, unsigned long, bool)
+00009480 g     F .text	00000078 PendingNoteOns::play(unsigned long)
+00029480 g     F .text	00000012 .hidden __gnu_Unwind_Resume_or_Rethrow
+0001e7f4  w    F .text	00000006 uart4_status_isr
+00039468 g     O .text	0000000c typeinfo for std::length_error
+00009454 g     F .text	0000002a PendingNoteOns::remove(int, int)
+0001e7f4  w    F .text	00000006 uart4_error_isr
+000315bc g     O .text	00000010 kArpRates
+0002062c g     F .text	00000040 usb_malloc
+000149e0 g     F .text	00000004 OmxModeSequencer::shouldBlockEncEdit()
+0001e7f4  w    F .text	00000006 dma_ch2_isr
+00039054 g     O .text	00000001 String::zerotermination
+000222ac g     F .text	00000014 __cxxabiv1::__class_type_info::~__class_type_info()
+00018d54  w    F .text	00000002 SubmodeInterface::onModeChanged()
+000392cc g     O .text	00000008 typeinfo for std::exception
+0001147c g     F .text	0000008c OmxModeEuclidean::toggleMute(unsigned char)
+0000864c  w    F .text	0000001c midimacro::MidiMacroM8::~MidiMacroM8()
+00011e50 g     F .text	00000006 OmxModeGrids::onClockTick()
+00011924 g     F .text	00000154 OmxModeEuclidean::setupPageLegends()
+0001e7f4  w    F .text	00000006 watchdog_isr
+00018eb4 g     F .text	0000003c SubModeMidiFxGroup::onDisabled()
+0001e7f4  w    F .text	00000006 enet_error_isr
+0003945c g     O .text	0000000c typeinfo for std::logic_error
+1fffc990 g     O .bss	00000300 pendingNoteOns
+0000bd94 g     F .text	00000002 OmxModeChords::InitSetup()
+00015930 g     F .text	00000214 OmxModeSequencer::onEncoderChangedNorm(Encoder::Update)
+0001dea4 g     F .text	00000064 random(long, long)
+00028568 g     F .text	0000008a __cxa_end_catch
+000337c4 g     O .text	00000018 vtable for FRAMStorage
+0002aaa0 g     F .text	00000088 snprintf
+20000142 g     O .bss	00000002 usb_midi_msg_sysex_len
+0003aa8c g     F .fini	00000000 _fini
+00021254 g     F .text	00000020 std::__throw_bad_alloc()
+000149d4 g     F .text	0000000a OmxModeSequencer::onEncoderButtonDown()
+000088f0  w    F .text	00000004 midimacro::MidiMacroNorns::consumesPots()
+00028988 g     F .text	0000008a .hidden __gtdf2
+0001aacc g     F .text	00000036 TwoWire::write(unsigned char const*, unsigned int)
+000004fc  w    F .text	00000040 OMXKeypad::~OMXKeypad()
+0001b1b0 g     F .text	00000036 Adafruit_I2CDevice::begin(bool)
+0001dda4 g     F .text	0000004c Print::print(String const&)
+00007f74 g     F .text	0000000c midimacro::MidiMacroInterface::DoNoteOn(unsigned char)
+000215f4 g     F .text	00000002 std::exception::~exception()
+000222dc g     F .text	00000042 __cxxabiv1::__class_type_info::__do_dyncast(int, __cxxabiv1::__class_type_info::__sub_kind, __cxxabiv1::__class_type_info const*, void const*, __cxxabiv1::__class_type_info const*, void const*, __cxxabiv1::__class_type_info::__dyncast_result&) const
+0000cfe4 g     F .text	000004f8 OmxModeChords::updateLEDsChordEdit()
+0000cb50 g     F .text	0000001e OmxModeChords::setSelPageAndParam(signed char, signed char)
+00001e64 g     F .text	00000010 MM::usbMidiRead()
+00029c6c g     F .text	00000022 .hidden ___Unwind_Resume_or_Rethrow
+000190ac  w    F .text	00000028 SubModeMidiFxGroup::~SubModeMidiFxGroup()
+00020614  w    F .text	00000004 usb_seremu_class::flush()
+1fffef5c g     O .bss	00000e74 subModeMidiFx
+000095f8  w    F .text	000000e0 U8G2_FOR_ADAFRUIT_GFX::write(unsigned char const*, unsigned int)
+0001fccc g     F .text	00000080 usb_rx_memory
+00007c20 g     F .text	000000a8 midifx::MidiFXTranspose::onEncoderChangedEditParam(Encoder::Update)
+00019428 g     F .text	00000030 SubModeMidiFxGroup::displayMidiFXName(unsigned char)
+00039510 g     O .text	00000022 typeinfo name for __cxxabiv1::__class_type_info
+00007ec4 g     F .text	00000054 midifx::MidiFXTranspose::getClone()
+0001dcbc  w    F .text	00000020 HardwareSerial::begin(unsigned long, unsigned long)
+0001a498 g     F .text	00000044 SubModePotConfig::onEncoderButtonDown()
+00002b04 g     F .text	00000020 euclidean::EuclideanSequencer::setPolyRClockDivMult(unsigned char)
+00002974 g     F .text	0000005c euclidean::EuclideanSequencer::EuclideanSequencer()
+00029030 g     F .text	00000012 .hidden __aeabi_fcmple
+00018a04 g     F .text	00000044 seqStart()
+00016c58 g     F .text	00000004 OmxUtil::areClocksRunning()
+0001cfd0 g     F .text	0000005c Adafruit_Keypad::begin()
+00029b4c g     F .text	00000000 .hidden __gnu_Unwind_Save_VFP
+00020f7c g     F .text	00000048 usb_seremu_write_buffer_free
+00003eb8 g     F .text	00000224 midifx::MidiFXArpeggiator::MidiFXArpeggiator()
+00028990 g     F .text	00000082 .hidden __ltdf2
+0001fd4c g     F .text	00000088 usb_tx
+00013668 g     F .text	0000004c OmxModeMidiKeyboard::inMidiNoteOff(unsigned char, unsigned char, unsigned char)
+00008b70 g     F .text	000000bc midimacro::MidiMacroNorns::onDisplayUpdate()
+00021200 g     F .text	00000048 roundf
+0001e7fc  w    F .text	0000000c startup_early_hook
+00010210  w    F .text	0000006c OmxModeEuclidean::onNoteTriggeredForwarder(void*, unsigned char, MidiNoteGroup)
+1fff95a0 g     O .data	0000000e usb_string_midi_port1_default
+0001a238 g     F .text	0000010c SubModeMidiFxGroup::SubModeMidiFxGroup()
+00004348 g     F .text	0000007a midifx::MidiFXArpeggiator::toggleHold()
+000062b4 g     F .text	00000016 midifx::MidiFXChance::saveToDisk(int, Storage*)
+1fffcda8 g     O .bss	00000018 strip
+00016968 g     F .text	00000048 OmxScreensaver::onDisplayUpdate()
+00002b24 g     F .text	00000006 euclidean::EuclideanSequencer::getPolyRClockDivMult()
+00012748  w    F .text	00000032 OmxModeGrids::onNoteTriggeredForwarder(void*, unsigned char, MidiNoteGroup)
+0002b748 g     F .text	000002dc strcmp
+00028f88 g     F .text	00000066 .hidden __lesf2
+00033970 g     O .text	00000020 TwoWire::i2c1_hardware
+0001e7f4  w    F .text	00000006 porte_isr
+00019254 g     F .text	00000058 SubModeMidiFxGroup::updateFuncKeyMode()
+0001cc98 g     F .text	00000008 Adafruit_EEPROM_I2C::Adafruit_EEPROM_I2C()
+1fff99dc g     O .data	00000004 __malloc_trim_threshold
+000049c4  w    F .text	000000b8 void std::vector<midifx::MidiFXArpeggiator::ArpNote, std::allocator<midifx::MidiFXArpeggiator::ArpNote> >::emplace_back<midifx::MidiFXArpeggiator::ArpNote>(midifx::MidiFXArpeggiator::ArpNote&&)
+00016fd8 g     F .text	00000028 ParamManager::addPage(unsigned char)
+000040dc g     F .text	00000100 midifx::MidiFXArpeggiator::getClone()
+00038fe8  w    O .text	00000001 _serialEvent_default
+0000759c g     F .text	000000d0 midifx::MidiFXScaler::noteInput(MidiNoteGroup)
+000122fc g     F .text	00000184 OmxModeGrids::onPotChanged(int, int, int, int)
+00017160 g     F .text	0000000a ParamManager::incrementParam()
+00017b08 g     F .text	00000008 grids::GridsWrapper::getX(unsigned char)
+0002e790 g     F .text	000000b0 __swbuf_r
+1fff9c78 g     O .data	00000004 _impure_ptr
+000345e4 g     O .text	000006fa u8g2_font_5x8_tf
+000149e4 g     F .text	00000038 OmxModeSequencer::onEncoderButtonDownLong()
+0001dc80  w    F .text	00000010 HardwareSerial::attachCts(unsigned char)
+0001aea0 g     F .text	000000ec TwoWire::endTransmission(unsigned char)
+0001e7f4  w    F .text	00000006 lpuart0_status_isr
+0001e7f4  w    F .text	00000006 ftm1_isr
+0000953c  w    F .text	00000022 OmxDisp::~OmxDisp()
+0003abb8 g       .ARM.exidx	00000000 __exidx_start
+00016748  w    F .text	0000000c OmxScreensaver::onKeyHeldUpdate(OMXKeypadEvent)
+00030d28 g     F .text	00000066 _fputwc_r
+0001b19c g     F .text	00000012 Adafruit_I2CDevice::Adafruit_I2CDevice(unsigned char, TwoWire*)
+00002e88 g     F .text	000000da euclidean::EuclideanSequencer::clockTick(unsigned long, unsigned long)
+1fff9ed0 g     O .bss	00000018 myEncoder
+1fffc220 g     O .bss	00000024 omxScreensaver
+1fffffd0 g     O .bss	00000004 usb_midi_handleAfterTouch
+0001673c  w    F .text	00000004 OmxModeInterface::shouldBlockEncEdit()
+1fff9ca0 g     O .bss	00000004 activeOmxMode
+0003935c g     O .text	00000025 typeinfo name for __cxxabiv1::__si_class_type_info
+0001f904 g     F .text	00000030 serial_write_buffer_free
+0002b514 g     F .text	000000a4 memset
+000004cc  w    F .text	00000030 OmxModeMidiKeyboard::~OmxModeMidiKeyboard()
+2000001f g     O .bss	00000001 usb_midi_msg_data2
+00028988 g     F .text	0000008a .hidden __gedf2
+00028c64 g     F .text	0000007c .hidden __floatdisf
+2000001e g     O .bss	00000001 usb_midi_msg_data1
+0000f8cc g     F .text	00000494 OmxModeChords::onKeyUpdateChordEdit(OMXKeypadEvent)
+0001e7f4  w    F .text	00000006 spi1_isr
+00018da0 g     F .text	00000024 SubmodeInterface::setEnabled(bool)
+00011cbc g     F .text	0000018c OmxModeEuclidean::loadFromDisk(int, Storage*)
+0001dca0  w    F .text	00000008 HardwareSerial::setTX(unsigned char, bool)
+00002bd0 g     F .text	00000006 euclidean::EuclideanSequencer::setPolyRhythmMode(bool)
+00007010 g     F .text	00000002 midifx::MidiFXRandomizer::loopUpdate()
+00031100 g     F .text	000001d0 .hidden __aeabi_ddiv
+000215fc g     F .text	00000008 std::bad_exception::what() const
+00016744  w    F .text	00000002 OmxScreensaver::onEncoderButtonDownLong()
+00002bc8 g     F .text	00000006 euclidean::EuclideanSequencer::getNoteLength()
+0000057c  w    F .text	00000058 OmxModeGrids::~OmxModeGrids()
+00039318 g     O .text	00000012 typeinfo name for std::bad_exception
+0001f55c g     F .text	000000cc serial_end
+0001b3ac g     F .text	0000007c SPIClass::begin()
+0001e7f4 g     F .text	00000006 unused_isr
+00021df0 g     F .text	00000014 __cxxabiv1::__si_class_type_info::~__si_class_type_info()
+00020610  w    F .text	00000004 usb_seremu_class::available()
+00017298 g     F .text	00000006 ParamManager::getSelParam()
+00007b60 g     F .text	000000c0 midifx::MidiFXTranspose::noteInput(MidiNoteGroup)
+1fff93dc g     O .data	00000004 __brkval
+0001c24c g     F .text	00000002 Adafruit_GFX::startWrite()
+00006ce0 g     F .text	00000004 midifx::MidiFXMonophonic::getFXType()
+00010510 g     F .text	000000f0 OmxModeEuclidean::loopUpdate(unsigned long)
+00009c30 g     F .text	00000080 OmxDisp::displayMessage(char const*)
+000215fc g     F .text	00000008 transaction clone for std::bad_exception::what() const
+00001948 g     F .text	0000002c initializeDisplay()
+000288d8 g     F .text	00000042 .hidden __extendsfdf2
+0001e850  w    F .text	00000004 _isatty
+0001ccc8 g     F .text	00000052 Adafruit_EEPROM_I2C::write(unsigned short, unsigned char)
+00007338  w    F .text	00000014 midifx::MidiFXRandomizer::~MidiFXRandomizer()
+000135ec g     F .text	0000007c OmxModeMidiKeyboard::inMidiNoteOn(unsigned char, unsigned char, unsigned char)
+0001a374  w    F .text	00000002 SubModePotConfig::~SubModePotConfig()
+0002bd84 g     F .text	000000a0 _malloc_trim_r
+1fff9cb8 g     O .bss	0000001c encButton
+20000010 g     O .bss	00000004 usb_midi_handleTimeCodeQuarterFrame
+0001e7f4  w    F .text	00000006 uart2_status_isr
+00018ef0 g     F .text	000001bc SubModeMidiFxGroup::updateLEDs()
+0002a0d0 g     F .text	00000010 malloc
+0002e168 g     F .text	000000f0 __lshift
+000028c0 g     F .text	000000b2 euclidean::EuclideanSequencer::regeneratePattern()
+00029b54 g     F .text	00000000 .hidden __gnu_Unwind_Restore_VFP_D
+0001467c  w    F .text	0000002e OmxModeMidiKeyboard::onNotePostFXForwarder(void*, MidiNoteGroup)
+1fff8b9c g     O .data	00000044 midifx::kPatDisp_
+00000768  w    F .text	0000000e OmxScreensaver::~OmxScreensaver()
+1fff9b58 g     O .data	00000120 _impure_data
+00029ff4 g     F .text	00000012 .hidden _Unwind_GetLanguageSpecificData
+00007ad8 g     F .text	00000002 midifx::MidiFXTranspose::onEnabled()
+00005838 g     F .text	00000098 midifx::MidiFXArpeggiator::noteInput(MidiNoteGroup)
+0000dd9c g     F .text	00000004 OmxModeChords::SetScale(MusicScales*)
+000174ec g     F .text	0000000a grids::GridsWrapper::stop()
+0001e3ec g     F .text	000000e4 analogRead
+1fff95b0  w    O .data	00000016 usb_string_serial_number
+0000053c  w    F .text	00000040 OmxModeEuclidean::~OmxModeEuclidean()
+1fff8dc0 g     O .data	000002c0 copyPatternBuffer
+000096d8 g     F .text	00000090 OmxDisp::OmxDisp()
+0000a7d8 g     F .text	000000f0 OmxDisp::dispCenteredSlots(char const**, unsigned char, unsigned char, bool, bool, bool, char const**, unsigned char)
+0001dcdc  w    F .text	00000004 HardwareSerial::peek()
+1fffcdc0 g     O .bss	0000000b stepCopyBuffer_
+00033990 g     O .text	00000024 vtable for TwoWire
+000315cc g     O .text	00000028 kNoteLengths
+0002100c g     F .text	00000040 usb_seremu_flush_callback
+000074fc g     F .text	0000003c midifx::MidiFXRandomizer::MidiFXRandomizer()
+00028f80 g     F .text	0000006e .hidden __gtsf2
+000285f4 g     F .text	0000001a __cxa_current_exception_type
+0000bd70  w    F .text	00000002 OmxModeInterface::inMidiNoteOn(unsigned char, unsigned char, unsigned char)
+00033ecc g     O .text	00000058 vtable for Adafruit_SSD1306
+0000b584 g     F .text	00000098 OMXKeypad::OMXKeypad(unsigned long, unsigned long, unsigned char*, unsigned char*, unsigned char*, int, int)
+00006a40 g     F .text	00000004 midifx::MidiFXInterface::setAuxDown(bool)
+00014080 g     F .text	00000288 OmxModeMidiKeyboard::updateLEDs()
+00021470 g     F .text	000000b0 __cxa_type_match
+0002ea2c g     F .text	0000001a _wcsrtombs_r
+0001b9ac g     F .text	00000010 Adafruit_SSD1306::~Adafruit_SSD1306()
+000009bc g     F .text	000000f4 saveHeader
+00004258 g     F .text	00000020 midifx::MidiFXArpeggiator::isHoldOn()
+00013774 g     F .text	00000058 OmxModeMidiKeyboard::shouldBlockEncEdit()
+0002b41c g     F .text	000000f8 memmove
+00021f0c g     F .text	00000004 std::type_info::__is_function_p() const
+0000bd80  w    F .text	0000000e SubmodeInterface::onKeyHeldUpdate(OMXKeypadEvent)
+00020e58 g     F .text	00000108 usb_seremu_write
+00011f1c g     F .text	00000060 OmxModeGrids::onModeActivated()
+00017d00 g     F .text	00000028 getSelectedStep()
+00006f8c g     F .text	0000004c midifx::MidiFXMonophonic::MidiFXMonophonic()
+0001e7f4  w    F .text	00000006 dma_ch8_isr
+0001e7f4  w    F .text	00000006 dma_ch12_isr
+00028f90 g     F .text	0000005e .hidden __nesf2
+1fff8ad8 g     O .data	00000038 midifx::kArpModMsg_
+1fff8abc g     O .data	00000005 rowPins
+0001b878 g     F .text	0000006e Adafruit_SSD1306::drawFastHLine(short, short, short, unsigned short)
+0001e8a8 g     F .text	00000004 operator new(unsigned int)
+00006590 g     F .text	00000052 midifx::MidiFXHarmonizer::loadFromDisk(int, Storage*)
+0001db04 g     F .text	00000084 EventResponder::triggerEventNotImmediate()
+0000802c g     F .text	00000002 midimacro::MidiMacroInterface::~MidiMacroInterface()
+2000000c g     O .bss	00000004 usb_midi_handleSystemReset
+00001c1c g     F .text	0000006c MM::sendNoteOff(int, int, int)
+0002a678 g     F .text	00000038 rand
+00019310 g     F .text	0000001c SubModeMidiFxGroup::resync()
+0001dca8  w    F .text	00000006 HardwareSerial::setRX(unsigned char)
+00007090 g     F .text	0000007c midifx::MidiFXRandomizer::loadFromDisk(int, Storage*)
+0002b5b8 g     F .text	0000008a strncmp
+0001e7f4  w    F .text	00000006 adc1_isr
+2000030c g     O .bss	00000001 __lock___malloc_recursive_mutex
+0001f4c0 g     F .text	0000009c serial_format
+000293c4 g     F .text	00000066 .hidden __gnu_Unwind_RaiseException
+1fffcc90 g     O .bss	000000b4 omxDisp
+00004b48  w    F .text	00000074 void std::__insertion_sort<__gnu_cxx::__normal_iterator<midifx::MidiFXArpeggiator::ArpNote*, std::vector<midifx::MidiFXArpeggiator::ArpNote, std::allocator<midifx::MidiFXArpeggiator::ArpNote> > >, __gnu_cxx::__ops::_Iter_comp_iter<bool (*)(midifx::MidiFXArpeggiator::ArpNote, midifx::MidiFXArpeggiator::ArpNote)> >(__gnu_cxx::__normal_iterator<midifx::MidiFXArpeggiator::ArpNote*, std::vector<midifx::MidiFXArpeggiator::ArpNote, std::allocator<midifx::MidiFXArpeggiator::ArpNote> > >, __gnu_cxx::__normal_iterator<midifx::MidiFXArpeggiator::ArpNote*, std::vector<midifx::MidiFXArpeggiator::ArpNote, std::allocator<midifx::MidiFXArpeggiator::ArpNote> > >, __gnu_cxx::__ops::_Iter_comp_iter<bool (*)(midifx::MidiFXArpeggiator::ArpNote, midifx::MidiFXArpeggiator::ArpNote)>)
+00006f70  w    F .text	0000001c midifx::MidiFXMonophonic::~MidiFXMonophonic()
+1fff8b20 g     O .data	00000038 midifx::kArpModDisp_
+00009534  w    F .text	00000004 Print::availableForWrite()
+00008038 g     F .text	00000002 midimacro::MidiMacroM8::loopUpdate()
+0000abd0 g     F .text	000001a8 OmxDisp::dispGenericMode2(unsigned char, signed char, signed char, bool)
+00002ba0 g     F .text	00000006 euclidean::EuclideanSequencer::setVelocity(unsigned char)
+0001f7dc g     F .text	00000110 serial_write
+00028a24 g     F .text	00000010 .hidden __aeabi_cdcmpeq
+00001a8c g     F .text	00000088 Button::update()
+0001e7f4  w    F .text	00000006 uart5_status_isr
+0001b5ac g     F .text	000000f2 Adafruit_SSD1306::drawPixel(short, short, unsigned short)
+00029b5c g     F .text	00000000 .hidden __gnu_Unwind_Save_VFP_D
+0001e7f4  w    F .text	00000006 nmi_isr
+00007554 g     F .text	00000002 midifx::MidiFXScaler::onDisabled()
+0001e7f4  w    F .text	00000006 lptmr_isr
+00007cc8 g     F .text	000001cc midifx::MidiFXTranspose::onDisplayUpdate(unsigned char)
+00017af8 g     F .text	00000008 grids::GridsWrapper::getDensity(unsigned char)
+0000766c g     F .text	000000f8 midifx::MidiFXScaler::onDisplayUpdate(unsigned char)
+00029494 g     F .text	00000002 .hidden _Unwind_Complete
+0003aa4c g       .text	00000000 __preinit_array_end
+0001d3a4 g     F .text	0000003e Adafruit_NeoPixel::fill(unsigned long, unsigned short, unsigned short)
+0001ac54 g     F .text	00000038 TwoWire::setClock(unsigned long)
+0002ba1c g     F .text	000000ba strcpy
+0001a590 g     F .text	00000038 SubModePotConfig::SubModePotConfig()
+0001f140 g     F .text	0000004c digitalWrite
+00007558 g     F .text	00000044 midifx::MidiFXScaler::saveToDisk(int, Storage*)
+00029498 g     F .text	0000000c .hidden _Unwind_DeleteException
+00012d90 g     F .text	00000074 OmxModeGrids::updateLEDsF1()
+000052d0 g     F .text	0000020e midifx::MidiFXArpeggiator::arpNoteOn(MidiNoteGroup)
+00019980 g     F .text	0000000a SubModeMidiFxGroup::setNoteOutputFunc(void (*)(void*, MidiNoteGroup), void*)
+00032370  w    O .text	00000018 vtable for U8G2_FOR_ADAFRUIT_GFX
+0003203c g     O .text	00000064 vtable for midimacro::MidiMacroNorns
+00039504 g     O .text	0000000c typeinfo for __cxxabiv1::__class_type_info
+0001f95c g     F .text	0000008c serial_getchar
+0001b958 g     F .text	00000054 Adafruit_SSD1306::Adafruit_SSD1306(unsigned char, unsigned char, TwoWire*, signed char, unsigned long, unsigned long)
+00002b88 g     F .text	00000006 euclidean::EuclideanSequencer::getNoteNumber()
+000222a0 g     F .text	0000000c __cxxabiv1::__class_type_info::__do_find_public_src(int, void const*, __cxxabiv1::__class_type_info const*, void const*) const
+0002906c g     F .text	0000002c .hidden __aeabi_fcmpun
+1fffc3ec g     O .bss	00000004 dac
+00013bb0 g     F .text	000000bc OmxModeMidiKeyboard::onPotChanged(int, int, int, int)
+0001edbc g     F .text	00000088 detachInterrupt
+00020608  w    F .text	00000004 usb_seremu_class::peek()
+00028acc g     F .text	00000164 .hidden __aeabi_fsub
+000090e4 g     F .text	0000002c MusicScales::getNoteName(unsigned char, bool)
+0001f3e4 g     F .text	000000dc serial_begin
+1fff95c8 g     O .data	00000004 __cxxabiv1::__unexpected_handler
+000062cc g     F .text	00000016 midifx::MidiFXChance::loadFromDisk(int, Storage*)
+000171cc g     F .text	00000076 ParamManager::decrementParam()
+00009384 g     F .text	0000007c PendingNoteOffs::sendOffNow(int, int, bool)
+0001401c g     F .text	00000064 OmxModeMidiKeyboard::onKeyHeldUpdate(OMXKeypadEvent)
+0002b6b4 g     F .text	0000000c __cxa_atexit
+0001e0bc g     F .text	00000022 String::operator=(char const*)
+0002e9b8 g     F .text	00000028 __libc_fini_array
+00002c88 g     F .text	000000d0 euclidean::EuclideanSequencer::loadSave(euclidean::EuclidSave)
+0000710c g     F .text	00000128 midifx::MidiFXRandomizer::onEncoderChangedEditParam(Encoder::Update)
+000147a8  w    F .text	00000004 OmxModeMidiKeyboard::doNoteOffForwarder(void*, unsigned char)
+0001e838  w    F .text	00000004 _read
+0001e090 g     F .text	0000002a String::operator=(String&&)
+00009780 g     F .text	00000018 OmxDisp::clearDisplay()
+00012480 g     F .text	000000f0 OmxModeGrids::OmxModeGrids()
+00021190 g     F .text	00000070 usb_init_serialnumber
+00000021 g       *ABS*	00000000 _teensy_model_identifier
+000337dc g     O .text	00000018 vtable for EEPROMStorage
+00019754 g     F .text	00000014 SubModeMidiFxGroup::nextArpPattern()
+00002f98 g     F .text	0000009c midifx::MidiFXArpeggiator::resync()
+0002dc00 g     F .text	000000d8 __smakebuf_r
+00028408 g     F .text	000000e4 __cxa_call_unexpected
+200004ac g       .bss	00000000 __bss_end
+00013f98 g     F .text	00000084 OmxModeMidiKeyboard::onEncoderButtonDown()
+00039350 g     O .text	0000000c typeinfo for __cxxabiv1::__si_class_type_info
+00028a14 g     F .text	00000020 .hidden __aeabi_cdrcmple
+00007010 g     F .text	00000002 midifx::MidiFXRandomizer::onEnabled()
+000145a4 g     F .text	000000d8 OmxModeMidiKeyboard::onNotePostFX(MidiNoteGroup)
+0002dd9c g     F .text	00000012 _Bfree
+0002bb24 g     F .text	00000002 __retarget_lock_close_recursive
+000146ac g     F .text	00000084 OmxModeMidiKeyboard::doNoteOn(unsigned char)
+0002a0f0 g     F .text	00000560 _malloc_r
+0000f06c g     F .text	000000ce OmxModeChords::onChordEditOn(unsigned char)
+0001e7f4  w    F .text	00000006 wakeup_isr
+000078b4 g     F .text	00000034 midifx::MidiFXScaler::loopUpdate()
+0001e7f4  w    F .text	00000006 i2s0_rx_isr
+00017258 g     F .text	00000006 ParamManager::getSelPage()
+00017d90 g     F .text	00000058 step_back()
+0001ab04 g     F .text	00000060 sda_rising_isr1()
+00013870 g     F .text	000000a0 OmxModeMidiKeyboard::selectMidiFx(unsigned char, bool)
+0001f220 g     F .text	00000040 micros
+0001e844  w    F .text	0000000a _fstat
+0001e7f4  w    F .text	00000006 low_voltage_isr
+000393b8 g     O .text	0000000d typeinfo name for std::type_info
+00000620  w    F .text	00000038 OmxModeMidiKeyboard::~OmxModeMidiKeyboard()
+00018c68 g     F .text	0000001e EEPROMStorage::write(unsigned int, unsigned char)
+00028ff8 g     F .text	00000010 .hidden __aeabi_cfcmple
+00009188 g     F .text	00000018 MusicScales::getScaleName(unsigned char)
+1fffc670 g     O .bss	00000004 midifx::nextArpTriggerTime_
+00039498 g     O .text	00000014 vtable for std::logic_error
+00002ad4 g     F .text	00000006 euclidean::EuclideanSequencer::getClockAdvanced()
+0000787c g     F .text	00000038 midifx::MidiFXScaler::MidiFXScaler()
+0003a870 g     O .text	00000028 __mprec_bigtens
+00006a50 g     F .text	00000006 midifx::MidiFXInterface::setNoteOutput(void (*)(void*, MidiNoteGroup), void*)
+00019c60 g     F .text	00000128 SubModeMidiFxGroup::onDisplayUpdateMidiFX()
+0002a6c8 g     F .text	000003d8 _realloc_r
+0001d4f0 g     F .text	0000005e Adafruit_NeoPixel::setBrightness(unsigned char)
+00001d7c g     F .text	00000054 MM::sendProgramChange(int, int)
+0002abc4 g     F .text	00000004 utoa
+0000bfc8 g     F .text	000000d0 OmxModeChords::onModeActivated()
+1ffffff4 g     O .bss	00000004 usb_midi_handleSongPosition
+000316c8 g     O .text	00000004 nummacromodes
+1fffcfe0 g     O .bss	00000800 loopCount
+0000bd78  w    F .text	00000002 SubmodeInterface::onPotChanged(int, int, int, int)
+000125bc g     F .text	00000064 OmxModeGrids::saveActivePattern(unsigned char)
+20000308 g     O .bss	00000001 __lock___atexit_recursive_mutex
+0002c030 g     F .text	0000002a __ascii_mbtowc
+00007a6c g     F .text	00000050 midifx::MidiFXScaler::getClone()
+0002986c  w    F .text	00000006 .hidden __aeabi_unwind_cpp_pr1
+00029874  w    F .text	00000006 .hidden __aeabi_unwind_cpp_pr2
+000009b8 g     F .text	00000004 OnNoteOff
+000212dc g     F .text	00000014 std::bad_alloc::~bad_alloc()
+000091d8 g     F .text	00000030 PendingNoteHistory::PendingNoteHistory()
+0003aa40 g     F .text	00000000 _init
+00013434 g     F .text	000000a4 OmxModeGrids::onDisplayUpdate()
+0002113c g     F .text	00000050 HardwareSerial::addToSerialEventsList()
+0001fa34 g     F .text	00000048 serial_clear
+000149c4  w    F .text	00000002 OmxModeInterface::onModeDeactivated()
+0001cca0 g     F .text	00000028 Adafruit_EEPROM_I2C::begin(unsigned char, TwoWire*)
+000062a8 g     F .text	00000006 midifx::MidiFXChance::getColor()
+00019130  w    F .text	00000034 SubModeMidiFxGroup::~SubModeMidiFxGroup()
+0001ef00 g     F .text	00000224 analogWrite
+000194c8 g     F .text	00000032 SubModeMidiFxGroup::cutMidiFX(unsigned char)
+0001c7a8 g     F .text	000003c0 Adafruit_GFX::drawChar(short, short, unsigned char, unsigned short, unsigned short, unsigned char, unsigned char)
+00031c1c g     O .text	000000a0 vtable for midifx::MidiFXMonophonic
+1fff8948 g     O .data	00000004 clickWindow
+00008c2c  w    F .text	00000014 midimacro::MidiMacroNorns::~MidiMacroNorns()
+00001d38 g     F .text	00000044 MM::sendControlChangeHW(int, int, int)
+00029864 g     F .text	00000006 .hidden __aeabi_unwind_cpp_pr0
+00003034 g     F .text	0000000c midifx::MidiFXArpeggiator::onKeyHeldUpdate(OMXKeypadEvent, unsigned char)
+1fff95b0 g     O .data	00000016 usb_string_serial_number_default
+00000458  w    F .text	00000002 OmxModeInterface::onEncoderButtonUpLong()
+00028894 g     F .text	0000001e .hidden __floatunsidf
+0001dc00 g     F .text	0000002c HardwareSerial::begin(unsigned long)
+00007e94  w    F .text	00000014 midifx::MidiFXTranspose::~MidiFXTranspose()
+0002b6a8 g     F .text	0000000c __locale_mb_cur_max
+00014a1c g     F .text	00000150 OmxModeSequencer::onPotChanged(int, int, int, int)
+0001d8f0 g     F .text	00000004 u8g2_SetFontMode(_u8g2_font_t*, unsigned char)
+00006368 g     F .text	00000050 midifx::MidiFXChance::onEncoderChangedEditParam(Encoder::Update)
+00028c54 g     F .text	0000008c .hidden __floatundisf
+0000b0a4 g     F .text	00000388 OmxDisp::dispKeyboard(int, int*, bool, char const**, unsigned char)
+000288d8 g     F .text	00000042 .hidden __aeabi_f2d
+0001e7f4  w    F .text	00000006 adc0_isr
+0000eb48 g     F .text	00000058 OmxModeChords::enterChordEditMode()
+00007778  w    F .text	0000001c midifx::MidiFXScaler::~MidiFXScaler()
+0001a238 g     F .text	0000010c SubModeMidiFxGroup::SubModeMidiFxGroup()
+000078e8 g     F .text	00000134 midifx::MidiFXScaler::onEncoderChangedEditParam(Encoder::Update)
+0001a37c g     F .text	0000000a SubModePotConfig::onEncoderChanged(Encoder::Update)
+00021e04 g     F .text	0000001c __cxxabiv1::__si_class_type_info::~__si_class_type_info()
+0001e7f4  w    F .text	00000006 i2s0_isr
+00006b00 g     F .text	00000024 midifx::MidiFXInterface::setEnabled(bool)
+00016c5c g     F .text	00000044 OmxUtil::cvNoteOn(int)
+000290e4 g     F .text	0000003e .hidden __fixunssfsi
+0002061c  w    F .text	00000008 usb_seremu_class::write(unsigned char const*, unsigned int)
+00007f18 g     F .text	0000003c midifx::MidiFXTranspose::MidiFXTranspose()
+00016058 g     F .text	00000588 OmxModeSequencer::showCurrentStepLEDs(int)
+0001e7f4  w    F .text	00000006 dma_ch5_isr
+000024c8  w    F .text	0000015e midi::MidiInterface<midi::SerialMIDI<HardwareSerial, midi::DefaultSerialSettings>, midi::DefaultSettings, midi::DefaultPlatform>::thruFilter(unsigned char)
+0001d820 g     F .text	0000007a u8g2_font_get_glyph_data(_u8g2_font_t*, unsigned short)
+0002b2ec g     F .text	000000cc __swsetup_r
+00028ce0 g     F .text	00000168 .hidden __mulsf3
+1ffffe18 g     O .bss	00000001 EventResponder::runningFromYield
+00006c18 g     F .text	000000c4 midifx::MidiFXInterface::sendNoteOff(midifx::MidiNoteGroupCache)
+00008afc g     F .text	00000074 midimacro::MidiMacroNorns::onEncoderChangedEditParam(Encoder::Update)
+00017fcc g     F .text	00000040 new_step_ahead(int)
+0001e7f4  w    F .text	00000006 pit1_isr
+0001f774 g     F .text	00000054 serial_set_cts
+00016c50 g     F .text	00000008 OmxUtil::stopClocks()
+0001e854  w    F .text	00000006 _lseek
+0002b220 g     F .text	000000aa _fwrite_r
+000069a4 g     F .text	0000004c midifx::MidiFXHarmonizer::MidiFXHarmonizer()
+00007008 g     F .text	00000008 midifx::MidiFXRandomizer::getColor()
+00016ca8 g     F .text	000000f8 OmxUtil::midiNoteOn(MusicScales*, int, int, int)
+0001998c g     F .text	00000030 SubModeMidiFxGroup::onPendingNoteOff(int, int)
+1fffffb1 g     O .bss	00000001 usb_reboot_timer
+00013594 g     F .text	00000034 OmxModeMidiKeyboard::loopUpdate(unsigned long)
+00001510 g     F .text	000002b0 setup
+00039278 g     O .text	0000000d typeinfo name for std::bad_alloc
+00009aa4 g     F .text	0000002c OmxDisp::clearLegends()
+000029ec g     F .text	00000014 euclidean::EuclideanSequencer::stop()
+0001dc7c  w    F .text	00000004 HardwareSerial::clear()
+00006280  w    F .text	00000002 midifx::MidiFXInterface::onModeChanged()
+00008668 g     F .text	00000238 midimacro::MidiMacroM8::drawLEDs()
+0001e7f4  w    F .text	00000006 can0_rx_warn_isr
+0001e7f4  w    F .text	00000006 cmp0_isr
+0001b428  w    F .text	0000013c SPIClass::dma_rxisr()
+00008fcc g     F .text	00000078 MusicScales::getGroup16Note(unsigned char, signed char)
+0000c484 g     F .text	0000009c OmxModeChords::selectMidiFx(unsigned char, bool)
+00021c74 g     F .text	00000008 __cxxabiv1::__unexpected(void (*)())
+0002ddb0 g     F .text	000000a0 __multadd
+00002ac4 g     F .text	00000004 euclidean::EuclideanSequencer::setMute(bool)
+0000bd74  w    F .text	00000002 OmxModeInterface::inMidiNoteOff(unsigned char, unsigned char, unsigned char)
+000062a0 g     F .text	00000008 midifx::MidiFXChance::getDispName()
+00029008 g     F .text	00000012 .hidden __aeabi_fcmpeq
+00029fbc g     F .text	0000002a .hidden __gnu_unwind_frame
+00007ac8 g     F .text	00000008 midifx::MidiFXTranspose::getDispName()
+00017b18 g     F .text	00000008 grids::GridsWrapper::getY(unsigned char)
+00038fec g     O .text	00000068 vtable for HardwareSerial
+0001b2ac g     F .text	00000070 Adafruit_I2CDevice::_read(unsigned char*, unsigned int, bool)
+00007538 g     F .text	00000004 midifx::MidiFXScaler::getFXType()
+00033950 g     O .text	00000020 TwoWire::i2c0_hardware
+00016730  w    F .text	00000002 OmxModeInterface::InitSetup()
+0001e7f4  w    F .text	00000006 rtc_seconds_isr
+0001e7f4  w    F .text	00000006 can0_wakeup_isr
+0001e7f4  w    F .text	00000006 tpm0_isr
+1fff93e4 g     O .data	00000038 isr_table_portA
+0001a388 g     F .text	00000038 SubModePotConfig::onEnabled()
+0003ad68 g       .ARM.exidx	00000000 _etext
+0001e384 g     F .text	00000068 analogReadRes
+0002e848 g     F .text	00000024 _close_r
+0001dfe4 g     F .text	00000030 String::String(unsigned char)
+0000c780 g     F .text	00000038 OmxModeChords::enableSubmode(SubmodeInterface*)
+00000e8c g     F .text	000002c4 loadPatterns
+00018710 g     F .text	00000150 doStepS1()
+00004248 g     F .text	0000000e midifx::MidiFXArpeggiator::isOn()
+00000460  w    F .text	00000002 OmxModeSequencer::~OmxModeSequencer()
+00017914 g     F .text	000000a2 grids::GridsWrapper::saveSnapShot(unsigned char)
+1ffffff8 g     O .bss	00000004 usb_midi_handleSongSelect
+00028c30 g     F .text	00000024 .hidden __floatunsisf
+0001e7f4  w    F .text	00000006 can1_wakeup_isr
+00007f58  w    F .text	00000002 midimacro::MidiMacroInterface::onDisabled()
+0001dc74  w    F .text	00000008 HardwareSerial::addMemoryForRead(void*, unsigned int)
+00008638  w    F .text	00000014 midimacro::MidiMacroM8::~MidiMacroM8()
+00001a60 g     F .text	0000002c Button::Button(unsigned long)
+0000cadc g     F .text	00000074 OmxModeChords::getParams()
+00020618  w    F .text	00000004 usb_seremu_class::availableForWrite()
+0002eab8 g     F .text	00000040 __assert_func
+0001d1e0 g     F .text	00000076 Adafruit_NeoPixel::Adafruit_NeoPixel(unsigned short, short, unsigned short)
+000134d8 g     F .text	00000008 OmxModeGrids::SetScale(MusicScales*)
+1fff949c g     O .data	00000020 isr_table_portD
+0001d02c g     F .text	00000014 Adafruit_Keypad::available()
+1fff89c4 g     O .data	0000001e keys
+0001e7f4  w    F .text	00000006 debugmonitor_isr
+0001e8b4 g     F .text	0000005c ultoa
+0001d9a0 g     F .text	00000004 u8g2_SetForegroundColor(_u8g2_font_t*, unsigned short)
+1fff941c g     O .data	00000050 isr_table_portB
+0000bbb4 g     F .text	00000044 OmxLeds::setAllLEDS(int, int, int)
+00002d58 g     F .text	00000130 euclidean::EuclideanSequencer::playNote()
+0001e7f4  w    F .text	00000006 dac1_isr
+0001aa5c  w    F .text	0000000c TwoWire::available()
+1fff94bc g     O .data	00000008 isr_table_portE
+0001dbd0 g     F .text	00000010 systick_isr
+00031598 g     O .text	00000004 LED_PIN
+0001027c  w    F .text	0000009c OmxModeEuclidean::onNotePostFXForwarder(void*, MidiNoteGroup)
+00002be4 g     F .text	000000a2 euclidean::EuclideanSequencer::getSave()
+00017084 g     F .text	00000052 ParamManager::incrementPage()
+00015218 g     F .text	000000b8 OmxModeSequencer::OmxModeSequencer()
+00021520 g     F .text	00000064 __cxa_begin_cleanup
+0000bd7c  w    F .text	00000004 SubmodeInterface::shouldBlockEncEdit()
+1fff946c g     O .data	00000030 isr_table_portC
+00006f5c  w    F .text	00000014 midifx::MidiFXMonophonic::~MidiFXMonophonic()
+00020580 g     F .text	00000088 usb_init
+00016ca0 g     F .text	00000008 OmxUtil::cvNoteOff()
+00007f8c g     F .text	00000014 midimacro::MidiMacroInterface::onEncoderButtonDown()
+20000008 g     O .bss	00000004 usb_midi_handleSysExPartial
+00017b00 g     F .text	00000008 grids::GridsWrapper::setX(unsigned char, unsigned char)
+00033870 g     O .text	0000005c vtable for SubModeMidiFxGroup
+00028a34 g     F .text	00000012 .hidden __aeabi_dcmpeq
+1fff8c40 g     O .data	0000008c scaleNames
+0001e7f4  w    F .text	00000006 can0_message_isr
+00006a30 g     F .text	0000000e midifx::MidiFXInterface::getEncoderSelect()
+1fffc3f4 g     O .bss	00000134 midiSettings
+0001e7f4  w    F .text	00000006 can1_bus_off_isr
+00011f7c g     F .text	0000002c OmxModeGrids::onModeDeactivated()
+00016768 g     F .text	0000008c OmxScreensaver::onPotChanged(int, int, int, int)
+00006484  w    F .text	00000014 midifx::MidiFXChance::~MidiFXChance()
+0001b1e8 g     F .text	00000054 Adafruit_I2CDevice::detected()
+0000bb98 g     F .text	0000001c OmxLeds::getBlinkPattern(unsigned char)
+0001e7f4  w    F .text	00000006 uart1_error_isr
+0001c250 g     F .text	0000000c Adafruit_GFX::writePixel(short, short, unsigned short)
+0000a544 g     F .text	00000044 OmxDisp::drawStartupScreen()
+00028f90 g     F .text	0000005e .hidden __cmpsf2
+1fff8840 g       .data	00000000 _sdata
+00001b14  w    F .text	00000002 midi::MidiInterface<midi::SerialMIDI<HardwareSerial, midi::DefaultSerialSettings>, midi::DefaultSettings, midi::DefaultPlatform>::~MidiInterface()
+1fff95cc g     O .data	00000004 __cxxabiv1::__terminate_handler
+1ffffe2c g     O .bss	00000004 systick_millis_count
+00029cb4 g     F .text	00000022 .hidden ___Unwind_Backtrace
+000391bc  w    O .text	00000024 vtable for usb_seremu_class
+00020fc4 g     F .text	00000048 usb_seremu_flush_output
+0001f260 g     F .text	00000098 delay
+00018d6c g     F .text	00000014 SubmodeInterface::onEncoderButtonDown()
+1fff9c7c g     O .data	00000004 __atexit_recursive_mutex
+0002bcdc g     F .text	00000088 __register_exitproc
+0002be24 g     F .text	0000020c _free_r
+1fff8200 g     O .dmabuffers	000001bc _VectorsRam
+00013558 g     F .text	0000003c OmxModeMidiKeyboard::onModeDeactivated()
+00032a10 g     O .text	0000005c vtable for OmxModeGrids
+00007234 g     F .text	00000104 midifx::MidiFXRandomizer::onDisplayUpdate(unsigned char)
+00021c50 g     F .text	00000010 __cxxabiv1::__terminate(void (*)())
+00017b64 g     F .text	00000006 grids::GridsWrapper::setSwing(unsigned char)
+00018218 g     F .text	00000078 seqNoteOff(int, int)
+0001aaa4 g     F .text	00000026 TwoWire::write(unsigned char)
+1fff8da0 g     O .data	00000020 kVoicingNames
+00019698 g     F .text	0000006c SubModeMidiFxGroup::getArp(bool)
+1fffc0b4 g     O .bss	000000f4 omxModeMidi
+0001c388 g     F .text	000000a4 Adafruit_GFX::drawLine(short, short, short, short, unsigned short)
+00020df0 g     F .text	00000068 usb_seremu_available
+00008f90 g     F .text	00000004 MusicScales::getNumScales()
+00028ad0 g     F .text	00000160 .hidden __addsf3
+000391e0 g     O .text	00000078 usb_descriptor_list
+000137cc g     F .text	000000a4 OmxModeMidiKeyboard::OmxModeMidiKeyboard()
+00012e04 g     F .text	000001d4 OmxModeGrids::updateLEDsChannelView()
+0001e7f4  w    F .text	00000006 sdhc_isr
+0001d040 g     F .text	000000b0 Adafruit_Keypad::read()
+1fffffe4 g     O .bss	00000004 usb_midi_handleNoteOn
+00018174 g     F .text	000000a4 seqNoteOn(int, int, int)
+20000014 g     O .bss	00000004 usb_midi_handleTuneRequest
+0000a3d4 g     F .text	00000064 OmxDisp::dispPageIndicators2(unsigned char, signed char)
+0000ef2c g     F .text	0000004c OmxModeChords::splitNoteOn(unsigned char)
+00028ac4 g     F .text	0000016c .hidden __aeabi_frsub
+00006e54 g     F .text	00000058 midifx::MidiFXMonophonic::onEncoderChangedEditParam(Encoder::Update)
+20000004 g     O .bss	00000004 usb_midi_handleSysExComplete
+0001e080 g     F .text	0000000e String::operator=(String const&)
+0001e7f4  w    F .text	00000006 portcd_isr
+0001e7f4  w    F .text	00000006 pit0_isr
+0001b31c g     F .text	00000078 Adafruit_I2CDevice::write_then_read(unsigned char const*, unsigned int, unsigned char*, unsigned int, bool)
+000212d4 g     F .text	00000008 std::bad_alloc::what() const
+0001e7f4  w    F .text	00000006 portd_isr
+00002bd8 g     F .text	00000006 euclidean::EuclideanSequencer::getLastSeqPos()
+0000da6c g     F .text	00000330 OmxModeChords::setupPageLegends()
+00009768 g     F .text	00000018 OmxDisp::setup()
+00008df8 g     F .text	0000005c midimacro::MidiMacroNorns::MidiMacroNorns()
+0002233c g     F .text	0000002a __cxxabiv1::__class_type_info::__do_catch(std::type_info const*, void**, unsigned int) const
+000197b8 g     F .text	000001c8 SubModeMidiFxGroup::onKeyUpdate(OMXKeypadEvent)
+00008038 g     F .text	00000002 midimacro::MidiMacroM8::onDisabled()
+0000ab4c g     F .text	00000084 OmxDisp::dispGridBoxes()
+0001f6dc g     F .text	00000054 serial_set_rx
+00008924 g     F .text	000001d8 midimacro::MidiMacroNorns::onKeyUpdate(OMXKeypadEvent)
+0001e7f4  w    F .text	00000006 dma_ch10_isr
+00017b20 g     F .text	00000044 grids::GridsWrapper::setResolution(unsigned char)
+00005fa8 g     F .text	000002b8 midifx::MidiFXArpeggiator::onEncoderChangedEditParam(Encoder::Update)
+2000001d g     O .bss	00000001 usb_midi_msg_channel
+0001d1ac g     F .text	00000034 Adafruit_NeoPixel::updateLength(unsigned short)
+000222c0 g     F .text	0000001c __cxxabiv1::__class_type_info::~__class_type_info()
+0001e7f4  w    F .text	00000006 mcm_isr
+1fffc3f0 g     O .bss	00000001 encoderConfig
+1fffcde0 g     O .bss	00000200 lastNote
+200001c4 g     O .bss	00000004 __malloc_max_total_mem
+00016630 g     F .text	000000fc OmxModeSequencer::initPatterns()
+000043c4 g     F .text	000000da midifx::MidiFXArpeggiator::loadFromDisk(int, Storage*)
+000062b0 g     F .text	00000002 midifx::MidiFXChance::loopUpdate()
+00031e94 g     O .text	000000a0 vtable for midifx::MidiFXTranspose
+000091a0 g     F .text	00000010 MusicScales::getScalePattern(unsigned char)
+0001c688 g     F .text	00000030 Adafruit_GFX::Adafruit_GFX(short, short)
+1fff99e0 g     O .data	0000000c __sglue
+0002e914 g     F .text	000000a4 fcvtbuf
+0001df44 g     F .text	0000000e String::~String()
+0002204c g     F .text	00000040 std::logic_error::~logic_error()
+00001b18 g     F .text	00000054 MM::begin()
+0001d168 g     F .text	0000001e Adafruit_NeoPixel::~Adafruit_NeoPixel()
+1fff8be0 g     O .data	00000030 noteNames
+0001e7f4  w    F .text	00000006 uart1_status_isr
+000045ec g     F .text	0000007e midifx::MidiFXArpeggiator::findIndexOfNextNotePos()
+0002079c g     F .text	00000090 usb_midi_send_sysex_buffer_has_term
+0003a694 g     O .text	00000101 _ctype_
+0002e574 g     F .text	0000011e __sflush_r
+00039484 g     O .text	00000011 typeinfo name for std::length_error
+0001e7f4  w    F .text	00000006 dma_ch11_isr
+00018a48 g     F .text	00000028 seqStop()
+0001cd1c g     F .text	0000002c Adafruit_EEPROM_I2C::read(unsigned short)
+00018c98 g     F .text	00000070 Storage::initStorage()
+0001977c g     F .text	00000026 SubModeMidiFxGroup::gotoArpParams()
+00019704 g     F .text	00000014 SubModeMidiFxGroup::toggleArp()
+0001e7f4  w    F .text	00000006 dma_ch15_isr
+0001ee58  w    F .text	00000002 startup_middle_hook
+0001a0e8 g     F .text	00000074 SubModeMidiFxGroup::onEncoderChanged(Encoder::Update)
+0001b194 g     F .text	00000006 Adafruit_MCP4725::Adafruit_MCP4725()
+1ffffe10 g     O .bss	00000004 EventResponder::lastInterrupt
+00016bd4 g     F .text	0000006c OmxUtil::restartClocks()
+000189bc g     F .text	0000000c allNotesOff()
+0002ad7c g     F .text	0000000c __sfp_lock_release
+00007ad0 g     F .text	00000008 midifx::MidiFXTranspose::getColor()
+00028610 g     F .text	00000000 .hidden __aeabi_drsub
+00016b80 g     F .text	00000054 OmxUtil::resetClocks()
+0002208c g     F .text	00000040 std::length_error::~length_error()
+0000dda0 g     F .text	0000009c OmxModeChords::pasteSelectedChordTo(unsigned char)
+00006a8c g     F .text	00000040 midifx::MidiFXInterface::sendNoteOff(MidiNoteGroup)
+1fff94ec g     O .data	00000001 yield_active_check_flags
+00006270  w    F .text	0000000c midifx::MidiFXInterface::onKeyHeldUpdate(OMXKeypadEvent, unsigned char)
+00002bc0 g     F .text	00000006 euclidean::EuclideanSequencer::setNoteLength(unsigned char)
+000215f8 g     F .text	00000002 std::bad_exception::~bad_exception()
+00021e5c g     F .text	00000080 __cxxabiv1::__si_class_type_info::__do_dyncast(int, __cxxabiv1::__class_type_info::__sub_kind, __cxxabiv1::__class_type_info const*, void const*, __cxxabiv1::__class_type_info const*, void const*, __cxxabiv1::__class_type_info::__dyncast_result&) const
+0002b2cc g     F .text	00000020 fwrite
+0000a438 g     F .text	000000a4 OmxDisp::dispGenericModeLabel(char const*, unsigned char, signed char)
+00018d58  w    F .text	00000002 SubmodeInterface::onClockTick()
+00006264  w    F .text	0000000c midifx::MidiFXInterface::onKeyUpdate(OMXKeypadEvent, unsigned char)
+00035de4 g     O .text	00002076 u8g2_font_cu12_h_symbols
+000217bc g     F .text	00000494 __gxx_personality_v0
+0001e50c g     F .text	0000006c eeprom_initialize
+0002a0a4 g     F .text	0000002c itoa
+00001150 g     F .text	0000006c loadFromStorage
+0001dc5c  w    F .text	00000010 HardwareSerial::write(unsigned char const*, unsigned int)
+00020f60 g     F .text	0000001a usb_seremu_putchar
+00006538 g     F .text	00000008 midifx::MidiFXHarmonizer::getColor()
+0001b8e8 g     F .text	0000006e Adafruit_SSD1306::drawFastVLine(short, short, short, unsigned short)
+0002ad34 g     F .text	0000003c __sinit
+0001c42c g     F .text	00000094 Adafruit_GFX::fillRect(short, short, short, short, unsigned short)
+1fffc5d0 g     O .bss	00000010 sysSettings
+0003a898 g     O .text	000000c8 __mprec_tens
+00029c6c g     F .text	00000022 .hidden _Unwind_Resume_or_Rethrow
+0000a0cc g     F .text	00000308 OmxDisp::dispValues16(signed char*, unsigned char, signed char, signed char, bool, unsigned char, unsigned char, signed char, bool, bool, char const**, unsigned char)
+00002f88 g     F .text	00000004 midifx::MidiFXArpeggiator::getColor()
+0001b958 g     F .text	00000054 Adafruit_SSD1306::Adafruit_SSD1306(unsigned char, unsigned char, TwoWire*, signed char, unsigned long, unsigned long)
+0002118c  w    F .text	00000002 serialEvent()
+000033e0 g     F .text	00000220 midifx::MidiFXArpeggiator::updateLEDs(unsigned char)
+00017ab4 g     F .text	0000000e grids::GridsWrapper::getChannelTriggered(unsigned char)
+0001adb4 g     F .text	000000ec TwoWire::wait_idle()
+1fff95d0 g     O .data	00000408 __malloc_av_
+0001e7f4  w    F .text	00000006 uart0_lon_isr
+00009cb0 g     F .text	00000014 OmxDisp::displayMessage(String)
+1fffffd8 g     O .bss	00000004 usb_midi_handleContinue
+1fff959c g     O .data	00000004 string0
+000312d0 g     F .text	0000004e .hidden __aeabi_d2iz
+00006294 g     F .text	00000004 midifx::MidiFXChance::getFXType()
+00018d64 g     F .text	00000004 SubmodeInterface::isEnabled()
+00021f08 g     F .text	00000002 std::type_info::~type_info()
+0001a440 g     F .text	00000058 SubModePotConfig::updateLEDs()
+0001c270 g     F .text	00000012 Adafruit_GFX::writeFastHLine(short, short, short, unsigned short)
+00030c7c g     F .text	000000ac __fputwc
+0001e7f4  w    F .text	00000006 can0_error_isr
+0001d550 g     F .text	0000000a Adafruit_NeoPixel::clear()
+00020db4 g     F .text	0000003c usb_seremu_peekchar
+0003932c g     O .text	0000000d typeinfo name for std::exception
+0001e7f4  w    F .text	00000006 enet_tx_isr
+0001c25c g     F .text	00000012 Adafruit_GFX::writeFastVLine(short, short, short, unsigned short)
+00008c40  w    F .text	0000001c midimacro::MidiMacroNorns::~MidiMacroNorns()
+00009110 g     F .text	00000078 MusicScales::getFullNoteName(unsigned char)
+1fffffec g     O .bss	00000004 usb_midi_handleProgramChange
+00004518 g     F .text	0000004c midifx::MidiFXArpeggiator::startArp()
+200001c8 g     O .bss	00000004 __malloc_top_pad
+00007ad8 g     F .text	00000002 midifx::MidiFXTranspose::loopUpdate()
+0002987c g     F .text	000002ae .hidden _Unwind_VRS_Pop
+000091d8 g     F .text	00000030 PendingNoteHistory::PendingNoteHistory()
+00028e48 g     F .text	00000136 .hidden __aeabi_fdiv
+0002b644 g     F .text	00000064 strncpy
+00009ef0 g     F .text	000001dc OmxDisp::dispLabelParams(signed char, bool, char const**, unsigned char, bool)
+00016754 g     F .text	00000006 OmxScreensaver::onEncoderChanged(Encoder::Update)
+0000c7b8 g     F .text	00000048 OmxModeChords::isSubmodeEnabled()
+0001a374  w    F .text	00000002 SubModePotConfig::~SubModePotConfig()
+1fffc244 g     O .bss	00000004 storage
+00019b1c g     F .text	00000144 SubModeMidiFxGroup::setupPageLegends()
+20000304 g     O .bss	00000004 __stdio_exit_handler
+0001b23c g     F .text	0000006e Adafruit_I2CDevice::write(unsigned char const*, unsigned int, bool, unsigned char const*, unsigned int)
+0001c29c g     F .text	0000001e Adafruit_GFX::fillScreen(unsigned short)
+00002b5c g     F .text	00000006 euclidean::EuclideanSequencer::getEvents()
+000354cc g     O .text	00000915 u8g2_font_7x14B_tf
+00029b6c g     F .text	00000000 .hidden __gnu_Unwind_Save_VFP_D_16_to_31
+00019e0c g     F .text	0000005c SubModeMidiFxGroup::saveToDisk(int, Storage*)
+0001c6b8 g     F .text	000000f0 Adafruit_GFX::drawBitmap(short, short, unsigned char const*, short, short, unsigned short)
+0000bc74 g     F .text	00000084 OmxLeds::initSetup()
+00002be0 g     F .text	00000004 euclidean::EuclideanSequencer::getPattern()
+00032cd8 g     O .text	0000005c vtable for OmxScreensaver
+00028998 g     F .text	0000007a .hidden __cmpdf2
+0002215c g     F .text	00000080 std::logic_error::logic_error(char const*)
+0002bb20 g     F .text	00000002 __retarget_lock_init_recursive
+0001dfbc g     F .text	00000026 String::String(char const*)
+00018e68 g     F .text	0000001c SubModeMidiFxGroup::onClockTick()
+0001e7f4  w    F .text	00000006 uart3_status_isr
+0001e578 g     F .text	00000034 eeprom_read_byte
+0003933c g     O .text	00000014 vtable for std::bad_exception
+00013c6c g     F .text	0000032c OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update)
+0001b394  w    F .text	00000016 EventResponder::triggerEvent(int, void*)
+00006288  w    F .text	00000002 midifx::MidiFXInterface::resync()
+00017a94 g     F .text	0000001e grids::GridsWrapper::getSeqPos()
+00018c54  w    F .text	00000004 FRAMStorage::isEeprom()
+1fffc5f0 g     O .bss	00000080 tempStrings
+000147ac g     F .text	00000218 OmxModeMidiKeyboard::onKeyUpdate(OMXKeypadEvent)
+00007338  w    F .text	00000014 midifx::MidiFXRandomizer::~MidiFXRandomizer()
+00001e74  w    F .text	0000006e midi::MidiInterface<midi::SerialMIDI<HardwareSerial, midi::DefaultSerialSettings>, midi::DefaultSettings, midi::DefaultPlatform>::send(midi::MidiType, unsigned char, unsigned char, unsigned char)
+20000198 g     O .bss	00000028 __malloc_current_mallinfo
+00006cfc g     F .text	00000002 midifx::MidiFXMonophonic::loopUpdate()
+0001ab64 g     F .text	00000060 sda_rising_isr0()
+00001a60 g     F .text	0000002c Button::Button(unsigned long)
+1fff8a0c g     O .data	00000004 mfxOffMsg
+0001a698 g     F .text	00000058 SubModePotConfig::onDisplayUpdate()
+200001cc g     O .bss	00000138 __sf
+00010150 g     F .text	0000002c OmxModeEuclidean::onEncoderButtonDownLong()
+00006298 g     F .text	00000008 midifx::MidiFXChance::getName()
+00028ff8 g     F .text	00000010 .hidden __aeabi_cfcmpeq
+0001de1c g     F .text	00000014 Print::printNumber(unsigned long, unsigned char, unsigned char)
+1fffc1a8 g     O .bss	00000078 omxModeSeq
+00017af0 g     F .text	00000008 grids::GridsWrapper::setDensity(unsigned char, unsigned char)
+00002a0c g     F .text	000000b8 euclidean::EuclideanSequencer::onNoteOn(unsigned char, unsigned char, unsigned char, float, bool, bool, unsigned long)
+00002974 g     F .text	0000005c euclidean::EuclideanSequencer::EuclideanSequencer()
+00018c18 g     F .text	00000020 pastePattern(int)
+0001c58c g     F .text	000000fc Adafruit_GFX::writeLine(short, short, short, short, unsigned short)
+00006498  w    F .text	0000001c midifx::MidiFXChance::~MidiFXChance()
+20000314 g     O .bss	00000190 __atexit0
+00005288 g     F .text	00000048 midifx::MidiFXArpeggiator::nextArpPattern()
+000088f4  w    F .text	00000004 midimacro::MidiMacroNorns::consumesDisplay()
+000149c8  w    F .text	00000002 OmxModeInterface::onClockTick()
+00002b48 g     F .text	00000014 euclidean::EuclideanSequencer::setEvents(unsigned char)
+00007f5c g     F .text	00000004 midimacro::MidiMacroInterface::getEnabled()
+000063b8 g     F .text	000000cc midifx::MidiFXChance::onDisplayUpdate(unsigned char)
+00011ee0 g     F .text	00000012 OmxModeGrids::shouldBlockEncEdit()
+00029b64 g     F .text	00000000 .hidden __gnu_Unwind_Restore_VFP_D_16_to_31
+0003ad68 g       .ARM.exidx	00000000 __exidx_end
+000088fc g     F .text	00000014 midimacro::MidiMacroNorns::getName()
+0001e7f4  w    F .text	00000006 cmp3_isr
+00010f20 g     F .text	000002e0 OmxModeEuclidean::OmxModeEuclidean()
+00011c60 g     F .text	00000008 OmxModeEuclidean::SetScale(MusicScales*)
+0001e1d0 g     F .text	00000034 String::getBytes(unsigned char*, unsigned int, unsigned int) const
+00016c48 g     F .text	00000008 OmxUtil::resumeClocks()
+00004a9c  w    F .text	000000ac void std::vector<midifx::MidiFXArpeggiator::ArpNote, std::allocator<midifx::MidiFXArpeggiator::ArpNote> >::_M_realloc_insert<midifx::MidiFXArpeggiator::ArpNote const&>(__gnu_cxx::__normal_iterator<midifx::MidiFXArpeggiator::ArpNote*, std::vector<midifx::MidiFXArpeggiator::ArpNote, std::allocator<midifx::MidiFXArpeggiator::ArpNote> > >, midifx::MidiFXArpeggiator::ArpNote const&)
+00007e94  w    F .text	00000014 midifx::MidiFXTranspose::~MidiFXTranspose()
+000193fc g     F .text	0000002c SubModeMidiFxGroup::copyMidiFX(unsigned char)
+00021248 g     F .text	0000000a __aeabi_atexit
+000165ec g     F .text	00000044 OmxModeSequencer::loopUpdate(unsigned long)
+0003926c g     O .text	0000000c typeinfo for std::bad_alloc
+0001a76c g     F .text	0000004c SysEx::sendCurrentState()
+00002b40 g     F .text	00000006 euclidean::EuclideanSequencer::getRotation()
+0002208c g     F .text	00000040 std::length_error::~length_error()
+0001dfe4 g     F .text	00000030 String::String(unsigned char)
+20000018 g     O .bss	00000004 usb_midi_handleVelocityChange
+00004c88  w    F .text	0000012a void std::__introsort_loop<__gnu_cxx::__normal_iterator<midifx::MidiFXArpeggiator::ArpNote*, std::vector<midifx::MidiFXArpeggiator::ArpNote, std::allocator<midifx::MidiFXArpeggiator::ArpNote> > >, int, __gnu_cxx::__ops::_Iter_comp_iter<bool (*)(midifx::MidiFXArpeggiator::ArpNote, midifx::MidiFXArpeggiator::ArpNote)> >(__gnu_cxx::__normal_iterator<midifx::MidiFXArpeggiator::ArpNote*, std::vector<midifx::MidiFXArpeggiator::ArpNote, std::allocator<midifx::MidiFXArpeggiator::ArpNote> > >, __gnu_cxx::__normal_iterator<midifx::MidiFXArpeggiator::ArpNote*, std::vector<midifx::MidiFXArpeggiator::ArpNote, std::allocator<midifx::MidiFXArpeggiator::ArpNote> > >, int, __gnu_cxx::__ops::_Iter_comp_iter<bool (*)(midifx::MidiFXArpeggiator::ArpNote, midifx::MidiFXArpeggiator::ArpNote)>)
+1fffc58c g     O .bss	0000000c scaleConfig
+000338f4 g     O .text	0000005c vtable for SubModePotConfig
+00009cf4 g     F .text	00000164 OmxDisp::dispChordBalance()
+1fff95a0  w    O .data	0000000e usb_string_midi_port1
+0001c334 g     F .text	00000054 Adafruit_GFX::drawFastHLine(short, short, short, unsigned short)
+0002b1d8 g     F .text	00000046 _fwalk_sglue
+0000627c  w    F .text	00000002 midifx::MidiFXInterface::updateLEDs(unsigned char)
+00019718 g     F .text	00000014 SubModeMidiFxGroup::toggleArpHold()
+0001fc00 g     F .text	00000038 serial_add_memory_for_read
+1fff8964 g     O .data	0000000e usb_string_product_name
+000041dc g     F .text	0000006c midifx::MidiFXArpeggiator::nextOctRange()
+0000cfb4  w    F .text	0000002e OmxModeChords::onNotePostFXForwarder(void*, MidiNoteGroup)
+1fff8a1c g     O .data	0000001c modes
+0001e7f4  w    F .text	00000006 randnum_isr
+00018c90 g     F .text	00000008 FRAMStorage::read(unsigned int)
+0002ade0 g     F .text	00000086 _fputs_r
+00000480  w    F .text	0000004c OmxModeChords::~OmxModeChords()
+0000a4dc g     F .text	00000068 OmxDisp::testdrawrect()
+1fff94d5 g     O .data	00000001 _serialEvent1_default
+0002060c  w    F .text	00000004 usb_seremu_class::read()
+0001675c g     F .text	0000000c OmxScreensaver::onKeyUpdate(OMXKeypadEvent)
+0002e3ec g     F .text	000000c0 __d2b
+1fffc674 g     O .bss	00000010 tempFullNoteName
+000048c4  w    F .text	00000100 void std::vector<midifx::MidiFXArpeggiator::PendingArpNote, std::allocator<midifx::MidiFXArpeggiator::PendingArpNote> >::_M_realloc_insert<midifx::MidiFXArpeggiator::PendingArpNote const&>(__gnu_cxx::__normal_iterator<midifx::MidiFXArpeggiator::PendingArpNote*, std::vector<midifx::MidiFXArpeggiator::PendingArpNote, std::allocator<midifx::MidiFXArpeggiator::PendingArpNote> > >, midifx::MidiFXArpeggiator::PendingArpNote const&)
+00017818 g     F .text	000000cc grids::GridsWrapper::getChannelLEDS(unsigned char)
+1fff8d60 g     O .data	00000020 kChordTypeDisp
+0001012c  w    F .text	00000024 OmxModeEuclidean::onPendingNoteOffForwarder(void*, int, int)
+0001e7f4  w    F .text	00000006 flash_cmd_isr
+000191e8 g     F .text	0000006c SubModeMidiFxGroup::onEnabled()
+00006540 g     F .text	00000002 midifx::MidiFXHarmonizer::onDisabled()
+0001e7f4  w    F .text	00000006 enet_rx_isr
+1fffc250 g     O .bss	00000068 display
+00001e24 g     F .text	00000020 MM::continueClock()
+00018d2c g     F .text	00000024 Storage::writeArray(unsigned int, unsigned char*, int)
+000134ec g     F .text	0000003e OmxModeGrids::setPattern(unsigned char, grids::SnapShotSettings)
+0000c578 g     F .text	00000038 OmxModeChords::loopUpdate(unsigned long)
+00006260  w    F .text	00000004 midifx::MidiFXInterface::usesKeys()
+0001d89c g     F .text	00000054 u8g2_GetGlyphWidth(_u8g2_font_t*, unsigned short)
+00019740 g     F .text	00000014 SubModeMidiFxGroup::isArpHoldOn()
+00002a04 g     F .text	00000008 euclidean::EuclideanSequencer::setNoteOutputFunc(void (*)(void*, unsigned char, MidiNoteGroup), void*, unsigned char)
+00029c90 g     F .text	00000022 .hidden _Unwind_ForcedUnwind
+1ffffff0 g     O .bss	00000004 usb_midi_handleRealTimeSystem
+0001e7f4  w    F .text	00000006 ftm2_isr
+00011200 g     F .text	000000f0 OmxModeEuclidean::setParamMode(unsigned char)
+00007764  w    F .text	00000014 midifx::MidiFXScaler::~MidiFXScaler()
+1fff8944 g     O .data	00000000 .hidden __dso_handle
+0002def0 g     F .text	0000005c __i2b
+00006ae0 g     F .text	00000020 midifx::MidiFXInterface::onEncoderChangedSelectParam(Encoder::Update)
+0001e83c  w    F .text	00000006 _close
+1fff89f0 g     O .data	0000001c mdivs
+000066f8 g     F .text	000000a8 midifx::MidiFXHarmonizer::onEncoderChangedEditParam(Encoder::Update)
+0002ad70 g     F .text	0000000c __sfp_lock_acquire
+00006a24  w    F .text	00000002 midifx::MidiFXInterface::onEnabled()
+00028a70 g     F .text	00000012 .hidden __aeabi_dcmpge
+00031fb8 g     O .text	00000064 vtable for midimacro::MidiMacroM8
+00013b68 g     F .text	00000048 OmxModeMidiKeyboard::isSubmodeEnabled()
+000045c8 g     F .text	00000024 midifx::MidiFXArpeggiator::onClockTick()
+00007f64 g     F .text	00000006 midimacro::MidiMacroInterface::setDoNoteOn(void (*)(void*, unsigned char), void*)
+00009b4c g     F .text	00000008 OmxDisp::setDirty()
+0003159c g     O .text	00000004 PPQ
+0001e7f4  w    F .text	00000006 uart5_error_isr
+0001ba50 g     F .text	000000ec Adafruit_SSD1306::invertDisplay(bool)
+000007f8 g     F .text	00000110 readPotentimeters
+00007544 g     F .text	00000008 midifx::MidiFXScaler::getDispName()
+000189c8 g     F .text	0000003c transposeSeq(int, int)
+1fff9c9c g     O .bss	00000004 V_scale
+0000ec50 g     F .text	000000a0 OmxModeChords::loadFromDisk(int, Storage*)
+0002ab28 g     F .text	0000009c __utoa
+000174f8 g     F .text	0000000a grids::GridsWrapper::setNoteOutputFunc(void (*)(void*, unsigned char, MidiNoteGroup), void*)
+0002161c g     F .text	00000008 __cxa_get_globals
+00009400 g     F .text	00000008 PendingNoteOffs::allOff()
+1fff909c g     O .data	00000090 trigConditions
+00000964 g     F .text	00000054 handleNoteOff
+00029098 g     F .text	0000004c .hidden __fixsfsi
+1fff99d8 g     O .data	00000004 __malloc_sbrk_base
+00007010 g     F .text	00000002 midifx::MidiFXRandomizer::onDisabled()
+00006cdc g     F .text	00000002 midifx::MidiFXInterface::~MidiFXInterface()
+0000fd60 g     F .text	000003a4 OmxModeChords::onKeyUpdate(OMXKeypadEvent)
+0001cc98 g     F .text	00000008 Adafruit_EEPROM_I2C::Adafruit_EEPROM_I2C()
+0002e70c g     F .text	0000003e __swrite
+00031588 g     O .text	00000004 CC_OM2
+1fff93c4 g     O .data	00000014 Serial1
+0001d648 g     F .text	0000004e u8g2_draw_hv_line(_u8g2_font_t*, short, short, short, unsigned char, unsigned short)
+0001a590 g     F .text	00000038 SubModePotConfig::SubModePotConfig()
+0001e014 g     F .text	0000002e String::String(int, unsigned char)
+00001e04 g     F .text	00000020 MM::startClock()
+00007fe4 g     F .text	00000048 midimacro::MidiMacroInterface::onEncoderChanged(Encoder::Update)
+0001e7b0  w    F .text	00000044 usage_fault_isr
+0002e4ac g     F .text	000000c6 _fclose_r
+00000780 g     F .text	00000078 changeOmxMode
+00030eac g     F .text	00000254 .hidden __aeabi_dmul
+0001c688 g     F .text	00000030 Adafruit_GFX::Adafruit_GFX(short, short)
+0001dce8  w    F .text	00000004 HardwareSerial::flush()
+0002fb00 g     F .text	00000100 __ssprint_r
+0000c834 g     F .text	00000060 OmxModeChords::onKeyHeldUpdate(OMXKeypadEvent)
+1fffc52c g     O .bss	00000060 potSettings
+0001d188 g     F .text	00000022 Adafruit_NeoPixel::begin()
+0001e7b0  w    F .text	00000044 hard_fault_isr
+20000158 g     O .bss	0000000c HardwareSerial::s_serials_with_serial_events
+00016f38 g     F .text	0000008c OmxUtil::midiNoteOff2(int, int)
+00005590 g     F .text	000001b8 midifx::MidiFXArpeggiator::processNoteInput(MidiNoteGroup)
+0001602c g     F .text	0000002c OmxModeSequencer::onEncoderChanged(Encoder::Update)
+00018e84 g     F .text	00000010 SubModeMidiFxGroup::getEncoderSelect()
+00028a98 g     F .text	0000002c .hidden __aeabi_dcmpun
+0002dd50 g     F .text	0000004c _Balloc
+20000164 g     O .bss	00000001 HardwareSerial::s_count_serials_with_serial_events
+00009cc4 g     F .text	00000030 OmxDisp::displayMessagef(char const*, ...)
+1fff8a58 g     O .data	00000064 pots
+00017ae0 g     F .text	00000008 grids::GridsWrapper::setNoteLength(unsigned char, unsigned char)
+00002ba8 g     F .text	00000006 euclidean::EuclideanSequencer::getVelocity()
+0001b188 g     F .text	0000000c i2c1_isr
+00028a5c g     F .text	00000012 .hidden __aeabi_dcmple
+0001df08 g     F .text	0000003a String::String(String const&)
+00018860 g     F .text	0000015c doStepS2()
+0003aa4c g       .text	00000000 __preinit_array_start
+00015050 g     F .text	0000004c OmxModeSequencer::onModeActivated()
+00028acc g     F .text	00000164 .hidden __subsf3
+0000466c g     F .text	00000258 midifx::MidiFXArpeggiator::applyModPattern(short)
+00000400 g     O .text	00000010 flashconfigbytes
+00031590 g     O .text	00000004 LED_BRIGHTNESS
+00019a9c  w    F .text	0000002e SubModeMidiFxGroup::noteFuncForwarder(void*, MidiNoteGroup)
+200001c0 g     O .bss	00000004 __malloc_max_sbrked_mem
+0001ee44 g     F .text	00000014 rtc_set
+00001b6c g     F .text	0000006c MM::sendNoteOn(int, int, int)
+00007f80 g     F .text	0000000c midimacro::MidiMacroInterface::DoNoteOff(unsigned char)
+00003dc4  w    F .text	00000074 midifx::MidiFXArpeggiator::~MidiFXArpeggiator()
+00019164 g     F .text	00000028 SubModeMidiFxGroup::getArpIndex()
+00032ac8 g     O .text	0000005c vtable for OmxModeMidiKeyboard
+0001e85c  w    F .text	00000002 __cxa_pure_virtual
+00028f80 g     F .text	0000006e .hidden __gesf2
+0001e7f4  w    F .text	00000006 software_isr
+000339b4 g     O .text	00000078 SPIClass::spi0_hardware
+0000b674  w    F .text	000000dc void std::vector<OMXKeypad::keystate*, std::allocator<OMXKeypad::keystate*> >::_M_realloc_insert<OMXKeypad::keystate* const&>(__gnu_cxx::__normal_iterator<OMXKeypad::keystate**, std::vector<OMXKeypad::keystate*, std::allocator<OMXKeypad::keystate*> > >, OMXKeypad::keystate* const&)
+000221f0  w    F .text	00000078 std::string::_Rep::_S_create(unsigned int, unsigned int, std::allocator<char> const&)
+0001af8c g     F .text	000001f0 TwoWire::requestFrom(unsigned char, unsigned char, unsigned char)
+0001e7f4  w    F .text	00000006 spi0_isr
+00019458 g     F .text	00000070 SubModeMidiFxGroup::reconnectInputsOutputs()
+000097a4 g     F .text	000000f8 OmxDisp::u8g2centerText(char const*, short, short, unsigned short, unsigned short)
+000194fc g     F .text	0000006c SubModeMidiFxGroup::pasteMidiFX(unsigned char)
+00004564 g     F .text	00000064 midifx::MidiFXArpeggiator::onSelected()
+1fff94d8 g     O .data	00000010 Serial
+0000bd90  w    F .text	00000004 SubmodeInterface::usesPots()
+000282e8 g     F .text	000000c4 __cxa_demangle
+00029c24 g     F .text	00000022 .hidden _Unwind_RaiseException
+0001aa88  w    F .text	00000016 TwoWire::peek()
+0002e74c g     F .text	00000020 __sseek
+00028a98 g     F .text	0000002c .hidden __unorddf2
+0001716c g     F .text	00000060 ParamManager::decrementPage()
+00000464  w    F .text	00000002 OmxScreensaver::~OmxScreensaver()
+0001c284 g     F .text	00000018 Adafruit_GFX::writeFillRect(short, short, short, short, unsigned short)
+0002a014 g     F .text	00000018 calloc
+0002fad8 g     F .text	00000028 fiprintf
+000074fc g     F .text	0000003c midifx::MidiFXRandomizer::MidiFXRandomizer()
+00006b4c g     F .text	00000064 midifx::MidiFXInterface::onEncoderChanged(Encoder::Update)
+00007f60 g     F .text	00000004 midimacro::MidiMacroInterface::setScale(MusicScales*)
+0001d8f4 g     F .text	0000001c u8g2_DrawGlyph(_u8g2_font_t*, short, short, unsigned short)
+1fff9c80 g       .bss	00000000 _sbss
+00007fa0 g     F .text	00000020 midimacro::MidiMacroInterface::onEncoderChangedSelectParam(Encoder::Update)
+0002dcd8 g     F .text	00000076 _putc_r
+0001fc5c g     F .text	00000044 usb_rx
+000096d8 g     F .text	00000090 OmxDisp::OmxDisp()
+00008038 g     F .text	00000002 midimacro::MidiMacroM8::onEnabled()
+00000778 g     F .text	00000006 _write
+0001dbcc g     F .text	00000004 pendablesrvreq_isr
+00009408 g     F .text	0000000a PendingNoteOffs::setNoteOffFunction(void (*)(void*, int, int), void*)
+00006974  w    F .text	00000014 midifx::MidiFXHarmonizer::~MidiFXHarmonizer()
+0000bc00 g     F .text	00000004 OmxLeds::isDirty()
+00012c7c g     F .text	00000114 OmxModeGrids::updateLEDsFNone()
+00006cfc g     F .text	00000002 midifx::MidiFXMonophonic::onEnabled()
+0001e7f4  w    F .text	00000006 usbhs_isr
+0001e0e0 g     F .text	0000007e String::append(char const*, unsigned int)
+20000188  w    O .bss	00000010 std::string::_Rep::_S_empty_rep_storage
+00002f74 g     F .text	00000004 midifx::MidiFXArpeggiator::getFXType()
+0001e7f4  w    F .text	00000006 cmt_isr
+0000b988 g     F .text	00000048 OmxLeds::getKeyColor(MusicScales*, int)
+0001f124 g     F .text	0000001c analogWriteRes
+00005748 g     F .text	000000ee midifx::MidiFXArpeggiator::trackNoteInput(MidiNoteGroup)
+0001cd5c g     F .text	00000052 Adafruit_FRAM_I2C::getDeviceID(unsigned short*, unsigned short*)
+0001b9bc g     F .text	00000094 Adafruit_SSD1306::ssd1306_command1(unsigned char)
+200004a4 g     O .bss	00000004 __atexit
+00006d18 g     F .text	00000016 midifx::MidiFXMonophonic::loadFromDisk(int, Storage*)
+00029b74 g     F .text	00000000 .hidden __gnu_Unwind_Restore_WMMXD
+00018d68 g     F .text	00000004 SubmodeInterface::getEncoderSelect()
+00007368 g     F .text	0000004c midifx::MidiFXRandomizer::getClone()
+00030eac g     F .text	00000254 .hidden __muldf3
+00014b6c g     F .text	000004e4 OmxModeSequencer::onDisplayUpdate()
+00004bbc  w    F .text	000000cc void std::__adjust_heap<__gnu_cxx::__normal_iterator<midifx::MidiFXArpeggiator::ArpNote*, std::vector<midifx::MidiFXArpeggiator::ArpNote, std::allocator<midifx::MidiFXArpeggiator::ArpNote> > >, int, midifx::MidiFXArpeggiator::ArpNote, __gnu_cxx::__ops::_Iter_comp_iter<bool (*)(midifx::MidiFXArpeggiator::ArpNote, midifx::MidiFXArpeggiator::ArpNote)> >(__gnu_cxx::__normal_iterator<midifx::MidiFXArpeggiator::ArpNote*, std::vector<midifx::MidiFXArpeggiator::ArpNote, std::allocator<midifx::MidiFXArpeggiator::ArpNote> > >, int, int, midifx::MidiFXArpeggiator::ArpNote, __gnu_cxx::__ops::_Iter_comp_iter<bool (*)(midifx::MidiFXArpeggiator::ArpNote, midifx::MidiFXArpeggiator::ArpNote)>)
+000327cc g     O .text	0000005c vtable for OmxModeChords
+0002215c g     F .text	00000080 std::logic_error::logic_error(char const*)
+00039288 g     O .text	00000014 vtable for std::bad_alloc
+1fff8950 g     O .data	00000012 usb_string_manufacturer_name
+1fffc684 g     O .bss	00000084 pendingNoteHistory
+00003eb8 g     F .text	00000224 midifx::MidiFXArpeggiator::MidiFXArpeggiator()
+00028ff0 g     F .text	00000018 .hidden __aeabi_cfrcmple
+0001e7f4  w    F .text	00000006 dma_ch0_isr
+00011c68 g     F .text	00000052 OmxModeEuclidean::saveToDisk(int, Storage*)
+00000460  w    F .text	00000002 OmxModeSequencer::~OmxModeSequencer()
+00006528 g     F .text	00000008 midifx::MidiFXHarmonizer::getName()
+00018c60 g     F .text	00000006 EEPROMStorage::read(unsigned int)
+0003165c g     O .text	0000006c notes
+00000c2c g     F .text	00000260 savePatterns
+00031b54 g     O .text	000000a0 vtable for midifx::MidiFXHarmonizer
+000213ec g     F .text	0000002e __cxa_allocate_exception
+00029cb4 g     F .text	00000022 .hidden _Unwind_Backtrace
+0002aef0 g     F .text	000002e8 __sfvwrite_r
+0000c0ec g     F .text	00000398 OmxModeChords::OmxModeChords()
+0001abc4 g     F .text	00000090 TwoWire::begin()
+0001d258 g     F .text	00000140 Adafruit_NeoPixel::show()
+0001139c g     F .text	000000e0 OmxModeEuclidean::loadActivePattern(unsigned char)
+0000953c  w    F .text	00000022 OmxDisp::~OmxDisp()
+000135c8  w    F .text	00000024 OmxModeMidiKeyboard::onPendingNoteOffForwarder(void*, int, int)
+0001e7f4  w    F .text	00000006 tpm1_isr
+0000be14  w    F .text	00000024 OmxModeChords::onPendingNoteOffForwarder(void*, int, int)
+000134e4 g     F .text	00000006 OmxModeGrids::getPattern(unsigned char)
+00017bd4 g     F .text	0000011c defaultSequencer()
+0001de00 g     F .text	0000001c Print::println()
+0001f628 g     F .text	00000038 serial_set_transmit_pin
+0001dcec  w    F .text	00000004 HardwareSerial::availableForWrite()
+000197a4 g     F .text	00000014 SubModeMidiFxGroup::getArpOctaveRange()
+00001b14  w    F .text	00000002 midi::MidiInterface<midi::SerialMIDI<HardwareSerial, midi::DefaultSerialSettings>, midi::DefaultSettings, midi::DefaultPlatform>::~MidiInterface()
+00018d5c  w    F .text	00000002 SubmodeInterface::onEnabled()
+00006988  w    F .text	0000001c midifx::MidiFXHarmonizer::~MidiFXHarmonizer()
+1fffb324 g     O .bss	00000abc omxModeEuclid
+000129b4 g     F .text	000002c8 OmxModeGrids::onKeyUpdate(OMXKeypadEvent)
+0001e7f4  w    F .text	00000006 can1_error_isr
+0001dfbc g     F .text	00000026 String::String(char const*)
+00011a78 g     F .text	000001e8 OmxModeEuclidean::onDisplayUpdate()
+00029bfc g     F .text	00000000 .hidden __gnu_Unwind_Restore_WMMXC
+00006a44 g     F .text	0000000a midifx::MidiFXInterface::processNoteOn(unsigned char, MidiNoteGroup)
+0001ce84 g     F .text	0000014a Adafruit_Keypad::tick()
+00000710  w    F .text	00000058 OmxModeChords::~OmxModeChords()
+000062b0 g     F .text	00000002 midifx::MidiFXChance::onDisabled()
+00010318 g     F .text	00000070 OmxModeEuclidean::onModeDeactivated()
+0000bc20 g     F .text	00000054 OmxLeds::rainbow(int)
+0002fc78 g     F .text	00000f84 _vfiprintf_r
+00002afc g     F .text	00000006 euclidean::EuclideanSequencer::getClockDivMult()
+0000ebec g     F .text	00000064 OmxModeChords::saveToDisk(int, Storage*)
+0001cdb0 g     F .text	0000008c Adafruit_FRAM_I2C::begin(unsigned char, TwoWire*)
+0000753c g     F .text	00000008 midifx::MidiFXScaler::getName()
+0001dc6c  w    F .text	00000008 HardwareSerial::addMemoryForWrite(void*, unsigned int)
+00029fe8 g     F .text	0000000a .hidden _Unwind_GetRegionStart
+00006d30 g     F .text	00000124 midifx::MidiFXMonophonic::noteInput(MidiNoteGroup)
+1fffffcc g     O .bss	00000004 usb_midi_handleActiveSensing
+000005d4 g     F .text	0000004c OnControlChange
+00007a1c g     F .text	00000050 midifx::MidiFXScaler::loadFromDisk(int, Storage*)
+1fff9c98 g     O .bss	00000002 AMAX
+0001a6f0 g     F .text	0000007c SysEx::loadGlobals()
+0002ad88 g     F .text	00000058 fputc
+000393b0 g     O .text	00000008 typeinfo for std::type_info
+1fff89e4 g     O .data	0000000c macromodes
+00018a7c g     F .text	000000a4 rotatePattern(int, int)
+0001e808  w    F .text	00000002 startup_late_hook
+1fffc598 g     O .bss	00000038 seqConfig
+00006540 g     F .text	00000002 midifx::MidiFXHarmonizer::loopUpdate()
+00029c90 g     F .text	00000022 .hidden ___Unwind_ForcedUnwind
+00001ccc g     F .text	0000006c MM::sendControlChange(int, int, int)
+00006ff8 g     F .text	00000008 midifx::MidiFXRandomizer::getName()
+000088f8 g     F .text	00000002 midimacro::MidiMacroNorns::loopUpdate()
+000069f0 g     F .text	00000032 midifx::MidiFXHarmonizer::getClone()
+0001ac8c g     F .text	00000128 TwoWire::isr()
+00017ac4 g     F .text	0000000c grids::GridsWrapper::setMidiChan(unsigned char, unsigned char)
+0001a874 g     F .text	000001cc ResponsiveAnalogRead::getResponsiveValue(int)
+0002e774 g     F .text	0000001a __ascii_wctomb
+000315b8 g     O .text	00000004 gridw
+00007b1c g     F .text	00000042 midifx::MidiFXTranspose::loadFromDisk(int, Storage*)
+00002a00 g     F .text	00000004 euclidean::EuclideanSequencer::isRunning()
+0001e7f4  w    F .text	00000006 usb_charge_isr
+000064f4 g     F .text	00000030 midifx::MidiFXChance::MidiFXChance()
+00009560  w    F .text	00000096 U8G2_FOR_ADAFRUIT_GFX::write(unsigned char)
+00018c88 g     F .text	00000008 FRAMStorage::write(unsigned int, unsigned char)
+0001a4dc g     F .text	000000a4 SubModePotConfig::onEncoderChangedEditParam(Encoder::Update)
+1fffffb0 g     O .bss	00000001 usb_configuration
+1ffffdd4 g     O .bss	00000038 SPI
+0001e7f4  w    F .text	00000006 dma_ch4_isr
+0001509c g     F .text	00000120 OmxModeSequencer::onKeyHeldUpdate(OMXKeypadEvent)
+0003158c g     O .text	00000001 DEFAULT_MODE
+000172a0 g     F .text	0000001e ParamManager::setSelParam(signed char)
+00006a58 g     F .text	00000034 midifx::MidiFXInterface::sendNoteOut(MidiNoteGroup)
+00016948 g     F .text	00000020 OmxScreensaver::updateLEDs()
+1fff8a38 g     O .data	0000001c multValues
+0001e7f4  w    F .text	00000006 pit_isr
+00016a24 g     F .text	00000044 OmxUtil::sendPots(int, int)
+1fff8b10 g     O .data	00000010 midifx::kResetDisp_
+00017cf0 g     F .text	0000000e serializedPatternSize(bool)
+00001c88 g     F .text	00000044 MM::sendNoteOffHW(int, int, int)
+0001e014 g     F .text	0000002e String::String(int, unsigned char)
+00001e44 g     F .text	00000020 MM::stopClock()
+0001f934 g     F .text	00000028 serial_available
+1fff8a10 g     O .data	0000000c midiMacroConfig
+0001e8ac g     F .text	00000004 operator delete(void*)
+000288b4 g     F .text	00000022 .hidden __aeabi_i2d
+00002628 g     F .text	00000060 MM::midiRead()
+0002a00e g     F .text	00000006 .hidden _Unwind_GetTextRelBase
+000212f0 g     F .text	0000001c std::bad_alloc::~bad_alloc()
+20000310 g     O .bss	00000001 __lock___sfp_recursive_mutex
+0001e7b0  w    F .text	00000044 bus_fault_isr
+00028c38 g     F .text	0000001c .hidden __aeabi_i2f
+0000b8f4 g     F .text	00000094 OmxLeds::updateBlinkStates()
+0001e7f4  w    F .text	00000006 dma_ch13_isr
+1fffcdd0 g     O .bss	00000010 omxUtil
+00021c60 g     F .text	00000014 std::terminate()
+00011e48 g     F .text	00000006 OmxModeGrids::InitSetup()
+00009208 g     F .text	00000026 PendingNoteHistory::clearIfChanged(unsigned long)
+00008df8 g     F .text	0000005c midimacro::MidiMacroNorns::MidiMacroNorns()
+000137cc g     F .text	000000a4 OmxModeMidiKeyboard::OmxModeMidiKeyboard()
+0001e7f4  w    F .text	00000006 dac0_isr
+00018c4c  w    F .text	00000006 EEPROMStorage::capacity()
+0001dcf0 g     F .text	0000002e Print::write(unsigned char const*, unsigned int)
+0001e910 g     F .text	0000001c ltoa
+0001936c g     F .text	00000090 SubModeMidiFxGroup::onEncoderButtonDown()
+00002b80 g     F .text	00000006 euclidean::EuclideanSequencer::setNoteNumber(unsigned char)
+000019ac g     F .text	000000b4 Encoder::update()
+0000430c g     F .text	0000003c midifx::MidiFXArpeggiator::toggleArp()
+0001c2c0 g     F .text	0000001c Adafruit_GFX::setRotation(unsigned char)
+0001dc2c  w    F .text	0000000c HardwareSerial::write9bit(unsigned long)
+000315f4 g     O .text	00000001 kNumArpRates
+0001aa40 g     F .text	0000001c ResponsiveAnalogRead::update(int)
+0000c098 g     F .text	00000054 OmxModeChords::shouldBlockEncEdit()
+00011fa8 g     F .text	00000354 OmxModeGrids::onEncoderChanged(Encoder::Update)
+0001e7f4  w    F .text	00000006 pit2_isr
+00010874 g     F .text	0000031c OmxModeEuclidean::updateLEDs()
+0000f628 g     F .text	000002a4 OmxModeChords::onEncoderChanged(Encoder::Update)
+1fff9c80 g       .bss	00000000 __bss_start__
+0001e1a8 g     F .text	00000028 operator+(StringSumHelper const&, int)
+00019acc g     F .text	0000004e SubModeMidiFxGroup::noteInput(MidiNoteGroup)
+00010b90 g     F .text	00000390 OmxModeEuclidean::onEncoderChanged(Encoder::Update)
+00018d80 g     F .text	00000020 SubmodeInterface::onEncoderChangedSelectParam(Encoder::Update)
+0001b17c g     F .text	0000000c i2c0_isr
+0002e76c g     F .text	00000008 __sclose
+000174c4 g     F .text	00000026 grids::GridsWrapper::start()
+00018bf4 g     F .text	00000024 copyPattern(int)
+00031dd8 g     O .text	000000a0 vtable for midifx::MidiFXScaler
+0001aa68  w    F .text	0000001e TwoWire::read()
+00021df0 g     F .text	00000014 __cxxabiv1::__si_class_type_info::~__si_class_type_info()
+0002066c g     F .text	00000050 usb_free
+0000b9d0 g     F .text	000001c0 OmxLeds::drawMidiLeds(MusicScales*)
+000112f0 g     F .text	000000ac OmxModeEuclidean::saveActivePattern(unsigned char, bool)
+0003872c g     O .text	000008bc u8g2_font_tenfatguys_tf
+00006d00 g     F .text	00000016 midifx::MidiFXMonophonic::saveToDisk(int, Storage*)
+00002f94 g     F .text	00000002 midifx::MidiFXArpeggiator::onDeselected()
+00006bb0 g     F .text	00000068 midifx::MidiFXInterface::processNoteOff(MidiNoteGroup)
+00029c24 g     F .text	00000022 .hidden ___Unwind_RaiseException
+00002b64 g     F .text	00000014 euclidean::EuclideanSequencer::setSteps(unsigned char)
+000192ac g     F .text	00000064 SubModeMidiFxGroup::loopUpdate()
+00019d88 g     F .text	00000084 SubModeMidiFxGroup::onDisplayUpdate()
+20000154 g     O .bss	00000001 usb_seremu_online
+00019568 g     F .text	0000012e SubModeMidiFxGroup::changeMidiFXType(unsigned char, unsigned char, bool)
+1fff8ac4 g     O .data	00000014 midifx::kModeDisp_
+0001b194 g     F .text	00000006 Adafruit_MCP4725::Adafruit_MCP4725()
+00012480 g     F .text	000000f0 OmxModeGrids::OmxModeGrids()
+0001a7b8 g     F .text	0000006a SysEx::processIncomingSysex(unsigned char const*, unsigned int)
+000284ec g     F .text	0000007c __cxa_begin_catch
+0001e7f4  w    F .text	00000006 i2s0_tx_isr
+00015b44 g     F .text	000004e8 OmxModeSequencer::onEncoderChangedStep(Encoder::Update)
+0001dce4  w    F .text	00000004 HardwareSerial::available()
+0000bb94 g     F .text	00000004 OmxLeds::getSlowBlinkState()
+000315f5 g     O .text	00000001 kNumNoteLengths
+00008f78 g     F .text	00000016 MusicScales::calculateScaleIfModified(unsigned char, unsigned char)
+00012620 g     F .text	00000078 OmxModeGrids::loadActivePattern(unsigned char)
+0000ef78 g     F .text	000000f4 OmxModeChords::onChordOn(unsigned char)
+000103dc g     F .text	00000084 OmxModeEuclidean::onEncoderButtonDown()
+0001dcb0  w    F .text	00000006 HardwareSerial::transmitterEnable(unsigned char)
+00001de4 g     F .text	00000020 MM::sendClock()
+0001e7f4  w    F .text	00000006 pdb_isr
+1fff99ec g     O .data	0000016c __global_locale
+00014308 g     F .text	0000029c OmxModeMidiKeyboard::onDisplayUpdate()
+0000cd90 g     F .text	00000120 OmxModeChords::doNoteOff(int, unsigned char, unsigned char)
+0001ddf0 g     F .text	00000010 Print::print(long)
+00002acc g     F .text	00000006 euclidean::EuclideanSequencer::getTriggered()
+00002088  w    F .text	00000440 midi::MidiInterface<midi::SerialMIDI<HardwareSerial, midi::DefaultSerialSettings>, midi::DefaultSettings, midi::DefaultPlatform>::parse()
+000179b8 g     F .text	000000da grids::GridsWrapper::loadSnapShot(unsigned char)
+0001e7f4  w    F .text	00000006 can1_rx_warn_isr
+00031cf8 g     O .text	000000a0 vtable for midifx::MidiFXRandomizer
+00034450 g     O .text	00000058 vtable for Adafruit_GFX
+00003128 g     F .text	00000012 midifx::MidiFXArpeggiator::usesKeys()
+00007fc0 g     F .text	00000024 midimacro::MidiMacroInterface::setEnabled(bool)
+0002ae68 g     F .text	00000018 fputs
+00006ce4 g     F .text	00000008 midifx::MidiFXMonophonic::getName()
+00011e58 g     F .text	0000005c OmxModeGrids::loopUpdate(unsigned long)
+00008c5c g     F .text	0000019c midimacro::MidiMacroNorns::drawLEDs()
+000064b4 g     F .text	00000040 midifx::MidiFXChance::getClone()
+00017260 g     F .text	0000000e ParamManager::setSelPage(signed char)
+00008c2c  w    F .text	00000014 midimacro::MidiMacroNorns::~MidiMacroNorns()
+000283e8 g     F .text	0000001e __cxa_call_terminate
+0002bb28 g     F .text	00000002 __retarget_lock_acquire_recursive
+00029b2c g     F .text	00000018 .hidden restore_core_regs
+00008f94 g     F .text	00000038 MusicScales::isNoteInScale(signed char)
+00013554 g     F .text	00000002 OmxModeMidiKeyboard::onEncoderButtonUp()
+0002906c g     F .text	0000002c .hidden __unordsf2
+1fff924c g     O .data	000000bc Wire
+0003aa4c g       .text	00000000 __init_array_start
+0002141c g     F .text	00000020 __cxa_free_exception
+1fffffe8 g     O .bss	00000004 usb_midi_handlePitchChange
+0001f730 g     F .text	00000044 serial_set_rts
+0002a02c g     F .text	00000078 _calloc_r
+0002ae80 g     F .text	00000070 vsnprintf
+00016e40 g     F .text	000000f8 OmxUtil::midiNoteOn2(MusicScales*, int, int, int)
+00017368 g     F .text	0000015c grids::GridsWrapper::GridsWrapper()
+0001b9ac g     F .text	00000010 Adafruit_SSD1306::~Adafruit_SSD1306()
+0001cd48 g     F .text	00000012 Adafruit_FRAM_I2C::Adafruit_FRAM_I2C()
+000006c8  w    F .text	00000048 OmxModeEuclidean::~OmxModeEuclidean()
+0001672c g     F .text	00000004 OmxModeSequencer::SetScale(MusicScales*)
+0002bd78 g     F .text	0000000c atexit
+00016b14 g     F .text	0000006c OmxUtil::advanceSteps(unsigned long)
+0001e7f4  w    F .text	00000006 dma_error_isr
+0000bb90 g     F .text	00000004 OmxLeds::getBlinkState()
+00011508 g     F .text	0000041c OmxModeEuclidean::onKeyUpdate(OMXKeypadEvent)
+00029098 g     F .text	0000004c .hidden __aeabi_f2iz
+00016738  w    F .text	00000002 OmxModeInterface::loopUpdate(unsigned long)
+00029b2c g     F .text	00000018 .hidden __restore_core_regs
+1fff8d80 g     O .data	00000020 kUIModeDisp
+00029d30 g     F .text	0000028a .hidden __gnu_unwind_execute
+00007f54  w    F .text	00000002 midimacro::MidiMacroInterface::onEnabled()
+00017ad0 g     F .text	0000000e grids::GridsWrapper::getMidiChan(unsigned char)
+00003e38 g     F .text	00000080 midifx::MidiFXArpeggiator::onModeChanged()
+00000ab0 g     F .text	0000017c loadHeader
+0001da2c g     F .text	000000d6 U8G2_FOR_ADAFRUIT_GFX::getUTF8Width(char const*)
+1fff9c80 g     O .data	00000000 .hidden __TMC_END__
+00007794 g     F .text	000000e8 midifx::MidiFXScaler::calculateRemap()
+00000668  w    F .text	00000060 OmxModeGrids::~OmxModeGrids()
+0001c2bc g     F .text	00000002 Adafruit_GFX::invertDisplay(bool)
+000073b4 g     F .text	00000148 midifx::MidiFXRandomizer::noteInput(MidiNoteGroup)
+00031a88 g     O .text	000000a0 vtable for midifx::MidiFXChance
+00002f94 g     F .text	00000002 midifx::MidiFXArpeggiator::onDisabled()
+1fff8a54 g     O .data	00000004 potMaxVal
+00002adc g     F .text	00000020 euclidean::EuclideanSequencer::setClockDivMult(unsigned char)
+0002942c g     F .text	00000010 .hidden __gnu_Unwind_ForcedUnwind
+0001d910 g     F .text	00000090 u8g2_SetFont(_u8g2_font_t*, unsigned char const*)
+000315a0 g     O .text	00000014 analogPins
+00029c48 g     F .text	00000022 .hidden ___Unwind_Resume
+0002df4c g     F .text	0000015c __multiply
+00039258 g     O .text	00000004 usb_endpoint_config_table
+0001e7f4  w    F .text	00000006 dma_ch6_isr
+0002e0a8 g     F .text	000000c0 __pow5mult
+000315b4 g     O .text	00000004 gridh
+1ffffe14 g     O .bss	00000004 EventResponder::firstInterrupt
+0001ce74 g     F .text	00000010 Adafruit_Keypad::~Adafruit_Keypad()
+00017244 g     F .text	00000014 ParamManager::changeParam(signed char)
+0000989c g     F .text	00000154 OmxDisp::drawLoading()
+00015218 g     F .text	000000b8 OmxModeSequencer::OmxModeSequencer()
+00006974  w    F .text	00000014 midifx::MidiFXHarmonizer::~MidiFXHarmonizer()
+00011ed0 g     F .text	00000010 OmxModeGrids::onEncoderButtonDownLong()
+0001a15c  w    F .text	000000dc void std::vector<midifx::MidiFXInterface*, std::allocator<midifx::MidiFXInterface*> >::_M_realloc_insert<midifx::MidiFXInterface*>(__gnu_cxx::__normal_iterator<midifx::MidiFXInterface**, std::vector<midifx::MidiFXInterface*, std::allocator<midifx::MidiFXInterface*> > >, midifx::MidiFXInterface*&&)
+000088a0 g     F .text	00000050 midimacro::MidiMacroM8::MidiMacroM8()
+00021c7c g     F .text	00000014 std::unexpected()
+1fffffd4 g     O .bss	00000004 usb_midi_handleClock
+0002a650 g     F .text	0000000c __malloc_lock
+0000c800 g     F .text	00000034 OmxModeChords::onEncoderButtonDown()
+00031594 g     O .text	00000004 LED_COUNT
+0001e7f4  w    F .text	00000006 tpm2_isr
+0000dfc0 g     F .text	00000414 OmxModeChords::onDisplayUpdate()
+00018b20 g     F .text	0000004c resetPatternDefaults(int)
+000390ac g     O .text	00000110 digital_pin_to_info_PGM
+0001e5ac g     F .text	0000004c eeprom_write_byte
+000004fc  w    F .text	00000040 OMXKeypad::~OMXKeypad()
+0000c520 g     F .text	00000058 OmxModeChords::updateFuncKeyMode()
+00008084 g     F .text	00000524 midimacro::MidiMacroM8::onKeyUpdate(OMXKeypadEvent)
+00001ee4  w    F .text	000001a4 midi::MidiInterface<midi::SerialMIDI<HardwareSerial, midi::DefaultSerialSettings>, midi::DefaultSettings, midi::DefaultPlatform>::launchCallback()
+0001f18c g     F .text	0000001c digitalRead
+0001fa7c g     F .text	00000184 uart0_status_isr
+00008030  w    F .text	00000004 midimacro::MidiMacroM8::consumesPots()
+00006524 g     F .text	00000004 midifx::MidiFXHarmonizer::getFXType()
+0000e3d4 g     F .text	00000190 OmxModeChords::constructChordBasic(unsigned char)
+00028ce0 g     F .text	00000168 .hidden __aeabi_fmul
+00029044 g     F .text	00000012 .hidden __aeabi_fcmpge
+20000144 g     O .bss	00000001 usb_midi_msg_type
+0002b6c0 g     F .text	00000020 fcvtf
+00016a08 g     F .text	00000006 OmxScreensaver::shouldShowScreenSaver()
+00019ea8  w    F .text	000000dc void std::vector<midifx::MidiFXInterface*, std::allocator<midifx::MidiFXInterface*> >::_M_realloc_insert<midifx::MidiFXInterface* const&>(__gnu_cxx::__normal_iterator<midifx::MidiFXInterface**, std::vector<midifx::MidiFXInterface*, std::allocator<midifx::MidiFXInterface*> > >, midifx::MidiFXInterface* const&)
+0001e7f4  w    F .text	00000006 can0_bus_off_isr
+0001e4d0 g     F .text	0000003c analogWriteDAC0
+00016c40 g     F .text	00000008 OmxUtil::startClocks()
+00022048 g     F .text	00000004 std::runtime_error::what() const
+0002a0e0 g     F .text	00000010 free
+0000802c g     F .text	00000002 midimacro::MidiMacroInterface::~MidiMacroInterface()
+000099f0 g     F .text	00000060 OmxDisp::dispValBox(int, short, bool)
+00017d28 g     F .text	00000068 step_ahead()
+0001c2dc g     F .text	00000058 Adafruit_GFX::drawFastVLine(short, short, short, unsigned short)
+00009538  w    F .text	00000002 Print::flush()
+000134e0 g     F .text	00000004 OmxModeGrids::serializedPatternSize(bool)
+1fff8b58 g     O .data	00000044 midifx::kPatMsg_
+00018d60  w    F .text	00000002 SubmodeInterface::onDisabled()
+00019768 g     F .text	00000014 SubModeMidiFxGroup::nextArpOctRange()
+000220cc g     F .text	00000048 std::logic_error::~logic_error()
+00007000 g     F .text	00000008 midifx::MidiFXRandomizer::getDispName()
+000215f4 g     F .text	00000002 std::exception::~exception()
+00007554 g     F .text	00000002 midifx::MidiFXScaler::onEnabled()
+0002de90 g     F .text	0000005e __lo0bits
+0000057c  w    F .text	00000058 OmxModeGrids::~OmxModeGrids()
+000316cc g     O .text	00000004 potCount
+0001c014 g     F .text	0000001e Adafruit_SSD1306::clearDisplay()
+00013534 g     F .text	00000020 OmxModeMidiKeyboard::onClockTick()
+00028618 g     F .text	0000027a .hidden __subdf3
+0000bd6c  w    F .text	00000002 OmxModeInterface::onEncoderButtonUp()
+000004cc  w    F .text	00000030 OmxModeMidiKeyboard::~OmxModeMidiKeyboard()
+1fff83bc g     O .usbbuffers	00000480 usb_buffer_memory
+00022048 g     F .text	00000004 std::logic_error::what() const
+0001e7f4  w    F .text	00000006 dma_ch14_isr
+0001800c g     F .text	00000048 evaluate_AB(int, int)
+00003d5c  w    F .text	00000068 midifx::MidiFXArpeggiator::~MidiFXArpeggiator()
+00028990 g     F .text	00000082 .hidden __ledf2
+000212dc g     F .text	00000014 std::bad_alloc::~bad_alloc()
+000044a0 g     F .text	00000078 midifx::MidiFXArpeggiator::doPendingStart()
+0001e044 g     F .text	0000003a String::String(float, unsigned char)
+1fff9308 g     O .data	000000bc Wire1
+0002861c g     F .text	00000276 .hidden __adddf3
+00002bb8 g     F .text	00000006 euclidean::EuclideanSequencer::getSwing()
+00010388 g     F .text	00000054 OmxModeEuclidean::shouldBlockEncEdit()
+0002e694 g     F .text	00000054 _fflush_r
+00031100 g     F .text	000001d0 .hidden __divdf3
+0002104c  w    F .text	000000f0 yield
+00016a10 g     F .text	00000014 OmxScreensaver::resetCounter()
+00006a2c g     F .text	00000004 midifx::MidiFXInterface::getEnabled()
+00007f18 g     F .text	0000003c midifx::MidiFXTranspose::MidiFXTranspose()
+00021d80 g     F .text	0000006e __cxa_rethrow
+0000787c g     F .text	00000038 midifx::MidiFXScaler::MidiFXScaler()
+0001df44 g     F .text	0000000e String::~String()
+0001de3c g     F .text	00000068 random(unsigned long)
+0002bb30 g     F .text	00000000 memchr
+00007ac0 g     F .text	00000008 midifx::MidiFXTranspose::getName()
+0002943c g     F .text	00000044 .hidden __gnu_Unwind_Resume
+00016da0 g     F .text	00000016 OmxUtil::midiNoteOn(int, int, int)
+000392f4 g     O .text	00000024 typeinfo name for __cxxabiv1::__foreign_exception
+0000053c  w    F .text	00000040 OmxModeEuclidean::~OmxModeEuclidean()
+0001e7f4  w    F .text	00000006 cmp1_isr
+00000468 g     F .text	00000018 OnSysEx
+00000908 g     F .text	00000058 handleNoteOn
+00016734  w    F .text	00000002 OmxModeInterface::onModeActivated()
+00028a48 g     F .text	00000012 .hidden __aeabi_dcmplt
+0001e8b0 g     F .text	00000004 operator delete(void*, unsigned int)
+0002e6e8 g     F .text	00000022 __sread
+00018a70 g     F .text	0000000a getPatternPage(int)
+0001d9a4 g     F .text	00000004 u8g2_SetBackgroundColor(_u8g2_font_t*, unsigned short)
+00000000 g     O .text	000001bc _VectorsFlash
+1fffc248 g     O .bss	00000004 sysEx
+0001b19c g     F .text	00000012 Adafruit_I2CDevice::Adafruit_I2CDevice(unsigned char, TwoWire*)
+00009044 g     F .text	00000044 MusicScales::getNoteByDegree(unsigned char, signed char)
+00037e5c g     O .text	000008cd u8g2_font_helvB18_tr
+00007ad8 g     F .text	00000002 midifx::MidiFXTranspose::onDisabled()
+1fff9c80 g       .data	00000000 _edata
+00006290  w    F .text	00000002 midifx::MidiFXInterface::onDeselected()
+0001ecd4 g     F .text	000000e8 attachInterrupt
+00007764  w    F .text	00000014 midifx::MidiFXScaler::~MidiFXScaler()
+00002f64  w    F .text	0000000e midifx::MidiFXArpeggiator::compareArpNote(midifx::MidiFXArpeggiator::ArpNote, midifx::MidiFXArpeggiator::ArpNote)
+000088f8 g     F .text	00000002 midimacro::MidiMacroNorns::onDisabled()
+00011ef4 g     F .text	00000026 OmxModeGrids::onKeyHeldUpdate(OMXKeypadEvent)
+0001fc58  w    F .text	00000002 serialEvent1()
+0001e7f4  w    F .text	00000006 dma_ch3_isr
+0001dc90  w    F .text	00000010 HardwareSerial::attachRts(unsigned char)
+00004280 g     F .text	0000008c midifx::MidiFXArpeggiator::changeArpMode(unsigned char)
+00018e4c g     F .text	0000001c SubModeMidiFxGroup::onModeChanged()
+0001a3c0 g     F .text	0000005c SubModePotConfig::onKeyUpdate(OMXKeypadEvent)
+00028a84 g     F .text	00000012 .hidden __aeabi_dcmpgt
+00022114 g     F .text	00000048 std::length_error::~length_error()
+00029c10 g     F .text	00000000 .hidden __gnu_Unwind_Save_WMMXC
+00002ac8 g     F .text	00000004 euclidean::EuclideanSequencer::getMute()
+0001e7f4  w    F .text	00000006 pit3_isr
+000065e4 g     F .text	00000114 midifx::MidiFXHarmonizer::noteInput(MidiNoteGroup)
+0001d398 g     F .text	0000000c Adafruit_NeoPixel::setPixelColor(unsigned short, unsigned long)
+000199bc g     F .text	000000e0 SubModeMidiFxGroup::noteOutputFunc(MidiNoteGroup)
+0000bd94 g     F .text	00000002 OmxModeChords::onEncoderButtonDownLong()
+0002bad8 g     F .text	00000048 __libc_init_array
+0001e80c  w    F .text	0000002c _sbrk
+0001352c g     F .text	00000006 OmxModeMidiKeyboard::InitSetup()
+00010460 g     F .text	000000b0 OmxModeEuclidean::onKeyHeldUpdate(OMXKeypadEvent)
+000136b4 g     F .text	000000c0 OmxModeMidiKeyboard::onModeActivated()
+000319dc g     O .text	000000a0 vtable for midifx::MidiFXArpeggiator
+0001e7f4  w    F .text	00000006 i2c2_isr
+0000cb70 g     F .text	00000220 OmxModeChords::onKeyUpdateSelMidiFX(OMXKeypadEvent)
+00003040 g     F .text	000000e8 midifx::MidiFXArpeggiator::saveToDisk(int, Storage*)
+20000155 g     O .bss	00000001 usb_seremu_transmit_flush_timer
+0000caa8 g     F .text	00000034 OmxModeChords::getEncoderSelect()
+000294a4 g     F .text	0000002e .hidden _Unwind_VRS_Get
+00009088 g     F .text	00000010 MusicScales::getScaleColor(unsigned char)
+0002e8bc g     F .text	0000002c _lseek_r
+0000313c g     F .text	000002a4 midifx::MidiFXArpeggiator::onKeyUpdate(OMXKeypadEvent, unsigned char)
+0001e7f4  w    F .text	00000006 can1_message_isr
+0001de30 g     F .text	0000000c randomSeed(unsigned long)
+00031574 g     O .text	00000004 CC1
+00029c48 g     F .text	00000022 .hidden _Unwind_Resume
+0001017c g     F .text	00000094 OmxModeEuclidean::onModeActivated()
+0000b42c g     F .text	00000158 OmxDisp::drawEuclidPattern(bool, bool*, unsigned char, unsigned char, bool, bool, unsigned char)
+00018054 g     F .text	00000120 changeStepType(int)
+00020930 g     F .text	0000042c usb_midi_read
+1fff9c9a g     O .bss	00000001 RES
+00031580 g     O .text	00000004 CC4
+0000d4dc g     F .text	00000590 OmxModeChords::updateLEDs()
+00034ce0 g     O .text	000007e9 u8g2_font_6x12_tf
+0003157c g     O .text	00000004 CC3
+00005dd0 g     F .text	000001d8 midifx::MidiFXArpeggiator::loopUpdate()
+00001dd0 g     F .text	00000012 MM::sendSysEx(unsigned long, unsigned char const*, bool)
+0001fdd4 g     F .text	000007ac usb_isr
+1fffffbc g     O .bss	00000001 usb_rx_memory_needed
+000288b4 g     F .text	00000022 .hidden __floatsidf
+20000000 g     O .bss	00000004 usb_midi_handleStop
+00039474 g     O .text	00000010 typeinfo name for std::logic_error
+00021604 g     F .text	0000000e std::bad_exception::~bad_exception()
+00000464  w    F .text	00000002 OmxScreensaver::~OmxScreensaver()
+00006530 g     F .text	00000008 midifx::MidiFXHarmonizer::getDispName()
+0001aaa0  w    F .text	00000002 TwoWire::flush()
+000069a4 g     F .text	0000004c midifx::MidiFXHarmonizer::MidiFXHarmonizer()
+0001e7f4  w    F .text	00000006 uart0_error_isr
+0001e7b0 g     F .text	00000044 fault_isr
+00017000 g     F .text	00000082 ParamManager::setPageEnabled(unsigned char, bool)
+00028e48 g     F .text	00000136 .hidden __divsf3
+00001974 g     F .text	00000038 Encoder::Encoder(unsigned long, unsigned long)
+00021f10 g     F .text	0000002c std::type_info::operator==(std::type_info const&) const
+200004ac g       .bss	00000000 __bss_end__
+0001cb68 g     F .text	00000130 Adafruit_GFX::write(unsigned char)
+1fffd7e0 g     O .bss	0000177c sequencer
+00006a28  w    F .text	00000002 midifx::MidiFXInterface::onDisabled()
+00031584 g     O .text	00000004 CC5
+00008910 g     F .text	00000014 midimacro::MidiMacroNorns::onPotChanged(int, int, int, int)
+0001918c g     F .text	00000022 SubModeMidiFxGroup::setSelected(bool)
+00017ae8 g     F .text	00000008 grids::GridsWrapper::getNoteLength(unsigned char)
+0000aeac g     F .text	000001f8 OmxDisp::dispSlots(char const**, unsigned char, unsigned char, unsigned char, bool, bool, char const**, unsigned char)
+1fffc5e0 g     O .bss	00000010 tempString
+0000b584 g     F .text	00000098 OMXKeypad::OMXKeypad(unsigned long, unsigned long, unsigned char*, unsigned char*, unsigned char*, int, int)
+00021c90 g     F .text	00000010 std::get_terminate()
+00006284  w    F .text	00000002 midifx::MidiFXInterface::onClockTick()
+0002226c g     F .text	00000034 __cxxabiv1::__class_type_info::__do_upcast(__cxxabiv1::__class_type_info const*, void**) const
+000001bc g     F .text	000001c4 ResetHandler
+000221dc g     F .text	00000014 std::length_error::length_error(char const*)
+0001a41c g     F .text	00000024 SubModePotConfig::onDisabled()
+00013554 g     F .text	00000002 OmxModeMidiKeyboard::onEncoderButtonDownLong()
+00006b24 g     F .text	00000028 midifx::MidiFXInterface::setSelected(bool)
+000088f8 g     F .text	00000002 midimacro::MidiMacroNorns::onEnabled()
+000222ac g     F .text	00000014 __cxxabiv1::__class_type_info::~__class_type_info()
+0001ee5c g     F .text	000000a4 _init_Teensyduino_internal_
+000315f8 g     O .text	00000064 midiKeyMap
+00009bc4 g     F .text	00000020 OmxDisp::bumpDisplayTimer()
+0000754c g     F .text	00000008 midifx::MidiFXScaler::getColor()
+0001fc38 g     F .text	00000020 serial_add_memory_for_write
+00002b90 g     F .text	00000006 euclidean::EuclideanSequencer::setMidiChannel(unsigned char)
+000152d0 g     F .text	0000009c OmxModeSequencer::changeSequencerMode(unsigned char)
+0001d9a8 g     F .text	00000082 U8G2_FOR_ADAFRUIT_GFX::utf8_next(unsigned char)
+0001c4c0 g     F .text	000000cc Adafruit_GFX::drawRect(short, short, short, short, unsigned short)
+00018dc4 g     F .text	00000054 SubmodeInterface::onEncoderChanged(Encoder::Update)
+0000c0ec g     F .text	00000398 OmxModeChords::OmxModeChords()
+0001972c g     F .text	00000014 SubModeMidiFxGroup::isArpOn()
+0001780c g     F .text	0000000c grids::GridsWrapper::gridsTick()
+1ffffe1c g     O .bss	00000004 EventResponder::lastYield
+00006f8c g     F .text	0000004c midifx::MidiFXMonophonic::MidiFXMonophonic()
+0002abc8 g     F .text	00000040 sprintf
+00031578 g     O .text	00000004 CC2
+00021464 g     F .text	00000000 __cxa_end_cleanup
+00018c48  w    F .text	00000004 EEPROMStorage::isEeprom()
+0001dc44  w    F .text	00000018 HardwareSerial::write(char const*)
+00007014 g     F .text	0000007c midifx::MidiFXRandomizer::saveToDisk(int, Storage*)
+00006484  w    F .text	00000014 midifx::MidiFXChance::~MidiFXChance()
+0001f660 g     F .text	0000007c serial_set_tx
+0000ecf0  w    F .text	000000e8 void std::vector<OmxModeChords::NoteTracker, std::allocator<OmxModeChords::NoteTracker> >::_M_realloc_insert<OmxModeChords::NoteTracker const&>(__gnu_cxx::__normal_iterator<OmxModeChords::NoteTracker*, std::vector<OmxModeChords::NoteTracker, std::allocator<OmxModeChords::NoteTracker> > >, OmxModeChords::NoteTracker const&)
+0001e7b0  w    F .text	00000044 memmanage_fault_isr
+00021f08 g     F .text	00000002 std::type_info::~type_info()
+00000480  w    F .text	0000004c OmxModeChords::~OmxModeChords()
+000067a0 g     F .text	000001d4 midifx::MidiFXHarmonizer::onDisplayUpdate(unsigned char)
+0001e608 g     F .text	000001a6 memcpy
+1fff9ee8 g     O .bss	0000143c omxModeChords
+0000628c  w    F .text	00000002 midifx::MidiFXInterface::onSelected()
+0000c894 g     F .text	00000214 OmxModeChords::onPotChanged(int, int, int, int)
+00009a50 g     F .text	00000054 OmxDisp::dispSymbBox(char const*, short, bool)
+00028998 g     F .text	0000007a .hidden __nedf2
+0000bbf8 g     F .text	00000006 OmxLeds::setDirty()
+00021edc g     F .text	0000002a __cxxabiv1::__si_class_type_info::__do_upcast(__cxxabiv1::__class_type_info const*, void const*, __cxxabiv1::__class_type_info::__upcast_result&) const
+00021cf4 g     F .text	00000058 __cxa_init_primary_exception
+00021ca0 g     F .text	00000010 std::get_unexpected()
+1fffffe0 g     O .bss	00000004 usb_midi_handleNoteOff
+0000bc04 g     F .text	0000001c OmxLeds::showLeds()
+00006f5c  w    F .text	00000014 midifx::MidiFXMonophonic::~MidiFXMonophonic()
+0000bd98 g     F .text	00000020 OmxModeChords::onClockTick()
+000206fc g     F .text	000000a0 usb_midi_write_packed
+000190ac  w    F .text	00000028 SubModeMidiFxGroup::~SubModeMidiFxGroup()
+00002bb0 g     F .text	00000006 euclidean::EuclideanSequencer::setSwing(unsigned char)
+1fff9d64 g     O .bss	00000154 keypad
+00002f8c g     F .text	00000008 midifx::MidiFXArpeggiator::onEnabled()
+0001bc4c g     F .text	000003c6 Adafruit_SSD1306::begin(unsigned char, unsigned char, bool, bool)
+0001df54 g     F .text	00000066 String::copy(char const*, unsigned int)
+0001f7c8 g     F .text	00000014 serial_putchar
+000191b0 g     F .text	00000038 SubModeMidiFxGroup::setAuxDown(bool)
+1fff8974 g     O .data	00000006 colPins
+0001e92c g     F .text	0000035e dtostrf
+000165e0 g     F .text	0000000c OmxModeSequencer::updateLEDs()
+00017de8 g     F .text	000001e4 auto_reset(int)
+00013158 g     F .text	0000000c OmxModeGrids::updateLEDs()
+0002a65c g     F .text	0000000c __malloc_unlock
+00029058 g     F .text	00000012 .hidden __aeabi_fcmpgt
+00028c64 g     F .text	0000007c .hidden __aeabi_l2f
+0000a8c8 g     F .text	00000284 OmxDisp::dispChordBasicPage(unsigned char, bool, char const*, char const*, char const*, signed char*, float*)
+00010f20 g     F .text	000002e0 OmxModeEuclidean::OmxModeEuclidean()
+000058d0 g     F .text	00000500 midifx::MidiFXArpeggiator::arpNoteTrigger()
+00022268  w    F .text	00000004 std::string::_Rep::_M_destroy(std::allocator<char> const&)
+00002f78 g     F .text	00000008 midifx::MidiFXArpeggiator::getName()
+00022320 g     F .text	0000001a __cxxabiv1::__class_type_info::__do_upcast(__cxxabiv1::__class_type_info const*, void const*, __cxxabiv1::__class_type_info::__upcast_result&) const
+0001a824 g     F .text	0000004e ResponsiveAnalogRead::begin(int, bool, float)
+00029538 g     F .text	00000084 .hidden __gnu_Unwind_Backtrace
+0001e7f4  w    F .text	00000006 uart2_error_isr
+0001c24c g     F .text	00000002 Adafruit_GFX::endWrite()
+0002861c g     F .text	00000276 .hidden __aeabi_dadd
+0002892c g     F .text	0000005a .hidden __aeabi_l2d
+00009ec4 g     F .text	0000002c OmxDisp::displayMessageTimed(String, unsigned char)
+0001e7f4  w    F .text	00000006 portb_isr
+00007adc g     F .text	00000040 midifx::MidiFXTranspose::saveToDisk(int, Storage*)
+0000bdb8 g     F .text	0000005c OmxModeChords::onModeDeactivated()
+0002bc00 g     F .text	000000dc strlen
+0001ce3c g     F .text	00000038 Adafruit_Keypad::Adafruit_Keypad(unsigned char*, unsigned char*, unsigned char*, int, int)
+0001e7f4  w    F .text	00000006 mcg_isr
+000011bc g     F .text	00000354 loop
+0001e2bc g     F .text	000000c8 analog_init
+00000658  w    F .text	0000000e OmxModeSequencer::~OmxModeSequencer()
+0001e7f4  w    F .text	00000006 dma_ch9_isr
+00021f3c g     F .text	0000010c __gnu_cxx::__verbose_terminate_handler()
+00009798 g     F .text	0000000c OmxDisp::isMessageActive()
+0001e7f4  w    F .text	00000006 portc_isr
+000158d4 g     F .text	0000005c OmxModeSequencer::onEncoderChangedSelectParam(Encoder::Update)
+0000de3c g     F .text	00000044 OmxModeChords::onChordOff(unsigned char)
+0002de50 g     F .text	00000040 __hi0bits
+00002b78 g     F .text	00000006 euclidean::EuclideanSequencer::getSteps()
+1fff9ecc g     O .bss	00000004 lastProcessTime
+1fffffdc g     O .bss	00000004 usb_midi_handleControlChange
+0001cd48 g     F .text	00000012 Adafruit_FRAM_I2C::Adafruit_FRAM_I2C()
+00030d90 g     F .text	000000f8 _wcsnrtombs_l
+00029b44 g     F .text	00000000 .hidden __gnu_Unwind_Restore_VFP
+00016e14 g     F .text	0000002c OmxUtil::allOff()
+1fffcd44 g     O .bss	00000048 u8g2_display
+00002f80 g     F .text	00000008 midifx::MidiFXArpeggiator::getDispName()
+00013958 g     F .text	00000210 OmxModeMidiKeyboard::onKeyUpdateSelMidiFX(OMXKeypadEvent)
+00007ea8  w    F .text	0000001c midifx::MidiFXTranspose::~MidiFXTranspose()
+00006540 g     F .text	00000002 midifx::MidiFXHarmonizer::onEnabled()
+0001dc38  w    F .text	0000000c HardwareSerial::write(unsigned char)
+2000001c g     O .bss	00000001 usb_midi_msg_cable
+0001e17c g     F .text	00000010 operator+(StringSumHelper const&, String const&)
+00018e18  w    F .text	00000032 midifx::MidiFXInterface::onNoteInputForwarder(void*, MidiNoteGroup)
+000290e4 g     F .text	0000003e .hidden __aeabi_f2uiz
+0000b770 g     F .text	00000184 OMXKeypad::tick()
+00009ad0 g     F .text	0000007c OmxDisp::dispMode()
+0001dbf8  w    F .text	00000008 HardwareSerial::write(int)
+1fffbde0 g     O .bss	000002d4 omxModeGrids
+0001e044 g     F .text	0000003a String::String(float, unsigned char)
+00008638  w    F .text	00000014 midimacro::MidiMacroM8::~MidiMacroM8()
+000149cc g     F .text	00000006 OmxModeSequencer::InitSetup()
+00018b6c g     F .text	00000088 clearPattern(int)
+00003600 g     F .text	000006b8 midifx::MidiFXArpeggiator::onDisplayUpdate(unsigned char)
+00012844 g     F .text	00000170 OmxModeGrids::onKeyUpdateChanLock(OMXKeypadEvent)
+0001dbf0  w    F .text	00000008 HardwareSerial::write(unsigned int)
+0001e18c g     F .text	0000001c operator+(StringSumHelper const&, char const*)
+00002b2c g     F .text	00000014 euclidean::EuclideanSequencer::setRotation(unsigned char)
+0001536c g     F .text	00000568 OmxModeSequencer::onKeyUpdate(OMXKeypadEvent)
+00013910 g     F .text	0000001c OmxModeMidiKeyboard::SetScale(MusicScales*)
+00016db8 g     F .text	0000005c OmxUtil::midiNoteOff(int, int)
+00018d08 g     F .text	00000024 Storage::readArray(unsigned int, unsigned char*, int)
+0001277c g     F .text	000000c8 OmxModeGrids::quickSelectInst(unsigned char)
+00010104 g     F .text	00000006 OmxModeEuclidean::InitSetup()
+0001e7f4  w    F .text	00000006 enet_timer_isr
+0001bb3c g     F .text	00000110 Adafruit_SSD1306::ssd1306_commandList(unsigned char const*, unsigned char)
+00008e54 g     F .text	00000124 MusicScales::calculateScale(unsigned char, unsigned char)
+0001a378 g     F .text	00000002 SubModePotConfig::loopUpdate()
+00014730  w    F .text	00000004 OmxModeMidiKeyboard::doNoteOnForwarder(void*, unsigned char)
+00028998 g     F .text	0000007a .hidden __eqdf2
+00001974 g     F .text	00000038 Encoder::Encoder(unsigned long, unsigned long)
+000151bc  w    F .text	0000005c StepNote::CopyFrom(StepNote*)
+000088a0 g     F .text	00000050 midimacro::MidiMacroM8::MidiMacroM8()
+00019e68 g     F .text	00000040 SubModeMidiFxGroup::loadFromDisk(int, Storage*)
+20008000 g       .bss	00000000 _estack
+000312d0 g     F .text	0000004e .hidden __fixdfsi
+0002e898 g     F .text	00000024 _isatty_r
+000054e0 g     F .text	000000b0 midifx::MidiFXArpeggiator::arpNoteOff(MidiNoteGroup)
+00021f0c g     F .text	00000004 std::type_info::__is_pointer_p() const
+000328e0 g     O .text	0000005c vtable for OmxModeEuclidean
+000215f8 g     F .text	00000002 std::bad_exception::~bad_exception()
+000085a8 g     F .text	00000090 midimacro::MidiMacroM8::onDisplayUpdate()
+0001e7f4  w    F .text	00000006 spi2_isr
+00028c54 g     F .text	0000008c .hidden __aeabi_ul2f
+00016740  w    F .text	00000002 OmxScreensaver::onEncoderButtonDown()
+
+
