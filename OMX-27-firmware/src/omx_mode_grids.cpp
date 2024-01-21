@@ -5,6 +5,7 @@
 #include "omx_leds.h"
 // #include "sequencer.h"
 #include "noteoffs.h"
+#include "consts.h"
 
 using namespace grids;
 
