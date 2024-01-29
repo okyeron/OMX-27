@@ -56,7 +56,6 @@ const auto DIMCYAN = 0x609F9F;
 const auto DIMBLUE = 0x60609F;
 const auto DIMPURPLE = 0x7F609F;
 
-
 // other
 const auto AMBER = 0x999900;
 const auto BEIGE = 0xFFCC33;
@@ -70,10 +69,9 @@ const auto VLOWWHITE = 0x101010;
 const auto LEDOFF = 0x000000;
 
 // sequencer pattern colors
-const uint32_t seqColors[] = {ORANGE,YELLOW,GREEN,MAGENTA,CYAN,BLUE,LIME,LTPURPLE};
-const uint32_t muteColors[] = {DKORANGE,DKYELLOW,DKGREEN,DKMAGENTA,DKCYAN,DKBLUE,DKLIME,DKPURPLE};
+const uint32_t seqColors[] = {ORANGE, YELLOW, GREEN, MAGENTA, CYAN, BLUE, LIME, LTPURPLE};
+const uint32_t muteColors[] = {DKORANGE, DKYELLOW, DKGREEN, DKMAGENTA, DKCYAN, DKBLUE, DKLIME, DKPURPLE};
 const uint32_t sequencePageColors[] = {RED, ORANGE, YELLOW, LIME};
-
 
 const auto MIDINOTEON = WHITE;
 const auto MIDIBG = VLOWWHITE;
@@ -87,9 +85,7 @@ const auto PATTSEL = LIME;
 
 const auto FUNKONE = LTCYAN;
 const auto FUNKTWO = MINT;
-const auto FUNKTHREE = DKBLUE; 
-
+const auto FUNKTHREE = DKBLUE;
 
 const auto SEQ1C = HALFWHITE;
 const auto SEQ2C = DKBLUE;
-

@@ -17,7 +17,8 @@ enum SequencerMode
 StepNote stepCopyBuffer_;
 // String tempString_;
 
-OmxModeSequencer::OmxModeSequencer() {
+OmxModeSequencer::OmxModeSequencer()
+{
     // seq params
     seqParams.addPage(4);
     seqParams.addPage(4);
@@ -44,7 +45,8 @@ void OmxModeSequencer::InitSetup()
 
 void OmxModeSequencer::onModeActivated()
 {
-    if(!initSetup){
+    if (!initSetup)
+    {
         InitSetup();
     }
 
@@ -113,16 +115,19 @@ void OmxModeSequencer::changeSequencerMode(uint8_t newMode)
 
 uint8_t OmxModeSequencer::getSequencerMode()
 {
-    if(noteSelect_){
+    if (noteSelect_)
+    {
         return SEQMODE_NOTESEL;
     }
-    else if(patternParams_){
+    else if (patternParams_)
+    {
         return SEQMODE_PAT;
     }
-    else if(stepRecord_){
+    else if (stepRecord_)
+    {
         return SEQMODE_STEPRECORD;
     }
-    
+
     return SEQMODE_MAIN;
 }
 
@@ -132,7 +137,7 @@ void OmxModeSequencer::onPotChanged(int potIndex, int prevValue, int newValue, i
 
     // note selection - do P-Locks
     if (seqMode == SEQMODE_NOTESEL)
-    { 
+    {
         potSettings.potNum = potIndex;
         potSettings.potCC = pots[potSettings.potbank][potIndex];
         potSettings.potVal = potSettings.analogValues[potIndex];
@@ -175,7 +180,7 @@ void OmxModeSequencer::loopUpdate(Micros elapsedTime)
         doStepS1();
     }
     else // S2
-    { 
+    {
         doStepS2();
     }
 
@@ -186,7 +191,8 @@ void OmxModeSequencer::loopUpdate(Micros elapsedTime)
 // Handles selecting params using encoder
 void OmxModeSequencer::onEncoderChangedSelectParam(Encoder::Update enc)
 {
-    if(enc.dir() == 0) return;
+    if (enc.dir() == 0)
+        return;
 
     uint8_t seqMode = getSequencerMode();
 
@@ -248,20 +254,20 @@ void OmxModeSequencer::onEncoderChangedNorm(Encoder::Update enc)
             }
         }
         else if (selParam == 2) // SET TRANSPOSE
-        {                                                
+        {
             transposeSeq(sequencer.playingPattern, amt); //
             int newtransp = constrain(midiSettings.transpose + amt, -64, 63);
             midiSettings.transpose = newtransp;
         }
         else if (selParam == 3) // SET SWING
-        {                                                                                                       
+        {
             int newswing = constrain(sequencer.getCurrentPattern()->swing + amt, 0, midiSettings.maxswing - 1); // -1 to deal with display values
             midiSettings.swing = newswing;
             sequencer.getCurrentPattern()->swing = newswing;
             //	setGlobalSwing(newswing);
         }
         else if (selParam == 4) // SET TEMPO
-        { 
+        {
             clockConfig.newtempo = constrain(clockConfig.clockbpm + amt, 40, 300);
             if (clockConfig.newtempo != clockConfig.clockbpm)
             {
@@ -275,7 +281,7 @@ void OmxModeSequencer::onEncoderChangedNorm(Encoder::Update enc)
     else if (selPage == 2)
     {
         if (selParam == 1) //  MIDI SOLO
-        { 
+        {
             //						playingPattern = constrain(playingPattern + amt, 0, 7);
             sequencer.getCurrentPattern()->solo = constrain(sequencer.getCurrentPattern()->solo + amt, 0, 1);
             if (sequencer.getCurrentPattern()->solo)
@@ -284,7 +290,7 @@ void OmxModeSequencer::onEncoderChangedNorm(Encoder::Update enc)
             }
         }
         else if (selParam == 2) // SET PATTERN LENGTH
-        { 
+        {
             auto newPatternLen = constrain(sequencer.getPatternLength(sequencer.playingPattern) + amt, 1, NUM_STEPS);
             sequencer.setPatternLength(sequencer.playingPattern, newPatternLen);
             if (sequencer.seqPos[sequencer.playingPattern] >= newPatternLen)
@@ -294,11 +300,11 @@ void OmxModeSequencer::onEncoderChangedNorm(Encoder::Update enc)
             }
         }
         else if (selParam == 3) // SET CLOCK DIV/MULT
-        { 
+        {
             sequencer.getCurrentPattern()->clockDivMultP = constrain(sequencer.getCurrentPattern()->clockDivMultP + amt, 0, NUM_MULTDIVS - 1);
         }
         else if (selParam == 4) // SET CV ON/OFF
-        { 
+        {
             sequencer.getCurrentPattern()->sendCV = constrain(sequencer.getCurrentPattern()->sendCV + amt, 0, 1);
         }
     }
@@ -309,13 +315,13 @@ void OmxModeSequencer::onEncoderChangedNorm(Encoder::Update enc)
 void OmxModeSequencer::onEncoderChangedStep(Encoder::Update enc)
 {
     auto amt = enc.accel(5); // where 5 is the acceleration factor if you want it, 0 if you don't)
-    auto amtSlow = enc.accel(1); 
+    auto amtSlow = enc.accel(1);
 
     uint8_t seqMode = getSequencerMode();
 
     // SEQUENCE PATTERN PARAMS SUB MODE
     if (seqMode == SEQMODE_PAT)
-    { 
+    {
         int8_t selPage = patParams.getSelPage() + 1; // Add one for readability
         int8_t selParam = patParams.getSelParam() + 1;
 
@@ -323,11 +329,11 @@ void OmxModeSequencer::onEncoderChangedStep(Encoder::Update enc)
         if (selPage == 1)
         {
             if (selParam == 1) // SET PLAYING PATTERN
-            { 
+            {
                 sequencer.playingPattern = constrain(sequencer.playingPattern + amt, 0, 7);
             }
             if (selParam == 2) // SET LENGTH
-            { 
+            {
                 auto newPatternLen = constrain(sequencer.getPatternLength(sequencer.playingPattern) + amt, 1, NUM_STEPS);
                 sequencer.setPatternLength(sequencer.playingPattern, newPatternLen);
                 if (sequencer.seqPos[sequencer.playingPattern] >= newPatternLen)
@@ -337,7 +343,7 @@ void OmxModeSequencer::onEncoderChangedStep(Encoder::Update enc)
                 }
             }
             if (selParam == 3) // SET PATTERN ROTATION
-            { 
+            {
                 int rotator;
                 (enc.dir() < 0 ? rotator = -1 : rotator = 1);
                 //							int rotator = constrain(rotcc, (sequencer.PatternLength(sequencer.playingPattern))*-1, sequencer.PatternLength(sequencer.playingPattern));
@@ -349,7 +355,7 @@ void OmxModeSequencer::onEncoderChangedStep(Encoder::Update enc)
                 midiSettings.rotationAmt = constrain(midiSettings.rotationAmt, (sequencer.getPatternLength(sequencer.playingPattern) - 1) * -1, sequencer.getPatternLength(sequencer.playingPattern) - 1);
             }
             if (selParam == 4) // SET PATTERN CHANNEL
-            { 
+            {
                 sequencer.getCurrentPattern()->channel = constrain(sequencer.getCurrentPattern()->channel + amt, 0, 15);
             }
         }
@@ -379,11 +385,11 @@ void OmxModeSequencer::onEncoderChangedStep(Encoder::Update enc)
         else if (selPage == 3)
         {
             if (selParam == 1) // SET CLOCK-DIV-MULT
-            {                                                                                                                                      
+            {
                 sequencer.getCurrentPattern()->clockDivMultP = constrain(sequencer.getCurrentPattern()->clockDivMultP + amt, 0, NUM_MULTDIVS - 1); // set clock div/mult
             }
             if (selParam == 2) // SET MIDI SOLO
-            { 
+            {
                 sequencer.getCurrentPattern()->solo = constrain(sequencer.getCurrentPattern()->solo + amt, 0, 1);
             }
         }
@@ -446,7 +452,7 @@ void OmxModeSequencer::onEncoderChangedStep(Encoder::Update enc)
     else if (seqMode == SEQMODE_NOTESEL)
     {
         int8_t selPage = noteSelParams.getSelPage() + 1; // Add one for readability
-        int8_t selParam = noteSelParams.getSelParam() + 1; 
+        int8_t selParam = noteSelParams.getSelParam() + 1;
 
         // PAGE ONE
         if (selPage == 1)
@@ -488,16 +494,16 @@ void OmxModeSequencer::onEncoderChangedStep(Encoder::Update enc)
         else if (selPage == 2)
         {
             if (noteSelParams.getSelParam() == 0) // SET STEP TYPE
-            { 
+            {
                 changeStepType(amt);
             }
             if (noteSelParams.getSelParam() == 1) // SET STEP PROB
-            { 
+            {
                 int tempProb = getSelectedStep()->prob;
                 getSelectedStep()->prob = constrain(tempProb + amt, 0, 100); // Note Len between 1-16
             }
             if (noteSelParams.getSelParam() == 2) // SET STEP TRIG CONDITION
-            { 
+            {
                 int tempCondition = getSelectedStep()->condition;
                 getSelectedStep()->condition = constrain(tempCondition + amt, 0, 35); // 0-32
             }
@@ -515,7 +521,7 @@ void OmxModeSequencer::onEncoderChangedStep(Encoder::Update enc)
     }
     else
     {
-        // TODO This shouldn't be possible. 
+        // TODO This shouldn't be possible.
         clockConfig.newtempo = constrain(clockConfig.clockbpm + amt, 40, 300);
         if (clockConfig.newtempo != clockConfig.clockbpm)
         {
@@ -579,7 +585,7 @@ void OmxModeSequencer::onKeyUpdate(OMXKeypadEvent e)
             }
             else
             {
-                if (!e.held()) // Prevent held F1 key from changing note. 
+                if (!e.held()) // Prevent held F1 key from changing note.
                 {
                     // stepSelect_ = false;
                     seqConfig.selectedNote = thisKey;
@@ -596,9 +602,9 @@ void OmxModeSequencer::onKeyUpdate(OMXKeypadEvent e)
             // see RELEASE events for more
             omxDisp.setDirty();
 
-            // // noteSelection_ 
+            // // noteSelection_
             // if (seqConfig.noteSelection)
-            // { 
+            // {
             //     // SET NOTE
             //     // left and right keys change the octave
             //     if (thisKey == 11 || thisKey == 26)
@@ -816,7 +822,7 @@ void OmxModeSequencer::onKeyUpdate(OMXKeypadEvent e)
                         seqConfig.selectedStep = (thisKey - 11) + (sequencer.patternPage[sequencer.playingPattern] * NUM_STEPKEYS); // set noteSelection to this step
                         auto selectedStep = getSelectedStep();
 
-                        if(selectedStep->trig == TRIGTYPE_MUTE) // paste copied note to current if trig is off
+                        if (selectedStep->trig == TRIGTYPE_MUTE) // paste copied note to current if trig is off
                         {
                             selectedStep->CopyFrom(&stepCopyBuffer_);
                             tempString = "Paste " + String(seqConfig.selectedStep);
@@ -984,7 +990,7 @@ void OmxModeSequencer::onKeyHeldUpdate(OMXKeypadEvent e)
             {
                 // skip AUX key, get pattern keys
                 if (thisKey > 2 && thisKey < 11)
-                { 
+                {
                     if (!stepRecord_)
                     {
                         changeSequencerMode(SEQMODE_PAT);
@@ -1019,7 +1025,8 @@ void OmxModeSequencer::showCurrentStepLEDs(int patternNum)
 {
     // omxLeds.updateBlinkStates();
 
-	if(sysSettings.screenSaverMode && !sequencer.playing) return; // Screensaver active and not playing, don't update sequencer LEDs. 
+    if (sysSettings.screenSaverMode && !sequencer.playing)
+        return; // Screensaver active and not playing, don't update sequencer LEDs.
 
     bool blinkState = omxLeds.getBlinkState();
     bool slowBlinkState = omxLeds.getSlowBlinkState();
@@ -1106,14 +1113,14 @@ void OmxModeSequencer::showCurrentStepLEDs(int patternNum)
     }
     // STEP RECORD
     else if (seqMode == SEQMODE_STEPRECORD)
-    { 
+    {
         uint8_t seqPos = sequencer.seqPos[sequencer.playingPattern];
         uint8_t currentNote = sequencer.patterns[sequencer.playingPattern].steps[seqPos].note;
 
         int seqPosNoteColor = LEDOFF;
 
         // 27 LEDS so use LED_COUNT
-        // This loop sets the key matching the current note to be on and turns other leds off. 
+        // This loop sets the key matching the current note to be on and turns other leds off.
         for (int j = 1; j < LED_COUNT; j++)
         {
             auto pixelpos = j;
@@ -1126,7 +1133,7 @@ void OmxModeSequencer::showCurrentStepLEDs(int patternNum)
                 strip.setPixelColor(pixelpos, HALFWHITE);
 
                 // will be overwritten by step indicator
-                if(j - 11 == seqPos % 16)
+                if (j - 11 == seqPos % 16)
                 {
                     seqPosNoteColor = HALFWHITE;
                 }
@@ -1143,7 +1150,7 @@ void OmxModeSequencer::showCurrentStepLEDs(int patternNum)
             // ONLY DO LEDS FOR THE CURRENT PAGE
             if (j == seqPos)
             {
-                // Blinks with the current note number if overlapped, blinks with LEDOFF otherwise. 
+                // Blinks with the current note number if overlapped, blinks with LEDOFF otherwise.
                 strip.setPixelColor(pixelpos, slowBlinkState ? SEQCHASE : seqPosNoteColor);
             }
         }
@@ -1391,10 +1398,10 @@ void OmxModeSequencer::onDisplayUpdate()
     }
     // DISPLAY
     if (omxDisp.isDirty())
-    { 
+    {
         // show only if not encoder edit or dialog display
         if (!encoderConfig.enc_edit && omxDisp.isMessageActive() == false)
-        { 
+        {
             uint8_t seqMode = getSequencerMode();
             if (seqMode == SEQMODE_MAIN)
             {
@@ -1618,6 +1625,7 @@ void OmxModeSequencer::initPatterns()
     }
 }
 
-void OmxModeSequencer::SetScale(MusicScales* scale){
+void OmxModeSequencer::SetScale(MusicScales *scale)
+{
     this->musicScale = scale;
 }

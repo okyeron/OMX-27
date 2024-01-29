@@ -3,47 +3,47 @@
 
 void SubmodeInterface::setEnabled(bool newEnabled)
 {
-    enabled_ = newEnabled;
-    if (enabled_)
-    {
-        onEnabled();
-    }
-    else
-    {
-        onDisabled();
-    }
+	enabled_ = newEnabled;
+	if (enabled_)
+	{
+		onEnabled();
+	}
+	else
+	{
+		onDisabled();
+	}
 }
 bool SubmodeInterface::isEnabled()
 {
-    return enabled_;
+	return enabled_;
 }
 
 bool SubmodeInterface::getEncoderSelect()
 {
-    return encoderSelect_;
+	return encoderSelect_;
 }
 
 void SubmodeInterface::onEncoderChanged(Encoder::Update enc)
 {
-    if (getEncoderSelect())
-    {
-        onEncoderChangedSelectParam(enc);
-    }
-    else
-    {
-        onEncoderChangedEditParam(enc);
-    }
+	if (getEncoderSelect())
+	{
+		onEncoderChangedSelectParam(enc);
+	}
+	else
+	{
+		onEncoderChangedEditParam(enc);
+	}
 }
 
 // Handles selecting params using encoder
 void SubmodeInterface::onEncoderChangedSelectParam(Encoder::Update enc)
 {
-    params_.changeParam(enc.dir());
-    omxDisp.setDirty();
+	params_.changeParam(enc.dir());
+	omxDisp.setDirty();
 }
 
 void SubmodeInterface::onEncoderButtonDown()
 {
-    encoderSelect_ = !encoderSelect_;
-    omxDisp.setDirty();
+	encoderSelect_ = !encoderSelect_;
+	omxDisp.setDirty();
 }

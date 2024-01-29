@@ -108,7 +108,7 @@ namespace midifx
         int8_t page = params_.getSelPage();
         int8_t param = params_.getSelParam();
 
-        auto amt = enc.accel(5); 
+        auto amt = enc.accel(5);
 
         if(page == RZPAGE_1)
         {

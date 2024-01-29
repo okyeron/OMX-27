@@ -2,7 +2,8 @@
 
 #include <Arduino.h>
 
-namespace MM {
+namespace MM
+{
 
 	void begin();
 

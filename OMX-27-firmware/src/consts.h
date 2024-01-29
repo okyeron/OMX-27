@@ -6,29 +6,29 @@
 
 // AUTOMATICALLY GET BOARD TYPE - DO NOT MODIFY
 #ifdef ARDUINO_TEENSY40
-	#define T4          1
+#define T4 1
 #else
-	#define T4          0
+#define T4 0
 #endif
 
-#define DEV         0
-#define MIDIONLY    0
+#define DEV 0
+#define MIDIONLY 0
 
 // HARDWARE Pin for CVGATE_PIN = 13 on beta1 boards, 22 on bodge/midi, 23 on 1.0
 #if DEV
-	const int CVGATE_PIN = 13;
+const int CVGATE_PIN = 13;
 #elif T4
-	const int CVGATE_PIN = 13;
+const int CVGATE_PIN = 13;
 #elif MIDIONLY
-	const int CVGATE_PIN = 22;  // 13 on beta1 boards, A10 (broken) on test/midi, 23 on 1.0
+const int CVGATE_PIN = 22; // 13 on beta1 boards, A10 (broken) on test/midi, 23 on 1.0
 #else
-	const int CVGATE_PIN = 23;  // 13 on beta1 boards, 22 on test, 23 on 1.0
+const int CVGATE_PIN = 23; // 13 on beta1 boards, 22 on test, 23 on 1.0
 #endif
 
 #if T4
 // const int CVPITCH_PIN = A14;
 #else
-	const int CVPITCH_PIN = A14;
+const int CVPITCH_PIN = A14;
 #endif
 
 const int loSkip = 0;
@@ -44,7 +44,6 @@ const float stepsPerSemitone = stepsPerOctave / 12;
 const int midiMiddleC = 60;
 const int midiLowestNote = midiMiddleC - 3 * 12; // 3 is how many octaves under middle c
 const int midiHightestNote = midiLowestNote + int(fullRangeV * 12) - 1;
-
 
 // FONTS
 #define FONT_LABELS u8g2_font_5x8_tf

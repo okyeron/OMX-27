@@ -6,14 +6,13 @@
 
 namespace midifx
 {
-    int b = sizeof(MidiNoteGroup);
-    class MidiFXNoteTracker
-    {
-    public:
-        MidiFXNoteTracker() {}
-        virtual ~MidiFXNoteTracker();
+	int b = sizeof(MidiNoteGroup);
+	class MidiFXNoteTracker
+	{
+	public:
+		MidiFXNoteTracker() {}
+		virtual ~MidiFXNoteTracker();
 
-    private:
-
-    };
+	private:
+	};
 }

@@ -594,7 +594,7 @@ void loadPatterns(void)
 // currently saves everything ( mode + patterns )
 void saveToStorage(void)
 {
-	// Serial.println( "saving..." );
+	Serial.println( "Saving to Storage..." );
 	saveHeader();
 	savePatterns();
 }

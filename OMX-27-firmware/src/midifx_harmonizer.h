@@ -5,45 +5,45 @@
 namespace midifx
 {
 
-    class MidiFXHarmonizer : public MidiFXInterface
-    {
-    public:
-        MidiFXHarmonizer();
-        ~MidiFXHarmonizer() {}
+	class MidiFXHarmonizer : public MidiFXInterface
+	{
+	public:
+		MidiFXHarmonizer();
+		~MidiFXHarmonizer() {}
 
-        int getFXType() override;
-        const char* getName() override;
-        const char* getDispName() override;
-        uint32_t getColor() override;
+		int getFXType() override;
+		const char *getName() override;
+		const char *getDispName() override;
+		uint32_t getColor() override;
 
-        MidiFXInterface* getClone() override;
+		MidiFXInterface *getClone() override;
 
-        void loopUpdate() override;
+		void loopUpdate() override;
 
-        void onDisplayUpdate(uint8_t funcKeyMode) override;
+		void onDisplayUpdate(uint8_t funcKeyMode) override;
 
-        void noteInput(MidiNoteGroup note) override;
+		void noteInput(MidiNoteGroup note) override;
 
-        int saveToDisk(int startingAddress, Storage *storage) override;
-        int loadFromDisk(int startingAddress, Storage *storage) override;
+		int saveToDisk(int startingAddress, Storage *storage) override;
+		int loadFromDisk(int startingAddress, Storage *storage) override;
 
-    protected:
-        void onEnabled() override;
-        void onDisabled() override;
+	protected:
+		void onEnabled() override;
+		void onDisabled() override;
 
-        void onEncoderChangedEditParam(Encoder::Update enc) override;
-    private:
-        // std::vector<MidiNoteGroup> triggeredNotes; 
-        bool playOrigin_ = true;
+		void onEncoderChangedEditParam(Encoder::Update enc) override;
 
-        int8_t notes_[7];
+	private:
+		// std::vector<MidiNoteGroup> triggeredNotes;
+		bool playOrigin_ = true;
 
-        uint8_t chancePerc_ = 100;
+		int8_t notes_[7];
 
-        // String tempString_ = "12345";
-        // String tempStrings_[4] = {"12345", "12345","12345","12345"};
+		uint8_t chancePerc_ = 100;
 
-        // String tempStringVal_ = "12345";
+		// String tempString_ = "12345";
+		// String tempStrings_[4] = {"12345", "12345","12345","12345"};
 
-    };
+		// String tempStringVal_ = "12345";
+	};
 }

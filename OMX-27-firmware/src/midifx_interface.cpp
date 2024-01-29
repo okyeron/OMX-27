@@ -3,170 +3,172 @@
 
 namespace midifx
 {
-    MidiFXInterface::~MidiFXInterface()
-    {
-        // std::vector<MidiNoteGroup>().swap(triggeredNotes);
-        // Serial.println("Deleted vector");
-    }
+	MidiFXInterface::~MidiFXInterface()
+	{
+		// std::vector<MidiNoteGroup>().swap(triggeredNotes);
+		// Serial.println("Deleted vector");
+	}
 
-    void MidiFXInterface::setSelected(bool selected)
-    {
-        bool prevSel = selected_;
-        selected_ = selected;
+	void MidiFXInterface::setSelected(bool selected)
+	{
+		bool prevSel = selected_;
+		selected_ = selected;
 
-        if (prevSel != selected_)
-        {
-            if (selected_)
-            {
-                onSelected();
-            }
-            else
-            {
-                onDeselected();
-            }
-        }
-    }
+		if (prevSel != selected_)
+		{
+			if (selected_)
+			{
+				onSelected();
+			}
+			else
+			{
+				onDeselected();
+			}
+		}
+	}
 
-    void MidiFXInterface::setEnabled(bool newEnabled)
-    {
-        enabled_ = newEnabled;
-        if (enabled_)
-        {
-            onEnabled();
-        }
-        else
-        {
-            onDisabled();
-        }
-    }
+	void MidiFXInterface::setEnabled(bool newEnabled)
+	{
+		enabled_ = newEnabled;
+		if (enabled_)
+		{
+			onEnabled();
+		}
+		else
+		{
+			onDisabled();
+		}
+	}
 
-    bool MidiFXInterface::getEnabled()
-    {
-        return enabled_;
-    }
+	bool MidiFXInterface::getEnabled()
+	{
+		return enabled_;
+	}
 
-    bool MidiFXInterface::getEncoderSelect()
-    {
-        return encoderSelect_ && !auxDown_;
-    }
+	bool MidiFXInterface::getEncoderSelect()
+	{
+		return encoderSelect_ && !auxDown_;
+	}
 
-    void MidiFXInterface::onEncoderChanged(Encoder::Update enc)
-    {
-        if (getEncoderSelect())
-        {
-            onEncoderChangedSelectParam(enc);
-        }
-        else
-        {
-            onEncoderChangedEditParam(enc);
-        }
-    }
+	void MidiFXInterface::onEncoderChanged(Encoder::Update enc)
+	{
+		if (getEncoderSelect())
+		{
+			onEncoderChangedSelectParam(enc);
+		}
+		else
+		{
+			onEncoderChangedEditParam(enc);
+		}
+	}
 
-    void MidiFXInterface::setAuxDown(bool auxDown)
-    {
-        auxDown_ = auxDown;
-    }
+	void MidiFXInterface::setAuxDown(bool auxDown)
+	{
+		auxDown_ = auxDown;
+	}
 
-    // Handles selecting params using encoder
-    void MidiFXInterface::onEncoderChangedSelectParam(Encoder::Update enc)
-    {
-        params_.changeParam(enc.dir());
-        omxDisp.setDirty();
-    }
+	// Handles selecting params using encoder
+	void MidiFXInterface::onEncoderChangedSelectParam(Encoder::Update enc)
+	{
+		params_.changeParam(enc.dir());
+		omxDisp.setDirty();
+	}
 
-    void MidiFXInterface::onEncoderButtonDown()
-    {
-        encoderSelect_ = !encoderSelect_;
-        omxDisp.setDirty();
-    }
+	void MidiFXInterface::onEncoderButtonDown()
+	{
+		encoderSelect_ = !encoderSelect_;
+		omxDisp.setDirty();
+	}
 
-    void MidiFXInterface::processNoteOff(MidiNoteGroup note)
-    {
-        // // See if note was previously effected
-        // // Adjust note number if it was and remove from vector
-        // for (size_t i = 0; i < triggeredNotes.size(); i++)
-        // {
-        //     if (triggeredNotes[i].prevNoteNumber == note.noteNumber)
-        //     {
-        //         note.noteNumber = triggeredNotes[i].noteNumber;
-        //         triggeredNotes.erase(triggeredNotes.begin() + i);
-        //         // Serial.println("Found previous triggered note");
-        //         break;
-        //     }
-        // }
+	void MidiFXInterface::processNoteOff(MidiNoteGroup note)
+	{
+		// // See if note was previously effected
+		// // Adjust note number if it was and remove from vector
+		// for (size_t i = 0; i < triggeredNotes.size(); i++)
+		// {
+		//     if (triggeredNotes[i].prevNoteNumber == note.noteNumber)
+		//     {
+		//         note.noteNumber = triggeredNotes[i].noteNumber;
+		//         triggeredNotes.erase(triggeredNotes.begin() + i);
+		//         // Serial.println("Found previous triggered note");
+		//         break;
+		//     }
+		// }
 
-        // Serial.println("TriggeredNotesSize: " + String(triggeredNotes.size()));
+		// Serial.println("TriggeredNotesSize: " + String(triggeredNotes.size()));
 
-        sendNoteOut(note);
-    }
+		sendNoteOut(note);
+	}
 
-    void MidiFXInterface::processNoteOn(uint8_t origNoteNumber, MidiNoteGroup note)
-    {
-        // From a keyboard source, length is 0
-        // if(note.stepLength == 0)
-        // {
-        //     note.prevNoteNumber = origNoteNumber;
+	void MidiFXInterface::processNoteOn(uint8_t origNoteNumber, MidiNoteGroup note)
+	{
+		// From a keyboard source, length is 0
+		// if(note.stepLength == 0)
+		// {
+		//     note.prevNoteNumber = origNoteNumber;
 
-        //     bool alreadyExists = false;
-        //     // See if orig note alread exists
-        //     for (size_t i = 0; i < triggeredNotes.size(); i++)
-        //     {
-        //         if (triggeredNotes[i].prevNoteNumber == origNoteNumber)
-        //         {
-        //             triggeredNotes[i] = note;
-        //             alreadyExists = true;
-        //             // Serial.println("Orig note already existed");
-        //             break;
-        //         }
-        //     }
-            
-        //     if (!alreadyExists)
-        //     {
-        //         triggeredNotes.push_back(note);
-        //     }
-        // }
-    }
+		//     bool alreadyExists = false;
+		//     // See if orig note alread exists
+		//     for (size_t i = 0; i < triggeredNotes.size(); i++)
+		//     {
+		//         if (triggeredNotes[i].prevNoteNumber == origNoteNumber)
+		//         {
+		//             triggeredNotes[i] = note;
+		//             alreadyExists = true;
+		//             // Serial.println("Orig note already existed");
+		//             break;
+		//         }
+		//     }
 
-    void MidiFXInterface::setNoteOutput(void (*fptr)(void *, MidiNoteGroup), void *context)
-    {
-        outFunctionContext_ = context;
-        outFunctionPtr_ = fptr;
-    }
+		//     if (!alreadyExists)
+		//     {
+		//         triggeredNotes.push_back(note);
+		//     }
+		// }
+	}
 
-    void MidiFXInterface::sendNoteOut(MidiNoteGroup note)
-    {
-        if(outFunctionContext_ != nullptr){
-            outFunctionPtr_(outFunctionContext_, note);
-        }
-    }
+	void MidiFXInterface::setNoteOutput(void (*fptr)(void *, MidiNoteGroup), void *context)
+	{
+		outFunctionContext_ = context;
+		outFunctionPtr_ = fptr;
+	}
 
-    void MidiFXInterface::sendNoteOff(MidiNoteGroupCache noteCache)
-    {
-        // Serial.println("Note off from cache: " + String(noteCache.noteNumber));
+	void MidiFXInterface::sendNoteOut(MidiNoteGroup note)
+	{
+		if (outFunctionContext_ != nullptr)
+		{
+			outFunctionPtr_(outFunctionContext_, note);
+		}
+	}
 
-        sendNoteOff(noteCache.toMidiNoteGroup());
-    }
+	void MidiFXInterface::sendNoteOff(MidiNoteGroupCache noteCache)
+	{
+		// Serial.println("Note off from cache: " + String(noteCache.noteNumber));
 
-    void MidiFXInterface::sendNoteOff(MidiNoteGroup note)
-    {
-        // Serial.println("Note off: " + String(note.noteNumber));
+		sendNoteOff(noteCache.toMidiNoteGroup());
+	}
 
-        note.velocity = 0;
-        note.noteOff = true;
+	void MidiFXInterface::sendNoteOff(MidiNoteGroup note)
+	{
+		// Serial.println("Note off: " + String(note.noteNumber));
 
-        if(outFunctionContext_ != nullptr){
-            // Serial.println("Note off sent");
-            outFunctionPtr_(outFunctionContext_, note);
-        }
-    }
+		note.velocity = 0;
+		note.noteOff = true;
 
-    int MidiFXInterface::saveToDisk(int startingAddress, Storage *storage)
-    {
-        return startingAddress;
-    }
+		if (outFunctionContext_ != nullptr)
+		{
+			// Serial.println("Note off sent");
+			outFunctionPtr_(outFunctionContext_, note);
+		}
+	}
 
-    int MidiFXInterface::loadFromDisk(int startingAddress, Storage *storage)
-    {
-        return startingAddress;
-    }
+	int MidiFXInterface::saveToDisk(int startingAddress, Storage *storage)
+	{
+		return startingAddress;
+	}
+
+	int MidiFXInterface::loadFromDisk(int startingAddress, Storage *storage)
+	{
+		return startingAddress;
+	}
 }

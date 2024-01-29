@@ -2,7 +2,8 @@
 
 #include <MIDI.h>
 
-namespace {
+namespace
+{
 	using SerialMIDI = midi::SerialMIDI<HardwareSerial>;
 	using MidiInterface = midi::MidiInterface<SerialMIDI>;
 
@@ -10,74 +11,90 @@ namespace {
 	MidiInterface HWMIDI(theSerialInstance);
 }
 
-namespace MM {
-	void begin() {
+namespace MM
+{
+	void begin()
+	{
 		HWMIDI.begin();
 	}
 
-	void sendNoteOn(int note, int velocity, int channel) {
+	void sendNoteOn(int note, int velocity, int channel)
+	{
 		usbMIDI.sendNoteOn(note, velocity, channel);
 		HWMIDI.sendNoteOn(note, velocity, channel);
 	}
 
-	void sendNoteOnHW(int note, int velocity, int channel) {
+	void sendNoteOnHW(int note, int velocity, int channel)
+	{
 		HWMIDI.sendNoteOn(note, velocity, channel);
 	}
 
-	void sendNoteOff(int note, int velocity, int channel) {
+	void sendNoteOff(int note, int velocity, int channel)
+	{
 		usbMIDI.sendNoteOff(note, velocity, channel);
 		HWMIDI.sendNoteOff(note, velocity, channel);
 	}
 
-	void sendNoteOffHW(int note, int velocity, int channel) {
+	void sendNoteOffHW(int note, int velocity, int channel)
+	{
 		HWMIDI.sendNoteOff(note, velocity, channel);
 	}
 
-	void sendControlChange(int control, int value, int channel) {
+	void sendControlChange(int control, int value, int channel)
+	{
 		usbMIDI.sendControlChange(control, value, channel);
 		HWMIDI.sendControlChange(control, value, channel);
 	}
 
-	void sendControlChangeHW(int control, int value, int channel) {
+	void sendControlChangeHW(int control, int value, int channel)
+	{
 		HWMIDI.sendControlChange(control, value, channel);
 	}
 
-	void sendProgramChange(int program, int channel) {
+	void sendProgramChange(int program, int channel)
+	{
 		usbMIDI.sendProgramChange(program, channel);
 		HWMIDI.sendProgramChange(program, channel);
 	}
 
-	void sendSysEx(uint32_t length, const uint8_t *sysexData, bool hasBeginEnd) {
- 		usbMIDI.sendSysEx(length, sysexData, hasBeginEnd);
+	void sendSysEx(uint32_t length, const uint8_t *sysexData, bool hasBeginEnd)
+	{
+		usbMIDI.sendSysEx(length, sysexData, hasBeginEnd);
 	}
 
-	void sendClock() {
+	void sendClock()
+	{
 		usbMIDI.sendRealTime(usbMIDI.Clock);
 		HWMIDI.sendClock();
 	}
 
-	void startClock(){
+	void startClock()
+	{
 		usbMIDI.sendRealTime(usbMIDI.Start);
 		HWMIDI.sendStart();
 	}
 
-	void continueClock(){
+	void continueClock()
+	{
 		usbMIDI.sendRealTime(usbMIDI.Continue);
 		HWMIDI.sendContinue();
 	}
 
-	void stopClock(){
+	void stopClock()
+	{
 		usbMIDI.sendRealTime(usbMIDI.Stop);
 		HWMIDI.sendStop();
 	}
 
 	// NEED SOMETHING FOR usbMIDI.read() / MIDI.read()
 
-	bool usbMidiRead(){
+	bool usbMidiRead()
+	{
 		return usbMIDI.read();
 	}
 
-	bool midiRead(){
+	bool midiRead()
+	{
 		return HWMIDI.read();
 	}
 }

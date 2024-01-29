@@ -56,7 +56,8 @@ bool PendingNoteHistory::eventThisFrame(int note, int channel)
 
 PendingNoteHistory pendingNoteHistory;
 
-PendingNoteOffs::PendingNoteOffs() {
+PendingNoteOffs::PendingNoteOffs()
+{
 	for (int i = 0; i < queueSize; ++i)
 		queue[i].inUse = false;
 }
@@ -149,7 +150,7 @@ void PendingNoteOffs::sendOffNow(int note, int channel, bool sendCV)
 {
 	bool noteOffSent = sendOffIfPresent(note, channel, sendCV);
 
-	if(!noteOffSent)
+	if (!noteOffSent)
 	{
 		pendingNoteHistory.insert(note, channel);
 		MM::sendNoteOff(note, 0, channel);
@@ -161,7 +162,8 @@ void PendingNoteOffs::sendOffNow(int note, int channel, bool sendCV)
 	}
 }
 
-void PendingNoteOffs::allOff() {
+void PendingNoteOffs::allOff()
+{
 	play(UINT32_MAX);
 }
 
@@ -186,20 +188,23 @@ void PendingNoteOffs::onNoteOff(int note, int channel)
 
 PendingNoteOffs pendingNoteOffs;
 
-
 ///
 
-PendingNoteOns::PendingNoteOns() {
+PendingNoteOns::PendingNoteOns()
+{
 	for (int i = 0; i < queueSize; ++i)
 		queue[i].inUse = false;
 }
 
-bool PendingNoteOns::insert(int note, int velocity, int channel, uint32_t time, bool sendCV) {
+bool PendingNoteOns::insert(int note, int velocity, int channel, uint32_t time, bool sendCV)
+{
 
 	// pendingNoteOffs.sendOffIfPresent(note, channel, sendCV);
 
-	for (int i = 0; i < queueSize; ++i) {
-		if (queue[i].inUse) continue;
+	for (int i = 0; i < queueSize; ++i)
+	{
+		if (queue[i].inUse)
+			continue;
 		queue[i].inUse = true;
 		queue[i].note = note;
 		queue[i].time = time;
@@ -244,11 +249,11 @@ void PendingNoteOns::play(uint32_t now)
 					pCV = static_cast<int>(roundf((queue[i].note - midiLowestNote) * stepsPerSemitone));
 					// map (adjnote, 36, 91, 0, 4080);
 					digitalWrite(CVGATE_PIN, HIGH);
-					#if T4
-						dac.setVoltage(pCV, false);
-					#else
-						analogWrite(CVPITCH_PIN, pCV);
-					#endif
+#if T4
+					dac.setVoltage(pCV, false);
+#else
+					analogWrite(CVPITCH_PIN, pCV);
+#endif
 				}
 			}
 			queue[i].inUse = false;
