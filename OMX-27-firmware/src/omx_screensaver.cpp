@@ -5,11 +5,15 @@
 #include "omx_disp.h"
 #include "omx_leds.h"
 
+void OmxScreensaver::setScreenSaverColor()
+{
+	colorConfig.screensaverColor = map(potSettings.analog[4]->getValue(), potMinVal, potMaxVal, 0, 32764);
+}
+
 void OmxScreensaver::onPotChanged(int potIndex, int prevValue, int newValue, int analogDelta)
 {
-//     colorConfig.screensaverColor = potSettings.analog[4]->getValue() * 4; // value is 0-32764 for strip.ColorHSV
-	int pot_temp = map(potSettings.analog[4]->getValue(), potMinVal, potMaxVal, 0, 32764);
-    colorConfig.screensaverColor = pot_temp; // value is 0-32764 for strip.ColorHSV
+	//     colorConfig.screensaverColor = potSettings.analog[4]->getValue() * 4; // value is 0-32764 for strip.ColorHSV
+	setScreenSaverColor();
 
     // reset screensaver
     if (potSettings.analog[0]->hasChanged() || potSettings.analog[1]->hasChanged() || potSettings.analog[2]->hasChanged() || potSettings.analog[3]->hasChanged())
@@ -36,7 +40,8 @@ void OmxScreensaver::updateScreenSaverState()
 
 bool OmxScreensaver::shouldShowScreenSaver()
 {
-    return screenSaverActive;
+	setScreenSaverColor();
+	return screenSaverActive;
 }
 
 void OmxScreensaver::onEncoderChanged(Encoder::Update enc) {

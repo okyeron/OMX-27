@@ -28,6 +28,7 @@ public:
     void onDisplayUpdate() override;
 
 private:
+	void setScreenSaverColor();
     elapsedMillis screenSaverCounter = 0;
     unsigned long screensaverInterval = 1000 * 60 * 3; // 3 minutes default? // 10000;  15000; //
     int ssstep = 0;
