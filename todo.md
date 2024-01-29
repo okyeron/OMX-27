@@ -2,8 +2,8 @@
 
 ## j__r0d's shortlist
 
-- move files to subfolders
-- update includes
+- ✅move files to subfolders
+- ✅update includes
 - move consts to appropriate files in consts subfolder
 - second pass move
 
