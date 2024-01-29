@@ -10,7 +10,7 @@
 #include <ResponsiveAnalogRead.h>
 #include <Wire.h>
 #include <Adafruit_MCP4725.h>
-#include "colors.h"
+#include "consts/colors.h"
 
 // #include <cstdarg>
 
