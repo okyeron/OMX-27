@@ -33,19 +33,9 @@ namespace midimacro
 	{
 	}
 
-<<<<<<< HEAD:OMX-27-firmware/src/midimacro_norns.cpp
 	void MidiMacroNorns::onDisabled()
 	{
 	}
-=======
-    void MidiMacroNorns::onDisabled()
-    {
-    }
-
-    void MidiMacroNorns::loopUpdate()
-    {
-    }
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/midimacro/midimacro_norns.cpp
 
 	void MidiMacroNorns::loopUpdate()
 	{
@@ -226,26 +216,12 @@ namespace midimacro
 
 		uint8_t encCC = 0;
 
-<<<<<<< HEAD:OMX-27-firmware/src/midimacro_norns.cpp
 		if (page == NRNPAGE_ENC1)
 			encCC = ccEnc1_;
 		else if (page == NRNPAGE_ENC2)
 			encCC = ccEnc2_;
 		else if (page == NRNPAGE_ENC3)
 			encCC = ccEnc3_;
-=======
-        if (enc.dir() > 0)
-        {
-            MM::sendControlChange(encCC, 65, midiMacroConfig.midiMacroChan);
-        }
-        else if (enc.dir() < 0)
-        {
-            MM::sendControlChange(encCC, 63, midiMacroConfig.midiMacroChan);
-        }
-
-        omxDisp.setDirty();
-    }
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/midimacro/midimacro_norns.cpp
 
 		if (enc.dir() > 0)
 		{
@@ -265,7 +241,6 @@ namespace midimacro
 
 		int8_t page = params_.getSelPage();
 
-<<<<<<< HEAD:OMX-27-firmware/src/midimacro_norns.cpp
 		bool genericDisp = true;
 
 		switch (page)
@@ -297,11 +272,4 @@ namespace midimacro
 			omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), encoderSelect_);
 		}
 	}
-=======
-        if (genericDisp)
-        {
-            omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), encoderSelect_);
-        }
-    }
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/midimacro/midimacro_norns.cpp
 }

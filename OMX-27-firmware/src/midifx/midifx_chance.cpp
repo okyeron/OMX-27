@@ -83,11 +83,7 @@ namespace midifx
 		int8_t page = params_.getSelPage();
 		int8_t param = params_.getSelParam();
 
-<<<<<<< HEAD:OMX-27-firmware/src/midifx_chance.cpp
 		auto amt = enc.accel(5);
-=======
-        auto amt = enc.accel(5);
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/midifx/midifx_chance.cpp
 
 		if (page == CHPAGE_1)
 		{
@@ -129,7 +125,6 @@ namespace midifx
 		omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), getEncoderSelect());
 	}
 
-<<<<<<< HEAD:OMX-27-firmware/src/midifx_chance.cpp
 	int MidiFXChance::saveToDisk(int startingAddress, Storage *storage)
 	{
 		// Serial.println((String)"Saving mfx chance: " + startingAddress); // 5969
@@ -137,15 +132,6 @@ namespace midifx
 		storage->write(startingAddress, chancePerc_);
 		return startingAddress + 1;
 	}
-=======
-    int MidiFXChance::saveToDisk(int startingAddress, Storage *storage)
-    {
-        // Serial.println((String)"Saving mfx chance: " + startingAddress); // 5969
-        // Serial.println((String)"chancePerc_: " + chancePerc_);
-        storage->write(startingAddress, chancePerc_);
-        return startingAddress + 1;
-    }
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/midifx/midifx_chance.cpp
 
 	int MidiFXChance::loadFromDisk(int startingAddress, Storage *storage)
 	{
@@ -154,11 +140,6 @@ namespace midifx
 		chancePerc_ = storage->read(startingAddress);
 		// Serial.println((String)"chancePerc_: " + chancePerc_);
 
-<<<<<<< HEAD:OMX-27-firmware/src/midifx_chance.cpp
 		return startingAddress + 1;
 	}
-=======
-        return startingAddress + 1;
-    }
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/midifx/midifx_chance.cpp
 }

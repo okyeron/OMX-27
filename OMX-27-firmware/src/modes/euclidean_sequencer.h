@@ -76,53 +76,18 @@ namespace euclidean
 	//     uint8_t resolution = 1;
 	// };
 
-<<<<<<< HEAD:OMX-27-firmware/src/euclidean_sequencer.h
 	// constexpr uint8_t kStepsPerPattern = 32;
-=======
-    class EuclideanSequencer
-    {
-    public:
-
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/euclidean_sequencer.h
 
 	// struct ChannelPatternLEDs
 	// {
 	//     uint8_t levels[kStepsPerPattern];
 	// };
 
-<<<<<<< HEAD:OMX-27-firmware/src/euclidean_sequencer.h
 	class EuclideanMath
 	{
 	public:
 		static const uint8_t kPatternSize = 32; // All pattern arrays are 32 length
 		EuclideanMath();
-=======
-        // static const uint8_t kStepsPerPattern = 16;
-
-        uint8_t midiFXGroup = 0;
-
-        // SnapShotSettings snapshots[8];
-
-        EuclideanSequencer();
-
-        void start();
-        void stop();
-        void proceed();
-        void clockTick(uint32_t stepmicros, uint32_t microsperstep);
-
-        // void saveSnapShot(uint8_t snapShotIndex);
-        // void loadSnapShot(uint8_t snapShotIndex);
-        // SnapShotSettings* getSnapShot(uint8_t snapShotIndex);
-        // void setSnapShot(uint8_t snapShotIndex, SnapShotSettings snapShot);
-
-        static uint32_t randomValue(uint32_t init = 0);
-
-        // ChannelPatternLEDs getChannelLEDS(uint8_t channel);
-
-        // uint8_t getSeqPos();
-
-        // bool getChannelTriggered(uint8_t chanIndex);
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/euclidean_sequencer.h
 
 		// bool array should be of length kPatternSize
 		static void generateEuclidPattern(bool *pattern, uint8_t events, uint8_t steps);
@@ -220,11 +185,7 @@ namespace euclidean
 
 		float getSeqPerc();
 
-<<<<<<< HEAD:OMX-27-firmware/src/euclidean_sequencer.h
 		bool *getPattern();
-=======
-
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/euclidean_sequencer.h
 
 		void printEuclidPattern();
 

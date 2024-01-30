@@ -33,13 +33,8 @@ namespace midifx
 
 		void onEncoderChangedEditParam(Encoder::Update enc) override;
 
-<<<<<<< HEAD:OMX-27-firmware/src/midifx_scaler.h
 	private:
 		// std::vector<MidiNoteGroup> triggeredNotes;
-=======
-    private:
-        // std::vector<MidiNoteGroup> triggeredNotes;
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/midifx/midifx_scaler.h
 
 		uint8_t chancePerc_ = 100;
 

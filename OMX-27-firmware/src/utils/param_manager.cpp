@@ -244,9 +244,5 @@ uint8_t ParamManager::getNumOfParamsForPage(uint8_t pageIndex)
 	if (numberOfPages == 0 || pageIndex < 0 || pageIndex >= numberOfPages)
 		return 0;
 
-<<<<<<< HEAD:OMX-27-firmware/src/param_manager.cpp
 	return pageConfigs[pageIndex].numberOfParams;
-=======
-    return pageConfigs[pageIndex].numberOfParams;
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/utils/param_manager.cpp
 }

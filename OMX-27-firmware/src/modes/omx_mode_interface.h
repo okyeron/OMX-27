@@ -2,7 +2,6 @@
 #include "../ClearUI/ClearUI_Input.h"
 #include "../hardware/omx_keypad.h"
 #include "../config.h"
-
 class OmxModeInterface
 {
 public:
@@ -32,16 +31,8 @@ public:
 
 	virtual void onDisplayUpdate(){};
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_mode_interface.h
 	// #### Inbound MIDI callbacks
 	virtual void inMidiNoteOn(byte channel, byte note, byte velocity) {}
 	virtual void inMidiNoteOff(byte channel, byte note, byte velocity) {}
 	virtual void inMidiControlChange(byte channel, byte control, byte value) {}
-=======
-    // #### Inbound MIDI callbacks
-    virtual void inMidiNoteOn(byte channel, byte note, byte velocity) {}
-    virtual void inMidiNoteOff(byte channel, byte note, byte velocity) {}
-    virtual void inMidiControlChange(byte channel, byte control,  byte value) {}
-
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/omx_mode_interface.h
 };

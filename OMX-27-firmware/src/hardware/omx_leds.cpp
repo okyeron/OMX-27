@@ -55,16 +55,9 @@ void OmxLeds::updateBlinkStates()
 	}
 }
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_leds.cpp
 int OmxLeds::getKeyColor(MusicScales *scale, int pixel)
 {
 	if (scale == nullptr)
-=======
-int OmxLeds::getKeyColor(MusicScales* scale, int pixel) {
-    if(scale == nullptr) return LEDOFF;
-
-	if(scaleConfig.scalePattern == -1) {
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/hardware/omx_leds.cpp
 		return LEDOFF;
 
 	if (scaleConfig.scalePattern == -1)
@@ -109,18 +102,12 @@ void OmxLeds::drawMidiLeds(MusicScales *scale)
 		auto color3 = blinkState ? ORANGE : LEDOFF;
 		auto color4 = blinkState ? RBLUE : LEDOFF;
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_leds.cpp
 		for (int q = 1; q < LED_COUNT; q++)
 		{
 			if (midiSettings.midiKeyState[q] == -1)
 			{
 				if (colorConfig.midiBg_Hue == 0)
 				{
-=======
-		for (int q = 1; q < LED_COUNT; q++){
-			if (midiSettings.midiKeyState[q] == -1){
-				if (colorConfig.midiBg_Hue == 0){
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/hardware/omx_leds.cpp
 					strip.setPixelColor(q, LEDOFF);
 				}
 				else if (colorConfig.midiBg_Hue == 32)
@@ -152,18 +139,12 @@ void OmxLeds::drawMidiLeds(MusicScales *scale)
 		if (!sysSettings.screenSaverMode)
 		{
 			// clear not held leds
-<<<<<<< HEAD:OMX-27-firmware/src/omx_leds.cpp
 			for (int q = 1; q < LED_COUNT; q++)
 			{
 				if (midiSettings.midiKeyState[q] == -1)
 				{
 					if (colorConfig.midiBg_Hue == 0)
 					{
-=======
-			for (int q = 1; q < LED_COUNT; q++){
-				if (midiSettings.midiKeyState[q] == -1){
-					if (colorConfig.midiBg_Hue == 0){
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/hardware/omx_leds.cpp
 						strip.setPixelColor(q, getKeyColor(scale, q)); // set off or in scale
 					}
 					else if (colorConfig.midiBg_Hue == 32)
@@ -197,21 +178,12 @@ bool OmxLeds::getBlinkPattern(uint8_t numberOfBlinks)
 
 	// Serial.println("blinkPatPos: " + String(blinkPatPos[numberOfBlinks - 1]));
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_leds.cpp
 	if (blinkPatPos[numberOfBlinks - 1] >= (numberOfBlinks * 2))
 	{
 		//  4 = x0x0x0x00000
 		// Serial.println("blinkPatPos delayed");
 		return false; // the delay
 	}
-=======
-    if(blinkPatPos[numberOfBlinks - 1] >= (numberOfBlinks * 2))
-    {
-        //  4 = x0x0x0x00000
-        // Serial.println("blinkPatPos delayed");
-        return false; // the delay
-    }
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/hardware/omx_leds.cpp
 
 	bool blink = (blinkPatPos[numberOfBlinks - 1] % 2 == 0); // the blink
 

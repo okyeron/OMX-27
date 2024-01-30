@@ -1,7 +1,6 @@
 #pragma once
 
 #include "midifx_interface.h"
-
 namespace midifx
 {
 

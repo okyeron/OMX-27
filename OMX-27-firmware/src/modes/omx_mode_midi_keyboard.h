@@ -129,18 +129,9 @@ private:
 		static_cast<OmxModeMidiKeyboard *>(context)->doNoteOn(keyIndex);
 	}
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_mode_midi_keyboard.h
 	// Static glue to link a pointer to a member function
 	static void doNoteOffForwarder(void *context, uint8_t keyIndex)
 	{
 		static_cast<OmxModeMidiKeyboard *>(context)->doNoteOff(keyIndex);
 	}
-=======
-    // Static glue to link a pointer to a member function
-    static void doNoteOffForwarder(void *context, uint8_t keyIndex)
-    {
-        static_cast<OmxModeMidiKeyboard *>(context)->doNoteOff(keyIndex);
-    }
-
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/omx_mode_midi_keyboard.h
 };

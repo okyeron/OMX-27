@@ -52,7 +52,6 @@ public:
 	CustomChordNote customNotes[6];
 	// CustomChordDegree customDegrees[6];
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_mode_chords.h
 	// Interval Type:
 	uint8_t numNotes : 3;
 	uint8_t degree : 3;	  // degree from root note of scale, if scale is cmaj, degree of 0 = c, degree of 3 = e
@@ -101,56 +100,6 @@ public:
 	//  Two hand jazz voicing
 	//  1,5,9,  10, 7th+oct,11+Oct
 	//  C3,G3,D4,E4,B4,F5
-=======
-    // Interval Type:
-    uint8_t numNotes : 3;
-    uint8_t degree : 3; // degree from root note of scale, if scale is cmaj, degree of 0 = c, degree of 3 = e
-    int8_t octave : 4; // transposes note by octave
-    int8_t transpose : 5; // transposes note by semitone, can bump off scale
-    int8_t spread : 4; // spreads chord notes over octave
-    // spread 0 =   C3,E3,G3        C3,E3,G3,B3
-    // spread -1 =  C2,E3,G2        C2,E3,G2,B3     -1,*,-1     -1,*,-1,*
-    // spread -2 =  C1,E3,G1        C1,E3,G1,B3     -2,*,-2     -2,*,-2,*
-    // spread 1 =   C3,E4,G3        C3,E4,G3,B4     *,+1,*      *,+1,*,+1
-    // spread 2 =   C3,E5,G3        C3,E5,G3,B5     *,+2,*      *,+2,*,+2
-    uint8_t rotate : 4; // Rotates the chord notes
-    // rotate 0 =   C3,E3,G3        C3,E3,G3,B3
-    // rotate 1 =   E3,G3,C4        E3,G3,B3,C4
-    // rotate 2 =   G3,C4,E4        G3,B3,C4,E4
-    // rotate 3 =   C3,E3,G3        B3,C4,E4,G4
-    // rotate 4 =   E3,G3,C4        C3,E3,G3,B3
-    bool spreadUpDown = false; // spreads notes in both directions
-    // false =      C3,E3,G3        C3,E3,G3,B3
-    // true =       C2,E4,G2        C2,E4,G2,B4
-    // Spead -1 =   C1,E4,G1        C1,E4,G1,E4
-    // bool widerInterDown = false; // Eh, not sure about this one. Could get with a rotate spread combo
-    // false =      C3,E3,G3        C3,E3,G3,B3
-    // true =       G2,C3,E3        C3,E3,G3,B3
-    bool quartalVoicing = false;
-    // false =      C3,E3,G3        C3,E3,G3,B3
-    // true =       C5,E3,G4        C5,E3,G4,B2
-    uint8_t voicing : 3;
-    // 0 = none - based off numNotes
-    // 1 = powerChord
-    //  C3,G3       C3,G3,C4        C3,G3,C4
-    // 2 = sus2
-    //  Shifts 2nd note down one degree
-    //  C3,D3       C3,D3,G3        C3,D3,G3,B3
-    // 3 = sus4
-    //  Shifts 2nd note up one degree
-    //  C3,F3       C3,F3,G3        C3,F3,G3,B3
-    // 4 = sus2+4
-    //  Shifts 2nd note down one degree and 3rd note down one degree
-    //  C3,D3       C3,D3,F3        C3,D3,F3,B3
-    // 5 = add 6
-    //  C3,D3,A3    C3,E3,G3,A3     C3,E3,G3,A3
-    // 6 = add 6 + 9
-    //  C3,E3,A3,D4  C3,E3,G3,A3,D4  C3,E3,G3,A3,D4
-    // 7 = kennyBarron11
-    //  Two hand jazz voicing
-    //  1,5,9,  10, 7th+oct,11+Oct
-    //  C3,G3,D4,E4,B4,F5
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/omx_mode_chords.h
 
 	ChordSettings()
 	{
@@ -159,28 +108,10 @@ public:
 		mchan = 0;
 		velocity = 100;
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_mode_chords.h
 		note = 0;
 		basicOct = 0;
 		chord = 0;
 		balance = 40; // Four note chord
-=======
-        note = 0;
-        basicOct = 0;
-        chord = 0;
-        balance = 40; // Four note chord
-
-        numNotes = 3;
-        degree = 0;
-        octave = 0;
-        transpose = 0;
-        spread = 0;
-        rotate = 0;
-        spreadUpDown = false;
-        quartalVoicing = false;
-        voicing = 0;
-    }
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/omx_mode_chords.h
 
 		numNotes = 3;
 		degree = 0;
@@ -321,15 +252,9 @@ private:
 	ParamManager basicParams_;
 	ParamManager intervalParams_;
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_mode_chords.h
 	// ParamManager chordEditParams_;
 	uint8_t funcKeyMode_ = 0;
 	uint8_t chordEditParam_ = 0; // None, Octave, Transpose, Spread, Rotate, Voicing
-=======
-    // ParamManager chordEditParams_;
-    uint8_t funcKeyMode_ = 0;
-    uint8_t chordEditParam_ = 0; // None, Octave, Transpose, Spread, Rotate, Voicing
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/omx_mode_chords.h
 
 	MusicScales *musicScale_;
 
@@ -430,25 +355,5 @@ private:
 		static_cast<OmxModeChords *>(context)->onPendingNoteOff(note, channel);
 	}
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_mode_chords.h
 	void onPendingNoteOff(int note, int channel);
-=======
-    void splitNoteOn(uint8_t keyIndex);
-    void splitNoteOff(uint8_t keyIndex);
-
-    void stopSequencers();
-
-    static void onNotePostFXForwarder(void *context, MidiNoteGroup note)
-    {
-        static_cast<OmxModeChords *>(context)->onNotePostFX(note);
-    }
-    void onNotePostFX(MidiNoteGroup note);
-
-    static void onPendingNoteOffForwarder(void *context, int note, int channel)
-    {
-        static_cast<OmxModeChords *>(context)->onPendingNoteOff(note, channel);
-    }
-
-    void onPendingNoteOff(int note, int channel);
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/omx_mode_chords.h
 };

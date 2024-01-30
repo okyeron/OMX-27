@@ -44,11 +44,6 @@ void SubmodeInterface::onEncoderChangedSelectParam(Encoder::Update enc)
 
 void SubmodeInterface::onEncoderButtonDown()
 {
-<<<<<<< HEAD:OMX-27-firmware/src/submode_interface.cpp
 	encoderSelect_ = !encoderSelect_;
 	omxDisp.setDirty();
-=======
-    encoderSelect_ = !encoderSelect_;
-    omxDisp.setDirty();
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/submodes/submode_interface.cpp
 }

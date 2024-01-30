@@ -48,16 +48,8 @@ public:
 	// Displays slots for midifx or something else in future
 	void dispSlots(const char *slotNames[], uint8_t slotCount, uint8_t selected, uint8_t animPos, bool encSelActive, bool showLabels, const char *labels[], uint8_t labelCount);
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_disp.h
 	// Displays multiple slots up to slotCount all centered
 	void dispCenteredSlots(const char *slotNames[], uint8_t slotCount, uint8_t selected, bool encoderSelect, bool showLabels, bool centerLabels, const char *labels[], uint8_t labelCount);
-=======
-    // Displays slots for midifx or something else in future
-    void dispSlots(const char* slotNames[], uint8_t slotCount, uint8_t selected, uint8_t animPos, bool encSelActive, bool showLabels, const char* labels[], uint8_t labelCount);
-
-    // Displays multiple slots up to slotCount all centered
-    void dispCenteredSlots(const char* slotNames[], uint8_t slotCount, uint8_t selected, bool encoderSelect, bool showLabels, bool centerLabels, const char* labels[], uint8_t labelCount);
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/hardware/omx_disp.h
 
 	// noteNumbers should be array of 6
 	void dispKeyboard(int rootNote, int noteNumbers[], bool showLabels, const char *labels[], uint8_t labelCount);
@@ -71,12 +63,8 @@ public:
 	void dispPageIndicators2(uint8_t numPages, int8_t selected);
 	void dispMode();
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_disp.h
 	void testdrawrect();
 	void drawLoading();
-=======
-
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/hardware/omx_disp.h
 
 	void setDirty();
 	bool isDirty() { return dirtyDisplay; }

@@ -728,11 +728,7 @@ namespace midifx
         }
 
         // Sort low to high.
-<<<<<<< HEAD:OMX-27-firmware/src/midifx_arpeggiator.cpp
         if (arpPattern_ != ARPPAT_AS_PLAYED)
-=======
-        if(arpPattern_ != ARPPAT_AS_PLAYED)
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/midifx/midifx_arpeggiator.cpp
         {
             std::sort(sortedNoteQueue.begin(), sortedNoteQueue.end(), compareArpNote);
         }
@@ -744,11 +740,7 @@ namespace midifx
             highestPitch_ = sortedNoteQueue[sortedNoteQueue.size() - 1].noteNumber;
 
             // add an octave to highest if there's only 1 note.
-<<<<<<< HEAD:OMX-27-firmware/src/midifx_arpeggiator.cpp
             if (highestPitch_ == lowestPitch_)
-=======
-            if(highestPitch_ == lowestPitch_)
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/midifx/midifx_arpeggiator.cpp
             {
                 highestPitch_ = lowestPitch_ + 12;
             }
@@ -765,11 +757,7 @@ namespace midifx
         // Serial.println("sortedNoteQueue capacity: " + String(sortedNoteQueue.capacity()));
 
         // Alternate sorted with upper high note or lower note.
-<<<<<<< HEAD:OMX-27-firmware/src/midifx_arpeggiator.cpp
         if (arpPattern_ == ARPPAT_HI_UP || arpPattern_ == ARPPAT_HI_UP_DOWN || arpPattern_ == ARPPAT_LOW_UP || arpPattern_ == ARPPAT_LOW_UP_DOWN)
-=======
-        if(arpPattern_ == ARPPAT_HI_UP || arpPattern_ == ARPPAT_HI_UP_DOWN || arpPattern_ == ARPPAT_LOW_UP || arpPattern_ == ARPPAT_LOW_UP_DOWN)
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/midifx/midifx_arpeggiator.cpp
         {
             tempNoteQueue.clear();
 
@@ -1219,10 +1207,6 @@ namespace midifx
                 if (pendingStopCount_ == 0)
                 {
                     doPendingStop();
-<<<<<<< HEAD:OMX-27-firmware/src/midifx_arpeggiator.cpp
-=======
-
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/midifx/midifx_arpeggiator.cpp
                 }
             }
         }
@@ -1339,59 +1323,9 @@ namespace midifx
                 // Turn around
                 if (currentNotePos >= qLength)
                 {
-<<<<<<< HEAD:OMX-27-firmware/src/midifx_arpeggiator.cpp
                     goingUp_ = false;
                     currentNotePos = qLength - 2;
                     if (sortedNoteQueue.size() <= 4 && (arpPattern_ == ARPPAT_HI_UP_DOWN || arpPattern_ == ARPPAT_LOW_UP_DOWN))
-=======
-                    currentNotePos = 0;
-                    incrementOctave = true;
-                }
-                nextNotePos = currentNotePos + 1;
-            }
-            break;
-            case ARPPAT_UP_DOWN:
-            case ARPPAT_DOWN_UP:
-            case ARPPAT_CONVERGE_DIVERGE:
-            case ARPPAT_HI_UP_DOWN:
-            case ARPPAT_LOW_UP_DOWN:
-            {
-                // Get down
-                if(goingUp_)
-                {
-                    // Turn around
-                    if (currentNotePos >= qLength)
-                    {
-                        goingUp_ = false;
-                        currentNotePos = qLength - 2;
-                        if (sortedNoteQueue.size() <= 4 && (arpPattern_ == ARPPAT_HI_UP_DOWN || arpPattern_ == ARPPAT_LOW_UP_DOWN))
-                        {
-                            currentNotePos = 0;
-                            goingUp_ = true;
-                            incrementOctave = true;
-                        }
-                        // incrementOctave = true;
-                    }
-                }
-                // go to town
-                else
-                {
-                    int endIndex = 1;
-                    //Boot scootin' boogie
-
-                    if (arpPattern_ == ARPPAT_HI_UP_DOWN || arpPattern_ == ARPPAT_LOW_UP_DOWN)
-                    {
-                        // CEGB
-                        // BCBEBG-BE-BCBEBG // on updown, down will need to end at index 2
-                        // CECGCB-CG
-                        // CEG
-                        // CECG-CE //
-
-                        endIndex = 3;
-                    }
-
-                    if (currentNotePos < endIndex)
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/midifx/midifx_arpeggiator.cpp
                     {
                         currentNotePos = 0;
                         goingUp_ = true;
@@ -1619,11 +1553,6 @@ namespace midifx
         // playNote(noteon_micros, notePat_[patPos_]);
 
         // patPos_++;
-<<<<<<< HEAD:OMX-27-firmware/src/midifx_arpeggiator.cpp
-=======
-
-
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/midifx/midifx_arpeggiator.cpp
     }
 
     int16_t MidiFXArpeggiator::applyModPattern(int16_t noteNumber)
@@ -1890,10 +1819,6 @@ namespace midifx
             {
                 chancePerc_ = constrain(chancePerc_ + amtFast, 0, 100);
             }
-<<<<<<< HEAD:OMX-27-firmware/src/midifx_arpeggiator.cpp
-=======
-
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/midifx/midifx_arpeggiator.cpp
         }
         else if (page == ARPPAGE_2) // Rate, Octave Range, Gate, BPM
         {
@@ -1921,11 +1846,7 @@ namespace midifx
                 // rateIndex_ = constrain(rateIndex_ + amt, 0, kNumArpRates - 1);
             }
         }
-<<<<<<< HEAD:OMX-27-firmware/src/midifx_arpeggiator.cpp
         else if (page == ARPPAGE_3)
-=======
-        else if(page == ARPPAGE_3)
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/midifx/midifx_arpeggiator.cpp
         {
             if (param == 0)
             {
@@ -2515,7 +2436,6 @@ namespace midifx
 
         chancePerc_ = arpSave.chancePerc;
         arpMode_ = arpSave.arpMode;
-<<<<<<< HEAD:OMX-27-firmware/src/midifx_arpeggiator.cpp
         arpPattern_ = arpSave.arpPattern;
         resetMode_ = arpSave.resetMode;
         midiChannel_ = arpSave.midiChannel;
@@ -2526,18 +2446,6 @@ namespace midifx
         gate = arpSave.gate;
         modPatternLength_ = arpSave.modPatternLength;
         transpPatternLength_ = arpSave.transpPatternLength;
-=======
-        arpPattern_= arpSave.arpPattern;
-        resetMode_= arpSave.resetMode;
-        midiChannel_= arpSave.midiChannel;
-        swing_= arpSave.swing;
-        rateIndex_= arpSave.rateIndex;
-        octaveRange_= arpSave.octaveRange;
-        octDistance_ = arpSave.octDistance_;
-        gate= arpSave.gate;
-        modPatternLength_= arpSave.modPatternLength;
-        transpPatternLength_= arpSave.transpPatternLength;
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/midifx/midifx_arpeggiator.cpp
 
         changeArpMode(arpMode_);
         prevArpMode_ = arpMode_;

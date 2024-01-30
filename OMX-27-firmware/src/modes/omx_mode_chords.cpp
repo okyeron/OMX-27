@@ -8,7 +8,6 @@
 #include "../midi/midi.h"
 #include "../midi/noteoffs.h"
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_mode_chords.cpp
 enum ChordsModePage
 {
 	CHRDPAGE_NOTES,
@@ -18,16 +17,6 @@ enum ChordsModePage
 	CHRDPAGE_2,	   // Note, Octave, Chord,         | numNotes, degree, octave, transpose
 	CHRDPAGE_3,	   //                              | spread, rotate, voicing
 	CHRDPAGE_4,	   //                              | spreadUpDown, quartalVoicing
-=======
-enum ChordsModePage {
-    CHRDPAGE_NOTES,
-    CHRDPAGE_GBL1, // UI Mode, Root, Scale, Octave
-    CHRDPAGE_GBL2, // Manual Strum, M-Chan,
-    CHRDPAGE_1, // Chord Type, MidiFX, 0, Midi Channel
-    CHRDPAGE_2, // Note, Octave, Chord,         | numNotes, degree, octave, transpose
-    CHRDPAGE_3, //                              | spread, rotate, voicing
-    CHRDPAGE_4, //                              | spreadUpDown, quartalVoicing
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/omx_mode_chords.cpp
 };
 
 enum ChordsModeParams
@@ -658,13 +647,8 @@ void OmxModeChords::onEncoderChanged(Encoder::Update enc)
 		return;
 	}
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_mode_chords.cpp
 	int8_t selPage = params->getSelPage();
 	int8_t selParam = params->getSelParam() + 1; // Add one for readability
-=======
-    int8_t selPage = params->getSelPage();
-    int8_t selParam = params->getSelParam() + 1; // Add one for readability
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/omx_mode_chords.cpp
 
 	// Global 1 - UI Mode, Root, Scale, Octave
 	if (selPage == CHRDPAGE_GBL1)
@@ -722,7 +706,6 @@ void OmxModeChords::onEncoderChanged(Encoder::Update enc)
 			int8_t sel = params->getSelParam();
 			chords_[selectedChord_].customNotes[sel].note = constrain(chords_[selectedChord_].customNotes[sel].note + amtSlow, -48, 48);
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_mode_chords.cpp
 			if (amtSlow != 0) // To see notes change on keyboard leds
 			{
 				constructChord(selectedChord_);
@@ -741,26 +724,6 @@ void OmxModeChords::onEncoderChanged(Encoder::Update enc)
 
 	omxDisp.setDirty();
 	omxLeds.setDirty();
-=======
-            if (amtSlow != 0) // To see notes change on keyboard leds
-            {
-                constructChord(selectedChord_);
-            }
-        }
-    }
-    // PAGE FOUR - spreadUpDown, quartalVoicing
-    else if (selPage == CHRDPAGE_4)
-    {
-        if (chords_[selectedChord_].type == CTYPE_INTERVAL)
-        {
-            onEncoderChangedEditParam(&enc, selParam, 1, CPARAM_INT_SPRDUPDOWN);
-            onEncoderChangedEditParam(&enc, selParam, 2, CPARAM_INT_QUARTVOICE);
-        }
-    }
-
-    omxDisp.setDirty();
-    omxLeds.setDirty();
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/omx_mode_chords.cpp
 }
 
 // Put all params here to make it easy to switch order in pages
@@ -902,7 +865,6 @@ void OmxModeChords::onEncoderChangedEditParam(Encoder::Update *enc, uint8_t sele
 		{
 			triggerChord = true;
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_mode_chords.cpp
 			// constructChord(selectedChord_);
 			// omxDisp.displayMessage(kChordMsg[chords_[selectedChord_].chord]);
 		}
@@ -912,18 +874,6 @@ void OmxModeChords::onEncoderChangedEditParam(Encoder::Update *enc, uint8_t sele
 	{
 		chords_[selectedChord_].balance = constrain(chords_[selectedChord_].balance + amtFast, 0, (kNumChordBalance - 1) * 10);
 		activeChordBalance_ = getChordBalanceDetails(chords_[selectedChord_].balance);
-=======
-
-            // constructChord(selectedChord_);
-            // omxDisp.displayMessage(kChordMsg[chords_[selectedChord_].chord]);
-        }
-    }
-    break;
-    case CPARAM_BAS_BALANCE:
-    {
-        chords_[selectedChord_].balance = constrain(chords_[selectedChord_].balance + amtFast, 0, (kNumChordBalance - 1) * 10);
-        activeChordBalance_ = getChordBalanceDetails(chords_[selectedChord_].balance);
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/omx_mode_chords.cpp
 
 		// omxDisp.chordBalanceMsg(activeChordBalance_.type, activeChordBalance_.velMult, 10);
 
@@ -1149,10 +1099,6 @@ void OmxModeChords::onKeyUpdate(OMXKeypadEvent e)
 	if (e.held())
 		return;
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_mode_chords.cpp
-=======
-
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/omx_mode_chords.cpp
 	// auto keyState = midiSettings.keyState;
 
 	auto params = getParams();
@@ -1168,7 +1114,6 @@ void OmxModeChords::onKeyUpdate(OMXKeypadEvent e)
 		{
 			auxDown_ = false;
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_mode_chords.cpp
 			// Forces all arps to work.
 			for (uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
 			{
@@ -1179,18 +1124,6 @@ void OmxModeChords::onKeyUpdate(OMXKeypadEvent e)
 		omxDisp.setDirty();
 		return;
 	}
-=======
-            // Forces all arps to work.
-            for(uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
-            {
-                subModeMidiFx[i].setSelected(true);
-            }
-        }
-        omxLeds.setDirty();
-        omxDisp.setDirty();
-        return;
-    }
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/omx_mode_chords.cpp
 
 	if (auxDown_) // Aux mode
 	{
@@ -1432,7 +1365,6 @@ void OmxModeChords::onKeyUpdateChordEdit(OMXKeypadEvent e)
 
 	// auto params = getParams();
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_mode_chords.cpp
 	// AUX KEY
 	if (thisKey == 0)
 	{
@@ -1444,25 +1376,6 @@ void OmxModeChords::onKeyUpdateChordEdit(OMXKeypadEvent e)
 			{
 				setSelPageAndParam(CHRDPAGE_NOTES, 0);
 			}
-=======
-    // AUX KEY
-    if(thisKey == 0)
-    {
-        if(e.down())
-        {
-            // Exit Chord Edit Mode
-            onChordEditOff();
-            if(mode_ == CHRDMODE_PLAY)
-            {
-                setSelPageAndParam(CHRDPAGE_NOTES, 0);
-            }
-
-            encoderSelect_ = true;
-            chordEditMode_ = false;
-            activeChordEditDegree_ = -1;
-            activeChordEditNoteKey_ = -1;
-        }
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/omx_mode_chords.cpp
 
 			encoderSelect_ = true;
 			chordEditMode_ = false;
@@ -1758,7 +1671,6 @@ bool OmxModeChords::onKeyUpdateSelMidiFX(OMXKeypadEvent e)
 
 	bool keyConsumed = false;
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_mode_chords.cpp
 	if (!e.held())
 	{
 		if (!e.down() && e.clicks() == 2 && thisKey >= 6 && thisKey < 11)
@@ -1769,18 +1681,6 @@ bool OmxModeChords::onKeyUpdateSelMidiFX(OMXKeypadEvent e)
 				keyConsumed = true;
 			}
 		}
-=======
-    if (!e.held())
-    {
-        if (!e.down() && e.clicks() == 2 && thisKey >= 6 && thisKey < 11)
-        {
-            if (auxDown_) // Aux mode
-            {
-                enableSubmode(&subModeMidiFx[thisKey - 6]);
-                keyConsumed = true;
-            }
-        }
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/omx_mode_chords.cpp
 
 		if (e.down() && thisKey != 0)
 		{
@@ -1983,7 +1883,6 @@ void OmxModeChords::doNoteOff(int noteNumber, uint8_t midifx, uint8_t midiChanne
 			// Serial.println("Tracker found " + String(noteNumber));
 			// Serial.println("triggerCount " + String(noteOffTracker[i].triggerCount));
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_mode_chords.cpp
 			noteOffTracker[i].triggerCount = noteOffTracker[i].triggerCount - 1;
 			if (noteOffTracker[i].triggerCount <= 0)
 			{
@@ -1991,15 +1890,6 @@ void OmxModeChords::doNoteOff(int noteNumber, uint8_t midifx, uint8_t midiChanne
 				doNoteOff = true;
 			}
 			trackerFound = true;
-=======
-            noteOffTracker[i].triggerCount = noteOffTracker[i].triggerCount - 1;
-            if(noteOffTracker[i].triggerCount <= 0)
-            {
-                // Serial.println("Do Note Off");
-                doNoteOff = true;
-            }
-            trackerFound = true;
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/omx_mode_chords.cpp
 
 			// Serial.println("triggerCount " + String(noteOffTracker[i].triggerCount));
 			break;
@@ -2024,12 +1914,8 @@ void OmxModeChords::doNoteOff(int noteNumber, uint8_t midifx, uint8_t midiChanne
 		}
 	}
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_mode_chords.cpp
 	if (!trackerFound || !doNoteOff)
 		return; // No note off tracker found.
-=======
-    if(!trackerFound || !doNoteOff) return; // No note off tracker found.
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/omx_mode_chords.cpp
 
 	// Serial.println("Doing Note Off");
 
@@ -2241,25 +2127,8 @@ void OmxModeChords::updateLEDs()
 			strip.setPixelColor(6 + i, mfxColor);
 		}
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_mode_chords.cpp
 		strip.setPixelColor(22, colorConfig.gotoArpParams);
 		strip.setPixelColor(23, colorConfig.nextArpPattern);
-=======
-        strip.setPixelColor(22, colorConfig.gotoArpParams);
-        strip.setPixelColor(23, colorConfig.nextArpPattern);
-
-        if(mfxIndex_ < NUM_MIDIFX_GROUPS)
-        {
-            uint8_t octaveRange = subModeMidiFx[mfxIndex_].getArpOctaveRange();
-            if(octaveRange == 0)
-            {
-                strip.setPixelColor(24, colorConfig.nextArpOctave);
-            }
-            else
-            {
-                // Serial.println("Blink Octave: " + String(octaveRange));
-                bool blinkOctave = omxLeds.getBlinkPattern(octaveRange);
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/omx_mode_chords.cpp
 
 		if (mfxIndex_ < NUM_MIDIFX_GROUPS)
 		{
@@ -2849,19 +2718,11 @@ void OmxModeChords::onDisplayUpdate()
 		updateLEDs();
 	}
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_mode_chords.cpp
 	if (omxDisp.isDirty())
 	{
 		if (!encoderConfig.enc_edit)
 		{
 			auto params = getParams();
-=======
-    if (omxDisp.isDirty())
-    {
-        if (!encoderConfig.enc_edit)
-        {
-            auto params = getParams();
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/omx_mode_chords.cpp
 
 			if (chordEditMode_ == false && (mode_ == CHRDMODE_PLAY || mode_ == CHRDMODE_EDIT || mode_ == CHRDMODE_MANSTRUM) && funcKeyMode_ == FUNCKEYMODE_F2) // Play mode copy
 			{
@@ -3046,21 +2907,12 @@ bool OmxModeChords::savePreset(uint8_t presetIndex)
 
 void OmxModeChords::onManualStrumOn(uint8_t chordIndex)
 {
-<<<<<<< HEAD:OMX-27-firmware/src/omx_mode_chords.cpp
 	// Serial.println("onManualStrumOn: " + String(chordIndex));
 	if (chordNotes_[chordIndex].active)
 	{
 		// Serial.println("chord already active");
 		return; // This shouldn't happen
 	}
-=======
-    // Serial.println("onManualStrumOn: " + String(chordIndex));
-    if(chordNotes_[chordIndex].active)
-    {
-        // Serial.println("chord already active");
-        return; // This shouldn't happen
-    }
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/omx_mode_chords.cpp
 
 	if (constructChord(chordIndex))
 	{
@@ -3092,21 +2944,12 @@ void OmxModeChords::onManualStrumOn(uint8_t chordIndex)
 
 void OmxModeChords::onChordOn(uint8_t chordIndex)
 {
-<<<<<<< HEAD:OMX-27-firmware/src/omx_mode_chords.cpp
 	// Serial.println("onChordOn: " + String(chordIndex));
 	if (chordNotes_[chordIndex].active)
 	{
 		// Serial.println("chord already active");
 		return; // This shouldn't happen
 	}
-=======
-    // Serial.println("onChordOn: " + String(chordIndex));
-    if(chordNotes_[chordIndex].active)
-    {
-        // Serial.println("chord already active");
-        return; // This shouldn't happen
-    }
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/omx_mode_chords.cpp
 
 	if (constructChord(chordIndex))
 	{
@@ -3170,21 +3013,12 @@ void OmxModeChords::onChordOff(uint8_t chordIndex)
 
 void OmxModeChords::onChordEditOn(uint8_t chordIndex)
 {
-<<<<<<< HEAD:OMX-27-firmware/src/omx_mode_chords.cpp
 	// Serial.println("onChordOn: " + String(chordIndex));
 	if (chordEditNotes_.active)
 	{
 		// Serial.println("chord already active");
 		return; // This shouldn't happen
 	}
-=======
-    // Serial.println("onChordOn: " + String(chordIndex));
-    if(chordEditNotes_.active)
-    {
-        // Serial.println("chord already active");
-        return; // This shouldn't happen
-    }
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/omx_mode_chords.cpp
 
 	if (constructChord(chordIndex))
 	{
@@ -3505,7 +3339,6 @@ bool OmxModeChords::constructChordBasic(uint8_t chordIndex)
 		{
 			int noteOffset = chord.customNotes[i].note;
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_mode_chords.cpp
 			if (noteOffset != 0 || (noteOffset == 0 && i == 0))
 			{
 				chordNotes_[chordIndex].notes[i] = rootNote + noteOffset;
@@ -3516,18 +3349,6 @@ bool OmxModeChords::constructChordBasic(uint8_t chordIndex)
 	else
 	{
 		auto pattern = chordPatterns[chord.chord];
-=======
-            if(noteOffset != 0 || (noteOffset == 0 && i == 0))
-            {
-                chordNotes_[chordIndex].notes[i] = rootNote + noteOffset;
-            }
-            // else offset is zero, do nothing.
-        }
-    }
-    else
-    {
-        auto pattern = chordPatterns[chord.chord];
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/omx_mode_chords.cpp
 
 		for (uint8_t i = 0; i < 3; i++)
 		{
@@ -3548,17 +3369,10 @@ bool OmxModeChords::constructChordBasic(uint8_t chordIndex)
 		{
 			int bal = activeChordBalance_.type[i];
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_mode_chords.cpp
 			chordNotes_[chordIndex].notes[i] = (bal <= -10 ? -1 : (pnote + (12 * bal)));
 			chordNotes_[chordIndex].velocities[i] = chord.velocity * activeChordBalance_.velMult[i];
 		}
 	}
-=======
-            chordNotes_[chordIndex].notes[i] = (bal <= -10 ? -1 : (pnote + (12 * bal)));
-            chordNotes_[chordIndex].velocities[i] = chord.velocity * activeChordBalance_.velMult[i];
-        }
-    }
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/omx_mode_chords.cpp
 
 	return true;
 }
@@ -3672,9 +3486,5 @@ int OmxModeChords::loadFromDisk(int startingAddress, Storage *storage)
 
 	loadPreset(0);
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_mode_chords.cpp
 	return startingAddress;
-=======
-    return startingAddress;
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/omx_mode_chords.cpp
 }

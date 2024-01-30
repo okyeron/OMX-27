@@ -56,15 +56,9 @@ protected:
 	void onEncoderChangedEditParam(Encoder::Update enc) override;
 
 private:
-<<<<<<< HEAD:OMX-27-firmware/src/submode_midifxgroup.h
 	bool selected_ = false;
 	bool midiFXParamView_ = false; // If true, parameters adjust the selected midiFX slot.
 	bool arpParamView_ = false;	   // If true, parameters adjust the selected midiFX slot.
-=======
-    bool selected_ = false;
-    bool midiFXParamView_ = false; // If true, parameters adjust the selected midiFX slot.
-    bool arpParamView_ = false; // If true, parameters adjust the selected midiFX slot.
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/submodes/submode_midifxgroup.h
 
 	uint8_t selectedMidiFX_ = 0; // Index of selected midiFX slot
 
@@ -74,15 +68,9 @@ private:
 
 	uint8_t funcKeyMode_ = 0;
 
-<<<<<<< HEAD:OMX-27-firmware/src/submode_midifxgroup.h
 	bool auxDown_ = false; // set to aux state onEnable, must be true to exit mode with aux.
 
 	bool auxReleased_ = false; // set to aux state onEnable, must be true to exit mode with aux.
-=======
-    bool auxDown_ = false; // set to aux state onEnable, must be true to exit mode with aux.
-
-    bool auxReleased_ = false; // set to aux state onEnable, must be true to exit mode with aux.
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/submodes/submode_midifxgroup.h
 
 	// typedef midifx::MidiFXInterface* MidiFXptr;
 
@@ -132,13 +120,8 @@ private:
 		static_cast<SubModeMidiFxGroup *>(context)->noteOutputFunc(note);
 	}
 
-<<<<<<< HEAD:OMX-27-firmware/src/submode_midifxgroup.h
 	// sends the final notes out of midifx
 	void noteOutputFunc(MidiNoteGroup note);
-=======
-    // sends the final notes out of midifx
-    void noteOutputFunc(MidiNoteGroup note);
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/submodes/submode_midifxgroup.h
 
 	// Pointer to external function that notes are sent out of fxgroup to
 	void *sendNoteOutFuncPtrContext_;

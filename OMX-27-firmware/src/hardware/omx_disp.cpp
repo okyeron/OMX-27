@@ -385,7 +385,6 @@ void OmxDisp::dispGenericMode2(uint8_t numPages, int8_t selectedPage, int8_t sel
 	{
 		highlight = (j == selectedParam && !encSelActive);
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_disp.cpp
 		if (useLegendString[j])
 		{
 			dispSymbBox(legendString[j].c_str(), j, highlight);
@@ -399,13 +398,6 @@ void OmxDisp::dispGenericMode2(uint8_t numPages, int8_t selectedPage, int8_t sel
 			dispValBox(legendVals[j], j, highlight);
 		}
 	}
-=======
-    // ValueBoxes
-    bool highlight = false;
-    for (int j = 0; j < 4; j++)
-    {
-        highlight = (j == selectedParam && !encSelActive);
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/hardware/omx_disp.cpp
 
 	dispPageIndicators2(numPages, selectedPage);
 }
@@ -495,18 +487,7 @@ void OmxDisp::dispChar16(const char *charArray[], uint8_t charCount, uint8_t sel
 	u8g2_display.setFontMode(1);
 	u8g2_display.setFont(FONT_CHAR16);
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_disp.cpp
 	uint8_t yPos = hline * 2 + 3; // 19
-=======
-    uint8_t yPos = hline * 2 + 3; // 19
-
-    for(uint8_t i = 0; i < 16; i++)
-    {
-        bool showChar = i < charCount;
-        if(i == selected)
-        {
-            display.drawFastHLine(i * charWidth + 1, 26, charWidth - 2, WHITE);
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/hardware/omx_disp.cpp
 
 	for (uint8_t i = 0; i < 16; i++)
 	{
@@ -659,15 +640,9 @@ void OmxDisp::dispSlots(const char *slotNames[], uint8_t slotCount, uint8_t sele
 		horzOffset = map(constrain(animPos, 13, 26), 13, 26, 18, 2);
 	}
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_disp.cpp
 	uint8_t slotWidth = 128 / rowCount;
 	uint8_t slotHeight = 12;
 	uint8_t slotPad = 1;
-=======
-    uint8_t slotWidth = 128 / rowCount;
-    uint8_t slotHeight = 12;
-    uint8_t slotPad = 1;
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/hardware/omx_disp.cpp
 
 	// uint8_t charWidth = 128 / 16; // 8
 
@@ -713,19 +688,11 @@ void OmxDisp::dispSlots(const char *slotNames[], uint8_t slotCount, uint8_t sele
 		}
 	}
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_disp.cpp
 	// Display selected slot
 	slotWidth = 36;
 	slotHeight = 13;
 	yPos = 0 + selYOffset; // 19
 	uint8_t selectedStart = 64 - (slotWidth / 2);
-=======
-    // Display selected slot
-    slotWidth = 36;
-    slotHeight = 13;
-    yPos = 0 + selYOffset; // 19
-    uint8_t selectedStart = 64 - (slotWidth / 2);
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/hardware/omx_disp.cpp
 
 	display.fillRect(selectedStart + slotPad, yPos, slotWidth - (slotPad * 2), slotHeight, WHITE);
 	display.fillRect(selectedStart + slotPad + 1, yPos + 1, slotWidth - 2 - (slotPad * 2), slotHeight - 2, BLACK);
@@ -790,13 +757,9 @@ void OmxDisp::dispKeyboard(int rootNote, int noteNumbers[], bool showLabels, con
 
 	display.fillRect(0, 0, 128, 32, BLACK);
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_disp.cpp
 	// Find and split up black and white notes
 	bool blackNotes[10];
 	bool whiteNotes[16];
-=======
-
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/hardware/omx_disp.cpp
 
 	for (uint8_t i = 0; i < 16; i++)
 	{
@@ -809,7 +772,6 @@ void OmxDisp::dispKeyboard(int rootNote, int noteNumbers[], bool showLabels, con
 
 	// int rootNote = -1;
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_disp.cpp
 	// // Find the lowest note
 	// for(uint8_t i = 0; i < 6; i++)
 	// {
@@ -823,27 +785,6 @@ void OmxDisp::dispKeyboard(int rootNote, int noteNumbers[], bool showLabels, con
 	// }
 
 	bool addOctave = rootNote % 24 >= 12;
-=======
-    // int rootNote = -1;
-
-    // // Find the lowest note
-    // for(uint8_t i = 0; i < 6; i++)
-    // {
-    //     if(noteNumbers[i] >= 0 && noteNumbers[i] <= 127)
-    //     {
-    //         if(rootNote < 0 || noteNumbers[i] < rootNote)
-    //         {
-    //             rootNote = noteNumbers[i];
-    //         }
-    //     }
-    // }
-
-    bool addOctave = rootNote % 24 >= 12;
-
-    for(uint8_t i = 0; i < 6; i++)
-    {
-        int note = noteNumbers[i];
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/hardware/omx_disp.cpp
 
 	for (uint8_t i = 0; i < 6; i++)
 	{
@@ -1000,15 +941,7 @@ void OmxDisp::dispChordBasicPage(uint8_t selected, bool encoderSelect, const cha
 
 	// const uint8_t startX = 64 - (((totalWidth) * 4) / 2); // 64 is width of duders
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_disp.cpp
 	const uint8_t startX = 64; // 64 is width of duders
-=======
-    const uint8_t startX = 64; // 64 is width of duders
-
-    for(uint8_t i = 0; i < 4; i++)
-    {
-        uint8_t yPos = map(velArray[i], 0.0f, 1.0f, (float)endY, (float)startY);
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/hardware/omx_disp.cpp
 
 	for (uint8_t i = 0; i < 4; i++)
 	{
@@ -1018,32 +951,9 @@ void OmxDisp::dispChordBasicPage(uint8_t selected, bool encoderSelect, const cha
 		if (bal <= -10)
 			continue;
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_disp.cpp
 		if (bal == 0)
 		{
 			display.fillRect(startX + (totalWidth * i) + space, yPos, width, height, WHITE);
-=======
-            // Eyes
-            // xx xx xx xx xx
-            // xx oo xx oo xx
-            // xx oo xx oo xx
-            // xx xx xx xx xx
-            display.fillRect(startX + (totalWidth * i) + space + 2, yPos + 2, 2, 4, BLACK);
-            display.fillRect(startX + (totalWidth * i) + space + 6, yPos + 2, 2, 4, BLACK);
-        }
-        else if(bal < 0)
-        {
-            yPos += 2;
-            display.fillRect(startX + (totalWidth * i) + space - 2, yPos - 2, width + 4, height + 4, WHITE);
-            display.fillRect(startX + (totalWidth * i) + space, yPos, width, height, BLACK);
-
-            display.fillRect(startX + (totalWidth * i) + space + 2, yPos + 2, 2, 2, WHITE);
-            display.fillRect(startX + (totalWidth * i) + space + 6, yPos + 2, 2, 2, WHITE);
-        }
-        else if(bal > 0)
-        {
-            display.fillRect(startX + (totalWidth * i) + space, yPos, width, highHeight, WHITE);
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/hardware/omx_disp.cpp
 
 			// Eyes
 			// xx xx xx xx xx
@@ -1096,15 +1006,7 @@ void OmxDisp::dispChordBalance()
 
 	const uint8_t startX = 64 - (((totalWidth) * 4) / 2);
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_disp.cpp
 	display.fillRect(0, 0, 128, 32, BLACK);
-=======
-    display.fillRect(0, 0, 128, 32, BLACK);
-
-    for(uint8_t i = 0; i < 4; i++)
-    {
-        uint8_t yPos = map(chordVelArray_[i], 0.0f, 1.0f, (float)endY, (float)startY);
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/hardware/omx_disp.cpp
 
 	for (uint8_t i = 0; i < 4; i++)
 	{
@@ -1119,32 +1021,9 @@ void OmxDisp::dispChordBalance()
 		if (bal <= -10)
 			continue;
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_disp.cpp
 		if (bal == 0)
 		{
 			display.fillRect(startX + (totalWidth * i) + space, yPos, width, height, WHITE);
-=======
-            // Eyes
-            // xx xx xx xx xx
-            // xx oo xx oo xx
-            // xx oo xx oo xx
-            // xx xx xx xx xx
-            display.fillRect(startX + (totalWidth * i) + space + 2, yPos + 2, 2, 4, BLACK);
-            display.fillRect(startX + (totalWidth * i) + space + 6, yPos + 2, 2, 4, BLACK);
-        }
-        else if(bal < 0)
-        {
-            yPos += 2;
-            display.fillRect(startX + (totalWidth * i) + space - 2, yPos - 2, width + 4, height + 4, WHITE);
-            display.fillRect(startX + (totalWidth * i) + space, yPos, width, height, BLACK);
-
-            display.fillRect(startX + (totalWidth * i) + space + 2, yPos + 2, 2, 2, WHITE);
-            display.fillRect(startX + (totalWidth * i) + space + 6, yPos + 2, 2, 2, WHITE);
-        }
-        else if(bal > 0)
-        {
-            display.fillRect(startX + (totalWidth * i) + space, yPos, width, highHeight, WHITE);
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/hardware/omx_disp.cpp
 
 			// Eyes
 			// xx xx xx xx xx
@@ -1361,28 +1240,8 @@ void OmxDisp::drawEuclidPattern(bool singleView, bool *pattern, uint8_t steps, u
 
 	const bool selectAsLine = false;
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_disp.cpp
 	int16_t startSpacing = singleView ? 0 : 6;
 	int16_t patWidth = gridw - startSpacing;
-=======
-    int16_t startSpacing = singleView ? 0 : 6;
-    int16_t patWidth = gridw - startSpacing;
-
-    if (selected)
-    {
-        if (selectAsLine)
-        {
-            display.drawLine(0, yPos, gridw, yPos, WHITE);
-            patWidth = gridw;
-            startSpacing = 0;
-        }
-        else
-        {
-            display.fillRect(0, yPos - 3, 3, 3, WHITE);
-            display.drawPixel(1, yPos - 2, BLACK);
-        }
-    }
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/hardware/omx_disp.cpp
 
 	if (selected)
 	{

@@ -4,7 +4,6 @@
 #include "../hardware/omx_keypad.h"
 #include "../utils/param_manager.h"
 #include "../hardware/storage.h"
-
 namespace midifx
 {
 	// Lighter version of MidiNoteGroup for tracking note offs
@@ -128,12 +127,8 @@ namespace midifx
 
 		// std::vector<MidiNoteGroup> triggeredNotes;
 
-<<<<<<< HEAD:OMX-27-firmware/src/midifx_interface.h
 		void *outFunctionContext_;
 		void (*outFunctionPtr_)(void *, MidiNoteGroup);
-=======
-        // std::vector<MidiNoteGroup> triggeredNotes;
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/midifx/midifx_interface.h
 
 		virtual void onEnabled() {}	 // Called whenever entering mode
 		virtual void onDisabled() {} // Called whenever entering mode
@@ -149,18 +144,7 @@ namespace midifx
 		virtual void sendNoteOff(MidiNoteGroupCache noteCache);
 		virtual void sendNoteOff(MidiNoteGroup note);
 
-<<<<<<< HEAD:OMX-27-firmware/src/midifx_interface.h
 		virtual void processNoteOn(uint8_t origNoteNumber, MidiNoteGroup note);
 		virtual void processNoteOff(MidiNoteGroup note);
 	};
-=======
-        virtual void sendNoteOff(MidiNoteGroupCache noteCache);
-        virtual void sendNoteOff(MidiNoteGroup note);
-
-
-        virtual void processNoteOn(uint8_t origNoteNumber, MidiNoteGroup note);
-        virtual void processNoteOff(MidiNoteGroup note);
-
-    };
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/midifx/midifx_interface.h
 }

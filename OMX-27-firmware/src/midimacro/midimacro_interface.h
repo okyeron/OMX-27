@@ -60,13 +60,7 @@ namespace midimacro
 		virtual void onEncoderChangedSelectParam(Encoder::Update enc);
 		virtual void onEncoderChangedEditParam(Encoder::Update enc) = 0;
 
-<<<<<<< HEAD:OMX-27-firmware/src/midimacro_interface.h
 		virtual void DoNoteOn(uint8_t keyIndex);
 		virtual void DoNoteOff(uint8_t keyIndex);
 	};
-=======
-        virtual void DoNoteOn(uint8_t keyIndex);
-        virtual void DoNoteOff(uint8_t keyIndex);
-    };
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/midimacro/midimacro_interface.h
 }

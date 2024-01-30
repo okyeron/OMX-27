@@ -1025,12 +1025,8 @@ void OmxModeSequencer::showCurrentStepLEDs(int patternNum)
 {
     // omxLeds.updateBlinkStates();
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_mode_sequencer.cpp
     if (sysSettings.screenSaverMode && !sequencer.playing)
         return; // Screensaver active and not playing, don't update sequencer LEDs.
-=======
-	if(sysSettings.screenSaverMode && !sequencer.playing) return; // Screensaver active and not playing, don't update sequencer LEDs.
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/omx_mode_sequencer.cpp
 
     bool blinkState = omxLeds.getBlinkState();
     bool slowBlinkState = omxLeds.getSlowBlinkState();

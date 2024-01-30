@@ -85,11 +85,7 @@ namespace midifx
 		int8_t page = params_.getSelPage();
 		int8_t param = params_.getSelParam();
 
-<<<<<<< HEAD:OMX-27-firmware/src/midifx_transpose.cpp
 		auto amt = enc.accel(1);
-=======
-        auto amt = enc.accel(1);
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/midifx/midifx_transpose.cpp
 
 		if (page == 0)
 		{
@@ -173,11 +169,6 @@ namespace midifx
 		transpose_ = save.transpose;
 		octave_ = save.octave;
 
-<<<<<<< HEAD:OMX-27-firmware/src/midifx_transpose.cpp
 		return startingAddress + saveSize;
 	}
-=======
-        return startingAddress + saveSize;
-    }
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/midifx/midifx_transpose.cpp
 }

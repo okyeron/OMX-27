@@ -12,15 +12,9 @@ enum PotConfigPage
 
 SubModePotConfig::SubModePotConfig()
 {
-<<<<<<< HEAD:OMX-27-firmware/src/submode_potconfig.cpp
 	params_.addPage(4);
 	params_.addPage(4);
 	params_.addPage(1); // Exit submode
-=======
-    params_.addPage(4);
-    params_.addPage(4);
-    params_.addPage(1); // Exit submode
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/submodes/submode_potconfig.cpp
 }
 
 void SubModePotConfig::onEnabled()
@@ -30,11 +24,7 @@ void SubModePotConfig::onEnabled()
 	omxLeds.setDirty();
 	omxDisp.setDirty();
 
-<<<<<<< HEAD:OMX-27-firmware/src/submode_potconfig.cpp
 	auxReleased_ = !midiSettings.keyState[0];
-=======
-    auxReleased_ = !midiSettings.keyState[0];
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/submodes/submode_potconfig.cpp
 }
 
 void SubModePotConfig::onDisabled()
@@ -149,14 +139,8 @@ void SubModePotConfig::onEncoderButtonDown()
 		SubmodeInterface::onEncoderButtonDown();
 	}
 
-<<<<<<< HEAD:OMX-27-firmware/src/submode_potconfig.cpp
 	omxDisp.setDirty();
 	omxLeds.setDirty();
-=======
-
-    omxDisp.setDirty();
-    omxLeds.setDirty();
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/submodes/submode_potconfig.cpp
 }
 
 bool SubModePotConfig::onKeyUpdate(OMXKeypadEvent e)
@@ -191,19 +175,11 @@ bool SubModePotConfig::onKeyUpdate(OMXKeypadEvent e)
 		// }
 	}
 
-<<<<<<< HEAD:OMX-27-firmware/src/submode_potconfig.cpp
 	if (!e.down() && thisKey == 0)
 	{
 		// Used to prevent quickly exiting if entered through aux shortcut.
 		auxReleased_ = true;
 	}
-=======
-    if(!e.down() && thisKey == 0)
-    {
-        // Used to prevent quickly exiting if entered through aux shortcut.
-        auxReleased_ = true;
-    }
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/submodes/submode_potconfig.cpp
 
 	omxDisp.setDirty();
 	omxLeds.setDirty();
@@ -277,7 +253,6 @@ void SubModePotConfig::onDisplayUpdate()
 	//     updateLEDs();
 	// }
 
-<<<<<<< HEAD:OMX-27-firmware/src/submode_potconfig.cpp
 	if (omxDisp.isDirty())
 	{
 		if (!encoderConfig.enc_edit)
@@ -286,14 +261,4 @@ void SubModePotConfig::onDisplayUpdate()
 			omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), encoderSelect_);
 		}
 	}
-=======
-    if (omxDisp.isDirty())
-    {
-        if (!encoderConfig.enc_edit)
-        {
-            setupPageLegends();
-            omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), encoderSelect_);
-        }
-    }
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/submodes/submode_potconfig.cpp
 }

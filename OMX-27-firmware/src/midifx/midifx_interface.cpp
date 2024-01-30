@@ -1,6 +1,5 @@
 #include "midifx_interface.h"
 #include "../hardware/omx_disp.h"
-
 namespace midifx
 {
 	MidiFXInterface::~MidiFXInterface()
@@ -107,7 +106,6 @@ namespace midifx
 		// {
 		//     note.prevNoteNumber = origNoteNumber;
 
-<<<<<<< HEAD:OMX-27-firmware/src/midifx_interface.cpp
 		//     bool alreadyExists = false;
 		//     // See if orig note alread exists
 		//     for (size_t i = 0; i < triggeredNotes.size(); i++)
@@ -120,27 +118,6 @@ namespace midifx
 		//             break;
 		//         }
 		//     }
-=======
-        //     bool alreadyExists = false;
-        //     // See if orig note alread exists
-        //     for (size_t i = 0; i < triggeredNotes.size(); i++)
-        //     {
-        //         if (triggeredNotes[i].prevNoteNumber == origNoteNumber)
-        //         {
-        //             triggeredNotes[i] = note;
-        //             alreadyExists = true;
-        //             // Serial.println("Orig note already existed");
-        //             break;
-        //         }
-        //     }
-
-        //     if (!alreadyExists)
-        //     {
-        //         triggeredNotes.push_back(note);
-        //     }
-        // }
-    }
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/midifx/midifx_interface.cpp
 
 		//     if (!alreadyExists)
 		//     {
@@ -184,7 +161,6 @@ namespace midifx
 		}
 	}
 
-<<<<<<< HEAD:OMX-27-firmware/src/midifx_interface.cpp
 	int MidiFXInterface::saveToDisk(int startingAddress, Storage *storage)
 	{
 		return startingAddress;
@@ -194,10 +170,4 @@ namespace midifx
 	{
 		return startingAddress;
 	}
-=======
-    int MidiFXInterface::loadFromDisk(int startingAddress, Storage *storage)
-    {
-        return startingAddress;
-    }
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/midifx/midifx_interface.cpp
 }

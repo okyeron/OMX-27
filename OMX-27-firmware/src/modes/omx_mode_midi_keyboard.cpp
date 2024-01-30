@@ -986,25 +986,8 @@ void OmxModeMidiKeyboard::updateLEDs()
 			strip.setPixelColor(6 + i, mfxColor);
 		}
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_mode_midi_keyboard.cpp
 		strip.setPixelColor(22, colorConfig.gotoArpParams);
 		strip.setPixelColor(23, colorConfig.nextArpPattern);
-=======
-        strip.setPixelColor(22, colorConfig.gotoArpParams);
-        strip.setPixelColor(23, colorConfig.nextArpPattern);
-
-        if(mfxIndex_ < NUM_MIDIFX_GROUPS)
-        {
-            uint8_t octaveRange = subModeMidiFx[mfxIndex_].getArpOctaveRange();
-            if(octaveRange == 0)
-            {
-                strip.setPixelColor(24, colorConfig.nextArpOctave);
-            }
-            else
-            {
-                // Serial.println("Blink Octave: " + String(octaveRange));
-                bool blinkOctave = omxLeds.getBlinkPattern(octaveRange);
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/omx_mode_midi_keyboard.cpp
 
 		if (mfxIndex_ < NUM_MIDIFX_GROUPS)
 		{
@@ -1431,15 +1414,8 @@ void OmxModeMidiKeyboard::onPendingNoteOff(int note, int channel)
 	// Serial.println("OmxModeEuclidean::onPendingNoteOff " + String(note) + " " + String(channel));
 	// subModeMidiFx.onPendingNoteOff(note, channel);
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_mode_midi_keyboard.cpp
 	for (uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
 	{
 		subModeMidiFx[i].onPendingNoteOff(note, channel);
 	}
-=======
-    for(uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
-    {
-        subModeMidiFx[i].onPendingNoteOff(note, channel);
-    }
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/omx_mode_midi_keyboard.cpp
 }

@@ -22,10 +22,6 @@ const int kSelMFXTypeColor = 0xE6FFCF;
 const int kMFXTypeColor = DKGREEN;
 const int kMFXTypeEmptyColor = 0x400000;
 
-<<<<<<< HEAD:OMX-27-firmware/src/submode_midifxgroup.cpp
-=======
-
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/submodes/submode_midifxgroup.cpp
 // None, Chance, Randomizer, Harmonizer = Heliotrope gray, Scaler = Spanish viridian, Monophonic = Maroon (Crayola),
 // const int kMFXTypeColors[16] = {kMFXTypeEmptyColor, CYAN, RED, 0xAA98A9, 0x007F5C, 0xC32148, kMFXTypeEmptyColor, kMFXTypeEmptyColor,
 // kMFXTypeEmptyColor, kMFXTypeEmptyColor, kMFXTypeEmptyColor, kMFXTypeEmptyColor, kMFXTypeEmptyColor, kMFXTypeEmptyColor, kMFXTypeEmptyColor, kMFXTypeEmptyColor};
@@ -242,7 +238,6 @@ void SubModeMidiFxGroup::onEnabled()
 	// params_.setSelPageAndParam(0, 0);
 	midiFXParamView_ = true;
 
-<<<<<<< HEAD:OMX-27-firmware/src/submode_midifxgroup.cpp
 	// Goto first available midifx if selected one is empty.
 	auto mfx = getMidiFX(selectedMidiFX_);
 	if (mfx == nullptr)
@@ -259,39 +254,13 @@ void SubModeMidiFxGroup::onEnabled()
 	}
 
 	heldMidiFX_ = -1;
-=======
-    // Goto first available midifx if selected one is empty.
-    auto mfx = getMidiFX(selectedMidiFX_);
-    if(mfx == nullptr)
-    {
-        for (uint8_t i = 0; i < NUM_MIDIFX_SLOTS; i++)
-        {
-            auto mfx = getMidiFX(i);
-            if (mfx != nullptr)
-            {
-                selectedMidiFX_ = i;
-                break;
-            }
-        }
-    }
-
-    heldMidiFX_ = -1;
-
-    encoderSelect_ = true;
-    omxLeds.setDirty();
-    omxDisp.setDirty();
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/submodes/submode_midifxgroup.cpp
 
 	encoderSelect_ = true;
 	omxLeds.setDirty();
 	omxDisp.setDirty();
 
-<<<<<<< HEAD:OMX-27-firmware/src/submode_midifxgroup.cpp
 	auxReleased_ = !midiSettings.keyState[0];
 	setAuxDown(false);
-=======
-
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/submodes/submode_midifxgroup.cpp
 
 	// for (uint8_t i = 0; i < NUM_MIDIFX_SLOTS; i++)
 	// {
@@ -590,19 +559,11 @@ void SubModeMidiFxGroup::onEncoderButtonDown()
 
 bool SubModeMidiFxGroup::onKeyUpdate(OMXKeypadEvent e)
 {
-<<<<<<< HEAD:OMX-27-firmware/src/submode_midifxgroup.cpp
 	if (e.held())
 	{
 		// if(arpParamView_) return false; // Don't consume key update
 		return true;
 	}
-=======
-    if(e.held())
-    {
-        // if(arpParamView_) return false; // Don't consume key update
-        return true;
-    }
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/submodes/submode_midifxgroup.cpp
 
 	int thisKey = e.key();
 
@@ -657,7 +618,6 @@ bool SubModeMidiFxGroup::onKeyUpdate(OMXKeypadEvent e)
 		mfxKeysActive = true;
 	}
 
-<<<<<<< HEAD:OMX-27-firmware/src/submode_midifxgroup.cpp
 	if (e.down())
 	{
 		// if (thisKey == 0)
@@ -677,34 +637,6 @@ bool SubModeMidiFxGroup::onKeyUpdate(OMXKeypadEvent e)
 		//     // }
 		//     // // Exit submode
 		//     // else
-=======
-    if(e.down())
-    {
-        // if (thisKey == 0)
-        // {
-        //     if(arpParamView_)
-        //     {
-        //         arpParamView_ = false;
-        //         midiFXParamView_ = false;
-        //         setEnabled(false);
-        //         return true;
-        //     }
-        //     // // Exit MidiFX view
-        //     // if (midiFXParamView_)
-        //     // {
-        //     //     midiFXParamView_ = false;
-        //     //     encoderSelect_ = true;
-        //     // }
-        //     // // Exit submode
-        //     // else
-
-        //     if (auxReleased_)
-        //     {
-        //         setEnabled(false);
-        //         return true;
-        //     }
-        // }
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/submodes/submode_midifxgroup.cpp
 
 		//     if (auxReleased_)
 		//     {
@@ -760,7 +692,6 @@ bool SubModeMidiFxGroup::onKeyUpdate(OMXKeypadEvent e)
 				}
 			}
 
-<<<<<<< HEAD:OMX-27-firmware/src/submode_midifxgroup.cpp
 			if (funcKeyMode_ == FUNCKEYMODE_NONE)
 			{
 			}
@@ -772,19 +703,6 @@ bool SubModeMidiFxGroup::onKeyUpdate(OMXKeypadEvent e)
 	//     // Used to prevent quickly exiting if entered through aux shortcut.
 	//     auxReleased_ = true;
 	// }
-=======
-    // if(!e.down() && thisKey == 0)
-    // {
-    //     // Used to prevent quickly exiting if entered through aux shortcut.
-    //     auxReleased_ = true;
-    // }
-
-    // release held midiFX whenever a midifx key is released.
-    if(!e.down() && thisKey >= 3 && thisKey < 3 + NUM_MIDIFX_SLOTS)
-    {
-        heldMidiFX_ = -1;
-    }
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/submodes/submode_midifxgroup.cpp
 
 	// release held midiFX whenever a midifx key is released.
 	if (!e.down() && thisKey >= 3 && thisKey < 3 + NUM_MIDIFX_SLOTS)
@@ -792,18 +710,10 @@ bool SubModeMidiFxGroup::onKeyUpdate(OMXKeypadEvent e)
 		heldMidiFX_ = -1;
 	}
 
-<<<<<<< HEAD:OMX-27-firmware/src/submode_midifxgroup.cpp
 	if (arpParamView_)
 	{
 		return false;
 	}
-=======
-    if(mfxKeysActive)
-    {
-        mfx->onKeyUpdate(e, funcKeyMode_);
-    }
-
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/submodes/submode_midifxgroup.cpp
 
 	if (mfxKeysActive)
 	{
@@ -1082,22 +992,9 @@ void SubModeMidiFxGroup::reconnectInputsOutputs()
 	}
 }
 
-<<<<<<< HEAD:OMX-27-firmware/src/submode_midifxgroup.cpp
 void SubModeMidiFxGroup::noteInput(MidiNoteGroup note)
 {
 	note.prevNoteNumber = note.noteNumber; // Cache the initial note number
-=======
- void SubModeMidiFxGroup::noteInput(MidiNoteGroup note)
- {
-    note.prevNoteNumber = note.noteNumber; // Cache the initial note number
-
-    if(doNoteOutputContext_ == nullptr)
-    {
-        // bypass effects, sends out
-        noteOutputFunc(note);
-        return;
-    }
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/submodes/submode_midifxgroup.cpp
 
 	if (doNoteOutputContext_ == nullptr)
 	{
@@ -1113,15 +1010,8 @@ void SubModeMidiFxGroup::noteInput(MidiNoteGroup note)
 // Sets function pointer to send notes out of FX Group
 void SubModeMidiFxGroup::setNoteOutputFunc(void (*fptr)(void *, MidiNoteGroup), void *context)
 {
-<<<<<<< HEAD:OMX-27-firmware/src/submode_midifxgroup.cpp
 	sendNoteOutFuncPtr_ = fptr;
 	sendNoteOutFuncPtrContext_ = context;
-=======
-    sendNoteOutFuncPtr_ = fptr;
-    sendNoteOutFuncPtrContext_ = context;
-
-
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/submodes/submode_midifxgroup.cpp
 }
 
 void SubModeMidiFxGroup::onPendingNoteOff(int note, int channel)
@@ -1329,7 +1219,6 @@ void SubModeMidiFxGroup::onDisplayUpdate()
 	//     updateLEDs();
 	// }
 
-<<<<<<< HEAD:OMX-27-firmware/src/submode_midifxgroup.cpp
 	if (omxDisp.isDirty())
 	{
 		if (!encoderConfig.enc_edit)
@@ -1346,26 +1235,6 @@ void SubModeMidiFxGroup::onDisplayUpdate()
 			}
 		}
 	}
-=======
-    if (omxDisp.isDirty())
-    {
-        if (!encoderConfig.enc_edit)
-        {
-
-
-
-            if (midiFXParamView_)
-            {
-                onDisplayUpdateMidiFX();
-            }
-            else
-            {
-                setupPageLegends();
-                omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), getEncoderSelect());
-            }
-        }
-    }
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/submodes/submode_midifxgroup.cpp
 }
 
 int SubModeMidiFxGroup::saveToDisk(int startingAddress, Storage *storage)
@@ -1421,9 +1290,5 @@ int SubModeMidiFxGroup::loadFromDisk(int startingAddress, Storage *storage)
 		// Serial.println((String)"startingAddress: " + startingAddress);
 	}
 
-<<<<<<< HEAD:OMX-27-firmware/src/submode_midifxgroup.cpp
 	return startingAddress;
-=======
-    return startingAddress;
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/submodes/submode_midifxgroup.cpp
 }

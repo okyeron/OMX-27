@@ -53,23 +53,10 @@ public:
 	int saveToDisk(int startingAddress, Storage *storage);
 	int loadFromDisk(int startingAddress, Storage *storage);
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_mode_euclidean.h
 	// static int serializedPatternSize(bool eeprom);
 	// static inline int getNumPatterns() { return 8; }
 	// grids::SnapShotSettings* getPattern(uint8_t patternIndex);
 	// void setPattern(uint8_t patternIndex, grids::SnapShotSettings snapShot);
-=======
-    int saveToDisk(int startingAddress, Storage *storage);
-    int loadFromDisk(int startingAddress, Storage *storage);
-
-
-
-
-    // static int serializedPatternSize(bool eeprom);
-    // static inline int getNumPatterns() { return 8; }
-    // grids::SnapShotSettings* getPattern(uint8_t patternIndex);
-    // void setPattern(uint8_t patternIndex, grids::SnapShotSettings snapShot);
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/omx_mode_euclidean.h
 private:
 	// void setParam(uint8_t pageIndex, uint8_t paramPosition);
 	// void setParam(uint8_t paramIndex);
@@ -191,9 +178,5 @@ private:
 		static_cast<OmxModeEuclidean *>(context)->onNotePostFX(note);
 	}
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_mode_euclidean.h
 	void onNotePostFX(MidiNoteGroup note);
-=======
-    void onNotePostFX(MidiNoteGroup note);
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/omx_mode_euclidean.h
 };

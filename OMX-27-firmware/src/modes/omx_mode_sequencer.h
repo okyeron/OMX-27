@@ -3,7 +3,6 @@
 #include "omx_mode_interface.h"
 #include "../utils/music_scales.h"
 #include "../utils/param_manager.h"
-
 class OmxModeSequencer : public OmxModeInterface
 {
 public:
@@ -65,13 +64,8 @@ private:
 	bool patternParams_ = false;
 	bool seqPages_ = false; // True when we can change page selection
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_mode_sequencer.h
 	bool noteSelect_ = false;
 	// bool noteSelection_ = false; // noteSelection_ is never set false when in noteSelect_ mode, so see no reason for it. seems to be remnant of some other feature.
-=======
-    bool noteSelect_ = false;
-    // bool noteSelection_ = false; // noteSelection_ is never set false when in noteSelect_ mode, so see no reason for it. seems to be remnant of some other feature.
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/omx_mode_sequencer.h
 
 	// bool stepSelect_ = false; // Only used in noteSelection after selecting a key, it is set false, value never checked, see no reason for it.
 	bool stepRecord_ = false;
@@ -95,10 +89,5 @@ private:
 	void changeSequencerMode(uint8_t newMode);
 	uint8_t getSequencerMode(); // based on enum SequencerMode in cpp file
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_mode_sequencer.h
 	void pasteStep(uint8_t stepKey);
-=======
-    void pasteStep(uint8_t stepKey);
-
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/omx_mode_sequencer.h
 };

@@ -1,6 +1,5 @@
 #include "midimacro_interface.h"
 #include "../hardware/omx_disp.h"
-
 namespace midimacro
 {
 	MidiMacroInterface::~MidiMacroInterface()
@@ -77,7 +76,6 @@ namespace midimacro
 		}
 	}
 
-<<<<<<< HEAD:OMX-27-firmware/src/midimacro_interface.cpp
 	void MidiMacroInterface::DoNoteOff(uint8_t keyIndex)
 	{
 		if (doNoteOffFptrContext_ != nullptr)
@@ -85,13 +83,4 @@ namespace midimacro
 			doNoteOffFptr_(doNoteOffFptrContext_, keyIndex);
 		}
 	}
-=======
-    void MidiMacroInterface::DoNoteOff(uint8_t keyIndex)
-    {
-        if (doNoteOffFptrContext_ != nullptr)
-        {
-            doNoteOffFptr_(doNoteOffFptrContext_, keyIndex);
-        }
-    }
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/midimacro/midimacro_interface.cpp
 }

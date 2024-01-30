@@ -128,16 +128,11 @@ namespace midifx
 		int8_t page = params_.getSelPage();
 		int8_t param = params_.getSelParam();
 
-<<<<<<< HEAD:OMX-27-firmware/src/midifx_harmonizer.cpp
 		auto amt = enc.accel(1);
-=======
-        auto amt = enc.accel(1);
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/midifx/midifx_harmonizer.cpp
 
 		bool modNote = false;
 		int noteIndex = 0;
 
-<<<<<<< HEAD:OMX-27-firmware/src/midifx_harmonizer.cpp
 		if (page == HARMPAGE_1)
 		{
 			if (param == 0)
@@ -160,30 +155,6 @@ namespace midifx
 			amt = enc.accel(5);
 			chancePerc_ = constrain(chancePerc_ + amt, 0, 100);
 		}
-=======
-        if(page == HARMPAGE_1)
-        {
-            if (param == 0)
-            {
-                playOrigin_ = constrain(playOrigin_ + amt, 0, 1);
-            }
-            else
-            {
-                modNote = true;
-                noteIndex = param - 1;
-            }
-        }
-        else if(page == HARMPAGE_2)
-        {
-            modNote = true;
-            noteIndex = param + 3;
-        }
-        else if(page == HARMPAGE_3)
-        {
-            amt = enc.accel(5);
-            chancePerc_ = constrain(chancePerc_ + amt, 0, 100);
-        }
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/midifx/midifx_harmonizer.cpp
 
 		if (modNote)
 		{
@@ -312,11 +283,6 @@ namespace midifx
 			notes_[i] = (int8_t)storage->read(startingAddress + 2 + i);
 		}
 
-<<<<<<< HEAD:OMX-27-firmware/src/midifx_harmonizer.cpp
 		return startingAddress + 9;
 	}
-=======
-        return startingAddress + 9;
-    }
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/midifx/midifx_harmonizer.cpp
 }

@@ -41,11 +41,6 @@ protected:
 	virtual void onEnabled() {}	 // Called whenever entering mode
 	virtual void onDisabled() {} // Called whenever exiting mode
 
-<<<<<<< HEAD:OMX-27-firmware/src/submode_interface.h
 	virtual void onEncoderChangedSelectParam(Encoder::Update enc);
 	virtual void onEncoderChangedEditParam(Encoder::Update enc) = 0;
-=======
-    virtual void onEncoderChangedSelectParam(Encoder::Update enc);
-    virtual void onEncoderChangedEditParam(Encoder::Update enc) = 0;
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/submodes/submode_interface.h
 };

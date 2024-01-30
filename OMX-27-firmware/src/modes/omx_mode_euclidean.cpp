@@ -11,6 +11,8 @@
 #include "../utils/logic_util.h"
 using namespace euclidean;
 
+using namespace euclidean;
+
 // enum EucModePage {
 //     EUCLID_DENSITY,
 //     EUCLID_XY,
@@ -55,19 +57,11 @@ OmxModeEuclidean::OmxModeEuclidean()
 {
 	midiKeyboard.setMidiMode();
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_mode_euclidean.cpp
 	// Setup function pointers for note ons.
 	for (uint8_t i = 0; i < kNumEuclids; i++)
 	{
 		euclids[i].setNoteOutputFunc(&OmxModeEuclidean::onNoteTriggeredForwarder, this, i);
 	}
-=======
-    // Setup function pointers for note ons.
-    for (uint8_t i = 0; i < kNumEuclids; i++)
-    {
-        euclids[i].setNoteOutputFunc(&OmxModeEuclidean::onNoteTriggeredForwarder, this, i);
-    }
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/omx_mode_euclidean.cpp
 
 	polyRhythmMode = false;
 
@@ -440,25 +434,11 @@ void OmxModeEuclidean::onPotChanged(int potIndex, int prevValue, int newValue, i
 
 void OmxModeEuclidean::loopUpdate(Micros elapsedTime)
 {
-<<<<<<< HEAD:OMX-27-firmware/src/omx_mode_euclidean.cpp
 	// if (isSubmodeEnabled())
 	// {
 	//     activeSubmode->loopUpdate();
 	//     // return;
 	// }
-=======
-    // if (isSubmodeEnabled())
-    // {
-    //     activeSubmode->loopUpdate();
-    //     // return;
-    // }
-
-    if (midiModeception)
-    {
-        midiKeyboard.loopUpdate(elapsedTime);
-        // return;
-    }
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/omx_mode_euclidean.cpp
 
 	if (midiModeception)
 	{
@@ -782,7 +762,6 @@ void OmxModeEuclidean::onEncoderButtonDown()
 
 void OmxModeEuclidean::onEncoderButtonDownLong()
 {
-<<<<<<< HEAD:OMX-27-firmware/src/omx_mode_euclidean.cpp
 	// if(isSubmodeEnabled()){
 	//     activeSubmode->onEncoderButtonDownLong();
 	//     return;
@@ -796,21 +775,6 @@ void OmxModeEuclidean::onEncoderButtonDownLong()
 
 	omxLeds.setDirty();
 	omxDisp.setDirty();
-=======
-    // if(isSubmodeEnabled()){
-    //     activeSubmode->onEncoderButtonDownLong();
-    //     return;
-    // }
-
-    if (midiModeception)
-    {
-        midiKeyboard.onEncoderButtonDownLong();
-        return;
-    }
-
-    omxLeds.setDirty();
-    omxDisp.setDirty();
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/omx_mode_euclidean.cpp
 }
 
 bool OmxModeEuclidean::shouldBlockEncEdit()
@@ -886,7 +850,6 @@ void OmxModeEuclidean::onKeyUpdate(OMXKeypadEvent e)
 
 	EuclideanSequencer *activeEuclid = &euclids[selectedEuclid_];
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_mode_euclidean.cpp
 	// if (instLockView_)
 	// {
 	//     onKeyUpdateChanLock(e);
@@ -914,46 +877,6 @@ void OmxModeEuclidean::onKeyUpdate(OMXKeypadEvent e)
 		// else if (e.down() && e.clicks() == 0 && (thisKey > 2 && thisKey < 11))
 		// {
 		//     int patt = thisKey - 3;
-=======
-    // if (instLockView_)
-    // {
-    //     onKeyUpdateChanLock(e);
-    //     return;
-    // }
-    // // auto keyState = midiSettings.keyState;
-    if (!e.held())
-    {
-        if (e.down() && thisKey == 0) // Aux key down
-        {
-            // Sequencer shouldn't be a dependancy here but current is used to advance clocks.
-            if (isPlaying_ && aux_)
-            {
-                aux_ = false;
-                stopSequencers();
-                // sequencer.playing = false;
-            }
-            else
-            {
-                aux_ = true;
-                startSequencers();
-                // sequencer.playing = true;
-            }
-        }
-        // else if (e.down() && e.clicks() == 0 && (thisKey > 2 && thisKey < 11))
-        // {
-        //     int patt = thisKey - 3;
-
-        //     if (f2_)
-        //     {
-        //         saveActivePattern(patt);
-        //     }
-        //     else if(fNone_)
-        //     {
-        //         loadActivePattern(patt);
-        //     }
-        // }
-    }
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/omx_mode_euclidean.cpp
 
 		//     if (f2_)
 		//     {
@@ -1325,13 +1248,7 @@ void OmxModeEuclidean::onNoteTriggered(uint8_t euclidIndex, MidiNoteGroup note)
 {
 	// Serial.println("OmxModeEuclidean::onNoteTriggered " + String(euclidIndex) + " note: " + String(note.noteNumber));
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_mode_euclidean.cpp
 	uint8_t mfxIndex = euclids[euclidIndex].midiFXGroup;
-=======
-    uint8_t mfxIndex = euclids[euclidIndex].midiFXGroup;
-
-    subModeMidiFx[mfxIndex].noteInput(note);
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/omx_mode_euclidean.cpp
 
 	subModeMidiFx[mfxIndex].noteInput(note);
 
@@ -1453,19 +1370,11 @@ void OmxModeEuclidean::onDisplayUpdate()
 		updateLEDs();
 	}
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_mode_euclidean.cpp
 	if (omxDisp.isDirty())
 	{
 		if (!encoderConfig.enc_edit)
 		{
 			auto params = getSelectedParamMode();
-=======
-    if (omxDisp.isDirty())
-    {
-        if (!encoderConfig.enc_edit)
-        {
-            auto params = getSelectedParamMode();
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/omx_mode_euclidean.cpp
 
 			if (!fNone_ && (paramMode_ == PARAMMODE_EDIT || paramMode_ == PARAMMODE_MIX))
 			{
@@ -1554,12 +1463,6 @@ void OmxModeEuclidean::onDisplayUpdate()
 	//     }
 }
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_mode_euclidean.cpp
-=======
-
-
-
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/omx_mode_euclidean.cpp
 void OmxModeEuclidean::SetScale(MusicScales *scale)
 {
 	midiKeyboard.SetScale(scale);
@@ -1657,9 +1560,5 @@ int OmxModeEuclidean::loadFromDisk(int startingAddress, Storage *storage)
 
 	polyRhythmMode = saveSlots_[selectedSave_].polyRhythmMode_;
 
-<<<<<<< HEAD:OMX-27-firmware/src/omx_mode_euclidean.cpp
 	return startingAddress;
-=======
-    return startingAddress;
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/modes/omx_mode_euclidean.cpp
 }

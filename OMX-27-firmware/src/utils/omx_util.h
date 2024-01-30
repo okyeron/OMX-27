@@ -6,15 +6,9 @@
 class OmxUtil
 {
 public:
-<<<<<<< HEAD:OMX-27-firmware/src/omx_util.h
 	OmxUtil()
 	{
 	}
-=======
-    OmxUtil()
-    {
-    }
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/utils/omx_util.h
 
 	void setup();
 

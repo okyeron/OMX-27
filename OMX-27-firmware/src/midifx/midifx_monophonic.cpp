@@ -1,6 +1,5 @@
 #include "midifx_monophonic.h"
 #include "../hardware/omx_disp.h"
-
 namespace midifx
 {
 	enum ChancePage
@@ -145,11 +144,7 @@ namespace midifx
 		int8_t page = params_.getSelPage();
 		int8_t param = params_.getSelParam();
 
-<<<<<<< HEAD:OMX-27-firmware/src/midifx_monophonic.cpp
 		auto amt = enc.accel(5);
-=======
-        auto amt = enc.accel(5);
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/midifx/midifx_monophonic.cpp
 
 		if (page == CHPAGE_1)
 		{
@@ -208,11 +203,6 @@ namespace midifx
 
 		chancePerc_ = storage->read(startingAddress + 0);
 
-<<<<<<< HEAD:OMX-27-firmware/src/midifx_monophonic.cpp
 		return startingAddress + 1;
 	}
-=======
-        return startingAddress + 1;
-    }
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/midifx/midifx_monophonic.cpp
 }

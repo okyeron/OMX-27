@@ -177,10 +177,6 @@ void MusicScales::calculateScaleIfModified(uint8_t scaleRoot, uint8_t scalePatte
 
 void MusicScales::calculateScale(uint8_t scaleRoot, uint8_t scalePattern)
 {
-<<<<<<< HEAD:OMX-27-firmware/src/music_scales.cpp
-=======
-
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/utils/music_scales.cpp
 
 	rootNote = scaleRoot;
 	scaleIndex = scalePattern;
@@ -288,19 +284,11 @@ uint8_t MusicScales::getNumScales()
 
 bool MusicScales::isNoteInScale(int8_t noteNum)
 {
-<<<<<<< HEAD:OMX-27-firmware/src/music_scales.cpp
 	// Serial.println((String)"isNoteInScale: " + noteNum );
 	if (!scaleCalculated || noteNum < 0 || noteNum > 127)
 	{
 		return false;
 	}
-=======
-    // Serial.println((String)"isNoteInScale: " + noteNum );
-    if (!scaleCalculated || noteNum < 0 || noteNum > 127)
-    {
-        return false;
-    }
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/utils/music_scales.cpp
 
 	int noteIndex = noteNum % 12;
 	bool inScale = scaleColors[noteIndex] != LEDOFF;
@@ -359,7 +347,6 @@ int8_t MusicScales::getNoteByDegree(uint8_t degree, int8_t octave)
 
 	int adjnote;
 
-<<<<<<< HEAD:OMX-27-firmware/src/music_scales.cpp
 	if (scaleIndex < 0)
 	{
 		// Chromatically offset
@@ -373,20 +360,6 @@ int8_t MusicScales::getNoteByDegree(uint8_t degree, int8_t octave)
 	if (adjnote > 127 || adjnote < -1)
 		adjnote = -1;
 	adjnote = constrain(adjnote, -1, 127);
-=======
-    if(scaleIndex < 0)
-    {
-        // Chromatically offset
-        adjnote = 60 + rootNote + degree + (octave * 12);
-        // Serial.println("Chromatic note: " + String(adjnote));
-    }
-    else
-    {
-        adjnote = group16Offsets[degree] + rootNote + 60 + (octave * 12);
-    }
-    if(adjnote > 127 || adjnote < -1) adjnote = -1;
-    adjnote = constrain(adjnote,-1,127);
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/utils/music_scales.cpp
 
 	return (int8_t)adjnote;
 }
@@ -425,16 +398,8 @@ const char *MusicScales::getNoteName(uint8_t noteIndex, bool removeSpaces)
 
 const char *MusicScales::getFullNoteName(uint8_t noteNumber)
 {
-<<<<<<< HEAD:OMX-27-firmware/src/music_scales.cpp
 	int8_t octave = (noteNumber / 12) - 2;
 	tempFullNoteName = String(noteNamesNoFormat[noteNumber % 12] + String(octave));
-=======
-    int8_t octave = (noteNumber / 12) - 2;
-    tempFullNoteName = String(noteNamesNoFormat[noteNumber % 12] + String(octave));
-
-    // strcpy(fullNoteNameBuf, noteNamesNoFormat[noteNumber % 12]);
-    // strcat(fullNoteNameBuf, itoa(octave,fullNoteNameBuf,10));
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/utils/music_scales.cpp
 
 	// strcpy(fullNoteNameBuf, noteNamesNoFormat[noteNumber % 12]);
 	// strcat(fullNoteNameBuf, itoa(octave,fullNoteNameBuf,10));
