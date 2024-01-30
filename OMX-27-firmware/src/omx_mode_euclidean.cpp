@@ -9,6 +9,7 @@
 #include "noteoffs.h"
 #include "MM.h"
 #include "logic_util.h"
+#include "consts.h"
 
 using namespace euclidean;
 
@@ -360,7 +361,14 @@ void OmxModeEuclidean::onPotChanged(int potIndex, int prevValue, int newValue, i
     {
         // Serial.println("Edit Mode");
 
-        if (analogDelta < 3)
+        // delta is way smaller on T4 - what to do?? Check OMX-27-firmware.ino 223
+        #if T4
+            int minAnalogDelta = 1;
+        #else
+            int minAnalogDelta = 3;
+        #endif
+
+        if (analogDelta < minAnalogDelta)
             return;
 
 
