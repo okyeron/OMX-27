@@ -49,6 +49,7 @@ Set the following for the Teensy under the Tools menu:
 __Board:  Teensy 3.2/3.1__  or __Board:  Teensy 4.0__  
 __USB Type: MIDI__  
 __CPU Speed: 120 MHz (overclock)__  
+![Screenshot 2024-01-30 164031](https://github.com/jr0dsgarage/OMX-27/assets/19356109/69b018c2-3e18-40a8-927b-c6739fac1c3d)
 
 Open the sketch at `OMX-27-firmware/OMX-27-firmware.ino`, click verify to ensure it all compiles and upload to flash the firmware to the hardware, pushing the button on the Teensy first.
 
