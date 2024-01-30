@@ -41,6 +41,10 @@ Adafruit_SSD1306
 Adafruit_GFX_Library  
 U8g2_for_Adafruit_GFX  
 Adafruit_FRAM_I2C  
+Adafruit_MCP4725
+
+![image](https://github.com/okyeron/OMX-27/assets/19356109/c241a3f8-1e7d-416c-8437-411b19238e09)
+
 
 Also check to be sure MIDI Library (by Francois Best / fortyseveneffects) is updated to 5.02 (I believe this is installed by default with Teensyduino)
 
