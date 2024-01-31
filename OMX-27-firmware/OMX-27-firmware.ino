@@ -17,26 +17,26 @@
 
 #include <functional>
 #include <ResponsiveAnalogRead.h>
-#include "src/consts.h"
+#include "src/consts/consts.h"
 #include "src/config.h"
-#include "src/colors.h"
-#include "src/MM.h"
-#include "src/ClearUI.h"
-#include "src/sequencer.h"
-#include "src/noteoffs.h"
-#include "src/storage.h"
-#include "src/sysex.h"
-#include "src/omx_keypad.h"
-#include "src/omx_util.h"
-#include "src/omx_disp.h"
-#include "src/omx_mode_midi_keyboard.h"
-#include "src/omx_mode_sequencer.h"
-#include "src/omx_mode_grids.h"
-#include "src/omx_mode_euclidean.h"
-#include "src/omx_mode_chords.h"
-#include "src/omx_screensaver.h"
-#include "src/omx_leds.h"
-#include "src/music_scales.h"
+#include "src/consts/colors.h"
+#include "src/midi/midi.h"
+#include "src/ClearUI/ClearUI.h"
+#include "src/modes/sequencer.h"
+#include "src/midi/noteoffs.h"
+#include "src/hardware/storage.h"
+#include "src/midi/sysex.h"
+#include "src/hardware/omx_keypad.h"
+#include "src/utils/omx_util.h"
+#include "src/hardware/omx_disp.h"
+#include "src/modes/omx_mode_midi_keyboard.h"
+#include "src/modes/omx_mode_sequencer.h"
+#include "src/modes/omx_mode_grids.h"
+#include "src/modes/omx_mode_euclidean.h"
+#include "src/modes/omx_mode_chords.h"
+#include "src/modes/omx_screensaver.h"
+#include "src/hardware/omx_leds.h"
+#include "src/utils/music_scales.h"
 
 // Allows code to compile with smallest code LTO
 extern "C"{
@@ -594,7 +594,7 @@ void loadPatterns(void)
 // currently saves everything ( mode + patterns )
 void saveToStorage(void)
 {
-	// Serial.println( "saving..." );
+	Serial.println( "Saving to Storage..." );
 	saveHeader();
 	savePatterns();
 }
