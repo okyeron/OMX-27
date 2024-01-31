@@ -1,4 +1,4 @@
-#include "./omx_screensaver.h"
+#include "omx_screensaver.h"
 #include "../consts/consts.h"
 #include "../config.h"
 #include "../utils/omx_util.h"
