@@ -598,21 +598,24 @@ void OmxModeChords::updateFuncKeyMode()
 
 	funcKeyMode_ = FUNCKEYMODE_NONE;
 
-	if (keyState[1] && !keyState[2])
+	if (!auxDown_)
 	{
-		funcKeyMode_ = FUNCKEYMODE_F1;
-	}
-	else if (!keyState[1] && keyState[2])
-	{
-		funcKeyMode_ = FUNCKEYMODE_F2;
-	}
-	else if (keyState[1] && keyState[2])
-	{
-		funcKeyMode_ = FUNCKEYMODE_F3;
-	}
-	else
-	{
-		funcKeyMode_ = FUNCKEYMODE_NONE;
+		if (keyState[1] && !keyState[2])
+		{
+			funcKeyMode_ = FUNCKEYMODE_F1;
+		}
+		else if (!keyState[1] && keyState[2])
+		{
+			funcKeyMode_ = FUNCKEYMODE_F2;
+		}
+		else if (keyState[1] && keyState[2])
+		{
+			funcKeyMode_ = FUNCKEYMODE_F3;
+		}
+		else
+		{
+			funcKeyMode_ = FUNCKEYMODE_NONE;
+		}
 	}
 
 	if (funcKeyMode_ != prevMode)
