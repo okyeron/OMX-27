@@ -14,6 +14,9 @@
 #define DEV 0
 #define MIDIONLY 0
 
+// Comment out defines to disable modes if needed for debug build
+#define OMXMODEGRIDS
+
 // HARDWARE Pin for CVGATE_PIN = 13 on beta1 boards, 22 on bodge/midi, 23 on 1.0
 #if DEV
 const int CVGATE_PIN = 13;

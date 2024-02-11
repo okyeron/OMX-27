@@ -52,7 +52,9 @@ extern "C"{
 
 OmxModeMidiKeyboard omxModeMidi;
 OmxModeSequencer omxModeSeq;
+#ifdef OMXMODEGRIDS
 OmxModeGrids omxModeGrids;
+#endif
 OmxModeEuclidean omxModeEuclid;
 OmxModeChords omxModeChords;
 
@@ -179,7 +181,9 @@ void changeOmxMode(OMXMode newOmxmode)
 		activeOmxMode = &omxModeMidi;
 		break;
 	case MODE_GRIDS:
+#ifdef OMXMODEGRIDS
 		activeOmxMode = &omxModeGrids;
+#endif
 		break;
 	case MODE_EUCLID:
 		activeOmxMode = &omxModeEuclid;
@@ -450,6 +454,7 @@ void savePatterns(void)
 	}
 	Serial.println((String)"nLocalAddress: " + nLocalAddress);
 
+#ifdef OMXMODEGRIDS
 	// Grids patterns
 	patternSize = OmxModeGrids::serializedPatternSize(isEeprom);
 	int numPatterns = OmxModeGrids::getNumPatterns();
@@ -468,6 +473,7 @@ void savePatterns(void)
 		nLocalAddress += patternSize;
 	}
 	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 5968
+#endif
 
 	Serial.println("Saving Euclidean");
 	nLocalAddress = omxModeEuclid.saveToDisk(nLocalAddress, storage);
@@ -533,6 +539,7 @@ void loadPatterns(void)
 	// 332 * 8 = 2656
 
 	// Grids patterns
+#ifdef OMXMODEGRIDS
 	patternSize = OmxModeGrids::serializedPatternSize(isEeprom);
 	int numPatterns = OmxModeGrids::getNumPatterns();
 
@@ -548,6 +555,7 @@ void loadPatterns(void)
 		omxModeGrids.setPattern(i, pattern);
 		nLocalAddress += patternSize;
 	}
+#endif
 
 	Serial.print( "Pattern size: " );
 	Serial.print( patternSize );
@@ -958,7 +966,9 @@ void setup()
 	globalScale.calculateScale(scaleConfig.scaleRoot, scaleConfig.scalePattern);
 	omxModeMidi.SetScale(&globalScale);
 	omxModeSeq.SetScale(&globalScale);
+#ifdef OMXMODEGRIDS
 	omxModeGrids.SetScale(&globalScale);
+#endif
 	omxModeEuclid.SetScale(&globalScale);
 	omxModeChords.SetScale(&globalScale);
 
