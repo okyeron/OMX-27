@@ -1261,23 +1261,12 @@ void OmxModeChords::onKeyUpdate(OMXKeypadEvent e)
 							selectedChord_ = thisKey - 11;
 							heldChord_ = thisKey - 11;
 							onChordOn(thisKey - 11);
-
-							// // Enter chord edit mode
-							// selectedChord_ = thisKey - 11;
-							// heldChord_ = thisKey - 11;
-							// enterChordEditMode();
-							// return;
 						}
 						else if (mode_ == CHRDMODE_PRESET) // Preset
 						{
 							selectedChord_ = thisKey - 11;
 							heldChord_ = thisKey - 11;
 							onChordOn(thisKey - 11);
-
-							// if (loadPreset(thisKey - 11))
-							// {
-							// 	omxDisp.displayMessageTimed("Load " + String(thisKey - 11), 5);
-							// }
 						}
 						else if (mode_ == CHRDMODE_MANSTRUM) // Manual Strum
 						{
@@ -1304,6 +1293,16 @@ void OmxModeChords::onKeyUpdate(OMXKeypadEvent e)
 			}
 			else // Function key held
 			{
+				// Alt way to enter manual strum useful in split screen view
+				// if(mode_ == CHRDMODE_PLAY && funcKeyMode_ == FUNCKEYMODE_F1 && e.down() && thisKey == 3)
+				if(funcKeyMode_ == FUNCKEYMODE_F1 && e.down() && thisKey == 3)
+				{
+					mode_ = CHRDMODE_MANSTRUM;
+					omxDisp.displayMessage("Manual Strum");
+					allNotesOff();
+					return;
+				}
+
 				if (e.down() && thisKey >= 11)
 				{
 					// --- PLAY MODE ---
@@ -1311,9 +1310,6 @@ void OmxModeChords::onKeyUpdate(OMXKeypadEvent e)
 					{
 						// if (funcKeyMode_ == FUNCKEYMODE_F1)
 						// {
-						// 	selectedChord_ = thisKey - 11;
-						// 	enterChordEditMode();
-						// 	return;
 						// }
 						// else if (funcKeyMode_ == FUNCKEYMODE_F2)
 						// {
@@ -1345,6 +1341,11 @@ void OmxModeChords::onKeyUpdate(OMXKeypadEvent e)
 					{
 						if (funcKeyMode_ == FUNCKEYMODE_F1)
 						{
+							// Autosave your current preset unless you are reloading the current preset
+							if(thisKey - 11 != selectedSave_)
+							{
+								savePreset(selectedSave_);
+							}
 							if (loadPreset(thisKey - 11))
 							{
 								omxDisp.displayMessageTimed("Load " + String(thisKey - 11), 5);
@@ -1361,19 +1362,19 @@ void OmxModeChords::onKeyUpdate(OMXKeypadEvent e)
 					// --- STRUM MODE ---
 					else if (mode_ == CHRDMODE_MANSTRUM) // Manual Strum
 					{
-						if (funcKeyMode_ == FUNCKEYMODE_F1)
-						{
-							selectedChord_ = thisKey - 11;
-							enterChordEditMode();
-							return;
-						}
-						else if (funcKeyMode_ == FUNCKEYMODE_F2)
-						{
-							if (pasteSelectedChordTo(thisKey - 11))
-							{
-								omxDisp.displayMessageTimed("Copied to " + String(thisKey - 11), 5);
-							}
-						}
+						// if (funcKeyMode_ == FUNCKEYMODE_F1)
+						// {
+						// 	selectedChord_ = thisKey - 11;
+						// 	enterChordEditMode();
+						// 	return;
+						// }
+						// else if (funcKeyMode_ == FUNCKEYMODE_F2)
+						// {
+						// 	if (pasteSelectedChordTo(thisKey - 11))
+						// 	{
+						// 		omxDisp.displayMessageTimed("Copied to " + String(thisKey - 11), 5);
+						// 	}
+						// }
 					}
 				}
 			}
@@ -1596,6 +1597,7 @@ void OmxModeChords::onKeyUpdateChordEdit(OMXKeypadEvent e)
 
 void OmxModeChords::enterChordEditMode()
 {
+	omxDisp.displayMessageTimed("Editing " + String(selectedChord_), 5);
 	constructChord(selectedChord_);
 
 	allNotesOff();
