@@ -74,16 +74,17 @@ const char *kUIModeDisp[8] = {"FULL", "SPLT"};
 
 enum ChordsMainMode
 {
-	CHRDMODE_PLAY,
-	CHRDMODE_EDIT,
-	CHRDMODE_PRESET,
-	CHRDMODE_MANSTRUM,
+	CHRDMODE_PLAY, // Play Chords
+	CHRDMODE_EDIT, // Play Chords, jumps to edit page
+	CHRDMODE_PRESET, // Loads groups of chord presets
+	CHRDMODE_MANSTRUM, // Manually strum chords using the encoder
 };
 
 enum ChordType
 {
-	CTYPE_BASIC,
-	CTYPE_INTERVAL
+	CTYPE_BASIC, // Chords are copied from the Syntakt Chord machine, has a root, octave, scale, and ghosts. The ghosts determine number of notes in chord and notes will either be brought down or up and octave
+	CTYPE_INTERVAL, // Advanced chord config using intervals, can be locked to a the global scale. 
+	CTYPE_BYOC, // Build your own chord however you'd like. 
 };
 
 // const int chordPatterns[16][3] = {
@@ -1148,17 +1149,6 @@ void OmxModeChords::onKeyUpdate(OMXKeypadEvent e)
 					params->incrementParam();
 				}
 			}
-			// else if (thisKey == 5)
-			// {
-			//     // Turn off midiFx
-			//     mfxIndex = 127;
-			// }
-			// else if (thisKey >= 6 && thisKey < 11)
-			// {
-			//     // Change active midiFx
-			//     mfxIndex = thisKey - 6;
-			//     // enableSubmode(&subModeMidiFx[thisKey - 6]);
-			// }
 		}
 	}
 	else
@@ -1167,18 +1157,22 @@ void OmxModeChords::onKeyUpdate(OMXKeypadEvent e)
 		if ((mode_ == CHRDMODE_PLAY || mode_ == CHRDMODE_EDIT) && uiMode_ == CUIMODE_SPLIT)
 		{
 			// Split UI Mode
-			if (thisKey >= 19 || (thisKey >= 6 && thisKey < 11))
+			if (thisKey >= 19 || (thisKey >= 6 && thisKey < 11)) // Check if key is on right side starting from C2(19)
 			{
 				keyConsumed = true;
 
 				uint8_t adjKeyIndex = thisKey >= 19 ? thisKey - 7 : thisKey - 5; // Pretends keys are down an octave
 
+				// If we're in edit mode and holding down a chord of the basic type, then we can edit the chord
+				// rather than play a note
 				if (mode_ == CHRDMODE_EDIT && heldChord_ >= 0 && chords_[heldChord_].type == CTYPE_BASIC)
 				{
 					if (e.down())
 					{
 						int adjnote = notes[adjKeyIndex] + (midiSettings.octave * 12);
 
+						// If valid note, we edit the chord setting the root note and octave, stop currently playing chord
+						// and turn on new chords
 						if (adjnote >= 0 && adjnote <= 127)
 						{
 							onChordOff(selectedChord_);
@@ -1200,6 +1194,7 @@ void OmxModeChords::onKeyUpdate(OMXKeypadEvent e)
 						}
 					}
 				}
+				// Not holding a chord in edit mode, play a note
 				else
 				{
 					activeChordEditNoteKey_ = -1;
@@ -1216,10 +1211,14 @@ void OmxModeChords::onKeyUpdate(OMXKeypadEvent e)
 			}
 		}
 
+		//       [F1][F2]    [PLAY][EDIT][PRESET]  [STRUM]
+		// [C1][C2][C3][C4][C5]  [C6]  [C7]
+
 		if (!keyConsumed)
 		{
 			if (funcKeyMode_ == FUNCKEYMODE_NONE)
 			{
+				// Key Down, no function keys, no aux
 				if (e.down())
 				{
 					if (thisKey == 3)
@@ -1228,7 +1227,7 @@ void OmxModeChords::onKeyUpdate(OMXKeypadEvent e)
 						setSelPageAndParam(CHRDPAGE_NOTES, 0);
 						encoderSelect_ = true;
 						omxDisp.displayMessage("Play");
-					}
+					} 
 					else if (thisKey == 4)
 					{
 						mode_ = CHRDMODE_EDIT;
@@ -1271,10 +1270,14 @@ void OmxModeChords::onKeyUpdate(OMXKeypadEvent e)
 						}
 						else if (mode_ == CHRDMODE_PRESET) // Preset
 						{
-							if (loadPreset(thisKey - 11))
-							{
-								omxDisp.displayMessageTimed("Load " + String(thisKey - 11), 5);
-							}
+							selectedChord_ = thisKey - 11;
+							heldChord_ = thisKey - 11;
+							onChordOn(thisKey - 11);
+
+							// if (loadPreset(thisKey - 11))
+							// {
+							// 	omxDisp.displayMessageTimed("Load " + String(thisKey - 11), 5);
+							// }
 						}
 						else if (mode_ == CHRDMODE_MANSTRUM) // Manual Strum
 						{
@@ -1303,7 +1306,25 @@ void OmxModeChords::onKeyUpdate(OMXKeypadEvent e)
 			{
 				if (e.down() && thisKey >= 11)
 				{
-					if (mode_ == CHRDMODE_PLAY || mode_ == CHRDMODE_EDIT) // Play
+					// --- PLAY MODE ---
+					if (mode_ == CHRDMODE_PLAY)
+					{
+						// if (funcKeyMode_ == FUNCKEYMODE_F1)
+						// {
+						// 	selectedChord_ = thisKey - 11;
+						// 	enterChordEditMode();
+						// 	return;
+						// }
+						// else if (funcKeyMode_ == FUNCKEYMODE_F2)
+						// {
+						// 	if (pasteSelectedChordTo(thisKey - 11))
+						// 	{
+						// 		omxDisp.displayMessageTimed("Copied to " + String(thisKey - 11), 5);
+						// 	}
+						// }
+					}
+					// --- EDIT MODE ---
+					else if (mode_ == CHRDMODE_EDIT)
 					{
 						if (funcKeyMode_ == FUNCKEYMODE_F1)
 						{
@@ -1319,10 +1340,15 @@ void OmxModeChords::onKeyUpdate(OMXKeypadEvent e)
 							}
 						}
 					}
-					else if (mode_ == CHRDMODE_PRESET) // Preset
+					// --- PRESET MODE ---
+					else if (mode_ == CHRDMODE_PRESET)
 					{
 						if (funcKeyMode_ == FUNCKEYMODE_F1)
 						{
+							if (loadPreset(thisKey - 11))
+							{
+								omxDisp.displayMessageTimed("Load " + String(thisKey - 11), 5);
+							}
 						}
 						else if (funcKeyMode_ == FUNCKEYMODE_F2)
 						{
@@ -1332,6 +1358,7 @@ void OmxModeChords::onKeyUpdate(OMXKeypadEvent e)
 							}
 						}
 					}
+					// --- STRUM MODE ---
 					else if (mode_ == CHRDMODE_MANSTRUM) // Manual Strum
 					{
 						if (funcKeyMode_ == FUNCKEYMODE_F1)
@@ -2727,9 +2754,21 @@ void OmxModeChords::onDisplayUpdate()
 		{
 			auto params = getParams();
 
-			if (chordEditMode_ == false && (mode_ == CHRDMODE_PLAY || mode_ == CHRDMODE_EDIT || mode_ == CHRDMODE_MANSTRUM) && funcKeyMode_ == FUNCKEYMODE_F2) // Play mode copy
+			if (chordEditMode_ == false && (mode_ == CHRDMODE_EDIT) && funcKeyMode_ == FUNCKEYMODE_F1) // Edit mode enter edit mode
+			{
+				omxDisp.dispGenericModeLabel("Edit chord", params->getNumPages(), params->getSelPage());
+			}
+			else if (chordEditMode_ == false && (mode_ == CHRDMODE_EDIT) && funcKeyMode_ == FUNCKEYMODE_F2) // Edit mode copy
 			{
 				omxDisp.dispGenericModeLabel("Copy to", params->getNumPages(), params->getSelPage());
+			}
+			// if (chordEditMode_ == false && (mode_ == CHRDMODE_PLAY || mode_ == CHRDMODE_EDIT || mode_ == CHRDMODE_MANSTRUM) && funcKeyMode_ == FUNCKEYMODE_F2) // Play mode copy
+			// {
+			// 	omxDisp.dispGenericModeLabel("Copy to", params->getNumPages(), params->getSelPage());
+			// }
+			else if (chordEditMode_ == false && (mode_ == CHRDMODE_PRESET) && funcKeyMode_ == FUNCKEYMODE_F1) // Preset move load
+			{
+				omxDisp.dispGenericModeLabel("Load from", params->getNumPages(), params->getSelPage());
 			}
 			else if (chordEditMode_ == false && (mode_ == CHRDMODE_PRESET) && funcKeyMode_ == FUNCKEYMODE_F2) // Preset move save
 			{
