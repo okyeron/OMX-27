@@ -291,6 +291,7 @@ namespace midifx
 		bool sortOrderChanged_;
 
 		MidiNoteGroup trackingNoteGroups[8];
+		MidiNoteGroup trackingNoteGroupsPassthrough[8];
 
 		bool insertMidiNoteQueue(MidiNoteGroup note);
 		bool removeMidiNoteQueue(MidiNoteGroup note);
@@ -303,6 +304,7 @@ namespace midifx
 		bool hasMidiNotes();
 
 		void trackNoteInput(MidiNoteGroup note);
+		void trackNoteInputPassthrough(MidiNoteGroup note, bool ignoreNoteOns);
 		void processNoteInput(MidiNoteGroup note);
 
 		void arpNoteOn(MidiNoteGroup note);

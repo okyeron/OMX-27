@@ -155,6 +155,7 @@ namespace midifx
         for (uint8_t i = 0; i < 8; i++)
         {
             trackingNoteGroups[i].prevNoteNumber = 255;
+            trackingNoteGroupsPassthrough[i].prevNoteNumber = 255;
         }
     }
 
@@ -388,7 +389,16 @@ namespace midifx
 
         if (chancePerc_ != 100 && (chancePerc_ == 0 || random(100) > chancePerc_))
         {
-            sendNoteOut(note);
+            // sendNoteOut(note);
+            if(note.unknownLength || note.noteOff)
+            {
+                trackNoteInputPassthrough(note, false);
+            }
+            else
+            {
+                sendNoteOut(note);
+            }
+            
             return;
         }
 
@@ -396,11 +406,77 @@ namespace midifx
         {
             // only notes of unknown lengths need to be tracked
             // notes with fixed lengths will turn off automatically.
+            trackNoteInputPassthrough(note, true);
             trackNoteInput(note);
         }
         else
         {
             processNoteInput(note);
+        }
+    }
+
+    // If chance is less than 100% and passing through, notes need to be tracked
+    // and if the same note comes in without passthrough for a noteoff event, it needs to 
+    // be passed through to send noteoff to prevent stuck notes
+    void MidiFXArpeggiator::trackNoteInputPassthrough(MidiNoteGroup note, bool ignoreNoteOns)
+    {
+        // Note on, not ignored
+        if (!ignoreNoteOns && !note.noteOff)
+        {
+            // Search for an empty slot in trackingNoteGroupsPassthrough
+            // If no slots are available/more than 8 notes/ note gets killed. 
+            for (uint8_t i = 0; i < 8; i++)
+            {
+                // Found empty slot
+                if (trackingNoteGroupsPassthrough[i].prevNoteNumber == 255)
+                {
+                    trackingNoteGroupsPassthrough[i].channel = note.channel;
+                    trackingNoteGroupsPassthrough[i].prevNoteNumber = note.prevNoteNumber;
+                    trackingNoteGroupsPassthrough[i].noteNumber = note.noteNumber;
+
+                    // Send it forward through chain
+                    sendNoteOut(note);
+                    return;
+                }
+            }
+        }
+
+        // Note off
+        if (note.noteOff)
+        {
+            bool noteFound = false;
+
+            // Search to see if this note is in trackingNoteGroupsPassthrough
+            // Meaning it was previously passed through
+            // If it is found, send it through chain
+            // PrevNoteNumber should be the origin note number before being modified by MidiFX
+            for (uint8_t i = 0; i < 8; i++)
+            {
+                if (trackingNoteGroupsPassthrough[i].prevNoteNumber != 255)
+                {
+                    if (trackingNoteGroupsPassthrough[i].channel == note.channel && trackingNoteGroupsPassthrough[i].prevNoteNumber == note.prevNoteNumber)
+                    {
+                        note.noteNumber = trackingNoteGroupsPassthrough[i].noteNumber;
+                        // processNoteInput(note);
+                        sendNoteOut(note);
+                        trackingNoteGroupsPassthrough[i].prevNoteNumber = 255; // mark empty
+                        noteFound = true;
+                    }
+                }
+            }
+
+            // Should be false if note getting sent to arp
+            // Avoid double trackNoteInput call
+            if(!ignoreNoteOns)
+            {
+                trackNoteInput(note);
+            }
+
+            // Note not previously passed through and is noteoff, now send to arp to turn off arp notes
+            // if(!noteFound)
+            // {
+            //     trackNoteInput(note);
+            // }
         }
     }
 
