@@ -34,16 +34,75 @@ namespace midimacro
 
 	MidiMacroDeluge::MidiMacroDeluge()
 	{
-		paramBanks[0].bankName = "Filt 1";
-		paramBanks[0].SetCCs("FREQ", 74, "RES", 71, "MORP", 70);
-		paramBanks[1].bankName = "Filt 2";
-		paramBanks[2].bankName = "Env 1";
-		paramBanks[3].bankName = "Env 2";
+		// Top Row Banks
+		paramBanks[0].bankName = "Env 1";
+		paramBanks[0].keyMap = 1;
+		paramBanks[0].SetCCs("Attack", 73, "Decay", 75, "Sustain", 76, "Release", 72);
 
-		params_.addPage(1); // 
-		params_.addPage(1); // 
-		params_.addPage(1); // 
-		params_.addPage(1); // 
+		paramBanks[1].bankName = "Env 2";
+		paramBanks[1].keyMap = 2;
+		paramBanks[1].SetCCs("Attack", 77, "Decay", 78, "Sustain", 79, "Release", 80);
+
+
+		paramBanks[2].bankName = "LPF";
+		paramBanks[2].keyMap = 3;
+		paramBanks[2].SetCCs("Freq", 74, "Res", 71, "Morph", 70);
+
+		paramBanks[3].bankName = "HPF";
+		paramBanks[3].keyMap = 4;
+		paramBanks[3].SetCCs("Freq", 81, "Res", 82, "Morph", 83);
+
+		paramBanks[4].bankName = "EQ";
+		paramBanks[4].keyMap = 5;
+		paramBanks[4].SetCCs("Bas Freq", 84, "Bass LVL", 86, "Treb Freq", 85, "Treb LVL", 87);
+
+		// Bot Row Banks
+		paramBanks[5].bankName = "Master";
+		paramBanks[5].keyMap = 11;
+		paramBanks[5].SetCCs("Pan", 10, "Transpose", 3, "Porta", 5, "", 255, "Level", 7);
+
+		// OSC1 and FM1 Mapped to same key with toggle
+		paramBanks[6].bankName = "OSC 1";
+		paramBanks[6].keyMap = 12;
+		paramBanks[6].altBank = false;
+		paramBanks[6].SetCCs("Level", 21, "Transpose", 12, "PW", 23, "FM Feedback", 24, "WT Morph", 25);
+
+		paramBanks[7].bankName = "FM 1";
+		paramBanks[7].keyMap = 12;
+		paramBanks[7].altBank = true;
+		paramBanks[7].SetCCs("Level", 54, "Transpose", 14, "Feedback", 55);
+
+		// OSC2 and FM2 Mapped to same key with toggle
+		paramBanks[8].bankName = "OSC 2";
+		paramBanks[8].keyMap = 13;
+		paramBanks[8].altBank = false;
+		paramBanks[8].SetCCs("Level", 26, "Transpose", 13, "PW", 28, "FM Feedback", 29, "WT Morph", 30);
+
+		paramBanks[9].bankName = "FM 2";
+		paramBanks[9].keyMap = 13;
+		paramBanks[9].altBank = true;
+		paramBanks[9].SetCCs("Level", 56, "Transpose", 15, "Feedback", 57);
+
+		paramBanks[10].bankName = "LFO Delay Reverb";
+		paramBanks[10].keyMap = 14;
+		paramBanks[10].SetCCs("LFO1 Rate", 58, "LFO2 Rate", 59, "DEL Rate", 53, "DEL AMT", 52, "Reverb AMT", 91);
+
+		paramBanks[11].bankName = "ModFX";
+		paramBanks[11].keyMap = 15;
+		paramBanks[11].SetCCs("Rate", 16, "Depth", 93, "Feedback", 17, "Offset", 18);
+
+		paramBanks[12].bankName = "Dist Noise";
+		paramBanks[12].keyMap = 16;
+		paramBanks[12].SetCCs("Bitcrush", 62, "Decimate", 63, "Wavefold", 19, "Noise", 41);
+
+		paramBanks[13].bankName = "Arp Sidechain";
+		paramBanks[13].keyMap = 17;
+		paramBanks[13].SetCCs("Arp Rate", 51, "Arp Gate", 50, "Vol Duck", 61, "SC Shape", 60);
+
+		params_.addPage(5); // 
+		// params_.addPage(1); // 
+		// params_.addPage(1); // 
+		// params_.addPage(1); // 
 
 		for(uint8_t i = 0; i < 127; i++)
 		{
@@ -60,20 +119,60 @@ namespace midimacro
 
 	MidiParamBank *MidiMacroDeluge::getActiveBank()
 	{
-		int8_t selPage = params_.getSelPage();
+		// int8_t selPage = params_.getSelPage();
 
-		if (selPage < 0 || selPage >= 4)
-		{
-			return nullptr;
-		}
+		// if (selPage < 0 || selPage >= 4)
+		// {
+		// 	return nullptr;
+		// }
 
-		return &paramBanks[selPage];
+		return &paramBanks[selBank];
 	}
 
-	void MidiMacroDeluge::onEnabled()
+	void MidiMacroDeluge::keyDownBankShortcut(uint8_t keyIndex)
 	{
-		omxDisp.displayMessage("Deluge");
+		auto activeBank = getActiveBank();
 
+		bool selAltBank = false;
+
+		if(activeBank->keyMap == keyIndex)
+		{
+			// If the active bank's keyMap matches this key then we have opprotunity to select an alt bank if one exists
+			// If the active bank is an altbank, then the main level bank will be selected
+			// TLDR: Pressing a key multiple times can toggle between different banks
+			selAltBank = activeBank->altBank == false;
+		}
+
+		for(uint8_t i = 0; i < kNumBanks; i++)
+		{
+			if(paramBanks[i].keyMap == keyIndex && paramBanks[i].altBank == selAltBank)
+			{
+				setActiveBank(i);
+				return;
+			}
+		}
+	}
+
+	void MidiMacroDeluge::setActiveBank(uint8_t bankIndex)
+	{
+		if (bankIndex >= kNumBanks)
+		{
+			Serial.println((String)"ERROR:MidiMacroDeluge: Cannot set active bank to " + bankIndex);
+			return;
+		}
+
+		if (bankIndex != selBank)
+		{
+			selBank = bankIndex;
+			updatePotPickups();
+		}
+	}
+
+	// Updates the pot pickups to the values saved in the active bank
+	// Thus if we switch banks, the value will need to be picked up
+	// by the pot before it sends out to avoid jumping values. 
+	void MidiMacroDeluge::updatePotPickups()
+	{
 		auto activeBank = getActiveBank();
 
 		// Update the potPickups to the values of the active bank
@@ -86,6 +185,13 @@ namespace midimacro
 		}
 	}
 
+	void MidiMacroDeluge::onEnabled()
+	{
+		omxDisp.displayMessage("Deluge");
+
+		updatePotPickups();
+	}
+
 	void MidiMacroDeluge::onDisabled()
 	{
 	}
@@ -96,27 +202,29 @@ namespace midimacro
 		{
 			// delVals[control] = value; // Might want to do this for speed
 
-			int8_t selPage = params_.getSelPage();
-
-			auto activeBank = getActiveBank();
-
-			if(activeBank != nullptr)
+			for (int8_t i = 0; i < kNumBanks; i++)
 			{
-				for(int8_t i = 0; i < kNumBanks; i++)
-				{
-					int8_t paramIndex = paramBanks[i].UpdateCCValue(control, value);
+				int8_t paramIndex = paramBanks[i].UpdateCCValue(control, value);
 
-					// CC was found in bank and this is the active bank
-					if(paramIndex >= 0 && i == selPage)
-					{
-						// Update the pot pickup for this index. 
-						potPickups[i].SetVal(value);
-						omxDisp.displayMessageTimed("CC " + String(control) + " Val " + String(value), 5);
-					}
+				// CC was found in bank and this is the active bank
+				if (paramIndex >= 0 && i == selBank)
+				{
+					// Update the pot pickup for this index.
+					potPickups[i].SetVal(value);
+					// omxDisp.displayMessageTimed("CC " + String(control) + " Val " + String(value), 5);
 				}
 			}
 
-			Serial.println((String)"IN CC: " + control + " VAL: " + value); // 5968
+			// int8_t selPage = params_.getSelPage();
+
+			// auto activeBank = getActiveBank();
+
+			// if(activeBank != nullptr)
+			// {
+				
+			// }
+
+			// Serial.println((String)"IN CC: " + control + " VAL: " + value); // 5968
 		}
 	}
 
@@ -138,12 +246,18 @@ namespace midimacro
 
 				if(potPickups[potIndex].pickedUp)
 				{
-					omxDisp.displayMessageTimed(String(activeBank->paramNames[potIndex]) + " " + String(cc) + " " + String(potPickups[potIndex].value), 5);
+					// omxDisp.displayMessageTimed(String(activeBank->paramNames[potIndex]) + " " + String(cc) + " " + String(potPickups[potIndex].value), 5);
+
+					uint8_t delugeMapVal = (uint8_t)map(potPickups[potIndex].value, 0, 127, 0, 50);
+
+					omxDisp.displayMessageTimed(String(activeBank->paramNames[potIndex]) + " " + String(delugeMapVal), 5);
 					MM::sendControlChange(cc, potPickups[potIndex].value, midiMacroConfig.midiMacroChan);
 				}
 				else 
 				{
-					omxDisp.displayMessageTimed(String(newValue) + " -> " + String(potPickups[potIndex].value), 5);
+					uint8_t delugeMapNewVal = (uint8_t)map(newValue, 0, 127, 0, 50);
+					uint8_t delugeMapVal = (uint8_t)map(potPickups[potIndex].value, 0, 127, 0, 50);
+					omxDisp.displayMessageTimed(String(delugeMapNewVal) + " -> " + String(delugeMapVal), 5);
 				}
 			}
 		}
@@ -160,7 +274,7 @@ namespace midimacro
 
 	void MidiMacroDeluge::onKeyUpdate(OMXKeypadEvent e)
 	{
-		int thisKey = e.key();
+		uint8_t thisKey = e.key();
 		// int keyPos = thisKey - 11;
 
 		if (thisKey != 0 && !e.held())
@@ -181,22 +295,25 @@ namespace midimacro
 			{
 				if (e.down())
 				{
-					if (thisKey == keyEnv1_)
-					{
-						params_.setSelPage(DELPAGE_ENV1);
-					}
-					else if (thisKey == keyEnv2_)
-					{
-						params_.setSelPage(DELPAGE_ENV2);
-					}
-					else if (thisKey == keyFilt1_)
-					{
-						params_.setSelPage(DELPAGE_FILT1);
-					}
-					else if (thisKey == keyFilt2_)
-					{
-						params_.setSelPage(DELPAGE_FILT2);
-					}
+					omxDisp.displayMessageTimed("Key Down " + String(thisKey), 5);
+
+					keyDownBankShortcut(thisKey);
+					// if (thisKey == keyEnv1_)
+					// {
+					// 	params_.setSelPage(DELPAGE_ENV1);
+					// }
+					// else if (thisKey == keyEnv2_)
+					// {
+					// 	params_.setSelPage(DELPAGE_ENV2);
+					// }
+					// else if (thisKey == keyFilt1_)
+					// {
+					// 	params_.setSelPage(DELPAGE_FILT1);
+					// }
+					// else if (thisKey == keyFilt2_)
+					// {
+					// 	params_.setSelPage(DELPAGE_FILT2);
+					// }
 				}
 				else
 				{

@@ -6,10 +6,12 @@ namespace midimacro
 {
 	struct MidiParamBank
 	{
+		uint8_t keyMap;
 		const char *bankName;
 		uint8_t midiCCs[5] = {255, 255, 255, 255, 255};
 		uint8_t midiValues[5] = {0, 0, 0, 0, 0};
 		const char *paramNames[5];
+		bool altBank = false;
 
 		void SetCCs(
 			const char *nameA = "", uint8_t a = 255,
@@ -81,21 +83,27 @@ namespace midimacro
 		void onEncoderChangedEditParam(Encoder::Update enc) override;
 
 	private:
-		static const uint8_t kNumBanks = 4;
+		static const uint8_t kNumBanks = 14;
 
 		MidiParamBank* getActiveBank();
+		void keyDownBankShortcut(uint8_t keyIndex);
+		void setActiveBank(uint8_t bankIndex);
+		void updatePotPickups();
+
 		MidiParamBank paramBanks[kNumBanks];
 		// Maps each CC to a cached value
 		uint8_t delVals[127];
+
+		uint8_t selBank = 0;
 
 		PotPickupUtil potPickups[5];
 
 		// bool m8mutesolo_[16];
 
 		// Control key mappings
-		static const uint8_t keyFilt1_ = 3;
-		static const uint8_t keyFilt2_ = 4;
-		static const uint8_t keyEnv1_ = 1;
-		static const uint8_t keyEnv2_ = 2;
+		// static const uint8_t keyFilt1_ = 3;
+		// static const uint8_t keyFilt2_ = 4;
+		// static const uint8_t keyEnv1_ = 1;
+		// static const uint8_t keyEnv2_ = 2;
 	};
 }
