@@ -9,6 +9,7 @@
 #include "../midifx/midifx_interface.h"
 #include "../midimacro/midimacro_m8.h"
 #include "../midimacro/midimacro_norns.h"
+#include "../midimacro/midimacro_deluge.h"
 
 class OmxModeMidiKeyboard : public OmxModeInterface
 {
@@ -50,6 +51,7 @@ public:
 	void onDisplayUpdate() override;
 	void inMidiNoteOn(byte channel, byte note, byte velocity) override;
 	void inMidiNoteOff(byte channel, byte note, byte velocity) override;
+	void inMidiControlChange(byte channel, byte control, byte value) override;
 
 	void SetScale(MusicScales *scale);
 
@@ -118,6 +120,7 @@ private:
 
 	midimacro::MidiMacroNorns nornsMarco_;
 	midimacro::MidiMacroM8 m8Macro_;
+	midimacro::MidiMacroDeluge delugeMacro_;
 
 	midimacro::MidiMacroInterface *activeMacro_;
 

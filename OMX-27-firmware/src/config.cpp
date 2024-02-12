@@ -59,8 +59,8 @@ const int PPQ = 96;
 const char *mfxOffMsg = "MidiFX are Off";
 
 const char *modes[] = {"MI", "CH", "S1", "S2", "GR", "EL", "OM"};
-const char *macromodes[] = {"Off", "M8", "NRN"};
-const int nummacromodes = 2;
+const char *macromodes[] = {"Off", "M8", "NRN", "DEL"};
+const int nummacromodes = 3;
 
 float multValues[] = {.25, .5, 1, 2, 4, 8, 16};
 const char *mdivs[] = {"1/64", "1/32", "1/16", "1/8", "1/4", "1/2", "W"};

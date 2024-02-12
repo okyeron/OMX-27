@@ -15,10 +15,10 @@
 // #include <cstdarg>
 
 /* * firmware metadata  */
-// OMX_VERSION = 1.12.17
+// OMX_VERSION = 1.12.18
 const int MAJOR_VERSION = 1;
 const int MINOR_VERSION = 12;
-const int POINT_VERSION = 17;
+const int POINT_VERSION = 18;
 
 const int DEVICE_ID = 2;
 

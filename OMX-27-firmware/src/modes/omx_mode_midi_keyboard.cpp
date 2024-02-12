@@ -30,6 +30,8 @@ OmxModeMidiKeyboard::OmxModeMidiKeyboard()
 	m8Macro_.setDoNoteOff(&OmxModeMidiKeyboard::doNoteOffForwarder, this);
 	nornsMarco_.setDoNoteOn(&OmxModeMidiKeyboard::doNoteOnForwarder, this);
 	nornsMarco_.setDoNoteOff(&OmxModeMidiKeyboard::doNoteOffForwarder, this);
+	delugeMacro_.setDoNoteOn(&OmxModeMidiKeyboard::doNoteOnForwarder, this);
+	delugeMacro_.setDoNoteOff(&OmxModeMidiKeyboard::doNoteOffForwarder, this);
 }
 
 void OmxModeMidiKeyboard::InitSetup()
@@ -898,6 +900,8 @@ midimacro::MidiMacroInterface *OmxModeMidiKeyboard::getActiveMacro()
 		return &m8Macro_;
 	case 2:
 		return &nornsMarco_;
+	case 3:
+		return &delugeMacro_;
 	}
 	return nullptr;
 }
@@ -1252,6 +1256,16 @@ void OmxModeMidiKeyboard::inMidiNoteOff(byte channel, byte note, byte velocity)
 													  //	dirtyPixels = true;
 	strip.show();
 	omxDisp.setDirty();
+}
+
+void OmxModeMidiKeyboard::inMidiControlChange(byte channel, byte control, byte value)
+{
+	auto activeMacro = getActiveMacro();
+
+	if (activeMacro != nullptr)
+	{
+		activeMacro->inMidiControlChange(channel, control, value);
+	}
 }
 
 void OmxModeMidiKeyboard::SetScale(MusicScales *scale)
