@@ -54,6 +54,11 @@ namespace midimacro
 			midiValues[index] = value;
 			return index;
 		}
+
+		void UpdatePotValue(uint8_t potIndex, uint8_t value)
+		{
+			midiValues[potIndex] = value;
+		}
 	};
 
 	class MidiMacroDeluge : public MidiMacroInterface

@@ -444,7 +444,7 @@ namespace midifx
         // Note off
         if (note.noteOff)
         {
-            bool noteFound = false;
+            // bool noteFound = false;
 
             // Search to see if this note is in trackingNoteGroupsPassthrough
             // Meaning it was previously passed through
@@ -460,7 +460,7 @@ namespace midifx
                         // processNoteInput(note);
                         sendNoteOut(note);
                         trackingNoteGroupsPassthrough[i].prevNoteNumber = 255; // mark empty
-                        noteFound = true;
+                        // noteFound = true;
                     }
                 }
             }

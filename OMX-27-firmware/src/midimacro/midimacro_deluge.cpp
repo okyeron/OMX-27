@@ -83,7 +83,7 @@ namespace midimacro
 		paramBanks[9].altBank = true;
 		paramBanks[9].SetCCs("Level", 56, "Transpose", 15, "Feedback", 57);
 
-		paramBanks[10].bankName = "LFO Delay Reverb";
+		paramBanks[10].bankName = "LFO Delay Rvrb";
 		paramBanks[10].keyMap = 14;
 		paramBanks[10].SetCCs("LFO1 Rate", 58, "LFO2 Rate", 59, "DEL Rate", 53, "DEL AMT", 52, "Reverb AMT", 91);
 
@@ -165,6 +165,7 @@ namespace midimacro
 		{
 			selBank = bankIndex;
 			updatePotPickups();
+			omxDisp.setDirty();
 		}
 	}
 
@@ -202,7 +203,24 @@ namespace midimacro
 		{
 			// delVals[control] = value; // Might want to do this for speed
 
-			for (int8_t i = 0; i < kNumBanks; i++)
+			// auto activeBank = getActiveBank();
+
+			// if(activeBank != nullptr)
+			// {
+			// 	// activeBank->UpdateCCValue(control, value);
+
+			// 	int8_t paramIndex = activeBank->UpdateCCValue(control, value);
+
+			// 	// CC was found in bank and this is the active bank
+			// 	if (paramIndex >= 0)
+			// 	{
+			// 		// Update the pot pickup for this index.
+			// 		potPickups[paramIndex].SetVal(value);
+			// 		// omxDisp.displayMessageTimed("CC " + String(control) + " Val " + String(value), 5);
+			// 	}
+			// }
+
+			for (uint8_t i = 0; i < kNumBanks; i++)
 			{
 				int8_t paramIndex = paramBanks[i].UpdateCCValue(control, value);
 
@@ -210,7 +228,7 @@ namespace midimacro
 				if (paramIndex >= 0 && i == selBank)
 				{
 					// Update the pot pickup for this index.
-					potPickups[i].SetVal(value);
+					potPickups[paramIndex].SetVal(value);
 					// omxDisp.displayMessageTimed("CC " + String(control) + " Val " + String(value), 5);
 				}
 			}
@@ -234,6 +252,8 @@ namespace midimacro
 
 	void MidiMacroDeluge::onPotChanged(int potIndex, int prevValue, int newValue, int analogDelta)
 	{
+		// omxDisp.displayMessageTimed("Pot Index " + String(potIndex), 5);
+
 		auto activeBank = getActiveBank();
 
 		if (activeBank != nullptr)
@@ -243,6 +263,7 @@ namespace midimacro
 			if (cc <= 127 && newValue != prevValue)
 			{
 				potPickups[potIndex].UpdatePot(prevValue, newValue);
+				activeBank->UpdatePotValue(potIndex, potPickups[potIndex].value);
 
 				if(potPickups[potIndex].pickedUp)
 				{
@@ -295,7 +316,7 @@ namespace midimacro
 			{
 				if (e.down())
 				{
-					omxDisp.displayMessageTimed("Key Down " + String(thisKey), 5);
+					// omxDisp.displayMessageTimed("Key Down " + String(thisKey), 5);
 
 					keyDownBankShortcut(thisKey);
 					// if (thisKey == keyEnv1_)
@@ -333,7 +354,7 @@ namespace midimacro
 			return;
 		}
 
-		auto blinkState = omxLeds.getBlinkState();
+		// auto blinkState = omxLeds.getBlinkState();
 
 		omxLeds.setAllLEDS(0, 0, 0);
 
