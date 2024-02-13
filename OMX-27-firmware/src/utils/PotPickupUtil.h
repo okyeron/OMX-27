@@ -5,6 +5,7 @@ class PotPickupUtil
 {
 public:
     uint8_t value;
+    uint8_t potValue;
 
     bool directionDetermined;
     bool directionCW;

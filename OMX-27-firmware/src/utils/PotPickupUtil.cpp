@@ -32,4 +32,6 @@ void PotPickupUtil::UpdatePot(uint8_t prevPot, uint8_t newPot)
     {
         value = newPot;
     }
+
+    potValue = newPot;
 }

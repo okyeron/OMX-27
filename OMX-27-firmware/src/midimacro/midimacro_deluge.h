@@ -100,6 +100,7 @@ namespace midimacro
 		uint8_t delVals[127];
 
 		uint8_t selBank = 0;
+		uint8_t activeParam = 0;
 
 		PotPickupUtil potPickups[5];
 

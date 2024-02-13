@@ -265,21 +265,23 @@ namespace midimacro
 				potPickups[potIndex].UpdatePot(prevValue, newValue);
 				activeBank->UpdatePotValue(potIndex, potPickups[potIndex].value);
 
-				if(potPickups[potIndex].pickedUp)
-				{
-					// omxDisp.displayMessageTimed(String(activeBank->paramNames[potIndex]) + " " + String(cc) + " " + String(potPickups[potIndex].value), 5);
+				activeParam = potIndex;
 
-					uint8_t delugeMapVal = (uint8_t)map(potPickups[potIndex].value, 0, 127, 0, 50);
+				// if(potPickups[potIndex].pickedUp)
+				// {
+				// 	// omxDisp.displayMessageTimed(String(activeBank->paramNames[potIndex]) + " " + String(cc) + " " + String(potPickups[potIndex].value), 5);
 
-					omxDisp.displayMessageTimed(String(activeBank->paramNames[potIndex]) + " " + String(delugeMapVal), 5);
-					MM::sendControlChange(cc, potPickups[potIndex].value, midiMacroConfig.midiMacroChan);
-				}
-				else 
-				{
-					uint8_t delugeMapNewVal = (uint8_t)map(newValue, 0, 127, 0, 50);
-					uint8_t delugeMapVal = (uint8_t)map(potPickups[potIndex].value, 0, 127, 0, 50);
-					omxDisp.displayMessageTimed(String(delugeMapNewVal) + " -> " + String(delugeMapVal), 5);
-				}
+				// 	uint8_t delugeMapVal = (uint8_t)map(potPickups[potIndex].value, 0, 127, 0, 50);
+
+				// 	// omxDisp.displayMessageTimed(String(activeBank->paramNames[potIndex]) + " " + String(delugeMapVal), 5);
+				// 	MM::sendControlChange(cc, potPickups[potIndex].value, midiMacroConfig.midiMacroChan);
+				// }
+				// else 
+				// {
+				// 	uint8_t delugeMapNewVal = (uint8_t)map(newValue, 0, 127, 0, 50);
+				// 	uint8_t delugeMapVal = (uint8_t)map(potPickups[potIndex].value, 0, 127, 0, 50);
+				// 	// omxDisp.displayMessageTimed(String(delugeMapNewVal) + " -> " + String(delugeMapVal), 5);
+				// }
 			}
 		}
 
@@ -436,7 +438,43 @@ namespace midimacro
 
 		if(activeBank != nullptr)
 		{
-			omxDisp.dispGenericModeLabel(activeBank->bankName, params_.getNumPages(), params_.getSelPage());
+		// 	auto activeBank = getActiveBank();
+
+		// if (activeBank != nullptr)
+		// {
+		// 	uint8_t cc = activeBank->midiCCs[potIndex];
+
+		// 	if (cc <= 127 && newValue != prevValue)
+		// 	{
+		// 		potPickups[potIndex].UpdatePot(prevValue, newValue);
+		// 		activeBank->UpdatePotValue(potIndex, potPickups[potIndex].value);
+
+		// 		activeParam = potIndex;
+
+		// 		if(potPickups[potIndex].pickedUp)
+		// 		{
+		// 			// omxDisp.displayMessageTimed(String(activeBank->paramNames[potIndex]) + " " + String(cc) + " " + String(potPickups[potIndex].value), 5);
+
+		// 			uint8_t delugeMapVal = (uint8_t)map(potPickups[potIndex].value, 0, 127, 0, 50);
+
+		// 			// omxDisp.displayMessageTimed(String(activeBank->paramNames[potIndex]) + " " + String(delugeMapVal), 5);
+		// 			MM::sendControlChange(cc, potPickups[potIndex].value, midiMacroConfig.midiMacroChan);
+		// 		}
+		// 		else 
+		// 		{
+		// 			uint8_t delugeMapNewVal = (uint8_t)map(newValue, 0, 127, 0, 50);
+		// 			uint8_t delugeMapVal = (uint8_t)map(potPickups[potIndex].value, 0, 127, 0, 50);
+		// 			// omxDisp.displayMessageTimed(String(delugeMapNewVal) + " -> " + String(delugeMapVal), 5);
+		// 		}
+		// 	}
+		// }
+
+		uint8_t delugeMapPotVal = (uint8_t)map(potPickups[activeParam].potValue, 0, 127, 0, 50);
+		uint8_t delugeMapVal = (uint8_t)map(potPickups[activeParam].value, 0, 127, 0, 50);
+		
+		omxDisp.dispParamBar(delugeMapPotVal, delugeMapVal, 0, 50, potPickups[activeParam].pickedUp, false, activeBank->bankName, activeBank->paramNames[activeParam]);
+
+			// omxDisp.dispGenericModeLabel(activeBank->bankName, params_.getNumPages(), params_.getSelPage());
 		}
 		else
 		{

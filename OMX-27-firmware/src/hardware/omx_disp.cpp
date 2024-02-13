@@ -607,6 +607,125 @@ void OmxDisp::dispValues16(int8_t valueArray[], uint8_t valueCount, int8_t minVa
 	// }
 }
 
+void OmxDisp::dispParamBar(int8_t potValue, int8_t targetValue, int8_t minValue, int8_t maxValue, bool pickedUp, bool centered, const char* bankName, const char* paramName)
+{
+	if (isMessageActive())
+	{
+		renderMessage();
+		return;
+	}
+
+	display.fillRect(0, 0, 128, 32, BLACK);
+
+	// if (showLabels)
+	// {
+	// 	int8_t selIndex = constrain(selected - 16, -1, 127);
+	// 	dispLabelParams(selIndex, encSelActive, labels, labelCount, false);
+	// }
+
+	u8g2_display.setFontMode(1);
+	// u8g2_display.setFont(FONT_LABELS);
+	u8g2_display.setCursor(0, 0);
+
+	u8g2_display.setFont(FONT_LABELS);
+	u8g2leftText(bankName, 2, hline - 3, 128 - 4, 10);
+	u8g2_display.setFont(FONT_TENFAT);
+	u8g2leftText(paramName, 2, 18, 96 - 4, 12);
+
+	u8g2_display.setFont(FONT_BIG);
+	tempString = String(targetValue);
+	u8g2centerText(tempString.c_str(), 96, 18, 128 - 96 - 4, 18);
+
+	float potPerc = map(potValue, minValue, maxValue, 0, 1000) / 1000.0f;
+	float targetPerc = map(targetValue, minValue, maxValue, 0, 1000) / 1000.0f;
+
+	uint8_t boxStartX = 0; // 8
+	uint8_t boxWidth = 128; // 8
+	uint8_t potWidth = boxWidth * potPerc; // 8
+	uint8_t targetWidth = boxWidth * targetPerc; // 8
+	uint8_t boxStartY = 27;
+	uint8_t heightMax = 32;
+	uint8_t boxHeight = heightMax - boxStartY;
+	// uint8_t halfBoxHeight = boxHeight / 2;
+
+	// int8_t middleValue = ((maxValue - minValue) / 2) + minValue;
+
+	display.fillRect(boxStartX, boxStartY, boxWidth, boxHeight, WHITE);
+	display.fillRect(boxStartX + 1, boxStartY + 1, boxWidth - 2, boxHeight - 2, BLACK);
+	display.fillRect(boxStartX + 1, boxStartY + 1, targetWidth - 2, boxHeight - 2, WHITE);
+
+	// Chevron showing pot value
+	// xxxxx
+	// -xxx
+	// --x
+	display.fillRect(boxStartX + potWidth - 3, boxStartY - 2, 5, 1, WHITE);
+	display.fillRect(boxStartX + potWidth - 2, boxStartY - 2, 3, 1, WHITE);
+	display.fillRect(boxStartX + potWidth - 1, boxStartY - 1, 1, 1, WHITE);
+
+	if(!pickedUp)
+	{
+		display.fillRect(boxStartX + potWidth - 2, boxStartY - 2, 3, 1, BLACK);
+		display.fillRect(boxStartX + potWidth - 1, boxStartY - 2, 1, 1, BLACK);
+	}
+
+	// for (uint8_t i = 0; i < 16; i++)
+	// {
+	// 	if (i < valueCount && valueArray[i] == -127)
+	// 		continue;
+
+	// 	uint16_t fgColor = WHITE;
+
+	// 	uint8_t xPos = i * boxWidth + 2;
+	// 	uint8_t width = boxWidth - 4;
+
+	// 	if (i == selected && encSelActive)
+	// 	{
+	// 		display.fillRect(i * boxWidth, boxStartY, boxWidth, boxHeight, WHITE);
+	// 		display.fillRect(i * boxWidth + 1, boxStartY + 1, boxWidth - 2, boxHeight - 2, BLACK);
+	// 	}
+
+	// 	if (i >= valueCount)
+	// 	{
+	// 		// display.fillRect(i * boxWidth + 3, boxStartY + (halfBoxHeight + 1), 1, 1, fgColor);
+
+	// 		continue;
+	// 	}
+
+	// 	if (centered)
+	// 	{
+	// 		if (valueArray[i] >= middleValue)
+	// 		{
+	// 			float valuePerc = constrain(map((float)valueArray[i], (float)middleValue, (float)maxValue, 0.0f, 1.0f), 0.0f, 1.0f);
+	// 			uint8_t valueHeight = max(halfBoxHeight * valuePerc, 0);
+	// 			display.fillRect(xPos, boxStartY + (halfBoxHeight + 1) - valueHeight, width, valueHeight + 1, fgColor);
+
+	// 			// if(i == selected)
+	// 			// {
+	// 			//     Serial.println("valuePerc: " + String(valuePerc) + " valueHeight: " + String(valueHeight) + " startY: " + String(boxStartY + halfBoxHeight - valueHeight));
+	// 			// }
+	// 		}
+	// 		else
+	// 		{
+	// 			float valuePerc = 1.0f - constrain(map((float)valueArray[i], (float)minValue, (float)middleValue, 0.0f, 1.0f), 0.0f, 1.0f);
+	// 			uint8_t valueHeight = constrain((boxHeight - halfBoxHeight) * valuePerc, 0, halfBoxHeight - 3);
+	// 			display.fillRect(xPos, boxStartY + halfBoxHeight + 1, width, valueHeight + 1, fgColor);
+	// 			// display.fillRect(i + 3, boxStartY + halfBoxHeight + 1, boxWidth - 4, valueHeight - 2, bgColor);
+	// 		}
+	// 	}
+	// 	else
+	// 	{
+	// 		float valuePerc = constrain(map((float)valueArray[i], (float)minValue, (float)maxValue, 0.0f, 1.0f), 0.0f, 1.0f);
+	// 		uint8_t valueHeight = constrain(boxHeight * valuePerc, 0, boxHeight - 1);
+	// 		display.fillRect(xPos, boxStartY + boxHeight - valueHeight, width, valueHeight + 1, fgColor);
+	// 	}
+	// }
+
+	// if (numPages > 1)
+	// {
+	//     dispPageIndicators2(numPages, selectedPage);
+	// }
+}
+
 void OmxDisp::dispSlots(const char *slotNames[], uint8_t slotCount, uint8_t selected, uint8_t animPos, bool encSelActive, bool showLabels, const char *labels[], uint8_t labelCount)
 {
 	// if (isMessageActive())
