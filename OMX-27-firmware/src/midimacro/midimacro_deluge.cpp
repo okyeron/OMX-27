@@ -59,39 +59,39 @@ namespace midimacro
 		// Bot Row Banks
 		paramBanks[5].bankName = "Master";
 		paramBanks[5].keyMap = 11;
-		paramBanks[5].SetCCs("Pan", 10, "Transpose", 3, "Porta", 5, "", 255, "Level", 7);
+		paramBanks[5].SetCCs("Pan", 10, "Transp", 3, "Porta", 5, "", 255, "Level", 7);
 
 		// OSC1 and FM1 Mapped to same key with toggle
 		paramBanks[6].bankName = "OSC 1";
 		paramBanks[6].keyMap = 12;
 		paramBanks[6].altBank = false;
-		paramBanks[6].SetCCs("Level", 21, "Transpose", 12, "PW", 23, "FM Feedback", 24, "WT Morph", 25);
+		paramBanks[6].SetCCs("Level", 21, "Transp", 12, "PW", 23, "FM Fdbk", 24, "WT Morph", 25);
 
 		paramBanks[7].bankName = "FM 1";
 		paramBanks[7].keyMap = 12;
 		paramBanks[7].altBank = true;
-		paramBanks[7].SetCCs("Level", 54, "Transpose", 14, "Feedback", 55);
+		paramBanks[7].SetCCs("Level", 54, "Transp", 14, "Feedback", 55);
 
 		// OSC2 and FM2 Mapped to same key with toggle
 		paramBanks[8].bankName = "OSC 2";
 		paramBanks[8].keyMap = 13;
 		paramBanks[8].altBank = false;
-		paramBanks[8].SetCCs("Level", 26, "Transpose", 13, "PW", 28, "FM Feedback", 29, "WT Morph", 30);
+		paramBanks[8].SetCCs("Level", 26, "Transp", 13, "PW", 28, "FM Fdbk", 29, "WT Morph", 30);
 
 		paramBanks[9].bankName = "FM 2";
 		paramBanks[9].keyMap = 13;
 		paramBanks[9].altBank = true;
-		paramBanks[9].SetCCs("Level", 56, "Transpose", 15, "Feedback", 57);
+		paramBanks[9].SetCCs("Level", 56, "Transp", 15, "Feedback", 57);
 
-		paramBanks[10].bankName = "LFO Delay Rvrb";
+		paramBanks[10].bankName = "LFO Delay Reverb";
 		paramBanks[10].keyMap = 14;
-		paramBanks[10].SetCCs("LFO1 Rate", 58, "LFO2 Rate", 59, "DEL Rate", 53, "DEL AMT", 52, "Reverb AMT", 91);
+		paramBanks[10].SetCCs("LFO1 Rate", 58, "LFO2 Rate", 59, "DEL Rate", 53, "Delay", 52, "Reverb", 91);
 
 		paramBanks[11].bankName = "ModFX";
 		paramBanks[11].keyMap = 15;
 		paramBanks[11].SetCCs("Rate", 16, "Depth", 93, "Feedback", 17, "Offset", 18);
 
-		paramBanks[12].bankName = "Dist Noise";
+		paramBanks[12].bankName = "Distortion Noise";
 		paramBanks[12].keyMap = 16;
 		paramBanks[12].SetCCs("Bitcrush", 62, "Decimate", 63, "Wavefold", 19, "Noise", 41);
 
@@ -229,6 +229,7 @@ namespace midimacro
 				{
 					// Update the pot pickup for this index.
 					potPickups[paramIndex].SetVal(value);
+					omxDisp.setDirty();
 					// omxDisp.displayMessageTimed("CC " + String(control) + " Val " + String(value), 5);
 				}
 			}
@@ -267,21 +268,21 @@ namespace midimacro
 
 				activeParam = potIndex;
 
-				// if(potPickups[potIndex].pickedUp)
-				// {
-				// 	// omxDisp.displayMessageTimed(String(activeBank->paramNames[potIndex]) + " " + String(cc) + " " + String(potPickups[potIndex].value), 5);
+				if(potPickups[potIndex].pickedUp)
+				{
+					// omxDisp.displayMessageTimed(String(activeBank->paramNames[potIndex]) + " " + String(cc) + " " + String(potPickups[potIndex].value), 5);
 
-				// 	uint8_t delugeMapVal = (uint8_t)map(potPickups[potIndex].value, 0, 127, 0, 50);
+					// uint8_t delugeMapVal = (uint8_t)map(potPickups[potIndex].value, 0, 127, 0, 50);
 
-				// 	// omxDisp.displayMessageTimed(String(activeBank->paramNames[potIndex]) + " " + String(delugeMapVal), 5);
-				// 	MM::sendControlChange(cc, potPickups[potIndex].value, midiMacroConfig.midiMacroChan);
-				// }
-				// else 
-				// {
-				// 	uint8_t delugeMapNewVal = (uint8_t)map(newValue, 0, 127, 0, 50);
-				// 	uint8_t delugeMapVal = (uint8_t)map(potPickups[potIndex].value, 0, 127, 0, 50);
-				// 	// omxDisp.displayMessageTimed(String(delugeMapNewVal) + " -> " + String(delugeMapVal), 5);
-				// }
+					// omxDisp.displayMessageTimed(String(activeBank->paramNames[potIndex]) + " " + String(delugeMapVal), 5);
+					MM::sendControlChange(cc, potPickups[potIndex].value, midiMacroConfig.midiMacroChan);
+				}
+				else 
+				{
+					// uint8_t delugeMapNewVal = (uint8_t)map(newValue, 0, 127, 0, 50);
+					// uint8_t delugeMapVal = (uint8_t)map(potPickups[potIndex].value, 0, 127, 0, 50);
+					// omxDisp.displayMessageTimed(String(delugeMapNewVal) + " -> " + String(delugeMapVal), 5);
+				}
 			}
 		}
 

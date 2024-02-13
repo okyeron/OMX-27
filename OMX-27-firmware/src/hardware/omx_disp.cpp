@@ -655,16 +655,19 @@ void OmxDisp::dispParamBar(int8_t potValue, int8_t targetValue, int8_t minValue,
 	display.fillRect(boxStartX + 1, boxStartY + 1, targetWidth - 2, boxHeight - 2, WHITE);
 
 	// Chevron showing pot value
-	// xxxxx
-	// -xxx
-	// --x
-	display.fillRect(boxStartX + potWidth - 3, boxStartY - 2, 5, 1, WHITE);
+	// xxxxxxx
+	// -xxxxx
+	// --xxx
+	// ---x
+	display.fillRect(boxStartX + potWidth - 4, boxStartY - 4, 7, 1, WHITE);
+	display.fillRect(boxStartX + potWidth - 3, boxStartY - 3, 5, 1, WHITE);
 	display.fillRect(boxStartX + potWidth - 2, boxStartY - 2, 3, 1, WHITE);
 	display.fillRect(boxStartX + potWidth - 1, boxStartY - 1, 1, 1, WHITE);
 
 	if(!pickedUp)
 	{
-		display.fillRect(boxStartX + potWidth - 2, boxStartY - 2, 3, 1, BLACK);
+		display.fillRect(boxStartX + potWidth - 3, boxStartY - 4, 5, 1, BLACK);
+		display.fillRect(boxStartX + potWidth - 2, boxStartY - 3, 3, 1, BLACK);
 		display.fillRect(boxStartX + potWidth - 1, boxStartY - 2, 1, 1, BLACK);
 	}
 
