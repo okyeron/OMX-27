@@ -9,6 +9,15 @@
 
 namespace midimacro
 {
+	struct MidiCommand
+	{
+		const char *name;
+		uint8_t midiCC;
+		uint8_t keyMap;
+		int keyColorOn = WHITE;
+		int keyColorOff = ORANGE;
+	};
+
 	struct MidiParamBank
 	{
 		uint8_t keyMap;
@@ -118,6 +127,8 @@ namespace midimacro
 
 		bool auxDown_ = false;
 		bool lockAuxView_ = false;
+		bool commandMode_ = false;
+
 
 		uint8_t selBank = 0;
 		uint8_t activeParam = 0;
