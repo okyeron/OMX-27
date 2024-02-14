@@ -37,67 +37,93 @@ namespace midimacro
 		// Top Row Banks
 		paramBanks[0].bankName = "Env 1";
 		paramBanks[0].keyMap = 1;
+		paramBanks[0].keyColor = BLUE;
 		paramBanks[0].SetCCs("Attack", 73, "Decay", 75, "Sustain", 76, "Release", 72);
 
 		paramBanks[1].bankName = "Env 2";
 		paramBanks[1].keyMap = 2;
+		paramBanks[1].keyColor = BLUE;
 		paramBanks[1].SetCCs("Attack", 77, "Decay", 78, "Sustain", 79, "Release", 80);
 
 
 		paramBanks[2].bankName = "LPF";
 		paramBanks[2].keyMap = 3;
+		paramBanks[2].keyColor = RED;
 		paramBanks[2].SetCCs("Freq", 74, "Res", 71, "Morph", 70);
 
 		paramBanks[3].bankName = "HPF";
 		paramBanks[3].keyMap = 4;
+		paramBanks[3].keyColor = RED;
 		paramBanks[3].SetCCs("Freq", 81, "Res", 82, "Morph", 83);
 
 		paramBanks[4].bankName = "EQ";
 		paramBanks[4].keyMap = 5;
+		paramBanks[4].keyColor = RED;
 		paramBanks[4].SetCCs("Bas Freq", 84, "Bass LVL", 86, "Treb Freq", 85, "Treb LVL", 87);
 
 		// Bot Row Banks
 		paramBanks[5].bankName = "Master";
 		paramBanks[5].keyMap = 11;
+		paramBanks[5].keyColor = GREEN;
 		paramBanks[5].SetCCs("Pan", 10, "Transp", 3, "Porta", 5, "", 255, "Level", 7);
 
 		// OSC1 and FM1 Mapped to same key with toggle
 		paramBanks[6].bankName = "OSC 1";
 		paramBanks[6].keyMap = 12;
 		paramBanks[6].altBank = false;
+		paramBanks[6].keyColor = ROSE;
 		paramBanks[6].SetCCs("Level", 21, "Transp", 12, "PW", 23, "FM Fdbk", 24, "WT Morph", 25);
 
 		paramBanks[7].bankName = "FM 1";
 		paramBanks[7].keyMap = 12;
 		paramBanks[7].altBank = true;
+		paramBanks[7].keyColor = ROSE;
 		paramBanks[7].SetCCs("Level", 54, "Transp", 14, "Feedback", 55);
 
 		// OSC2 and FM2 Mapped to same key with toggle
 		paramBanks[8].bankName = "OSC 2";
 		paramBanks[8].keyMap = 13;
 		paramBanks[8].altBank = false;
+		paramBanks[8].keyColor = ROSE;
 		paramBanks[8].SetCCs("Level", 26, "Transp", 13, "PW", 28, "FM Fdbk", 29, "WT Morph", 30);
 
 		paramBanks[9].bankName = "FM 2";
 		paramBanks[9].keyMap = 13;
 		paramBanks[9].altBank = true;
+		paramBanks[9].keyColor = ROSE;
 		paramBanks[9].SetCCs("Level", 56, "Transp", 15, "Feedback", 57);
 
 		paramBanks[10].bankName = "LFO Delay Reverb";
 		paramBanks[10].keyMap = 14;
+		paramBanks[10].keyColor = ORANGE;
 		paramBanks[10].SetCCs("LFO1 Rate", 58, "LFO2 Rate", 59, "DEL Rate", 53, "Delay", 52, "Reverb", 91);
 
 		paramBanks[11].bankName = "ModFX";
 		paramBanks[11].keyMap = 15;
+		paramBanks[11].keyColor = MAGENTA;
 		paramBanks[11].SetCCs("Rate", 16, "Depth", 93, "Feedback", 17, "Offset", 18);
 
 		paramBanks[12].bankName = "Distortion Noise";
 		paramBanks[12].keyMap = 16;
+		paramBanks[12].keyColor = RED;
 		paramBanks[12].SetCCs("Bitcrush", 62, "Decimate", 63, "Wavefold", 19, "Noise", 41);
 
 		paramBanks[13].bankName = "Arp Sidechain";
 		paramBanks[13].keyMap = 17;
+		paramBanks[13].keyColor = LIME;
 		paramBanks[13].SetCCs("Arp Rate", 51, "Arp Gate", 50, "Vol Duck", 61, "SC Shape", 60);
+
+		paramBanks[14].bankName = "Custom 1";
+		paramBanks[14].keyMap = 18;
+		paramBanks[14].keyColor = ORANGE;
+		paramBanks[14].SetCCs("Pot 1", 100, "Pot 2", 101, "Pot 3", 102, "Pot 4", 103, "Pot 5", 104);
+
+		paramBanks[15].bankName = "Custom 2";
+		paramBanks[15].keyMap = 18;
+		paramBanks[15].altBank = true;
+		paramBanks[15].keyColor = ORANGE;
+		paramBanks[15].SetCCs("Pot 1", 105, "Pot 2", 106, "Pot 3", 107, "Pot 4", 108, "Pot 5", 109);
+
 
 		params_.addPage(5); // 
 		// params_.addPage(1); // 
@@ -163,9 +189,13 @@ namespace midimacro
 
 		if (bankIndex != selBank)
 		{
+			// save/load activeParam to bank
+			paramBanks[selBank].activeParam = activeParam;
 			selBank = bankIndex;
+			activeParam = paramBanks[selBank].activeParam;
 			updatePotPickups();
 			omxDisp.setDirty();
+			omxLeds.setDirty();
 		}
 	}
 
@@ -301,7 +331,33 @@ namespace midimacro
 		uint8_t thisKey = e.key();
 		// int keyPos = thisKey - 11;
 
-		if (thisKey != 0 && !e.held())
+		// AUX KEY
+		if (thisKey == 0)
+		{
+			auxDown_ = e.down();
+
+			omxLeds.setDirty();
+			omxDisp.setDirty();
+			return;
+		}
+
+		if(auxDown_)
+		{
+			if (!e.held())
+			{
+				if (thisKey >= 1 && thisKey <= 5)
+				{
+					activeParam = thisKey - 1;
+
+					omxLeds.setDirty();
+					omxDisp.setDirty();
+				}
+			}
+
+			return;
+		}
+
+		if (!e.held())
 		{
 			// Keyboard on right for playing notes
 			if ((thisKey >= 6 && thisKey <= 10) || (thisKey >= 19))
@@ -357,11 +413,11 @@ namespace midimacro
 			return;
 		}
 
-		// auto blinkState = omxLeds.getBlinkState();
+		auto blinkState = omxLeds.getBlinkState();
 
 		omxLeds.setAllLEDS(0, 0, 0);
 
-		strip.setPixelColor(0, BLUE); // aux
+		strip.setPixelColor(0, (auxDown_ && blinkState) ? WHITE : BLUE); // aux
 
 		// strip.setPixelColor(but1_, midiSettings.keyState[but1_] ? LTYELLOW : ORANGE);
 		// strip.setPixelColor(but2_, midiSettings.keyState[but2_] ? LTYELLOW : ORANGE);
@@ -398,6 +454,33 @@ namespace midimacro
 				else
 				{
 					strip.setPixelColor(q, MIDINOTEON);
+				}
+			}
+		}
+
+		if (auxDown_)
+		{
+			for(int8_t i = 1; i <= 5; i++)
+			{
+				int8_t pIndex = i - 1;
+
+				strip.setPixelColor(i, pIndex == activeParam ? WHITE : ORANGE);
+			}
+		}
+		else
+		{
+			for (int8_t i = 0; i < kNumBanks; i++)
+			{
+				if (i == selBank)
+				{
+					strip.setPixelColor(paramBanks[i].keyMap, paramBanks[i].altBank ? LTYELLOW : WHITE);
+				}
+				else
+				{
+					if (paramBanks[i].altBank == false)
+					{
+						strip.setPixelColor(paramBanks[i].keyMap, paramBanks[i].keyColor);
+					}
 				}
 			}
 		}

@@ -2,16 +2,23 @@
 #include "midimacro_interface.h"
 #include "../utils/PotPickupUtil.h"
 
+// RAM:   [=====     ]  51.2% (used 33528 bytes from 65536 bytes)
+// Flash: [======    ]  61.5% (used 161276 bytes from 262144 bytes)
+// RAM:   [=====     ]  51.4% (used 33696 bytes from 65536 bytes)
+// Flash: [======    ]  61.6% (used 161356 bytes from 262144 bytes)
+
 namespace midimacro
 {
 	struct MidiParamBank
 	{
 		uint8_t keyMap;
+		int keyColor = ORANGE;
 		const char *bankName;
 		uint8_t midiCCs[5] = {255, 255, 255, 255, 255};
 		uint8_t midiValues[5] = {0, 0, 0, 0, 0};
 		const char *paramNames[5];
 		bool altBank = false;
+		uint8_t activeParam = 0;
 
 		void SetCCs(
 			const char *nameA = "", uint8_t a = 255,
@@ -88,7 +95,7 @@ namespace midimacro
 		void onEncoderChangedEditParam(Encoder::Update enc) override;
 
 	private:
-		static const uint8_t kNumBanks = 14;
+		static const uint8_t kNumBanks = 16;
 
 		MidiParamBank* getActiveBank();
 		void keyDownBankShortcut(uint8_t keyIndex);
@@ -99,6 +106,7 @@ namespace midimacro
 		// Maps each CC to a cached value
 		uint8_t delVals[127];
 
+		bool auxDown_ = false;
 		uint8_t selBank = 0;
 		uint8_t activeParam = 0;
 
