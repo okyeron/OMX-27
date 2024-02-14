@@ -208,6 +208,31 @@ void OmxLeds::setAllLEDS(int R, int G, int B)
 	setDirty();
 }
 
+void OmxLeds::drawOctaveKeys(uint8_t octaveDownKey, uint8_t octaveUpKey, int8_t octaveVal)
+{
+	if (octaveVal == 0)
+	{
+		strip.setPixelColor(octaveDownKey, octDnColor);
+		strip.setPixelColor(octaveUpKey, octUpColor);
+	}
+	else if (octaveVal > 0)
+	{
+		bool blinkOctave = getBlinkPattern(octaveVal);
+
+		strip.setPixelColor(octaveDownKey, octDnColor);
+		strip.setPixelColor(octaveUpKey, blinkOctave ? octUpColor : LEDOFF);
+	}
+	else
+	{
+		bool blinkOctave = getBlinkPattern(-octaveVal);
+
+		strip.setPixelColor(octaveDownKey, blinkOctave ? octDnColor : LEDOFF);
+		strip.setPixelColor(octaveUpKey, octUpColor);
+	}
+
+	setDirty();
+}
+
 void OmxLeds::setDirty()
 {
 	dirtyPixels = true;

@@ -193,6 +193,12 @@ namespace midimacro
 			paramBanks[selBank].activeParam = activeParam;
 			selBank = bankIndex;
 			activeParam = paramBanks[selBank].activeParam;
+
+			if(params_.getSelPage() == 0)
+			{
+				params_.setSelParam(activeParam);	
+			}
+
 			updatePotPickups();
 			omxDisp.setDirty();
 			omxLeds.setDirty();
@@ -219,6 +225,8 @@ namespace midimacro
 	void MidiMacroDeluge::onEnabled()
 	{
 		omxDisp.displayMessage("Deluge");
+
+		auxDown_ = false;
 
 		updatePotPickups();
 	}
@@ -296,7 +304,13 @@ namespace midimacro
 				potPickups[potIndex].UpdatePot(prevValue, newValue);
 				activeBank->UpdatePotValue(potIndex, potPickups[potIndex].value);
 
-				activeParam = potIndex;
+				uint8_t oldValDel = (uint8_t)map(prevValue, 0, 127, 0, 50);
+				uint8_t newValDel = (uint8_t)map(newValue, 0, 127, 0, 50);
+
+				if (newValDel != oldValDel)
+				{
+					activeParam = potIndex;
+				}
 
 				if(potPickups[potIndex].pickedUp)
 				{
@@ -334,23 +348,71 @@ namespace midimacro
 		// AUX KEY
 		if (thisKey == 0)
 		{
-			auxDown_ = e.down();
+			if (lockAuxView_ && auxDown_ && e.down() && !e.held())
+			{
+				// unlock aux lock when pressing aux again
+				lockAuxView_ = false;
+				auxDown_ = true;
+			}
+			else if (lockAuxView_ && auxDown_ && !e.down())
+			{
+				auxDown_ = true; // Aux Down stays valid until pushed again
+			}
+			else
+			{
+				auxDown_ = e.down();
+			}
 
 			omxLeds.setDirty();
 			omxDisp.setDirty();
 			return;
 		}
 
-		if(auxDown_)
+		// key is on the right side
+		bool keyOnRight = (thisKey >= 6 && thisKey <= 10) || (thisKey >= 19);
+
+		if(auxDown_ && !keyOnRight)
 		{
 			if (!e.held())
 			{
-				if (thisKey >= 1 && thisKey <= 5)
+				if (e.down())
 				{
-					activeParam = thisKey - 1;
+					if (thisKey >= 1 && thisKey <= 5)
+					{
+						uint8_t paramIndex = thisKey - 1;
+						auto activeBank = getActiveBank();
 
-					omxLeds.setDirty();
-					omxDisp.setDirty();
+						if (activeBank->HasParamAtIndex(paramIndex))
+						{
+							activeParam = paramIndex;
+
+							omxLeds.setDirty();
+							omxDisp.setDirty();
+						}
+					}
+					// Change Octave
+					else if (thisKey == 11 || thisKey == 12) 
+					{
+						int amt = thisKey == 11 ? -1 : 1;
+						midiSettings.octave = constrain(midiSettings.octave + amt, -5, 4);
+					}
+					// Lock AUX
+					else if (thisKey == 14)
+					{
+						lockAuxView_ = !lockAuxView_;
+
+						if(lockAuxView_)
+						{
+							omxDisp.displayMessage("Locked AUX");
+						}
+						else if(midiSettings.keyState[0] == false)
+						{
+							auxDown_ = false;
+						}
+					}
+				}
+				else
+				{
 				}
 			}
 
@@ -360,7 +422,7 @@ namespace midimacro
 		if (!e.held())
 		{
 			// Keyboard on right for playing notes
-			if ((thisKey >= 6 && thisKey <= 10) || (thisKey >= 19))
+			if (keyOnRight)
 			{
 				if (e.down())
 				{
@@ -460,12 +522,20 @@ namespace midimacro
 
 		if (auxDown_)
 		{
-			for(int8_t i = 1; i <= 5; i++)
+			for (int8_t i = 1; i <= 5; i++)
 			{
 				int8_t pIndex = i - 1;
+				auto activeBank = getActiveBank();
 
-				strip.setPixelColor(i, pIndex == activeParam ? WHITE : ORANGE);
+				if (activeBank->HasParamAtIndex(pIndex))
+				{
+					strip.setPixelColor(i, pIndex == activeParam ? WHITE : ORANGE);
+				}
 			}
+
+			omxLeds.drawOctaveKeys(11, 12, midiSettings.octave);
+
+			strip.setPixelColor(14, lockAuxView_ ? PINK : RED);
 		}
 		else
 		{
@@ -484,6 +554,18 @@ namespace midimacro
 				}
 			}
 		}
+	}
+
+	void MidiMacroDeluge::onEncoderChangedSelectParam(Encoder::Update enc)
+	{
+		params_.changeParam(enc.dir());
+		
+		if(params_.getSelPage() == 0)
+		{
+			activeParam = params_.getSelParam();
+		}
+
+		omxDisp.setDirty();
 	}
 
 	void MidiMacroDeluge::onEncoderChangedEditParam(Encoder::Update enc)
@@ -510,6 +592,18 @@ namespace midimacro
 		// {
 		// 	MM::sendControlChange(encCC, 63, midiMacroConfig.midiMacroChan);
 		// }
+
+		auto amt = enc.accel(1);
+
+		auto activeBank = getActiveBank();
+
+		if(activeBank->HasParamAtIndex(activeParam))
+		{
+			uint8_t newValue = constrain(potPickups[activeParam].value + amt, 0, 127);
+			potPickups[activeParam].SetVal(newValue);
+			activeBank->UpdatePotValue(activeParam, potPickups[activeParam].value);
+			MM::sendControlChange(activeBank->midiCCs[activeParam], potPickups[activeParam].value, midiMacroConfig.midiMacroChan);
+		}
 
 		omxDisp.setDirty();
 	}

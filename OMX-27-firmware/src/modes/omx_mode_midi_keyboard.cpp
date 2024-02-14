@@ -957,28 +957,7 @@ void OmxModeMidiKeyboard::updateLEDs()
 		strip.setPixelColor(1, color1);
 		strip.setPixelColor(2, color2);
 
-		auto octDnColor = ORANGE;
-		auto octUpColor = RBLUE;
-
-		if (midiSettings.octave == 0)
-		{
-			strip.setPixelColor(11, octDnColor);
-			strip.setPixelColor(12, octUpColor);
-		}
-		else if (midiSettings.octave > 0)
-		{
-			bool blinkOctave = omxLeds.getBlinkPattern(midiSettings.octave);
-
-			strip.setPixelColor(11, octDnColor);
-			strip.setPixelColor(12, blinkOctave ? octUpColor : LEDOFF);
-		}
-		else
-		{
-			bool blinkOctave = omxLeds.getBlinkPattern(-midiSettings.octave);
-
-			strip.setPixelColor(11, blinkOctave ? octDnColor : LEDOFF);
-			strip.setPixelColor(12, octUpColor);
-		}
+		omxLeds.drawOctaveKeys(11, 12, midiSettings.octave);
 
 		// MidiFX off
 		strip.setPixelColor(5, (mfxIndex_ >= NUM_MIDIFX_GROUPS ? colorConfig.selMidiFXGRPOffColor : colorConfig.midiFXGRPOffColor));

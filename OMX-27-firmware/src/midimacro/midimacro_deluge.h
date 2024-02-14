@@ -34,6 +34,13 @@ namespace midimacro
 			SetCC(4, nameE, e);
 		}
 
+		bool HasParamAtIndex(uint8_t index)
+		{
+			if(index >= 5) return false;
+
+			return midiCCs[index] < 128;
+		}
+
 		void SetCC(uint8_t index, const char *name, uint8_t cc)
 		{
 			if (index >= 5)
@@ -92,6 +99,7 @@ namespace midimacro
 		void onEnabled() override;
 		void onDisabled() override;
 
+		void onEncoderChangedSelectParam(Encoder::Update enc) override;
 		void onEncoderChangedEditParam(Encoder::Update enc) override;
 
 	private:
@@ -107,6 +115,8 @@ namespace midimacro
 		uint8_t delVals[127];
 
 		bool auxDown_ = false;
+		bool lockAuxView_ = false;
+
 		uint8_t selBank = 0;
 		uint8_t activeParam = 0;
 
