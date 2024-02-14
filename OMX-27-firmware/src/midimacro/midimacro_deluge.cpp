@@ -99,27 +99,28 @@ namespace midimacro
 		paramBanks[10].SetCCs("LFO1 Rate", 58, "LFO2 Rate", 59, "DEL Rate", 53, "Delay", 52, "Reverb", 91);
 
 		paramBanks[11].bankName = "ModFX";
-		paramBanks[11].keyMap = 15;
+		paramBanks[11].keyMap = 14;
+		paramBanks[11].altBank = true;
 		paramBanks[11].keyColor = MAGENTA;
 		paramBanks[11].SetCCs("Rate", 16, "Depth", 93, "Feedback", 17, "Offset", 18);
 
 		paramBanks[12].bankName = "Distortion Noise";
-		paramBanks[12].keyMap = 16;
+		paramBanks[12].keyMap = 15;
 		paramBanks[12].keyColor = RED;
 		paramBanks[12].SetCCs("Bitcrush", 62, "Decimate", 63, "Wavefold", 19, "Noise", 41);
 
 		paramBanks[13].bankName = "Arp Sidechain";
-		paramBanks[13].keyMap = 17;
+		paramBanks[13].keyMap = 16;
 		paramBanks[13].keyColor = LIME;
 		paramBanks[13].SetCCs("Arp Rate", 51, "Arp Gate", 50, "Vol Duck", 61, "SC Shape", 60);
 
 		paramBanks[14].bankName = "Custom 1";
-		paramBanks[14].keyMap = 18;
+		paramBanks[14].keyMap = 17;
 		paramBanks[14].keyColor = ORANGE;
 		paramBanks[14].SetCCs("Pot 1", 100, "Pot 2", 101, "Pot 3", 102, "Pot 4", 103, "Pot 5", 104);
 
 		paramBanks[15].bankName = "Custom 2";
-		paramBanks[15].keyMap = 18;
+		paramBanks[15].keyMap = 17;
 		paramBanks[15].altBank = true;
 		paramBanks[15].keyColor = ORANGE;
 		paramBanks[15].SetCCs("Pot 1", 105, "Pot 2", 106, "Pot 3", 107, "Pot 4", 108, "Pot 5", 109);
@@ -217,7 +218,24 @@ namespace midimacro
 		{
 			for(int8_t i = 0; i < 5; i++)
 			{
-				potPickups[i].SetVal(activeBank->midiValues[i]);
+				potPickups[i].SetVal(activeBank->midiValues[i], false);
+				potPickups[i].SaveRevertVal();
+			}
+		}
+	}
+
+	// Reverts the values of current bank and sends update via midiCC
+	// Revert value is saved when switching banks or when a new value comes in through midi
+	void MidiMacroDeluge::revertPotPickups()
+	{
+		auto activeBank = getActiveBank();
+
+		for(int8_t i = 0; i < 5; i++)
+		{
+			if(activeBank->midiCCs[i] < 128)
+			{
+				potPickups[i].RevertVal();
+				MM::sendControlChange(activeBank->midiCCs[i], potPickups[i].value, midiMacroConfig.midiMacroChan);
 			}
 		}
 	}
@@ -266,7 +284,7 @@ namespace midimacro
 				if (paramIndex >= 0 && i == selBank)
 				{
 					// Update the pot pickup for this index.
-					potPickups[paramIndex].SetVal(value);
+					potPickups[paramIndex].SetVal(value, true);
 					omxDisp.setDirty();
 					// omxDisp.displayMessageTimed("CC " + String(control) + " Val " + String(value), 5);
 				}
@@ -410,6 +428,12 @@ namespace midimacro
 							auxDown_ = false;
 						}
 					}
+					// Revert Values
+					else if(thisKey == 18)
+					{
+						omxDisp.displayMessage("Revert Vals");
+						revertPotPickups();
+					}
 				}
 				else
 				{
@@ -535,7 +559,11 @@ namespace midimacro
 
 			omxLeds.drawOctaveKeys(11, 12, midiSettings.octave);
 
-			strip.setPixelColor(14, lockAuxView_ ? PINK : RED);
+			strip.setPixelColor(14, lockAuxView_ ? PINK : MAGENTA);
+
+			// Revert Values Key
+			strip.setPixelColor(18, midiSettings.keyState[18] ? LTCYAN : RED);
+
 		}
 		else
 		{
@@ -600,7 +628,7 @@ namespace midimacro
 		if(activeBank->HasParamAtIndex(activeParam))
 		{
 			uint8_t newValue = constrain(potPickups[activeParam].value + amt, 0, 127);
-			potPickups[activeParam].SetVal(newValue);
+			potPickups[activeParam].SetVal(newValue, false);
 			activeBank->UpdatePotValue(activeParam, potPickups[activeParam].value);
 			MM::sendControlChange(activeBank->midiCCs[activeParam], potPickups[activeParam].value, midiMacroConfig.midiMacroChan);
 		}

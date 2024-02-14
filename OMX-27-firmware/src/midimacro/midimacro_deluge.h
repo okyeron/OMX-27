@@ -109,6 +109,8 @@ namespace midimacro
 		void keyDownBankShortcut(uint8_t keyIndex);
 		void setActiveBank(uint8_t bankIndex);
 		void updatePotPickups();
+		void revertPotPickups();
+
 
 		MidiParamBank paramBanks[kNumBanks];
 		// Maps each CC to a cached value

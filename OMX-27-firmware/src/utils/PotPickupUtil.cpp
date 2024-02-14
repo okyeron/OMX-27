@@ -1,8 +1,24 @@
 #include "PotPickupUtil.h"
 
-void PotPickupUtil::SetVal(uint8_t newValue)
+void PotPickupUtil::SetVal(uint8_t newValue, bool midiIn)
 {
     value = newValue;
+    if(midiIn)
+    {
+        revertValue = value;
+    }
+    directionDetermined = false;
+    pickedUp = false;
+}
+
+void PotPickupUtil::SaveRevertVal()
+{
+    revertValue = value;
+}
+
+void PotPickupUtil::RevertVal()
+{
+    value = revertValue;
     directionDetermined = false;
     pickedUp = false;
 }
