@@ -358,7 +358,9 @@ void saveHeader()
 	uint8_t scaleGrp16 = (uint8_t)scaleConfig.group16 ;
 	storage->write(EEPROM_HEADER_ADDRESS + 34, scaleGrp16);
 
-	// 35 bytes
+	storage->write(EEPROM_HEADER_ADDRESS + 35, midiSettings.defaultVelocity);
+
+	// 36 bytes
 }
 
 // returns true if the header contained initialized data
@@ -423,6 +425,8 @@ bool loadHeader(void)
 	scaleConfig.group16 = scaleGrp16;
 
 	globalScale.calculateScale(scaleConfig.scaleRoot, scaleConfig.scalePattern);
+
+	midiSettings.defaultVelocity = storage->read(EEPROM_HEADER_ADDRESS + 35);
 
 	return true;
 }

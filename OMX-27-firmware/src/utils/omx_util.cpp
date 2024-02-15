@@ -169,6 +169,7 @@ void OmxUtil::midiNoteOn(MusicScales *scale, int notenum, int velocity, int chan
 	if (adjnote >= 0 && adjnote < 128)
 	{
 		midiSettings.midiLastNote = adjnote;
+		midiSettings.midiLastVel = velocity;
 
 		// keep track of adjusted note when pressed so that when key is released we send
 		// the correct note off message
@@ -255,6 +256,7 @@ MidiNoteGroup OmxUtil::midiNoteOn2(MusicScales *scale, int notenum, int velocity
 	if (adjnote >= 0 && adjnote < 128)
 	{
 		midiSettings.midiLastNote = adjnote;
+		midiSettings.midiLastVel = velocity;
 
 		// keep track of adjusted note when pressed so that when key is released we send
 		// the correct note off message
