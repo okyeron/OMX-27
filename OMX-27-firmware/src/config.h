@@ -65,7 +65,7 @@ enum FUNCKEYMODE
 extern const uint8_t EEPROM_VERSION;
 
 #define EEPROM_HEADER_ADDRESS 0
-#define EEPROM_HEADER_SIZE 34
+#define EEPROM_HEADER_SIZE 36
 #define EEPROM_PATTERN_ADDRESS 64
 
 // next address 1104 (was 1096 before clock)
@@ -135,7 +135,7 @@ extern int potMaxVal;
 
 struct MidiConfig
 {
-	int defaultVelocity = 100;
+	uint8_t defaultVelocity = 100;
 	int octave = 0; // default C4 is 0 - range is -4 to +5
 	// int newoctave = octave;
 	int transpose = 0;
@@ -153,6 +153,7 @@ struct MidiConfig
 	int midiRRChannelOffset = 0;
 	int midiRRChannelCount = 1;
 	uint8_t midiLastNote = 0;
+	uint8_t midiLastVel = 0;
 	int currpgm = 0;
 	int currbank = 0;
 	bool midiInToCV = true;
