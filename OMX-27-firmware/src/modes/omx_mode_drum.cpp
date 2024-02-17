@@ -64,7 +64,7 @@ void OmxModeDrum::onModeActivated()
 	params.setSelPageAndParam(0, 0);
 	encoderSelect = true;
 
-	selectMidiFx(mfxIndex_, false);
+	// selectMidiFx(mfxIndex_, false);
 }
 
 void OmxModeDrum::onModeDeactivated()
@@ -86,7 +86,10 @@ void OmxModeDrum::stopSequencers()
 
 void OmxModeDrum::selectMidiFx(uint8_t mfxIndex, bool dispMsg)
 {
-	this->mfxIndex_ = mfxIndex;
+    drumKits[activeDrumKit].drumKeys[selDrumKey].midifx = mfxIndex;
+
+
+	// this->mfxIndex_ = mfxIndex;
 
 	for (uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
 	{
@@ -206,6 +209,20 @@ void OmxModeDrum::onEncoderChanged(Encoder::Update enc)
 		else if (selParam == 3) // Vel
 		{
             drumKey.vel = constrain(drumKey.vel + amt, 0, 127);
+		}
+        else if (selParam == 4) // MidiFX Slot
+		{
+            int midiFX = drumKey.midifx;
+            if(midiFX > NUM_MIDIFX_GROUPS)
+            {
+                midiFX = -1;
+            }
+            midiFX = constrain(midiFX + amt, -1, NUM_MIDIFX_GROUPS - 1);
+            if(midiFX < 0)
+            {
+                midiFX = 127;
+            }
+            drumKey.midifx = midiFX;
 		}
 
         // Apply changes
@@ -367,8 +384,8 @@ void OmxModeDrum::onKeyUpdate(OMXKeypadEvent e)
 		}
 	}
 
-	// if (onKeyUpdateSelMidiFX(e))
-	// 	return;
+	if (onKeyUpdateSelMidiFX(e))
+		return;
 
 	// REGULAR KEY PRESSES
 	if (!e.held())
@@ -436,8 +453,11 @@ bool OmxModeDrum::onKeyUpdateSelMidiFX(OMXKeypadEvent e)
 
 	bool keyConsumed = false;
 
+    uint8_t mfxIndex = drumKits[activeDrumKit].drumKeys[selDrumKey].midifx;
+
 	if (!e.held())
 	{
+        // Double Click to edit midi fx
 		if (!e.down() && e.clicks() == 2 && thisKey >= 6 && thisKey < 11)
 		{
 			if (midiSettings.midiAUX) // Aux mode
@@ -468,10 +488,11 @@ bool OmxModeDrum::onKeyUpdateSelMidiFX(OMXKeypadEvent e)
 				else if (thisKey == 22) // Goto arp params
 				{
 					keyConsumed = true;
-					if (mfxIndex_ < NUM_MIDIFX_GROUPS)
+					if (mfxIndex < NUM_MIDIFX_GROUPS)
 					{
-						enableSubmode(&subModeMidiFx[mfxIndex_]);
-						subModeMidiFx[mfxIndex_].gotoArpParams();
+
+						enableSubmode(&subModeMidiFx[mfxIndex]);
+						subModeMidiFx[mfxIndex].gotoArpParams();
 						midiSettings.midiAUX = false;
 					}
 					else
@@ -482,9 +503,9 @@ bool OmxModeDrum::onKeyUpdateSelMidiFX(OMXKeypadEvent e)
 				else if (thisKey == 23) // Next arp pattern
 				{
 					keyConsumed = true;
-					if (mfxIndex_ < NUM_MIDIFX_GROUPS)
+					if (mfxIndex < NUM_MIDIFX_GROUPS)
 					{
-						subModeMidiFx[mfxIndex_].nextArpPattern();
+						subModeMidiFx[mfxIndex].nextArpPattern();
 					}
 					else
 					{
@@ -494,9 +515,9 @@ bool OmxModeDrum::onKeyUpdateSelMidiFX(OMXKeypadEvent e)
 				else if (thisKey == 24) // Next arp octave
 				{
 					keyConsumed = true;
-					if (mfxIndex_ < NUM_MIDIFX_GROUPS)
+					if (mfxIndex < NUM_MIDIFX_GROUPS)
 					{
-						subModeMidiFx[mfxIndex_].nextArpOctRange();
+						subModeMidiFx[mfxIndex].nextArpOctRange();
 					}
 					else
 					{
@@ -506,11 +527,11 @@ bool OmxModeDrum::onKeyUpdateSelMidiFX(OMXKeypadEvent e)
 				else if (thisKey == 25)
 				{
 					keyConsumed = true;
-					if (mfxIndex_ < NUM_MIDIFX_GROUPS)
+					if (mfxIndex < NUM_MIDIFX_GROUPS)
 					{
-						subModeMidiFx[mfxIndex_].toggleArpHold();
+						subModeMidiFx[mfxIndex].toggleArpHold();
 
-						if (subModeMidiFx[mfxIndex_].isArpHoldOn())
+						if (subModeMidiFx[mfxIndex].isArpHoldOn())
 						{
 							omxDisp.displayMessageTimed("Arp Hold: On", 5);
 						}
@@ -527,11 +548,11 @@ bool OmxModeDrum::onKeyUpdateSelMidiFX(OMXKeypadEvent e)
 				else if (thisKey == 26)
 				{
 					keyConsumed = true;
-					if (mfxIndex_ < NUM_MIDIFX_GROUPS)
+					if (mfxIndex < NUM_MIDIFX_GROUPS)
 					{
-						subModeMidiFx[mfxIndex_].toggleArp();
+						subModeMidiFx[mfxIndex].toggleArp();
 
-						if (subModeMidiFx[mfxIndex_].isArpOn())
+						if (subModeMidiFx[mfxIndex].isArpOn())
 						{
 							omxDisp.displayMessageTimed("Arp On", 5);
 						}
@@ -579,8 +600,8 @@ void OmxModeDrum::onKeyHeldUpdate(OMXKeypadEvent e)
 		return;
 	}
 
-	// if (onKeyHeldSelMidiFX(e))
-	// 	return;
+	if (onKeyHeldSelMidiFX(e))
+		return;
 }
 
 midimacro::MidiMacroInterface *OmxModeDrum::getActiveMacro()
@@ -638,12 +659,14 @@ void OmxModeDrum::updateLEDs()
 
 		omxLeds.drawOctaveKeys(11, 12, midiSettings.octave);
 
+        uint8_t mfxIndex = drumKits[activeDrumKit].drumKeys[selDrumKey].midifx;
+
 		// MidiFX off
-		strip.setPixelColor(5, (mfxIndex_ >= NUM_MIDIFX_GROUPS ? colorConfig.selMidiFXGRPOffColor : colorConfig.midiFXGRPOffColor));
+		strip.setPixelColor(5, (mfxIndex >= NUM_MIDIFX_GROUPS ? colorConfig.selMidiFXGRPOffColor : colorConfig.midiFXGRPOffColor));
 
 		for (uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
 		{
-			auto mfxColor = (i == mfxIndex_) ? colorConfig.selMidiFXGRPColor : colorConfig.midiFXGRPColor;
+			auto mfxColor = (i == mfxIndex) ? colorConfig.selMidiFXGRPColor : colorConfig.midiFXGRPColor;
 
 			strip.setPixelColor(6 + i, mfxColor);
 		}
@@ -651,9 +674,9 @@ void OmxModeDrum::updateLEDs()
 		strip.setPixelColor(22, colorConfig.gotoArpParams);
 		strip.setPixelColor(23, colorConfig.nextArpPattern);
 
-		if (mfxIndex_ < NUM_MIDIFX_GROUPS)
+		if (mfxIndex < NUM_MIDIFX_GROUPS)
 		{
-			uint8_t octaveRange = subModeMidiFx[mfxIndex_].getArpOctaveRange();
+			uint8_t octaveRange = subModeMidiFx[mfxIndex].getArpOctaveRange();
 			if (octaveRange == 0)
 			{
 				strip.setPixelColor(24, colorConfig.nextArpOctave);
@@ -666,8 +689,8 @@ void OmxModeDrum::updateLEDs()
 				strip.setPixelColor(24, blinkOctave ? colorConfig.nextArpOctave : LEDOFF);
 			}
 
-			bool isOn = subModeMidiFx[mfxIndex_].isArpOn() && blinkState;
-			bool isHoldOn = subModeMidiFx[mfxIndex_].isArpHoldOn();
+			bool isOn = subModeMidiFx[mfxIndex].isArpOn() && blinkState;
+			bool isHoldOn = subModeMidiFx[mfxIndex].isArpHoldOn();
 
 			strip.setPixelColor(25, isHoldOn ? colorConfig.arpHoldOn : colorConfig.arpHoldOff);
 			strip.setPixelColor(26, isOn ? colorConfig.arpOn : colorConfig.arpOff);
@@ -756,7 +779,14 @@ void OmxModeDrum::onDisplayUpdate()
 					omxDisp.legendVals[0] = drumKey.noteNum;
 					omxDisp.legendVals[1] = drumKey.chan;
 					omxDisp.legendVals[2] = drumKey.vel;
-					omxDisp.legendVals[3] = drumKey.midifx;
+                    if(drumKey.midifx >= NUM_MIDIFX_GROUPS)
+                    {
+                        omxDisp.legendText[3] = "OFF";
+                    }
+                    else
+                    {
+					    omxDisp.legendVals[3] = drumKey.midifx + 1;
+                    }
 				}
                 else if (params.getSelPage() == DRUMPAGE_DRUMKEY2)
 				{
@@ -994,15 +1024,17 @@ void OmxModeDrum::doNoteOn(uint8_t keyIndex)
 	noteGroup.unknownLength = true;
 	noteGroup.prevNoteNumber = noteGroup.noteNumber;
 
-	if (mfxIndex_ < NUM_MIDIFX_GROUPS)
-	{
-		subModeMidiFx[mfxIndex_].noteInput(noteGroup);
-		// subModeMidiFx.noteInput(noteGroup);
-	}
-	else
-	{
-		onNotePostFX(noteGroup);
-	}
+    onNotePostFX(noteGroup);
+
+	// if (mfxIndex_ < NUM_MIDIFX_GROUPS)
+	// {
+	// 	subModeMidiFx[mfxIndex_].noteInput(noteGroup);
+	// 	// subModeMidiFx.noteInput(noteGroup);
+	// }
+	// else
+	// {
+	// 	onNotePostFX(noteGroup);
+	// }
 }
 
 // Called via doNoteOnForwarder
@@ -1018,15 +1050,17 @@ void OmxModeDrum::doNoteOff(uint8_t keyIndex)
 	noteGroup.unknownLength = true;
 	noteGroup.prevNoteNumber = noteGroup.noteNumber;
 
-	if (mfxIndex_ < NUM_MIDIFX_GROUPS)
-	{
-		subModeMidiFx[mfxIndex_].noteInput(noteGroup);
-		// subModeMidiFx.noteInput(noteGroup);
-	}
-	else
-	{
-		onNotePostFX(noteGroup);
-	}
+    onNotePostFX(noteGroup);
+
+	// if (mfxIndex_ < NUM_MIDIFX_GROUPS)
+	// {
+	// 	subModeMidiFx[mfxIndex_].noteInput(noteGroup);
+	// 	// subModeMidiFx.noteInput(noteGroup);
+	// }
+	// else
+	// {
+	// 	onNotePostFX(noteGroup);
+	// }
 }
 
 // Called by the midiFX group when a note exits it's FX Pedalboard

@@ -179,7 +179,7 @@ void OmxModeMidiKeyboard::onPotChanged(int potIndex, int prevValue, int newValue
 
 void OmxModeMidiKeyboard::onClockTick()
 {
-	for (uint8_t i = 0; i < 5; i++)
+	for (uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
 	{
 		// Lets them do things in background
 		subModeMidiFx[i].onClockTick();
@@ -198,7 +198,7 @@ void OmxModeMidiKeyboard::loopUpdate(Micros elapsedTime)
 	// 	}
 	// }
 
-	for (uint8_t i = 0; i < 5; i++)
+	for (uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
 	{
 		// Lets them do things in background
 		subModeMidiFx[i].loopUpdate();

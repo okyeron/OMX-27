@@ -148,8 +148,6 @@ private:
 	// SubModes
 	SubmodeInterface *activeSubmode = nullptr;
 
-	void selectMidiFx(uint8_t mfxIndex);
-
 	// SubModeMidiFxGroup subModeMidiFx[kNumMidiFXGroups];
 
 	void enableSubmode(SubmodeInterface *subMode);
