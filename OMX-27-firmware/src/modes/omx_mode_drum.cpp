@@ -606,6 +606,7 @@ void OmxModeDrum::updateLEDs()
 	}
 
     bool blinkState = omxLeds.getBlinkState();
+    bool slowBlink = omxLeds.getSlowBlinkState();
 
 	if (midiSettings.midiAUX)
 	{
@@ -687,12 +688,12 @@ void OmxModeDrum::updateLEDs()
 
             if(k-1 == selDrumKey)
             {
-                drumKeyOn = drumKeyOn && blinkState;
+                drumKeyOn = drumKeyOn || slowBlink;
             }
 
-            auto color = strip.ColorHSV(drumKey.hue, 255, drumKeyOn ? 255 : 100);
+	        uint16_t hue = map(drumKey.hue, 0, 255, 0, 65535);
 
-			strip.setPixelColor(k, color);
+            strip.setPixelColor(k, strip.gamma32(strip.ColorHSV(hue, drumKeyOn ? 200 : 255, drumKeyOn ? 255 : 160)));
         }
 	}
 
