@@ -16,6 +16,13 @@ enum DrumModePage {
     DRUMPAGE_CFG
 };
 
+enum DrumEditMode {
+    DRUMMODE_NORMAL,
+    DRUMMODE_LOADKIT,
+    DRUMMODE_SAVEKIT,
+    DRUMMODE_NUM_OF_MODES,
+};
+
 OmxModeDrum::OmxModeDrum()
 {
 	// Add 4 pages
@@ -32,6 +39,17 @@ OmxModeDrum::OmxModeDrum()
 	delugeMacro_.setDoNoteOn(&OmxModeDrum::doNoteOnForwarder, this);
 	delugeMacro_.setDoNoteOff(&OmxModeDrum::doNoteOffForwarder, this);
 }
+
+void OmxModeDrum::changeMode(uint8_t newModeIndex)
+{
+    if(newModeIndex >= DRUMMODE_NUM_OF_MODES)
+    {
+        return;
+    }
+
+    activeMode = newModeIndex;
+}
+
 
 void OmxModeDrum::InitSetup()
 {
@@ -86,8 +104,14 @@ void OmxModeDrum::stopSequencers()
 
 void OmxModeDrum::selectMidiFx(uint8_t mfxIndex, bool dispMsg)
 {
-    drumKits[activeDrumKit].drumKeys[selDrumKey].midifx = mfxIndex;
+    uint8_t prevMidiFX = drumKits[activeDrumKit].drumKeys[selDrumKey].midifx;
+    
+    if(mfxIndex != prevMidiFX && prevMidiFX < NUM_MIDIFX_GROUPS)
+    {
+        drumKeyUp(selDrumKey + 1);
+    }
 
+    drumKits[activeDrumKit].drumKeys[selDrumKey].midifx = mfxIndex;
 
 	// this->mfxIndex_ = mfxIndex;
 
@@ -95,6 +119,11 @@ void OmxModeDrum::selectMidiFx(uint8_t mfxIndex, bool dispMsg)
 	{
 		subModeMidiFx[i].setSelected(i == mfxIndex);
 	}
+
+    if(mfxIndex != prevMidiFX && prevMidiFX < NUM_MIDIFX_GROUPS)
+    {
+        doNoteOff(selDrumKey + 1);
+    }
 
 	if (dispMsg)
 	{
@@ -223,6 +252,7 @@ void OmxModeDrum::onEncoderChanged(Encoder::Update enc)
                 midiFX = 127;
             }
             drumKey.midifx = midiFX;
+            selectMidiFx(midiFX, false);
 		}
 
         // Apply changes
@@ -414,6 +444,16 @@ void OmxModeDrum::onKeyUpdate(OMXKeypadEvent e)
 						params.incrementParam();
 					}
 				}
+                else if(thisKey == 3)
+                {
+                    omxDisp.displayMessage("Load Kit");
+                    changeMode(DRUMMODE_LOADKIT);
+                }
+                else if(thisKey == 4)
+                {
+                    omxDisp.displayMessage("Save Kit");
+                    changeMode(DRUMMODE_SAVEKIT);
+                }
 			}
 
 			if (!keyConsumed)
@@ -490,7 +530,6 @@ bool OmxModeDrum::onKeyUpdateSelMidiFX(OMXKeypadEvent e)
 					keyConsumed = true;
 					if (mfxIndex < NUM_MIDIFX_GROUPS)
 					{
-
 						enableSubmode(&subModeMidiFx[mfxIndex]);
 						subModeMidiFx[mfxIndex].gotoArpParams();
 						midiSettings.midiAUX = false;

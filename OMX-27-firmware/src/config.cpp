@@ -59,6 +59,8 @@ const int gridw = 128;
 const int PPQ = 96;
 
 const char *mfxOffMsg = "MidiFX are Off";
+const char *mfxArpEditMsg = "Arp Edit";
+const char *exitMsg = "Exit";
 
 const char *modes[] = {"MI", "DRUM", "CH", "S1", "S2", "GR", "EL", "OM"};
 const char *macromodes[] = {"Off", "M8", "NRN", "DEL"};

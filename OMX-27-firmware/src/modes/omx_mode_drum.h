@@ -64,11 +64,13 @@ public:
 
 	void SetScale(MusicScales *scale);
 private:
+	uint8_t activeMode = 0;
 	uint8_t activeDrumKit;
 	uint8_t selDrumKey;
 	DrumKit drumKits[8];
 	MusicScales *musicScale;
 
+	void changeMode(uint8_t newModeIndex);
 	void drumKeyDown(uint8_t keyIndex);
 	void drumKeyUp(uint8_t keyIndex);
 

@@ -180,6 +180,8 @@ void SubModeMidiFxGroup::gotoArpParams()
 	{
 		selectedMidiFX_ = arpIndex;
 	}
+
+	omxDisp.displayMessage(mfxArpEditMsg);
 }
 
 uint8_t SubModeMidiFxGroup::getArpOctaveRange()
@@ -599,6 +601,7 @@ bool SubModeMidiFxGroup::onKeyUpdate(OMXKeypadEvent e)
 				arpParamView_ = false;
 				midiFXParamView_ = false;
 				setEnabled(false);
+				omxDisp.displayMessage(exitMsg);
 				return true;
 			}
 		}
