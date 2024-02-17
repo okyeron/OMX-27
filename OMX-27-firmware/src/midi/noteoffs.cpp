@@ -240,6 +240,9 @@ void PendingNoteOns::play(uint32_t now)
 	{
 		if (queue[i].inUse && queue[i].time <= now)
 		{
+			midiSettings.midiLastNote = queue[i].note;
+			midiSettings.midiLastVel = queue[i].velocity;
+
 			MM::sendNoteOn(queue[i].note, queue[i].velocity, queue[i].channel);
 
 			if (queue[i].sendCV)

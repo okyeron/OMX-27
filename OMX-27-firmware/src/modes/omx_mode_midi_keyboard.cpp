@@ -1414,6 +1414,8 @@ void OmxModeMidiKeyboard::onNotePostFX(MidiNoteGroup note)
 
 			if (note.sendMidi)
 			{
+				midiSettings.midiLastNote = note.noteNumber;
+				midiSettings.midiLastVel = note.velocity;
 				MM::sendNoteOn(note.noteNumber, note.velocity, note.channel);
 			}
 			if (note.sendCV)

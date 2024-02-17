@@ -30,6 +30,7 @@
 #include "src/utils/omx_util.h"
 #include "src/hardware/omx_disp.h"
 #include "src/modes/omx_mode_midi_keyboard.h"
+#include "src/modes/omx_mode_drum.h"
 #include "src/modes/omx_mode_sequencer.h"
 #include "src/modes/omx_mode_grids.h"
 #include "src/modes/omx_mode_euclidean.h"
@@ -51,6 +52,7 @@ extern "C"{
 // #endif
 
 OmxModeMidiKeyboard omxModeMidi;
+OmxModeDrum omxModeDrum;
 OmxModeSequencer omxModeSeq;
 #ifdef OMXMODEGRIDS
 OmxModeGrids omxModeGrids;
@@ -164,6 +166,9 @@ void changeOmxMode(OMXMode newOmxmode)
 	case MODE_MIDI:
 		omxModeMidi.setMidiMode();
 		activeOmxMode = &omxModeMidi;
+		break;
+	case MODE_DRUM:
+		activeOmxMode = &omxModeDrum;
 		break;
 	case MODE_CHORDS:
 		activeOmxMode = &omxModeChords;
@@ -839,7 +844,10 @@ void loop()
 	{
 		omxLeds.updateBlinkStates();
 		omxDisp.UpdateMessageTextTimer();
-		activeOmxMode->onDisplayUpdate();
+		if(!encoderConfig.enc_edit)
+		{
+			activeOmxMode->onDisplayUpdate();
+		}
 	}
 	else
 	{ // if screenSaverMode
@@ -969,6 +977,7 @@ void setup()
 
 	globalScale.calculateScale(scaleConfig.scaleRoot, scaleConfig.scalePattern);
 	omxModeMidi.SetScale(&globalScale);
+	omxModeDrum.SetScale(&globalScale);
 	omxModeSeq.SetScale(&globalScale);
 #ifdef OMXMODEGRIDS
 	omxModeGrids.SetScale(&globalScale);

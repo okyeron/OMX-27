@@ -335,4 +335,69 @@ MidiNoteGroup OmxUtil::midiNoteOff2(int notenum, int channel)
 	return noteGroup;
 }
 
+MidiNoteGroup OmxUtil::midiDrumNoteOn(uint8_t keyIndex, uint8_t notenum, int velocity, int channel)
+{
+    MidiNoteGroup noteGroup;
+
+	// Not a valid note
+	if(notenum >= 128)
+	{
+		noteGroup.noteNumber = 255;
+		return noteGroup;
+	}
+
+    // keep track of adjusted note when pressed so that when key is released we send
+    // the correct note off message
+    midiSettings.midiKeyState[keyIndex] = notenum;
+    midiSettings.midiChannelState[keyIndex] = channel;
+
+    noteGroup.noteNumber = notenum;
+    noteGroup.velocity = velocity;
+    noteGroup.channel = channel;
+    noteGroup.stepLength = 0;
+    noteGroup.sendMidi = true;
+    noteGroup.sendCV = true;
+    noteGroup.noteonMicros = micros();
+
+    midiSettings.midiLastNote = notenum;
+    midiSettings.midiLastVel = velocity;
+	omxLeds.setDirty();
+	omxDisp.setDirty();
+
+	return noteGroup;
+}
+
+MidiNoteGroup OmxUtil::midiDrumNoteOff(uint8_t keyIndex)
+{
+	// we use the key state captured at the time we pressed the key to send the correct note off message
+	int adjnote = midiSettings.midiKeyState[keyIndex];
+	int adjchan = midiSettings.midiChannelState[keyIndex];
+
+	MidiNoteGroup noteGroup;
+	noteGroup.noteOff = true;
+
+	if (adjnote >= 0 && adjnote < 128)
+	{
+		midiSettings.midiKeyState[keyIndex] = -1;
+
+		noteGroup.noteNumber = adjnote;
+		noteGroup.velocity = 0;
+		noteGroup.channel = adjchan;
+		noteGroup.stepLength = 0;
+		noteGroup.sendMidi = true;
+		noteGroup.sendCV = true;
+		noteGroup.noteonMicros = micros();
+	}
+	else
+	{
+		noteGroup.noteNumber = 255;
+		return noteGroup;
+	}
+
+	omxLeds.setDirty();
+	omxDisp.setDirty();
+
+	return noteGroup;
+}
+
 OmxUtil omxUtil;

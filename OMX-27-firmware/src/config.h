@@ -28,6 +28,7 @@ extern Adafruit_MCP4725 dac;
 enum OMXMode
 {
 	MODE_MIDI = 0,
+	MODE_DRUM,
 	MODE_CHORDS,
 	MODE_S1,
 	MODE_S2,

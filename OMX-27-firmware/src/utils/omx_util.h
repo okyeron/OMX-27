@@ -41,6 +41,9 @@ public:
 	MidiNoteGroup midiNoteOn2(MusicScales *scale, int notenum, int velocity, int channel);
 	MidiNoteGroup midiNoteOff2(int notenum, int channel);
 
+	MidiNoteGroup midiDrumNoteOn(uint8_t keyIndex, uint8_t notenum, int velocity, int channel);
+	MidiNoteGroup midiDrumNoteOff(uint8_t keyIndex);
+
 private:
 	// int potbank = 0;
 	// int analogValues[5] = {0,0,0,0,0};		// default values
