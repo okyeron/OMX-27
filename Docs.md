@@ -619,6 +619,176 @@ See MidiFX for more info.
 
 ## CH - Chords <a name="chordsmode"></a>
 
+Ever wanted to play insanely complex chords with the click of a button? Well now you can! In Chord mode, the bottom 16 keys can each be assigned to play a unique chord. 
+
+### UI Views
+
+There are two UI views: "Split" and "Full". This can be changed on page 2. By default, the UI layout is in "Split Mode" meaning the right half of the keyboard works like a 1 octave keyboard and the left half will give you 8 chords that can be played. In "Full" mode, each of the 16 bottom keys will play chords.
+
+### Key Modes
+
+There are several different modes available which can be switched using the top keys 3, 4, & 5, and a strum mode by holding top key 1 and pressing top key 3. 
+
+- **[Top 3] Play Mode**
+- **[Top 4] Edit Mode**
+- **[Top 5] Preset Mode**
+- **[Top 1 - F1] + [Top 3] Enter Strum Mode**
+- **[Top 6] Enter Strum Mode** : Only available in "Full" UI View
+
+
+#### Play Mode
+- **[Top 3] Play Mode**
+
+This mode is where you want to be if you would like to play chords and the keyboard(Split UI Mode) at the same time. Switching to this mode will bring the menu to the first page, displaying a keyboard that shows the notes of the last chord key that was pressed. You can still edit chords through the menu by switching pages.
+
+#### Edit Mode
+- **[Top 4] Edit Mode**
+
+This mode is for editing the available chords and will bring the menu to the chord edit page. 
+
+When in the edit mode and in the "Split" UI view, you can hold down a chord key on the left half and press a key on the right half to set the root note for basic chords. For interval chords, the right half will not change anything. 
+
+The first two top keys, key 1 and key 2 act as function keys F1 and F2 in this mode.
+
+- **[Top 1 - F1] Edit Chord** : Holding F1 and pressing a chord key will enter a edit chord submode.   
+- **[Top 2 - F2] Copy Chord** : Holding F2 and pressing a chord key will save the selected chord to the newly selected chord slot. 
+
+#### Preset Mode
+- **[Top 5] Preset Mode**
+
+This mode is for saving and loading banks of chord keys. There are 8 available banks. 
+
+While in this mode, the bottom 8 or 16 keys will play chords, the F1 and F2 keys are used to save and load banks. 
+
+- **[Top 1 - F1] Load From** : Holding F1 and pressing one of keys 1-8 on the bottom will load that bank. If you load a bank other than the current one, the current bank will be autosaved. You can revert changes to your current bank by loading it again. 
+- **[Top 2 - F2] Save To** : Holding F2 and pressing one of keys 1-8 on the bottom will save the current bank to the bank at that key. 
+
+#### Strum Mode
+- **[Top 1 - F1] + [Top 3] Enter Strum Mode**
+- **[Top 6] Enter Strum Mode** : Only available in "Full" UI View
+
+This mode allows you to strum chords using the encoder. The UI view will change to "Full" in this mode. 
+
+You can enter this mode either by holding F1 and pressing top key 3 or by pressing top key 6 if you are in the "Full" UI Mode. 
+
+To use this mode hold down a chord key and turn the encoder CW or CCW. Only the last pressed chord will be strummed. Multiple chords will not be strummed. 
+
+
+##### Strum Pot Parameters. 
+In strum mode, the 5 pots are used to change the behaviour of the strum. 
+
+- **[Pot 1] Sens - Sensitivity** : This determines how much the encoder needs to be turned to trigger a new note
+- **[Pot 2] Wrap** : If this is off, the chord can be strummed once, if this is on, the chord will wrap back to the beginning like an arpeggio. 
+- **[Pot 3] Increment / Octave** : This is only valid if Wrap is on. If it is, each time the chord wraps the notes will increase by an octave. This value determines how many octaves will be added before resetting. 
+- **[Pot 4] Sustain** : This value determines how long each strum note will be played for. 
+- **[Pot 5] Not Assigned**
+
+### Chord Key Settings
+
+A chord key is either bottom key 1-8 in "Split" UI mode or bottom key 1-16 in "Full" UI Mode. Pushing a chord key will play a chord, and releasing the key will stop playing the chord. Multiple Chord Keys can be pressed at once, and also combined with the 1 Octave midi keyboard on the right half in "Split" UI mode. 
+
+Each chord key can have a unique chord type, velocity, midi channel, and be routed to one of 5 MidiFX(#midifx) slots. 
+
+The last chord key that was pressed becomes the selected chord key. This is visually represented on the LEDs as that key will stay lit up
+
+**Page 4 - Chord Key Settings:**<a name="chordkeysettings"></a>
+These parameters apply to the selected chord key
+- `TYPE` : Determines the chord type: Basic`BASC` or Interval`INTV`, see section below on chord types. 
+- `MIFX` : Which [MidiFX](#midifx) will this chord be sent to? 
+- `VEL` : Velocity of the notes in the chord
+- `MCHAN` : Midi channel of the notes that this chord gets sent to
+
+### Chord Types
+
+Two types of chords are currently available: Basic and Interval. Basic chords don't have many settings and are quick to tweak. Interval chords have a lot more options and are linked to the current global musical scale. 
+
+#### Basic Chords <a name="basicchords"></a>
+These chords have no relation to the current global musical scale. 
+
+All the parameters are shown on a single page that will show 4 ghosts. 
+
+- `NOTE` : Determines the root note of the chord
+- `OCTAVE NUMBER` : Determines the octave of the root note
+- `GHOSTS` : The ghosts determine how the chord is voiced. Each ghost represents the order of the notes in the chord. The vertical position of a ghost determines the velocity of that notes. A large white ghost will play a note in the same octave as the root note. A large black ghost will play a note one octave below. A short white ghost will play a note one octave above. 
+- `SCALE` : Determines the scale of the chord. The last scale is called "Custom" and will let you manually set the notes in the chord. 
+
+##### Custom Chords
+If `SCALE` is set to `Custom` an additional page in the menu will be revealed. In this page you can program up to 6 notes. 
+
+The first 4 notes will be modified +- an octave, or turned off based on your `GHOST` settings
+
+The value of each note in a custom chord is defined as a semitone from the root note of the chord. For a C Maj basic triad chord, you would set this to `RT +4 +7` . `RT` means root note. 
+
+#### Interval Chords <a name="intervalchords"></a>
+These chords are linked to the current global musical scale. If you play an interval chord and it does not sound good, start by seeing if you have a global scale enabled, and make sure it's not chromatic. 
+
+##### Interval Menu Page 1
+- `#NTS` - Number of notes : How many notes to play, 1 - 4
+- `DEG` - Degree : Determines which degree of the the current global scale to start the chord on. If the global scale was C Maj, then Deg 0 would play a chord that starts on C, Deg 1 would play a chord that starts on D, Deg 6 would play a chord that starts on B. 
+- `OCT` - Octave : The octave of the chord is determined by the global octave +- this value. 
+- `TPS` - Transpose : This will transpose the chord by a seminote. Do note that if you transpose a interval chord it will no longer be in scale. 
+
+##### Interval Menu Page 2
+- `SPRD` - Spread : This determines how many octaves the chord is spread out across the keyboard. 
+- `ROT` - Rotate : This rotates the notes of the chord. for a C Maj Triad, rot of 0 will play C E G, rot of 1 will make E the lowest note, playing E G C+1oct, rot of 2 will make G the lowest note
+- `VOIC` - Voicing : Changes the voicing of the chord. Still stays in scale, but will shift notes or add additional notes. 
+
+##### Interval Menu Page 3
+- `UPDN` - Spread Up & Down : This will spread the notes out in a negative octave and positive octave. 
+- `QRTV` - Quartal Harmony : This enables Quartal Harmony. I have no idea what this is doing music theory wise, but it sounds cool. Technically it's bumping the first note up two octaves, the third note up one octave, and the fourth note down 1 octave. It's supposed to separate the notes by 4ths. 
+
+### Menu Pages
+
+##### Menu Page 1 - Keyboard
+This page will display a keyboard on the screen showing which notes are being played from the last chord key that was pressed. 
+##### Menu Page 2 - UI & Global Scale
+- `UI` : Change the UI View from `SPLIT` or `FULL`. Split view adds a 1-octave midi keyboard on the right half of the keys. in Full view, all 16 of the bottom keys play chords.
+- `ROOT` : The global root note. This changes what note the interval chords will play. 
+- `SCALE` : This sets the global scale. If the global scale is off, interval chords will not sound good. 
+- `OCT` : This sets the global octave. This value will change the octave of the midi keyboard in split view and also change the base octave of interval chords
+##### Menu Page 3 - Strum Mode, Keyboard Midi Chan, Potbank
+- `STRUM` : Alternate way to enter the strum mode
+- `CH` - Midi Channel : This sets the midi channel for the 1-octave keyboard in split view. Each chord key has a unique midi channel
+- `CC` - Pot CC Value : This displays the CC value being sent by the last pot that was turned. 
+- `PBNCK` - Active Pot Bank : This selects the active pot bank. 
+##### Menu Page 4 - Chord Key Settings
+This changes the settings of the selected chord key. See [Chord Key Settings](#chordkeysettings)
+##### Menu Page 5 - Basic or Interval Chord Key Settings
+These pages will be different depending if the selected chord key is set to Basic or Interval.
+See [Basic Chords](#basicchords) or [Interval Chords](#intervalchords)
+
+### KEYS & LEDS - AUX Button Held
+Hold down the AUX key to access quick functions. 
+
+#### Top Keys
+- **[1] Previous Parameter** : Selects the previous parameter in the menu
+- **[2] Next Parameter** : Selects the next parameter in the menu
+
+##### MidiFX
+This sets the MidiFX slot that the keyboard in split UI view is being sent to. To change the midifx slot a chord key is sent to see [Chord Key Settings](#chordkeysettings)
+Hold or double click a MidiFX key to enter the MidiFX submode. 
+See [MidiFX](#midifx) for more info. 
+- **[5] MidiFX Off**
+- **[6] MidiFX 1**
+- **[7] MidiFX 2**
+- **[8] MidiFX 3**
+- **[9] MidiFX 4**
+- **[10] MidiFX 5**
+
+#### Bottom Keys
+##### Change Octave
+This changes the global octave. This value will change the octave of the midi keyboard in split view and also change the base octave of interval chords.
+- **[1] Prev Octave**
+- **[2] Next Octave**
+
+##### Arpeggiator
+This effects the Arpeggiator on the currently selected MidiFX slot that the midi keyboard is being sent to.
+- **[12] Edit Params** : Enters a pass through arp edit sub-mode allowing you to edit arp values and also play the keyboard. You can also edit the arp in the MidiFX sub-mode but will need to exit the sub-mode to play the keyboard.
+- **[13] Change Pattern** : Cycles through arpeggiator patterns  
+- **[14] Change Octave** : Cycles through arpeggiator octave ranges  
+- **[15] Toggle Hold** : Toggles the arpeggiator hold function  
+- **[16] Power** : Toggles the arpeggiator on and off  
+
 ---
 
 ## S1 - Sequencer 1 <a name="s1mode"></a>
