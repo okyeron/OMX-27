@@ -5,6 +5,7 @@
 #include "../utils/param_manager.h"
 #include "submodes/submode_midifxgroup.h"
 #include "submodes/submode_potconfig.h"
+#include "submodes/submode_preset.h"
 #include "../midifx/midifx_interface.h"
 #include "../midifx/midifx_interface.h"
 #include "../midimacro/midimacro_m8.h"
@@ -19,12 +20,29 @@ public:
 	uint8_t vel = 100;
 	uint8_t midifx = 0;
 	uint8_t hue = 64;
+
+	void CopyFrom(DrumKeySettings other)
+	{
+		this->noteNum = other.noteNum;
+		this->chan = other.chan;
+		this->vel = other.vel;
+		this->midifx = other.midifx;
+		this->hue = other.hue;
+	}
 };
 
 struct DrumKit
 {
 	public:
 	DrumKeySettings drumKeys[26]; // Sorry, Aux can't be used for a drum key
+
+	void CopyFrom(DrumKit other)
+	{
+		for(uint8_t i = 0; i < 26; i++)
+		{
+			drumKeys[i].CopyFrom(other.drumKeys[i]);
+		}
+	}
 };
 
 // This mode is designed to be used with samplers or drum machines
@@ -63,16 +81,22 @@ public:
 	void inMidiControlChange(byte channel, byte control, byte value) override;
 
 	void SetScale(MusicScales *scale);
+
+	int saveToDisk(int startingAddress, Storage *storage);
+	int loadFromDisk(int startingAddress, Storage *storage);
 private:
-	uint8_t activeMode = 0;
-	uint8_t activeDrumKit;
+	static const uint8_t NUM_DRUM_KITS = 8;
+	SubModePreset presetManager;
+	uint8_t selDrumKit;
 	uint8_t selDrumKey;
-	DrumKit drumKits[8];
+	DrumKit activeDrumKit;
+	DrumKit drumKits[NUM_DRUM_KITS];
 	MusicScales *musicScale;
 
 	void changeMode(uint8_t newModeIndex);
 	void drumKeyDown(uint8_t keyIndex);
 	void drumKeyUp(uint8_t keyIndex);
+	void randomizeHues();
 
 	bool initSetup = false;
 
@@ -83,13 +107,13 @@ private:
 
 	bool macroActive_ = false;
 
+	void onKeyUpdateLoadKit(OMXKeypadEvent e);
 	void onKeyUpdateM8Macro(OMXKeypadEvent e);
 	bool onKeyUpdateSelMidiFX(OMXKeypadEvent e);
 	bool onKeyHeldSelMidiFX(OMXKeypadEvent e);
 
 	// SubModes
 	SubmodeInterface *activeSubmode = nullptr;
-	// SubModeMidiFxGroup subModeMidiFx;
 	SubModePotConfig subModePotConfig_;
 
 	void enableSubmode(SubmodeInterface *subMode);
@@ -128,6 +152,19 @@ private:
 	midimacro::MidiMacroInterface *activeMacro_;
 
 	midimacro::MidiMacroInterface *getActiveMacro();
+
+	void saveKit(uint8_t saveIndex);
+	void loadKit(uint8_t loadIndex);
+
+	static void doSaveKitForwarder(void *context, uint8_t kitIndex)
+	{
+		static_cast<OmxModeDrum *>(context)->saveKit(kitIndex);
+	}
+
+	static void doLoadKitForwarder(void *context, uint8_t kitIndex)
+	{
+		static_cast<OmxModeDrum *>(context)->loadKit(kitIndex);
+	}
 
 	// Static glue to link a pointer to a member function
 	static void doNoteOnForwarder(void *context, uint8_t keyIndex)

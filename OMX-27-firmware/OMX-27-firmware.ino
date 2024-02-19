@@ -461,9 +461,11 @@ void savePatterns(void)
 	{
 		return;
 	}
-	Serial.println((String)"nLocalAddress: " + nLocalAddress);
+	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 5784
 
 #ifdef OMXMODEGRIDS
+	Serial.println("Saving Grids");
+
 	// Grids patterns
 	patternSize = OmxModeGrids::serializedPatternSize(isEeprom);
 	int numPatterns = OmxModeGrids::getNumPatterns();
@@ -481,16 +483,20 @@ void savePatterns(void)
 
 		nLocalAddress += patternSize;
 	}
-	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 5968
+	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 6008
 #endif
 
 	Serial.println("Saving Euclidean");
 	nLocalAddress = omxModeEuclid.saveToDisk(nLocalAddress, storage);
-	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 6321
+	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 7433
 
 	Serial.println("Saving Chords");
 	nLocalAddress = omxModeChords.saveToDisk(nLocalAddress, storage);
-	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 6321
+	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 10505
+
+	Serial.println("Saving Drums");
+	nLocalAddress = omxModeDrum.saveToDisk(nLocalAddress, storage);
+	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 11545
 
 	Serial.println("Saving MidiFX");
 	for(uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
@@ -499,7 +505,12 @@ void savePatterns(void)
 		// Serial.println((String)"Saved: " + i);
 		// Serial.println((String)"nLocalAddress: " + nLocalAddress);
 	}
-	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 6321
+	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 11585
+
+	// Starting 11545
+	// MidiFX with nothing 11585
+	// 1 MidiFX full ARPS 11913
+	// 
 
 	// Seq patternSize: 715
 	// nLocalAddress: 5752
@@ -578,6 +589,10 @@ void loadPatterns(void)
 
 	Serial.print("Loading Chords - ");
 	nLocalAddress = omxModeChords.loadFromDisk(nLocalAddress, storage);
+	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 5988
+
+	Serial.print("Loading Drums - ");
+	nLocalAddress = omxModeDrum.loadFromDisk(nLocalAddress, storage);
 	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 5988
 
 	// Serial.println((String)"nLocalAddress: " + nLocalAddress); // 5968

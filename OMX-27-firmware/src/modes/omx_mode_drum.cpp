@@ -11,6 +11,7 @@
 enum DrumModePage {
     DRUMPAGE_DRUMKEY, // Note, Chan, Vel, MidiFX
     DRUMPAGE_DRUMKEY2, // Hue,
+    DRUMPAGE_SCALES, // Hue,
     DRUMPAGE_INSPECT, // Sent Pot CC, Last Note, Last Vel, Last Chan, Not editable, just FYI
     DRUMPAGE_POTSANDMACROS, // PotBank, Thru, Macro, Macro Channel
     DRUMPAGE_CFG
@@ -38,6 +39,10 @@ OmxModeDrum::OmxModeDrum()
 	nornsMarco_.setDoNoteOff(&OmxModeDrum::doNoteOffForwarder, this);
 	delugeMacro_.setDoNoteOn(&OmxModeDrum::doNoteOnForwarder, this);
 	delugeMacro_.setDoNoteOff(&OmxModeDrum::doNoteOffForwarder, this);
+
+    presetManager.setContextPtr(this);
+    presetManager.setDoSaveFunc(&OmxModeDrum::doSaveKitForwarder);
+    presetManager.setDoLoadFunc(&OmxModeDrum::doLoadKitForwarder);
 }
 
 void OmxModeDrum::changeMode(uint8_t newModeIndex)
@@ -47,7 +52,20 @@ void OmxModeDrum::changeMode(uint8_t newModeIndex)
         return;
     }
 
-    activeMode = newModeIndex;
+    if(newModeIndex == DRUMMODE_NORMAL)
+    {
+        disableSubmode();
+    }
+    if(newModeIndex == DRUMMODE_SAVEKIT)
+    {
+        presetManager.configure(PRESETMODE_SAVE, selDrumKit, NUM_DRUM_KITS, true);
+        enableSubmode(&presetManager);
+    }
+    else if(newModeIndex == DRUMMODE_LOADKIT)
+    {
+        presetManager.configure(PRESETMODE_LOAD, selDrumKit, NUM_DRUM_KITS, true);
+        enableSubmode(&presetManager);
+    }
 }
 
 
@@ -82,6 +100,8 @@ void OmxModeDrum::onModeActivated()
 	params.setSelPageAndParam(0, 0);
 	encoderSelect = true;
 
+    activeDrumKit.CopyFrom(drumKits[selDrumKit]);
+
 	// selectMidiFx(mfxIndex_, false);
 }
 
@@ -104,14 +124,14 @@ void OmxModeDrum::stopSequencers()
 
 void OmxModeDrum::selectMidiFx(uint8_t mfxIndex, bool dispMsg)
 {
-    uint8_t prevMidiFX = drumKits[activeDrumKit].drumKeys[selDrumKey].midifx;
+    uint8_t prevMidiFX = activeDrumKit.drumKeys[selDrumKey].midifx;
     
     if(mfxIndex != prevMidiFX && prevMidiFX < NUM_MIDIFX_GROUPS)
     {
         drumKeyUp(selDrumKey + 1);
     }
 
-    drumKits[activeDrumKit].drumKeys[selDrumKey].midifx = mfxIndex;
+    activeDrumKit.drumKeys[selDrumKey].midifx = mfxIndex;
 
 	// this->mfxIndex_ = mfxIndex;
 
@@ -225,7 +245,7 @@ void OmxModeDrum::onEncoderChanged(Encoder::Update enc)
 
 	if (selPage == DRUMPAGE_DRUMKEY)
 	{
-        auto drumKey = drumKits[activeDrumKit].drumKeys[selDrumKey];
+        auto drumKey = activeDrumKit.drumKeys[selDrumKey];
         
 		if (selParam == 1) // NoteNum
 		{
@@ -256,11 +276,11 @@ void OmxModeDrum::onEncoderChanged(Encoder::Update enc)
 		}
 
         // Apply changes
-        drumKits[activeDrumKit].drumKeys[selDrumKey] = drumKey;
+        activeDrumKit.drumKeys[selDrumKey] = drumKey;
 	}
     else if (selPage == DRUMPAGE_DRUMKEY2)
 	{
-        auto drumKey = drumKits[activeDrumKit].drumKeys[selDrumKey];
+        auto drumKey = activeDrumKit.drumKeys[selDrumKey];
         
 		if (selParam == 1) // Hue
 		{
@@ -269,7 +289,7 @@ void OmxModeDrum::onEncoderChanged(Encoder::Update enc)
 		}
 
         // Apply changes
-        drumKits[activeDrumKit].drumKeys[selDrumKey] = drumKey;
+        activeDrumKit.drumKeys[selDrumKey] = drumKey;
 	}
 	else if (selPage == DRUMPAGE_POTSANDMACROS)
 	{
@@ -288,6 +308,36 @@ void OmxModeDrum::onEncoderChanged(Encoder::Update enc)
 		if (selParam == 4)
 		{
 			midiMacroConfig.midiMacroChan = constrain(midiMacroConfig.midiMacroChan + amt, 1, 16);
+		}
+	}
+    else if (selPage == DRUMPAGE_SCALES)
+	{
+		if (selParam == 1)
+		{
+			int prevRoot = scaleConfig.scaleRoot;
+			scaleConfig.scaleRoot = constrain(scaleConfig.scaleRoot + amt, 0, 12 - 1);
+			if (prevRoot != scaleConfig.scaleRoot)
+			{
+				musicScale->calculateScale(scaleConfig.scaleRoot, scaleConfig.scalePattern);
+			}
+		}
+		if (selParam == 2)
+		{
+			int prevPat = scaleConfig.scalePattern;
+			scaleConfig.scalePattern = constrain(scaleConfig.scalePattern + amt, -1, musicScale->getNumScales() - 1);
+			if (prevPat != scaleConfig.scalePattern)
+			{
+				omxDisp.displayMessage(musicScale->getScaleName(scaleConfig.scalePattern));
+				musicScale->calculateScale(scaleConfig.scaleRoot, scaleConfig.scalePattern);
+			}
+		}
+		if (selParam == 3)
+		{
+			scaleConfig.lockScale = constrain(scaleConfig.lockScale + amt, 0, 1);
+		}
+		if (selParam == 4)
+		{
+			scaleConfig.group16 = constrain(scaleConfig.group16 + amt, 0, 1);
 		}
 	}
 
@@ -311,6 +361,14 @@ void OmxModeDrum::onEncoderButtonDown()
 	if (macroConsumesDisplay)
 	{
 		activeMacro_->onEncoderButtonDown();
+		return;
+	}
+
+    if (params.getSelPage() == DRUMPAGE_DRUMKEY2 && params.getSelParam() == 1)
+	{
+        randomizeHues();
+		omxDisp.isDirty();
+        omxLeds.isDirty();
 		return;
 	}
 
@@ -346,6 +404,18 @@ bool OmxModeDrum::shouldBlockEncEdit()
 	}
 
 	return false;
+}
+
+void OmxModeDrum::saveKit(uint8_t saveIndex)
+{
+    drumKits[saveIndex].CopyFrom(activeDrumKit);
+    selDrumKit = saveIndex;
+}
+
+void OmxModeDrum::loadKit(uint8_t loadIndex)
+{
+    activeDrumKit.CopyFrom(drumKits[loadIndex]);
+    selDrumKit = loadIndex;
 }
 
 void OmxModeDrum::onKeyUpdate(OMXKeypadEvent e)
@@ -446,13 +516,13 @@ void OmxModeDrum::onKeyUpdate(OMXKeypadEvent e)
 				}
                 else if(thisKey == 3)
                 {
-                    omxDisp.displayMessage("Load Kit");
                     changeMode(DRUMMODE_LOADKIT);
+                    return;
                 }
                 else if(thisKey == 4)
                 {
-                    omxDisp.displayMessage("Save Kit");
                     changeMode(DRUMMODE_SAVEKIT);
+                    return;
                 }
 			}
 
@@ -493,7 +563,7 @@ bool OmxModeDrum::onKeyUpdateSelMidiFX(OMXKeypadEvent e)
 
 	bool keyConsumed = false;
 
-    uint8_t mfxIndex = drumKits[activeDrumKit].drumKeys[selDrumKey].midifx;
+    uint8_t mfxIndex = activeDrumKit.drumKeys[selDrumKey].midifx;
 
 	if (!e.held())
 	{
@@ -696,9 +766,12 @@ void OmxModeDrum::updateLEDs()
 		strip.setPixelColor(1, color1);
 		strip.setPixelColor(2, color2);
 
+		strip.setPixelColor(3, BLUE); // Load
+		strip.setPixelColor(4, ORANGE); // Save
+
 		omxLeds.drawOctaveKeys(11, 12, midiSettings.octave);
 
-        uint8_t mfxIndex = drumKits[activeDrumKit].drumKeys[selDrumKey].midifx;
+        uint8_t mfxIndex = activeDrumKit.drumKeys[selDrumKey].midifx;
 
 		// MidiFX off
 		strip.setPixelColor(5, (mfxIndex >= NUM_MIDIFX_GROUPS ? colorConfig.selMidiFXGRPOffColor : colorConfig.midiFXGRPOffColor));
@@ -744,7 +817,7 @@ void OmxModeDrum::updateLEDs()
 	{
         for(uint8_t k = 1; k < 27; k++)
         {
-            auto drumKey = drumKits[activeDrumKit].drumKeys[k-1];
+            auto drumKey = activeDrumKit.drumKeys[k-1];
 
             bool drumKeyOn = midiSettings.midiKeyState[k] >= 0;
 
@@ -807,7 +880,7 @@ void OmxModeDrum::onDisplayUpdate()
 			{
 				if (params.getSelPage() == DRUMPAGE_DRUMKEY)
 				{
-                    auto drumKey = drumKits[activeDrumKit].drumKeys[selDrumKey];
+                    auto drumKey = activeDrumKit.drumKeys[selDrumKey];
 
 					omxDisp.clearLegends();
 
@@ -829,12 +902,14 @@ void OmxModeDrum::onDisplayUpdate()
 				}
                 else if (params.getSelPage() == DRUMPAGE_DRUMKEY2)
 				{
-                    auto drumKey = drumKits[activeDrumKit].drumKeys[selDrumKey];
+                    auto drumKey = activeDrumKit.drumKeys[selDrumKey];
 
 					omxDisp.clearLegends();
 
 					omxDisp.legends[0] = "HUE";
+					omxDisp.legends[1] = "HUE";
 					omxDisp.legendVals[0] = drumKey.hue;
+					omxDisp.legendText[1] = "RND";
 				}
 				else if (params.getSelPage() == DRUMPAGE_INSPECT)
 				{
@@ -862,6 +937,31 @@ void OmxModeDrum::onDisplayUpdate()
 					omxDisp.legendText[2] = macromodes[midiMacroConfig.midiMacro];
 					omxDisp.legendVals[3] = midiMacroConfig.midiMacroChan;
 				}
+                else if (params.getSelPage() == DRUMPAGE_SCALES) // SCALES
+				{
+					omxDisp.clearLegends();
+					omxDisp.legends[0] = "ROOT";
+					omxDisp.legends[1] = "SCALE";
+					omxDisp.legends[2] = "LOCK";
+					omxDisp.legends[3] = "GROUP";
+					omxDisp.legendVals[0] = -127;
+					if (scaleConfig.scalePattern < 0)
+					{
+						omxDisp.legendVals[1] = -127;
+						omxDisp.legendText[1] = "Off";
+					}
+					else
+					{
+						omxDisp.legendVals[1] = scaleConfig.scalePattern;
+					}
+
+					omxDisp.legendVals[2] = -127;
+					omxDisp.legendVals[3] = -127;
+
+					omxDisp.legendText[0] = musicScale->getNoteName(scaleConfig.scaleRoot);
+					omxDisp.legendText[2] = scaleConfig.lockScale ? "On" : "Off";
+					omxDisp.legendText[3] = scaleConfig.group16 ? "On" : "Off";
+				}
 				else if (params.getSelPage() == DRUMPAGE_CFG) // CONFIG
 				{
 					omxDisp.clearLegends();
@@ -874,6 +974,11 @@ void OmxModeDrum::onDisplayUpdate()
 		}
 	}
 }
+
+// void onDisplayUpdateLoadKit()
+// {
+
+// }
 
 // incoming midi note on
 void OmxModeDrum::inMidiNoteOn(byte channel, byte note, byte velocity)
@@ -964,6 +1069,14 @@ void OmxModeDrum::SetScale(MusicScales *scale)
 	nornsMarco_.setScale(scale);
 }
 
+void OmxModeDrum::randomizeHues()
+{
+    for(uint8_t i = 0; i < 26; i++)
+    {
+        activeDrumKit.drumKeys[i].hue = random(255);
+    }
+}
+
 void OmxModeDrum::enableSubmode(SubmodeInterface *subMode)
 {
 	if (activeSubmode != nullptr)
@@ -1006,7 +1119,7 @@ bool OmxModeDrum::isSubmodeEnabled()
 
 void OmxModeDrum::drumKeyDown(uint8_t keyIndex)
 {
-    auto drumKey = drumKits[activeDrumKit].drumKeys[keyIndex - 1];
+    auto drumKey = activeDrumKit.drumKeys[keyIndex - 1];
 
     MidiNoteGroup noteGroup = omxUtil.midiDrumNoteOn(keyIndex, drumKey.noteNum, drumKey.vel, drumKey.chan);
 
@@ -1035,7 +1148,7 @@ void OmxModeDrum::drumKeyUp(uint8_t keyIndex)
 	if (noteGroup.noteNumber == 255)
 		return;
 
-    auto drumKey = drumKits[activeDrumKit].drumKeys[keyIndex - 1];
+    auto drumKey = activeDrumKit.drumKeys[keyIndex - 1];
 
 	noteGroup.unknownLength = true;
 	noteGroup.prevNoteNumber = noteGroup.noteNumber;
@@ -1166,4 +1279,45 @@ void OmxModeDrum::onPendingNoteOff(int note, int channel)
 	{
 		subModeMidiFx[i].onPendingNoteOff(note, channel);
 	}
+}
+
+int OmxModeDrum::saveToDisk(int startingAddress, Storage *storage)
+{
+	int saveSize = sizeof(DrumKit);
+
+	for (uint8_t saveIndex = 0; saveIndex < NUM_DRUM_KITS; saveIndex++)
+	{
+        auto saveBytesPtr = (byte *)(&drumKits[saveIndex]);
+        for (int j = 0; j < saveSize; j++)
+        {
+            storage->write(startingAddress + j, *saveBytesPtr++);
+        }
+
+        startingAddress += saveSize;
+	}
+
+	return startingAddress;
+}
+
+int OmxModeDrum::loadFromDisk(int startingAddress, Storage *storage)
+{
+	int saveSize = sizeof(DrumKit);
+
+    for (uint8_t saveIndex = 0; saveIndex < NUM_DRUM_KITS; saveIndex++)
+    {
+        auto drumKit = DrumKit{};
+        auto current = (byte *)&drumKit;
+        for (int j = 0; j < saveSize; j++)
+        {
+            *current = storage->read(startingAddress + j);
+            current++;
+        }
+
+        drumKits[saveIndex] = drumKit;
+        startingAddress += saveSize;
+    }
+
+    loadKit(0);
+
+	return startingAddress;
 }
