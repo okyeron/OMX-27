@@ -511,6 +511,9 @@ void savePatterns(void)
 	// MidiFX with nothing 11585
 	// 1 MidiFX full ARPS 11913
 	// 
+	// OMX Frooze/Ran out of memory after creating 4 x 8 - 3 = 29  ARPs
+	// Maybe build in a limit of 2 or one arps per MidiFX, or just recommend users not to
+	// create 29 ARPs. 
 
 	// Seq patternSize: 715
 	// nLocalAddress: 5752
@@ -823,6 +826,7 @@ void loop()
 		if (e.down() && thisKey == 0 && encoderConfig.enc_edit)
 		{
 			// temp - save whenever the 0 key is pressed in encoder edit mode
+			omxDisp.displayMessage("Saving...");
 			saveToStorage();
 			//	Serial.println("EEPROM saved");
 			omxDisp.displayMessage("Saved State");

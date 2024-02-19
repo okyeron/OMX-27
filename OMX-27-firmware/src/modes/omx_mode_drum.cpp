@@ -14,7 +14,8 @@ enum DrumModePage {
     DRUMPAGE_SCALES, // Hue,
     DRUMPAGE_INSPECT, // Sent Pot CC, Last Note, Last Vel, Last Chan, Not editable, just FYI
     DRUMPAGE_POTSANDMACROS, // PotBank, Thru, Macro, Macro Channel
-    DRUMPAGE_CFG
+    DRUMPAGE_CFG,
+    DRUMPAGE_NUMPAGES
 };
 
 enum DrumEditMode {
@@ -26,12 +27,7 @@ enum DrumEditMode {
 
 OmxModeDrum::OmxModeDrum()
 {
-	// Add 4 pages
-	params.addPage(4); 
-	params.addPage(4); 
-	params.addPage(4);
-	params.addPage(4);
-	params.addPage(4);
+    params.addPages(DRUMPAGE_NUMPAGES);
 
 	m8Macro_.setDoNoteOn(&OmxModeDrum::doNoteOnForwarder, this);
 	m8Macro_.setDoNoteOff(&OmxModeDrum::doNoteOffForwarder, this);
@@ -524,6 +520,16 @@ void OmxModeDrum::onKeyUpdate(OMXKeypadEvent e)
                     changeMode(DRUMMODE_SAVEKIT);
                     return;
                 }
+				else if (thisKey == 11 || thisKey == 12)
+				{
+					saveKit(selDrumKit);
+
+					int8_t amt = thisKey == 11 ? -1 : 1;
+					uint8_t newKitIndex = (selDrumKit + NUM_DRUM_KITS + amt) % NUM_DRUM_KITS;
+					loadKit(newKitIndex); 
+
+					omxDisp.displayMessage("Loaded " + String(newKitIndex + 1));
+				}
 			}
 
 			if (!keyConsumed)
