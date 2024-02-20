@@ -741,19 +741,34 @@ These chords are linked to the current global musical scale. If you play an inte
 
 ##### Menu Page 1 - Keyboard
 This page will display a keyboard on the screen showing which notes are being played from the last chord key that was pressed. 
-##### Menu Page 2 - UI & Global Scale
+
+##### Menu Page 2 - Chord Mode Settings
 - `UI` : Change the UI View from `SPLIT` or `FULL`. Split view adds a 1-octave midi keyboard on the right half of the keys. in Full view, all 16 of the bottom keys play chords.
-- `ROOT` : The global root note. This changes what note the interval chords will play. 
-- `SCALE` : This sets the global scale. If the global scale is off, interval chords will not sound good. 
-- `OCT` : This sets the global octave. This value will change the octave of the midi keyboard in split view and also change the base octave of interval chords
-##### Menu Page 3 - Strum Mode, Keyboard Midi Chan, Potbank
-- `STRUM` : Alternate way to enter the strum mode
-- `CH` - Midi Channel : This sets the midi channel for the 1-octave keyboard in split view. Each chord key has a unique midi channel
-- `CC` - Pot CC Value : This displays the CC value being sent by the last pot that was turned. 
-- `PBNCK` - Active Pot Bank : This selects the active pot bank. 
-##### Menu Page 4 - Chord Key Settings
+
+##### Menu Page 3 - Keyboard Midi Settings
+These settings apply to the 1-octave keyboard on the right side if the UI View is in `SPLIT` view. Each chord has unique settings.
+- `OCT`: Current Octave. This value also changes the base octave used by interval chords
+- `CH`: Active MIDI Channel 
+- `VEL`: The velocity level for midi notes 
+
+##### Menu Page 4 - Pots and Macros
+- `PBNK`: Potentiometer bank select
+- `THRU`: When "On" incoming USBMIDI is passed to TRS MIDI Out.
+- `MCRO`: MIDI Macro Mode Select (default is OFF)
+- `M-CH`: MIDI Macro Mode Channel
+
+##### Menu Page 5 - Scale Settings
+The scale settings apply to the 1-octave keyboard on the right side if the UI View is in `SPLIT` view and also will effect the interval chord keys. 
+A scale should be set to something other than chromatic to get good results from interval chords. 
+- `ROOT` : Select the root note for scale mode. This changes what note the interval chords will play. 
+- `SCALE` : Select a scale or turn off scale mode
+- `LOCK` : Locks to the active scale. If this is enabled, you can only play notes in the scale
+- `GROUP` : Groups all the notes of the scale across the lower row of 16 keys. 
+
+##### Menu Page 6 - Chord Key Settings
 This changes the settings of the selected chord key. See [Chord Key Settings](#chordkeysettings)
-##### Menu Page 5 - Basic or Interval Chord Key Settings
+
+##### Menu Page 7 - Basic or Interval Chord Key Settings
 These pages will be different depending if the selected chord key is set to Basic or Interval.
 See [Basic Chords](#basicchords) or [Interval Chords](#intervalchords)
 

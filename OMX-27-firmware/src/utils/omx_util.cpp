@@ -400,4 +400,216 @@ MidiNoteGroup OmxUtil::midiDrumNoteOff(uint8_t keyIndex)
 	return noteGroup;
 }
 
+void OmxUtil::onEncoderChangedEditParam(Encoder::Update *enc, uint8_t selectedParmIndex, uint8_t targetParamIndex, uint8_t paramType)
+{
+	onEncoderChangedEditParam(enc, nullptr, selectedParmIndex, targetParamIndex, paramType);
+}
+
+void OmxUtil::onEncoderChangedEditParam(Encoder::Update *enc, MusicScales *musicScale, uint8_t selectedParmIndex, uint8_t targetParamIndex, uint8_t paramType)
+{
+	if (selectedParmIndex != targetParamIndex)
+		return;
+
+	auto amtSlow = enc->accel(1);
+	auto amtFast = enc->accel(5);
+
+	switch (paramType)
+	{
+	case GPARAM_MOUT_OCT:
+	{
+		midiSettings.octave = constrain(midiSettings.octave + amtSlow, -5, 4);
+	}
+	break;
+	case GPARAM_MOUT_CHAN:
+	{
+		sysSettings.midiChannel = constrain(sysSettings.midiChannel + amtSlow, 1, 16);
+	}
+	break;
+	case GPARAM_MOUT_VEL:
+	{
+		midiSettings.defaultVelocity = constrain((int)midiSettings.defaultVelocity + amtFast, 0, 127); // cast to int to prevent rollover
+	}
+	break;
+	case GPARAM_MIDI_THRU:
+	{
+		midiSettings.midiSoftThru = constrain(midiSettings.midiSoftThru + amtSlow, 0, 1);
+	}
+	break;
+	case GPARAM_POTS_PBANK:
+	{
+		potSettings.potbank = constrain(potSettings.potbank + amtSlow, 0, NUM_CC_BANKS - 1);
+	}
+	break;
+	case GPARAM_SCALE_ROOT:
+	{
+		if (musicScale != nullptr)
+		{
+			int prevRoot = scaleConfig.scaleRoot;
+			scaleConfig.scaleRoot = constrain(scaleConfig.scaleRoot + amtSlow, 0, 12 - 1);
+			if (prevRoot != scaleConfig.scaleRoot)
+			{
+				musicScale->calculateScale(scaleConfig.scaleRoot, scaleConfig.scalePattern);
+			}
+		}
+	}
+	break;
+	case GPARAM_SCALE_PAT:
+	{
+		if (musicScale != nullptr)
+		{
+			int prevPat = scaleConfig.scalePattern;
+			scaleConfig.scalePattern = constrain(scaleConfig.scalePattern + amtSlow, -1, musicScale->getNumScales() - 1);
+			if (prevPat != scaleConfig.scalePattern)
+			{
+				omxDisp.displayMessage(musicScale->getScaleName(scaleConfig.scalePattern));
+				musicScale->calculateScale(scaleConfig.scaleRoot, scaleConfig.scalePattern);
+			}
+		}
+	}
+	break;
+	case GPARAM_SCALE_LOCK:
+	{
+		scaleConfig.lockScale = constrain(scaleConfig.lockScale + amtSlow, 0, 1);
+	}
+	break;
+	case GPARAM_SCALE_GRP16:
+	{
+		scaleConfig.group16 = constrain(scaleConfig.group16 + amtSlow, 0, 1);
+	}
+	break;
+	case GPARAM_MACRO_MODE:
+	{
+		midiMacroConfig.midiMacro = constrain(midiMacroConfig.midiMacro + amtSlow, 0, nummacromodes);
+	}
+	break;
+	case GPARAM_MACRO_CHAN:
+	{
+		midiMacroConfig.midiMacroChan = constrain(midiMacroConfig.midiMacroChan + amtSlow, 1, 16);
+	}
+	break;
+	case GPARAM_MIDI_LASTNOTE:
+	case GPARAM_MIDI_LASTVEL:
+	case GPARAM_POTS_LASTVAL:
+	case GPARAM_POTS_LASTCC:
+	{
+		Serial.println("Param not editable: ");
+		Serial.println(paramType);
+	}
+	break;
+	}
+}
+
+void OmxUtil::setupPageLegend(uint8_t index, uint8_t paramType)
+{
+	setupPageLegend(nullptr, index, paramType);
+}
+
+void OmxUtil::setupPageLegend(MusicScales *musicScale, uint8_t index, uint8_t paramType)
+{
+	switch (paramType)
+	{
+	case GPARAM_MOUT_OCT:
+	{
+		omxDisp.legends[index] = "OCT";
+		omxDisp.legendVals[index] = (int)midiSettings.octave + 4;
+	}
+	break;
+	case GPARAM_MOUT_CHAN:
+	{
+		omxDisp.legends[index] = "CH";
+		omxDisp.legendVals[index] = sysSettings.midiChannel;
+	}
+	break;
+	case GPARAM_MOUT_VEL:
+	{
+		omxDisp.legends[index] = "VEL";
+		omxDisp.legendVals[index] = midiSettings.defaultVelocity;
+	}
+	break;
+	case GPARAM_MIDI_THRU:
+	{
+		omxDisp.legends[index] = "THRU"; // MIDI thru (usb to hardware)
+		omxDisp.legendText[index] = midiSettings.midiSoftThru ? "On" : "Off";
+	}
+	break;
+	case GPARAM_MIDI_LASTNOTE:
+	{
+		omxDisp.legends[index] = "NOTE"; 
+		omxDisp.legendVals[index] = midiSettings.midiLastNote;
+	}
+	break;
+	case GPARAM_MIDI_LASTVEL:
+	{
+		omxDisp.legends[index] = "VEL"; 
+		omxDisp.legendVals[index] = midiSettings.midiLastVel;
+	}
+	break;
+	case GPARAM_POTS_LASTCC:
+	{
+		omxDisp.legends[index] = "P CC";
+		omxDisp.legendVals[index] = potSettings.potCC;
+	}
+	break;
+	case GPARAM_POTS_LASTVAL:
+	{
+		omxDisp.legends[index] = "P VAL";
+		omxDisp.legendVals[index] = potSettings.potVal;
+	}
+	break;
+	case GPARAM_POTS_PBANK:
+	{
+		omxDisp.legends[index] = "PBNK"; // Potentiometer Banks
+		omxDisp.legendVals[index] = potSettings.potbank + 1;
+	}
+	break;
+	case GPARAM_SCALE_ROOT:
+	{
+		if(musicScale != nullptr)
+		{
+			omxDisp.legends[index] = "ROOT";
+			omxDisp.legendText[index] = musicScale->getNoteName(scaleConfig.scaleRoot);
+		}
+	}
+	break;
+	case GPARAM_SCALE_PAT:
+	{
+		omxDisp.legends[index] = "SCALE";
+
+		if (scaleConfig.scalePattern < 0)
+		{
+			omxDisp.legendText[index] = "CHRM";
+		}
+		else
+		{
+			omxDisp.legendVals[index] = scaleConfig.scalePattern;
+		}
+	}
+	break;
+	case GPARAM_SCALE_LOCK:
+	{
+		omxDisp.legends[index] = "LOCK";
+		omxDisp.legendText[index] = scaleConfig.lockScale ? "On" : "Off";
+	}
+	break;
+	case GPARAM_SCALE_GRP16:
+	{
+		omxDisp.legends[index] = "GROUP";
+		omxDisp.legendText[index] = scaleConfig.group16 ? "On" : "Off";
+	}
+	break;
+	case GPARAM_MACRO_MODE:
+	{
+		omxDisp.legends[index] = "MCRO"; // Macro mode
+		omxDisp.legendText[index] = macromodes[midiMacroConfig.midiMacro];
+	}
+	break;
+	case GPARAM_MACRO_CHAN:
+	{
+		omxDisp.legends[index] = "M-CH";
+		omxDisp.legendVals[index] = midiMacroConfig.midiMacroChan;
+	}
+	break;
+	}
+}
+
 OmxUtil omxUtil;

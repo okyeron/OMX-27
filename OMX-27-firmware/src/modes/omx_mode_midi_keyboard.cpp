@@ -27,8 +27,8 @@ enum MIKeyModePage {
 OmxModeMidiKeyboard::OmxModeMidiKeyboard()
 {
 	// Add 4 pages
-	params.addPage(3); // Oct, CH, Vel
-	params.addPage(1); // Sent Pot CC, Last Note, Last Vel, Not editable, just FYI
+	params.addPage(4); // Oct, CH, Vel
+	params.addPage(4); // Sent Pot CC, Last Note, Last Vel, Not editable, just FYI
 	params.addPage(4); // RR - Midi Round Robin, RROF - Round Robin Offset, PGm, BNK
 	params.addPage(4); // PotBank, Thru, Macro, Macro Channel
 	params.addPage(4); // Root, Scale, Lock Scale Notes, Group notes. 

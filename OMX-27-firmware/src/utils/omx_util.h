@@ -3,6 +3,25 @@
 #include "../utils/music_scales.h"
 #include "../modes/omx_mode_interface.h"
 
+enum GlobalParams
+{
+	GPARAM_MOUT_OCT,
+	GPARAM_MOUT_CHAN,
+	GPARAM_MOUT_VEL,
+	GPARAM_MIDI_THRU,
+	GPARAM_MIDI_LASTNOTE,
+	GPARAM_MIDI_LASTVEL,
+	GPARAM_POTS_LASTVAL,
+	GPARAM_POTS_LASTCC,
+	GPARAM_POTS_PBANK,
+	GPARAM_SCALE_ROOT,
+	GPARAM_SCALE_PAT,
+	GPARAM_SCALE_LOCK,
+	GPARAM_SCALE_GRP16,
+	GPARAM_MACRO_MODE,
+	GPARAM_MACRO_CHAN
+};
+
 class OmxUtil
 {
 public:
@@ -43,6 +62,15 @@ public:
 
 	MidiNoteGroup midiDrumNoteOn(uint8_t keyIndex, uint8_t notenum, int velocity, int channel);
 	MidiNoteGroup midiDrumNoteOff(uint8_t keyIndex);
+
+	// Used for global params defined in GlobalParams to avoid code duplication
+	// called on Encoder update to edit a parameter
+	void onEncoderChangedEditParam(Encoder::Update *enc, uint8_t selectedParmIndex, uint8_t targetParamIndex, uint8_t paramType);
+	void onEncoderChangedEditParam(Encoder::Update *enc, MusicScales *musicScale, uint8_t selectedParmIndex, uint8_t targetParamIndex, uint8_t paramType);
+
+	// Used for global page legends defined in GlobalParams to avoid code duplication
+	void setupPageLegend(uint8_t index, uint8_t paramType);
+	void setupPageLegend(MusicScales *musicScale, uint8_t index, uint8_t paramType);
 
 private:
 	// int potbank = 0;
