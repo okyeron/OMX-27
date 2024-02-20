@@ -558,8 +558,7 @@ void OmxModeChords::onPotChanged(int potIndex, int prevValue, int newValue, int 
 		macroConsumesPots = activeMacro->consumesPots();
 	}
 
-	// Note, these get sent even if macro mode is not active
-	if (macroConsumesPots)
+	if (macroActive_ && macroConsumesPots)
 	{
 		activeMacro->onPotChanged(potIndex, prevValue, newValue, analogDelta);
 		omxDisp.setDirty();
@@ -1434,7 +1433,6 @@ void OmxModeChords::onKeyUpdate(OMXKeypadEvent e)
 						// }
 						else if (mode_ == CHRDMODE_MANSTRUM) // Manual Strum
 						{
-							// Enter chord edit mode
 							selectedChord_ = thisKey - 11;
 							heldChord_ = thisKey - 11;
 							lastKeyWasKeyboard_ = false;
@@ -2933,10 +2931,10 @@ void OmxModeChords::onDisplayUpdate()
 				{
 					omxDisp.dispGenericModeLabel("Copy to", params->getNumPages(), params->getSelPage());
 				}
-				// if (chordEditMode_ == false && (mode_ == CHRDMODE_PLAY || mode_ == CHRDMODE_EDIT || mode_ == CHRDMODE_MANSTRUM) && funcKeyMode_ == FUNCKEYMODE_F2) // Play mode copy
-				// {
-				// 	omxDisp.dispGenericModeLabel("Copy to", params->getNumPages(), params->getSelPage());
-				// }
+				if (chordEditMode_ == false && (mode_ == CHRDMODE_PLAY || mode_ == CHRDMODE_EDIT || mode_ == CHRDMODE_MANSTRUM) && funcKeyMode_ == FUNCKEYMODE_F2) // Play mode copy
+				{
+					omxDisp.dispGenericModeLabel("Copy to", params->getNumPages(), params->getSelPage());
+				}
 				// else if (chordEditMode_ == false && (mode_ == CHRDMODE_PRESET) && funcKeyMode_ == FUNCKEYMODE_F1) // Preset move load
 				// {
 				// 	omxDisp.dispGenericModeLabel("Load from", params->getNumPages(), params->getSelPage());
@@ -2945,10 +2943,10 @@ void OmxModeChords::onDisplayUpdate()
 				// {
 				// 	omxDisp.dispGenericModeLabel("Save to", params->getNumPages(), params->getSelPage());
 				// }
-				// else if (chordEditMode_ == false && mode_ == CHRDMODE_MANSTRUM)
-				// {
-				// 	omxDisp.dispGenericModeLabel("Enc Strum", params->getNumPages(), 0);
-				// }
+				else if (chordEditMode_ == false && mode_ == CHRDMODE_MANSTRUM)
+				{
+					omxDisp.dispGenericModeLabel("Enc Strum", params->getNumPages(), 0);
+				}
 				else if (params->getSelPage() == CHRDPAGE_NOTES)
 				{
 					if (chordNotes_[selectedChord_].active || chordEditNotes_.active)
