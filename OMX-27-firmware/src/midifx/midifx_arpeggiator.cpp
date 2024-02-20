@@ -1021,6 +1021,7 @@ namespace midifx
             velocity_ = note.velocity;
             sendMidi_ = note.sendMidi;
             sendCV_ = note.sendCV;
+            midiChannel_ = note.channel - 1; // note.channel is 1-16, sub 1 for 0-15
 
             // if(arpMode_ == ARPMODE_ON || arpMode_ == ARPMODE_ONCE)
             // {
