@@ -129,17 +129,10 @@ void OmxModeDrum::selectMidiFx(uint8_t mfxIndex, bool dispMsg)
 
     activeDrumKit.drumKeys[selDrumKey].midifx = mfxIndex;
 
-	// this->mfxIndex_ = mfxIndex;
-
 	for (uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
 	{
 		subModeMidiFx[i].setSelected(i == mfxIndex);
 	}
-
-    if(mfxIndex != prevMidiFX && prevMidiFX < NUM_MIDIFX_GROUPS)
-    {
-        doNoteOff(selDrumKey + 1);
-    }
 
 	if (dispMsg)
 	{

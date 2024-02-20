@@ -333,6 +333,7 @@ private:
 	bool getEncoderSelect();
 
 	void selectMidiFx(uint8_t mfxIndex, bool dispMsg);
+	void selectMidiFxChordKey(int8_t mfxIndex, bool dispMsg);
 	bool onKeyUpdateSelMidiFX(OMXKeypadEvent e);
 	bool onKeyHeldSelMidiFX(OMXKeypadEvent e);
 

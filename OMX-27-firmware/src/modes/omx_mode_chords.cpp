@@ -479,6 +479,35 @@ void OmxModeChords::selectMidiFx(uint8_t mfxIndex, bool dispMsg)
 	}
 }
 
+void OmxModeChords::selectMidiFxChordKey(int8_t mfxIndex, bool dispMsg)
+{
+    int8_t prevMidiFX = chords_[selectedChord_].midiFx;
+    
+    if(mfxIndex != prevMidiFX && (prevMidiFX >= 0 && prevMidiFX < NUM_MIDIFX_GROUPS))
+    {
+		onChordOff(selectedChord_);
+    }
+
+    chords_[selectedChord_].midiFx = mfxIndex;
+
+	for (uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
+	{
+		subModeMidiFx[i].setSelected(i == mfxIndex);
+	}
+
+	if (dispMsg)
+	{
+		if (mfxIndex >= 0 && mfxIndex < NUM_MIDIFX_GROUPS)
+		{
+			omxDisp.displayMessageTimed("MidiFX " + String(mfxIndex + 1), 5);
+		}
+		else
+		{
+			omxDisp.displayMessageTimed("MidiFX Off", 5);
+		}
+	}
+}
+
 void OmxModeChords::onClockTick()
 {
 	for (uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
@@ -851,7 +880,8 @@ void OmxModeChords::onEncoderChangedEditParam(Encoder::Update *enc, uint8_t sele
 	break;
 	case CPARAM_CHORD_MFX:
 	{
-		chords_[selectedChord_].midiFx = constrain(chords_[selectedChord_].midiFx + amtSlow, -1, NUM_MIDIFX_GROUPS - 1);
+		int8_t newMidiFx = constrain(chords_[selectedChord_].midiFx + amtSlow, -1, NUM_MIDIFX_GROUPS - 1);
+		selectMidiFxChordKey(newMidiFx, false);
 	}
 	break;
 	case CPARAM_CHORD_VEL:
@@ -1988,7 +2018,7 @@ void OmxModeChords::doNoteOff(int noteNumber, uint8_t midifx, uint8_t midiChanne
 	noteGroup.unknownLength = true;
 	noteGroup.prevNoteNumber = noteGroup.noteNumber;
 
-	if (midifx < NUM_MIDIFX_GROUPS)
+	if (midifx >= 0 && midifx < NUM_MIDIFX_GROUPS)
 	{
 		subModeMidiFx[midifx].noteInput(noteGroup);
 		// subModeMidiFx.noteInput(noteGroup);
