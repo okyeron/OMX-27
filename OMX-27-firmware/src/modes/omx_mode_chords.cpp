@@ -813,43 +813,6 @@ void OmxModeChords::onEncoderChangedEditParam(Encoder::Update *enc, uint8_t sele
 		}
 	}
 	break;
-	// case CPARAM_SCALE_ROOT:
-	// {
-	// 	int prevRoot = scaleConfig.scaleRoot;
-	// 	scaleConfig.scaleRoot = constrain(scaleConfig.scaleRoot + amtSlow, 0, 12 - 1);
-	// 	if (prevRoot != scaleConfig.scaleRoot)
-	// 	{
-	// 		musicScale_->calculateScale(scaleConfig.scaleRoot, scaleConfig.scalePattern);
-	// 	}
-	// }
-	// break;
-	// case CPARAM_SCALE_PAT:
-	// {
-	// 	int prevPat = scaleConfig.scalePattern;
-	// 	scaleConfig.scalePattern = constrain(scaleConfig.scalePattern + amtSlow, -1, musicScale_->getNumScales() - 1);
-	// 	if (prevPat != scaleConfig.scalePattern)
-	// 	{
-	// 		omxDisp.displayMessage(musicScale_->getScaleName(scaleConfig.scalePattern));
-	// 		musicScale_->calculateScale(scaleConfig.scaleRoot, scaleConfig.scalePattern);
-	// 	}
-	// }
-	// break;
-	// case CPARAM_SCALE_LOCK:
-	// {
-	// 	scaleConfig.lockScale = constrain(scaleConfig.lockScale + amtSlow, 0, 1);
-	// }
-	// break;
-	// case CPARAM_SCALE_GRP16:
-	// {
-	// 	scaleConfig.group16 = constrain(scaleConfig.group16 + amtSlow, 0, 1);
-	// }
-	// break;
-	// case CPARAM_GBL_OCT:
-	// {
-	// 	// set octave
-	// 	midiSettings.octave = constrain(midiSettings.octave + amtSlow, -5, 4);
-	// }
-	// break;
 	case CPARAM_MAN_STRUM:
 	{
 		if (mode_ == CHRDMODE_MANSTRUM)
@@ -868,44 +831,6 @@ void OmxModeChords::onEncoderChangedEditParam(Encoder::Update *enc, uint8_t sele
 		}
 	}
 	break;
-	// case CPARAM_GBL_MCHAN:
-	// {
-	// 	int newchan = constrain(sysSettings.midiChannel + amtSlow, 1, 16);
-	// 	if (newchan != sysSettings.midiChannel)
-	// 	{
-	// 		sysSettings.midiChannel = newchan;
-	// 	}
-	// }
-	// break;
-	// case CPARAM_GBL_VEL:
-	// {
-	// 	midiSettings.defaultVelocity = constrain((int)midiSettings.defaultVelocity + amtFast, 0, 127); // cast to int to prevent rollover
-	// }
-	// break;
-	// case CPARAM_GBL_POTCC:
-	// {
-	// }
-	// break;
-	// case CPARAM_GBL_PBANK:
-	// {
-	// 	potSettings.potbank = constrain(potSettings.potbank + amtSlow, 0, NUM_CC_BANKS - 1);
-	// }
-	// break;
-	// case CPARAM_GBL_MIDITHRU:
-	// {
-	// 	midiSettings.midiSoftThru = constrain(midiSettings.midiSoftThru + amtSlow, 0, 1);
-	// }
-	// break;
-	// case CPARAM_GBL_MIDIMACRO:
-	// {
-	// 	midiMacroConfig.midiMacro = constrain(midiMacroConfig.midiMacro + amtSlow, 0, nummacromodes);
-	// }
-	// break;
-	// case CPARAM_GBL_MACROCHAN:
-	// {
-	// 	midiMacroConfig.midiMacroChan = constrain(midiMacroConfig.midiMacroChan + amtSlow, 1, 16);
-	// }
-	// break;
 	case CPARAM_CHORD_TYPE:
 	{
 		if (amtSlow != 0)
@@ -2582,94 +2507,12 @@ void OmxModeChords::setupPageLegend(uint8_t index, uint8_t paramType)
 		omxDisp.legendText[index] = kUIModeDisp[uiMode_];
 	}
 	break;
-	// case CPARAM_SCALE_ROOT:
-	// {
-	// 	omxDisp.legends[index] = "ROOT";
-	// 	omxDisp.legendVals[index] = -127;
-	// 	omxDisp.legendText[index] = musicScale_->getNoteName(scaleConfig.scaleRoot);
-	// }
-	// break;
-	// case CPARAM_SCALE_PAT:
-	// {
-	// 	omxDisp.legends[index] = "SCALE";
-
-	// 	if (scaleConfig.scalePattern < 0)
-	// 	{
-	// 		omxDisp.legendText[index] = "CHRM";
-	// 	}
-	// 	else
-	// 	{
-	// 		omxDisp.legendVals[index] = scaleConfig.scalePattern;
-	// 	}
-	// }
-	// break;
-	// case CPARAM_SCALE_LOCK:
-	// {
-	// 	omxDisp.legends[index] = "LOCK";
-	// 	omxDisp.legendText[index] = scaleConfig.lockScale ? "On" : "Off";
-	// }
-	// break;
-	// case CPARAM_SCALE_GRP16:
-	// {
-	// 	omxDisp.legends[index] = "GROUP";
-	// 	omxDisp.legendText[index] = scaleConfig.group16 ? "On" : "Off";
-	// }
-	// break;
-	// case CPARAM_GBL_OCT:
-	// {
-	// 	omxDisp.legends[index] = "OCT";
-	// 	omxDisp.legendVals[index] = (int)midiSettings.octave + 4;
-	// 	;
-	// }
-	// break;
 	case CPARAM_MAN_STRUM:
 	{
 		omxDisp.legends[index] = "STRUM";
 		omxDisp.legendText[index] = mode_ == CHRDMODE_MANSTRUM ? "ON" : "OFF";
 	}
 	break;
-	// case CPARAM_GBL_MCHAN:
-	// {
-	// 	omxDisp.legends[index] = "CH";
-	// 	omxDisp.legendVals[index] = sysSettings.midiChannel;
-	// }
-	// break;
-	// case CPARAM_GBL_VEL:
-	// {
-	// 	omxDisp.legends[index] = "VEL";
-	// 	omxDisp.legendVals[index] = midiSettings.defaultVelocity;
-	// }
-	// break;
-	// case CPARAM_GBL_POTCC:
-	// {
-	// 	omxDisp.legends[index] = "CC";
-	// 	omxDisp.legendVals[index] = potSettings.potVal;
-	// }
-	// break;
-	// case CPARAM_GBL_PBANK:
-	// {
-	// 	omxDisp.legends[index] = "PBNK"; // Potentiometer Banks
-	// 	omxDisp.legendVals[index] = potSettings.potbank + 1;
-	// }
-	// break;
-	// case CPARAM_GBL_MIDITHRU:
-	// {
-	// 	omxDisp.legends[index] = "THRU"; // MIDI thru (usb to hardware)
-	// 	omxDisp.legendText[index] = midiSettings.midiSoftThru ? "On" : "Off";
-	// }
-	// break;
-	// case CPARAM_GBL_MIDIMACRO:
-	// {
-	// 	omxDisp.legends[index] = "MCRO"; // Macro mode
-	// 	omxDisp.legendText[index] = macromodes[midiMacroConfig.midiMacro];
-	// }
-	// break;
-	// case CPARAM_GBL_MACROCHAN:
-	// {
-	// 	omxDisp.legends[index] = "M-CH";
-	// 	omxDisp.legendVals[index] = midiMacroConfig.midiMacroChan;
-	// }
-	// break;
 	case CPARAM_CHORD_TYPE:
 	{
 		omxDisp.legends[index] = "TYPE";
@@ -2793,19 +2636,8 @@ void OmxModeChords::setupPageLegends()
 	case CHRDPAGE_GBL1:
 	{
 		setupPageLegend(0, CPARAM_UIMODE);
-		// setupPageLegend(1, CPARAM_SCALE_ROOT);
-		// setupPageLegend(2, CPARAM_SCALE_PAT);
-		// setupPageLegend(3, CPARAM_GBL_OCT);
 	}
 	break;
-	// case CHRDPAGE_GBL2:
-	// {
-	// 	setupPageLegend(0, CPARAM_MAN_STRUM);
-	// 	setupPageLegend(1, CPARAM_GBL_MCHAN);
-	// 	setupPageLegend(2, CPARAM_GBL_POTCC);
-	// 	setupPageLegend(3, CPARAM_GBL_PBANK);
-	// }
-	// break;
 	case CHRDPAGE_OUTMIDI:
 	{
 		omxUtil.setupPageLegend(0, GPARAM_MOUT_OCT);
