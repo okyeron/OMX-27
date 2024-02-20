@@ -627,14 +627,11 @@ There are two UI views: "Split" and "Full". This can be changed on page 2. By de
 
 ### Key Modes
 
-There are several different modes available which can be switched using the top keys 3, 4, & 5, and a strum mode by holding top key 1 and pressing top key 3. 
+There are several different modes available which can be switched using the top keys 3, 4, & 5.
 
 - **[Top 3] Play Mode**
 - **[Top 4] Edit Mode**
-- **[Top 5] Preset Mode**
-- **[Top 1 - F1] + [Top 3] Enter Strum Mode**
-- **[Top 6] Enter Strum Mode** : Only available in "Full" UI View
-
+- **[Top 5] Strum Mode**
 
 #### Play Mode
 - **[Top 3] Play Mode**
@@ -653,26 +650,12 @@ The first two top keys, key 1 and key 2 act as function keys F1 and F2 in this m
 - **[Top 1 - F1] Edit Chord** : Holding F1 and pressing a chord key will enter a edit chord submode.   
 - **[Top 2 - F2] Copy Chord** : Holding F2 and pressing a chord key will save the selected chord to the newly selected chord slot. 
 
-#### Preset Mode
-- **[Top 5] Preset Mode**
-
-This mode is for saving and loading banks of chord keys. There are 8 available banks. 
-
-While in this mode, the bottom 8 or 16 keys will play chords, the F1 and F2 keys are used to save and load banks. 
-
-- **[Top 1 - F1] Load From** : Holding F1 and pressing one of keys 1-8 on the bottom will load that bank. If you load a bank other than the current one, the current bank will be autosaved. You can revert changes to your current bank by loading it again. 
-- **[Top 2 - F2] Save To** : Holding F2 and pressing one of keys 1-8 on the bottom will save the current bank to the bank at that key. 
-
 #### Strum Mode
-- **[Top 1 - F1] + [Top 3] Enter Strum Mode**
-- **[Top 6] Enter Strum Mode** : Only available in "Full" UI View
+- **[Top 5] Strum Mode**
 
 This mode allows you to strum chords using the encoder. The UI view will change to "Full" in this mode. 
 
-You can enter this mode either by holding F1 and pressing top key 3 or by pressing top key 6 if you are in the "Full" UI Mode. 
-
 To use this mode hold down a chord key and turn the encoder CW or CCW. Only the last pressed chord will be strummed. Multiple chords will not be strummed. 
-
 
 ##### Strum Pot Parameters. 
 In strum mode, the 5 pots are used to change the behaviour of the strum. 
@@ -779,6 +762,10 @@ Hold down the AUX key to access quick functions.
 - **[1] Previous Parameter** : Selects the previous parameter in the menu
 - **[2] Next Parameter** : Selects the next parameter in the menu
 
+#### Saving and loading
+- **[3] Load Bank**
+- **[4] Save Bank**
+
 ##### MidiFX
 This sets the MidiFX slot that either the keyboard in split UI view is being sent to, or the selected chord key is being sent to. Whichever key was last used determines this. You can also change the midifx slot a chord key is sent to from the menu, see [Chord Key Settings](#chordkeysettings)
 Hold or double click a MidiFX key to enter the MidiFX submode. 
@@ -803,6 +790,12 @@ This effects the Arpeggiator on the currently selected MidiFX slot that the midi
 - **[14] Change Octave** : Cycles through arpeggiator octave ranges  
 - **[15] Toggle Hold** : Toggles the arpeggiator hold function  
 - **[16] Power** : Toggles the arpeggiator on and off  
+
+### Saving and Loading
+- **[AUX + Top 3] Load Bank**
+- **[AUX + Top 4] Save Bank**
+
+Use these shortcuts to save and load banks of chords. There are 8 available banks. If you load a bank other than the current one, the current bank will be autosaved. You can revert changes to your current bank by loading the same bank again. 
 
 ---
 
