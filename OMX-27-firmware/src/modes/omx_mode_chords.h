@@ -234,6 +234,9 @@ private:
 	// bool splitKeyboardMode_ = false;
 
 	bool wrapManStrum_ = true;
+
+	bool lastKeyWasKeyboard_ = false; // This gets set to true if the last key pressed was a keyboard key and not a chord key
+
 	uint8_t incrementManStrum_ = 0;
 	uint8_t manStrumSensit_ = 10;
 
