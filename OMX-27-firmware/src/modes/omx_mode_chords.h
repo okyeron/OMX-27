@@ -9,6 +9,9 @@
 #include "submodes/submode_interface.h"
 #include "submodes/submode_midifxgroup.h"
 #include "submodes/submode_preset.h"
+#include "../midimacro/midimacro_m8.h"
+#include "../midimacro/midimacro_norns.h"
+#include "../midimacro/midimacro_deluge.h"
 
 enum ChordVoicing
 {
@@ -209,6 +212,9 @@ public:
 	void onEncoderButtonDown() override;
 	void onEncoderButtonDownLong() override;
 
+	void inMidiControlChange(byte channel, byte control, byte value) override;
+
+
 	bool shouldBlockEncEdit() override;
 
 	void onKeyUpdate(OMXKeypadEvent e) override;
@@ -241,6 +247,29 @@ private:
 	static void doLoadPresetForwarder(void *context, uint8_t presetIndex)
 	{
 		static_cast<OmxModeChords *>(context)->loadPreset(presetIndex);
+	}
+
+	bool macroActive_ = false;
+
+	midimacro::MidiMacroNorns nornsMarco_;
+	midimacro::MidiMacroM8 m8Macro_;
+	midimacro::MidiMacroDeluge delugeMacro_;
+
+	midimacro::MidiMacroInterface *activeMacro_;
+	midimacro::MidiMacroInterface *getActiveMacro();
+
+	// Used by the Macros for playing normal notes
+	static void doNoteOnForwarder(void *context, uint8_t keyIndex)
+	{
+		auto chordsInstance = static_cast<OmxModeChords *>(context);
+		chordsInstance->doNoteOn(keyIndex, chordsInstance->mfxIndex_, midiSettings.defaultVelocity, sysSettings.midiChannel);
+	}
+
+	// Used by the Macros for playing normal notes
+	static void doNoteOffForwarder(void *context, uint8_t keyIndex)
+	{
+		auto chordsInstance = static_cast<OmxModeChords *>(context);
+		chordsInstance->doNoteOff(keyIndex, chordsInstance->mfxIndex_, sysSettings.midiChannel);
 	}
 
 	// If true, encoder selects param rather than modifies value

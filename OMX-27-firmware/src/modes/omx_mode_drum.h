@@ -108,7 +108,6 @@ private:
 	bool macroActive_ = false;
 
 	void onKeyUpdateLoadKit(OMXKeypadEvent e);
-	void onKeyUpdateM8Macro(OMXKeypadEvent e);
 	bool onKeyUpdateSelMidiFX(OMXKeypadEvent e);
 	bool onKeyHeldSelMidiFX(OMXKeypadEvent e);
 

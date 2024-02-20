@@ -712,6 +712,7 @@ void OmxModeDrum::onKeyHeldUpdate(OMXKeypadEvent e)
 		return;
 }
 
+// TODO : Instantiate these outside of class so they are global
 midimacro::MidiMacroInterface *OmxModeDrum::getActiveMacro()
 {
 	switch (midiMacroConfig.midiMacro)
