@@ -780,7 +780,7 @@ Hold down the AUX key to access quick functions.
 - **[2] Next Parameter** : Selects the next parameter in the menu
 
 ##### MidiFX
-This sets the MidiFX slot that the keyboard in split UI view is being sent to. To change the midifx slot a chord key is sent to see [Chord Key Settings](#chordkeysettings)
+This sets the MidiFX slot that either the keyboard in split UI view is being sent to, or the selected chord key is being sent to. Whichever key was last used determines this. You can also change the midifx slot a chord key is sent to from the menu, see [Chord Key Settings](#chordkeysettings)
 Hold or double click a MidiFX key to enter the MidiFX submode. 
 See [MidiFX](#midifx) for more info. 
 - **[5] MidiFX Off**
