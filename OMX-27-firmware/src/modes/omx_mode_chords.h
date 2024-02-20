@@ -8,6 +8,7 @@
 #include "../hardware/storage.h"
 #include "submodes/submode_interface.h"
 #include "submodes/submode_midifxgroup.h"
+#include "submodes/submode_preset.h"
 
 enum ChordVoicing
 {
@@ -226,6 +227,21 @@ private:
 		uint8_t noteNumber : 7;
 		uint8_t midiChannel : 4;
 	};
+
+	SubModePreset presetManager;
+
+	// void savePreset(uint8_t saveIndex);
+	// void loadPreset(uint8_t loadIndex);
+
+	static void doSavePresetForwarder(void *context, uint8_t presetIndex)
+	{
+		static_cast<OmxModeChords *>(context)->savePreset(presetIndex);
+	}
+
+	static void doLoadPresetForwarder(void *context, uint8_t presetIndex)
+	{
+		static_cast<OmxModeChords *>(context)->loadPreset(presetIndex);
+	}
 
 	// If true, encoder selects param rather than modifies value
 	bool auxDown_ = false;

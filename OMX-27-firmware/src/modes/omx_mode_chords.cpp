@@ -85,7 +85,7 @@ enum ChordsMainMode
 {
 	CHRDMODE_PLAY, // Play Chords
 	CHRDMODE_EDIT, // Play Chords, jumps to edit page
-	CHRDMODE_PRESET, // Loads groups of chord presets
+	// CHRDMODE_PRESET, // Replaced by preset manager // Loads groups of chord presets
 	CHRDMODE_MANSTRUM, // Manually strum chords using the encoder
 };
 
@@ -381,6 +381,11 @@ OmxModeChords::OmxModeChords()
 	activeChordEditNoteKey_ = -1;
 
 	uiMode_ = CUIMODE_SPLIT;
+
+
+	presetManager.setContextPtr(this);
+    presetManager.setDoSaveFunc(&OmxModeChords::doSavePresetForwarder);
+    presetManager.setDoLoadFunc(&OmxModeChords::doLoadPresetForwarder);
 
 	// chords_[0].numNotes = 3;
 	// chords_[0].degree = 0;
@@ -1194,6 +1199,18 @@ void OmxModeChords::onKeyUpdate(OMXKeypadEvent e)
 					params->incrementParam();
 				}
 			}
+			else if (thisKey == 3)
+			{
+				presetManager.configure(PRESETMODE_LOAD, selectedSave_, NUM_CHORD_SAVES, true);
+        		enableSubmode(&presetManager);
+				return;
+			}
+			else if (thisKey == 4)
+			{
+				presetManager.configure(PRESETMODE_SAVE, selectedSave_, NUM_CHORD_SAVES, true);
+        		enableSubmode(&presetManager);
+				return;
+			}
 		}
 	}
 	else
@@ -1282,13 +1299,13 @@ void OmxModeChords::onKeyUpdate(OMXKeypadEvent e)
 						omxDisp.displayMessage("Edit");
 						allNotesOff();
 					}
+					// else if (thisKey == 5)
+					// {
+					// 	mode_ = CHRDMODE_PRESET;
+					// 	omxDisp.displayMessage("Preset");
+					// 	allNotesOff();
+					// }
 					else if (thisKey == 5)
-					{
-						mode_ = CHRDMODE_PRESET;
-						omxDisp.displayMessage("Preset");
-						allNotesOff();
-					}
-					else if (thisKey == 6)
 					{
 						mode_ = CHRDMODE_MANSTRUM;
 						omxDisp.displayMessage("Manual Strum");
@@ -1310,13 +1327,13 @@ void OmxModeChords::onKeyUpdate(OMXKeypadEvent e)
 							lastKeyWasKeyboard_ = false;
 							onChordOn(thisKey - 11);
 						}
-						else if (mode_ == CHRDMODE_PRESET) // Preset
-						{
-							selectedChord_ = thisKey - 11;
-							heldChord_ = thisKey - 11;
-							lastKeyWasKeyboard_ = false;
-							onChordOn(thisKey - 11);
-						}
+						// else if (mode_ == CHRDMODE_PRESET) // Preset
+						// {
+						// 	selectedChord_ = thisKey - 11;
+						// 	heldChord_ = thisKey - 11;
+						// 	lastKeyWasKeyboard_ = false;
+						// 	onChordOn(thisKey - 11);
+						// }
 						else if (mode_ == CHRDMODE_MANSTRUM) // Manual Strum
 						{
 							// Enter chord edit mode
@@ -1345,13 +1362,13 @@ void OmxModeChords::onKeyUpdate(OMXKeypadEvent e)
 			{
 				// Alt way to enter manual strum useful in split screen view
 				// if(mode_ == CHRDMODE_PLAY && funcKeyMode_ == FUNCKEYMODE_F1 && e.down() && thisKey == 3)
-				if(funcKeyMode_ == FUNCKEYMODE_F1 && e.down() && thisKey == 3)
-				{
-					mode_ = CHRDMODE_MANSTRUM;
-					omxDisp.displayMessage("Manual Strum");
-					allNotesOff();
-					return;
-				}
+				// if(funcKeyMode_ == FUNCKEYMODE_F1 && e.down() && thisKey == 3)
+				// {
+				// 	mode_ = CHRDMODE_MANSTRUM;
+				// 	omxDisp.displayMessage("Manual Strum");
+				// 	allNotesOff();
+				// 	return;
+				// }
 
 				if (e.down() && thisKey >= 11)
 				{
@@ -1388,28 +1405,28 @@ void OmxModeChords::onKeyUpdate(OMXKeypadEvent e)
 						}
 					}
 					// --- PRESET MODE ---
-					else if (mode_ == CHRDMODE_PRESET)
-					{
-						if (funcKeyMode_ == FUNCKEYMODE_F1)
-						{
-							// Autosave your current preset unless you are reloading the current preset
-							if(thisKey - 11 != selectedSave_)
-							{
-								savePreset(selectedSave_);
-							}
-							if (loadPreset(thisKey - 11))
-							{
-								omxDisp.displayMessageTimed("Load " + String(thisKey - 11), 5);
-							}
-						}
-						else if (funcKeyMode_ == FUNCKEYMODE_F2)
-						{
-							if (savePreset(thisKey - 11))
-							{
-								omxDisp.displayMessageTimed("Saved to " + String(thisKey - 11), 5);
-							}
-						}
-					}
+					// else if (mode_ == CHRDMODE_PRESET)
+					// {
+					// 	if (funcKeyMode_ == FUNCKEYMODE_F1)
+					// 	{
+					// 		// Autosave your current preset unless you are reloading the current preset
+					// 		if(thisKey - 11 != selectedSave_)
+					// 		{
+					// 			savePreset(selectedSave_);
+					// 		}
+					// 		if (loadPreset(thisKey - 11))
+					// 		{
+					// 			omxDisp.displayMessageTimed("Load " + String(thisKey - 11), 5);
+					// 		}
+					// 	}
+					// 	else if (funcKeyMode_ == FUNCKEYMODE_F2)
+					// 	{
+					// 		if (savePreset(thisKey - 11))
+					// 		{
+					// 			omxDisp.displayMessageTimed("Saved to " + String(thisKey - 11), 5);
+					// 		}
+					// 	}
+					// }
 					// --- STRUM MODE ---
 					else if (mode_ == CHRDMODE_MANSTRUM) // Manual Strum
 					{
@@ -2193,6 +2210,9 @@ void OmxModeChords::updateLEDs()
 		strip.setPixelColor(1, LIME);
 		strip.setPixelColor(2, MAGENTA);
 
+		strip.setPixelColor(3, BLUE); // Load
+		strip.setPixelColor(4, ORANGE); // Save
+
 		if (midiSettings.octave == 0)
 		{
 			strip.setPixelColor(11, colorConfig.octDnColor);
@@ -2276,8 +2296,8 @@ void OmxModeChords::updateLEDs()
 
 	strip.setPixelColor(3, mode_ == CHRDMODE_PLAY ? WHITE : kPlayColor);
 	strip.setPixelColor(4, mode_ == CHRDMODE_EDIT ? WHITE : kEditColor);
-	strip.setPixelColor(5, mode_ == CHRDMODE_PRESET ? WHITE : kPresetColor);
-	strip.setPixelColor(6, mode_ == CHRDMODE_MANSTRUM ? WHITE : MAGENTA);
+	// strip.setPixelColor(5, mode_ == CHRDMODE_PRESET ? WHITE : kPresetColor);
+	strip.setPixelColor(5, mode_ == CHRDMODE_MANSTRUM ? WHITE : MAGENTA);
 
 	if (mode_ == CHRDMODE_PLAY || mode_ == CHRDMODE_MANSTRUM) // Play
 	{
@@ -2307,13 +2327,13 @@ void OmxModeChords::updateLEDs()
 			}
 		}
 	}
-	else if (mode_ == CHRDMODE_PRESET) // Preset
-	{
-		for (uint8_t i = 0; i < NUM_CHORD_SAVES; i++)
-		{
-			strip.setPixelColor(11 + i, (i == selectedSave_ ? WHITE : kPresetColor));
-		}
-	}
+	// else if (mode_ == CHRDMODE_PRESET) // Preset
+	// {
+	// 	for (uint8_t i = 0; i < NUM_CHORD_SAVES; i++)
+	// 	{
+	// 		strip.setPixelColor(11 + i, (i == selectedSave_ ? WHITE : kPresetColor));
+	// 	}
+	// }
 
 	if ((mode_ == CHRDMODE_PLAY || mode_ == CHRDMODE_EDIT) && uiMode_ == CUIMODE_SPLIT)
 	{
@@ -2800,18 +2820,18 @@ void OmxModeChords::onDisplayUpdate()
 			// {
 			// 	omxDisp.dispGenericModeLabel("Copy to", params->getNumPages(), params->getSelPage());
 			// }
-			else if (chordEditMode_ == false && (mode_ == CHRDMODE_PRESET) && funcKeyMode_ == FUNCKEYMODE_F1) // Preset move load
-			{
-				omxDisp.dispGenericModeLabel("Load from", params->getNumPages(), params->getSelPage());
-			}
-			else if (chordEditMode_ == false && (mode_ == CHRDMODE_PRESET) && funcKeyMode_ == FUNCKEYMODE_F2) // Preset move save
-			{
-				omxDisp.dispGenericModeLabel("Save to", params->getNumPages(), params->getSelPage());
-			}
-			else if (chordEditMode_ == false && mode_ == CHRDMODE_MANSTRUM)
-			{
-				omxDisp.dispGenericModeLabel("Enc Strum", params->getNumPages(), 0);
-			}
+			// else if (chordEditMode_ == false && (mode_ == CHRDMODE_PRESET) && funcKeyMode_ == FUNCKEYMODE_F1) // Preset move load
+			// {
+			// 	omxDisp.dispGenericModeLabel("Load from", params->getNumPages(), params->getSelPage());
+			// }
+			// else if (chordEditMode_ == false && (mode_ == CHRDMODE_PRESET) && funcKeyMode_ == FUNCKEYMODE_F2) // Preset move save
+			// {
+			// 	omxDisp.dispGenericModeLabel("Save to", params->getNumPages(), params->getSelPage());
+			// }
+			// else if (chordEditMode_ == false && mode_ == CHRDMODE_MANSTRUM)
+			// {
+			// 	omxDisp.dispGenericModeLabel("Enc Strum", params->getNumPages(), 0);
+			// }
 			else if (params->getSelPage() == CHRDPAGE_NOTES)
 			{
 				if (chordNotes_[selectedChord_].active || chordEditNotes_.active)
