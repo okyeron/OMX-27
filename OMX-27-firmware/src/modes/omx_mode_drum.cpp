@@ -10,7 +10,7 @@
 
 enum DrumModePage {
     DRUMPAGE_DRUMKEY, // Note, Chan, Vel, MidiFX
-    DRUMPAGE_DRUMKEY2, // Hue,
+    DRUMPAGE_DRUMKEY2, // Hue, RND Hue, Copy, Paste
     DRUMPAGE_SCALES, // Hue,
     DRUMPAGE_INSPECT, // Sent Pot CC, Last Note, Last Vel, Last Chan, Not editable, just FYI
     DRUMPAGE_POTSANDMACROS, // PotBank, Thru, Macro, Macro Channel
@@ -198,6 +198,26 @@ void OmxModeDrum::loopUpdate(Micros elapsedTime)
 	
 }
 
+bool OmxModeDrum::isDrumKeyHeld()
+{
+	if(isSubmodeEnabled()) return false;
+
+	for(uint8_t i = 1; i < 27; i++)
+	{
+		if(midiSettings.midiKeyState[i] >= 0)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool OmxModeDrum::getEncoderSelect()
+{
+	return encoderSelect && !midiSettings.midiAUX && !isDrumKeyHeld();
+}
+
 void OmxModeDrum::onEncoderChanged(Encoder::Update enc)
 {
 	if (isSubmodeEnabled())
@@ -219,7 +239,7 @@ void OmxModeDrum::onEncoderChanged(Encoder::Update enc)
 		return;
 	}
 
-	if (encoderSelect && !midiSettings.midiAUX)
+	if (getEncoderSelect())
 	{
 		// onEncoderChangedSelectParam(enc);
 		params.changeParam(enc.dir());
@@ -353,12 +373,33 @@ void OmxModeDrum::onEncoderButtonDown()
 		return;
 	}
 
-    if (params.getSelPage() == DRUMPAGE_DRUMKEY2 && params.getSelParam() == 1)
+	if (params.getSelPage() == DRUMPAGE_DRUMKEY2)
 	{
-        randomizeHues();
-		omxDisp.isDirty();
-        omxLeds.isDirty();
-		return;
+		auto selParam = params.getSelParam();
+
+		if (selParam == 1)
+		{
+			randomizeHues();
+			omxDisp.isDirty();
+			omxLeds.isDirty();
+			return;
+		}
+		else if (selParam == 2) // Copy
+		{
+			tempDrumKey.CopyFrom(activeDrumKit.drumKeys[selDrumKey]);
+			omxDisp.displayMessage("Copied " + String(selDrumKey + 1));
+			omxDisp.isDirty();
+			omxLeds.isDirty();
+			return;
+		}
+		else if (selParam == 3) // Paste
+		{
+			activeDrumKit.drumKeys[selDrumKey].CopyFrom(tempDrumKey);
+			omxDisp.displayMessage("Pasted " + String(selDrumKey + 1));
+			omxDisp.isDirty();
+			omxLeds.isDirty();
+			return;
+		}
 	}
 
 	if (params.getSelPage() == DRUMPAGE_CFG && params.getSelParam() == 0)
@@ -908,8 +949,12 @@ void OmxModeDrum::onDisplayUpdate()
 
 					omxDisp.legends[0] = "HUE";
 					omxDisp.legends[1] = "HUE";
+					omxDisp.legends[2] = "COPY";
+					omxDisp.legends[3] = "PAST";
 					omxDisp.legendVals[0] = drumKey.hue;
 					omxDisp.legendText[1] = "RND";
+					omxDisp.legendVals[2] = selDrumKey + 1;
+					omxDisp.legendVals[3] = selDrumKey + 1;
 				}
 				else if (params.getSelPage() == DRUMPAGE_INSPECT)
 				{
@@ -969,7 +1014,7 @@ void OmxModeDrum::onDisplayUpdate()
 					omxDisp.legendText[0] = "CFG";
 				}
 
-				omxDisp.dispGenericMode2(params.getNumPages(), params.getSelPage(), params.getSelParam(), encoderSelect && !midiSettings.midiAUX);
+				omxDisp.dispGenericMode2(params.getNumPages(), params.getSelPage(), params.getSelParam(), getEncoderSelect());
 			}
 		}
 	}

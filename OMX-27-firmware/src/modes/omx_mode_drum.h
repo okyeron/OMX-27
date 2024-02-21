@@ -89,6 +89,9 @@ private:
 	SubModePreset presetManager;
 	uint8_t selDrumKit;
 	uint8_t selDrumKey;
+
+	DrumKeySettings tempDrumKey; // for copy/paste
+
 	DrumKit activeDrumKit;
 	DrumKit drumKits[NUM_DRUM_KITS];
 	MusicScales *musicScale;
@@ -106,6 +109,9 @@ private:
 	ParamManager params;
 
 	bool macroActive_ = false;
+
+	bool isDrumKeyHeld();
+	bool getEncoderSelect();
 
 	void onKeyUpdateLoadKit(OMXKeypadEvent e);
 	bool onKeyUpdateSelMidiFX(OMXKeypadEvent e);
