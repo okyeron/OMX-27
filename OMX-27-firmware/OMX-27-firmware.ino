@@ -835,6 +835,8 @@ void loop()
 		{
 			// temp - save whenever the 0 key is pressed in encoder edit mode
 			omxDisp.displayMessage("Saving...");
+			omxDisp.isDirty();
+			omxDisp.showDisplay();
 			saveToStorage();
 			//	Serial.println("EEPROM saved");
 			omxDisp.displayMessage("Saved State");

@@ -1301,7 +1301,11 @@ int OmxModeDrum::saveToDisk(int startingAddress, Storage *storage)
 
 int OmxModeDrum::loadFromDisk(int startingAddress, Storage *storage)
 {
-	int saveSize = sizeof(DrumKit);
+	int saveSize = sizeof(DrumKit); // 5 * 26 = 130
+
+	// int drumKeySize = sizeof(DrumKeySettings);
+
+	// Serial.println((String)"DrumKit Size: " + saveSize + " drumKeySize: " + drumKeySize); // 5 - 130 - 1040 bytes
 
     for (uint8_t saveIndex = 0; saveIndex < NUM_DRUM_KITS; saveIndex++)
     {
@@ -1313,7 +1317,7 @@ int OmxModeDrum::loadFromDisk(int startingAddress, Storage *storage)
             current++;
         }
 
-        drumKits[saveIndex] = drumKit;
+        drumKits[saveIndex].CopyFrom(drumKit);
         startingAddress += saveSize;
     }
 
