@@ -79,10 +79,14 @@ const int8_t scalePatterns[][7] = {
 	{0, 2, 3, 5, 6, 8, 9},
 
 	// pentatonic scales
+	// major blues
+	{0, 2, 3, 4, 7, 9, -1},
+	// minor blues
+	{0, 3, 5, 6, 7, 10, -1},
 	// major pentatonic
 	{0, 2, 4, 7, 9, -1, -1},
 	// minor pentatonic
-	{0, 3, 5, 7, 9, -1, -1},
+	{0, 3, 5, 7, 10, -1, -1},
 	// in sen (japanese)
 	{0, 1, 5, 7, 10, -1, -1},
 	// iwato
@@ -128,6 +132,8 @@ const char *scaleNames[] = {
 	"ionian #2#5",
 	"loc bb3bb7",
 
+	"blues maj",
+	"blues min",
 	"penta maj",
 	"penta min",
 	"in sen",
