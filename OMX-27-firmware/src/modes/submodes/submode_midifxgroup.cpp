@@ -298,6 +298,15 @@ void SubModeMidiFxGroup::updateFuncKeyMode()
 
 	funcKeyMode_ = FUNCKEYMODE_NONE;
 
+	if(arpParamView_)
+	{
+		if (funcKeyMode_ != prevMode)
+		{
+			omxDisp.setDirty();
+		}
+		return;
+	}
+
 	if (keyState[1] && !keyState[2])
 	{
 		funcKeyMode_ = FUNCKEYMODE_F1;
