@@ -763,10 +763,11 @@ namespace midifx
         while (it != playedNoteQueue.end())
         {
             // remove matching note numbers
-            if (it->noteNumber == note.noteNumber)
+            if (it->noteNumber == note.noteNumber && it->channel == note.channel - 1)
             {
                 // `erase()` invalidates the iterator, use returned iterator
                 it = playedNoteQueue.erase(it);
+                foundNoteToRemove = true;
             }
             else
             {
@@ -1564,7 +1565,7 @@ namespace midifx
 
         int16_t noteNumber = arpNote.noteNumber;
 
-        noteNumber = applyModPattern(noteNumber);
+        noteNumber = applyModPattern(noteNumber, arpNote.channel);
         stepLength_ = findStepLength(); // Can be changed by ties in mod pattern
 
         if (noteNumber != -127)
@@ -1573,7 +1574,7 @@ namespace midifx
 
             // Add octave
             noteNumber = noteNumber + (octavePos_ * octDistance_);
-            playNote(noteon_micros, noteNumber, velocity_);
+            playNote(noteon_micros, noteNumber, velocity_, arpNote.channel);
         }
 
         bool seqReset = false;
@@ -1632,7 +1633,7 @@ namespace midifx
         // patPos_++;
     }
 
-    int16_t MidiFXArpeggiator::applyModPattern(int16_t noteNumber)
+    int16_t MidiFXArpeggiator::applyModPattern(int16_t noteNumber, uint8_t channel)
     {
         uint8_t modMode = modPattern_[modPos_].mod;
 
@@ -1674,7 +1675,7 @@ namespace midifx
             newNote = lowestPitch_ - 12;
             newNote = applyTranspPattern(newNote);
             uint32_t noteon_micros = seqConfig.currentFrameMicros;
-            playNote(noteon_micros, newNote, velocity_);
+            playNote(noteon_micros, newNote, velocity_, channel);
             lastPlayedNoteNumber_ = newNote;
             newNote = -127;
         }
@@ -1684,7 +1685,7 @@ namespace midifx
             newNote = highestPitch_ + 12;
             newNote = applyTranspPattern(newNote);
             uint32_t noteon_micros = seqConfig.currentFrameMicros;
-            playNote(noteon_micros, newNote, velocity_);
+            playNote(noteon_micros, newNote, velocity_, channel);
             lastPlayedNoteNumber_ = newNote;
             newNote = -127;
         }
@@ -1699,12 +1700,12 @@ namespace midifx
                 newNote = lowestPitch_;
                 newNote = applyTranspPattern(newNote);
                 newNote = newNote + (octavePos_ * 12);
-                playNote(noteon_micros, newNote, velocity_);
+                playNote(noteon_micros, newNote, velocity_, channel);
 
                 newNote = highestPitch_;
                 newNote = applyTranspPattern(newNote);
                 newNote = newNote + (octavePos_ * 12);
-                playNote(noteon_micros, newNote, velocity_);
+                playNote(noteon_micros, newNote, velocity_, channel);
 
                 newNote = -127; // Don't play this note.
 
@@ -1729,7 +1730,7 @@ namespace midifx
                 newNote = applyTranspPattern(newNote);
                 newNote = newNote + (octavePos_ * 12);
 
-                playNote(noteon_micros, newNote, velocity_);
+                playNote(noteon_micros, newNote, velocity_, n.channel);
             }
 
             lastPlayedMod_ = modMode;
@@ -1814,7 +1815,7 @@ namespace midifx
         return newNote;
     }
 
-    void MidiFXArpeggiator::playNote(uint32_t noteOnMicros, int16_t noteNumber, uint8_t velocity)
+    void MidiFXArpeggiator::playNote(uint32_t noteOnMicros, int16_t noteNumber, uint8_t velocity, uint8_t channel)
     {
         // Serial.println("PlayNote: " + String(note.noteNumber));
         if (noteNumber < 0 || noteNumber > 127)
@@ -1822,7 +1823,7 @@ namespace midifx
 
         MidiNoteGroup noteOut;
 
-        noteOut.channel = midiChannel_ + 1;
+        noteOut.channel = channel + 1;
         noteOut.noteNumber = (uint8_t)noteNumber;
         noteOut.prevNoteNumber = (uint8_t)noteNumber;
         noteOut.velocity = velocity;

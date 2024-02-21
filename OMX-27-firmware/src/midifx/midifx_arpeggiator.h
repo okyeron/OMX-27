@@ -120,6 +120,7 @@ namespace midifx
 		{
 			// bool inUse = false;
 			uint8_t noteNumber;
+			uint8_t channel;
 			// uint8_t velocity : 7;
 			// bool sendMidi = false;
 			// bool sendCV = false;
@@ -129,18 +130,20 @@ namespace midifx
 				noteNumber = 255;
 			}
 
-			ArpNote(int noteNumber)
+			ArpNote(int noteNumber, uint8_t channel)
 			{
 				if (noteNumber < 0 || noteNumber > 127)
 				{
 					noteNumber = 255;
 				}
 				this->noteNumber = noteNumber;
+				this->channel = channel;
 			}
 
 			ArpNote(MidiNoteGroup noteGroup)
 			{
 				noteNumber = noteGroup.noteNumber;
+				channel = noteGroup.channel - 1;
 				// velocity = noteGroup.velocity;
 				// sendMidi = noteGroup.sendMidi;
 				// sendCV = noteGroup.sendCV;
@@ -317,11 +320,11 @@ namespace midifx
 		void resetArpSeq();
 
 		void arpNoteTrigger();
-		int16_t applyModPattern(int16_t note);
+		int16_t applyModPattern(int16_t note, uint8_t channel);
 		uint8_t findStepLength();
 		int16_t applyTranspPattern(int16_t note);
 
-		void playNote(uint32_t noteOnMicros, int16_t noteNumber, uint8_t velocity);
+		void playNote(uint32_t noteOnMicros, int16_t noteNumber, uint8_t velocity, uint8_t channel);
 
 		void showMessage();
 
