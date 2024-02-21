@@ -91,6 +91,9 @@ private:
 	int messageTextTimer = 0;
 	bool dirtyDisplay = false;
 
+	uint8_t animPos = 0;
+	int animTimer = 0;
+
 	String currentMsg;
 	uint8_t specialMsgType_ = 0;
 

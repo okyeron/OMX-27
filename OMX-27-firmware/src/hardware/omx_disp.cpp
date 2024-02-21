@@ -6,6 +6,8 @@
 
 U8G2_FOR_ADAFRUIT_GFX u8g2_display;
 
+const char *loaderAnim[] = {"\u25f0", "\u25f1", "\u25f2", "\u25f3"};
+
 // Constructor
 OmxDisp::OmxDisp()
 {
@@ -174,7 +176,6 @@ void OmxDisp::testdrawrect()
 
 void OmxDisp::drawLoading()
 {
-	const char *loader[] = {"\u25f0", "\u25f1", "\u25f2", "\u25f3"};
 	display.clearDisplay();
 	u8g2_display.setFontMode(0);
 	for (int16_t i = 0; i < 16; i += 1)
@@ -184,7 +185,7 @@ void OmxDisp::drawLoading()
 		u8g2_display.setFont(FONT_TENFAT);
 		u8g2_display.print("OMX-27");
 		u8g2_display.setFont(FONT_SYMB_BIG);
-		u8g2centerText(loader[i % 4], 80, 10, 32, 32); // "\u00BB\u00AB" // // dice: "\u2685"
+		u8g2centerText(loaderAnim[i % 4], 80, 10, 32, 32); // "\u00BB\u00AB" // // dice: "\u2685"
 		display.display();
 		delay(100);
 	}
@@ -468,6 +469,12 @@ void OmxDisp::dispGenericModeLabelSmallText(const char *label, uint8_t numPages,
 
 void OmxDisp::dispOptionCombo(const char * header, const char *optionsArray[], uint8_t optionCount, uint8_t selected)
 {
+	if (isMessageActive())
+	{
+		renderMessage();
+		return;
+	}
+
 	// Draw header text
 	u8g2_display.setFontMode(1);
 	u8g2_display.setFont(FONT_LABELS);
@@ -1326,24 +1333,42 @@ void OmxDisp::dispPageIndicators(int page, bool selected)
 
 void OmxDisp::dispMode()
 {
-	// labels formatting
-	u8g2_display.setFontMode(1);
-	u8g2_display.setFont(FONT_BIG);
-	u8g2_display.setCursor(0, 0);
+	animPos = constrain(animPos, 0, 3);
 
-	u8g2_display.setForegroundColor(WHITE);
-	u8g2_display.setBackgroundColor(BLACK);
+	animTimer -= sysSettings.timeElasped;
 
-	const char *displaymode = "";
-	if (sysSettings.newmode != sysSettings.omxMode && encoderConfig.enc_edit)
+	if(animTimer <= 0)
 	{
-		displaymode = modes[sysSettings.newmode]; // display.print(modes[sysSettings.newmode]);
+		animPos = (animPos + 1) % 4;
+		animTimer = 100000;
+		setDirty();
 	}
-	else if (encoderConfig.enc_edit)
+
+	if (isDirty())
 	{
-		displaymode = modes[sysSettings.omxMode]; // display.print(modes[mode]);
+		u8g2_display.setFontMode(0);
+		u8g2_display.setFont(FONT_SYMB_BIG);
+		u8g2centerText(loaderAnim[animPos], 80, 10, 32, 32); // "\u00BB\u00AB" // // dice: "\u2685"
+
+		// labels formatting
+		u8g2_display.setFontMode(1);
+		u8g2_display.setFont(FONT_BIG);
+		u8g2_display.setCursor(0, 0);
+
+		u8g2_display.setForegroundColor(WHITE);
+		u8g2_display.setBackgroundColor(BLACK);
+
+		const char *displaymode = "";
+		if (sysSettings.newmode != sysSettings.omxMode && encoderConfig.enc_edit)
+		{
+			displaymode = modes[sysSettings.newmode]; // display.print(modes[sysSettings.newmode]);
+		}
+		else if (encoderConfig.enc_edit)
+		{
+			displaymode = modes[sysSettings.omxMode]; // display.print(modes[mode]);
+		}
+		u8g2centerText(displaymode, 2, 20, 75, 32);
 	}
-	u8g2centerText(displaymode, 86, 20, 44, 32);
 }
 
 void OmxDisp::setDirty()

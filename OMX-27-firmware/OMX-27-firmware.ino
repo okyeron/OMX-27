@@ -200,6 +200,9 @@ void changeOmxMode(OMXMode newOmxmode)
 	}
 
 	activeOmxMode->onModeActivated();
+
+	omxLeds.setDirty();
+	omxDisp.setDirty();
 }
 
 // ####### END LEDS
@@ -737,9 +740,10 @@ void loop()
 			// set mode
 			//			int modesize = NUM_OMX_MODES;
 			sysSettings.newmode = (OMXMode)constrain(sysSettings.newmode + amt, 0, NUM_OMX_MODES - 1);
-			omxDisp.dispMode();
-			omxDisp.bumpDisplayTimer();
+			// omxDisp.dispMode();
+			// omxDisp.bumpDisplayTimer();
 			omxDisp.setDirty();
+			omxLeds.setDirty();
 		}
 		else
 		{
@@ -765,7 +769,8 @@ void loop()
 			seqStop();
 			omxLeds.setAllLEDS(0, 0, 0);
 			encoderConfig.enc_edit = false;
-			omxDisp.dispMode();
+			// omxDisp.dispMode();
+			omxDisp.setDirty();
 		}
 		else if (encoderConfig.enc_edit)
 		{
@@ -789,9 +794,12 @@ void loop()
 		}
 		else
 		{
+			// Enter mode change
 			encoderConfig.enc_edit = true;
 			sysSettings.newmode = sysSettings.omxMode;
-			omxDisp.dispMode();
+			omxLeds.setAllLEDS(0, 0, 0);
+			omxDisp.setDirty();
+			// omxDisp.dispMode();
 		}
 
 		omxDisp.setDirty();
@@ -863,7 +871,12 @@ void loop()
 	{
 		omxLeds.updateBlinkStates();
 		omxDisp.UpdateMessageTextTimer();
-		if(!encoderConfig.enc_edit)
+
+		if (encoderConfig.enc_edit)
+		{
+			omxDisp.dispMode();
+		}
+		else
 		{
 			activeOmxMode->onDisplayUpdate();
 		}
