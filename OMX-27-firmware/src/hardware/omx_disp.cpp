@@ -466,6 +466,36 @@ void OmxDisp::dispGenericModeLabelSmallText(const char *label, uint8_t numPages,
 	}
 }
 
+void OmxDisp::dispOptionCombo(const char * header, const char *optionsArray[], uint8_t optionCount, uint8_t selected)
+{
+	// Draw header text
+	u8g2_display.setFontMode(1);
+	u8g2_display.setFont(FONT_LABELS);
+	u8g2_display.setCursor(0, 0);
+
+	uint8_t labelWidth = 128; // 8
+	u8g2centerText(header, 2, hline - 2, labelWidth - 4, 10);
+
+	// Draw options
+	u8g2_display.setFontMode(1);
+	u8g2_display.setFont(FONT_LABELS);
+
+	uint8_t optionWidth = 128 / optionCount; // 8
+
+	uint8_t yPos = hline * 2 + 3; // 19
+
+	for (uint8_t i = 0; i < optionCount; i++)
+	{
+		if (i == selected)
+		{
+			display.fillRect(i * optionWidth, 14, optionWidth, 12, WHITE);
+			display.fillRect(i * optionWidth + 1, 14 + 1, optionWidth - 2, 12 - 2, BLACK);
+		}
+
+		u8g2centerText(optionsArray[i], i * optionWidth, yPos, optionWidth - 1, 16);
+	}
+}
+
 void OmxDisp::dispChar16(const char *charArray[], uint8_t charCount, uint8_t selected, uint8_t numPages, int8_t selectedPage, bool encSelActive, bool showLabels, const char *labels[], uint8_t labelCount)
 {
 	if (isMessageActive())

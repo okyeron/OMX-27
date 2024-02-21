@@ -440,11 +440,21 @@ void OmxModeMidiKeyboard::onEncoderButtonDown()
 		return;
 	}
 
-	if (params.getSelPage() == MIPAGE_CFG && params.getSelParam() == 0)
+	if(params.getSelPage() == MIPAGE_CFG)
 	{
-		enableSubmode(&subModePotConfig_);
-		omxDisp.isDirty();
-		return;
+		int8_t selParam = params.getSelParam();
+		if(selParam == 0)
+		{
+			enableSubmode(&subModePotConfig_);
+			omxDisp.isDirty();
+			return;
+		}
+		else if(selParam == 1)
+		{
+			enableSubmode(&omxUtil.subModeClearStorage);
+			omxDisp.isDirty();
+			return;
+		}
 	}
 
 	encoderSelect = !encoderSelect;
@@ -1167,18 +1177,10 @@ void OmxModeMidiKeyboard::onDisplayUpdate()
 				else if (params.getSelPage() == MIPAGE_CFG) // CONFIG
 				{
 					omxDisp.clearLegends();
-					omxDisp.legends[0] = "CC";
-					omxDisp.legends[1] = "";
-					omxDisp.legends[2] = "";
-					omxDisp.legends[3] = "";
-					omxDisp.legendVals[0] = -127;
-					omxDisp.legendVals[1] = -127;
-					omxDisp.legendVals[2] = -127;
-					omxDisp.legendVals[3] = -127;
+					omxDisp.legends[0] = "P CC";
+					omxDisp.legends[1] = "CLR";
 					omxDisp.legendText[0] = "CFG";
-					omxDisp.legendText[1] = "";
-					omxDisp.legendText[2] = "";
-					omxDisp.legendText[3] = "";
+					omxDisp.legendText[1] = "STOR";
 				}
 
 				omxDisp.dispGenericMode2(params.getNumPages(), params.getSelPage(), params.getSelParam(), encoderSelect && !midiSettings.midiAUX);

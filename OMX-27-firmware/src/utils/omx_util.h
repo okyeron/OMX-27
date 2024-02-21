@@ -2,6 +2,7 @@
 #include "../config.h"
 #include "../utils/music_scales.h"
 #include "../modes/omx_mode_interface.h"
+#include "../modes/submodes/submode_clearstorage.h"
 
 enum GlobalParams
 {
@@ -71,6 +72,8 @@ public:
 	// Used for global page legends defined in GlobalParams to avoid code duplication
 	void setupPageLegend(uint8_t index, uint8_t paramType);
 	void setupPageLegend(MusicScales *musicScale, uint8_t index, uint8_t paramType);
+
+	SubModeClearStorage subModeClearStorage;
 
 private:
 	// int potbank = 0;

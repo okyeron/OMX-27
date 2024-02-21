@@ -943,6 +943,7 @@ void setup()
 
 	lastProcessTime = micros();
 	omxUtil.resetClocks();
+	omxUtil.subModeClearStorage.setStoragePtr(storage);
 
 	// HW MIDI
 	MM::begin();
@@ -1008,6 +1009,8 @@ void setup()
 	bool bLoaded = loadFromStorage();
 	if (!bLoaded)
 	{
+		Serial.println( "Init load fail. Reinitializing" );
+
 		// Failed to load due to initialized EEPROM or version mismatch
 		// defaults
 		// sysSettings.omxMode = DEFAULT_MODE;
