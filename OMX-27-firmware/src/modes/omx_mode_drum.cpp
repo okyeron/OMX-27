@@ -1309,15 +1309,24 @@ int OmxModeDrum::loadFromDisk(int startingAddress, Storage *storage)
 
     for (uint8_t saveIndex = 0; saveIndex < NUM_DRUM_KITS; saveIndex++)
     {
-        auto drumKit = DrumKit{};
-        auto current = (byte *)&drumKit;
-        for (int j = 0; j < saveSize; j++)
+        // auto drumKit = DrumKit{};
+        // auto current = (byte *)&drumKit;
+        // for (int j = 0; j < saveSize; j++)
+        // {
+        //     *current = storage->read(startingAddress + j);
+        //     current++;
+        // }
+
+        // drumKits[saveIndex].CopyFrom(drumKit);
+
+		// Write bytes to heap
+		auto current = (byte *)&drumKits[saveIndex];
+		for (int j = 0; j < saveSize; j++)
         {
             *current = storage->read(startingAddress + j);
             current++;
         }
 
-        drumKits[saveIndex].CopyFrom(drumKit);
         startingAddress += saveSize;
     }
 
