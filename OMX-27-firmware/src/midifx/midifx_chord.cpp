@@ -1,5 +1,6 @@
 #include "midifx_chord.h"
 #include "../hardware/omx_disp.h"
+#include "../utils/chord_util.h"
 
 namespace midifx
 {
@@ -57,19 +58,117 @@ namespace midifx
 			return;
 		}
 
-		// Serial.println("MidiFXChord::noteInput");
-		// note.noteNumber += 7;
-
-		uint8_t r = random(255);
-
-		if (r <= chancePerc_)
+		if (chancePerc_ != 100 && (chancePerc_ == 0 || random(100) > chancePerc_))
 		{
-			processNoteOn(note.noteNumber, note);
 			sendNoteOut(note);
+			return;
 		}
+
+        onChordOn(note);
+
+		// if (playOrigin_)
+		// {
+		// 	sendNoteOut(note);
+		// }
+
+		// int8_t origNote = note.noteNumber;
+
+		// int8_t sentNoteNumbers[7] = {0, 0, 0, 0, 0, 0, 0};
+
+		// for (uint8_t i = 0; i < 7; i++)
+		// {
+		// 	if (notes_[i] != 0)
+		// 	{
+		// 		int8_t newNoteNumber = constrain(origNote + notes_[i], 0, 127);
+
+		// 		bool noteAlreadyPlayed = false;
+
+		// 		for (uint8_t j = 0; j < 7; j++)
+		// 		{
+		// 			if (sentNoteNumbers[j] == newNoteNumber)
+		// 			{
+		// 				noteAlreadyPlayed = true;
+		// 				break;
+		// 			}
+		// 		}
+
+		// 		if (!noteAlreadyPlayed)
+		// 		{
+		// 			note.noteNumber = constrain(origNote + notes_[i], 0, 127);
+		// 			sendNoteOut(note);
+		// 			sentNoteNumbers[i] = newNoteNumber;
+		// 		}
+		// 	}
+		// }
 	}
 
-	// MidiFXNoteFunction MidiFXChord::getInputFunc()
+    void MidiFXChord::onChordOn(MidiNoteGroup inNote)
+    {
+        if (useGlobalScale_)
+		{
+			rootNote_ = scaleConfig.scaleRoot;
+			scaleIndex_ = scaleConfig.scalePattern;
+		}
+        // Serial.println("onChordOn: " + String(chordIndex));
+        // if (chordNotes_[chordIndex].active)
+        // {
+        //     // Serial.println("chord already active");
+        //     return; // This shouldn't happen
+        // }
+
+        chord_.note = inNote.noteNumber % 12;
+        chord_.basicOct = (inNote.noteNumber / 12) - 5;
+        chord_.octave = chord_.basicOct;
+
+        // if (constructChord(chordIndex))
+        if (chordUtil.constructChord(&chord_, &chordNotes_, rootNote_, scaleIndex_))
+        {
+            chordNotes_.active = true;
+            chordNotes_.channel = chord_.mchan + 1;
+
+            // Prevent stuck notes
+            // playedChordNotes_[chordIndex].CopyFrom(chordNotes_[chordIndex]);
+            // uint8_t velocity = chords_[chordIndex].velocity;
+
+            // uint32_t noteOnMicros = micros();
+
+            // Serial.print("Chord: ");
+            for (uint8_t i = 0; i < 6; i++)
+            {
+                int noteNumber = chordNotes_.notes[i];
+
+                if (noteNumber < 0 || noteNumber > 127)
+                {
+                    continue;
+                }
+                // uint8_t velocity = chordNotes_.velocities[i];
+
+                // Serial.print("Note: " + String(note));
+                // Serial.print(" Vel: " + String(velocity));
+                // Serial.print("\n");
+
+                // if(note >= 0 && note <= 127)
+                // {
+                //     // MM::sendNoteOn(note, velocity, chordNotes_[chordIndex].channel);
+                //     pendingNoteOns.insert(note, velocity, chordNotes_[chordIndex].channel, noteOnMicros, false);
+                // }
+
+                inNote.noteNumber = chordNotes_.notes[i];
+                inNote.velocity = chordNotes_.velocities[i];
+
+                sendNoteOut(inNote);
+
+                // doNoteOn(note, chordNotes_[chordIndex].midifx, velocity, chordNotes_[chordIndex].channel);
+            }
+            // Serial.print("\n");
+        }
+        else
+        {
+            // Serial.println("constructChord failed");
+        }
+    }
+
+    // MidiFXNoteFunction MidiFXChord::getInputFunc()
 	// {
 	//     return &MidiFXChord::noteInput;
 	// }

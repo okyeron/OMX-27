@@ -1,6 +1,28 @@
 #pragma once
 #include "../config.h"
 
+#define NUM_CHORD_PATTERNS 37
+
+extern const uint8_t kNumChordPatterns;
+extern const uint8_t kCustomChordPattern;
+
+// Last pattern is custom
+extern const int8_t chordPatterns[NUM_CHORD_PATTERNS - 1][3];
+
+extern const char *kChordMsg[NUM_CHORD_PATTERNS];
+
+#define NUM_CHORD_BALANCE 23
+
+extern const uint8_t kNumChordBalance;
+
+extern const int8_t chordBalance[NUM_CHORD_BALANCE][3];
+
+// extern int balSize;
+// extern int patSize;
+
+extern const char *kChordTypeDisp[2];
+extern const char *kVoicingNames[8];
+
 enum ChordVoicing
 {
 	CHRDVOICE_NONE,
@@ -167,4 +189,20 @@ struct ChordBalanceDetails
 {
 	int8_t type[4];
 	float velMult[4];
+
+    void Clear()
+    {
+        for(uint8_t i = 0; i < 4; i++)
+        {
+            type[i] = 0;
+            velMult[i] = 0;
+        }
+    }
+};
+
+enum ChordType
+{
+	CTYPE_BASIC, // Chords are copied from the Syntakt Chord machine, has a root, octave, scale, and ghosts. The ghosts determine number of notes in chord and notes will either be brought down or up and octave
+	CTYPE_INTERVAL, // Advanced chord config using intervals, can be locked to a the global scale. 
+	CTYPE_BYOC, // Build your own chord however you'd like. 
 };

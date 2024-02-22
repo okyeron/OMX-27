@@ -89,12 +89,7 @@ enum ChordsMainMode
 	CHRDMODE_MANSTRUM, // Manually strum chords using the encoder
 };
 
-enum ChordType
-{
-	CTYPE_BASIC, // Chords are copied from the Syntakt Chord machine, has a root, octave, scale, and ghosts. The ghosts determine number of notes in chord and notes will either be brought down or up and octave
-	CTYPE_INTERVAL, // Advanced chord config using intervals, can be locked to a the global scale. 
-	CTYPE_BYOC, // Build your own chord however you'd like. 
-};
+
 
 // const int chordPatterns[16][3] = {
 // 	{ -1, -1, -1 }, // 0:  N/A
@@ -152,128 +147,6 @@ enum ChordType
 // Fifths
 // C C# D D# E F F# G G# A A# B  C  C# D  D#
 // 0 1  2 3  4 5 6  7 8  9 10 11 12 13 14 15
-
-const uint8_t kNumChordPatterns = 37;
-const uint8_t kCustomChordPattern = kNumChordPatterns - 1;
-
-// Last pattern is custom
-const int8_t chordPatterns[kNumChordPatterns - 1][3] = {
-	{4, 7, -1},	 // Major        C E G
-	{3, 7, -1},	 // minor        C Eb G
-	{2, 7, -1},	 // sus2         C D G
-	{5, 7, -1},	 // sus4         C F G
-	{3, 6, -1},	 // mb5          C Eb Gb
-	{4, 6, -1},	 // Mb5          C E Gb
-	{4, 8, -1},	 // M#5          C E G#
-	{4, 14, -1}, // M9no5        C E D2  no 5
-
-	{3, 6, 9},	 // dim7         C Eb Gb A
-	{3, 6, 10},	 // m7b5         C Eb Gb Bb
-	{3, 7, 8},	 // mb6          C Eb G Ab
-	{3, 7, 9},	 // m6           C Eb G A
-	{3, 7, 10},	 // m7           C Eb G Bb
-	{3, 7, 11},	 // mMaj7        C Eb G B
-	{3, 7, 14},	 // madd9        C Eb G D
-	{3, 8, 10},	 // m7#5         C Eb Ab Bb
-	{3, 10, 13}, // m7b9no5      C Eb Bb Db2
-	{3, 10, 14}, // m9no5        C Eb Bb D2
-
-	{4, 5, 9},	 // M6add4no5    C E F A
-	{4, 6, 10},	 // M7b5         C E Gb Bb
-	{4, 6, 11},	 // Maj7b5       C E Gb B
-	{4, 6, 14},	 // Madd9b5      C E Gb D2
-	{4, 7, 8},	 // Maddb5       C E G Gb
-	{4, 7, 9},	 // M6           C E G A
-	{4, 7, 10},	 // M7           C E G Bb
-	{4, 7, 11},	 // Maj7         C E G B
-	{4, 7, 14},	 // Madd9        C E G D2
-	{4, 8, 10},	 // M7#5         C E G# Bb
-	{4, 10, 13}, // M7b9no5      C E Bb Db2
-	{4, 11, 14}, // Maj9no5      C E B D2
-	{4, 11, 21}, // Maj7/6no5    C E B A2
-	{5, 7, 8},	 // sus4add#5    C F G G#
-	{5, 7, 10},	 // 7sus4        C F G Bb
-	{5, 8, 13},	 // sus4#5b9     C F G# Db2
-	{5, -1, -1}, // Fourth       CF
-	{7, -1, -1}	 // Fifth        CG
-};
-
-const char *kChordMsg[kNumChordPatterns] = {
-	"Major",
-	"Minor",
-	"sus2",
-	"sus4",
-	"mb5",
-	"Mb5",
-	"M#5",
-	"M9no5",
-
-	"dim7",
-	"m7b5",
-	"mb6",
-	"m6",
-	"m7",
-	"mMaj7",
-	"madd9",
-	"m7#5",
-	"m7b9no5",
-	"m9no5",
-
-	"M6add4no5",
-	"M7b5",
-	"Maj7b5",
-	"Madd9b5",
-	"Maddb5",
-	"M6",
-	"M7",
-	"Maj7",
-	"Madd9",
-	"M7#5",
-	"M7b9no5",
-	"Maj9no5",
-	"Maj7/6no5",
-	"sus4add#5",
-	"7sus4",
-	"sus4#5b9",
-
-	"Fourths",
-	"Fifth",
-	"Custom"};
-
-const uint8_t kNumChordBalance = 23;
-
-const int8_t chordBalance[kNumChordBalance][3] = {
-	{-10, -10, -10}, // 0 Single Note - 0
-	{0, -10, -10},	 // 10 Power Chord - 10
-	{0, 0, -10},	 // 20 Triad
-	{0, 0, 0},		 // 30 Four notes - Root
-	{0, 0, 0},		 // 32 Four notes - Root
-	{-10, 0, 0},	 // 37
-	{-1, 0, 0},		 // 42
-	{-1, -10, 0},	 // 47
-	{-1, -1, 0},	 // 52
-	{-1, -1, -10},	 // 57
-	{-1, -1, -1},	 // 62 - Inv 1
-	{-10, -1, -1},	 // 69
-	{0, -1, -1},	 // 74 - Inv 2
-	{0, -10, -1},	 // 79
-	{0, 0, -1},		 // 84 - Inv 3
-	{0, 0, -10},	 // 91
-	{0, 0, 0},		 // 96
-	{-10, 0, 0},	 // 101
-	{1, 0, 0},		 // 106
-	{1, -10, 0},	 // 111
-	{1, 1, 0},		 // 116
-	{1, 1, -10},	 // 121
-	{1, 1, 1},		 // 127
-};
-
-int balSize = sizeof(chordBalance);
-int patSize = sizeof(chordPatterns);
-
-const char *kChordTypeDisp[8] = {"BASC", "INTV"};
-
-const char *kVoicingNames[8] = {"NONE", "POWR", "SUS2", "SUS4", "SU24", "+6", "+6+9", "KB11"};
 
 const int kDegreeColor = ORANGE;
 const int kDegreeSelColor = 0xFFBF80;
