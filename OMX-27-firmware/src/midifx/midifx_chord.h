@@ -32,6 +32,7 @@ namespace midifx
 		void onEnabled() override;
 		void onDisabled() override;
 
+		void onEncoderChangedSelectParam(Encoder::Update enc) override;
 		void onEncoderChangedEditParam(Encoder::Update enc) override;
 
 	private:
@@ -42,7 +43,10 @@ namespace midifx
             uint8_t midiChannel : 4;
         };
 
-		uint8_t chancePerc_ = 255;
+		uint8_t chancePerc_ = 100;
+
+		uint8_t lastNote_;
+
 
         ParamManager basicParams_;
 	    ParamManager intervalParams_;
@@ -60,11 +64,15 @@ namespace midifx
 
 	    std::vector<NoteTracker> noteOffTracker;
 
-
 		bool useGlobalScale_ = true;
         int8_t rootNote_ = 0;
 		int8_t scaleIndex_ = 0;
 
         void onChordOn(MidiNoteGroup inNote);
-	};
+        ParamManager *getParams();
+
+        void setupPageLegends();
+        void setupPageLegend(ChordSettings *chord, uint8_t index, uint8_t paramType);
+		void calculateRemap();
+    };
 }

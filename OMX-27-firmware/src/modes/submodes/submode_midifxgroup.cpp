@@ -8,6 +8,8 @@
 #include "../../midifx/midifx_monophonic.h"
 #include "../../midifx/midifx_harmonizer.h"
 #include "../../midifx/midifx_transpose.h"
+#include "../../midifx/midifx_chord.h"
+
 // #include "midifx_arpeggiator.h"
 
 using namespace midifx;
@@ -917,6 +919,11 @@ void SubModeMidiFxGroup::changeMidiFXType(uint8_t slotIndex, uint8_t typeIndex, 
 		setMidiFX(slotIndex, new MidiFXMonophonic());
 	}
 	break;
+	case MIDIFX_CHORD:
+	{
+		setMidiFX(slotIndex, new MidiFXChord());
+	}
+	break;
 	case MIDIFX_ARP:
 	{
 		setMidiFX(slotIndex, new MidiFXArpeggiator());
@@ -1283,6 +1290,8 @@ int SubModeMidiFxGroup::loadFromDisk(int startingAddress, Storage *storage)
 	{
 		int mfxType = storage->read(startingAddress);
 		startingAddress++;
+
+		if(mfxType >= 0 && mfxType)
 
 		// Serial.println((String)"MFX: " + mfxType);
 

@@ -22,40 +22,7 @@ enum ChordsModePage
 	CHRDPAGE_4,	   //                              | spreadUpDown, quartalVoicing
 };
 
-enum ChordsModeParams
-{
-	CPARAM_UIMODE,
-	// CPARAM_SCALE_ROOT,
-	// CPARAM_SCALE_PAT,
-	// CPARAM_SCALE_LOCK,
-	// CPARAM_SCALE_GRP16,
-	// CPARAM_GBL_OCT,
-	// CPARAM_GBL_MCHAN,
-	// CPARAM_GBL_VEL,
-	CPARAM_MAN_STRUM,
-	// CPARAM_GBL_POTCC,
-	// CPARAM_GBL_PBANK,
-	// CPARAM_GBL_MIDITHRU,
-	// CPARAM_GBL_MIDIMACRO,
-	// CPARAM_GBL_MACROCHAN,
-	CPARAM_CHORD_TYPE,
-	CPARAM_CHORD_MFX,
-	CPARAM_CHORD_VEL,
-	CPARAM_CHORD_MCHAN,
-	CPARAM_BAS_NOTE,
-	CPARAM_BAS_OCT,
-	CPARAM_BAS_CHORD,
-	CPARAM_BAS_BALANCE,
-	CPARAM_INT_NUMNOTES,
-	CPARAM_INT_DEGREE,
-	CPARAM_INT_OCTAVE,
-	CPARAM_INT_TRANSPOSE,
-	CPARAM_INT_SPREAD,
-	CPARAM_INT_ROTATE,
-	CPARAM_INT_VOICING,
-	CPARAM_INT_SPRDUPDOWN,
-	CPARAM_INT_QUARTVOICE
-};
+
 
 // enum ChordsModeIntervalPage {
 //     CHRDINTPAGE_NOTES,
@@ -79,7 +46,7 @@ enum ChordsUIModes
 	CUIMODE_SPLIT
 };
 
-const char *kUIModeDisp[8] = {"FULL", "SPLT"};
+const char *kUIModeDisp[2] = {"FULL", "SPLT"};
 
 enum ChordsMainMode
 {
@@ -775,25 +742,10 @@ void OmxModeChords::onEncoderChangedEditParam(Encoder::Update *enc, uint8_t sele
 		selectMidiFxChordKey(newMidiFx, false);
 	}
 	break;
-	case CPARAM_CHORD_VEL:
-	{
-		chords_[selectedChord_].velocity = constrain(chords_[selectedChord_].velocity + amtFast, 0, 127);
-	}
-	break;
-	case CPARAM_CHORD_MCHAN:
-	{
-		chords_[selectedChord_].mchan = constrain(chords_[selectedChord_].mchan + amtSlow, 0, 15);
-	}
-	break;
 	case CPARAM_BAS_NOTE:
-	{
-		chords_[selectedChord_].note = constrain(chords_[selectedChord_].note + amtSlow, 0, 11);
-		triggerChord = amtSlow != 0;
-	}
-	break;
 	case CPARAM_BAS_OCT:
 	{
-		chords_[selectedChord_].basicOct = constrain(chords_[selectedChord_].basicOct + amtSlow, -5, 4);
+		chordUtil.onEncoderChangedEditParam(enc, &chords_[selectedChord_], selectedParmIndex, targetParamIndex, paramType);
 		triggerChord = amtSlow != 0;
 	}
 	break;
@@ -823,49 +775,19 @@ void OmxModeChords::onEncoderChangedEditParam(Encoder::Update *enc, uint8_t sele
 		}
 	}
 	break;
+	case CPARAM_CHORD_MCHAN:
+	case CPARAM_CHORD_VEL:
 	case CPARAM_INT_NUMNOTES:
-	{
-		chords_[selectedChord_].numNotes = constrain(chords_[selectedChord_].numNotes + amtSlow, 1, 4);
-	}
-	break;
 	case CPARAM_INT_DEGREE:
-	{
-		chords_[selectedChord_].degree = constrain(chords_[selectedChord_].degree + amtSlow, 0, 7);
-	}
-	break;
 	case CPARAM_INT_OCTAVE:
-	{
-		chords_[selectedChord_].octave = constrain(chords_[selectedChord_].octave + amtSlow, -2, 2);
-	}
-	break;
 	case CPARAM_INT_TRANSPOSE:
-	{
-		chords_[selectedChord_].transpose = constrain(chords_[selectedChord_].transpose + amtSlow, -7, 7);
-	}
-	break;
 	case CPARAM_INT_SPREAD:
-	{
-		chords_[selectedChord_].spread = constrain(chords_[selectedChord_].spread + amtSlow, -2, 2);
-	}
-	break;
 	case CPARAM_INT_ROTATE:
-	{
-		chords_[selectedChord_].rotate = constrain(chords_[selectedChord_].rotate + amtSlow, 0, 4);
-	}
-	break;
 	case CPARAM_INT_VOICING:
-	{
-		chords_[selectedChord_].voicing = constrain(chords_[selectedChord_].voicing + amtSlow, 0, 7);
-	}
-	break;
 	case CPARAM_INT_SPRDUPDOWN:
-	{
-		chords_[selectedChord_].spreadUpDown = constrain(chords_[selectedChord_].spreadUpDown + amtSlow, 0, 1);
-	}
-	break;
 	case CPARAM_INT_QUARTVOICE:
 	{
-		chords_[selectedChord_].quartalVoicing = constrain(chords_[selectedChord_].quartalVoicing + amtSlow, 0, 1);
+		chordUtil.onEncoderChangedEditParam(enc, &chords_[selectedChord_], selectedParmIndex, targetParamIndex, paramType);
 	}
 	break;
 	}
@@ -2556,115 +2478,115 @@ void OmxModeChords::setupPageLegend(uint8_t index, uint8_t paramType)
 		omxDisp.legendText[index] = mode_ == CHRDMODE_MANSTRUM ? "ON" : "OFF";
 	}
 	break;
-	case CPARAM_CHORD_TYPE:
-	{
-		omxDisp.legends[index] = "TYPE";
-		omxDisp.legendText[index] = kChordTypeDisp[chords_[selectedChord_].type];
-	}
-	break;
-	case CPARAM_CHORD_MFX:
-	{
-		omxDisp.legends[index] = "MIFX";
-		if (chords_[selectedChord_].midiFx >= 0)
-		{
-			omxDisp.legendVals[index] = chords_[selectedChord_].midiFx + 1;
-		}
-		else
-		{
-			omxDisp.legendText[index] = "OFF";
-		}
-	}
-	break;
-	case CPARAM_CHORD_VEL:
-	{
-		omxDisp.legends[index] = "VEL";
-		omxDisp.legendVals[index] = chords_[selectedChord_].velocity;
-	}
-	break;
-	case CPARAM_CHORD_MCHAN:
-	{
-		omxDisp.legends[index] = "MCHAN";
-		omxDisp.legendVals[index] = chords_[selectedChord_].mchan + 1;
-	}
-	break;
-	case CPARAM_BAS_NOTE:
-	{
-		omxDisp.legends[index] = "NOTE";
-		omxDisp.legendText[index] = MusicScales::getNoteName(chords_[selectedChord_].note);
-	}
-	break;
-	case CPARAM_BAS_OCT:
-	{
-		omxDisp.legends[index] = "C-OCT";
-		omxDisp.legendVals[index] = chords_[selectedChord_].basicOct + 4;
-	}
-	break;
-	case CPARAM_BAS_CHORD:
-	{
-		omxDisp.legends[index] = "CHRD";
-		omxDisp.legendVals[index] = chords_[selectedChord_].chord;
-	}
-	break;
-	case CPARAM_BAS_BALANCE:
-	{
-		omxDisp.legends[index] = "BAL";
-		omxDisp.legendVals[index] = map(chords_[selectedChord_].balance, 0, (kNumChordBalance - 1) * 10, 0, 127);
-	}
-	break;
-	case CPARAM_INT_NUMNOTES:
-	{
-		omxDisp.legends[index] = "#NTS";
-		omxDisp.legendVals[index] = chords_[selectedChord_].numNotes;
-	}
-	break;
-	case CPARAM_INT_DEGREE:
-	{
-		omxDisp.legends[index] = "DEG";
-		omxDisp.legendVals[index] = chords_[selectedChord_].degree;
-	}
-	break;
-	case CPARAM_INT_OCTAVE:
-	{
-		omxDisp.legends[index] = "OCT";
-		omxDisp.legendVals[index] = chords_[selectedChord_].octave;
-	}
-	break;
-	case CPARAM_INT_TRANSPOSE:
-	{
-		omxDisp.legends[index] = "TPS";
-		omxDisp.legendVals[index] = chords_[selectedChord_].transpose;
-	}
-	break;
-	case CPARAM_INT_SPREAD:
-	{
-		omxDisp.legends[index] = "SPRD";
-		omxDisp.legendVals[index] = chords_[selectedChord_].spread;
-	}
-	break;
-	case CPARAM_INT_ROTATE:
-	{
-		omxDisp.legends[index] = "ROT";
-		omxDisp.legendVals[index] = chords_[selectedChord_].rotate;
-	}
-	break;
-	case CPARAM_INT_VOICING:
-	{
-		omxDisp.legends[index] = "VOIC";
-		omxDisp.legendText[index] = kVoicingNames[chords_[selectedChord_].voicing];
-	}
-	break;
-	case CPARAM_INT_SPRDUPDOWN:
-	{
-		omxDisp.legends[index] = "UPDN";
-		omxDisp.legendText[index] = chords_[selectedChord_].spreadUpDown ? "ON" : "OFF";
-	}
-	break;
-	case CPARAM_INT_QUARTVOICE:
-	{
-		omxDisp.legends[index] = "QRTV";
-		omxDisp.legendText[index] = chords_[selectedChord_].quartalVoicing ? "ON" : "OFF";
-	}
-	break;
+	// case CPARAM_CHORD_TYPE:
+	// {
+	// 	omxDisp.legends[index] = "TYPE";
+	// 	omxDisp.legendText[index] = kChordTypeDisp[chords_[selectedChord_].type];
+	// }
+	// break;
+	// case CPARAM_CHORD_MFX:
+	// {
+	// 	omxDisp.legends[index] = "MIFX";
+	// 	if (chords_[selectedChord_].midiFx >= 0)
+	// 	{
+	// 		omxDisp.legendVals[index] = chords_[selectedChord_].midiFx + 1;
+	// 	}
+	// 	else
+	// 	{
+	// 		omxDisp.legendText[index] = "OFF";
+	// 	}
+	// }
+	// break;
+	// case CPARAM_CHORD_VEL:
+	// {
+	// 	omxDisp.legends[index] = "VEL";
+	// 	omxDisp.legendVals[index] = chords_[selectedChord_].velocity;
+	// }
+	// break;
+	// case CPARAM_CHORD_MCHAN:
+	// {
+	// 	omxDisp.legends[index] = "MCHAN";
+	// 	omxDisp.legendVals[index] = chords_[selectedChord_].mchan + 1;
+	// }
+	// break;
+	// case CPARAM_BAS_NOTE:
+	// {
+	// 	omxDisp.legends[index] = "NOTE";
+	// 	omxDisp.legendText[index] = MusicScales::getNoteName(chords_[selectedChord_].note);
+	// }
+	// break;
+	// case CPARAM_BAS_OCT:
+	// {
+	// 	omxDisp.legends[index] = "C-OCT";
+	// 	omxDisp.legendVals[index] = chords_[selectedChord_].basicOct + 4;
+	// }
+	// break;
+	// case CPARAM_BAS_CHORD:
+	// {
+	// 	omxDisp.legends[index] = "CHRD";
+	// 	omxDisp.legendVals[index] = chords_[selectedChord_].chord;
+	// }
+	// break;
+	// case CPARAM_BAS_BALANCE:
+	// {
+	// 	omxDisp.legends[index] = "BAL";
+	// 	omxDisp.legendVals[index] = map(chords_[selectedChord_].balance, 0, (kNumChordBalance - 1) * 10, 0, 127);
+	// }
+	// break;
+	// case CPARAM_INT_NUMNOTES:
+	// {
+	// 	omxDisp.legends[index] = "#NTS";
+	// 	omxDisp.legendVals[index] = chords_[selectedChord_].numNotes;
+	// }
+	// break;
+	// case CPARAM_INT_DEGREE:
+	// {
+	// 	omxDisp.legends[index] = "DEG";
+	// 	omxDisp.legendVals[index] = chords_[selectedChord_].degree;
+	// }
+	// break;
+	// case CPARAM_INT_OCTAVE:
+	// {
+	// 	omxDisp.legends[index] = "OCT";
+	// 	omxDisp.legendVals[index] = chords_[selectedChord_].octave;
+	// }
+	// break;
+	// case CPARAM_INT_TRANSPOSE:
+	// {
+	// 	omxDisp.legends[index] = "TPS";
+	// 	omxDisp.legendVals[index] = chords_[selectedChord_].transpose;
+	// }
+	// break;
+	// case CPARAM_INT_SPREAD:
+	// {
+	// 	omxDisp.legends[index] = "SPRD";
+	// 	omxDisp.legendVals[index] = chords_[selectedChord_].spread;
+	// }
+	// break;
+	// case CPARAM_INT_ROTATE:
+	// {
+	// 	omxDisp.legends[index] = "ROT";
+	// 	omxDisp.legendVals[index] = chords_[selectedChord_].rotate;
+	// }
+	// break;
+	// case CPARAM_INT_VOICING:
+	// {
+	// 	omxDisp.legends[index] = "VOIC";
+	// 	omxDisp.legendText[index] = kVoicingNames[chords_[selectedChord_].voicing];
+	// }
+	// break;
+	// case CPARAM_INT_SPRDUPDOWN:
+	// {
+	// 	omxDisp.legends[index] = "UPDN";
+	// 	omxDisp.legendText[index] = chords_[selectedChord_].spreadUpDown ? "ON" : "OFF";
+	// }
+	// break;
+	// case CPARAM_INT_QUARTVOICE:
+	// {
+	// 	omxDisp.legends[index] = "QRTV";
+	// 	omxDisp.legendText[index] = chords_[selectedChord_].quartalVoicing ? "ON" : "OFF";
+	// }
+	// break;
 	}
 }
 
@@ -2673,6 +2595,8 @@ void OmxModeChords::setupPageLegends()
 	omxDisp.clearLegends();
 
 	int8_t page = getParams()->getSelPage();
+
+    auto chordPtr = &chords_[selectedChord_];
 
 	switch (page)
 	{
@@ -2706,27 +2630,27 @@ void OmxModeChords::setupPageLegends()
 	break;
 	case CHRDPAGE_1:
 	{
-		setupPageLegend(0, CPARAM_CHORD_TYPE);
-		setupPageLegend(1, CPARAM_CHORD_MFX);
-		setupPageLegend(2, CPARAM_CHORD_VEL);
-		setupPageLegend(3, CPARAM_CHORD_MCHAN);
+		chordUtil.setupPageLegend(chordPtr, 0, CPARAM_CHORD_TYPE);
+		chordUtil.setupPageLegend(chordPtr, 1, CPARAM_CHORD_MFX);
+		chordUtil.setupPageLegend(chordPtr, 2, CPARAM_CHORD_VEL);
+		chordUtil.setupPageLegend(chordPtr, 3, CPARAM_CHORD_MCHAN);
 	}
 	break;
 	case CHRDPAGE_2:
 	{
 		if (chords_[selectedChord_].type == CTYPE_INTERVAL)
 		{
-			setupPageLegend(0, CPARAM_INT_NUMNOTES);
-			setupPageLegend(1, CPARAM_INT_DEGREE);
-			setupPageLegend(2, CPARAM_INT_OCTAVE);
-			setupPageLegend(3, CPARAM_INT_TRANSPOSE);
+			chordUtil.setupPageLegend(chordPtr, 0, CPARAM_INT_NUMNOTES);
+			chordUtil.setupPageLegend(chordPtr, 1, CPARAM_INT_DEGREE);
+			chordUtil.setupPageLegend(chordPtr, 2, CPARAM_INT_OCTAVE);
+			chordUtil.setupPageLegend(chordPtr, 3, CPARAM_INT_TRANSPOSE);
 		}
 		else if (chords_[selectedChord_].type == CTYPE_BASIC)
 		{
-			setupPageLegend(0, CPARAM_BAS_NOTE);
-			setupPageLegend(1, CPARAM_BAS_OCT);
-			setupPageLegend(2, CPARAM_BAS_CHORD);
-			setupPageLegend(3, CPARAM_BAS_BALANCE);
+			chordUtil.setupPageLegend(chordPtr, 0, CPARAM_BAS_NOTE);
+			chordUtil.setupPageLegend(chordPtr, 1, CPARAM_BAS_OCT);
+			chordUtil.setupPageLegend(chordPtr, 2, CPARAM_BAS_CHORD);
+			chordUtil.setupPageLegend(chordPtr, 3, CPARAM_BAS_BALANCE);
 		}
 	}
 	break;
@@ -2734,9 +2658,9 @@ void OmxModeChords::setupPageLegends()
 	{
 		if (chords_[selectedChord_].type == CTYPE_INTERVAL)
 		{
-			setupPageLegend(0, CPARAM_INT_SPREAD);
-			setupPageLegend(1, CPARAM_INT_ROTATE);
-			setupPageLegend(2, CPARAM_INT_VOICING);
+			chordUtil.setupPageLegend(chordPtr, 0, CPARAM_INT_SPREAD);
+			chordUtil.setupPageLegend(chordPtr, 1, CPARAM_INT_ROTATE);
+			chordUtil.setupPageLegend(chordPtr, 2, CPARAM_INT_VOICING);
 		}
 	}
 	break;
@@ -2744,8 +2668,8 @@ void OmxModeChords::setupPageLegends()
 	{
 		if (chords_[selectedChord_].type == CTYPE_INTERVAL)
 		{
-			setupPageLegend(0, CPARAM_INT_SPRDUPDOWN);
-			setupPageLegend(1, CPARAM_INT_QUARTVOICE);
+			chordUtil.setupPageLegend(chordPtr, 0, CPARAM_INT_SPRDUPDOWN);
+			chordUtil.setupPageLegend(chordPtr, 1, CPARAM_INT_QUARTVOICE);
 		}
 	}
 	break;

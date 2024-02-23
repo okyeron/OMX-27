@@ -575,6 +575,17 @@ bool ChordUtil::constructChordBasic(ChordSettings * chord, ChordNotes * chordNot
 	return true;
 }
 
+ChordBalanceDetails ChordUtil::getChordBalance(uint8_t balance)
+{
+    updateChordBalance(balance);
+    return chordBalanceDetails;
+}
+
+MusicScales* ChordUtil::getMusicScale()
+{
+    return &musicScale_;
+}
+
 void ChordUtil::updateChordBalance(uint8_t balance)
 {
 	// ChordBalanceDetails bDetails;
@@ -615,5 +626,298 @@ void ChordUtil::updateChordBalance(uint8_t balance)
 		}
 	}
 }
+
+void ChordUtil::onEncoderChangedEditParam(Encoder::Update *enc, ChordSettings *chord, uint8_t selectedParmIndex, uint8_t targetParamIndex, uint8_t paramType)
+{
+    if (selectedParmIndex != targetParamIndex)
+        return;
+
+    auto amtSlow = enc->accel(1);
+    auto amtFast = enc->accel(5);
+
+    // bool triggerChord = false;
+
+    switch (paramType)
+    {
+        // Handled by Chord Mode class
+    case CPARAM_UIMODE:
+    {
+        // uiMode_ = constrain(uiMode_ + amtSlow, 0, 1);
+        // if (amtSlow != 0)
+        // {
+        // 	allNotesOff();
+        // 	// omxUtil.allOff();
+        // }
+    }
+    break;
+    // Handled by Chord Mode class
+    case CPARAM_MAN_STRUM:
+    {
+        // if (mode_ == CHRDMODE_MANSTRUM)
+        // {
+        // 	if (enc->dir() < 0)
+        // 	{
+        // 		mode_ = CHRDMODE_PLAY;
+        // 	}
+        // }
+        // else
+        // {
+        // 	if (enc->dir() > 0)
+        // 	{
+        // 		mode_ = CHRDMODE_MANSTRUM;
+        // 	}
+        // }
+    }
+    break;
+    case CPARAM_CHORD_TYPE:
+    {
+        // if (amtSlow != 0)
+        // {
+        // 	if (chordEditMode_)
+        // 	{
+        // 		onChordEditOff();
+        // 		enterChordEditMode();
+        // 	}
+        // 	else
+        // 	{
+        // 		onChordOff(selectedChord_);
+        // 	}
+        // }
+
+        chord->type = constrain(chord->type + amtSlow, 0, 1);
+    }
+    break;
+    // Handled by Chord Mode class
+    case CPARAM_CHORD_MFX:
+    {
+        // int8_t newMidiFx = constrain(chord->midiFx + amtSlow, -1, NUM_MIDIFX_GROUPS - 1);
+        // chord->midiFx = newMidiFx;
+    }
+    break;
+    case CPARAM_CHORD_VEL:
+    {
+        chord->velocity = constrain(chord->velocity + amtFast, 0, 127);
+    }
+    break;
+    case CPARAM_CHORD_MCHAN:
+    {
+        chord->mchan = constrain(chord->mchan + amtSlow, 0, 15);
+    }
+    break;
+    case CPARAM_BAS_NOTE:
+    {
+        chord->note = constrain(chord->note + amtSlow, 0, 11);
+        // triggerChord = amtSlow != 0;
+    }
+    break;
+    case CPARAM_BAS_OCT:
+    {
+        chord->basicOct = constrain(chord->basicOct + amtSlow, -5, 4);
+        // triggerChord = amtSlow != 0;
+    }
+    break;
+    case CPARAM_BAS_CHORD:
+    {
+        // uint8_t prevChord = chord->chord;
+        chord->chord = constrain(chord->chord + amtSlow, 0, kNumChordPatterns - 1);
+        // if (chord->chord != prevChord)
+        // {
+        // 	// triggerChord = true;
+
+        // 	// constructChord(selectedChord_);
+        // 	// omxDisp.displayMessage(kChordMsg[chord->chord]);
+        // }
+    }
+    break;
+    case CPARAM_BAS_BALANCE:
+    {
+        chord->balance = constrain(chord->balance + amtFast, 0, (kNumChordBalance - 1) * 10);
+        updateChordBalance(chord->balance);
+
+        // omxDisp.chordBalanceMsg(activeChordBalance_.type, activeChordBalance_.velMult, 10);
+
+        // if (amtSlow != 0) // To see notes change on keyboard leds
+        // {
+        // 	constructChord(selectedChord_);
+        // }
+    }
+    break;
+    case CPARAM_INT_NUMNOTES:
+    {
+        chord->numNotes = constrain(chord->numNotes + amtSlow, 1, 4);
+    }
+    break;
+    case CPARAM_INT_DEGREE:
+    {
+        chord->degree = constrain(chord->degree + amtSlow, 0, 7);
+    }
+    break;
+    case CPARAM_INT_OCTAVE:
+    {
+        chord->octave = constrain(chord->octave + amtSlow, -2, 2);
+    }
+    break;
+    case CPARAM_INT_TRANSPOSE:
+    {
+        chord->transpose = constrain(chord->transpose + amtSlow, -7, 7);
+    }
+    break;
+    case CPARAM_INT_SPREAD:
+    {
+        chord->spread = constrain(chord->spread + amtSlow, -2, 2);
+    }
+    break;
+    case CPARAM_INT_ROTATE:
+    {
+        chord->rotate = constrain(chord->rotate + amtSlow, 0, 4);
+    }
+    break;
+    case CPARAM_INT_VOICING:
+    {
+        chord->voicing = constrain(chord->voicing + amtSlow, 0, 7);
+    }
+    break;
+    case CPARAM_INT_SPRDUPDOWN:
+    {
+        chord->spreadUpDown = constrain(chord->spreadUpDown + amtSlow, 0, 1);
+    }
+    break;
+    case CPARAM_INT_QUARTVOICE:
+    {
+        chord->quartalVoicing = constrain(chord->quartalVoicing + amtSlow, 0, 1);
+    }
+    break;
+    }
+}
+
+void ChordUtil::setupPageLegend(ChordSettings *chord, uint8_t index, uint8_t paramType)
+    {
+        switch (paramType)
+        {
+        // Handled by Chord Mode class
+        case CPARAM_UIMODE:
+        {
+            omxDisp.legends[index] = "UI";
+            // omxDisp.legendText[index] = kUIModeDisp[uiMode_];
+        }
+        break;
+        // Handled by Chord Mode class
+        case CPARAM_MAN_STRUM:
+        {
+            omxDisp.legends[index] = "STRUM";
+            // omxDisp.legendText[index] = mode_ == CHRDMODE_MANSTRUM ? "ON" : "OFF";
+        }
+        break;
+        case CPARAM_CHORD_TYPE:
+        {
+            omxDisp.legends[index] = "TYPE";
+            omxDisp.legendText[index] = kChordTypeDisp[chord->type];
+        }
+        break;
+        case CPARAM_CHORD_MFX:
+        {
+            omxDisp.legends[index] = "MIFX";
+            if (chord->midiFx >= 0)
+            {
+                omxDisp.legendVals[index] = chord->midiFx + 1;
+            }
+            else
+            {
+                omxDisp.legendText[index] = "OFF";
+            }
+        }
+        break;
+        case CPARAM_CHORD_VEL:
+        {
+            omxDisp.legends[index] = "VEL";
+            omxDisp.legendVals[index] = chord->velocity;
+        }
+        break;
+        case CPARAM_CHORD_MCHAN:
+        {
+            omxDisp.legends[index] = "MCHAN";
+            omxDisp.legendVals[index] = chord->mchan + 1;
+        }
+        break;
+        case CPARAM_BAS_NOTE:
+        {
+            omxDisp.legends[index] = "NOTE";
+            omxDisp.legendText[index] = MusicScales::getNoteName(chord->note);
+        }
+        break;
+        case CPARAM_BAS_OCT:
+        {
+            omxDisp.legends[index] = "C-OCT";
+            omxDisp.legendVals[index] = chord->basicOct + 4;
+        }
+        break;
+        case CPARAM_BAS_CHORD:
+        {
+            omxDisp.legends[index] = "CHRD";
+            omxDisp.legendVals[index] = chord->chord;
+        }
+        break;
+        case CPARAM_BAS_BALANCE:
+        {
+            omxDisp.legends[index] = "BAL";
+            omxDisp.legendVals[index] = map(chord->balance, 0, (kNumChordBalance - 1) * 10, 0, 127);
+        }
+        break;
+        case CPARAM_INT_NUMNOTES:
+        {
+            omxDisp.legends[index] = "#NTS";
+            omxDisp.legendVals[index] = chord->numNotes;
+        }
+        break;
+        case CPARAM_INT_DEGREE:
+        {
+            omxDisp.legends[index] = "DEG";
+            omxDisp.legendVals[index] = chord->degree;
+        }
+        break;
+        case CPARAM_INT_OCTAVE:
+        {
+            omxDisp.legends[index] = "OCT";
+            omxDisp.legendVals[index] = chord->octave;
+        }
+        break;
+        case CPARAM_INT_TRANSPOSE:
+        {
+            omxDisp.legends[index] = "TPS";
+            omxDisp.legendVals[index] = chord->transpose;
+        }
+        break;
+        case CPARAM_INT_SPREAD:
+        {
+            omxDisp.legends[index] = "SPRD";
+            omxDisp.legendVals[index] = chord->spread;
+        }
+        break;
+        case CPARAM_INT_ROTATE:
+        {
+            omxDisp.legends[index] = "ROT";
+            omxDisp.legendVals[index] = chord->rotate;
+        }
+        break;
+        case CPARAM_INT_VOICING:
+        {
+            omxDisp.legends[index] = "VOIC";
+            omxDisp.legendText[index] = kVoicingNames[chord->voicing];
+        }
+        break;
+        case CPARAM_INT_SPRDUPDOWN:
+        {
+            omxDisp.legends[index] = "UPDN";
+            omxDisp.legendText[index] = chord->spreadUpDown ? "ON" : "OFF";
+        }
+        break;
+        case CPARAM_INT_QUARTVOICE:
+        {
+            omxDisp.legends[index] = "QRTV";
+            omxDisp.legendText[index] = chord->quartalVoicing ? "ON" : "OFF";
+        }
+        break;
+        }
+    }
 
 ChordUtil chordUtil;
