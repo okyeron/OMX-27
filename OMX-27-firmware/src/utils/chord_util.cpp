@@ -278,28 +278,30 @@ int ChordUtil::TransposeNote(int note, int8_t semitones)
 	return newNote;
 }
 
-bool ChordUtil::constructChord(ChordSettings *chord, ChordNotes *chordNotes, int scaleRoot, int scalePattern, bool midiFx)
+bool ChordUtil::constructChord(ChordSettings *chord, ChordNotes *chordNotes, int8_t autoOctave, int scaleRoot, int scalePattern, bool midiFx)
 {
 	// Serial.println("Constructing Chord: " + String(chordIndex));
 	// auto chord = chords_[chordIndex];
 
 	if (chord->type == CTYPE_BASIC)
 	{
-		return constructChordBasic(chord, chordNotes, midiFx);
+		return constructChordBasic(chord, chordNotes, autoOctave, midiFx);
 	}
     else if (chord->type == CTYPE_INTERVAL)
 	{
-		return constructChordInterval(chord, chordNotes, scaleRoot, scalePattern, midiFx);
+		return constructChordInterval(chord, chordNotes, autoOctave, scaleRoot, scalePattern, midiFx);
 	}
 
-    return constructChordBasic(chord, chordNotes, midiFx);
+    return constructChordBasic(chord, chordNotes, autoOctave, midiFx);
 }
 
-bool ChordUtil::constructChordInterval(ChordSettings *chord, ChordNotes *chordNotes, int scaleRoot, int scalePattern, bool midiFx)
+bool ChordUtil::constructChordInterval(ChordSettings *chord, ChordNotes *chordNotes, int8_t autoOctave, int scaleRoot, int scalePattern, bool midiFx)
 {
     musicScale_.calculateScaleIfModified(scaleRoot, scalePattern);
 
-    int8_t octave = midiFx ? chord->octave : midiSettings.octave + chord->octave;
+    // int8_t octave = midiSettings.octave + chord->octave;
+
+    int8_t octave = midiFx ? autoOctave + chord->octave : midiSettings.octave + chord->octave;
 
     uint8_t numNotes = 0;
 
@@ -513,7 +515,7 @@ bool ChordUtil::constructChordInterval(ChordSettings *chord, ChordNotes *chordNo
     return true;
 }
 
-bool ChordUtil::constructChordBasic(ChordSettings * chord, ChordNotes * chordNotes, bool midiFx)
+bool ChordUtil::constructChordBasic(ChordSettings * chord, ChordNotes * chordNotes, int8_t autoOctave, bool midiFx)
 {
 	// auto chord = chords_[chordIndex];
 
@@ -529,7 +531,9 @@ bool ChordUtil::constructChordBasic(ChordSettings * chord, ChordNotes * chordNot
 
 	// int adjRoot = notes[thisKey] + (midiSettings.octave + 1 * 12);
 
-	int rootNote = chord->note + ((chord->basicOct + 5) * 12);
+    int8_t octave = midiFx ? autoOctave + chord->basicOct : chord->basicOct;
+
+	int rootNote = chord->note + ((octave + 5) * 12);
 
 	if (rootNote < 0 || rootNote > 127)
 		return false;

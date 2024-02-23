@@ -12,9 +12,9 @@ class ChordUtil
 public:
 	ChordUtil();
 
-	bool constructChord(ChordSettings *chord, ChordNotes *chordNotes, int scaleRoot, int scalePattern, bool midiFx);
-	bool constructChordBasic(ChordSettings * chord, ChordNotes * chordNotes, bool midiFx);
-	bool constructChordInterval(ChordSettings *chord, ChordNotes *chordNotes, int scaleRoot, int scalePattern, bool midiFx);
+	bool constructChord(ChordSettings *chord, ChordNotes *chordNotes, int8_t autoOctave, int scaleRoot, int scalePattern, bool midiFx);
+	bool constructChordBasic(ChordSettings * chord, ChordNotes * chordNotes, int8_t autoOctave, bool midiFx);
+	bool constructChordInterval(ChordSettings *chord, ChordNotes *chordNotes, int8_t autoOctave, int scaleRoot, int scalePattern, bool midiFx);
 
 	ChordBalanceDetails getChordBalance(uint8_t balance);
 	MusicScales* getMusicScale();

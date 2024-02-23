@@ -194,7 +194,7 @@ void SubModeClearStorage::onDisplayUpdate()
             if (state == CLRSTOR_CONFIRM)
             {
                 int8_t selParam = params_.getSelParam();
-                omxDisp.dispOptionCombo(confirmLabel, confirmOptions, 2, selParam);
+                omxDisp.dispOptionCombo(confirmLabel, confirmOptions, 2, selParam, true);
             }
             else if (state == CLRSTOR_RESTART)
             {

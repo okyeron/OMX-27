@@ -42,7 +42,7 @@ public:
 
 	// Displays a header and options below
 	// Good for something like a yes/no box
-	void dispOptionCombo(const char * header, const char *options[], uint8_t optionCount, uint8_t selected);
+	void dispOptionCombo(const char * header, const char *options[], uint8_t optionCount, uint8_t selected, bool encSelActive);
 
 	void dispChar16(const char *charArray[], uint8_t charCount, uint8_t selected, uint8_t numPages, int8_t selectedPage, bool encSelActive, bool showLabels, const char *labels[], uint8_t labelCount);
 

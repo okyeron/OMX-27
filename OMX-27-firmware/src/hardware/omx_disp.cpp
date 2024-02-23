@@ -467,7 +467,7 @@ void OmxDisp::dispGenericModeLabelSmallText(const char *label, uint8_t numPages,
 	}
 }
 
-void OmxDisp::dispOptionCombo(const char * header, const char *optionsArray[], uint8_t optionCount, uint8_t selected)
+void OmxDisp::dispOptionCombo(const char * header, const char *optionsArray[], uint8_t optionCount, uint8_t selected, bool encSelActive)
 {
 	if (isMessageActive())
 	{
@@ -500,6 +500,11 @@ void OmxDisp::dispOptionCombo(const char * header, const char *optionsArray[], u
 		}
 
 		u8g2centerText(optionsArray[i], i * optionWidth, yPos, optionWidth - 1, 16);
+	}
+
+	if(!encSelActive)
+	{
+		display.drawFastHLine(4, 28, 128 - 8, WHITE);
 	}
 }
 
