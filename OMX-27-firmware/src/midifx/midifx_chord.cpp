@@ -13,12 +13,13 @@ namespace midifx
     {
         MFXCHRDPAGE_NOTES = 0,
         MFXCHRDPAGE_CHORDTYPE = 1,	    // Select Chord Type, Basic or Interval
-        MFXCHRDPAGE_BASIC_NOTES = 2,
-        MFXCHRDPAGE_CUSTOM_NOTES = 3,
-        MFXCHRDPAGE_SCALES = 2,
-        MFXCHRDPAGE_INT_NOTES = 3,
-        MFXCHRDPAGE_INT_SPREAD = 4,
-        MFXCHRDPAGE_INT_QUART = 5,
+        MFXCHRDPAGE_CHANCE = 2,	    // Select Chord Type, Basic or Interval
+        MFXCHRDPAGE_BASIC_NOTES = 3,
+        MFXCHRDPAGE_CUSTOM_NOTES = 4,
+        MFXCHRDPAGE_SCALES = 3,
+        MFXCHRDPAGE_INT_NOTES = 4,
+        MFXCHRDPAGE_INT_SPREAD = 5,
+        MFXCHRDPAGE_INT_QUART = 6,
         // MFXCHRDPAGE_1,	            // Note, Octave, Chord,         | numNotes, degree, octave, transpose
         // MFXCHRDPAGE_3,	            //                              | spread, rotate, voicing
         // MFXCHRDPAGE_4,	            //                              | spreadUpDown, quartalVoicing
@@ -33,11 +34,13 @@ namespace midifx
 	{
         basicParams_.addPage(1); // MFXCHRDPAGE_NOTES
         basicParams_.addPage(1); // MFXCHRDPAGE_CHORDTYPE
+        basicParams_.addPage(1); // MFXCHRDPAGE_CHANCE
         basicParams_.addPage(4); // MFXCHRDPAGE_BASIC_NOTES
         basicParams_.addPage(6); // MFXCHRDPAGE_CUSTOM_NOTES - Custom chord notes, toggled on and off
 
         intervalParams_.addPage(1); // MFXCHRDPAGE_NOTES
         intervalParams_.addPage(1); // MFXCHRDPAGE_CHORDTYPE
+        intervalParams_.addPage(1); // MFXCHRDPAGE_CHANCE
         intervalParams_.addPage(4); // MFXCHRDPAGE_SCALES
         intervalParams_.addPage(4); // MFXCHRDPAGE_INT_NOTES
         intervalParams_.addPage(4); // MFXCHRDPAGE_INT_SPREAD
@@ -255,11 +258,15 @@ namespace midifx
         auto chordPtr = &chord_;
 
         auto amtSlow = enc.accel(1);
-        // auto amtFast = enc.accel(5);
+        auto amtFast = enc.accel(5);
 
         if (selPage == MFXCHRDPAGE_CHORDTYPE)
         {
             chordUtil.onEncoderChangedEditParam(&enc, chordPtr, selParam, 1, CPARAM_CHORD_TYPE);
+        }
+        else if (selPage == MFXCHRDPAGE_CHANCE)
+        {
+            chancePerc_ = constrain(chancePerc_ + amtFast, 0, 100);
         }
 
         if (chord_.type == CTYPE_INTERVAL)
@@ -318,10 +325,6 @@ namespace midifx
                             calculateRemap();
                         }
                     }
-                }
-                else if (selParam == 4)
-                {
-                    chancePerc_ = constrain(chancePerc_ + amtSlow, 0, 100);
                 }
             }
             else if (selPage == MFXCHRDPAGE_INT_NOTES)
@@ -471,7 +474,10 @@ namespace midifx
         else if (params->getSelPage() == MFXCHRDPAGE_CHORDTYPE)
         {
             omxDisp.dispOptionCombo(chordTypeLabel, chordTypeOptions, 2, chord_.type, getEncoderSelect());
-            
+        }
+        else if (params->getSelPage() == MFXCHRDPAGE_CHANCE)
+        {
+            omxDisp.dispParamBar(chancePerc_, chancePerc_, 0, 100, !getEncoderSelect(), false, "Chord Trigger", "Chance");
         }
         // Chord page
         else if (params->getSelPage() == MFXCHRDPAGE_BASIC_NOTES && chord_.type == CTYPE_BASIC)
@@ -575,9 +581,9 @@ namespace midifx
                     omxDisp.legendVals[2] = scaleIndex_;
                 }
 
-                omxDisp.legends[3] = "CHC%";
-                tempString = String(chancePerc_) + "%";
-                omxDisp.legendText[3] = tempString.c_str();
+                // omxDisp.legends[3] = "CHC%";
+                // tempString = String(chancePerc_) + "%";
+                // omxDisp.legendText[3] = tempString.c_str();
             }
             break;
             case MFXCHRDPAGE_INT_NOTES:

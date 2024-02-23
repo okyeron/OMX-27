@@ -672,11 +672,11 @@ void OmxDisp::dispParamBar(int8_t potValue, int8_t targetValue, int8_t minValue,
 	u8g2_display.setFont(FONT_LABELS);
 	u8g2leftText(bankName, 2, hline - 3, 128 - 4, 10);
 	u8g2_display.setFont(FONT_TENFAT);
-	u8g2leftText(paramName, 2, 18, 96 - 4, 12);
+	u8g2leftText(paramName, 2, 18, 92 - 4, 12);
 
 	u8g2_display.setFont(FONT_BIG);
 	tempString = String(targetValue);
-	u8g2centerText(tempString.c_str(), 96, 18, 128 - 96 - 4, 18);
+	u8g2centerText(tempString.c_str(), 92, 18, 128 - 96 - 4, 22);
 
 	float potPerc = map(potValue, minValue, maxValue, 0, 1000) / 1000.0f;
 	float targetPerc = map(targetValue, minValue, maxValue, 0, 1000) / 1000.0f;
@@ -712,63 +712,6 @@ void OmxDisp::dispParamBar(int8_t potValue, int8_t targetValue, int8_t minValue,
 		display.fillRect(boxStartX + potWidth - 2, boxStartY - 3, 3, 1, BLACK);
 		display.fillRect(boxStartX + potWidth - 1, boxStartY - 2, 1, 1, BLACK);
 	}
-
-	// for (uint8_t i = 0; i < 16; i++)
-	// {
-	// 	if (i < valueCount && valueArray[i] == -127)
-	// 		continue;
-
-	// 	uint16_t fgColor = WHITE;
-
-	// 	uint8_t xPos = i * boxWidth + 2;
-	// 	uint8_t width = boxWidth - 4;
-
-	// 	if (i == selected && encSelActive)
-	// 	{
-	// 		display.fillRect(i * boxWidth, boxStartY, boxWidth, boxHeight, WHITE);
-	// 		display.fillRect(i * boxWidth + 1, boxStartY + 1, boxWidth - 2, boxHeight - 2, BLACK);
-	// 	}
-
-	// 	if (i >= valueCount)
-	// 	{
-	// 		// display.fillRect(i * boxWidth + 3, boxStartY + (halfBoxHeight + 1), 1, 1, fgColor);
-
-	// 		continue;
-	// 	}
-
-	// 	if (centered)
-	// 	{
-	// 		if (valueArray[i] >= middleValue)
-	// 		{
-	// 			float valuePerc = constrain(map((float)valueArray[i], (float)middleValue, (float)maxValue, 0.0f, 1.0f), 0.0f, 1.0f);
-	// 			uint8_t valueHeight = max(halfBoxHeight * valuePerc, 0);
-	// 			display.fillRect(xPos, boxStartY + (halfBoxHeight + 1) - valueHeight, width, valueHeight + 1, fgColor);
-
-	// 			// if(i == selected)
-	// 			// {
-	// 			//     Serial.println("valuePerc: " + String(valuePerc) + " valueHeight: " + String(valueHeight) + " startY: " + String(boxStartY + halfBoxHeight - valueHeight));
-	// 			// }
-	// 		}
-	// 		else
-	// 		{
-	// 			float valuePerc = 1.0f - constrain(map((float)valueArray[i], (float)minValue, (float)middleValue, 0.0f, 1.0f), 0.0f, 1.0f);
-	// 			uint8_t valueHeight = constrain((boxHeight - halfBoxHeight) * valuePerc, 0, halfBoxHeight - 3);
-	// 			display.fillRect(xPos, boxStartY + halfBoxHeight + 1, width, valueHeight + 1, fgColor);
-	// 			// display.fillRect(i + 3, boxStartY + halfBoxHeight + 1, boxWidth - 4, valueHeight - 2, bgColor);
-	// 		}
-	// 	}
-	// 	else
-	// 	{
-	// 		float valuePerc = constrain(map((float)valueArray[i], (float)minValue, (float)maxValue, 0.0f, 1.0f), 0.0f, 1.0f);
-	// 		uint8_t valueHeight = constrain(boxHeight * valuePerc, 0, boxHeight - 1);
-	// 		display.fillRect(xPos, boxStartY + boxHeight - valueHeight, width, valueHeight + 1, fgColor);
-	// 	}
-	// }
-
-	// if (numPages > 1)
-	// {
-	//     dispPageIndicators2(numPages, selectedPage);
-	// }
 }
 
 void OmxDisp::dispSlots(const char *slotNames[], uint8_t slotCount, uint8_t selected, uint8_t animPos, bool encSelActive, bool showLabels, const char *labels[], uint8_t labelCount)
