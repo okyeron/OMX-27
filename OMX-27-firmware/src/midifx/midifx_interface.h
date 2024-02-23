@@ -68,7 +68,10 @@ namespace midifx
 		// Short Display Name
 		virtual const char *getDispName() = 0;
 
-		virtual uint32_t getColor() { return colorConfig.midiFXGRPColor; }
+		virtual uint32_t getColor()
+		{
+			return colorConfig.getMidiFXColor(getFXType());
+		}
 
 		virtual MidiFXInterface *getClone() { return nullptr; }
 

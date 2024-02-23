@@ -28,11 +28,6 @@ namespace midifx
 		return "MONO";
 	}
 
-	uint32_t MidiFXMonophonic::getColor()
-	{
-		return ROSE;
-	}
-
 	MidiFXInterface *MidiFXMonophonic::getClone()
 	{
 		auto clone = new MidiFXMonophonic();

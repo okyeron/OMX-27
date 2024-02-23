@@ -40,11 +40,6 @@ namespace midifx
 		return "SEL";
 	}
 
-	uint32_t MidiFXSelector::getColor()
-	{
-		return LIME;
-	}
-
 	MidiFXInterface *MidiFXSelector::getClone()
 	{
 		auto clone = new MidiFXSelector();

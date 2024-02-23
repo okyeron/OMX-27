@@ -29,11 +29,6 @@ namespace midifx
 		return "CHC";
 	}
 
-	uint32_t MidiFXChance::getColor()
-	{
-		return RED;
-	}
-
 	MidiFXInterface *MidiFXChance::getClone()
 	{
 		auto clone = new MidiFXChance();

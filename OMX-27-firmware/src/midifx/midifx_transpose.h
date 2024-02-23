@@ -14,7 +14,6 @@ namespace midifx
 		int getFXType() override;
 		const char *getName() override;
 		const char *getDispName() override;
-		uint32_t getColor() override;
 
 		MidiFXInterface *getClone() override;
 

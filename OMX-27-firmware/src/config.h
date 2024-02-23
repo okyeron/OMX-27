@@ -276,6 +276,46 @@ struct ColorConfig
 
 	uint32_t octDnColor = ORANGE;
 	uint32_t octUpColor = RBLUE;
+
+	uint32_t mfxNone = LEDOFF; 
+	uint32_t mfxChance = RED; 
+	uint32_t mfxTranspose = PURPLE;		
+	uint32_t mfxRandomizer = ORANGE;
+	uint32_t mfxSelector = LIME;
+	uint32_t mfxChord = CYAN;
+	uint32_t mfxHarmonizer = MINT;
+	uint32_t mfxScaler = YELLOW;
+	uint32_t mfxMonophonic = ROSE;
+	uint32_t mfxArp = BLUE;
+
+	uint32_t getMidiFXColor(uint8_t mfxType)
+	{
+		switch (mfxType)
+		{
+		case MIDIFX_NONE:
+			return mfxNone;
+		case MIDIFX_CHANCE:
+			return mfxChance;
+		case MIDIFX_TRANSPOSE:
+			return mfxTranspose;
+		case MIDIFX_RANDOMIZER:
+			return mfxRandomizer;
+		case MIDIFX_SELECTOR:
+			return mfxSelector;
+		case MIDIFX_CHORD:
+			return mfxChord;
+		case MIDIFX_HARMONIZER:
+			return mfxHarmonizer;
+		case MIDIFX_SCALER:
+			return mfxScaler;
+		case MIDIFX_MONOPHONIC:
+			return mfxMonophonic;
+		case MIDIFX_ARP:
+			return mfxArp;
+		};
+
+		return LEDOFF;
+	}
 };
 
 extern ColorConfig colorConfig;

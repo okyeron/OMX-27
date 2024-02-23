@@ -31,11 +31,6 @@ namespace midifx
 		return "SCAL";
 	}
 
-	uint32_t MidiFXScaler::getColor()
-	{
-		return YELLOW;
-	}
-
 	MidiFXInterface *MidiFXScaler::getClone()
 	{
 		auto clone = new MidiFXScaler();

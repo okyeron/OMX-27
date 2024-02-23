@@ -28,11 +28,6 @@ namespace midifx
 		return "TRAN";
 	}
 
-	uint32_t MidiFXTranspose::getColor()
-	{
-		return PURPLE;
-	}
-
 	MidiFXInterface *MidiFXTranspose::getClone()
 	{
 		auto clone = new MidiFXTranspose();

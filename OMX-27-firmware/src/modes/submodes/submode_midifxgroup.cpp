@@ -22,7 +22,7 @@ SubModeMidiFxGroup subModeMidiFx[NUM_MIDIFX_GROUPS];
 
 const int kSelMFXTypeColor = 0xE6FFCF;
 const int kMFXTypeColor = DKGREEN;
-const int kMFXTypeEmptyColor = 0x400000;
+// const int kMFXTypeEmptyColor = 0x400000;
 
 // None, Chance, Randomizer, Harmonizer = Heliotrope gray, Scaler = Spanish viridian, Monophonic = Maroon (Crayola),
 // const int kMFXTypeColors[16] = {kMFXTypeEmptyColor, CYAN, RED, 0xAA98A9, 0x007F5C, 0xC32148, kMFXTypeEmptyColor, kMFXTypeEmptyColor,
@@ -459,9 +459,14 @@ bool SubModeMidiFxGroup::updateLEDs()
 
 		for (uint8_t i = 0; i < 16; i++)
 		{
-			auto fxColor = (i == selFXType ? kSelMFXTypeColor : ((i == MIDIFX_NONE || i >= MIDIFX_COUNT) ? kMFXTypeEmptyColor : kMFXTypeColor));
-
-			strip.setPixelColor(11 + i, fxColor);
+			if (i == selFXType)
+			{
+				strip.setPixelColor(11 + i, blinkState ? colorConfig.getMidiFXColor(i) : LEDOFF);
+			}
+			else
+			{
+				strip.setPixelColor(11 + i, colorConfig.getMidiFXColor(i));
+			}
 		}
 	}
 

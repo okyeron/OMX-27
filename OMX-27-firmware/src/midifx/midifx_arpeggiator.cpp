@@ -174,11 +174,6 @@ namespace midifx
         return "ARP";
     }
 
-    uint32_t MidiFXArpeggiator::getColor()
-    {
-        return BLUE;
-    }
-
     MidiFXInterface *MidiFXArpeggiator::getClone()
     {
         MidiFXArpeggiator *clone = new MidiFXArpeggiator();

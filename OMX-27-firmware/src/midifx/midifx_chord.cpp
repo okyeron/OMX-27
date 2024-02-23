@@ -64,11 +64,6 @@ namespace midifx
 		return "CHRD";
 	}
 
-	uint32_t MidiFXChord::getColor()
-	{
-		return CYAN;
-	}
-
 	MidiFXInterface *MidiFXChord::getClone()
 	{
 		auto clone = new MidiFXChord();

@@ -91,6 +91,7 @@ private:
 	MidiNoteGroup onNoteGroups[32];
 
 	midifx::MidiFXInterface *getMidiFX(uint8_t index);
+
 	void setMidiFX(uint8_t index, midifx::MidiFXInterface *midifx);
 	uint8_t getArpIndex();
 	void setupPageLegends();
