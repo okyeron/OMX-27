@@ -60,6 +60,8 @@ namespace midifx
 
 		virtual int getFXType() = 0;
 
+		virtual void setSlotIndex(uint8_t slotIndex);
+
 		// Display name
 		virtual const char *getName() = 0;
 
@@ -121,6 +123,8 @@ namespace midifx
 		bool enabled_ = false;
 		bool selected_ = false;
 		bool auxDown_ = false;
+
+        uint8_t mfxSlotIndex_;
 
 		bool encoderSelect_ = true;
 		ParamManager params_;

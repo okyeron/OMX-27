@@ -904,6 +904,13 @@ void SubModeMidiFxGroup::changeMidiFXType(uint8_t slotIndex, uint8_t typeIndex, 
 		setMidiFX(slotIndex, new MidiFXRandomizer());
 	}
 	break;
+	case MIDIFX_SELECTOR:
+	{
+		auto selector = new MidiFXSelector();
+		selector->setNoteInputFunc(slotIndex, &SubModeMidiFxGroup::midiFxSelNoteInputForwarder, this);
+		setMidiFX(slotIndex, selector);
+	}
+	break;
 	case MIDIFX_HARMONIZER:
 	{
 		setMidiFX(slotIndex, new MidiFXHarmonizer());
@@ -949,6 +956,111 @@ void SubModeMidiFxGroup::changeMidiFXType(uint8_t slotIndex, uint8_t typeIndex, 
 	reconnectInputsOutputs();
 }
 
+void SubModeMidiFxGroup::midiFxSelNoteInput(midifx::MidiFXSelector *mfxSelector, uint8_t midiFXIndex, MidiNoteGroup note)
+{
+	// Serial.println("midiFxSelNoteInput");
+
+	// Note offs should go through every FX in chain
+	if (note.noteOff)
+	{
+		// Serial.println("Note off, reconnecting");
+
+		reconnectInputsOutputs();
+		mfxSelector->handleNoteOff(note);
+		return;
+	}
+
+	uint8_t finalIndex = mfxSelector->getFinalMidiFXIndex(midiFXIndex);
+	// Serial.println(String("finalIndex = ") + String(finalIndex));
+
+	midifx::MidiFXInterface *finalMFX = nullptr;
+	bool finalOutputToGroup = true;
+
+	// Search for the next MFX for final mfx
+	for(uint8_t i = finalIndex; i < NUM_MIDIFX_SLOTS; i++)
+	{
+		finalMFX = getMidiFX(i);
+		if(finalMFX != nullptr)
+		{
+			// Serial.println(String("Final output: ") + String(i));
+
+			finalOutputToGroup = false;
+			break;
+		}
+	}
+
+	// if (finalOutputToGroup)
+	// {
+	// 	Serial.println("Final output is group");
+	// }
+
+	// Skip due to chance, note should go to next mfx + selector length, or master output
+	if(mfxSelector->chanceShouldSkip())
+	{
+		// Serial.println("Should Skip");
+
+		if(finalOutputToGroup)
+		{
+			noteOutputFunc(note);
+			return;
+		}
+		else
+		{
+			finalMFX->noteInput(note);
+			return;
+		}
+	}
+
+	uint8_t selIndex = mfxSelector->getSelectedMidiFXIndex(midiFXIndex);
+	// Serial.println(String("selIndex = ") + String(selIndex));
+
+	// Selected index out of range
+	if(selIndex >= NUM_MIDIFX_SLOTS)
+	{
+		// Serial.println("Sel index oor");
+		noteOutputFunc(note);
+		return;
+	}
+
+	auto selMidiFX = getMidiFX(selIndex);
+
+	// Selected MFX is empty, jump to final or group output
+	if(selMidiFX == nullptr)
+	{
+		// Serial.println("Sel mfx empty");
+		if(finalOutputToGroup)
+		{
+			noteOutputFunc(note);
+			return;
+		}
+		else
+		{
+			finalMFX->noteInput(note);
+			return;
+		}
+	}
+
+	// Selected MFX is valid, remap this FX to go to final or group output
+	// Then send the note to it
+	if(selMidiFX != nullptr)
+	{
+		// Serial.println("Valid sel MFX");
+
+		if(finalOutputToGroup)
+		{
+			// Serial.println("Note to group");
+			selMidiFX->setNoteOutput(&SubModeMidiFxGroup::noteFuncForwarder, this);
+		}
+		else
+		{
+			// Serial.println("Note to final");
+			selMidiFX->setNoteOutput(&MidiFXInterface::onNoteInputForwarder, finalMFX);
+		}
+
+		selMidiFX->noteInput(note);
+	}
+}
+
 // Where the magic happens
 void SubModeMidiFxGroup::reconnectInputsOutputs()
 {
@@ -969,6 +1081,8 @@ void SubModeMidiFxGroup::reconnectInputsOutputs()
 			continue;
 		}
 
+		fx->setSlotIndex(i);
+
 		// Last valid MidiFX, connect it's output to the main midifxgroup output
 		if (!validMidiFXFound)
 		{
@@ -981,12 +1095,21 @@ void SubModeMidiFxGroup::reconnectInputsOutputs()
 		// connect the output of this midiFX to the input of the next one
 		else
 		{
-			// if(lastValidMidiFX == nullptr)
+			// if(lastValidMidiFX->getFXType() == MIDIFX_SELECTOR)
 			// {
-			//     Serial.println("lastValidMidiFX is null");
-			// }
 
-			// Serial.println("connecting midifx to previous midifx");
+			// }
+			// else
+			// {
+			// // if(lastValidMidiFX == nullptr)
+			// // {
+			// //     Serial.println("lastValidMidiFX is null");
+			// // }
+
+			// // Serial.println("connecting midifx to previous midifx");
+
+			// 	fx->setNoteOutput(&MidiFXInterface::onNoteInputForwarder, lastValidMidiFX);
+			// }
 
 			fx->setNoteOutput(&MidiFXInterface::onNoteInputForwarder, lastValidMidiFX);
 			lastValidMidiFX = fx;

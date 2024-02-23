@@ -4,6 +4,7 @@
 #include "../../midifx/midifx_interface.h"
 #include "../../hardware/storage.h"
 #include "../../midifx/midifx_arpeggiator.h"
+#include "../../midifx/midifx_selector.h"
 
 #define NUM_MIDIFX_GROUPS 5
 #define NUM_MIDIFX_SLOTS 8
@@ -136,6 +137,12 @@ private:
 	//     static_cast<SubModeMidiFxGroup *>(context)->noteOutputFunc(note);
 	// }
 
+	static void midiFxSelNoteInputForwarder(void *context, midifx::MidiFXSelector *mfxSelector, uint8_t midiFXIndex, MidiNoteGroup note)
+	{
+		static_cast<SubModeMidiFxGroup *>(context)->midiFxSelNoteInput(mfxSelector, midiFXIndex, note);
+	}
+
+	void midiFxSelNoteInput(midifx::MidiFXSelector *mfxSelector, uint8_t midiFXIndex, MidiNoteGroup note);
 	void reconnectInputsOutputs();
 };
 
