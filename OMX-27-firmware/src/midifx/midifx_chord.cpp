@@ -85,7 +85,7 @@ namespace midifx
             {
                 chordNotes_.active = false;
             }
-            
+
 			processNoteOff(note);
 			return;
 		}
@@ -150,9 +150,20 @@ namespace midifx
         //     return; // This shouldn't happen
         // }
 
-        chord_.note = inNote.noteNumber % 12;
-        chord_.basicOct = (inNote.noteNumber / 12) - 5;
-        chord_.octave = chord_.basicOct;
+        if (chord_.type == CTYPE_BASIC)
+        {
+
+            chord_.note = inNote.noteNumber % 12;
+            chord_.basicOct = (inNote.noteNumber / 12) - 5;
+        }
+        else if (chord_.type == CTYPE_INTERVAL)
+        {
+            // Get the note forced to the current scale
+            // int8_t noteInScale = chordUtil.getMusicScale()->remapNoteToScale(inNote.noteNumber);
+
+            chord_.degree = MusicScales::getDegreeFromNote(inNote.noteNumber, rootNote_, scaleIndex_);
+            chord_.octave = (inNote.noteNumber / 12) - 5;
+        }
 
         // if (constructChord(chordIndex))
         if (chordUtil.constructChord(&chord_, &chordNotes_, rootNote_, scaleIndex_))

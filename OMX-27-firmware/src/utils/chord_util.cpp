@@ -280,8 +280,6 @@ int ChordUtil::TransposeNote(int note, int8_t semitones)
 
 bool ChordUtil::constructChord(ChordSettings *chord, ChordNotes *chordNotes, int scaleRoot, int scalePattern)
 {
-    musicScale_.calculateScaleIfModified(scaleRoot, scalePattern);
-
 	// Serial.println("Constructing Chord: " + String(chordIndex));
 	// auto chord = chords_[chordIndex];
 
@@ -289,219 +287,230 @@ bool ChordUtil::constructChord(ChordSettings *chord, ChordNotes *chordNotes, int
 	{
 		return constructChordBasic(chord, chordNotes);
 	}
+    else if (chord->type == CTYPE_INTERVAL)
+	{
+		return constructChordInterval(chord, chordNotes, scaleRoot, scalePattern);
+	}
+    
+    return constructChordBasic(chord, chordNotes);
+}
 
-	int8_t octave = midiSettings.octave + chord->octave;
+bool ChordUtil::constructChordInterval(ChordSettings *chord, ChordNotes *chordNotes, int scaleRoot, int scalePattern)
+{
+    musicScale_.calculateScaleIfModified(scaleRoot, scalePattern);
 
-	uint8_t numNotes = 0;
+    int8_t octave = midiSettings.octave + chord->octave;
 
-	for (uint8_t i = 0; i < 6; i++)
-	{
-		chordNotes->notes[i] = -1;
-		chordNotes->velocities[i] = chord->velocity;
-	}
+    uint8_t numNotes = 0;
 
-	if (chord->numNotes == 0)
-	{
-		return false;
-	}
-	else if (chord->numNotes == 1)
-	{
-		chordNotes->notes[0] = musicScale_.getNoteByDegree(chord->degree, octave);
-		numNotes = 1;
-	}
-	else if (chord->numNotes == 2)
-	{
-		chordNotes->notes[0] = musicScale_.getNoteByDegree(chord->degree, octave);
-		chordNotes->notes[1] = musicScale_.getNoteByDegree(chord->degree + 2, octave);
-		numNotes = 2;
-	}
-	else if (chord->numNotes == 3)
-	{
-		chordNotes->notes[0] = musicScale_.getNoteByDegree(chord->degree, octave);
-		chordNotes->notes[1] = musicScale_.getNoteByDegree(chord->degree + 2, octave);
-		chordNotes->notes[2] = musicScale_.getNoteByDegree(chord->degree + 4, octave);
-		numNotes = 3;
-	}
-	else if (chord->numNotes == 4)
-	{
-		chordNotes->notes[0] = musicScale_.getNoteByDegree(chord->degree, octave);
-		chordNotes->notes[1] = musicScale_.getNoteByDegree(chord->degree + 2, octave);
-		chordNotes->notes[2] = musicScale_.getNoteByDegree(chord->degree + 4, octave);
-		chordNotes->notes[3] = musicScale_.getNoteByDegree(chord->degree + 6, octave);
-		numNotes = 4;
-	}
+    for (uint8_t i = 0; i < 6; i++)
+    {
+        chordNotes->notes[i] = -1;
+        chordNotes->velocities[i] = chord->velocity;
+    }
 
-	chordNotes->rootNote = chordNotes->notes[0];
+    if (chord->numNotes == 0)
+    {
+        return false;
+    }
+    else if (chord->numNotes == 1)
+    {
+        chordNotes->notes[0] = musicScale_.getNoteByDegree(chord->degree, octave);
+        numNotes = 1;
+    }
+    else if (chord->numNotes == 2)
+    {
+        chordNotes->notes[0] = musicScale_.getNoteByDegree(chord->degree, octave);
+        chordNotes->notes[1] = musicScale_.getNoteByDegree(chord->degree + 2, octave);
+        numNotes = 2;
+    }
+    else if (chord->numNotes == 3)
+    {
+        chordNotes->notes[0] = musicScale_.getNoteByDegree(chord->degree, octave);
+        chordNotes->notes[1] = musicScale_.getNoteByDegree(chord->degree + 2, octave);
+        chordNotes->notes[2] = musicScale_.getNoteByDegree(chord->degree + 4, octave);
+        numNotes = 3;
+    }
+    else if (chord->numNotes == 4)
+    {
+        chordNotes->notes[0] = musicScale_.getNoteByDegree(chord->degree, octave);
+        chordNotes->notes[1] = musicScale_.getNoteByDegree(chord->degree + 2, octave);
+        chordNotes->notes[2] = musicScale_.getNoteByDegree(chord->degree + 4, octave);
+        chordNotes->notes[3] = musicScale_.getNoteByDegree(chord->degree + 6, octave);
+        numNotes = 4;
+    }
 
-	// Serial.println("numNotes: " + String(numNotes));
+    chordNotes->rootNote = chordNotes->notes[0];
 
-	switch (chord->voicing)
-	{
-	case CHRDVOICE_NONE:
-	{
-	}
-	break;
-	case CHRDVOICE_POWER:
-	{
-		if (chord->numNotes > 1)
-		{
-			chordNotes->notes[1] = musicScale_.getNoteByDegree(chord->degree + 4, octave);
-		}
-		if (chord->numNotes > 2)
-		{
-			chordNotes->notes[2] = chordNotes->notes[1] + 12;
-			for (uint8_t i = 3; i < 6; i++)
-			{
-				chordNotes->notes[i] = -1;
-			}
-			numNotes = 3;
-		}
-	}
-	break;
-	case CHRDVOICE_SUS2:
-	{
-		if (chord->numNotes > 1)
-		{
-			chordNotes->notes[1] = musicScale_.getNoteByDegree(chord->degree + 1, octave);
-		}
-	}
-	break;
-	case CHRDVOICE_SUS4:
-	{
-		if (chord->numNotes > 1)
-		{
-			chordNotes->notes[1] = musicScale_.getNoteByDegree(chord->degree + 3, octave);
-		}
-	}
-	break;
-	case CHRDVOICE_SUS24:
-	{
-		if (chord->numNotes > 1)
-		{
-			chordNotes->notes[1] = musicScale_.getNoteByDegree(chord->degree + 1, octave);
-		}
-		if (chord->numNotes > 2)
-		{
-			chordNotes->notes[2] = musicScale_.getNoteByDegree(chord->degree + 3, octave);
-		}
-	}
-	break;
-	case CHRDVOICE_ADD6:
-	{
-		chordNotes->notes[chord->numNotes] = musicScale_.getNoteByDegree(chord->degree + 5, octave);
-		numNotes = chord->numNotes + 1;
-	}
-	break;
-	case CHRDVOICE_ADD69:
-	{
-		chordNotes->notes[chord->numNotes] = musicScale_.getNoteByDegree(chord->degree + 5, octave);
-		chordNotes->notes[chord->numNotes + 1] = musicScale_.getNoteByDegree(chord->degree + 8, octave);
-		numNotes = chord->numNotes + 2;
-	}
-	break;
-	case CHRDVOICE_KB11:
-	{
-		if (chord->numNotes > 1)
-		{
-			chordNotes->notes[0] = musicScale_.getNoteByDegree(chord->degree + 0, octave);
-			chordNotes->notes[1] = musicScale_.getNoteByDegree(chord->degree + 4, octave);
-			numNotes = 2;
-		}
-		if (chord->numNotes > 2)
-		{
-			chordNotes->notes[2] = musicScale_.getNoteByDegree(chord->degree + 8, octave);
-			numNotes = 3;
-		}
-		if (chord->numNotes > 3)
-		{
-			chordNotes->notes[3] = musicScale_.getNoteByDegree(chord->degree + 9, octave);
-			chordNotes->notes[4] = musicScale_.getNoteByDegree(chord->degree + 6, octave + 1);
-			chordNotes->notes[5] = musicScale_.getNoteByDegree(chord->degree + 10, octave + 1);
-			numNotes = 6;
-		}
-	}
-	break;
-	default:
-		break;
-	}
+    // Serial.println("numNotes: " + String(numNotes));
 
-	// Serial.println("numNotes: " + String(numNotes));
+    switch (chord->voicing)
+    {
+    case CHRDVOICE_NONE:
+    {
+    }
+    break;
+    case CHRDVOICE_POWER:
+    {
+        if (chord->numNotes > 1)
+        {
+            chordNotes->notes[1] = musicScale_.getNoteByDegree(chord->degree + 4, octave);
+        }
+        if (chord->numNotes > 2)
+        {
+            chordNotes->notes[2] = chordNotes->notes[1] + 12;
+            for (uint8_t i = 3; i < 6; i++)
+            {
+                chordNotes->notes[i] = -1;
+            }
+            numNotes = 3;
+        }
+    }
+    break;
+    case CHRDVOICE_SUS2:
+    {
+        if (chord->numNotes > 1)
+        {
+            chordNotes->notes[1] = musicScale_.getNoteByDegree(chord->degree + 1, octave);
+        }
+    }
+    break;
+    case CHRDVOICE_SUS4:
+    {
+        if (chord->numNotes > 1)
+        {
+            chordNotes->notes[1] = musicScale_.getNoteByDegree(chord->degree + 3, octave);
+        }
+    }
+    break;
+    case CHRDVOICE_SUS24:
+    {
+        if (chord->numNotes > 1)
+        {
+            chordNotes->notes[1] = musicScale_.getNoteByDegree(chord->degree + 1, octave);
+        }
+        if (chord->numNotes > 2)
+        {
+            chordNotes->notes[2] = musicScale_.getNoteByDegree(chord->degree + 3, octave);
+        }
+    }
+    break;
+    case CHRDVOICE_ADD6:
+    {
+        chordNotes->notes[chord->numNotes] = musicScale_.getNoteByDegree(chord->degree + 5, octave);
+        numNotes = chord->numNotes + 1;
+    }
+    break;
+    case CHRDVOICE_ADD69:
+    {
+        chordNotes->notes[chord->numNotes] = musicScale_.getNoteByDegree(chord->degree + 5, octave);
+        chordNotes->notes[chord->numNotes + 1] = musicScale_.getNoteByDegree(chord->degree + 8, octave);
+        numNotes = chord->numNotes + 2;
+    }
+    break;
+    case CHRDVOICE_KB11:
+    {
+        if (chord->numNotes > 1)
+        {
+            chordNotes->notes[0] = musicScale_.getNoteByDegree(chord->degree + 0, octave);
+            chordNotes->notes[1] = musicScale_.getNoteByDegree(chord->degree + 4, octave);
+            numNotes = 2;
+        }
+        if (chord->numNotes > 2)
+        {
+            chordNotes->notes[2] = musicScale_.getNoteByDegree(chord->degree + 8, octave);
+            numNotes = 3;
+        }
+        if (chord->numNotes > 3)
+        {
+            chordNotes->notes[3] = musicScale_.getNoteByDegree(chord->degree + 9, octave);
+            chordNotes->notes[4] = musicScale_.getNoteByDegree(chord->degree + 6, octave + 1);
+            chordNotes->notes[5] = musicScale_.getNoteByDegree(chord->degree + 10, octave + 1);
+            numNotes = 6;
+        }
+    }
+    break;
+    default:
+        break;
+    }
 
-	if (chord->quartalVoicing)
-	{
-		chordNotes->notes[0] = AddOctave(chordNotes->notes[0], 2);
-		chordNotes->notes[1] = AddOctave(chordNotes->notes[1], 0);
-		chordNotes->notes[2] = AddOctave(chordNotes->notes[2], 1);
-		chordNotes->notes[3] = AddOctave(chordNotes->notes[3], -1);
-	}
+    // Serial.println("numNotes: " + String(numNotes));
 
-	if (chord->spreadUpDown)
-	{
-		for (uint8_t i = 0; i < 6; i++)
-		{
-			if (i % 2 == 0)
-			{
-				chordNotes->notes[i] = AddOctave(chordNotes->notes[i], -1);
-			}
-			else
-			{
-				chordNotes->notes[i] = AddOctave(chordNotes->notes[i], 1);
-			}
-		}
-	}
+    if (chord->quartalVoicing)
+    {
+        chordNotes->notes[0] = AddOctave(chordNotes->notes[0], 2);
+        chordNotes->notes[1] = AddOctave(chordNotes->notes[1], 0);
+        chordNotes->notes[2] = AddOctave(chordNotes->notes[2], 1);
+        chordNotes->notes[3] = AddOctave(chordNotes->notes[3], -1);
+    }
 
-	if (chord->spread < 0)
-	{
-		for (uint8_t i = 0; i < 6; i++)
-		{
-			if (i % 2 == 0)
-			{
-				chordNotes->notes[i] = AddOctave(chordNotes->notes[i], chord->spread);
-			}
-		}
-	}
-	else if (chord->spread > 0)
-	{
-		for (uint8_t i = 0; i < 6; i++)
-		{
-			if (i % 2 != 0)
-			{
-				chordNotes->notes[i] = AddOctave(chordNotes->notes[i], chord->spread);
-			}
-		}
-	}
+    if (chord->spreadUpDown)
+    {
+        for (uint8_t i = 0; i < 6; i++)
+        {
+            if (i % 2 == 0)
+            {
+                chordNotes->notes[i] = AddOctave(chordNotes->notes[i], -1);
+            }
+            else
+            {
+                chordNotes->notes[i] = AddOctave(chordNotes->notes[i], 1);
+            }
+        }
+    }
 
-	if (chord->rotate != 0 && numNotes > 0)
-	{
-		int temp[numNotes];
+    if (chord->spread < 0)
+    {
+        for (uint8_t i = 0; i < 6; i++)
+        {
+            if (i % 2 == 0)
+            {
+                chordNotes->notes[i] = AddOctave(chordNotes->notes[i], chord->spread);
+            }
+        }
+    }
+    else if (chord->spread > 0)
+    {
+        for (uint8_t i = 0; i < 6; i++)
+        {
+            if (i % 2 != 0)
+            {
+                chordNotes->notes[i] = AddOctave(chordNotes->notes[i], chord->spread);
+            }
+        }
+    }
 
-		uint8_t val = numNotes - chord->rotate;
+    if (chord->rotate != 0 && numNotes > 0)
+    {
+        int temp[numNotes];
 
-		uint8_t offset = chord->rotate % numNotes;
+        uint8_t val = numNotes - chord->rotate;
 
-		for (uint8_t i = 0; i < offset; i++)
-		{
-			chordNotes->notes[i] = AddOctave(chordNotes->notes[i], 1);
-		}
+        uint8_t offset = chord->rotate % numNotes;
 
-		for (uint8_t i = 0; i < numNotes; i++)
-		{
-			temp[i] = chordNotes->notes[abs((i + val) % numNotes)];
-		}
-		for (int i = 0; i < numNotes; i++)
-		{
-			chordNotes->notes[i] = temp[i];
-		}
-	}
+        for (uint8_t i = 0; i < offset; i++)
+        {
+            chordNotes->notes[i] = AddOctave(chordNotes->notes[i], 1);
+        }
 
-	for (uint8_t i = 0; i < 6; i++)
-	{
-		chordNotes->notes[i] = TransposeNote(chordNotes->notes[i], chord->transpose);
-	}
+        for (uint8_t i = 0; i < numNotes; i++)
+        {
+            temp[i] = chordNotes->notes[abs((i + val) % numNotes)];
+        }
+        for (int i = 0; i < numNotes; i++)
+        {
+            chordNotes->notes[i] = temp[i];
+        }
+    }
 
-	chordNotes->midifx = chord->midiFx;
+    for (uint8_t i = 0; i < 6; i++)
+    {
+        chordNotes->notes[i] = TransposeNote(chordNotes->notes[i], chord->transpose);
+    }
 
-	return true;
+    chordNotes->midifx = chord->midiFx;
+
+    return true;
 }
 
 bool ChordUtil::constructChordBasic(ChordSettings * chord, ChordNotes * chordNotes)

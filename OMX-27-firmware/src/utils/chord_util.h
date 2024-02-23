@@ -14,6 +14,7 @@ public:
 
 	bool constructChord(ChordSettings *chord, ChordNotes *chordNotes, int scaleRoot, int scalePattern);
 	bool constructChordBasic(ChordSettings * chord, ChordNotes * chordNotes);
+	bool constructChordInterval(ChordSettings *chord, ChordNotes *chordNotes, int scaleRoot, int scalePattern);
 
 	ChordBalanceDetails getChordBalance(uint8_t balance);
 	MusicScales* getMusicScale();
