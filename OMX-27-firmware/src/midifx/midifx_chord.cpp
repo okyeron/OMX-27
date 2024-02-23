@@ -44,7 +44,7 @@ namespace midifx
 
 	int MidiFXChord::getFXType()
 	{
-		return MIDIFX_CHANCE;
+		return MIDIFX_CHORD;
 	}
 
 	const char *MidiFXChord::getName()
@@ -162,11 +162,11 @@ namespace midifx
             // int8_t noteInScale = chordUtil.getMusicScale()->remapNoteToScale(inNote.noteNumber);
 
             chord_.degree = MusicScales::getDegreeFromNote(inNote.noteNumber, rootNote_, scaleIndex_);
-            chord_.octave = (inNote.noteNumber / 12) - 5;
+            chord_.octave = ((inNote.noteNumber + 12 - rootNote_) / 12) - 6;
         }
 
         // if (constructChord(chordIndex))
-        if (chordUtil.constructChord(&chord_, &chordNotes_, rootNote_, scaleIndex_))
+        if (chordUtil.constructChord(&chord_, &chordNotes_, rootNote_, scaleIndex_, true))
         {
             chordNotes_.active = true;
             chordNotes_.channel = chord_.mchan + 1;
@@ -367,7 +367,7 @@ namespace midifx
                         scaleIndex_ = scaleConfig.scalePattern;
                     }
 
-                    chordUtil.constructChord(chordPtr, &chordNotes_, rootNote_, scaleIndex_);
+                    chordUtil.constructChord(chordPtr, &chordNotes_, rootNote_, scaleIndex_, true);
                 }
             }
         }
@@ -668,20 +668,47 @@ namespace midifx
     }
 
     int MidiFXChord::saveToDisk(int startingAddress, Storage *storage)
-	{
-		// Serial.println((String)"Saving mfx chance: " + startingAddress); // 5969
-		// Serial.println((String)"chancePerc_: " + chancePerc_);
-		storage->write(startingAddress, chancePerc_);
-		return startingAddress + 1;
-	}
+    {
+        mfxChordSave chordSave;
+        chordSave.chancePerc = chancePerc_;
+        chordSave.useGlobalScale = useGlobalScale_;
+        chordSave.rootNote = rootNote_;
+        chordSave.scaleIndex = scaleIndex_;
+        chordSave.chord.CopySettingsFrom(&chord_);
 
-	int MidiFXChord::loadFromDisk(int startingAddress, Storage *storage)
-	{
-		// Serial.println((String)"Loading mfx chance: " + startingAddress); // 5969
+        int saveSize = sizeof(mfxChordSave);
 
-		chancePerc_ = storage->read(startingAddress);
-		// Serial.println((String)"chancePerc_: " + chancePerc_);
+        auto saveBytesPtr = (byte *)(&chordSave);
+        for (int j = 0; j < saveSize; j++)
+        {
+            storage->write(startingAddress + j, *saveBytesPtr++);
+        }
 
-		return startingAddress + 1;
-	}
+        startingAddress += saveSize;
+
+        return startingAddress;
+    }
+
+    int MidiFXChord::loadFromDisk(int startingAddress, Storage *storage)
+    {
+        int saveSize = sizeof(mfxChordSave);
+
+        auto chordSave = mfxChordSave{};
+        auto current = (byte *)&chordSave;
+        for (int j = 0; j < saveSize; j++)
+        {
+            *current = storage->read(startingAddress + j);
+            current++;
+        }
+
+        startingAddress += saveSize;
+
+        chancePerc_ = chordSave.chancePerc;
+        useGlobalScale_ = chordSave.useGlobalScale;
+        rootNote_ = chordSave.rootNote;
+        scaleIndex_ = chordSave.scaleIndex;
+        chord_.CopySettingsFrom(&chordSave.chord);
+
+        return startingAddress;
+    }
 }

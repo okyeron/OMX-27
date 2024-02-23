@@ -2525,14 +2525,14 @@ namespace midifx
         modPatternLength_ = arpSave.modPatternLength;
         transpPatternLength_ = arpSave.transpPatternLength;
 
-        changeArpMode(arpMode_);
-        prevArpMode_ = arpMode_;
-
         for (uint8_t i = 0; i < 16; i++)
         {
             modPattern_[i] = arpSave.modPattern[i];
             transpPattern_[i] = arpSave.transpPattern[i];
         }
+
+        changeArpMode(arpMode_);
+        prevArpMode_ = arpMode_;
 
         return startingAddress + saveSize;
     }

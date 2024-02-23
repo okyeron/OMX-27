@@ -2880,7 +2880,7 @@ bool OmxModeChords::pasteSelectedChordTo(uint8_t chordIndex)
 	if (chordIndex == selectedChord_ || chordIndex >= 16)
 		return false;
 
-	chords_[chordIndex].CopySettingsFrom(chords_[selectedChord_]);
+	chords_[chordIndex].CopySettingsFrom(&chords_[selectedChord_]);
 	selectedChord_ = chordIndex;
 	lastKeyWasKeyboard_ = false;
 	return true;
@@ -2892,7 +2892,7 @@ bool OmxModeChords::loadPreset(uint8_t presetIndex)
 
 	for (uint8_t i = 0; i < 16; i++)
 	{
-		chords_[i].CopySettingsFrom(chordSaves_[presetIndex][i]);
+		chords_[i].CopySettingsFrom(&chordSaves_[presetIndex][i]);
 	}
 
 	selectedSave_ = presetIndex;
@@ -2907,7 +2907,7 @@ bool OmxModeChords::savePreset(uint8_t presetIndex)
 
 	for (uint8_t i = 0; i < 16; i++)
 	{
-		chordSaves_[presetIndex][i].CopySettingsFrom(chords_[i]);
+		chordSaves_[presetIndex][i].CopySettingsFrom(&chords_[i]);
 	}
 
 	selectedSave_ = presetIndex;
@@ -2967,7 +2967,7 @@ void OmxModeChords::onChordOn(uint8_t chordIndex)
 		chordNotes_[chordIndex].channel = chords_[chordIndex].mchan + 1;
 
 		// Prevent stuck notes
-		playedChordNotes_[chordIndex].CopyFrom(chordNotes_[chordIndex]);
+		playedChordNotes_[chordIndex].CopyFrom(&chordNotes_[chordIndex]);
 		// uint8_t velocity = chords_[chordIndex].velocity;
 
 		// uint32_t noteOnMicros = micros();
@@ -3036,7 +3036,7 @@ void OmxModeChords::onChordEditOn(uint8_t chordIndex)
 		chordNotes_[chordIndex].channel = chords_[chordIndex].mchan + 1;
 		// uint8_t velocity = chords_[chordIndex].velocity;
 
-		chordEditNotes_.CopyFrom(chordNotes_[chordIndex]);
+		chordEditNotes_.CopyFrom(&chordNotes_[chordIndex]);
 		chordEditNotes_.active = true;
 
 		// chordEditNotes_.channel = chordNotes_[chordIndex].channel;
@@ -3489,7 +3489,7 @@ int OmxModeChords::loadFromDisk(int startingAddress, Storage *storage)
 				current++;
 			}
 
-			chordSaves_[saveIndex][i] = chord;
+			chordSaves_[saveIndex][i].CopySettingsFrom(&chord);
 			startingAddress += saveSize;
 		}
 	}

@@ -178,7 +178,7 @@ namespace midifx
 			uint8_t rateIndex : 4;	 // max 15
 			uint8_t octaveRange : 4; // max 7, 0 = 1 octave
 			int8_t octDistance_ : 6; // -24 to 24
-			uint8_t gate : 7;		 // 0 - 200
+			uint8_t gate;		 // 0 - 200
 
 			uint8_t modPatternLength : 4; // Max 15
 			ArpMod modPattern[16];

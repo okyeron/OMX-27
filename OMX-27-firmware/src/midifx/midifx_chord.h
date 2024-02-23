@@ -43,10 +43,19 @@ namespace midifx
             uint8_t midiChannel : 4;
         };
 
+        struct mfxChordSave
+		{
+			uint8_t chancePerc : 7;
+			bool useGlobalScale;
+            int8_t rootNote;
+		    int8_t scaleIndex;
+            
+            ChordSettings chord;
+		};
+
 		uint8_t chancePerc_ = 100;
 
 		uint8_t lastNote_;
-
 
         ParamManager basicParams_;
 	    ParamManager intervalParams_;
@@ -58,7 +67,7 @@ namespace midifx
 
 	    ChordBalanceDetails activeChordBalance_;
 
-	    int noNotes[6] = {-1, -1, -1, -1, -1, -1};
+	    int noNotes[6] = {0,0,0,0,0,0};
 
 	    const uint8_t kMaxNoteTrackerSize = 32;
 

@@ -278,28 +278,28 @@ int ChordUtil::TransposeNote(int note, int8_t semitones)
 	return newNote;
 }
 
-bool ChordUtil::constructChord(ChordSettings *chord, ChordNotes *chordNotes, int scaleRoot, int scalePattern)
+bool ChordUtil::constructChord(ChordSettings *chord, ChordNotes *chordNotes, int scaleRoot, int scalePattern, bool midiFx)
 {
 	// Serial.println("Constructing Chord: " + String(chordIndex));
 	// auto chord = chords_[chordIndex];
 
 	if (chord->type == CTYPE_BASIC)
 	{
-		return constructChordBasic(chord, chordNotes);
+		return constructChordBasic(chord, chordNotes, midiFx);
 	}
     else if (chord->type == CTYPE_INTERVAL)
 	{
-		return constructChordInterval(chord, chordNotes, scaleRoot, scalePattern);
+		return constructChordInterval(chord, chordNotes, scaleRoot, scalePattern, midiFx);
 	}
-    
-    return constructChordBasic(chord, chordNotes);
+
+    return constructChordBasic(chord, chordNotes, midiFx);
 }
 
-bool ChordUtil::constructChordInterval(ChordSettings *chord, ChordNotes *chordNotes, int scaleRoot, int scalePattern)
+bool ChordUtil::constructChordInterval(ChordSettings *chord, ChordNotes *chordNotes, int scaleRoot, int scalePattern, bool midiFx)
 {
     musicScale_.calculateScaleIfModified(scaleRoot, scalePattern);
 
-    int8_t octave = midiSettings.octave + chord->octave;
+    int8_t octave = midiFx ? chord->octave : midiSettings.octave + chord->octave;
 
     uint8_t numNotes = 0;
 
@@ -513,7 +513,7 @@ bool ChordUtil::constructChordInterval(ChordSettings *chord, ChordNotes *chordNo
     return true;
 }
 
-bool ChordUtil::constructChordBasic(ChordSettings * chord, ChordNotes * chordNotes)
+bool ChordUtil::constructChordBasic(ChordSettings * chord, ChordNotes * chordNotes, bool midiFx)
 {
 	// auto chord = chords_[chordIndex];
 

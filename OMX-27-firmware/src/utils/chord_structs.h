@@ -151,30 +151,40 @@ public:
 		spreadUpDown = false;
 		quartalVoicing = false;
 		voicing = 0;
+
+        for(uint8_t i = 0; i < 6; i++)
+        {
+            customNotes[i].note = 0;
+        }
 	}
 
-	void CopySettingsFrom(ChordSettings other)
+	void CopySettingsFrom(ChordSettings *other)
 	{
-		this->type = other.type;
-		this->midiFx = other.midiFx;
-		this->mchan = other.mchan;
-		this->velocity = other.velocity;
+		this->type = other->type;
+		this->midiFx = other->midiFx;
+		this->mchan = other->mchan;
+		this->velocity = other->velocity;
 
 		// Basic Type:
-		this->note = other.note;
-		this->basicOct = other.basicOct;
-		this->chord = other.chord;
-		this->balance = other.balance;
+		this->note = other->note;
+		this->basicOct = other->basicOct;
+		this->chord = other->chord;
+		this->balance = other->balance;
 
-		this->numNotes = other.numNotes;
-		this->degree = other.degree;
-		this->octave = other.octave;
-		this->transpose = other.transpose;
-		this->spread = other.spread;
-		this->rotate = other.rotate;
-		this->spreadUpDown = other.spreadUpDown;
-		this->quartalVoicing = other.quartalVoicing;
-		this->voicing = other.voicing;
+		this->numNotes = other->numNotes;
+		this->degree = other->degree;
+		this->octave = other->octave;
+		this->transpose = other->transpose;
+		this->spread = other->spread;
+		this->rotate = other->rotate;
+		this->spreadUpDown = other->spreadUpDown;
+		this->quartalVoicing = other->quartalVoicing;
+		this->voicing = other->voicing;
+
+        for(uint8_t i = 0; i < 6; i++)
+        {
+            this->customNotes[i].note = other->customNotes[i].note;
+        }
 	}
 };
 
@@ -191,20 +201,20 @@ struct ChordNotes
 	uint8_t midifx;
 	int rootNote;
 
-	void CopyFrom(ChordNotes other)
+	void CopyFrom(ChordNotes *other)
 	{
-		active = other.active;
-		channel = other.channel;
+		active = other->active;
+		channel = other->channel;
 		for (uint8_t i = 0; i < 6; i++)
 		{
-			notes[i] = other.notes[i];
-			velocities[i] = other.velocities[i];
+			notes[i] = other->notes[i];
+			velocities[i] = other->velocities[i];
 		}
-		strumPos = other.strumPos;
-		encDelta = other.encDelta;
-		octIncrement = other.octIncrement;
-		midifx = other.midifx;
-		rootNote = other.rootNote;
+		strumPos = other->strumPos;
+		encDelta = other->encDelta;
+		octIncrement = other->octIncrement;
+		midifx = other->midifx;
+		rootNote = other->rootNote;
 	}
 };
 
