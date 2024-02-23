@@ -278,14 +278,14 @@ struct ColorConfig
 	uint32_t octUpColor = RBLUE;
 
 	uint32_t mfxNone = LEDOFF; 
-	uint32_t mfxChance = RED; 
+	uint32_t mfxChance = MEDRED; 
 	uint32_t mfxTranspose = PURPLE;		
-	uint32_t mfxRandomizer = ORANGE;
-	uint32_t mfxSelector = LIME;
+	uint32_t mfxRandomizer = RED;
+	uint32_t mfxSelector = ORANGE;
 	uint32_t mfxChord = CYAN;
-	uint32_t mfxHarmonizer = MINT;
+	uint32_t mfxHarmonizer = ROSE;
 	uint32_t mfxScaler = YELLOW;
-	uint32_t mfxMonophonic = ROSE;
+	uint32_t mfxMonophonic = INDIGO;
 	uint32_t mfxArp = BLUE;
 
 	uint32_t getMidiFXColor(uint8_t mfxType)
