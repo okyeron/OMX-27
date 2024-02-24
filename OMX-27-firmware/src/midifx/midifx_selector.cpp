@@ -69,17 +69,27 @@ namespace midifx
         return (chancePerc_ != 100 && (chancePerc_ == 0 || random(100) > chancePerc_));
     }
 
-    uint8_t MidiFXSelector::getFinalMidiFXIndex(uint8_t thisMFXIndex)
+	uint8_t MidiFXSelector::getLength()
+	{
+		return length_;
+	}
+
+	uint8_t MidiFXSelector::getFinalMidiFXIndex(uint8_t thisMFXIndex)
     {
         return thisMFXIndex + length_ + 1; // +1 to account for this index, mfxIndex: 0 with length 2 should return index 3
     }
 
     uint8_t MidiFXSelector::getSelectedMidiFXIndex(uint8_t thisMFXIndex)
     {
-        if(length_ <= 1)
+        if(length_ == 1)
         {
             return thisMFXIndex + 1;
         }
+
+		if(length_ == 0)
+		{
+			return -1;
+		}
 
         switch (mode_)
         {

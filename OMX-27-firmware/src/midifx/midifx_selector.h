@@ -30,6 +30,8 @@ namespace midifx
 
         bool chanceShouldSkip();
 
+		uint8_t getLength();
+
         // The next mfx index after going through the selector
         // If selector is in slot 1, length is 2, then the next mfx slot index
         // would be slot 4

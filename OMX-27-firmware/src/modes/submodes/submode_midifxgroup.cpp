@@ -966,14 +966,14 @@ void SubModeMidiFxGroup::midiFxSelNoteInput(midifx::MidiFXSelector *mfxSelector,
 	// Serial.println("midiFxSelNoteInput");
 
 	// Note offs should go through every FX in chain
-	if (note.noteOff)
-	{
-		// Serial.println("Note off, reconnecting");
+	// if (note.noteOff)
+	// {
+	// 	// Serial.println("Note off, reconnecting");
 
-		reconnectInputsOutputs();
-		mfxSelector->handleNoteOff(note);
-		return;
-	}
+	// 	reconnectInputsOutputs();
+	// 	mfxSelector->handleNoteOff(note);
+	// 	return;
+	// }
 
 	uint8_t finalIndex = mfxSelector->getFinalMidiFXIndex(midiFXIndex);
 	// Serial.println(String("finalIndex = ") + String(finalIndex));
@@ -992,6 +992,56 @@ void SubModeMidiFxGroup::midiFxSelNoteInput(midifx::MidiFXSelector *mfxSelector,
 			finalOutputToGroup = false;
 			break;
 		}
+	}
+
+
+	// For a note off, send it to all the midifx in the length
+	// however, map those outputs to the final midifx or the group output
+	if (note.noteOff)
+	{
+		uint8_t length =  mfxSelector->getLength();
+
+		// len = 2, mfxIndex = 1, check 2, 3, final = 4
+
+		// midifx::MidiFXInterface *firstMidiFX;
+
+		bool validMfxFound = false;
+
+		for(uint8_t i = midiFXIndex + 1; i < midiFXIndex + length + 1; i++)
+		{
+			auto mfx = getMidiFX(i);
+
+			if(mfx != nullptr)
+			{
+				validMfxFound = true;
+
+				if (finalOutputToGroup)
+				{
+					mfx->setNoteOutput(&SubModeMidiFxGroup::noteFuncForwarder, this);
+					mfx->noteInput(note);
+				}
+				else
+				{
+					mfx->setNoteOutput(&MidiFXInterface::onNoteInputForwarder, finalMFX);
+					mfx->noteInput(note);
+				}
+			}
+		}
+
+		if(!validMfxFound)
+		{
+			if (finalOutputToGroup)
+			{
+				noteOutputFunc(note);
+				return;
+			}
+			else
+			{
+				finalMFX->noteInput(note);
+				return;
+			}
+		}
+		return;
 	}
 
 	// if (finalOutputToGroup)
@@ -1018,6 +1068,21 @@ void SubModeMidiFxGroup::midiFxSelNoteInput(midifx::MidiFXSelector *mfxSelector,
 
 	uint8_t selIndex = mfxSelector->getSelectedMidiFXIndex(midiFXIndex);
 	// Serial.println(String("selIndex = ") + String(selIndex));
+
+	// goto final or group
+	if(selIndex == 0)
+	{
+		if(finalOutputToGroup)
+		{
+			noteOutputFunc(note);
+			return;
+		}
+		else
+		{
+			finalMFX->noteInput(note);
+			return;
+		}
+	}
 
 	// Selected index out of range
 	if(selIndex >= NUM_MIDIFX_SLOTS)
