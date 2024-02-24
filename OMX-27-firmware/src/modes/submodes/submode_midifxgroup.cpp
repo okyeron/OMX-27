@@ -9,6 +9,7 @@
 #include "../../midifx/midifx_harmonizer.h"
 #include "../../midifx/midifx_transpose.h"
 #include "../../midifx/midifx_chord.h"
+#include "../../midifx/midifx_repeat.h"
 
 // #include "midifx_arpeggiator.h"
 
@@ -934,6 +935,11 @@ void SubModeMidiFxGroup::changeMidiFXType(uint8_t slotIndex, uint8_t typeIndex, 
 	case MIDIFX_CHORD:
 	{
 		setMidiFX(slotIndex, new MidiFXChord());
+	}
+	break;
+	case MIDIFX_REPEAT:
+	{
+		setMidiFX(slotIndex, new MidiFXRepeat());
 	}
 	break;
 	case MIDIFX_ARP:
