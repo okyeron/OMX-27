@@ -75,8 +75,6 @@ namespace midifx
 
 		bool lengthChanged_;
 
-        midifx::MidiFXInterface *getMidiFX(uint8_t index);
-
         void *noteInputContext_;
 		void (*noteInputFunctionPtr_)(void *, midifx::MidiFXSelector *, uint8_t, MidiNoteGroup);
 	};
