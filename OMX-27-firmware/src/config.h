@@ -287,6 +287,7 @@ struct ColorConfig
 	uint32_t mfxHarmonizer = ROSE;
 	uint32_t mfxScaler = YELLOW;
 	uint32_t mfxMonophonic = INDIGO;
+	uint32_t mfxRepeat = RED;
 	uint32_t mfxArp = BLUE;
 
 	uint32_t getMidiFXColor(uint8_t mfxType)
@@ -311,6 +312,8 @@ struct ColorConfig
 			return mfxScaler;
 		case MIDIFX_MONOPHONIC:
 			return mfxMonophonic;
+		case MIDIFX_REPEAT:
+			return mfxRepeat;
 		case MIDIFX_ARP:
 			return mfxArp;
 		};

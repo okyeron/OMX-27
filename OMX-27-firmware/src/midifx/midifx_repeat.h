@@ -56,15 +56,27 @@ namespace midifx
                 {
                     noteNumber = 255;
                 }
-                this->noteNumber = noteNumber;
-                this->channel = channel;
+                else
+                {
+                    this->noteNumber = noteNumber;
+                    this->velocity = velocity;
+                    this->channel = channel;
+                }
             }
 
             RepeatNote(MidiNoteGroup *noteGroup)
             {
-                RepeatNote(noteGroup->noteNumber, noteGroup->velocity, noteGroup->channel - 1);
+                if (noteGroup->noteNumber < 0 || noteGroup->noteNumber > 127)
+                {
+                    noteNumber = 255;
+                    return;
+                }
+                this->noteNumber = noteGroup->noteNumber;
+                this->velocity = noteGroup->velocity;
+                this->channel = noteGroup->channel;
             }
         };
+
         struct RepeatSave
 		{
 			uint8_t chancePerc : 7;
@@ -87,7 +99,7 @@ namespace midifx
         uint8_t velEnd_ : 7; // 0-127
 
         // Consts
-		static const int queueSize = 8;
+		static const int queueSize = 16;
 
         bool seqRunning_;
 

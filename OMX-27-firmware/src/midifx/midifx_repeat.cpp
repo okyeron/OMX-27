@@ -29,7 +29,7 @@ namespace midifx
         velStart_ = 10;
         velEnd_ = 115;
 
-        changeRepeatMode(MFXREPEATMODE_1SHOT);
+        changeRepeatMode(MFXREPEATMODE_ON);
 
 		encoderSelect_ = true;
 	}
@@ -77,6 +77,7 @@ namespace midifx
     {
         if (mode_ == MFXREPEATMODE_OFF)
         {
+            Serial.println("MFXREPEATMODE_OFF");
             sendNoteOut(note);
             return;
         }
@@ -174,6 +175,8 @@ namespace midifx
             holdNoteQueue.push_back(RepeatNote(note));
             noteAdded = true;
         }
+
+        Serial.println("Note Added: " + String(noteAdded));
         return noteAdded;
     }
 
@@ -183,8 +186,11 @@ namespace midifx
         auto it = playedNoteQueue.begin();
         while (it != playedNoteQueue.end())
         {
+            Serial.println("playedNoteQueue: note " + String(it->noteNumber));
+            Serial.println("MidiNoteGroup: note " + String(note->noteNumber));
             // remove matching note numbers
-            if (it->noteNumber == note->noteNumber && it->channel == note->channel - 1)
+            // if (it->noteNumber == note->noteNumber && it->channel == note->channel - 1)
+            if (it->noteNumber == note->noteNumber)
             {
                 // `erase()` invalidates the iterator, use returned iterator
                 it = playedNoteQueue.erase(it);
@@ -195,6 +201,8 @@ namespace midifx
                 ++it;
             }
         }
+
+        Serial.println("foundNoteToRemove " + String(foundNoteToRemove));
 
         return foundNoteToRemove;
     }
@@ -234,6 +242,8 @@ namespace midifx
 
     void MidiFXRepeat::repeatNoteOn(MidiNoteGroup *note)
     {
+        Serial.println("repeatNoteOn");
+
         bool seqReset = false;
 
         if (!seqRunning_)
@@ -286,8 +296,8 @@ namespace midifx
     }
     void MidiFXRepeat::repeatNoteOff(MidiNoteGroup *note)
     {
+        Serial.println("repeatNoteOff");
         removeMidiNoteQueue(note);
-
         sortNotes();
 
         if ((mode_ == MFXREPEATMODE_ON || mode_ == MFXREPEATMODE_ONCE) && hasMidiNotes() == false)
@@ -302,7 +312,7 @@ namespace midifx
 
     void MidiFXRepeat::startSeq()
     {
-        // Serial.println("startArp");
+        Serial.println("startArp");
         if (seqRunning_)
             return;
 
@@ -436,8 +446,12 @@ namespace midifx
 
     void MidiFXRepeat::repeatNoteTrigger()
     {
+        Serial.println("repeatNoteTrigger");
+
         if (sortedNoteQueue.size() == 0)
         {
+            Serial.println("no sorted notes");
+
             return;
         }
 
@@ -537,7 +551,8 @@ namespace midifx
 
     void MidiFXRepeat::playNote(uint32_t noteOnMicros, int16_t noteNumber, uint8_t velocity, uint8_t channel)
     {
-        // Serial.println("PlayNote: " + String(note.noteNumber));
+        Serial.println("SeqRunning: " + String(seqRunning_));
+        Serial.println("PlayNote: " + String(noteNumber) + String(velocity) + String(velocity));
         if (noteNumber < 0 || noteNumber > 127)
             return;
 
@@ -604,6 +619,7 @@ namespace midifx
 
         if (sysSettings.omxMode == MODE_MIDI && !selected_)
         {
+            Serial.println("Not selected");
             return;
         }
 
