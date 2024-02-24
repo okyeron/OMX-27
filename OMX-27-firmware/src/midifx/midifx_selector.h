@@ -32,6 +32,8 @@ namespace midifx
 
 		uint8_t getLength();
 
+		bool didLengthChange();
+
         // The next mfx index after going through the selector
         // If selector is in slot 1, length is 2, then the next mfx slot index
         // would be slot 4
@@ -70,6 +72,8 @@ namespace midifx
 		uint8_t chancePerc_ = 100;
 
         uint8_t selPos_ = 0;
+
+		bool lengthChanged_;
 
         midifx::MidiFXInterface *getMidiFX(uint8_t index);
 

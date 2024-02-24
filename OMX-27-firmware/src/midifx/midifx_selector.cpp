@@ -74,6 +74,13 @@ namespace midifx
 		return length_;
 	}
 
+	bool MidiFXSelector::didLengthChange()
+	{
+		bool changed = lengthChanged_;
+		lengthChanged_ = false;
+		return changed;
+	}
+
 	uint8_t MidiFXSelector::getFinalMidiFXIndex(uint8_t thisMFXIndex)
     {
         return thisMFXIndex + length_ + 1; // +1 to account for this index, mfxIndex: 0 with length 2 should return index 3
@@ -183,7 +190,9 @@ namespace midifx
 			}
 			else if (param == 1)
 			{
+				uint8_t oldLength = length_;
 				length_ = constrain(length_ + amt, 0, 7);
+				lengthChanged_ = oldLength != length_;
 			}
 			else if (param == 3)
 			{

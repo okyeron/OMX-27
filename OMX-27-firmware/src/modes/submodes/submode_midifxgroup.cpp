@@ -963,6 +963,13 @@ void SubModeMidiFxGroup::changeMidiFXType(uint8_t slotIndex, uint8_t typeIndex, 
 
 void SubModeMidiFxGroup::midiFxSelNoteInput(midifx::MidiFXSelector *mfxSelector, uint8_t midiFXIndex, MidiNoteGroup note)
 {
+	// Reconnect the outputs if the length changed. 
+	// Otherwise unexpected things might happen. 
+	if(mfxSelector->didLengthChange())
+	{
+		reconnectInputsOutputs();
+	}
+
 	// Serial.println("midiFxSelNoteInput");
 
 	// Note offs should go through every FX in chain
@@ -994,12 +1001,26 @@ void SubModeMidiFxGroup::midiFxSelNoteInput(midifx::MidiFXSelector *mfxSelector,
 		}
 	}
 
+	uint8_t length =  mfxSelector->getLength();
+
+	// 0 length edge case
+	if(length == 0)
+	{
+		if(finalOutputToGroup)
+		{
+			noteOutputFunc(note);
+		}
+		else
+		{
+			finalMFX->noteInput(note);
+		}
+		return;
+	}
 
 	// For a note off, send it to all the midifx in the length
 	// however, map those outputs to the final midifx or the group output
 	if (note.noteOff)
 	{
-		uint8_t length =  mfxSelector->getLength();
 
 		// len = 2, mfxIndex = 1, check 2, 3, final = 4
 
