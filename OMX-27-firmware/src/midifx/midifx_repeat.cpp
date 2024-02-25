@@ -579,7 +579,7 @@ namespace midifx
 
     void MidiFXRepeat::loopUpdate()
 	{
-        auto now = seqConfig.currentFrameMicros;
+        // auto now = seqConfig.currentFrameMicros;
 
         // Send arp offs for notes that had fixed lengths
         // auto it = pendingNotes.begin();
@@ -629,8 +629,10 @@ namespace midifx
         {
             lastStepTimeP_ = nextStepTimeP_;
 
-            uint8_t rate = kArpRates[rateIndex_];
-            multiplier_ = 1.0f / (float)rate;
+            uint8_t rate = kArpRates[rateIndex_]; // 8
+            multiplier_ = 1.0f / (float)rate; // 1 / 8 = 0.125 // Only need to recalculate this if rate changes yo
+
+            // clockConfig.step_micros = 16th note step in microseconds
 
             stepMicroDelta_ = (clockConfig.step_micros * 16) * multiplier_;
 

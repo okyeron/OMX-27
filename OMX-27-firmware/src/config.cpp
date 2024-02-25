@@ -59,7 +59,7 @@ int potMaxVal = 8190; // T4 = 1019 // T3.2 = 8190;
 
 const int gridh = 32;
 const int gridw = 128;
-const int PPQ = 96;
+const int PPQ = 96; // Pulses Per Quarter note
 
 const char *mfxOffMsg = "MidiFX are Off";
 const char *mfxArpEditMsg = "Arp Edit";
