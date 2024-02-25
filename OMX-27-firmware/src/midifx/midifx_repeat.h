@@ -18,6 +18,7 @@ namespace midifx
 		MidiFXInterface *getClone() override;
 
 		void loopUpdate() override;
+        void onClockTick() override;
 		void resync() override;
 
 		void onDisplayUpdate(uint8_t funcKeyMode) override;
@@ -36,6 +37,7 @@ namespace midifx
 	private:
         struct RepeatNote
         {
+            bool playing;
             // bool inUse = false;
             uint8_t noteNumber;
             uint8_t channel : 4;
@@ -92,6 +94,8 @@ namespace midifx
         };
 		uint8_t chancePerc_ = 100;
 
+        bool quantizeSync_ = true;
+
 		uint8_t numOfRepeats_ : 4; // 1 to 16, stored as 0 - 15
         uint8_t mode_ : 3; // Off, 1-Shot - Repeats for numOfRepeats_ restarts on new note on, On - Repeats indefinitely while key is hold, Hold - Endlessly repeats, 
         int8_t rateIndex_ : 5; // max 15 or -1 for hz
@@ -114,6 +118,10 @@ namespace midifx
 		Micros lastStepTimeP_ = 32;
 		uint32_t stepMicroDelta_ = 0;
 
+		Micros last16thTime_ = 0;
+		Micros next16thTime_ = 0;
+
+
 		std::vector<RepeatNote> playedNoteQueue; // Keeps track of which notes are being played
 		std::vector<RepeatNote> holdNoteQueue;	  // Holds notes
 
@@ -123,6 +131,7 @@ namespace midifx
 		MidiNoteGroup trackingNoteGroups[8];
 
 		bool hasMidiNotes();
+        void updateMultiplier();
         bool insertMidiNoteQueue(MidiNoteGroup *note);
 		bool removeMidiNoteQueue(MidiNoteGroup *note);
 

@@ -23,11 +23,13 @@ namespace midifx
         chancePerc_ = 100;
 
         numOfRepeats_ = 4;
-        rateIndex_ = 6;
+        rateIndex_ = 9;
         rateHz_ = 40;
         gate_ = 90;
         velStart_ = 10;
         velEnd_ = 115;
+
+        quantizeSync_ = true;
 
         changeRepeatMode(MFXREPEATMODE_ON);
 
@@ -147,7 +149,18 @@ namespace midifx
 
     bool MidiFXRepeat::hasMidiNotes()
     {
-        return playedNoteQueue.size() > 0;
+        return activeNoteQueue.size() > 0;
+    }
+
+    void MidiFXRepeat::updateMultiplier()
+    {
+        if(!multiplierCalculated_)
+        {
+            uint8_t rate = kArpRates[rateIndex_]; // 8
+            multiplier_ = 1.0f / (float)rate; // 1 / 8 = 0.125 // Only need to recalculate this if rate changes yo
+
+            multiplierCalculated_ = true;
+        }
     }
 
     bool MidiFXRepeat::insertMidiNoteQueue(MidiNoteGroup *note)
@@ -162,7 +175,32 @@ namespace midifx
         if (activeNoteQueue.size() < queueSize)
         {
             auto newNote = RepeatNote(note);
-            newNote.nextTriggerTime = seqConfig.currentFrameMicros;
+
+            // If quantizeSync_is true, this note won't start triggering until the next clock tick. 
+            if(quantizeSync_)
+            {
+                newNote.playing = true;
+                auto delta = seqConfig.currentFrameMicros - last16thTime_;
+
+                if(delta < (clockConfig.step_micros / 3.0f))
+                {
+                    newNote.nextTriggerTime = last16thTime_;
+                }
+                else
+                {
+                    newNote.nextTriggerTime = next16thTime_;
+                }
+
+                // newNote.nextTriggerTime = next16thTime_;
+                // updateMultiplier();
+                // newNote.nextTriggerTime = seqConfig.lastClockMicros + (clockConfig.step_micros * 16 * multiplier_);
+            }
+            else
+            {
+                // Trigger note asap
+                newNote.playing = true;
+                newNote.nextTriggerTime = seqConfig.currentFrameMicros;
+            }
 
             activeNoteQueue.push_back(newNote);
             noteAdded = true;
@@ -211,6 +249,7 @@ namespace midifx
             // if (it->noteNumber == note->noteNumber && it->channel == note->channel - 1)
             if (it->noteNumber == note->noteNumber)
             {
+                Serial.println("removing note: " + String(it->noteNumber));
                 // `erase()` invalidates the iterator, use returned iterator
                 it = activeNoteQueue.erase(it);
                 foundNoteToRemove = true;
@@ -387,6 +426,9 @@ namespace midifx
             stepMicroDelta_ = (clockConfig.step_micros * 16) * multiplier_;
             nextStepTimeP_ = seqConfig.lastClockMicros; // Should be current time, start now.
             nextRepeatTriggerTime_ = nextStepTimeP_;
+
+            next16thTime_ = seqConfig.lastClockMicros;
+            last16thTime_ = seqConfig.lastClockMicros;
         }
         else
         {
@@ -626,6 +668,19 @@ namespace midifx
         sendNoteOut(noteOut);
     }
 
+    void MidiFXRepeat::onClockTick()
+    {
+        // for(uint8_t i = 0; i < activeNoteQueue.size(); i++)
+        // {
+        //     if(activeNoteQueue[i].playing == false)
+        //     {
+        //         updateMultiplier();
+        //         activeNoteQueue[i].playing = true;
+        //         activeNoteQueue[i].nextTriggerTime = seqConfig.lastClockMicros;
+        //     }
+        // }
+    }
+
     void MidiFXRepeat::loopUpdate()
 	{
         // auto now = seqConfig.currentFrameMicros;
@@ -672,26 +727,47 @@ namespace midifx
             return;
         }
 
-        if(!multiplierCalculated_)
-        {
-            uint8_t rate = kArpRates[rateIndex_]; // 8
-            multiplier_ = 1.0f / (float)rate; // 1 / 8 = 0.125 // Only need to recalculate this if rate changes yo
+        updateMultiplier();
 
-            multiplierCalculated_ = true;
+        uint32_t stepmicros = seqConfig.currentFrameMicros;
+
+        if(stepmicros >= next16thTime_)
+        {
+            last16thTime_ = next16thTime_;
+            next16thTime_ = next16thTime_ + (clockConfig.step_micros * 16 * (1.0f / 16.0f));
+
+            // for (uint8_t i = 0; i < activeNoteQueue.size(); i++)
+            // {
+            //     if (activeNoteQueue[i].playing == false)
+            //     {
+            //         activeNoteQueue[i].playing = true;
+            //         activeNoteQueue[i].nextTriggerTime = next16thTime_;
+            //     }
+            // }
+
+            // next16thTime_ = next16thTime_ + (clockConfig.step_micros * 16 * (1.0f / 16.0f));
         }
 
         tempNoteQueue.clear();
-
-        uint32_t stepmicros = seqConfig.currentFrameMicros;
 
         // Loop through all the notes and see which notes should be triggered this frame
         // if a note should be triggered it gets added to the tempNoteQueue
         for(uint8_t i = 0; i < activeNoteQueue.size(); i++)
         {
             // The time has come to
-            if(stepmicros >= activeNoteQueue[i].nextTriggerTime)
+            if(stepmicros >= activeNoteQueue[i].nextTriggerTime && activeNoteQueue[i].playing)
             {
-                activeNoteQueue[i].nextTriggerTime = seqConfig.currentFrameMicros + (clockConfig.step_micros * 16 * multiplier_);
+                activeNoteQueue[i].nextTriggerTime = activeNoteQueue[i].nextTriggerTime + (clockConfig.step_micros * 16 * multiplier_);
+
+                // sync with the clock
+                // if (quantizeSync_)
+                // {
+                //     activeNoteQueue[i].nextTriggerTime = seqConfig.lastClockMicros + (clockConfig.step_micros * 16 * multiplier_);
+                // }
+                // else
+                // {
+                //     activeNoteQueue[i].nextTriggerTime = seqConfig.currentFrameMicros + (clockConfig.step_micros * 16 * multiplier_);
+                // }
 
                 // Don't hold back
                 tempNoteQueue.push_back(activeNoteQueue[i]);
