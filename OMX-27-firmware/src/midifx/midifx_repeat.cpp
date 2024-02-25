@@ -152,48 +152,67 @@ namespace midifx
 
     bool MidiFXRepeat::insertMidiNoteQueue(MidiNoteGroup *note)
     {
-        // Serial.println("playedNoteQueue capacity: " + String(playedNoteQueue.capacity()));
-        if (playedNoteQueue.capacity() > queueSize)
+        if (activeNoteQueue.capacity() > queueSize)
         {
-            playedNoteQueue.shrink_to_fit();
-        }
-        if (holdNoteQueue.capacity() > queueSize)
-        {
-            holdNoteQueue.shrink_to_fit();
+            activeNoteQueue.shrink_to_fit();
         }
 
         bool noteAdded = false;
 
-        if (playedNoteQueue.size() < queueSize)
+        if (activeNoteQueue.size() < queueSize)
         {
-            playedNoteQueue.push_back(RepeatNote(note));
-            noteAdded = true;
-        }
+            auto newNote = RepeatNote(note);
+            newNote.nextTriggerTime = seqConfig.currentFrameMicros;
 
-        if (holdNoteQueue.size() < queueSize)
-        {
-            holdNoteQueue.push_back(RepeatNote(note));
+            activeNoteQueue.push_back(newNote);
             noteAdded = true;
         }
 
         Serial.println("Note Added: " + String(noteAdded));
         return noteAdded;
+
+        // // Serial.println("playedNoteQueue capacity: " + String(playedNoteQueue.capacity()));
+        // if (playedNoteQueue.capacity() > queueSize)
+        // {
+        //     playedNoteQueue.shrink_to_fit();
+        // }
+        // if (holdNoteQueue.capacity() > queueSize)
+        // {
+        //     holdNoteQueue.shrink_to_fit();
+        // }
+
+        // bool noteAdded = false;
+
+        // if (playedNoteQueue.size() < queueSize)
+        // {
+        //     playedNoteQueue.push_back(RepeatNote(note));
+        //     noteAdded = true;
+        // }
+
+        // if (holdNoteQueue.size() < queueSize)
+        // {
+        //     holdNoteQueue.push_back(RepeatNote(note));
+        //     noteAdded = true;
+        // }
+
+        // Serial.println("Note Added: " + String(noteAdded));
+        // return noteAdded;
     }
 
     bool MidiFXRepeat::removeMidiNoteQueue(MidiNoteGroup *note)
     {
         bool foundNoteToRemove = false;
-        auto it = playedNoteQueue.begin();
-        while (it != playedNoteQueue.end())
+        auto it = activeNoteQueue.begin();
+        while (it != activeNoteQueue.end())
         {
-            Serial.println("playedNoteQueue: note " + String(it->noteNumber));
-            Serial.println("MidiNoteGroup: note " + String(note->noteNumber));
+            // Serial.println("playedNoteQueue: note " + String(it->noteNumber));
+            // Serial.println("MidiNoteGroup: note " + String(note->noteNumber));
             // remove matching note numbers
             // if (it->noteNumber == note->noteNumber && it->channel == note->channel - 1)
             if (it->noteNumber == note->noteNumber)
             {
                 // `erase()` invalidates the iterator, use returned iterator
-                it = playedNoteQueue.erase(it);
+                it = activeNoteQueue.erase(it);
                 foundNoteToRemove = true;
             }
             else
@@ -202,9 +221,33 @@ namespace midifx
             }
         }
 
-        Serial.println("foundNoteToRemove " + String(foundNoteToRemove));
+        // Serial.println("foundNoteToRemove " + String(foundNoteToRemove));
 
         return foundNoteToRemove;
+
+        // bool foundNoteToRemove = false;
+        // auto it = playedNoteQueue.begin();
+        // while (it != playedNoteQueue.end())
+        // {
+        //     Serial.println("playedNoteQueue: note " + String(it->noteNumber));
+        //     Serial.println("MidiNoteGroup: note " + String(note->noteNumber));
+        //     // remove matching note numbers
+        //     // if (it->noteNumber == note->noteNumber && it->channel == note->channel - 1)
+        //     if (it->noteNumber == note->noteNumber)
+        //     {
+        //         // `erase()` invalidates the iterator, use returned iterator
+        //         it = playedNoteQueue.erase(it);
+        //         foundNoteToRemove = true;
+        //     }
+        //     else
+        //     {
+        //         ++it;
+        //     }
+        // }
+
+        // Serial.println("foundNoteToRemove " + String(foundNoteToRemove));
+
+        // return foundNoteToRemove;
     }
 
     void MidiFXRepeat::changeRepeatMode(uint8_t newMode)
@@ -230,7 +273,7 @@ namespace midifx
         playedNoteQueue.clear();
         holdNoteQueue.clear();
         tempNoteQueue.clear();
-        sortedNoteQueue.clear();
+        activeNoteQueue.clear();
 
         resetArpSeq();
 
@@ -276,7 +319,7 @@ namespace midifx
         }
 
         insertMidiNoteQueue(note);
-        sortNotes();
+        // sortNotes();
 
         if (seqReset)
         {
@@ -298,7 +341,7 @@ namespace midifx
     {
         Serial.println("repeatNoteOff");
         removeMidiNoteQueue(note);
-        sortNotes();
+        // sortNotes();
 
         if ((mode_ == MFXREPEATMODE_ON || mode_ == MFXREPEATMODE_ONCE) && hasMidiNotes() == false)
         {
@@ -408,47 +451,53 @@ namespace midifx
         // nextNotePos_ = 0;
     }
 
-    void MidiFXRepeat::sortNotes()
+    // void MidiFXRepeat::sortNotes()
+    // {
+    //     activeNoteQueue.clear();
+
+    //     // Copy played or held notes to sorted note queue
+    //     if (mode_ != MFXREPEATMODE_ON && mode_ != MFXREPEATMODE_ONCE)
+    //     {
+    //         for (RepeatNote a : holdNoteQueue)
+    //         {
+    //             activeNoteQueue.push_back(a);
+    //         }
+    //     }
+    //     else
+    //     {
+    //         for (RepeatNote a : playedNoteQueue)
+    //         {
+    //             activeNoteQueue.push_back(a);
+    //         }
+    //     }
+
+    //     if (activeNoteQueue.size() == 0)
+    //         return; // Not much to do without any notes
+
+    //     // Keep vectors in check
+    //     if (activeNoteQueue.capacity() > queueSize)
+    //     {
+    //         activeNoteQueue.shrink_to_fit();
+    //     }
+
+    //     if (tempNoteQueue.capacity() > queueSize)
+    //     {
+    //         tempNoteQueue.shrink_to_fit();
+    //     }
+    // }
+
+    void MidiFXRepeat::triggerNote(RepeatNote note)
     {
-        sortedNoteQueue.clear();
+        if(note.noteNumber > 127) return;
 
-        // Copy played or held notes to sorted note queue
-        if (mode_ != MFXREPEATMODE_ON && mode_ != MFXREPEATMODE_ONCE)
-        {
-            for (RepeatNote a : holdNoteQueue)
-            {
-                sortedNoteQueue.push_back(a);
-            }
-        }
-        else
-        {
-            for (RepeatNote a : playedNoteQueue)
-            {
-                sortedNoteQueue.push_back(a);
-            }
-        }
-
-        if (sortedNoteQueue.size() == 0)
-            return; // Not much to do without any notes
-
-        // Keep vectors in check
-        if (sortedNoteQueue.capacity() > queueSize)
-        {
-            sortedNoteQueue.shrink_to_fit();
-        }
-
-        if (tempNoteQueue.capacity() > queueSize)
-        {
-            tempNoteQueue.shrink_to_fit();
-        }
+        playNote(seqConfig.currentFrameMicros, note.noteNumber, note.velocity, note.channel);
     }
-
 
     void MidiFXRepeat::repeatNoteTrigger()
     {
         Serial.println("repeatNoteTrigger");
 
-        if (sortedNoteQueue.size() == 0)
+        if (activeNoteQueue.size() == 0)
         {
             Serial.println("no sorted notes");
 
@@ -475,7 +524,7 @@ namespace midifx
 
         // currentNotePos = constrain(currentNotePos, 0, qLength - 1);
 
-        for (RepeatNote r : sortedNoteQueue)
+        for (RepeatNote r : activeNoteQueue)
         {
             if (r.noteNumber >= 0 && r.noteNumber <= 127)
             {
@@ -623,35 +672,65 @@ namespace midifx
             return;
         }
 
-        uint32_t stepmicros = seqConfig.currentFrameMicros;
-
-        if (stepmicros >= nextStepTimeP_)
+        if(!multiplierCalculated_)
         {
-            lastStepTimeP_ = nextStepTimeP_;
-
             uint8_t rate = kArpRates[rateIndex_]; // 8
             multiplier_ = 1.0f / (float)rate; // 1 / 8 = 0.125 // Only need to recalculate this if rate changes yo
 
-            // clockConfig.step_micros = 16th note step in microseconds
-
-            stepMicroDelta_ = (clockConfig.step_micros * 16) * multiplier_;
-
-            nextStepTimeP_ = seqConfig.currentFrameMicros + stepMicroDelta_; // calc step based on rate
-
-            nextRepeatTriggerTime_ = nextStepTimeP_;
-
-            repeatNoteTrigger();
-
-            // Keeps arp running for a bit on stop so if you play new notes they will be in sync
-            // if (pendingStop_)
-            // {
-            //     pendingStopCount_--;
-            //     if (pendingStopCount_ == 0)
-            //     {
-            //         doPendingStop();
-            //     }
-            // }
+            multiplierCalculated_ = true;
         }
+
+        tempNoteQueue.clear();
+
+        uint32_t stepmicros = seqConfig.currentFrameMicros;
+
+        // Loop through all the notes and see which notes should be triggered this frame
+        // if a note should be triggered it gets added to the tempNoteQueue
+        for(uint8_t i = 0; i < activeNoteQueue.size(); i++)
+        {
+            // The time has come to
+            if(stepmicros >= activeNoteQueue[i].nextTriggerTime)
+            {
+                activeNoteQueue[i].nextTriggerTime = seqConfig.currentFrameMicros + (clockConfig.step_micros * 16 * multiplier_);
+
+                // Don't hold back
+                tempNoteQueue.push_back(activeNoteQueue[i]);
+            }
+        }
+
+        // Trigger any notes that should be triggered this frame
+        for (RepeatNote n : tempNoteQueue)
+        {
+            triggerNote(n);
+        }
+
+        // if (stepmicros >= nextStepTimeP_)
+        // {
+        //     lastStepTimeP_ = nextStepTimeP_;
+
+        //     uint8_t rate = kArpRates[rateIndex_]; // 8
+        //     multiplier_ = 1.0f / (float)rate; // 1 / 8 = 0.125 // Only need to recalculate this if rate changes yo
+
+        //     // clockConfig.step_micros = 16th note step in microseconds
+
+        //     stepMicroDelta_ = (clockConfig.step_micros * 16) * multiplier_;
+
+        //     nextStepTimeP_ = seqConfig.currentFrameMicros + stepMicroDelta_; // calc step based on rate
+
+        //     nextRepeatTriggerTime_ = nextStepTimeP_;
+
+        //     repeatNoteTrigger();
+
+        //     // Keeps arp running for a bit on stop so if you play new notes they will be in sync
+        //     // if (pendingStop_)
+        //     // {
+        //     //     pendingStopCount_--;
+        //     //     if (pendingStopCount_ == 0)
+        //     //     {
+        //     //         doPendingStop();
+        //     //     }
+        //     // }
+        // }
 	}
 
 	void MidiFXRepeat::onEncoderChangedEditParam(Encoder::Update enc)

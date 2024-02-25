@@ -43,6 +43,8 @@ namespace midifx
             // bool sendMidi = false;
             // bool sendCV = false;
 
+            Micros nextTriggerTime = 0;
+
             RepeatNote()
             {
                 noteNumber = 255;
@@ -104,6 +106,7 @@ namespace midifx
         bool seqRunning_;
 
         // Timing stuff
+        bool multiplierCalculated_ = false; // Used to prevent recalculating multiplier
 		float multiplier_ = 1;
 		uint8_t stepLength_ = 1; // length of note in arp steps
 
@@ -113,7 +116,9 @@ namespace midifx
 
 		std::vector<RepeatNote> playedNoteQueue; // Keeps track of which notes are being played
 		std::vector<RepeatNote> holdNoteQueue;	  // Holds notes
-		std::vector<RepeatNote> sortedNoteQueue;	  // Holds notes
+
+		std::vector<RepeatNote> activeNoteQueue;	  // Holds notes
+
 		std::vector<RepeatNote> tempNoteQueue;	  // Notes that are used in arp
 		MidiNoteGroup trackingNoteGroups[8];
 
@@ -128,8 +133,9 @@ namespace midifx
 		void stopSeq();
         void resetArpSeq();
 
-        void sortNotes();
+        // void sortNotes();
 
+        void triggerNote(RepeatNote note);
         void repeatNoteTrigger();
 		void playNote(uint32_t noteOnMicros, int16_t noteNumber, uint8_t velocity, uint8_t channel);
 	};
