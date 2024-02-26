@@ -61,6 +61,9 @@ const int gridh = 32;
 const int gridw = 128;
 const int PPQ = 96; // Pulses Per Quarter note
 
+const uint32_t secs2micros = 1000000;
+
+
 const char *mfxOffMsg = "MidiFX are Off";
 const char *mfxArpEditMsg = "Arp Edit";
 const char *exitMsg = "Exit";

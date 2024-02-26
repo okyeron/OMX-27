@@ -103,6 +103,7 @@ extern int pots[NUM_CC_BANKS][NUM_CC_POTS]; // the MIDI CC (continuous controlle
 
 using Micros = unsigned long; // for tracking time per pattern
 
+
 struct SysSettings
 {
 	OMXMode omxMode = DEFAULT_MODE;
@@ -194,9 +195,12 @@ struct EncoderConfig
 
 extern EncoderConfig encoderConfig;
 
+extern const uint32_t secs2micros;
+
 struct ClockConfig
 {
 	float clockbpm = 120;
+	uint8_t globalQuantizeStepIndex = 9; // Determines what unit to quantize to. Index of kArpRates
 	float newtempo = clockbpm;
 	unsigned long tempoStartTime;
 	unsigned long tempoEndTime;
@@ -225,7 +229,7 @@ struct SequencerConfig
 
 	uint8_t midiOutClockTick; // Shouldn't be modified
 
-	uint8_t currentClockTick; // Counter that wraps from 0-96 on the clock tick. currentClockTick % 96 will align with global 1/4 note, currentClockTick % 96/2=48 global 8th note and 96/4=24 global 16th note
+	uint16_t currentClockTick; // Counter that wraps from 0-96 on the clock tick. currentClockTick % 96 will align with global 1/4 note, currentClockTick % 96/2=48 global 8th note and 96/4=24 global 16th note
 
 	int numOfActiveArps = 0;
 

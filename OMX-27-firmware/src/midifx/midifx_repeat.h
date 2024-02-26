@@ -105,6 +105,8 @@ namespace midifx
         uint8_t velStart_ : 7; // 0-127
         uint8_t velEnd_ : 7; // 0-127
 
+        float rateInHz_;
+
         // Consts
 		static const int queueSize = 16;
 
@@ -122,6 +124,8 @@ namespace midifx
 		Micros last16thTime_ = 0;
 		Micros next16thTime_ = 0;
 
+        Micros hzRateLength_;
+
 
 		std::vector<RepeatNote> playedNoteQueue; // Keeps track of which notes are being played
 		std::vector<RepeatNote> holdNoteQueue;	  // Holds notes
@@ -138,6 +142,8 @@ namespace midifx
         void updateMultiplier();
         bool insertMidiNoteQueue(MidiNoteGroup *note);
 		bool removeMidiNoteQueue(MidiNoteGroup *note);
+
+        static float rateToHz(uint8_t rateHz);
 
         void changeRepeatMode(uint8_t newMode);
         void repeatNoteOn(MidiNoteGroup *note);

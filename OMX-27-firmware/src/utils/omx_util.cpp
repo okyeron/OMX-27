@@ -80,7 +80,7 @@ void OmxUtil::advanceClock(OmxModeInterface *activeOmxMode, Micros advance)
 		// timeToNextClock = clockConfig.ppqInterval * (PPQ / 24); // ppqInt=5.208ms * 4 = 20.83 milliseconds for 120 bpm, 120 bpm = 2 beats per second, a beat being a quarter note
 
 		seqConfig.midiOutClockTick = (seqConfig.midiOutClockTick + 1) % PPQ;
-		seqConfig.currentClockTick = (seqConfig.currentClockTick + 1) % PPQ;
+		seqConfig.currentClockTick = (seqConfig.currentClockTick + 1) % (PPQ * 4);
 
 		timeToNextClock = clockConfig.ppqInterval;
 	}
@@ -124,7 +124,8 @@ void OmxUtil::setGlobalSwing(int swng_amt)
 void OmxUtil::resetClocks()
 {
 	// BPM tempo to step_delay calculation
-	clockConfig.ppqInterval = 60000000 / (PPQ * clockConfig.clockbpm); // ppq interval is in microseconds, 96 * 120 = 11520, 60000000 / 11520 = 52083 microsecond, * 0.001 = 5.208 milliseconds
+	// 60000000 = 60 secs
+	clockConfig.ppqInterval = 60000000 / (PPQ * clockConfig.clockbpm); // ppq interval is in microseconds, 96 * 120 = 11520, 60000000 / 11520 = 52083 microsecond, * 0.001 = 5.208 milliseconds, 
 	clockConfig.step_micros = clockConfig.ppqInterval * (PPQ / 4);	   // 16th note step in microseconds (quarter of quarter note)
 
 	// 16th note step length in milliseconds

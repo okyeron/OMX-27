@@ -9,24 +9,37 @@ namespace midifx
     enum MidiFXRepeatModes
     {
         MFXREPEATMODE_OFF,
-        MFXREPEATMODE_1SHOT,
         MFXREPEATMODE_ON,
-        MFXREPEATMODE_HOLD,
+        MFXREPEATMODE_1SHOT,
         MFXREPEATMODE_ONCE,
+        MFXREPEATMODE_HOLD,
         MFXREPEATMODE_COUNT
+    };
+
+    const char *kRepeatModeDisp_[] = {"OFF", "ON", "1-ST", "ONCE", "HOLD"};
+
+    enum MidiFXRepeatPages
+    {
+        MFXREPEATPAGE_CHANCE, // Chance Perc
+        MFXREPEATPAGE_MODERATE, // Mode, Rate, RateHz, Gate
+        MFXREPEATPAGE_QUANT // Quant Rate
     };
 
 	MidiFXRepeat::MidiFXRepeat()
 	{
-		params_.addPage(4);
+		params_.addPage(1); // MFXREPEATPAGE_CHANCE
+		params_.addPage(4); // MFXREPEATPAGE_MODERATE
+		params_.addPage(4); // MFXREPEATPAGE_QUANT
 	
         chancePerc_ = 100;
 
+        mode_ = MFXREPEATMODE_ON;
         numOfRepeats_ = 4;
         rateIndex_ = 6;
         quantizedRateIndex_ = 6;
         multiplierCalculated_ = false;
-        rateHz_ = 40;
+        rateHz_ = 100;
+        rateInHz_ = rateToHz(rateHz_);
         gate_ = 90;
         velStart_ = 10;
         velEnd_ = 115;
@@ -154,13 +167,45 @@ namespace midifx
         return activeNoteQueue.size() > 0;
     }
 
+    float MidiFXRepeat::rateToHz(uint8_t rateHz)
+    {
+        float hertz = 1.0f;
+
+        if (rateHz < 100)
+        {
+            hertz = map((float)rateHz, 0.0f, 100.0f, 0.1f, 1.0f);
+        }
+        else if (rateHz == 100)
+        {
+            hertz = 1.0f;
+        }
+        else if (rateHz > 100)
+        {
+            hertz = map((float)rateHz, 100.0f, 255.0f, 1.0f, 50.0f);
+        }
+
+        return hertz;
+    }
+
+
     void MidiFXRepeat::updateMultiplier()
     {
         if(!multiplierCalculated_)
         {
-            uint8_t rate = kArpRates[rateIndex_]; // 8
-            // uint8_t rate = 16; // 8
-            multiplier_ = 1.0f / (float)rate; // 1 / 8 = 0.125 // Only need to recalculate this if rate changes yo
+            // Use Hertz
+            if (rateIndex_ < 0)
+            {
+                multiplier_ = 1;
+
+                rateInHz_ = rateToHz(rateHz_);
+                hzRateLength_ = (1.0f / rateInHz_) * secs2micros;
+            }
+            else
+            {
+                uint8_t rate = kArpRates[rateIndex_]; // 8
+                // uint8_t rate = 16; // 8
+                multiplier_ = 1.0f / (float)rate; // 1 / 8 = 0.125 // Only need to recalculate this if rate changes yo
+            }
 
             multiplierCalculated_ = true;
         }
@@ -747,7 +792,9 @@ namespace midifx
     {
         if(pendingNoteQueue.size() == 0) return;
 
-        bool isQuantizedStep = seqConfig.currentClockTick % (96 * 4 / kArpRates[quantizedRateIndex_]) == 0;
+        uint8_t quantIndex = quantizedRateIndex_ < 0 ? clockConfig.globalQuantizeStepIndex : quantizedRateIndex_; // Use global or local quantize rate?
+
+        bool isQuantizedStep = seqConfig.currentClockTick % (96 * 4 / kArpRates[quantIndex]) == 0;
 
         // Move pending notes to active
         if(isQuantizedStep)
@@ -839,7 +886,14 @@ namespace midifx
             // The time has come to
             if(stepmicros >= activeNoteQueue[i].nextTriggerTime)
             {
-                activeNoteQueue[i].nextTriggerTime = activeNoteQueue[i].nextTriggerTime + (clockConfig.step_micros * 16 * multiplier_);
+                if(rateIndex_ < 0) // Use hertz
+                {
+                    activeNoteQueue[i].nextTriggerTime = activeNoteQueue[i].nextTriggerTime + hzRateLength_;
+                }
+                else // Synced 
+                {
+                    activeNoteQueue[i].nextTriggerTime = activeNoteQueue[i].nextTriggerTime + (clockConfig.step_micros * 16 * multiplier_);
+                }
 
                 // sync with the clock
                 // if (quantizeSync_)
@@ -891,61 +945,147 @@ namespace midifx
         // }
 	}
 
-	void MidiFXRepeat::onEncoderChangedEditParam(Encoder::Update enc)
-	{
-		int8_t page = params_.getSelPage();
-		int8_t param = params_.getSelParam();
+    void MidiFXRepeat::onEncoderChangedEditParam(Encoder::Update enc)
+    {
+        int8_t page = params_.getSelPage();
+        int8_t param = params_.getSelParam();
 
-		auto amt = enc.accel(1);
+        auto amtSlow = enc.accel(1);
+        auto amtFast = enc.accel(5);
 
-		// if (page == 0)
-		// {
-		// 	if (param == 0)
-		// 	{
-		// 		mode_ = constrain(mode_ + amt, 0, MFXSELMODE_COUNT - 1);
-		// 	}
-		// 	else if (param == 1)
-		// 	{
-		// 		uint8_t oldLength = length_;
-		// 		length_ = constrain(length_ + amt, 0, 7);
-		// 		lengthChanged_ = oldLength != length_;
-		// 	}
-		// 	else if (param == 3)
-		// 	{
-		// 		chancePerc_ = constrain(chancePerc_ + amt, 0, 100);
-		// 	}
-		// }
+        switch (page)
+        {
+        case MFXREPEATPAGE_CHANCE:
+        {
+            switch (param)
+            {
+            case 0:
+                chancePerc_ = constrain(chancePerc_ + amtSlow, 0, 100);
+                break;
+            case 1:
+                break;
+            case 2:
+                break;
+            case 3:
+                break;
+            }
+        }
+        break;
+        case MFXREPEATPAGE_MODERATE:
+        {
+            switch (param)
+            {
+            case 0:
+                mode_ = constrain(mode_ + amtSlow, 0, MFXREPEATMODE_COUNT - 1);
+                break;
+            case 1:
+                rateIndex_ = constrain(rateIndex_ + amtSlow, -1, kNumArpRates - 1);
+                multiplierCalculated_ = false;
+                break;
+            case 2:
+                rateHz_ = constrain(rateHz_ + amtFast, 0, 255);
+                rateInHz_ = rateToHz(rateHz_);
+                multiplierCalculated_ = false;
+                break;
+            case 3:
+                gate_ = constrain(gate_ + amtFast, 2, 200);
+                break;
+            }
+        }
+        break;
+        case MFXREPEATPAGE_QUANT:
+        {
+            switch (param)
+            {
+            case 0:
+                quantizedRateIndex_ = constrain(quantizedRateIndex_ + amtSlow, -2, kNumArpRates - 1);
+                quantizeSync_ = quantizedRateIndex_ >= -1; // -2 for off
+                break;
+            case 1:
+                break;
+            case 2:
+                break;
+            case 3:
+                break;
+            }
+        }
+        break;
+        }
 
-		omxDisp.setDirty();
-	}
+        omxDisp.setDirty();
+    }
 
-	void MidiFXRepeat::onDisplayUpdate(uint8_t funcKeyMode)
-	{
-		omxDisp.clearLegends();
+    void MidiFXRepeat::onDisplayUpdate(uint8_t funcKeyMode)
+    {
+        omxDisp.clearLegends();
 
-		int8_t page = params_.getSelPage();
+        int8_t page = params_.getSelPage();
 
-		// switch (page)
-		// {
-		// case 0:
-		// {
-		// 	omxDisp.legends[0] = "MODE";
-		// 	omxDisp.legends[1] = "LEN";
-		// 	omxDisp.legends[3] = "CHC%";
-		// 	omxDisp.legendText[0] = modeLabels[mode_];
-		// 	omxDisp.legendVals[1] = length_;
-		// 	omxDisp.useLegendString[3] = true;
-		// 	omxDisp.legendString[3] = String(chancePerc_) + "%";
-		// }
-		// break;
-		// default:
-		// 	break;
-		// }
+        switch (page)
+        {
+        case MFXREPEATPAGE_CHANCE:
+        {
+            omxDisp.dispParamBar(chancePerc_, chancePerc_, 0, 100, !getEncoderSelect(), false, "Repeat", "Chance");
+        }
+        break;
+        case MFXREPEATPAGE_MODERATE:
+        {
+            omxDisp.legends[0] = "MODE";
+            omxDisp.legendText[0] = kRepeatModeDisp_[mode_];
 
-		// omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), getEncoderSelect());
-	}
+            omxDisp.legends[1] = "RATE";
 
-	int MidiFXRepeat::saveToDisk(int startingAddress, Storage *storage)
+            if (rateIndex_ < 0)
+            {
+                omxDisp.legendText[1] = "HZ";
+            }
+            else
+            {
+                if(rateInHz_ < 1.0f)
+                {
+                    omxDisp.useLegendString[1] = true;
+                    omxDisp.legendString[1] = String(rateInHz_, 2);
+                }
+                else
+                {
+                    omxDisp.legendVals[1] = rateInHz_;
+                }
+            }
+
+            omxDisp.legends[2] = "RTHZ";
+            omxDisp.legendVals[2] = rateHz_;
+
+            omxDisp.legends[3] = "Gate";
+            omxDisp.legendVals[3] = gate_;
+
+            omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), getEncoderSelect());
+        }
+        break;
+        case MFXREPEATPAGE_QUANT:
+        {
+            omxDisp.legends[0] = "QUANT";
+
+            if (quantizedRateIndex_ <= -2)
+            {
+                omxDisp.legendText[0] = "OFF";
+            }
+            else if (quantizedRateIndex_ == -1)
+            {
+                omxDisp.legendText[0] = "GBL";
+            }
+            else
+            {
+                omxDisp.useLegendString[0] = true;
+                omxDisp.legendString[0] = "1/" + String(kArpRates[quantizedRateIndex_]);
+            }
+
+            omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), getEncoderSelect());
+        }
+        break;
+        }
+    }
+
+    int MidiFXRepeat::saveToDisk(int startingAddress, Storage *storage)
 	{
         RepeatSave save;
         save.chancePerc = chancePerc_;
