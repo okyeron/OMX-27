@@ -99,6 +99,7 @@ namespace midifx
 		uint8_t numOfRepeats_ : 4; // 1 to 16, stored as 0 - 15
         uint8_t mode_ : 3; // Off, 1-Shot - Repeats for numOfRepeats_ restarts on new note on, On - Repeats indefinitely while key is hold, Hold - Endlessly repeats, 
         int8_t rateIndex_ : 5; // max 15 or -1 for hz
+        int8_t quantizedRateIndex_ : 5; // max 15 or -1 for hz
         uint8_t rateHz_;	
         uint8_t gate_ : 8; // 0-200
         uint8_t velStart_ : 7; // 0-127
@@ -126,6 +127,9 @@ namespace midifx
 		std::vector<RepeatNote> holdNoteQueue;	  // Holds notes
 
 		std::vector<RepeatNote> activeNoteQueue;	  // Holds notes
+
+		std::vector<RepeatNote> pendingNoteQueue;	  // notes pending for quantization
+
 
 		std::vector<RepeatNote> tempNoteQueue;	  // Notes that are used in arp
 		MidiNoteGroup trackingNoteGroups[8];

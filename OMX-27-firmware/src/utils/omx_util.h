@@ -38,6 +38,7 @@ public:
 	void advanceClock(OmxModeInterface *activeOmxMode, Micros advance);
 	void advanceSteps(Micros advance);
 	void setGlobalSwing(int swng_amt);
+	void resetPPQCounter();
 	void resetClocks();
 	void restartClocks();
 

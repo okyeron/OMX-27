@@ -66,8 +66,16 @@ void OmxModeGrids::onModeDeactivated()
     stopPlayback();
 }
 
-void OmxModeGrids::onClockTick() {
-    grids_.gridsTick();
+void OmxModeGrids::onClockTick() 
+{
+    // Clock tick was previously firing at 24 ppq, 
+    // keeping gridsTick() at 24 ppq for now so behaviour does not change
+    if(seqConfig.currentClockTick % 4 == 0)
+    {
+        // Should always send clock
+        // This way external gear can update themselves
+        grids_.gridsTick();
+    }
 }
 
 void OmxModeGrids::onPotChanged(int potIndex, int prevValue, int newValue, int analogDelta)

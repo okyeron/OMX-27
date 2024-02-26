@@ -23,30 +23,73 @@ void OmxUtil::sendPots(int val, int channel)
 
 void OmxUtil::advanceClock(OmxModeInterface *activeOmxMode, Micros advance)
 {
+	// advance is delta in Micros from previous loop update to this loop update. 
+
+	// XXXXXXXXXXXXXXXXXXXXXXXX
+	// Txxxxxxxxxxxxxxxxxxxxxxx - Quarter Note - 24 ticks
+	// TxxxxxxxxxxxTxxxxxxxxxxx - 8th note - 12 ticks
+	// TxxxxxTxxxxxTxxxxxTxxxxx - 16th note - 6 ticks
+	// TxxTxxTxxTxxTxxTxxTxxTxx - 32nd note - 3 ticks
+
+	// TxxxxxT
+	// xTxxxxT
+	// xxTxxxT
+
+
 	activeOmxMode_ = activeOmxMode;
 
 	signed long long adv = advance;
 
+	// Not sure what advantage of doing the time comparison
+	// in a while loop like this is
+	// Maybe so if there is a long advance multiple clocks
+	// will get fired to catch up?
+	// Keeping like this for now as it works. 
 	while (adv >= timeToNextClock)
 	{
 		adv -= timeToNextClock;
 
-		if (sendClocks_)
-		{
-			MM::sendClock();
-		}
+		// if (sendClocks_)
+		// {
+		// 	MM::sendClock();
+		// }
 
 		seqConfig.currentFrameMicros = micros();
 		seqConfig.lastClockMicros = micros();
 
+		// if(seqConfig.currentClockTick == 0)
+		// {
+		// 	Serial.println("Quarter Note");
+		// }
+
+		// Midi Clock should be sent out at ppq of 24
+		// Since ppq is 96, every 4 clock ticks should send midi clock
+		if(seqConfig.midiOutClockTick % 4 == 0)
+		{
+			// Should always send clock
+			// This way external gear can update themselves
+			MM::sendClock();
+		}
+
 		if (activeOmxMode_ != nullptr)
 		{
+			// Update internally at PPQ of 94
 			activeOmxMode_->onClockTick();
 		}
 
-		timeToNextClock = clockConfig.ppqInterval * (PPQ / 24);
+		// timeToNextClock = clockConfig.ppqInterval * (PPQ / 24); // ppqInt=5.208ms * 4 = 20.83 milliseconds for 120 bpm, 120 bpm = 2 beats per second, a beat being a quarter note
+
+		seqConfig.midiOutClockTick = (seqConfig.midiOutClockTick + 1) % PPQ;
+		seqConfig.currentClockTick = (seqConfig.currentClockTick + 1) % PPQ;
+
+		timeToNextClock = clockConfig.ppqInterval;
 	}
 	timeToNextClock = timeToNextClock - adv;
+}
+
+void OmxUtil::resetPPQCounter()
+{
+	seqConfig.currentClockTick = 0;
 }
 
 void OmxUtil::advanceSteps(Micros advance)
@@ -57,7 +100,6 @@ void OmxUtil::advanceSteps(Micros advance)
 	{
 		advance -= timeToNextStep;
 		timeToNextStep = clockConfig.ppqInterval;
-
 		auto currentMicros = micros();
 
 		pendingNoteHistory.clearIfChanged(currentMicros);
@@ -82,7 +124,7 @@ void OmxUtil::setGlobalSwing(int swng_amt)
 void OmxUtil::resetClocks()
 {
 	// BPM tempo to step_delay calculation
-	clockConfig.ppqInterval = 60000000 / (PPQ * clockConfig.clockbpm); // ppq interval is in microseconds
+	clockConfig.ppqInterval = 60000000 / (PPQ * clockConfig.clockbpm); // ppq interval is in microseconds, 96 * 120 = 11520, 60000000 / 11520 = 52083 microsecond, * 0.001 = 5.208 milliseconds
 	clockConfig.step_micros = clockConfig.ppqInterval * (PPQ / 4);	   // 16th note step in microseconds (quarter of quarter note)
 
 	// 16th note step length in milliseconds

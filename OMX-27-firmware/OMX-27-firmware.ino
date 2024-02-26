@@ -685,7 +685,7 @@ void loop()
 	// Micros timeStart = micros();
 	activeOmxMode->loopUpdate(passed);
 
-	if (passed > 0)
+	if (passed > 0) // This should always be true
 	{
 		if (sequencer.playing || omxUtil.areClocksRunning())
 		{

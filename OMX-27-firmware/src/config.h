@@ -200,11 +200,11 @@ struct ClockConfig
 	float newtempo = clockbpm;
 	unsigned long tempoStartTime;
 	unsigned long tempoEndTime;
-	float step_delay;
+	float step_delay; // 16th note step length in milliseconds
 	unsigned long minDelta = 5000;
 
-	volatile unsigned long step_micros; // 124992 for 120 bpm : 35712 for 300 bpm
-	volatile unsigned long ppqInterval; // 5208 for 120 bpm : 1488 for 300 bpm
+	volatile unsigned long step_micros; // 16th note step in microseconds (quarter of quarter note), 124992 for 120 bpm : 35712 for 300 bpm
+	volatile unsigned long ppqInterval; // time in microseconds between clock ticks,  5208 or 5.2ms for 120 bpm : 1488 for 300 bpm, 5.2 * 96 = 500ms
 };
 
 extern ClockConfig clockConfig;
@@ -222,6 +222,10 @@ struct SequencerConfig
 
 	uint32_t currentFrameMicros;
 	uint32_t lastClockMicros;
+
+	uint8_t midiOutClockTick; // Shouldn't be modified
+
+	uint8_t currentClockTick; // Counter that wraps from 0-96 on the clock tick. currentClockTick % 96 will align with global 1/4 note, currentClockTick % 96/2=48 global 8th note and 96/4=24 global 16th note
 
 	int numOfActiveArps = 0;
 

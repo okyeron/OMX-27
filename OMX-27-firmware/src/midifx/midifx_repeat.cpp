@@ -23,7 +23,9 @@ namespace midifx
         chancePerc_ = 100;
 
         numOfRepeats_ = 4;
-        rateIndex_ = 9;
+        rateIndex_ = 6;
+        quantizedRateIndex_ = 6;
+        multiplierCalculated_ = false;
         rateHz_ = 40;
         gate_ = 90;
         velStart_ = 10;
@@ -79,7 +81,7 @@ namespace midifx
     {
         if (mode_ == MFXREPEATMODE_OFF)
         {
-            Serial.println("MFXREPEATMODE_OFF");
+            // Serial.println("MFXREPEATMODE_OFF");
             sendNoteOut(note);
             return;
         }
@@ -157,6 +159,7 @@ namespace midifx
         if(!multiplierCalculated_)
         {
             uint8_t rate = kArpRates[rateIndex_]; // 8
+            // uint8_t rate = 16; // 8
             multiplier_ = 1.0f / (float)rate; // 1 / 8 = 0.125 // Only need to recalculate this if rate changes yo
 
             multiplierCalculated_ = true;
@@ -170,43 +173,87 @@ namespace midifx
             activeNoteQueue.shrink_to_fit();
         }
 
+        if (pendingNoteQueue.capacity() > queueSize)
+        {
+            activeNoteQueue.shrink_to_fit();
+        }
+
         bool noteAdded = false;
 
-        if (activeNoteQueue.size() < queueSize)
+        if (activeNoteQueue.size() + pendingNoteQueue.size() < queueSize)
         {
-            auto newNote = RepeatNote(note);
-
-            // If quantizeSync_is true, this note won't start triggering until the next clock tick. 
-            if(quantizeSync_)
+            if (quantizeSync_)
             {
-                newNote.playing = true;
-                auto delta = seqConfig.currentFrameMicros - last16thTime_;
+                auto newNote = RepeatNote(note);
 
-                if(delta < (clockConfig.step_micros / 3.0f))
-                {
-                    newNote.nextTriggerTime = last16thTime_;
-                }
-                else
-                {
-                    newNote.nextTriggerTime = next16thTime_;
-                }
+                newNote.playing = false;
+                newNote.nextTriggerTime = seqConfig.lastClockMicros;
 
-                // newNote.nextTriggerTime = next16thTime_;
-                // updateMultiplier();
-                // newNote.nextTriggerTime = seqConfig.lastClockMicros + (clockConfig.step_micros * 16 * multiplier_);
+                pendingNoteQueue.push_back(newNote);
+                noteAdded = true;
             }
             else
             {
-                // Trigger note asap
-                newNote.playing = true;
-                newNote.nextTriggerTime = seqConfig.currentFrameMicros;
-            }
+                auto newNote = RepeatNote(note);
 
-            activeNoteQueue.push_back(newNote);
-            noteAdded = true;
+                // If quantizeSync_is true, this note will be quantized to the global time
+                // based on the rate
+                // if(quantizeSync_)
+                // {
+                //     newNote.playing = true;
+
+                //     auto ratePos = seqConfig.currentClockTick % (96 / 4);
+
+                //     // On th 16th note, play now
+                //     if(ratePos == 0)
+                //     {
+                //         newNote.nextTriggerTime = seqConfig.lastClockMicros;
+                //     }
+                //     else
+                //     {
+                //         auto prev16 = seqConfig.lastClockMicros - clockConfig.ppqInterval * ratePos;
+
+                //         if(ratePos <= (94/4/2))
+                //         {
+                //             newNote.nextTriggerTime = prev16; // Set time to previous 16th note time, note will immediately play
+                //         }
+                //         else
+                //         {
+                //             newNote.nextTriggerTime = prev16 + clockConfig.ppqInterval * ratePos; // Delay trigger to future on next 16th note
+                //         }
+                //     }
+
+                //     // auto delta = seqConfig.currentFrameMicros - last16thTime_;
+
+                //     // if(delta < (clockConfig.step_micros / 3.0f))
+                //     // {
+                //     //     newNote.nextTriggerTime = last16thTime_;
+                //     // }
+                //     // else
+                //     // {
+                //     //     newNote.nextTriggerTime = next16thTime_;
+                //     // }
+
+                //     // newNote.nextTriggerTime = next16thTime_;
+                //     // updateMultiplier();
+                //     // newNote.nextTriggerTime = seqConfig.lastClockMicros + (clockConfig.step_micros * 16 * multiplier_);
+                // }
+                // else
+                // {
+                //     // Trigger note asap
+                //     newNote.playing = true;
+                //     newNote.nextTriggerTime = seqConfig.lastClockMicros;
+                // }
+
+                newNote.playing = true;
+                newNote.nextTriggerTime = seqConfig.lastClockMicros;
+
+                activeNoteQueue.push_back(newNote);
+                noteAdded = true;
+            }
         }
 
-        Serial.println("Note Added: " + String(noteAdded));
+        // Serial.println("Note Added: " + String(noteAdded));
         return noteAdded;
 
         // // Serial.println("playedNoteQueue capacity: " + String(playedNoteQueue.capacity()));
@@ -240,23 +287,44 @@ namespace midifx
     bool MidiFXRepeat::removeMidiNoteQueue(MidiNoteGroup *note)
     {
         bool foundNoteToRemove = false;
-        auto it = activeNoteQueue.begin();
-        while (it != activeNoteQueue.end())
+
+        if (activeNoteQueue.size() > 0)
         {
-            // Serial.println("playedNoteQueue: note " + String(it->noteNumber));
-            // Serial.println("MidiNoteGroup: note " + String(note->noteNumber));
-            // remove matching note numbers
-            // if (it->noteNumber == note->noteNumber && it->channel == note->channel - 1)
-            if (it->noteNumber == note->noteNumber)
+            auto it = activeNoteQueue.begin();
+            while (it != activeNoteQueue.end())
             {
-                Serial.println("removing note: " + String(it->noteNumber));
-                // `erase()` invalidates the iterator, use returned iterator
-                it = activeNoteQueue.erase(it);
-                foundNoteToRemove = true;
+                // Serial.println("playedNoteQueue: note " + String(it->noteNumber));
+                // Serial.println("MidiNoteGroup: note " + String(note->noteNumber));
+                // remove matching note numbers
+                // if (it->noteNumber == note->noteNumber && it->channel == note->channel - 1)
+                if (it->noteNumber == note->noteNumber)
+                {
+                    // Serial.println("removing note: " + String(it->noteNumber));
+                    // `erase()` invalidates the iterator, use returned iterator
+                    it = activeNoteQueue.erase(it);
+                    foundNoteToRemove = true;
+                }
+                else
+                {
+                    ++it;
+                }
             }
-            else
+        }
+
+        if (pendingNoteQueue.size() > 0)
+        {
+            auto it = pendingNoteQueue.begin();
+            while (it != pendingNoteQueue.end())
             {
-                ++it;
+                if (it->noteNumber == note->noteNumber)
+                {
+                    it = pendingNoteQueue.erase(it);
+                    foundNoteToRemove = true;
+                }
+                else
+                {
+                    ++it;
+                }
             }
         }
 
@@ -324,7 +392,7 @@ namespace midifx
 
     void MidiFXRepeat::repeatNoteOn(MidiNoteGroup *note)
     {
-        Serial.println("repeatNoteOn");
+        // Serial.println("repeatNoteOn");
 
         bool seqReset = false;
 
@@ -378,7 +446,7 @@ namespace midifx
     }
     void MidiFXRepeat::repeatNoteOff(MidiNoteGroup *note)
     {
-        Serial.println("repeatNoteOff");
+        // Serial.println("repeatNoteOff");
         removeMidiNoteQueue(note);
         // sortNotes();
 
@@ -417,25 +485,32 @@ namespace midifx
         //     doPendingStart();
         // }
 
-        if (omxUtil.areClocksRunning() == false)
-        {
-            omxUtil.restartClocks();
-            omxUtil.startClocks();
-            uint8_t rate = kArpRates[rateIndex_];
-            multiplier_ = 1.0f / (float)rate;
-            stepMicroDelta_ = (clockConfig.step_micros * 16) * multiplier_;
-            nextStepTimeP_ = seqConfig.lastClockMicros; // Should be current time, start now.
-            nextRepeatTriggerTime_ = nextStepTimeP_;
+        updateMultiplier();
 
-            next16thTime_ = seqConfig.lastClockMicros;
-            last16thTime_ = seqConfig.lastClockMicros;
-        }
-        else
+        if(seqConfig.numOfActiveArps <= 0)
         {
-            nextStepTimeP_ = nextRepeatTriggerTime_;
+            // omxUtil.resetPPQCounter();
         }
 
-        lastStepTimeP_ = nextStepTimeP_;
+        // if (omxUtil.areClocksRunning() == false)
+        // {
+        //     omxUtil.restartClocks();
+        //     omxUtil.startClocks();
+        //     // uint8_t rate = kArpRates[rateIndex_];
+        //     // multiplier_ = 1.0f / (float)rate;
+        //     stepMicroDelta_ = (clockConfig.step_micros * 16) * multiplier_;
+        //     nextStepTimeP_ = seqConfig.lastClockMicros; // Should be current time, start now.
+        //     nextRepeatTriggerTime_ = nextStepTimeP_;
+
+        //     next16thTime_ = seqConfig.lastClockMicros;
+        //     last16thTime_ = seqConfig.lastClockMicros;
+        // }
+        // else
+        // {
+        //     nextStepTimeP_ = nextRepeatTriggerTime_;
+        // }
+
+        // lastStepTimeP_ = nextStepTimeP_;
 
         seqRunning_ = true;
         // pendingStart_ = false;
@@ -457,10 +532,10 @@ namespace midifx
         {
             // Stop clocks if last arp
             seqConfig.numOfActiveArps--;
-            if (seqConfig.numOfActiveArps <= 0)
-            {
-                omxUtil.stopClocks();
-            }
+            // if (seqConfig.numOfActiveArps <= 0)
+            // {
+            //     omxUtil.stopClocks();
+            // }
         }
 
         seqRunning_ = false;
@@ -537,11 +612,11 @@ namespace midifx
 
     void MidiFXRepeat::repeatNoteTrigger()
     {
-        Serial.println("repeatNoteTrigger");
+        // Serial.println("repeatNoteTrigger");
 
         if (activeNoteQueue.size() == 0)
         {
-            Serial.println("no sorted notes");
+            // Serial.println("no sorted notes");
 
             return;
         }
@@ -642,8 +717,8 @@ namespace midifx
 
     void MidiFXRepeat::playNote(uint32_t noteOnMicros, int16_t noteNumber, uint8_t velocity, uint8_t channel)
     {
-        Serial.println("SeqRunning: " + String(seqRunning_));
-        Serial.println("PlayNote: " + String(noteNumber) + String(velocity) + String(velocity));
+        // Serial.println("SeqRunning: " + String(seqRunning_));
+        // Serial.println("PlayNote: " + String(noteNumber) + String(velocity) + String(velocity));
         if (noteNumber < 0 || noteNumber > 127)
             return;
 
@@ -670,15 +745,22 @@ namespace midifx
 
     void MidiFXRepeat::onClockTick()
     {
-        // for(uint8_t i = 0; i < activeNoteQueue.size(); i++)
-        // {
-        //     if(activeNoteQueue[i].playing == false)
-        //     {
-        //         updateMultiplier();
-        //         activeNoteQueue[i].playing = true;
-        //         activeNoteQueue[i].nextTriggerTime = seqConfig.lastClockMicros;
-        //     }
-        // }
+        if(pendingNoteQueue.size() == 0) return;
+
+        bool isQuantizedStep = seqConfig.currentClockTick % (96 * 4 / kArpRates[quantizedRateIndex_]) == 0;
+
+        // Move pending notes to active
+        if(isQuantizedStep)
+        {
+            for (uint8_t i = 0; i < pendingNoteQueue.size(); i++)
+            {
+                pendingNoteQueue[i].playing = true;
+                pendingNoteQueue[i].nextTriggerTime = seqConfig.lastClockMicros;
+                activeNoteQueue.push_back(pendingNoteQueue[i]);
+            }
+
+            pendingNoteQueue.clear();
+        }
     }
 
     void MidiFXRepeat::loopUpdate()
@@ -723,7 +805,7 @@ namespace midifx
 
         if (sysSettings.omxMode == MODE_MIDI && !selected_)
         {
-            Serial.println("Not selected");
+            // Serial.println("Not selected");
             return;
         }
 
@@ -731,22 +813,22 @@ namespace midifx
 
         uint32_t stepmicros = seqConfig.currentFrameMicros;
 
-        if(stepmicros >= next16thTime_)
-        {
-            last16thTime_ = next16thTime_;
-            next16thTime_ = next16thTime_ + (clockConfig.step_micros * 16 * (1.0f / 16.0f));
+        // if(stepmicros >= next16thTime_)
+        // {
+        //     last16thTime_ = next16thTime_;
+        //     next16thTime_ = next16thTime_ + (clockConfig.step_micros * 16 * (1.0f / 16.0f));
 
-            // for (uint8_t i = 0; i < activeNoteQueue.size(); i++)
-            // {
-            //     if (activeNoteQueue[i].playing == false)
-            //     {
-            //         activeNoteQueue[i].playing = true;
-            //         activeNoteQueue[i].nextTriggerTime = next16thTime_;
-            //     }
-            // }
+        //     // for (uint8_t i = 0; i < activeNoteQueue.size(); i++)
+        //     // {
+        //     //     if (activeNoteQueue[i].playing == false)
+        //     //     {
+        //     //         activeNoteQueue[i].playing = true;
+        //     //         activeNoteQueue[i].nextTriggerTime = next16thTime_;
+        //     //     }
+        //     // }
 
-            // next16thTime_ = next16thTime_ + (clockConfig.step_micros * 16 * (1.0f / 16.0f));
-        }
+        //     // next16thTime_ = next16thTime_ + (clockConfig.step_micros * 16 * (1.0f / 16.0f));
+        // }
 
         tempNoteQueue.clear();
 
@@ -755,7 +837,7 @@ namespace midifx
         for(uint8_t i = 0; i < activeNoteQueue.size(); i++)
         {
             // The time has come to
-            if(stepmicros >= activeNoteQueue[i].nextTriggerTime && activeNoteQueue[i].playing)
+            if(stepmicros >= activeNoteQueue[i].nextTriggerTime)
             {
                 activeNoteQueue[i].nextTriggerTime = activeNoteQueue[i].nextTriggerTime + (clockConfig.step_micros * 16 * multiplier_);
 
