@@ -35,9 +35,15 @@ namespace midifx
 		void onEncoderChangedEditParam(Encoder::Update enc) override;
 
 	private:
+        struct FixedLengthNote
+		{
+			MidiNoteGroupCache noteCache;
+			Micros offTime;
+		};
+
         struct RepeatNote
         {
-            bool playing;
+            bool playing; // Not needed now with two queues
             // bool inUse = false;
             uint8_t noteNumber;
             uint8_t channel : 4;
@@ -64,7 +70,7 @@ namespace midifx
                 {
                     this->noteNumber = noteNumber;
                     this->velocity = velocity;
-                    this->channel = channel;
+                    this->channel = channel - 1;
                 }
             }
 
@@ -77,7 +83,7 @@ namespace midifx
                 }
                 this->noteNumber = noteGroup->noteNumber;
                 this->velocity = noteGroup->velocity;
-                this->channel = noteGroup->channel;
+                this->channel = noteGroup->channel - 1;
             }
         };
 
@@ -130,13 +136,22 @@ namespace midifx
 		std::vector<RepeatNote> playedNoteQueue; // Keeps track of which notes are being played
 		std::vector<RepeatNote> holdNoteQueue;	  // Holds notes
 
-		std::vector<RepeatNote> activeNoteQueue;	  // Holds notes
 
+		std::vector<RepeatNote> activeNoteQueue;	  // Holds notes
 		std::vector<RepeatNote> pendingNoteQueue;	  // notes pending for quantization
 
 
 		std::vector<RepeatNote> tempNoteQueue;	  // Notes that are used in arp
+
+		std::vector<FixedLengthNote> fixedLengthNotes; // Tracking of fixed length notes
+
+
 		MidiNoteGroup trackingNoteGroups[8];
+		MidiNoteGroup trackingNoteGroupsPassthrough[8];
+
+        void trackNoteInputPassthrough(MidiNoteGroup *note, bool ignoreNoteOns);
+        void trackNoteInput(MidiNoteGroup *note);
+        void processNoteInput(MidiNoteGroup *note);
 
 		bool hasMidiNotes();
         void updateMultiplier();

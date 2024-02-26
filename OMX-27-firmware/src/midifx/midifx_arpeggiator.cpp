@@ -584,7 +584,8 @@ namespace midifx
                         }
                     }
                 }
-                sendNoteOut(note);
+                // Kill note
+                // sendNoteOut(note);
             }
             // if(pendingNotes.si)
             // arpNoteOn(note);
