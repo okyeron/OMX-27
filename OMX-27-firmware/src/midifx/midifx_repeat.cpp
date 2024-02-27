@@ -318,7 +318,7 @@ namespace midifx
 
     bool MidiFXRepeat::hasMidiNotes()
     {
-        return activeNoteQueue.size() > 0;
+        return playedNoteQueue.size() > 0;
     }
 
     float MidiFXRepeat::rateToHz(uint8_t rateHz)
@@ -367,6 +367,21 @@ namespace midifx
 
     bool MidiFXRepeat::insertMidiNoteQueue(MidiNoteGroup *note)
     {
+        if (playedNoteQueue.capacity() > queueSize)
+        {
+            playedNoteQueue.shrink_to_fit();
+        }
+
+        bool noteAdded = false;
+
+        // Played note queue simply tracks which notes are being played. 
+        // These notes do not get played
+        if (playedNoteQueue.size() < queueSize)
+        {
+            playedNoteQueue.push_back(RepeatNote(note));
+            noteAdded = true;
+        }
+
         if (activeNoteQueue.capacity() > queueSize)
         {
             activeNoteQueue.shrink_to_fit();
@@ -377,188 +392,98 @@ namespace midifx
             activeNoteQueue.shrink_to_fit();
         }
 
-        bool noteAdded = false;
-
-        if (activeNoteQueue.size() + pendingNoteQueue.size() < queueSize)
+        // Room up to 16 in playedNoteQueue, can add to pending or active
+        if (noteAdded)
         {
-            if (quantizeSync_)
+            if (activeNoteQueue.capacity() + pendingNoteQueue.capacity() < queueSize)
             {
-                auto newNote = RepeatNote(note);
+                // Add to pending queue, note will be added to active queue on clock
+                if (quantizeSync_)
+                {
+                    auto newNote = RepeatNote(note);
 
-                newNote.playing = false;
-                newNote.nextTriggerTime = seqConfig.lastClockMicros;
+                    newNote.repeatCounter = numOfRepeats_;
+                    newNote.nextTriggerTime = seqConfig.lastClockMicros;
 
-                pendingNoteQueue.push_back(newNote);
-                noteAdded = true;
-            }
-            else
-            {
-                auto newNote = RepeatNote(note);
+                    pendingNoteQueue.push_back(newNote);
+                }
+                // No quantization, play immediately by adding to active note queue
+                else
+                {
+                    auto newNote = RepeatNote(note);
 
-                // If quantizeSync_is true, this note will be quantized to the global time
-                // based on the rate
-                // if(quantizeSync_)
-                // {
-                //     newNote.playing = true;
+                    newNote.repeatCounter = numOfRepeats_;
+                    newNote.nextTriggerTime = seqConfig.lastClockMicros;
 
-                //     auto ratePos = seqConfig.currentClockTick % (96 / 4);
-
-                //     // On th 16th note, play now
-                //     if(ratePos == 0)
-                //     {
-                //         newNote.nextTriggerTime = seqConfig.lastClockMicros;
-                //     }
-                //     else
-                //     {
-                //         auto prev16 = seqConfig.lastClockMicros - clockConfig.ppqInterval * ratePos;
-
-                //         if(ratePos <= (94/4/2))
-                //         {
-                //             newNote.nextTriggerTime = prev16; // Set time to previous 16th note time, note will immediately play
-                //         }
-                //         else
-                //         {
-                //             newNote.nextTriggerTime = prev16 + clockConfig.ppqInterval * ratePos; // Delay trigger to future on next 16th note
-                //         }
-                //     }
-
-                //     // auto delta = seqConfig.currentFrameMicros - last16thTime_;
-
-                //     // if(delta < (clockConfig.step_micros / 3.0f))
-                //     // {
-                //     //     newNote.nextTriggerTime = last16thTime_;
-                //     // }
-                //     // else
-                //     // {
-                //     //     newNote.nextTriggerTime = next16thTime_;
-                //     // }
-
-                //     // newNote.nextTriggerTime = next16thTime_;
-                //     // updateMultiplier();
-                //     // newNote.nextTriggerTime = seqConfig.lastClockMicros + (clockConfig.step_micros * 16 * multiplier_);
-                // }
-                // else
-                // {
-                //     // Trigger note asap
-                //     newNote.playing = true;
-                //     newNote.nextTriggerTime = seqConfig.lastClockMicros;
-                // }
-
-                newNote.playing = true;
-                newNote.nextTriggerTime = seqConfig.lastClockMicros;
-
-                activeNoteQueue.push_back(newNote);
-                noteAdded = true;
+                    activeNoteQueue.push_back(newNote);
+                }
             }
         }
 
         // Serial.println("Note Added: " + String(noteAdded));
         return noteAdded;
-
-        // // Serial.println("playedNoteQueue capacity: " + String(playedNoteQueue.capacity()));
-        // if (playedNoteQueue.capacity() > queueSize)
-        // {
-        //     playedNoteQueue.shrink_to_fit();
-        // }
-        // if (holdNoteQueue.capacity() > queueSize)
-        // {
-        //     holdNoteQueue.shrink_to_fit();
-        // }
-
-        // bool noteAdded = false;
-
-        // if (playedNoteQueue.size() < queueSize)
-        // {
-        //     playedNoteQueue.push_back(RepeatNote(note));
-        //     noteAdded = true;
-        // }
-
-        // if (holdNoteQueue.size() < queueSize)
-        // {
-        //     holdNoteQueue.push_back(RepeatNote(note));
-        //     noteAdded = true;
-        // }
-
-        // Serial.println("Note Added: " + String(noteAdded));
-        // return noteAdded;
     }
+
+    bool MidiFXRepeat::removeFromQueue(std::vector<RepeatNote> *queue, MidiNoteGroup *note)
+    {
+        bool foundNoteToRemove = false;
+
+        if (queue->size() > 0)
+        {
+            auto it = queue->begin();
+            while (it != queue->end())
+            {
+                // Serial.println("activeNoteQueue: " + String(it->noteNumber) + " Chan: " + String(it->channel));
+
+                if (it->noteNumber == note->noteNumber && it->channel == note->channel - 1)
+                {
+                    // `erase()` invalidates the iterator, use returned iterator
+                    it = queue->erase(it);
+                    foundNoteToRemove = true;
+                }
+                else
+                {
+                    ++it;
+                }
+            }
+        }
+
+        return foundNoteToRemove;
+    }
+
 
     bool MidiFXRepeat::removeMidiNoteQueue(MidiNoteGroup *note)
     {
-        Serial.println("removeMidiNoteQueue: " + String(note->noteNumber) + " Chan: " + String(note->channel));
-
         bool foundNoteToRemove = false;
 
-        if (activeNoteQueue.size() > 0)
+        // Always remove from played notes
+        if(removeFromQueue(&playedNoteQueue, note))
         {
-            auto it = activeNoteQueue.begin();
-            while (it != activeNoteQueue.end())
-            {
-                Serial.println("activeNoteQueue: " + String(it->noteNumber) + " Chan: " + String(it->channel));
-
-                // Serial.println("playedNoteQueue: note " + String(it->noteNumber));
-                // Serial.println("MidiNoteGroup: note " + String(note->noteNumber));
-                // remove matching note numbers
-                // if (it->noteNumber == note->noteNumber && it->channel == note->channel - 1)
-                if (it->noteNumber == note->noteNumber && it->channel == note->channel - 1)
-                {
-                    Serial.println("match, removing note: " + String(it->noteNumber) + " Chan: " + String(it->channel));
-                    // Serial.println("removing note: " + String(it->noteNumber));
-                    // `erase()` invalidates the iterator, use returned iterator
-                    it = activeNoteQueue.erase(it);
-                    foundNoteToRemove = true;
-                }
-                else
-                {
-                    ++it;
-                }
-            }
+            foundNoteToRemove = true;
         }
 
-        if (pendingNoteQueue.size() > 0)
+        switch (mode_)
         {
-            auto it = pendingNoteQueue.begin();
-            while (it != pendingNoteQueue.end())
-            {
-                if (it->noteNumber == note->noteNumber && it->channel == note->channel - 1)
-                {
-                    it = pendingNoteQueue.erase(it);
-                    foundNoteToRemove = true;
-                }
-                else
-                {
-                    ++it;
-                }
-            }
+        // Should not get here
+        case MFXREPEATMODE_OFF:
+        break;
+        case MFXREPEATMODE_ON:
+        {
+            removeFromQueue(&activeNoteQueue, note);
+            removeFromQueue(&pendingNoteQueue, note);
         }
-
-        // Serial.println("foundNoteToRemove " + String(foundNoteToRemove));
+        break;
+        // Don't remove from active or pending
+        // each note gets removed after playing for number of times
+        case MFXREPEATMODE_1SHOT:
+        break;
+        // Don't remove from active or pending
+        // queue will be reset once playedNoteQueue is empty and a new noteon comes in
+        case MFXREPEATMODE_HOLD:
+        break;
+        }
 
         return foundNoteToRemove;
-
-        // bool foundNoteToRemove = false;
-        // auto it = playedNoteQueue.begin();
-        // while (it != playedNoteQueue.end())
-        // {
-        //     Serial.println("playedNoteQueue: note " + String(it->noteNumber));
-        //     Serial.println("MidiNoteGroup: note " + String(note->noteNumber));
-        //     // remove matching note numbers
-        //     // if (it->noteNumber == note->noteNumber && it->channel == note->channel - 1)
-        //     if (it->noteNumber == note->noteNumber)
-        //     {
-        //         // `erase()` invalidates the iterator, use returned iterator
-        //         it = playedNoteQueue.erase(it);
-        //         foundNoteToRemove = true;
-        //     }
-        //     else
-        //     {
-        //         ++it;
-        //     }
-        // }
-
-        // Serial.println("foundNoteToRemove " + String(foundNoteToRemove));
-
-        // return foundNoteToRemove;
     }
 
     void MidiFXRepeat::changeRepeatMode(uint8_t newMode)
@@ -585,6 +510,7 @@ namespace midifx
         holdNoteQueue.clear();
         tempNoteQueue.clear();
         activeNoteQueue.clear();
+        pendingNoteQueue.clear();
 
         resetArpSeq();
 
@@ -618,7 +544,14 @@ namespace midifx
             resetArpSeq();
             seqReset = true;
 
-            holdNoteQueue.clear();
+            // For one shot mode, notes are removed from active
+            // once they have played a certain number of times
+            // Important to clear this for hold mode
+            if (mode_ != MFXREPEATMODE_1SHOT)
+            {
+                // Reset the active note queue
+                activeNoteQueue.clear();
+            }
         }
         else
         {
@@ -960,7 +893,6 @@ namespace midifx
         {
             for (uint8_t i = 0; i < pendingNoteQueue.size(); i++)
             {
-                pendingNoteQueue[i].playing = true;
                 pendingNoteQueue[i].nextTriggerTime = seqConfig.lastClockMicros;
                 activeNoteQueue.push_back(pendingNoteQueue[i]);
             }
@@ -1055,6 +987,11 @@ namespace midifx
                     activeNoteQueue[i].nextTriggerTime = activeNoteQueue[i].nextTriggerTime + (clockConfig.step_micros * 16 * multiplier_);
                 }
 
+                if(activeNoteQueue[i].repeatCounter > 0)
+                {
+                    activeNoteQueue[i].repeatCounter -= 1;
+                }
+
                 // sync with the clock
                 // if (quantizeSync_)
                 // {
@@ -1074,6 +1011,24 @@ namespace midifx
         for (RepeatNote n : tempNoteQueue)
         {
             triggerNote(n);
+        }
+
+        // Once and 1shot modes will use repeat counter
+        // if any of these counters reached 0, remove the note
+        if ((mode_ == MFXREPEATMODE_1SHOT || mode_ == MFXREPEATMODE_ONCE) && activeNoteQueue.size() > 0)
+        {
+            auto it = activeNoteQueue.begin();
+            while (it != activeNoteQueue.end())
+            {
+                if(it->repeatCounter <= 0)
+                {
+                    it = activeNoteQueue.erase(it);
+                }
+                else
+                {
+                    ++it;
+                }
+            }
         }
 
         // if (stepmicros >= nextStepTimeP_)
@@ -1162,6 +1117,7 @@ namespace midifx
                 quantizeSync_ = quantizedRateIndex_ >= -1; // -2 for off
                 break;
             case 1:
+                numOfRepeats_ = constrain(numOfRepeats_ + amtSlow, 0, 15);
                 break;
             case 2:
                 break;
@@ -1238,6 +1194,9 @@ namespace midifx
                 omxDisp.useLegendString[0] = true;
                 omxDisp.legendString[0] = "1/" + String(kArpRates[quantizedRateIndex_]);
             }
+
+            omxDisp.legends[1] = "#RPT";
+            omxDisp.legendVals[1] = numOfRepeats_;
 
             omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), getEncoderSelect());
         }

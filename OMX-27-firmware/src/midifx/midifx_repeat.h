@@ -43,11 +43,13 @@ namespace midifx
 
         struct RepeatNote
         {
-            bool playing; // Not needed now with two queues
+            // bool playing; // Not needed now with two queues
             // bool inUse = false;
             uint8_t noteNumber;
             uint8_t channel : 4;
             uint8_t velocity : 7;
+            uint8_t repeatCounter : 5;
+
             // bool sendMidi = false;
             // bool sendCV = false;
 
@@ -132,14 +134,10 @@ namespace midifx
 
         Micros hzRateLength_;
 
-
 		std::vector<RepeatNote> playedNoteQueue; // Keeps track of which notes are being played
 		std::vector<RepeatNote> holdNoteQueue;	  // Holds notes
-
-
 		std::vector<RepeatNote> activeNoteQueue;	  // Holds notes
 		std::vector<RepeatNote> pendingNoteQueue;	  // notes pending for quantization
-
 
 		std::vector<RepeatNote> tempNoteQueue;	  // Notes that are used in arp
 
@@ -157,6 +155,7 @@ namespace midifx
         void updateMultiplier();
         bool insertMidiNoteQueue(MidiNoteGroup *note);
 		bool removeMidiNoteQueue(MidiNoteGroup *note);
+        static bool removeFromQueue(std::vector<RepeatNote> *queue, MidiNoteGroup *note);
 
         static float rateToHz(uint8_t rateHz);
 
