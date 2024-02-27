@@ -22,7 +22,9 @@ namespace midifx
     {
         MFXREPEATPAGE_CHANCE, // Chance Perc
         MFXREPEATPAGE_MODERATE, // Mode, Rate, RateHz, Gate
-        MFXREPEATPAGE_QUANT // Quant Rate
+        MFXREPEATPAGE_QUANT, // Quant Rate
+        MFXREPEATPAGE_FADEVEL,
+        MFXREPEATPAGE_FADERATE
     };
 
 	MidiFXRepeat::MidiFXRepeat()
@@ -30,6 +32,8 @@ namespace midifx
 		params_.addPage(1); // MFXREPEATPAGE_CHANCE
 		params_.addPage(4); // MFXREPEATPAGE_MODERATE
 		params_.addPage(4); // MFXREPEATPAGE_QUANT
+		params_.addPage(4); // MFXREPEATPAGE_FADEVEL
+		params_.addPage(4); // MFXREPEATPAGE_FADERATE
 	
         chancePerc_ = 100;
 
@@ -978,13 +982,28 @@ namespace midifx
             // The time has come to
             if(stepmicros >= activeNoteQueue[i].nextTriggerTime)
             {
-                if(rateIndex_ < 0) // Use hertz
+                if(fadeVel_)
                 {
-                    activeNoteQueue[i].nextTriggerTime = activeNoteQueue[i].nextTriggerTime + hzRateLength_;
+                    activeNoteQueue[i].velocity = map(activeNoteQueue[i].repeatCounter, 0, numOfRepeats_, velEnd_, velStart_);
                 }
-                else // Synced 
+
+                if(fadeRate_)
                 {
-                    activeNoteQueue[i].nextTriggerTime = activeNoteQueue[i].nextTriggerTime + (clockConfig.step_micros * 16 * multiplier_);
+                    uint8_t rIndex = map(activeNoteQueue[i].repeatCounter, 0, numOfRepeats_, rateEnd_, rateStart_);
+                    float mult = 1.0f / (float)kArpRates[rIndex];
+
+                    activeNoteQueue[i].nextTriggerTime = activeNoteQueue[i].nextTriggerTime + (clockConfig.step_micros * 16 * mult);
+                }
+                else
+                {
+                    if (rateIndex_ < 0) // Use hertz
+                    {
+                        activeNoteQueue[i].nextTriggerTime = activeNoteQueue[i].nextTriggerTime + hzRateLength_;
+                    }
+                    else // Synced
+                    {
+                        activeNoteQueue[i].nextTriggerTime = activeNoteQueue[i].nextTriggerTime + (clockConfig.step_micros * 16 * multiplier_);
+                    }
                 }
 
                 if(activeNoteQueue[i].repeatCounter > 0)
@@ -1126,6 +1145,42 @@ namespace midifx
             }
         }
         break;
+        case MFXREPEATPAGE_FADEVEL:
+        {
+            switch (param)
+            {
+            case 0:
+                fadeVel_ = constrain(fadeVel_ + amtSlow, 0, 1);
+                break;
+            case 1:
+                velStart_ = constrain(velStart_ + amtSlow, 0, 127);
+                break;
+            case 2:
+                velEnd_ = constrain(velEnd_ + amtSlow, 0, 127);
+                break;
+            case 3:
+                break;
+            }
+        }
+        break;
+        case MFXREPEATPAGE_FADERATE:
+        {
+            switch (param)
+            {
+            case 0:
+                fadeRate_ = constrain(fadeRate_ + amtSlow, 0, 1);
+                break;
+            case 1:
+                rateStart_ = constrain(rateStart_ + amtSlow, 0, kNumArpRates - 1);
+                break;
+            case 2:
+                rateEnd_ = constrain(rateEnd_ + amtSlow, 0, kNumArpRates - 1);
+                break;
+            case 3:
+                break;
+            }
+        }
+        break;
         }
 
         omxDisp.setDirty();
@@ -1197,6 +1252,32 @@ namespace midifx
 
             omxDisp.legends[1] = "#RPT";
             omxDisp.legendVals[1] = numOfRepeats_;
+
+            omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), getEncoderSelect());
+        }
+        break;
+        case MFXREPEATPAGE_FADEVEL:
+        {
+            omxDisp.legends[0] = "FVEL";
+            omxDisp.legendText[0] = fadeVel_ ? "FADE" : "OFF";
+            omxDisp.legends[1] = "STAR";
+            omxDisp.legendVals[1] = velStart_;
+            omxDisp.legends[2] = "END";
+            omxDisp.legendVals[2] = velEnd_;
+
+            omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), getEncoderSelect());
+        }
+        break;
+        case MFXREPEATPAGE_FADERATE:
+        {
+            omxDisp.legends[0] = "FRAT";
+            omxDisp.legendText[0] = fadeRate_ ? "FADE" : "OFF";
+            omxDisp.legends[1] = "STAR";
+            omxDisp.useLegendString[1] = true;
+            omxDisp.legendString[1] = "1/" + String(kArpRates[rateStart_]);
+            omxDisp.legends[2] = "END";
+            omxDisp.useLegendString[2] = true;
+            omxDisp.legendString[2] = "1/" + String(kArpRates[rateEnd_]);
 
             omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), getEncoderSelect());
         }

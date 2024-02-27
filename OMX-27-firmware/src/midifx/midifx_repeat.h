@@ -110,8 +110,12 @@ namespace midifx
         int8_t quantizedRateIndex_ : 5; // max 15 or -1 for hz
         uint8_t rateHz_;	
         uint8_t gate_ : 8; // 0-200
+        bool fadeVel_;
         uint8_t velStart_ : 7; // 0-127
         uint8_t velEnd_ : 7; // 0-127
+        bool fadeRate_;
+        uint8_t rateStart_; // 0-127
+        uint8_t rateEnd_; // 0-127
 
         float rateInHz_;
 
