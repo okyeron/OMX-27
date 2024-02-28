@@ -38,7 +38,7 @@ namespace midifx
         chancePerc_ = 100;
 
         mode_ = MFXREPEATMODE_ON;
-        numOfRepeats_ = 4;
+        numOfRepeats_ = 3;
         rateIndex_ = 6;
         quantizedRateIndex_ = 6;
         rateHz_ = 100;
@@ -370,27 +370,25 @@ namespace midifx
 
     void MidiFXRepeat::updateMultiplier()
     {
-        if(!multiplierCalculated_)
+        if (!multiplierCalculated_)
         {
             // Use Hertz
-            if (rateIndex_ < 0)
+            if (useRateHz())
             {
                 multiplier_ = 1;
 
                 rateInHz_ = rateToHz(rateHz_);
-                hzRateLength_ = (1.0f / rateInHz_) * secs2micros;
-
-                float sHz = rateToHz(rateStartHz_);
-                hzRateStartLength_ = (1.0f / sHz) * secs2micros;
-
-                float eHz = rateToHz(rateEndHz_);
-                hzRateEndLength_ = (1.0f / eHz) * secs2micros;
+                rateStartInHz_ = rateToHz(rateStartHz_);
+                rateEndInHz_ = rateToHz(rateEndHz_);
             }
             else
             {
                 uint8_t rate = kArpRates[rateIndex_]; // 8
                 // uint8_t rate = 16; // 8
                 multiplier_ = 1.0f / (float)rate; // 1 / 8 = 0.125 // Only need to recalculate this if rate changes yo
+
+                rateStartMult_ = 1.0f / ((float)kArpRates[rateStart_]);
+                rateEndMult_ = 1.0f / ((float)kArpRates[rateEnd_]);
             }
 
             multiplierCalculated_ = true;
@@ -434,7 +432,7 @@ namespace midifx
                 {
                     auto newNote = RepeatNote(note);
 
-                    newNote.repeatCounter = numOfRepeats_;
+                    newNote.repeatCounter = numOfRepeats_ + 1;
 
                     newNote.velocityStart = note->velocity * velStartPerc_;
                     newNote.velocityEnd = note->velocity * velEndPerc_;
@@ -448,7 +446,7 @@ namespace midifx
                 {
                     auto newNote = RepeatNote(note);
 
-                    newNote.repeatCounter = numOfRepeats_;
+                    newNote.repeatCounter = numOfRepeats_ + 1;
 
                     newNote.velocityStart = note->velocity * velStartPerc_;
                     newNote.velocityEnd = note->velocity * velEndPerc_;
@@ -556,6 +554,7 @@ namespace midifx
         for (uint8_t i = 0; i < 8; i++)
         {
             trackingNoteGroups[i].prevNoteNumber = 255;
+            trackingNoteGroupsPassthrough[i].prevNoteNumber = 255;
         }
     }
 
@@ -783,115 +782,115 @@ namespace midifx
     {
         if(note.noteNumber > 127) return;
 
-        playNote(seqConfig.currentFrameMicros, note.noteNumber, note.velocity, note.channel);
+        playNote(seqConfig.currentFrameMicros, note.nextTriggerDelta, note.noteNumber, note.velocity, note.channel);
     }
 
-    void MidiFXRepeat::repeatNoteTrigger()
-    {
-        // Serial.println("repeatNoteTrigger");
+    // void MidiFXRepeat::repeatNoteTrigger()
+    // {
+    //     // Serial.println("repeatNoteTrigger");
 
-        if (activeNoteQueue.size() == 0)
-        {
-            // Serial.println("no sorted notes");
+    //     if (activeNoteQueue.size() == 0)
+    //     {
+    //         // Serial.println("no sorted notes");
 
-            return;
-        }
+    //         return;
+    //     }
 
-        uint32_t noteon_micros = seqConfig.currentFrameMicros;
+    //     uint32_t noteon_micros = seqConfig.currentFrameMicros;
 
-        // if (resetNextTrigger_)
-        // {
-        //     resetArpSeq();
-        // }
+    //     // if (resetNextTrigger_)
+    //     // {
+    //     //     resetArpSeq();
+    //     // }
 
-        // bool incrementOctave = false;
-        // int currentNotePos = notePos_;
-        // int nextNotePos = notePos_;
-        // int qLength = sortedNoteQueue.size();
+    //     // bool incrementOctave = false;
+    //     // int currentNotePos = notePos_;
+    //     // int nextNotePos = notePos_;
+    //     // int qLength = sortedNoteQueue.size();
 
-        // prevNotePos_ = notePos_;
+    //     // prevNotePos_ = notePos_;
         
-        // prevQLength_ = qLength;
+    //     // prevQLength_ = qLength;
 
-        // syncPos_ = syncPos_ + 1 % 16;
+    //     // syncPos_ = syncPos_ + 1 % 16;
 
-        // currentNotePos = constrain(currentNotePos, 0, qLength - 1);
+    //     // currentNotePos = constrain(currentNotePos, 0, qLength - 1);
 
-        for (RepeatNote r : activeNoteQueue)
-        {
-            if (r.noteNumber >= 0 && r.noteNumber <= 127)
-            {
-                playNote(noteon_micros, r.noteNumber, r.velocity, r.channel);
-            }
-        }
+    //     for (RepeatNote r : activeNoteQueue)
+    //     {
+    //         if (r.noteNumber >= 0 && r.noteNumber <= 127)
+    //         {
+    //             playNote(noteon_micros, r.noteNumber, r.velocity, r.channel);
+    //         }
+    //     }
 
-        // ArpNote arpNote = sortedNoteQueue[currentNotePos];
-        // randPrevNote_ = arpNote.noteNumber;
+    //     // ArpNote arpNote = sortedNoteQueue[currentNotePos];
+    //     // randPrevNote_ = arpNote.noteNumber;
 
-        // int16_t noteNumber = arpNote.noteNumber;
+    //     // int16_t noteNumber = arpNote.noteNumber;
 
-        // noteNumber = applyModPattern(noteNumber, arpNote.channel);
-        // stepLength_ = findStepLength(); // Can be changed by ties in mod pattern
+    //     // noteNumber = applyModPattern(noteNumber, arpNote.channel);
+    //     // stepLength_ = findStepLength(); // Can be changed by ties in mod pattern
 
-        // if (noteNumber != -127)
-        // {
-        //     noteNumber = applyTranspPattern(noteNumber);
+    //     // if (noteNumber != -127)
+    //     // {
+    //     //     noteNumber = applyTranspPattern(noteNumber);
 
-        //     // Add octave
-        //     noteNumber = noteNumber + (octavePos_ * octDistance_);
-        //     playNote(noteon_micros, noteNumber, velocity_, arpNote.channel);
-        // }
+    //     //     // Add octave
+    //     //     noteNumber = noteNumber + (octavePos_ * octDistance_);
+    //     //     playNote(noteon_micros, noteNumber, velocity_, arpNote.channel);
+    //     // }
 
-        // bool seqReset = false;
+    //     // bool seqReset = false;
 
-        // // Advance mod pattern
-        // modPos_++;
-        // if (modPos_ >= modPatternLength_ + 1)
-        // {
-        //     if (resetMode_ == ARPRESET_MODPAT)
-        //     {
-        //         resetArpSeq();
-        //         seqReset = true;
-        //     }
-        //     modPos_ = 0;
-        // }
+    //     // // Advance mod pattern
+    //     // modPos_++;
+    //     // if (modPos_ >= modPatternLength_ + 1)
+    //     // {
+    //     //     if (resetMode_ == ARPRESET_MODPAT)
+    //     //     {
+    //     //         resetArpSeq();
+    //     //         seqReset = true;
+    //     //     }
+    //     //     modPos_ = 0;
+    //     // }
 
-        // // Advance transpose pattern
-        // transpPos_++;
-        // if (transpPos_ >= transpPatternLength_ + 1)
-        // {
-        //     if (resetMode_ == ARPRESET_TRANSPOSEPAT)
-        //     {
-        //         resetArpSeq();
-        //         seqReset = true;
-        //     }
-        //     transpPos_ = 0;
-        // }
+    //     // // Advance transpose pattern
+    //     // transpPos_++;
+    //     // if (transpPos_ >= transpPatternLength_ + 1)
+    //     // {
+    //     //     if (resetMode_ == ARPRESET_TRANSPOSEPAT)
+    //     //     {
+    //     //         resetArpSeq();
+    //     //         seqReset = true;
+    //     //     }
+    //     //     transpPos_ = 0;
+    //     // }
         
-        // if (!seqReset)
-        // {
-        //     notePos_ = nextNotePos;
+    //     // if (!seqReset)
+    //     // {
+    //     //     notePos_ = nextNotePos;
 
-        //     nextNotePos_ = (notePos_ + qLength) % qLength;
-        // }
-        // else
-        // {
-        //     nextNotePos_ = notePos_;
-        // }
+    //     //     nextNotePos_ = (notePos_ + qLength) % qLength;
+    //     // }
+    //     // else
+    //     // {
+    //     //     nextNotePos_ = notePos_;
+    //     // }
 
-        // prevSortedNoteQueue.clear();
+    //     // prevSortedNoteQueue.clear();
 
-        // for (ArpNote a : sortedNoteQueue)
-        // {
-        //     prevSortedNoteQueue.push_back(a);
-        // }
+    //     // for (ArpNote a : sortedNoteQueue)
+    //     // {
+    //     //     prevSortedNoteQueue.push_back(a);
+    //     // }
 
-        // playNote(noteon_micros, notePat_[patPos_]);
+    //     // playNote(noteon_micros, notePat_[patPos_]);
 
-        // patPos_++;
-    }
+    //     // patPos_++;
+    // }
 
-    void MidiFXRepeat::playNote(uint32_t noteOnMicros, int16_t noteNumber, uint8_t velocity, uint8_t channel)
+    void MidiFXRepeat::playNote(uint32_t noteOnMicros, uint32_t lengthDelta, int16_t noteNumber, uint8_t velocity, uint8_t channel)
     {
         // Serial.println("SeqRunning: " + String(seqRunning_));
         // Serial.println("PlayNote: " + String(noteNumber) + String(velocity) + String(velocity));
@@ -904,7 +903,12 @@ namespace midifx
         noteOut.noteNumber = (uint8_t)noteNumber;
         noteOut.prevNoteNumber = (uint8_t)noteNumber;
         noteOut.velocity = velocity;
-        noteOut.stepLength = ((float)gate_ * 0.01f) * (16.0f * multiplier_) * (float)stepLength_;
+        // noteOut.stepLength = ((float)gate_ * 0.01f) * (16.0f * multiplier_);
+
+        noteOut.stepLength = (lengthDelta * ((float)gate_ * 0.01f)) / clockConfig.step_micros;
+
+        // noteOut.stepLength = ((float)gate_ * 0.01f) * (16.0f * multiplier_);
+
         // noteOut.sendMidi = sendMidi_;
         // noteOut.sendCV = sendCV_;
 
@@ -964,18 +968,6 @@ namespace midifx
             }
         }
 
-        // if (patternDirty_)
-        // {
-        //     regeneratePattern();
-        //     patternDirty_ = false;
-        // }
-
-        // if (pendingStart_ && !omxUtil.areClocksRunning() && micros() - pendingStartTime_ >= 15000)
-        // {
-        //     omxUtil.resetClocks();
-        //     doPendingStart();
-        // }
-
         if (!seqRunning_)
         {
             return;
@@ -991,23 +983,6 @@ namespace midifx
 
         uint32_t stepmicros = seqConfig.currentFrameMicros;
 
-        // if(stepmicros >= next16thTime_)
-        // {
-        //     last16thTime_ = next16thTime_;
-        //     next16thTime_ = next16thTime_ + (clockConfig.step_micros * 16 * (1.0f / 16.0f));
-
-        //     // for (uint8_t i = 0; i < activeNoteQueue.size(); i++)
-        //     // {
-        //     //     if (activeNoteQueue[i].playing == false)
-        //     //     {
-        //     //         activeNoteQueue[i].playing = true;
-        //     //         activeNoteQueue[i].nextTriggerTime = next16thTime_;
-        //     //     }
-        //     // }
-
-        //     // next16thTime_ = next16thTime_ + (clockConfig.step_micros * 16 * (1.0f / 16.0f));
-        // }
-
         tempNoteQueue.clear();
 
         // Loop through all the notes and see which notes should be triggered this frame
@@ -1021,48 +996,26 @@ namespace midifx
                 {
                     activeNoteQueue[i].velocity = map(activeNoteQueue[i].repeatCounter, 0, numOfRepeats_, activeNoteQueue[i].velocityEnd, activeNoteQueue[i].velocityStart);
                 }
-
-                float rateMultiplier = 1.0f; // Used to fade the rate
-
-                if(fadeRate_)
-                {
-                    rateMultiplier = map((float)activeNoteQueue[i].repeatCounter, 0.0f, (float)numOfRepeats_, rateEndPerc_, rateStartPerc_);
-                }
-
+                
                 if (useRateHz()) // Use hertz
                 {
-                    if(fadeRate_)
-                    {
+                    float hzRate = fadeRate_ ? map((float)activeNoteQueue[i].repeatCounter, 0.0f, (float)numOfRepeats_, rateEndInHz_, rateStartInHz_) : rateInHz_;
 
-
-
-
-
-                    }
-
-
-
-                    activeNoteQueue[i].nextTriggerTime = activeNoteQueue[i].nextTriggerTime + hzRateLength_ * rateMultiplier;
+                    activeNoteQueue[i].nextTriggerDelta = (1.0f / hzRate) * secs2micros;
                 }
                 else // Synced
                 {
-                    activeNoteQueue[i].nextTriggerTime = activeNoteQueue[i].nextTriggerTime + (clockConfig.step_micros * 16 * multiplier_ * rateMultiplier);
+                    float mult = fadeRate_ ? map((float)activeNoteQueue[i].repeatCounter, 0.0f, (float)numOfRepeats_, rateEndMult_, rateStartMult_) : multiplier_;
+
+                    activeNoteQueue[i].nextTriggerDelta = clockConfig.step_micros * 16 * mult; // 1/8th note, 120 bpm, 124992 * 16 * 0.125 = 249984 / 124992 = 2 steps, 16 / 2 = 8
                 }
+
+                activeNoteQueue[i].nextTriggerTime = activeNoteQueue[i].nextTriggerTime + activeNoteQueue[i].nextTriggerDelta;
 
                 if(activeNoteQueue[i].repeatCounter > 0)
                 {
                     activeNoteQueue[i].repeatCounter -= 1;
                 }
-
-                // sync with the clock
-                // if (quantizeSync_)
-                // {
-                //     activeNoteQueue[i].nextTriggerTime = seqConfig.lastClockMicros + (clockConfig.step_micros * 16 * multiplier_);
-                // }
-                // else
-                // {
-                //     activeNoteQueue[i].nextTriggerTime = seqConfig.currentFrameMicros + (clockConfig.step_micros * 16 * multiplier_);
-                // }
 
                 // Don't hold back
                 tempNoteQueue.push_back(activeNoteQueue[i]);
@@ -1092,34 +1045,6 @@ namespace midifx
                 }
             }
         }
-
-        // if (stepmicros >= nextStepTimeP_)
-        // {
-        //     lastStepTimeP_ = nextStepTimeP_;
-
-        //     uint8_t rate = kArpRates[rateIndex_]; // 8
-        //     multiplier_ = 1.0f / (float)rate; // 1 / 8 = 0.125 // Only need to recalculate this if rate changes yo
-
-        //     // clockConfig.step_micros = 16th note step in microseconds
-
-        //     stepMicroDelta_ = (clockConfig.step_micros * 16) * multiplier_;
-
-        //     nextStepTimeP_ = seqConfig.currentFrameMicros + stepMicroDelta_; // calc step based on rate
-
-        //     nextRepeatTriggerTime_ = nextStepTimeP_;
-
-        //     repeatNoteTrigger();
-
-        //     // Keeps arp running for a bit on stop so if you play new notes they will be in sync
-        //     // if (pendingStop_)
-        //     // {
-        //     //     pendingStopCount_--;
-        //     //     if (pendingStopCount_ == 0)
-        //     //     {
-        //     //         doPendingStop();
-        //     //     }
-        //     // }
-        // }
 	}
 
     void MidiFXRepeat::onEncoderChangedEditParam(Encoder::Update enc)
@@ -1179,7 +1104,7 @@ namespace midifx
                 quantizeSync_ = quantizedRateIndex_ >= -1; // -2 for off
                 break;
             case 1:
-                numOfRepeats_ = constrain(numOfRepeats_ + amtSlow, 0, 15);
+                numOfRepeats_ = constrain(numOfRepeats_ + amtSlow, 0, 63);
                 break;
             case 2:
                 break;
@@ -1219,25 +1144,23 @@ namespace midifx
                 if (useRateHz())
                 {
                     rateStartHz_ = constrain(rateStartHz_ + amtFast, 0, 255);
-                    multiplierCalculated_ = false;
                 }
                 else
                 {
                     rateStart_ = constrain(rateStart_ + amtSlow, 0, kNumArpRates - 1);
-                    rateStartPerc_ = rateStart_ / 100.0f;
                 }
+                multiplierCalculated_ = false;
                 break;
             case 2:
                 if (useRateHz())
                 {
                     rateEndHz_ = constrain(rateEndHz_ + amtFast, 0, 255);
-                    multiplierCalculated_ = false;
                 }
                 else
                 {
                     rateEnd_ = constrain(rateEnd_ + amtSlow, 0, kNumArpRates - 1);
-                    rateEndPerc_ = rateEnd_ / 100.0f;
                 }
+                multiplierCalculated_ = false;
                 break;
             case 3:
                 break;
@@ -1314,7 +1237,7 @@ namespace midifx
             }
 
             omxDisp.legends[1] = "#RPT";
-            omxDisp.legendVals[1] = numOfRepeats_;
+            omxDisp.legendVals[1] = numOfRepeats_ + 1;
 
             omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), getEncoderSelect());
         }
@@ -1341,26 +1264,26 @@ namespace midifx
             if(useRateHz())
             {
                 float sHz = rateToHz(rateStartHz_);
-                float eHz = rateToHz(rateStartHz_);
+                float eHz = rateToHz(rateEndHz_);
 
                 if (sHz < 1.0f)
                 {
                     omxDisp.useLegendString[1] = true;
-                    omxDisp.legendString[1] = String(rateInHz_, 2);
+                    omxDisp.legendString[1] = String(sHz, 2);
                 }
                 else
                 {
-                    omxDisp.legendVals[1] = rateInHz_;
+                    omxDisp.legendVals[1] = sHz;
                 }
 
                 if (eHz < 1.0f)
                 {
                     omxDisp.useLegendString[2] = true;
-                    omxDisp.legendString[2] = String(rateInHz_, 2);
+                    omxDisp.legendString[2] = String(eHz, 2);
                 }
                 else
                 {
-                    omxDisp.legendVals[2] = rateInHz_;
+                    omxDisp.legendVals[2] = eHz;
                 }
             }
             else
@@ -1448,9 +1371,6 @@ namespace midifx
 
         velStartPerc_ = velStart_ / 100.0f;
         velEndPerc_ = velEnd_ / 100.0f;
-
-        rateStartPerc_ = rateStart_ / 100.0f;
-        rateEndPerc_ = rateEnd_ / 100.0f;
 
         quantizeSync_ = quantizedRateIndex_ >= -1; // -2 for off
 

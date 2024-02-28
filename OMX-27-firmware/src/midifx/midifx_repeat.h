@@ -50,12 +50,13 @@ namespace midifx
             uint8_t velocity : 7;
             uint8_t velocityStart : 7;
             uint8_t velocityEnd : 7;
-            uint8_t repeatCounter : 5;
+            uint8_t repeatCounter : 7;
 
             // bool sendMidi = false;
             // bool sendCV = false;
 
-            Micros nextTriggerTime = 0;
+            Micros nextTriggerDelta = 0; // Delta time to next trigger
+            Micros nextTriggerTime = 0; // Time in global microseconds when note should trigger next
 
             RepeatNote()
             {
@@ -94,7 +95,7 @@ namespace midifx
         struct RepeatSave
         {
             uint8_t chancePerc : 7;
-            uint8_t numOfRepeats : 4;
+            uint8_t numOfRepeats : 6;
             uint8_t mode : 3;
             int8_t rateIndex : 5;
             int8_t quantizedRateIndex_ : 5;
@@ -109,24 +110,22 @@ namespace midifx
             uint8_t rateStartHz_;
             uint8_t rateEndHz_;
         };
+        // Saved variables
         uint8_t chancePerc_ = 100;
-
-		uint8_t numOfRepeats_ : 4; // 1 to 16, stored as 0 - 15
+		uint8_t numOfRepeats_ : 6; // 1 to 64, stored as 0 - 63
         uint8_t mode_ : 3; // Off, 1-Shot - Repeats for numOfRepeats_ restarts on new note on, On - Repeats indefinitely while key is hold, Hold - Endlessly repeats, 
         int8_t rateIndex_ : 5; // max 15 or -1 for hz
         int8_t quantizedRateIndex_ : 5; // max 15 or -1 for hz
-        uint8_t rateHz_;	
+        uint8_t rateHz_; // 0-255, gets remapped to a hertz float value
         uint8_t gate_ : 8; // 0-200
-        bool fadeVel_;
+        bool fadeVel_; // Fade the velocity if true
         uint8_t velStart_ : 7; // 0-127
         uint8_t velEnd_ : 7; // 0-127
-        bool fadeRate_;
-        uint8_t rateStart_ : 4; // 0-127
-        uint8_t rateEnd_ : 4; // 0-127
-
-        uint8_t rateStartHz_; // 0-127
-        uint8_t rateEndHz_; // 0-127
-
+        bool fadeRate_; // Fade the rate if true
+        uint8_t rateStart_ : 4; // 0-15
+        uint8_t rateEnd_ : 4; // 0-15
+        uint8_t rateStartHz_; // 0-255, gets remapped to a hertz float value
+        uint8_t rateEndHz_; // 0-255
 
         // Consts
 		static const int queueSize = 16;
@@ -138,27 +137,26 @@ namespace midifx
 		float multiplier_ = 1;
 		uint8_t stepLength_ = 1; // length of note in arp steps
 
+        // Micros nextStepTimeP_ = 32;
+		// Micros lastStepTimeP_ = 32;
+		// uint32_t stepMicroDelta_ = 0;
+
+		// Micros last16thTime_ = 0;
+		// Micros next16thTime_ = 0;
+
+        // Calculated
         bool quantizeSync_ = true;
 
         float velStartPerc_ = 1.0f;
         float velEndPerc_ = 1.0f;
 
-		float rateStartPerc_ = 1;
-		float rateEndPerc_ = 1;
+		float rateStartMult_ = 1;
+		float rateEndMult_ = 1;
 
+        // Rate in hertz
         float rateInHz_;
-
-        Micros nextStepTimeP_ = 32;
-		Micros lastStepTimeP_ = 32;
-		uint32_t stepMicroDelta_ = 0;
-
-		Micros last16thTime_ = 0;
-		Micros next16thTime_ = 0;
-
-        Micros hzRateLength_;
-
-        Micros hzRateStartLength_;
-        Micros hzRateEndLength_;
+        float rateStartInHz_;
+        float rateEndInHz_;
 
 		std::vector<RepeatNote> playedNoteQueue; // Keeps track of which notes are being played
 		std::vector<RepeatNote> activeNoteQueue;	  // Holds notes
@@ -167,7 +165,6 @@ namespace midifx
 		std::vector<RepeatNote> tempNoteQueue;	  // Notes that are used in arp
 
 		std::vector<FixedLengthNote> fixedLengthNotes; // Tracking of fixed length notes
-
 
 		MidiNoteGroup trackingNoteGroups[8];
 		MidiNoteGroup trackingNoteGroupsPassthrough[8];
@@ -181,8 +178,8 @@ namespace midifx
         void updateMultiplier();
         bool insertMidiNoteQueue(MidiNoteGroup *note);
 		bool removeMidiNoteQueue(MidiNoteGroup *note);
-        static bool removeFromQueue(std::vector<RepeatNote> *queue, MidiNoteGroup *note);
 
+        static bool removeFromQueue(std::vector<RepeatNote> *queue, MidiNoteGroup *note);
         static float rateToHz(uint8_t rateHz);
 
         void changeRepeatMode(uint8_t newMode);
@@ -192,12 +189,10 @@ namespace midifx
 		void stopSeq();
         void resetArpSeq();
 
-        // void sortNotes();
-
         void recalcVariables();
 
         void triggerNote(RepeatNote note);
-        void repeatNoteTrigger();
-		void playNote(uint32_t noteOnMicros, int16_t noteNumber, uint8_t velocity, uint8_t channel);
+        // void repeatNoteTrigger();
+		void playNote(uint32_t noteOnMicros, uint32_t lengthDelta, int16_t noteNumber, uint8_t velocity, uint8_t channel);
 	};
 }
