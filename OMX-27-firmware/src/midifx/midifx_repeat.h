@@ -106,6 +106,8 @@ namespace midifx
             bool fadeRate_;
             uint8_t rateStart_;
             uint8_t rateEnd_; 
+            uint8_t rateStartHz_;
+            uint8_t rateEndHz_;
         };
         uint8_t chancePerc_ = 100;
 
@@ -155,6 +157,9 @@ namespace midifx
 
         Micros hzRateLength_;
 
+        Micros hzRateStartLength_;
+        Micros hzRateEndLength_;
+
 		std::vector<RepeatNote> playedNoteQueue; // Keeps track of which notes are being played
 		std::vector<RepeatNote> activeNoteQueue;	  // Holds notes
 		std::vector<RepeatNote> pendingNoteQueue;	  // notes pending for quantization
@@ -172,6 +177,7 @@ namespace midifx
         void processNoteInput(MidiNoteGroup *note);
 
 		bool hasMidiNotes();
+        bool useRateHz();
         void updateMultiplier();
         bool insertMidiNoteQueue(MidiNoteGroup *note);
 		bool removeMidiNoteQueue(MidiNoteGroup *note);

@@ -45,8 +45,10 @@ namespace midifx
         gate_ = 90;
         velStart_ = 50;
         velEnd_ = 100;
-        rateStart_ = 100;
-        rateEnd_ = 100;
+        rateStart_ = 6;
+        rateEnd_ = 6;
+        rateStartHz_ = 1.0f;
+        rateEndHz_ = 1.0f;
 
         quantizeSync_ = true;
 
@@ -92,6 +94,9 @@ namespace midifx
 
         clone->rateStart_ = rateStart_;
         clone->rateEnd_ = rateEnd_;
+
+        clone->rateStartHz_ = rateStartHz_;
+        clone->rateEndHz_ = rateEndHz_;
 
         clone->recalcVariables();
 
@@ -337,6 +342,11 @@ namespace midifx
         return playedNoteQueue.size() > 0;
     }
 
+    bool MidiFXRepeat::useRateHz()
+    {
+        return rateIndex_ < 0;
+    }
+
     float MidiFXRepeat::rateToHz(uint8_t rateHz)
     {
         float hertz = 1.0f;
@@ -369,6 +379,12 @@ namespace midifx
 
                 rateInHz_ = rateToHz(rateHz_);
                 hzRateLength_ = (1.0f / rateInHz_) * secs2micros;
+
+                float sHz = rateToHz(rateStartHz_);
+                hzRateStartLength_ = (1.0f / sHz) * secs2micros;
+
+                float eHz = rateToHz(rateEndHz_);
+                hzRateEndLength_ = (1.0f / eHz) * secs2micros;
             }
             else
             {
@@ -1013,8 +1029,19 @@ namespace midifx
                     rateMultiplier = map((float)activeNoteQueue[i].repeatCounter, 0.0f, (float)numOfRepeats_, rateEndPerc_, rateStartPerc_);
                 }
 
-                if (rateIndex_ < 0) // Use hertz
+                if (useRateHz()) // Use hertz
                 {
+                    if(fadeRate_)
+                    {
+
+
+
+
+
+                    }
+
+
+
                     activeNoteQueue[i].nextTriggerTime = activeNoteQueue[i].nextTriggerTime + hzRateLength_ * rateMultiplier;
                 }
                 else // Synced
@@ -1189,12 +1216,28 @@ namespace midifx
                 fadeRate_ = constrain(fadeRate_ + amtSlow, 0, 1);
                 break;
             case 1:
-                rateStart_ = constrain(rateStart_ + amtFast, 0, 100);
-                rateStartPerc_ = rateStart_ / 100.0f;
+                if (useRateHz())
+                {
+                    rateStartHz_ = constrain(rateStartHz_ + amtFast, 0, 255);
+                    multiplierCalculated_ = false;
+                }
+                else
+                {
+                    rateStart_ = constrain(rateStart_ + amtSlow, 0, kNumArpRates - 1);
+                    rateStartPerc_ = rateStart_ / 100.0f;
+                }
                 break;
             case 2:
-                rateEnd_ = constrain(rateEnd_ + amtFast, 0, 100);
-                rateEndPerc_ = rateEnd_ / 100.0f;
+                if (useRateHz())
+                {
+                    rateEndHz_ = constrain(rateEndHz_ + amtFast, 0, 255);
+                    multiplierCalculated_ = false;
+                }
+                else
+                {
+                    rateEnd_ = constrain(rateEnd_ + amtSlow, 0, kNumArpRates - 1);
+                    rateEndPerc_ = rateEnd_ / 100.0f;
+                }
                 break;
             case 3:
                 break;
@@ -1293,9 +1336,41 @@ namespace midifx
             omxDisp.legends[0] = "FRAT";
             omxDisp.legendText[0] = fadeRate_ ? "FADE" : "OFF";
             omxDisp.legends[1] = "STAR";
-            omxDisp.legendVals[1] = rateStart_;
             omxDisp.legends[2] = "END";
-            omxDisp.legendVals[2] = rateEnd_;
+
+            if(useRateHz())
+            {
+                float sHz = rateToHz(rateStartHz_);
+                float eHz = rateToHz(rateStartHz_);
+
+                if (sHz < 1.0f)
+                {
+                    omxDisp.useLegendString[1] = true;
+                    omxDisp.legendString[1] = String(rateInHz_, 2);
+                }
+                else
+                {
+                    omxDisp.legendVals[1] = rateInHz_;
+                }
+
+                if (eHz < 1.0f)
+                {
+                    omxDisp.useLegendString[2] = true;
+                    omxDisp.legendString[2] = String(rateInHz_, 2);
+                }
+                else
+                {
+                    omxDisp.legendVals[2] = rateInHz_;
+                }
+            }
+            else
+            {
+                omxDisp.useLegendString[1] = true;
+                omxDisp.legendString[1] = "1/" + String(kArpRates[rateStart_]);
+
+                omxDisp.useLegendString[2] = true;
+                omxDisp.legendString[2] = "1/" + String(kArpRates[rateEnd_]);
+            }
 
             omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), getEncoderSelect());
         }
@@ -1319,6 +1394,8 @@ namespace midifx
         save.fadeRate_ = fadeRate_;
         save.rateStart_ = rateStart_;
         save.rateEnd_ = rateEnd_;
+        save.rateStartHz_ = rateStartHz_;
+        save.rateEndHz_ = rateEndHz_;
 
         int saveSize = sizeof(RepeatSave);
 
@@ -1356,6 +1433,8 @@ namespace midifx
         velEnd_ = save.velEnd;
         rateStart_ = save.rateStart_;
         rateEnd_ = save.rateEnd_;
+        rateStartHz_ = save.rateStartHz_;
+        rateEndHz_ = save.rateEndHz_;
 
         recalcVariables();
         resync();
