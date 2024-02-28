@@ -41,14 +41,17 @@ namespace midifx
         numOfRepeats_ = 4;
         rateIndex_ = 6;
         quantizedRateIndex_ = 6;
-        multiplierCalculated_ = false;
         rateHz_ = 100;
-        rateInHz_ = rateToHz(rateHz_);
         gate_ = 90;
-        velStart_ = 10;
-        velEnd_ = 115;
+        velStart_ = 50;
+        velEnd_ = 100;
+        rateStart_ = 100;
+        rateEnd_ = 100;
 
         quantizeSync_ = true;
+
+        recalcVariables();
+        resync();
 
         changeRepeatMode(MFXREPEATMODE_ON);
 
@@ -78,10 +81,19 @@ namespace midifx
         clone->numOfRepeats_ = numOfRepeats_;
         clone->mode_ = mode_;
         clone->rateIndex_ = rateIndex_;
+        clone->quantizedRateIndex_ = quantizedRateIndex_;
         clone->rateHz_ = rateHz_;
         clone->gate_ = gate_;
         clone->velStart_ = velStart_;
         clone->velEnd_ = velEnd_;
+
+        clone->fadeVel_ = fadeVel_;
+        clone->fadeRate_ = fadeRate_;
+
+        clone->rateStart_ = rateStart_;
+        clone->rateEnd_ = rateEnd_;
+
+        clone->recalcVariables();
 
 		return clone;
 	}
@@ -407,6 +419,10 @@ namespace midifx
                     auto newNote = RepeatNote(note);
 
                     newNote.repeatCounter = numOfRepeats_;
+
+                    newNote.velocityStart = note->velocity * velStartPerc_;
+                    newNote.velocityEnd = note->velocity * velEndPerc_;
+
                     newNote.nextTriggerTime = seqConfig.lastClockMicros;
 
                     pendingNoteQueue.push_back(newNote);
@@ -417,6 +433,10 @@ namespace midifx
                     auto newNote = RepeatNote(note);
 
                     newNote.repeatCounter = numOfRepeats_;
+
+                    newNote.velocityStart = note->velocity * velStartPerc_;
+                    newNote.velocityEnd = note->velocity * velEndPerc_;
+
                     newNote.nextTriggerTime = seqConfig.lastClockMicros;
 
                     activeNoteQueue.push_back(newNote);
@@ -511,7 +531,6 @@ namespace midifx
     void MidiFXRepeat::resync()
     {
         playedNoteQueue.clear();
-        holdNoteQueue.clear();
         tempNoteQueue.clear();
         activeNoteQueue.clear();
         pendingNoteQueue.clear();
@@ -984,26 +1003,23 @@ namespace midifx
             {
                 if(fadeVel_)
                 {
-                    activeNoteQueue[i].velocity = map(activeNoteQueue[i].repeatCounter, 0, numOfRepeats_, velEnd_, velStart_);
+                    activeNoteQueue[i].velocity = map(activeNoteQueue[i].repeatCounter, 0, numOfRepeats_, activeNoteQueue[i].velocityEnd, activeNoteQueue[i].velocityStart);
                 }
+
+                float rateMultiplier = 1.0f; // Used to fade the rate
 
                 if(fadeRate_)
                 {
-                    uint8_t rIndex = map(activeNoteQueue[i].repeatCounter, 0, numOfRepeats_, rateEnd_, rateStart_);
-                    float mult = 1.0f / (float)kArpRates[rIndex];
-
-                    activeNoteQueue[i].nextTriggerTime = activeNoteQueue[i].nextTriggerTime + (clockConfig.step_micros * 16 * mult);
+                    rateMultiplier = map((float)activeNoteQueue[i].repeatCounter, 0.0f, (float)numOfRepeats_, rateEndPerc_, rateStartPerc_);
                 }
-                else
+
+                if (rateIndex_ < 0) // Use hertz
                 {
-                    if (rateIndex_ < 0) // Use hertz
-                    {
-                        activeNoteQueue[i].nextTriggerTime = activeNoteQueue[i].nextTriggerTime + hzRateLength_;
-                    }
-                    else // Synced
-                    {
-                        activeNoteQueue[i].nextTriggerTime = activeNoteQueue[i].nextTriggerTime + (clockConfig.step_micros * 16 * multiplier_);
-                    }
+                    activeNoteQueue[i].nextTriggerTime = activeNoteQueue[i].nextTriggerTime + hzRateLength_ * rateMultiplier;
+                }
+                else // Synced
+                {
+                    activeNoteQueue[i].nextTriggerTime = activeNoteQueue[i].nextTriggerTime + (clockConfig.step_micros * 16 * multiplier_ * rateMultiplier);
                 }
 
                 if(activeNoteQueue[i].repeatCounter > 0)
@@ -1153,10 +1169,12 @@ namespace midifx
                 fadeVel_ = constrain(fadeVel_ + amtSlow, 0, 1);
                 break;
             case 1:
-                velStart_ = constrain(velStart_ + amtSlow, 0, 127);
+                velStart_ = constrain(velStart_ + amtFast, 0, 100);
+                velStartPerc_ = velStart_ / 100.0f;
                 break;
             case 2:
-                velEnd_ = constrain(velEnd_ + amtSlow, 0, 127);
+                velEnd_ = constrain(velEnd_ + amtFast, 0, 100);
+                velEndPerc_ = velEnd_ / 100.0f;
                 break;
             case 3:
                 break;
@@ -1171,10 +1189,12 @@ namespace midifx
                 fadeRate_ = constrain(fadeRate_ + amtSlow, 0, 1);
                 break;
             case 1:
-                rateStart_ = constrain(rateStart_ + amtSlow, 0, kNumArpRates - 1);
+                rateStart_ = constrain(rateStart_ + amtFast, 0, 100);
+                rateStartPerc_ = rateStart_ / 100.0f;
                 break;
             case 2:
-                rateEnd_ = constrain(rateEnd_ + amtSlow, 0, kNumArpRates - 1);
+                rateEnd_ = constrain(rateEnd_ + amtFast, 0, 100);
+                rateEndPerc_ = rateEnd_ / 100.0f;
                 break;
             case 3:
                 break;
@@ -1273,11 +1293,9 @@ namespace midifx
             omxDisp.legends[0] = "FRAT";
             omxDisp.legendText[0] = fadeRate_ ? "FADE" : "OFF";
             omxDisp.legends[1] = "STAR";
-            omxDisp.useLegendString[1] = true;
-            omxDisp.legendString[1] = "1/" + String(kArpRates[rateStart_]);
+            omxDisp.legendVals[1] = rateStart_;
             omxDisp.legends[2] = "END";
-            omxDisp.useLegendString[2] = true;
-            omxDisp.legendString[2] = "1/" + String(kArpRates[rateEnd_]);
+            omxDisp.legendVals[2] = rateEnd_;
 
             omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), getEncoderSelect());
         }
@@ -1286,16 +1304,21 @@ namespace midifx
     }
 
     int MidiFXRepeat::saveToDisk(int startingAddress, Storage *storage)
-	{
+    {
         RepeatSave save;
         save.chancePerc = chancePerc_;
         save.numOfRepeats = numOfRepeats_;
         save.mode = mode_;
         save.rateIndex = rateIndex_;
         save.rateHz = rateHz_;
+        save.quantizedRateIndex_ = quantizedRateIndex_;
         save.gate = gate_;
         save.velStart = velStart_;
         save.velEnd = velEnd_;
+        save.fadeVel_ = fadeVel_;
+        save.fadeRate_ = fadeRate_;
+        save.rateStart_ = rateStart_;
+        save.rateEnd_ = rateEnd_;
 
         int saveSize = sizeof(RepeatSave);
 
@@ -1306,9 +1329,9 @@ namespace midifx
 		}
 
 		return startingAddress + saveSize;
-	}
+    }
 
-	int MidiFXRepeat::loadFromDisk(int startingAddress, Storage *storage)
+    int MidiFXRepeat::loadFromDisk(int startingAddress, Storage *storage)
 	{
 		int saveSize = sizeof(RepeatSave);
 
@@ -1325,10 +1348,34 @@ namespace midifx
         mode_ = save.mode;
         rateHz_ = save.rateHz;
         rateIndex_ = save.rateIndex;
+        quantizedRateIndex_ = save.quantizedRateIndex_;
         gate_ = save.gate;
+        fadeVel_ = save.fadeVel_;
+        fadeRate_ = save.fadeRate_;
         velStart_ = save.velStart;
         velEnd_ = save.velEnd;
+        rateStart_ = save.rateStart_;
+        rateEnd_ = save.rateEnd_;
+
+        recalcVariables();
+        resync();
 
         return startingAddress + saveSize;
 	}
+
+    void MidiFXRepeat::recalcVariables()
+    {
+        rateInHz_ = rateToHz(rateHz_);
+
+        velStartPerc_ = velStart_ / 100.0f;
+        velEndPerc_ = velEnd_ / 100.0f;
+
+        rateStartPerc_ = rateStart_ / 100.0f;
+        rateEndPerc_ = rateEnd_ / 100.0f;
+
+        quantizeSync_ = quantizedRateIndex_ >= -1; // -2 for off
+
+        multiplierCalculated_ = false;
+        updateMultiplier();
+    }
 }

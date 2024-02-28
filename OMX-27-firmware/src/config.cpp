@@ -2,12 +2,13 @@
 #include "consts/consts.h"
 
 const OMXMode DEFAULT_MODE = MODE_MIDI;
-const uint8_t EEPROM_VERSION = 33;
+const uint8_t EEPROM_VERSION = 34;
 
 // v30 - adds storage to header for velocity
 // v31 - adds storage for drums
 // v32 - adds mfx chord saves
 // v33 - adds mfx selector saves
+// v34 - adds mfx repeat saves
 
 // DEFINE CC NUMBERS FOR POTS // CCS mapped to Organelle Defaults
 const int CC1 = 21;

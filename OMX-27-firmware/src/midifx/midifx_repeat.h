@@ -48,6 +48,8 @@ namespace midifx
             uint8_t noteNumber;
             uint8_t channel : 4;
             uint8_t velocity : 7;
+            uint8_t velocityStart : 7;
+            uint8_t velocityEnd : 7;
             uint8_t repeatCounter : 5;
 
             // bool sendMidi = false;
@@ -90,19 +92,22 @@ namespace midifx
         };
 
         struct RepeatSave
-		{
-			uint8_t chancePerc : 7;
-            uint8_t numOfRepeats : 4; 
+        {
+            uint8_t chancePerc : 7;
+            uint8_t numOfRepeats : 4;
             uint8_t mode : 3;
             int8_t rateIndex : 5;
-            uint8_t rateHz;	
+            int8_t quantizedRateIndex_ : 5;
+            uint8_t rateHz;
             uint8_t gate : 8;
+            bool fadeVel_;
             uint8_t velStart : 7;
             uint8_t velEnd : 7;
+            bool fadeRate_;
+            uint8_t rateStart_;
+            uint8_t rateEnd_; 
         };
-		uint8_t chancePerc_ = 100;
-
-        bool quantizeSync_ = true;
+        uint8_t chancePerc_ = 100;
 
 		uint8_t numOfRepeats_ : 4; // 1 to 16, stored as 0 - 15
         uint8_t mode_ : 3; // Off, 1-Shot - Repeats for numOfRepeats_ restarts on new note on, On - Repeats indefinitely while key is hold, Hold - Endlessly repeats, 
@@ -114,10 +119,12 @@ namespace midifx
         uint8_t velStart_ : 7; // 0-127
         uint8_t velEnd_ : 7; // 0-127
         bool fadeRate_;
-        uint8_t rateStart_; // 0-127
-        uint8_t rateEnd_; // 0-127
+        uint8_t rateStart_ : 4; // 0-127
+        uint8_t rateEnd_ : 4; // 0-127
 
-        float rateInHz_;
+        uint8_t rateStartHz_; // 0-127
+        uint8_t rateEndHz_; // 0-127
+
 
         // Consts
 		static const int queueSize = 16;
@@ -129,6 +136,16 @@ namespace midifx
 		float multiplier_ = 1;
 		uint8_t stepLength_ = 1; // length of note in arp steps
 
+        bool quantizeSync_ = true;
+
+        float velStartPerc_ = 1.0f;
+        float velEndPerc_ = 1.0f;
+
+		float rateStartPerc_ = 1;
+		float rateEndPerc_ = 1;
+
+        float rateInHz_;
+
         Micros nextStepTimeP_ = 32;
 		Micros lastStepTimeP_ = 32;
 		uint32_t stepMicroDelta_ = 0;
@@ -139,7 +156,6 @@ namespace midifx
         Micros hzRateLength_;
 
 		std::vector<RepeatNote> playedNoteQueue; // Keeps track of which notes are being played
-		std::vector<RepeatNote> holdNoteQueue;	  // Holds notes
 		std::vector<RepeatNote> activeNoteQueue;	  // Holds notes
 		std::vector<RepeatNote> pendingNoteQueue;	  // notes pending for quantization
 
@@ -171,6 +187,8 @@ namespace midifx
         void resetArpSeq();
 
         // void sortNotes();
+
+        void recalcVariables();
 
         void triggerNote(RepeatNote note);
         void repeatNoteTrigger();
