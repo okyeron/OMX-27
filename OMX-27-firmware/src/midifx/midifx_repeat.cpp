@@ -47,8 +47,8 @@ namespace midifx
         velEnd_ = 100;
         rateStart_ = 6;
         rateEnd_ = 6;
-        rateStartHz_ = 1.0f;
-        rateEndHz_ = 1.0f;
+        rateStartHz_ = 100;
+        rateEndHz_ = 100;
 
         quantizeSync_ = true;
 
@@ -135,6 +135,8 @@ namespace midifx
             return;
         }
 
+        
+
         if (note.unknownLength || note.noteOff)
         {
             // only notes of unknown lengths need to be tracked
@@ -153,11 +155,11 @@ namespace midifx
     // be passed through the effect to send noteoff to prevent stuck notes
     void MidiFXRepeat::trackNoteInputPassthrough(MidiNoteGroup *note, bool ignoreNoteOns)
     {
-        Serial.println("trackNoteInputPassthrough");
+        // Serial.println("trackNoteInputPassthrough");
         // Note on, not ignored
         if (!ignoreNoteOns && !note->noteOff)
         {
-            Serial.println("trackNoteInputPassthrough note on");
+            // Serial.println("trackNoteInputPassthrough note on");
 
             // Search for an empty slot in trackingNoteGroupsPassthrough
             // If no slots are available/more than 8 notes/ note gets killed. 
@@ -180,7 +182,7 @@ namespace midifx
         // Note off
         if (note->noteOff)
         {
-            Serial.println("trackNoteInputPassthrough note off");
+            // Serial.println("trackNoteInputPassthrough note off");
 
             // bool noteFound = false;
 
@@ -231,7 +233,7 @@ namespace midifx
                 {
                     if (trackingNoteGroups[i].channel == note->channel && trackingNoteGroups[i].prevNoteNumber == note->prevNoteNumber)
                     {
-                        Serial.println("trackNoteInput note off found in trackingNoteGroups");
+                        // Serial.println("trackNoteInput note off found in trackingNoteGroups");
                         note->noteNumber = trackingNoteGroups[i].noteNumber;
                         processNoteInput(note);
                         trackingNoteGroups[i].prevNoteNumber = 255; // mark empty
@@ -242,7 +244,7 @@ namespace midifx
 
             if (!noteFound)
             {
-                Serial.println("trackNoteInput note off not found in trackingNoteGroups");
+                // Serial.println("trackNoteInput note off not found in trackingNoteGroups");
 
                 processNoteInput(note);
             }
@@ -397,6 +399,13 @@ namespace midifx
 
     bool MidiFXRepeat::insertMidiNoteQueue(MidiNoteGroup *note)
     {
+        // Serial.println("insertMidiNoteQueue");
+        // Serial.println("playedNoteQueue.capacity(): " + String(playedNoteQueue.capacity()));
+        // Serial.println("activeNoteQueue.capacity(): " + String(activeNoteQueue.capacity()));
+        // Serial.println("pendingNoteQueue.capacity(): " + String(pendingNoteQueue.capacity()));
+        // Serial.println("tempNoteQueue.capacity(): " + String(tempNoteQueue.capacity()));
+        // Serial.println("fixedLengthNotes.capacity(): " + String(fixedLengthNotes.capacity()));
+
         if (playedNoteQueue.capacity() > queueSize)
         {
             playedNoteQueue.shrink_to_fit();
@@ -422,14 +431,21 @@ namespace midifx
             activeNoteQueue.shrink_to_fit();
         }
 
+        // if(!noteAdded)
+        // {
+        //     Serial.println("Could not add note");
+        // }
+
         // Room up to 16 in playedNoteQueue, can add to pending or active
         if (noteAdded)
         {
-            if (activeNoteQueue.capacity() + pendingNoteQueue.capacity() < queueSize)
+            if (activeNoteQueue.size() + pendingNoteQueue.size() < queueSize)
             {
                 // Add to pending queue, note will be added to active queue on clock
                 if (quantizeSync_)
                 {
+                    // Serial.println("adding quantize note");
+
                     auto newNote = RepeatNote(note);
 
                     newNote.repeatCounter = numOfRepeats_ + 1;
@@ -444,6 +460,8 @@ namespace midifx
                 // No quantization, play immediately by adding to active note queue
                 else
                 {
+                    // Serial.println("adding non-quantize note");
+
                     auto newNote = RepeatNote(note);
 
                     newNote.repeatCounter = numOfRepeats_ + 1;
@@ -526,6 +544,7 @@ namespace midifx
 
     void MidiFXRepeat::changeRepeatMode(uint8_t newMode)
     {
+        uint8_t prevMode = mode_;
         mode_ = newMode;
 
         if ((mode_ == MFXREPEATMODE_ON && hasMidiNotes() == false) || (mode_ == MFXREPEATMODE_ONCE && hasMidiNotes() == false) || mode_ == MFXREPEATMODE_OFF)
@@ -540,6 +559,13 @@ namespace midifx
             resync();
             break;
         }
+
+        if(prevMode != newMode && newMode == MFXREPEATMODE_OFF)
+        {
+            seqRunning_ = false;
+            recalcVariables();
+            resync();
+        }
     }
 
     void MidiFXRepeat::resync()
@@ -548,6 +574,7 @@ namespace midifx
         tempNoteQueue.clear();
         activeNoteQueue.clear();
         pendingNoteQueue.clear();
+        fixedLengthNotes.clear();
 
         resetArpSeq();
 
@@ -560,27 +587,37 @@ namespace midifx
 
     void MidiFXRepeat::repeatNoteOn(MidiNoteGroup *note)
     {
-        Serial.println("repeatNoteOn");
+        // Serial.println("repeatNoteOn");
 
-        bool seqReset = false;
+        // bool seqReset = false;
 
         if (!seqRunning_)
         {
             startSeq();
             resetArpSeq();
-            seqReset = true;
+            // seqReset = true;
+
+            // Serial.println("playedNoteQueue: " + String(playedNoteQueue.size()));
+            // Serial.println("activeNoteQueue: " + String(activeNoteQueue.size()));
+            // Serial.println("pendingNoteQueue: " + String(pendingNoteQueue.size()));
+            // Serial.println("tempNoteQueue: " + String(tempNoteQueue.size()));
+            // Serial.println("fixedLengthNotes: " + String(fixedLengthNotes.size()));
         }
 
         if (hasMidiNotes() == false)
         {
+            // Serial.println("No Midi Notes");
+
+
+
             // velocity_ = note.velocity;
             // sendMidi_ = note.sendMidi;
             // sendCV_ = note.sendCV;
             // midiChannel_ = note.channel - 1; // note.channel is 1-16, sub 1 for 0-15
 
 
-            resetArpSeq();
-            seqReset = true;
+            // resetArpSeq();
+            // seqReset = true;
 
             // For one shot mode, notes are removed from active
             // once they have played a certain number of times
@@ -591,23 +628,26 @@ namespace midifx
                 activeNoteQueue.clear();
             }
         }
-        else
-        {
-            // if (resetMode_ == ARPRESET_NOTE)
-            // {
-            //     resetArpSeq();
-            //     seqReset = true;
-            // }
-        }
+
+        // Serial.println("seqRunning_: " + String(seqRunning_));
+        
+        // else
+        // {
+        //     // if (resetMode_ == ARPRESET_NOTE)
+        //     // {
+        //     //     resetArpSeq();
+        //     //     seqReset = true;
+        //     // }
+        // }
 
         insertMidiNoteQueue(note);
         // sortNotes();
 
-        if (seqReset)
-        {
-            // nextNotePos_ = notePos_;
-            // prevQLength_ = sortedNoteQueue.size();
-        }
+        // if (seqReset)
+        // {
+        //     // nextNotePos_ = notePos_;
+        //     // prevQLength_ = sortedNoteQueue.size();
+        // }
 
         // if (pendingStop_)
         // {
@@ -621,7 +661,7 @@ namespace midifx
     }
     void MidiFXRepeat::repeatNoteOff(MidiNoteGroup *note)
     {
-        Serial.println("repeatNoteOff");
+        // Serial.println("repeatNoteOff");
         removeMidiNoteQueue(note);
         // sortNotes();
 
@@ -637,7 +677,7 @@ namespace midifx
 
     void MidiFXRepeat::startSeq()
     {
-        Serial.println("startArp");
+        // Serial.println("startArp");
         if (seqRunning_)
             return;
 
@@ -893,7 +933,7 @@ namespace midifx
     void MidiFXRepeat::playNote(uint32_t noteOnMicros, uint32_t lengthDelta, int16_t noteNumber, uint8_t velocity, uint8_t channel)
     {
         // Serial.println("SeqRunning: " + String(seqRunning_));
-        // Serial.println("PlayNote: " + String(noteNumber) + String(velocity) + String(velocity));
+        // Serial.println("PlayNote: " + String(noteNumber) + " " + String(velocity) + " " + String(channel));
         if (noteNumber < 0 || noteNumber > 127)
             return;
 
@@ -906,6 +946,8 @@ namespace midifx
         // noteOut.stepLength = ((float)gate_ * 0.01f) * (16.0f * multiplier_);
 
         noteOut.stepLength = (lengthDelta * ((float)gate_ * 0.01f)) / clockConfig.step_micros;
+
+        // Serial.println("stepLength: " + String(noteOut.stepLength));
 
         // noteOut.stepLength = ((float)gate_ * 0.01f) * (16.0f * multiplier_);
 
@@ -1078,8 +1120,11 @@ namespace midifx
             switch (param)
             {
             case 0:
-                mode_ = constrain(mode_ + amtSlow, 0, MFXREPEATMODE_COUNT - 1);
-                break;
+            {
+                uint8_t newMode = constrain(mode_ + amtSlow, 0, MFXREPEATMODE_COUNT - 1);
+                changeRepeatMode(newMode);
+            }
+            break;
             case 1:
                 rateIndex_ = constrain(rateIndex_ + amtSlow, -1, kNumArpRates - 1);
                 multiplierCalculated_ = false;
