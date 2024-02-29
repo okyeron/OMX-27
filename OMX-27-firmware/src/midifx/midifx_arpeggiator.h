@@ -67,7 +67,7 @@ namespace midifx
 	{
 	public:
 		MidiFXArpeggiator();
-		~MidiFXArpeggiator() {}
+		~MidiFXArpeggiator();
 
 		int getFXType() override;
 		const char *getName() override;
@@ -228,6 +228,8 @@ namespace midifx
 
 		bool pendingStart_ = false;
 		bool pendingStop_ = false;
+    	Micros nextArpTriggerTime_;
+
 		// Micros pendingStartTime_;
 		// uint8_t pendingStopCount_ = 0;
 

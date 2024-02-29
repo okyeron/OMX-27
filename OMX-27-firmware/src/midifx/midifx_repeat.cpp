@@ -63,7 +63,15 @@ namespace midifx
 		encoderSelect_ = true;
 	}
 
-	int MidiFXRepeat::getFXType()
+    MidiFXRepeat::~MidiFXRepeat()
+    {
+        if (seqRunning_)
+        {
+            seqConfig.numOfActiveArps--;
+        }
+    }
+
+    int MidiFXRepeat::getFXType()
 	{
 		return MIDIFX_REPEAT;
 	}

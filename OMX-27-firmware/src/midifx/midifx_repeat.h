@@ -9,7 +9,7 @@ namespace midifx
 	{
 	public:
 		MidiFXRepeat();
-		~MidiFXRepeat() {}
+		~MidiFXRepeat();
 
 		int getFXType() override;
 		const char *getName() override;

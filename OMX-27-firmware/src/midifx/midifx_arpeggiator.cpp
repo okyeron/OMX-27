@@ -9,8 +9,6 @@
 
 namespace midifx
 {
-    Micros nextArpTriggerTime_ = 0;
-
     enum ArpPage
     {
         ARPPAGE_1,
@@ -159,6 +157,15 @@ namespace midifx
         {
             trackingNoteGroups[i].prevNoteNumber = 255;
             trackingNoteGroupsPassthrough[i].prevNoteNumber = 255;
+        }
+    }
+
+    MidiFXArpeggiator::~MidiFXArpeggiator()
+    {
+        if (arpRunning_)
+        {
+            // Remove from this
+            seqConfig.numOfActiveArps--;
         }
     }
 
@@ -641,7 +648,7 @@ namespace midifx
 
     void MidiFXArpeggiator::doPendingStart()
     {
-        Serial.println("doPendingStart()");
+        // Serial.println("doPendingStart()");
 
         // stepMicroDelta_ = (clockConfig.step_micros * 16) * multiplier_;
         multiplierCalculated_ = false;
@@ -695,7 +702,7 @@ namespace midifx
 
         seqConfig.numOfActiveArps++;
 
-        Serial.println("numOfActiveArps: " + String(seqConfig.numOfActiveArps));
+        // Serial.println("numOfActiveArps: " + String(seqConfig.numOfActiveArps));
     }
 
     void MidiFXArpeggiator::stopArp()
@@ -714,7 +721,7 @@ namespace midifx
 
     void MidiFXArpeggiator::doPendingStop()
     {
-        Serial.println("doPendingStop");
+        // Serial.println("doPendingStop");
         if (arpRunning_)
         {
             // Stop clocks if last arp
@@ -729,7 +736,7 @@ namespace midifx
         pendingStart_ = false;
         pendingStop_ = false;
 
-        Serial.println("numOfActiveArps: " + String(seqConfig.numOfActiveArps));
+        // Serial.println("numOfActiveArps: " + String(seqConfig.numOfActiveArps));
     }
 
     bool MidiFXArpeggiator::insertMidiNoteQueue(MidiNoteGroup note)
@@ -1216,7 +1223,7 @@ namespace midifx
 
         uint8_t quantIndex = quantizedRateIndex_ < 0 ? clockConfig.globalQuantizeStepIndex : quantizedRateIndex_; // Use global or local quantize rate?
 
-        bool isQuantizedStep = seqConfig.currentClockTick % (96 * 4 / kArpRates[quantIndex]) == 0;
+        bool isQuantizedStep = seqConfig.currentClockTick % ((96 * 4) / kArpRates[quantIndex]) == 0;
 
         // Move pending notes to active
         if(isQuantizedStep)
