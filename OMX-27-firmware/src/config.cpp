@@ -9,6 +9,7 @@ const uint8_t EEPROM_VERSION = 34;
 // v32 - adds mfx chord saves
 // v33 - adds mfx selector saves
 // v34 - adds mfx repeat saves
+// - added global quant rate to header, keeping version, but value will be random
 
 // DEFINE CC NUMBERS FOR POTS // CCS mapped to Organelle Defaults
 const int CC1 = 21;

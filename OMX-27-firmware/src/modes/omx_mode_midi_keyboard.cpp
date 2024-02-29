@@ -416,6 +416,13 @@ void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
 			scaleConfig.group16 = constrain(scaleConfig.group16 + amt, 0, 1);
 		}
 	}
+	else if(selPage == MIPAGE_CFG)
+	{
+		if (selParam == 3)
+		{
+			clockConfig.globalQuantizeStepIndex = constrain(clockConfig.globalQuantizeStepIndex + amt, 0, kNumArpRates - 1);
+		}
+	}
 
 	omxDisp.setDirty();
 }
@@ -1181,6 +1188,10 @@ void OmxModeMidiKeyboard::onDisplayUpdate()
 					omxDisp.legends[1] = "CLR";
 					omxDisp.legendText[0] = "CFG";
 					omxDisp.legendText[1] = "STOR";
+
+					omxDisp.legends[2] = "QUANT";
+					omxDisp.useLegendString[2] = true;
+                	omxDisp.legendString[2] = "1/" + String(kArpRates[clockConfig.globalQuantizeStepIndex]);
 				}
 
 				omxDisp.dispGenericMode2(params.getNumPages(), params.getSelPage(), params.getSelParam(), encoderSelect && !midiSettings.midiAUX);

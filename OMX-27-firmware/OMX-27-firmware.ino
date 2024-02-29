@@ -368,7 +368,9 @@ void saveHeader()
 
 	storage->write(EEPROM_HEADER_ADDRESS + 35, midiSettings.defaultVelocity);
 
-	// 36 bytes
+	storage->write(EEPROM_HEADER_ADDRESS + 36, clockConfig.globalQuantizeStepIndex);
+
+	// 37 bytes
 }
 
 // returns true if the header contained initialized data
@@ -435,6 +437,8 @@ bool loadHeader(void)
 	globalScale.calculateScale(scaleConfig.scaleRoot, scaleConfig.scalePattern);
 
 	midiSettings.defaultVelocity = storage->read(EEPROM_HEADER_ADDRESS + 35);
+
+	clockConfig.globalQuantizeStepIndex = constrain(storage->read(EEPROM_HEADER_ADDRESS + 36), 0, kNumArpRates - 1);
 
 	return true;
 }

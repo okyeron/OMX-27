@@ -50,6 +50,9 @@ namespace midifx
         rateStartHz_ = 100;
         rateEndHz_ = 100;
 
+        fadeVel_ = false;
+        fadeRate_ = false;
+
         quantizeSync_ = true;
 
         recalcVariables();
@@ -431,6 +434,8 @@ namespace midifx
             activeNoteQueue.shrink_to_fit();
         }
 
+        
+
         // if(!noteAdded)
         // {
         //     Serial.println("Could not add note");
@@ -439,6 +444,14 @@ namespace midifx
         // Room up to 16 in playedNoteQueue, can add to pending or active
         if (noteAdded)
         {
+            // In these modes the note will be on
+            // Remove the note and readd to avoid weird overlapping repeats
+            if (mode_ == MFXREPEATMODE_1SHOT || mode_ == MFXREPEATMODE_HOLD)
+            {
+                removeFromQueue(&activeNoteQueue, note);
+                removeFromQueue(&pendingNoteQueue, note);
+            }
+
             if (activeNoteQueue.size() + pendingNoteQueue.size() < queueSize)
             {
                 // Add to pending queue, note will be added to active queue on clock
