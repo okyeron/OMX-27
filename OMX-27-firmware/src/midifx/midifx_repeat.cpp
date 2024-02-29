@@ -40,7 +40,7 @@ namespace midifx
         mode_ = MFXREPEATMODE_ON;
         numOfRepeats_ = 3;
         rateIndex_ = 6;
-        quantizedRateIndex_ = 6;
+        quantizedRateIndex_ = -1; // Use global
         rateHz_ = 100;
         gate_ = 90;
         velStart_ = 50;
@@ -53,7 +53,7 @@ namespace midifx
         fadeVel_ = false;
         fadeRate_ = false;
 
-        quantizeSync_ = true;
+        quantizeSync_ = quantizedRateIndex_ >= -1; // -2 for off
 
         recalcVariables();
         resync();

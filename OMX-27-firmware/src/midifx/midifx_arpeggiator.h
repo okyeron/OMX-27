@@ -175,6 +175,7 @@ namespace midifx
 			uint8_t midiChannel : 4; // 0-15, Add 1 when using
 			uint8_t swing : 7;		 // max 100
 			uint8_t rateIndex : 4;	 // max 15
+        	int8_t quantizedRateIndex_ : 5; // max 15 or -1 for hz
 			uint8_t octaveRange : 4; // max 7, 0 = 1 octave
 			int8_t octDistance_ : 6; // -24 to 24
 			uint8_t gate;		 // 0 - 200
@@ -208,6 +209,8 @@ namespace midifx
 
 		uint8_t rateIndex_ : 4; // max 15
 
+        int8_t quantizedRateIndex_ : 5; // max 15 or -1 for hz
+
 		uint8_t octaveRange_ : 4; // max 7, 0 = 1 octave
 		int8_t octDistance_ : 6;  // -24 to 24
 
@@ -221,12 +224,16 @@ namespace midifx
 
 		uint8_t randPrevNote_;
 
+        bool quantizeSync_ = true;
+
 		bool pendingStart_ = false;
 		bool pendingStop_ = false;
-		Micros pendingStartTime_;
-		uint8_t pendingStopCount_ = 0;
+		// Micros pendingStartTime_;
+		// uint8_t pendingStopCount_ = 0;
 
 		bool arpRunning_ = false;
+
+		bool multiplierCalculated_ = false;
 
 		static const int queueSize = 8;
 
@@ -237,7 +244,7 @@ namespace midifx
 
 		std::vector<ArpNote> prevSortedNoteQueue;
 
-		std::vector<PendingArpNote> pendingNotes; // Notes that are used in arp
+		std::vector<PendingArpNote> fixedLengthNotes; // Notes that are used in arp
 
 		uint8_t modPatternLength_ : 4; // Max 15
 		ArpMod modPattern_[16];
@@ -268,9 +275,9 @@ namespace midifx
 		int16_t lastPlayedNoteNumber_;
 		int8_t lastPlayedMod_;
 
-		Micros nextStepTimeP_ = 32;
-		Micros lastStepTimeP_ = 32;
-		uint32_t stepMicroDelta_ = 0;
+		// Micros nextStepTimeP_ = 32;
+		// Micros lastStepTimeP_ = 32;
+		// uint32_t stepMicroDelta_ = 0;
 
 		float multiplier_ = 1;
 
@@ -317,6 +324,8 @@ namespace midifx
 		void stopArp();
 		void doPendingStop();
 		void resetArpSeq();
+
+		void updateMultiplier();
 
 		void arpNoteTrigger();
 		int16_t applyModPattern(int16_t note, uint8_t channel);

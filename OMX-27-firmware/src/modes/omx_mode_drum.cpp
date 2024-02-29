@@ -349,6 +349,13 @@ void OmxModeDrum::onEncoderChanged(Encoder::Update enc)
 			scaleConfig.group16 = constrain(scaleConfig.group16 + amt, 0, 1);
 		}
 	}
+	else if(selPage == DRUMPAGE_CFG)
+	{
+		if (selParam == 3)
+		{
+			clockConfig.globalQuantizeStepIndex = constrain(clockConfig.globalQuantizeStepIndex + amt, 0, kNumArpRates - 1);
+		}
+	}
 
 	omxDisp.setDirty();
 }
@@ -1012,6 +1019,11 @@ void OmxModeDrum::onDisplayUpdate()
 					omxDisp.clearLegends();
 					omxDisp.legends[0] = "CC";
 					omxDisp.legendText[0] = "CFG";
+
+
+					omxDisp.legends[2] = "QUANT";
+					omxDisp.useLegendString[2] = true;
+                	omxDisp.legendString[2] = "1/" + String(kArpRates[clockConfig.globalQuantizeStepIndex]);
 				}
 
 				omxDisp.dispGenericMode2(params.getNumPages(), params.getSelPage(), params.getSelParam(), getEncoderSelect());
