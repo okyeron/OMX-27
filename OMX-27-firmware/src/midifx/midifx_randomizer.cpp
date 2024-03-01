@@ -109,7 +109,7 @@ namespace midifx
 
         if(midiChan_ != 0)
         {
-            note.channel = constrain(random(note.channel, note.channel + midiChan_), 1, 16);
+            // note.channel = constrain(random(note.channel, note.channel + midiChan_), 1, 16);
         }
 
         if(delayMin_ > 0 || delayMax_ > 0)
@@ -275,7 +275,7 @@ namespace midifx
                 lengthPerc_ = constrain(lengthPerc_ + amtFast, 0, 100);
                 break;
             case 3:
-                midiChan_ = constrain(midiChan_ + amtSlow, 0, 16);
+                // midiChan_ = constrain(midiChan_ + amtSlow, 0, 16);
                 break;
             }
         }
@@ -339,7 +339,7 @@ namespace midifx
             omxDisp.setLegend(0, "VEL-", velMinus_);
             omxDisp.setLegend(1, "VEL+", velPlus_);
             omxDisp.setLegend(2, "LEN%", lengthPerc_);
-            omxDisp.setLegend(3, "CHAN", midiChan_ == 0, midiChan_);
+            // omxDisp.setLegend(3, "CHAN", midiChan_ == 0, midiChan_);
         }
         case RZPAGE_3:
         {
