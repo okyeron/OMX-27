@@ -341,14 +341,13 @@ namespace midifx
             omxDisp.setLegend(2, "LEN%", lengthPerc_);
             // omxDisp.setLegend(3, "CHAN", midiChan_ == 0, midiChan_);
         }
+        break;
         case RZPAGE_3:
         {
             omxDisp.setLegend(0, "DEL-", delayMin_ == 0, "1/" + String(getDelayLength(delayMin_)));
             omxDisp.setLegend(1, "DEL+", delayMax_ == 0, "1/" + String(getDelayLength(delayMax_)));
         }
         break;
-        default:
-            break;
         }
 
         if (genDisplay)
