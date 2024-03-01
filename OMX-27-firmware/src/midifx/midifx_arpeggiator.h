@@ -1,6 +1,7 @@
 #pragma once
 
 #include "midifx_interface.h"
+#include "midifx_notemaster.h"
 
 namespace midifx
 {
@@ -139,10 +140,10 @@ namespace midifx
 				this->channel = channel;
 			}
 
-			ArpNote(MidiNoteGroup noteGroup)
+			ArpNote(MidiNoteGroup *noteGroup)
 			{
-				noteNumber = noteGroup.noteNumber;
-				channel = noteGroup.channel - 1;
+				noteNumber = noteGroup->noteNumber;
+				channel = noteGroup->channel - 1;
 				// velocity = noteGroup.velocity;
 				// sendMidi = noteGroup.sendMidi;
 				// sendCV = noteGroup.sendCV;
@@ -301,11 +302,23 @@ namespace midifx
 		bool resetNextTrigger_;
 		bool sortOrderChanged_;
 
-		MidiNoteGroup trackingNoteGroups[8];
-		MidiNoteGroup trackingNoteGroupsPassthrough[8];
+		MidiFXNoteMaster noteMaster;
 
-		bool insertMidiNoteQueue(MidiNoteGroup note);
-		bool removeMidiNoteQueue(MidiNoteGroup note);
+		static void processNoteForwarder(void *context, MidiNoteGroup *note)
+        {
+            static_cast<MidiFXArpeggiator *>(context)->processNoteInput(note);
+        }
+
+        static void sendNoteOutForwarder(void *context, MidiNoteGroup *note)
+        {
+            static_cast<MidiFXArpeggiator *>(context)->sendNoteOut(*note);
+        }
+
+		// MidiNoteGroup trackingNoteGroups[8];
+		// MidiNoteGroup trackingNoteGroupsPassthrough[8];
+
+		bool insertMidiNoteQueue(MidiNoteGroup *note);
+		bool removeMidiNoteQueue(MidiNoteGroup *note);
 
 		void findIndexOfNextNotePos();
 
@@ -314,12 +327,12 @@ namespace midifx
 
 		bool hasMidiNotes();
 
-		void trackNoteInput(MidiNoteGroup note);
-		void trackNoteInputPassthrough(MidiNoteGroup note, bool ignoreNoteOns);
-		void processNoteInput(MidiNoteGroup note);
+		// void trackNoteInput(MidiNoteGroup note);
+		// void trackNoteInputPassthrough(MidiNoteGroup note, bool ignoreNoteOns);
+		void processNoteInput(MidiNoteGroup *note);
 
-		void arpNoteOn(MidiNoteGroup note);
-		void arpNoteOff(MidiNoteGroup note);
+		void arpNoteOn(MidiNoteGroup *note);
+		void arpNoteOff(MidiNoteGroup *note);
 
 		void startArp();
 		void doPendingStart();

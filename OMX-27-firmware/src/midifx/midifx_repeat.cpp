@@ -332,7 +332,7 @@ namespace midifx
                 // Insert the note into the queue, calculate when it should turn off
                 // And send it through the repeat on
                 FixedLengthNote fixedNote;
-                fixedNote.noteCache.setFromNoteGroup(*note);
+                fixedNote.noteCache.setFromNoteGroup(note);
                 fixedNote.offTime = seqConfig.currentFrameMicros + (note->stepLength * clockConfig.step_micros);
                 fixedLengthNotes.push_back(fixedNote);
                 repeatNoteOn(note);

@@ -20,19 +20,19 @@ namespace midifx
 		{
 		}
 
-		MidiNoteGroupCache(MidiNoteGroup noteGroup)
+		MidiNoteGroupCache(MidiNoteGroup *noteGroup)
 		{
 			setFromNoteGroup(noteGroup);
 		}
 
-		void setFromNoteGroup(MidiNoteGroup noteGroup)
+		void setFromNoteGroup(MidiNoteGroup *noteGroup)
 		{
-			prevNoteNumber = noteGroup.prevNoteNumber;
-			channel = noteGroup.channel;
-			noteNumber = noteGroup.noteNumber;
-			sendMidi = noteGroup.sendMidi;
-			sendCV = noteGroup.sendCV;
-			unknownLength = noteGroup.unknownLength;
+			prevNoteNumber = noteGroup->prevNoteNumber;
+			channel = noteGroup->channel;
+			noteNumber = noteGroup->noteNumber;
+			sendMidi = noteGroup->sendMidi;
+			sendCV = noteGroup->sendCV;
+			unknownLength = noteGroup->unknownLength;
 		}
 
 		MidiNoteGroup toMidiNoteGroup()

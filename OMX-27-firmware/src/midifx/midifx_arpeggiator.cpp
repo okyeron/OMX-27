@@ -153,11 +153,15 @@ namespace midifx
             // }
         }
 
-        for (uint8_t i = 0; i < 8; i++)
-        {
-            trackingNoteGroups[i].prevNoteNumber = 255;
-            trackingNoteGroupsPassthrough[i].prevNoteNumber = 255;
-        }
+        noteMaster.setContext(this);
+        noteMaster.setProcessNoteFptr(&processNoteForwarder);
+        noteMaster.setSendNoteOutFptr(&sendNoteOutForwarder);
+
+        // for (uint8_t i = 0; i < 8; i++)
+        // {
+        //     trackingNoteGroups[i].prevNoteNumber = 255;
+        //     trackingNoteGroupsPassthrough[i].prevNoteNumber = 255;
+        // }
     }
 
     MidiFXArpeggiator::~MidiFXArpeggiator()
@@ -397,151 +401,154 @@ namespace midifx
 
         if (chancePerc_ != 100 && (chancePerc_ == 0 || random(100) > chancePerc_))
         {
-            // sendNoteOut(note);
-            if(note.unknownLength || note.noteOff)
-            {
-                trackNoteInputPassthrough(note, false);
-            }
-            else
-            {
-                sendNoteOut(note);
-            }
+            noteMaster.trackNoteInputPassthrough(&note);
+            // // sendNoteOut(note);
+            // if(note.unknownLength || note.noteOff)
+            // {
+            //     trackNoteInputPassthrough(note, false);
+            // }
+            // else
+            // {
+            //     sendNoteOut(note);
+            // }
             
             return;
         }
 
-        if (note.unknownLength || note.noteOff)
-        {
-            // only notes of unknown lengths need to be tracked
-            // notes with fixed lengths will turn off automatically.
-            trackNoteInputPassthrough(note, true);
-            trackNoteInput(note);
-        }
-        else
-        {
-            processNoteInput(note);
-        }
+        noteMaster.trackNoteInput(&note);
+
+        // if (note.unknownLength || note.noteOff)
+        // {
+        //     // only notes of unknown lengths need to be tracked
+        //     // notes with fixed lengths will turn off automatically.
+        //     trackNoteInputPassthrough(note, true);
+        //     trackNoteInput(note);
+        // }
+        // else
+        // {
+        //     processNoteInput(note);
+        // }
     }
 
     // If chance is less than 100% and passing through, notes need to be tracked
     // and if the same note comes in without passthrough for a noteoff event, it needs to 
     // be passed through to send noteoff to prevent stuck notes
-    void MidiFXArpeggiator::trackNoteInputPassthrough(MidiNoteGroup note, bool ignoreNoteOns)
+    // void MidiFXArpeggiator::trackNoteInputPassthrough(MidiNoteGroup note, bool ignoreNoteOns)
+    // {
+    //     // Note on, not ignored
+    //     if (!ignoreNoteOns && !note.noteOff)
+    //     {
+    //         // Search for an empty slot in trackingNoteGroupsPassthrough
+    //         // If no slots are available/more than 8 notes/ note gets killed. 
+    //         for (uint8_t i = 0; i < 8; i++)
+    //         {
+    //             // Found empty slot
+    //             if (trackingNoteGroupsPassthrough[i].prevNoteNumber == 255)
+    //             {
+    //                 trackingNoteGroupsPassthrough[i].channel = note.channel;
+    //                 trackingNoteGroupsPassthrough[i].prevNoteNumber = note.prevNoteNumber;
+    //                 trackingNoteGroupsPassthrough[i].noteNumber = note.noteNumber;
+
+    //                 // Send it forward through chain
+    //                 sendNoteOut(note);
+    //                 return;
+    //             }
+    //         }
+    //     }
+
+    //     // Note off
+    //     if (note.noteOff)
+    //     {
+    //         // bool noteFound = false;
+
+    //         // Search to see if this note is in trackingNoteGroupsPassthrough
+    //         // Meaning it was previously passed through
+    //         // If it is found, send it through chain
+    //         // PrevNoteNumber should be the origin note number before being modified by MidiFX
+    //         for (uint8_t i = 0; i < 8; i++)
+    //         {
+    //             if (trackingNoteGroupsPassthrough[i].prevNoteNumber != 255)
+    //             {
+    //                 if (trackingNoteGroupsPassthrough[i].channel == note.channel && trackingNoteGroupsPassthrough[i].prevNoteNumber == note.prevNoteNumber)
+    //                 {
+    //                     note.noteNumber = trackingNoteGroupsPassthrough[i].noteNumber;
+    //                     // processNoteInput(note);
+    //                     sendNoteOut(note);
+    //                     trackingNoteGroupsPassthrough[i].prevNoteNumber = 255; // mark empty
+    //                     // noteFound = true;
+    //                 }
+    //             }
+    //         }
+
+    //         // Should be false if note getting sent to arp
+    //         // Avoid double trackNoteInput call
+    //         if(!ignoreNoteOns)
+    //         {
+    //             trackNoteInput(note);
+    //         }
+
+    //         // Note not previously passed through and is noteoff, now send to arp to turn off arp notes
+    //         // if(!noteFound)
+    //         // {
+    //         //     trackNoteInput(note);
+    //         // }
+    //     }
+    // }
+
+    // void MidiFXArpeggiator::trackNoteInput(MidiNoteGroup note)
+    // {
+    //     // Same implementation with more comments in submode_midifx
+    //     // Keeps track of previous note ons and and adjusts note number
+    //     // for note offs using the prevNoteNumber parameter.
+    //     // Why is this necessary?
+    //     // If the note is modified by midifx like randomize before the arp
+    //     // Then the arp can end up having notes stuck on
+    //     // This ensures that notes don't get stuck on.
+    //     if (note.noteOff)
+    //     {
+    //         bool noteFound = false;
+
+    //         for (uint8_t i = 0; i < 8; i++)
+    //         {
+    //             if (trackingNoteGroups[i].prevNoteNumber != 255)
+    //             {
+    //                 if (trackingNoteGroups[i].channel == note.channel && trackingNoteGroups[i].prevNoteNumber == note.prevNoteNumber)
+    //                 {
+    //                     note.noteNumber = trackingNoteGroups[i].noteNumber;
+    //                     processNoteInput(note);
+    //                     trackingNoteGroups[i].prevNoteNumber = 255; // mark empty
+    //                     noteFound = true;
+    //                 }
+    //             }
+    //         }
+
+    //         if (!noteFound)
+    //         {
+    //             processNoteInput(note);
+    //         }
+    //     }
+    //     else if (!note.noteOff)
+    //     {
+    //         for (uint8_t i = 0; i < 8; i++)
+    //         {
+    //             if (trackingNoteGroups[i].prevNoteNumber == 255)
+    //             {
+    //                 trackingNoteGroups[i].channel = note.channel;
+    //                 trackingNoteGroups[i].prevNoteNumber = note.prevNoteNumber;
+    //                 trackingNoteGroups[i].noteNumber = note.noteNumber;
+
+    //                 processNoteInput(note);
+    //                 return;
+    //             }
+    //         }
+    //     }
+    // }
+
+    void MidiFXArpeggiator::processNoteInput(MidiNoteGroup *note)
     {
-        // Note on, not ignored
-        if (!ignoreNoteOns && !note.noteOff)
+        if (note->unknownLength)
         {
-            // Search for an empty slot in trackingNoteGroupsPassthrough
-            // If no slots are available/more than 8 notes/ note gets killed. 
-            for (uint8_t i = 0; i < 8; i++)
-            {
-                // Found empty slot
-                if (trackingNoteGroupsPassthrough[i].prevNoteNumber == 255)
-                {
-                    trackingNoteGroupsPassthrough[i].channel = note.channel;
-                    trackingNoteGroupsPassthrough[i].prevNoteNumber = note.prevNoteNumber;
-                    trackingNoteGroupsPassthrough[i].noteNumber = note.noteNumber;
-
-                    // Send it forward through chain
-                    sendNoteOut(note);
-                    return;
-                }
-            }
-        }
-
-        // Note off
-        if (note.noteOff)
-        {
-            // bool noteFound = false;
-
-            // Search to see if this note is in trackingNoteGroupsPassthrough
-            // Meaning it was previously passed through
-            // If it is found, send it through chain
-            // PrevNoteNumber should be the origin note number before being modified by MidiFX
-            for (uint8_t i = 0; i < 8; i++)
-            {
-                if (trackingNoteGroupsPassthrough[i].prevNoteNumber != 255)
-                {
-                    if (trackingNoteGroupsPassthrough[i].channel == note.channel && trackingNoteGroupsPassthrough[i].prevNoteNumber == note.prevNoteNumber)
-                    {
-                        note.noteNumber = trackingNoteGroupsPassthrough[i].noteNumber;
-                        // processNoteInput(note);
-                        sendNoteOut(note);
-                        trackingNoteGroupsPassthrough[i].prevNoteNumber = 255; // mark empty
-                        // noteFound = true;
-                    }
-                }
-            }
-
-            // Should be false if note getting sent to arp
-            // Avoid double trackNoteInput call
-            if(!ignoreNoteOns)
-            {
-                trackNoteInput(note);
-            }
-
-            // Note not previously passed through and is noteoff, now send to arp to turn off arp notes
-            // if(!noteFound)
-            // {
-            //     trackNoteInput(note);
-            // }
-        }
-    }
-
-    void MidiFXArpeggiator::trackNoteInput(MidiNoteGroup note)
-    {
-        // Same implementation with more comments in submode_midifx
-        // Keeps track of previous note ons and and adjusts note number
-        // for note offs using the prevNoteNumber parameter.
-        // Why is this necessary?
-        // If the note is modified by midifx like randomize before the arp
-        // Then the arp can end up having notes stuck on
-        // This ensures that notes don't get stuck on.
-        if (note.noteOff)
-        {
-            bool noteFound = false;
-
-            for (uint8_t i = 0; i < 8; i++)
-            {
-                if (trackingNoteGroups[i].prevNoteNumber != 255)
-                {
-                    if (trackingNoteGroups[i].channel == note.channel && trackingNoteGroups[i].prevNoteNumber == note.prevNoteNumber)
-                    {
-                        note.noteNumber = trackingNoteGroups[i].noteNumber;
-                        processNoteInput(note);
-                        trackingNoteGroups[i].prevNoteNumber = 255; // mark empty
-                        noteFound = true;
-                    }
-                }
-            }
-
-            if (!noteFound)
-            {
-                processNoteInput(note);
-            }
-        }
-        else if (!note.noteOff)
-        {
-            for (uint8_t i = 0; i < 8; i++)
-            {
-                if (trackingNoteGroups[i].prevNoteNumber == 255)
-                {
-                    trackingNoteGroups[i].channel = note.channel;
-                    trackingNoteGroups[i].prevNoteNumber = note.prevNoteNumber;
-                    trackingNoteGroups[i].noteNumber = note.noteNumber;
-
-                    processNoteInput(note);
-                    return;
-                }
-            }
-        }
-    }
-
-    void MidiFXArpeggiator::processNoteInput(MidiNoteGroup note)
-    {
-        if (note.unknownLength)
-        {
-            if (note.noteOff)
+            if (note->noteOff)
             {
                 arpNoteOff(note);
             }
@@ -561,10 +568,10 @@ namespace midifx
                     PendingArpNote p = fixedLengthNotes[i];
 
                     // Note already exists
-                    if (p.noteCache.noteNumber == note.noteNumber && p.noteCache.channel == note.channel)
+                    if (p.noteCache.noteNumber == note->noteNumber && p.noteCache.channel == note->channel)
                     {
                         // Update note off time
-                        fixedLengthNotes[i].offTime = seqConfig.currentFrameMicros + (note.stepLength * clockConfig.step_micros);
+                        fixedLengthNotes[i].offTime = seqConfig.currentFrameMicros + (note->stepLength * clockConfig.step_micros);
                         canInsert = false;
                         break;
                     }
@@ -580,23 +587,24 @@ namespace midifx
                 // Serial.println("Inserting pending note");
                 PendingArpNote fixedLengthNote;
                 fixedLengthNote.noteCache.setFromNoteGroup(note);
-                fixedLengthNote.offTime = seqConfig.currentFrameMicros + (note.stepLength * clockConfig.step_micros);
+                fixedLengthNote.offTime = seqConfig.currentFrameMicros + (note->stepLength * clockConfig.step_micros);
                 fixedLengthNotes.push_back(fixedLengthNote);
                 arpNoteOn(note);
             }
             else
             {
                 // Remove from tracking notes
-                for (uint8_t i = 0; i < 8; i++)
-                {
-                    if (trackingNoteGroups[i].prevNoteNumber != 255)
-                    {
-                        if (trackingNoteGroups[i].channel == note.channel && trackingNoteGroups[i].prevNoteNumber == note.prevNoteNumber)
-                        {
-                            trackingNoteGroups[i].prevNoteNumber = 255; // mark empty
-                        }
-                    }
-                }
+                noteMaster.removeFromTracking(note);
+                // for (uint8_t i = 0; i < 8; i++)
+                // {
+                //     if (trackingNoteGroups[i].prevNoteNumber != 255)
+                //     {
+                //         if (trackingNoteGroups[i].channel == note->channel && trackingNoteGroups[i].prevNoteNumber == note->prevNoteNumber)
+                //         {
+                //             trackingNoteGroups[i].prevNoteNumber = 255; // mark empty
+                //         }
+                //     }
+                // }
                 // Kill note
                 // sendNoteOut(note);
             }
@@ -739,7 +747,7 @@ namespace midifx
         // Serial.println("numOfActiveArps: " + String(seqConfig.numOfActiveArps));
     }
 
-    bool MidiFXArpeggiator::insertMidiNoteQueue(MidiNoteGroup note)
+    bool MidiFXArpeggiator::insertMidiNoteQueue(MidiNoteGroup *note)
     {
         // Serial.println("playedNoteQueue capacity: " + String(playedNoteQueue.capacity()));
         if (playedNoteQueue.capacity() > queueSize)
@@ -781,14 +789,14 @@ namespace midifx
         return noteAdded;
     }
 
-    bool MidiFXArpeggiator::removeMidiNoteQueue(MidiNoteGroup note)
+    bool MidiFXArpeggiator::removeMidiNoteQueue(MidiNoteGroup *note)
     {
         bool foundNoteToRemove = false;
         auto it = playedNoteQueue.begin();
         while (it != playedNoteQueue.end())
         {
             // remove matching note numbers
-            if (it->noteNumber == note.noteNumber && it->channel == note.channel - 1)
+            if (it->noteNumber == note->noteNumber && it->channel == note->channel - 1)
             {
                 // `erase()` invalidates the iterator, use returned iterator
                 it = playedNoteQueue.erase(it);
@@ -1022,7 +1030,7 @@ namespace midifx
     //     Serial.print("\n\n");
     // }
 
-    void MidiFXArpeggiator::arpNoteOn(MidiNoteGroup note)
+    void MidiFXArpeggiator::arpNoteOn(MidiNoteGroup *note)
     {
         // if(arpMode_ != ARPMODE_ONESHOT && !arpRunning_ )
         // {
@@ -1044,10 +1052,10 @@ namespace midifx
 
         if (hasMidiNotes() == false)
         {
-            velocity_ = note.velocity;
-            sendMidi_ = note.sendMidi;
-            sendCV_ = note.sendCV;
-            midiChannel_ = note.channel - 1; // note.channel is 1-16, sub 1 for 0-15
+            velocity_ = note->velocity;
+            sendMidi_ = note->sendMidi;
+            sendCV_ = note->sendCV;
+            midiChannel_ = note->channel - 1; // note.channel is 1-16, sub 1 for 0-15
 
             // if(arpMode_ == ARPMODE_ON || arpMode_ == ARPMODE_ONCE)
             // {
@@ -1111,7 +1119,7 @@ namespace midifx
         }
     }
 
-    void MidiFXArpeggiator::arpNoteOff(MidiNoteGroup note)
+    void MidiFXArpeggiator::arpNoteOff(MidiNoteGroup *note)
     {
         removeMidiNoteQueue(note);
 
@@ -1205,10 +1213,12 @@ namespace midifx
 
         resetArpSeq();
 
-        for (uint8_t i = 0; i < 8; i++)
-        {
-            trackingNoteGroups[i].prevNoteNumber = 255;
-        }
+        noteMaster.clear();
+
+        // for (uint8_t i = 0; i < 8; i++)
+        // {
+        //     trackingNoteGroups[i].prevNoteNumber = 255;
+        // }
     }
 
     void MidiFXArpeggiator::onClockTick()
@@ -1264,8 +1274,9 @@ namespace midifx
             // remove matching note numbers
             if (it->offTime <= now)
             {
+                auto nt = it->noteCache.toMidiNoteGroup();
                 // Serial.println("Removing pending note");
-                arpNoteOff(it->noteCache.toMidiNoteGroup());
+                arpNoteOff(&nt);
                 // `erase()` invalidates the iterator, use returned iterator
                 it = fixedLengthNotes.erase(it);
             }

@@ -5,6 +5,7 @@ namespace midifx
 {
     MidiFXNoteMaster::MidiFXNoteMaster()
     {
+        clear();
     }
 
     MidiFXNoteMaster::~MidiFXNoteMaster()

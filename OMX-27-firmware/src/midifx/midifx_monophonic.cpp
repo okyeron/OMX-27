@@ -98,7 +98,7 @@ namespace midifx
 		// }
 
 		// Update previous note history
-		prevNoteOn[midiChannel].setFromNoteGroup(note);
+		prevNoteOn[midiChannel].setFromNoteGroup(&note);
 
 		sendNoteOut(note);
 
