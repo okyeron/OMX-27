@@ -21,6 +21,16 @@ void OmxUtil::sendPots(int val, int channel)
 	potSettings.potValues[val] = potSettings.potVal;
 }
 
+float OmxUtil::randFloat()
+{
+	return static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+}
+
+float OmxUtil::lerp(float a, float b, float t)
+{
+    return a + t * (b - a);
+}
+
 void OmxUtil::advanceClock(OmxModeInterface *activeOmxMode, Micros advance)
 {
 	// advance is delta in Micros from previous loop update to this loop update. 

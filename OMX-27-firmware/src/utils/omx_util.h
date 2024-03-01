@@ -34,6 +34,12 @@ public:
 
 	void sendPots(int val, int channel);
 
+	// random float between 0.0 to 1.0, inclusive
+	static float randFloat();
+
+	// Assumes b is greater than a
+	static float lerp(float a, float b, float t);
+
 	// #### Clocks, might want to put in own class
 	void advanceClock(OmxModeInterface *activeOmxMode, Micros advance);
 	void advanceSteps(Micros advance);

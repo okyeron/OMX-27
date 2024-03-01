@@ -374,6 +374,7 @@ extern const int PPQ;
 extern const char *mfxOffMsg;
 extern const char *mfxArpEditMsg;
 extern const char *exitMsg;
+extern const char *paramOffMsg;
 
 extern const char *modes[];
 extern const char *macromodes[];

@@ -1,18 +1,36 @@
 #include "midifx_randomizer.h"
 #include "../hardware/omx_disp.h"
+#include "../utils/omx_util.h"
 
 namespace midifx
 {
     enum RandPage {
+        RZPAGE_CHANCE,
         RZPAGE_1,
-        RZPAGE_2
+        RZPAGE_2,
+        RZPAGE_3
     };
 
     MidiFXRandomizer::MidiFXRandomizer()
     {
-        params_.addPage(4);
-        params_.addPage(4);
+        params_.addPage(1); // RZPAGE_CHANCE
+        params_.addPage(4); // RZPAGE_1
+        params_.addPage(4); // RZPAGE_2
+        params_.addPage(4); // RZPAGE_3
         encoderSelect_ = true;
+
+        noteMinus_ = 0;
+		notePlus_ = 0;
+		octMinus_ = 0;
+		octPlus_ = 0;
+		velMinus_ = 0;
+		velPlus_ = 0;
+		lengthPerc_ = 0;
+		chancePerc_ = 100;
+
+        midiChan_ = 0;
+        delayMin_ = 0;
+        delayMax_ = 0;
     }
 
     int MidiFXRandomizer::getFXType()
@@ -42,6 +60,9 @@ namespace midifx
         clone->velPlus_ = velPlus_;
         clone->lengthPerc_ = lengthPerc_;
         clone->chancePerc_ = chancePerc_;
+        clone->midiChan_ = midiChan_;
+        clone->delayMin_ = delayMin_;
+        clone->delayMax_ = delayMax_;
 
         return clone;
     }
@@ -54,10 +75,15 @@ namespace midifx
     {
     }
 
+    
+
+    
+
     void MidiFXRandomizer::noteInput(MidiNoteGroup note)
     {
         if(note.noteOff)
         {
+            removeFromDelayQueue(&note);
             processNoteOff(note);
             return;
         }
@@ -81,10 +107,87 @@ namespace midifx
         note.velocity = getRand(note.velocity, velMinus_, velPlus_);
         note.stepLength = note.stepLength * map(random(lengthPerc_), 0, 100, 1, 16);
 
+        if(midiChan_ != 0)
+        {
+            note.channel = constrain(random(note.channel, note.channel + midiChan_), 1, 16);
+        }
 
-        processNoteOn(origNote, note);
+        if(delayMin_ > 0 || delayMax_ > 0)
+        {
+		    processDelayedNote(&note);
+        }
+        else
+        {
+            processNoteOn(origNote, note);
+            sendNoteOut(note);
+        }
+    }
 
-        sendNoteOut(note);
+    void MidiFXRandomizer::removeFromDelayQueue(MidiNoteGroup *note)
+    {
+        if (delayedNoteQueue.size() > 0)
+        {
+            auto it = delayedNoteQueue.begin();
+            while (it != delayedNoteQueue.end())
+            {
+                // Serial.println("activeNoteQueue: " + String(it->noteNumber) + " Chan: " + String(it->channel));
+
+                // TODO track note off midichannels and compare with random one
+                // Might cause problems
+                if (it->noteNumber == note->noteNumber)
+                {
+                    // `erase()` invalidates the iterator, use returned iterator
+                    it = delayedNoteQueue.erase(it);
+                    // foundNoteToRemove = true;
+                }
+                else
+                {
+                    ++it;
+                }
+            }
+        }
+
+        // return foundNoteToRemove;
+    }
+
+    void MidiFXRandomizer::processDelayedNote(MidiNoteGroup *note)
+    {
+        if (delayedNoteQueue.capacity() > queueSize)
+        {
+            delayedNoteQueue.shrink_to_fit();
+        }
+
+        if(delayedNoteQueue.size() < queueSize)
+        {
+            float mult = 0.0f;
+            // Assume one of these is greater than 0
+            if (delayMin_ == 0 || delayMax_ == 0)
+            {
+                uint8_t rate = delayMin_ == 0 ? getDelayLength(delayMax_) : getDelayLength(delayMin_);
+                mult = (1.0f / max((float)rate, __FLT_EPSILON__)) * omxUtil.randFloat();
+            }
+            else if (delayMin_ > 0 && delayMax_ > 0)
+            {
+                uint8_t lMin = getDelayLength(delayMin_);
+                uint8_t lMax = getDelayLength(delayMax_);
+
+                float rmin = (float)min(lMin, lMax);
+                float rmax = (float)max(lMin, lMax);
+
+                float rate = omxUtil.lerp(rmin, rmax, omxUtil.randFloat());
+
+                mult = 1.0f / rate;
+            }
+
+            note->noteonMicros = seqConfig.lastClockMicros + (clockConfig.step_micros * 16 * mult);
+
+            delayedNoteQueue.push_back(*note);
+        }
+        else
+        {
+            // queue is filled, send note out
+            sendNoteOut(*note);
+        }
     }
 
     uint8_t MidiFXRandomizer::getRand(uint8_t v, uint8_t minus, uint8_t plus)
@@ -96,6 +199,27 @@ namespace midifx
 
     void MidiFXRandomizer::loopUpdate()
     {
+        if(delayedNoteQueue.size() == 0)
+        {
+            return;
+        }
+
+        uint32_t stepmicros = seqConfig.currentFrameMicros;
+
+        auto it = delayedNoteQueue.begin();
+        while (it != delayedNoteQueue.end())
+        {
+            if (stepmicros >= it->noteonMicros)
+            {
+                // Send out and remove
+                sendNoteOut(*it);
+                it = delayedNoteQueue.erase(it);
+            }
+            else
+            {
+                ++it;
+            }
+        }
     }
 
     void MidiFXRandomizer::onEncoderChangedEditParam(Encoder::Update enc)
@@ -103,146 +227,186 @@ namespace midifx
         int8_t page = params_.getSelPage();
         int8_t param = params_.getSelParam();
 
-        auto amt = enc.accel(5);
+        auto amtSlow = enc.accel(1);
+        auto amtFast = enc.accel(5);
 
-        if(page == RZPAGE_1)
+        switch (page)
         {
-            if (param == 0)
+        case RZPAGE_CHANCE:
+        {
+            switch (param)
             {
-                noteMinus_ = constrain(noteMinus_ + amt, 0, 12);
-            }
-            else if (param == 1)
-            {
-                notePlus_ = constrain(notePlus_ + amt, 0, 12);
-            }
-            else if (param == 2)
-            {
-                octMinus_ = constrain(octMinus_ + amt, 0, 12);
-            }
-            else if (param == 3)
-            {
-                octPlus_ = constrain(octPlus_ + amt, 0, 12);
+            case 0:
+                chancePerc_ = constrain(chancePerc_ + amtSlow, 0, 100);
+                break;
             }
         }
-        else if(page == RZPAGE_2)
+        break;
+        case RZPAGE_1:
         {
-            if (param == 0)
+            switch (param)
             {
-                velMinus_ = constrain(velMinus_ + amt, 0, 127);
-            }
-            else if (param == 1)
-            {
-                velPlus_ = constrain(velPlus_ + amt, 0, 127);
-            }
-            else if (param == 2)
-            {
-                lengthPerc_ = constrain(lengthPerc_ + amt, 0, 100);
-            }
-            else if (param == 3)
-            {
-                chancePerc_ = constrain(chancePerc_ + amt, 0, 100);
+            case 0:
+                noteMinus_ = constrain(noteMinus_ + amtSlow, 0, 12);
+                break;
+            case 1:
+                notePlus_ = constrain(notePlus_ + amtSlow, 0, 12);
+                break;
+            case 2:
+                octMinus_ = constrain(octMinus_ + amtSlow, 0, 12);
+                break;
+            case 3:
+                octPlus_ = constrain(octPlus_ + amtSlow, 0, 12);
+                break;
             }
         }
+        break;
+        case RZPAGE_2:
+        {
+            switch (param)
+            {
+            case 0:
+                velMinus_ = constrain(velMinus_ + amtFast, 0, 127);
+                break;
+            case 1:
+                velPlus_ = constrain(velPlus_ + amtFast, 0, 127);
+                break;
+            case 2:
+                lengthPerc_ = constrain(lengthPerc_ + amtFast, 0, 100);
+                break;
+            case 3:
+                midiChan_ = constrain(midiChan_ + amtSlow, 0, 16);
+                break;
+            }
+        }
+        break;
+        case RZPAGE_3:
+        {
+            switch (param)
+            {
+            case 0:
+                delayMin_ = constrain(delayMin_ + amtSlow, 0, kNumArpRates); // 0 = off
+                break;
+            case 1:
+                delayMax_ = constrain(delayMax_ + amtSlow, 0, kNumArpRates);
+                break;
+            }
+        }
+        break;
+        }
+
         omxDisp.setDirty();
+    }
+    uint8_t MidiFXRandomizer::getDelayLength(uint8_t delayIndex)
+    {
+        if(delayIndex == 0 || delayIndex - 1 >= kNumArpRates)
+        {
+            return 0;
+        }
+
+        uint8_t i = delayIndex - 1;
+
+        // Reverse order
+        i = (kNumArpRates - 1) - i;
+
+        return kArpRates[i];
     }
 
     void MidiFXRandomizer::onDisplayUpdate(uint8_t funcKeyMode)
     {
         omxDisp.clearLegends();
 
-        // omxDisp.dispPage = page + 1;
+        bool genDisplay = true;
 
-        int8_t page = params_.getSelPage();
-
-        switch (page)
+        switch (params_.getSelPage())
         {
+        case RZPAGE_CHANCE:
+        {
+            omxDisp.dispParamBar(chancePerc_, chancePerc_, 0, 100, !getEncoderSelect(), false, "Rand", "Chance");
+            genDisplay = false;
+        }
+        break;
         case RZPAGE_1:
         {
-            omxDisp.legends[0] = "NT-";
-            omxDisp.legends[1] = "NT+";
-            omxDisp.legends[2] = "OCT-";
-            omxDisp.legends[3] = "OCT+";
-            omxDisp.legendVals[0] = noteMinus_;
-            omxDisp.legendVals[1] = notePlus_;
-            omxDisp.legendVals[2] = octMinus_;
-            omxDisp.legendVals[3] = octPlus_;
-
-            // omxDisp.legendVals[0] = -127;
-            // omxDisp.legendVals[1] = -127;
-            // omxDisp.legendVals[2] = -127;
-            // omxDisp.legendVals[3] = -127;
-            // String msg1 = "-"+String(noteMinus_);
-            // String msg2 = "+"+String(notePlus_);
-            // String msg3 = "-"+String(octMinus_);
-            // String msg4 = "+"+String(octPlus_);
-            // omxDisp.legendText[0] = msg1.c_str();
-            // omxDisp.legendText[1] = msg2.c_str();
-            // omxDisp.legendText[2] = msg3.c_str();
-            // omxDisp.legendText[3] = msg4.c_str();
+            omxDisp.setLegend(0, "NT-", noteMinus_);
+            omxDisp.setLegend(1, "NT+", notePlus_);
+            omxDisp.setLegend(2, "OCT-", octMinus_);
+            omxDisp.setLegend(3, "OCT+", octPlus_);
         }
         break;
         case RZPAGE_2:
         {
-            omxDisp.legends[0] = "VEL-";
-            omxDisp.legends[1] = "VEL+";
-            omxDisp.legends[2] = "LEN%";
-            omxDisp.legends[3] = "CHC%";
-            omxDisp.legendVals[0] = velMinus_;
-            omxDisp.legendVals[1] = velPlus_;
-            omxDisp.legendVals[2] = lengthPerc_;
-            omxDisp.legendVals[3] = -127;
-            omxDisp.useLegendString[3] = true;
-            omxDisp.legendString[3] = String(chancePerc_) + "%";
-
-            // omxDisp.legendVals[0] = -127;
-            // omxDisp.legendVals[1] = -127;
-            // omxDisp.legendVals[2] = -127;
-            // omxDisp.legendVals[3] = -127;
-            // String msg1 = "-" + String(velMinus_);
-            // String msg2 = "+" + String(velPlus_);
-            // String msg3 = "+" + String(lengthPerc_) + "%";
-            // String msg4 = String(chancePerc_) + "%";
-            // omxDisp.legendText[0] = msg1.c_str();
-            // omxDisp.legendText[1] = msg2.c_str();
-            // omxDisp.legendText[2] = msg3.c_str();
-            // omxDisp.legendText[3] = msg4.c_str();
+            omxDisp.setLegend(0, "VEL-", velMinus_);
+            omxDisp.setLegend(1, "VEL+", velPlus_);
+            omxDisp.setLegend(2, "LEN%", lengthPerc_);
+            omxDisp.setLegend(3, "CHAN", midiChan_ == 0, midiChan_);
+        }
+        case RZPAGE_3:
+        {
+            omxDisp.setLegend(0, "DEL-", delayMin_ == 0, "1/" + String(getDelayLength(delayMin_)));
+            omxDisp.setLegend(1, "DEL-", delayMax_ == 0, "1/" + String(getDelayLength(delayMax_)));
         }
         break;
         default:
             break;
         }
 
-        omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), getEncoderSelect());
+        if (genDisplay)
+        {
+            omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), getEncoderSelect());
+        }
     }
 
     int MidiFXRandomizer::saveToDisk(int startingAddress, Storage *storage)
     {
-        // Serial.println((String) "Saving mfx randomizer: " + startingAddress); // 5969
-        storage->write(startingAddress + 0, noteMinus_);
-        storage->write(startingAddress + 1, notePlus_);
-        storage->write(startingAddress + 2, octMinus_);
-        storage->write(startingAddress + 3, octPlus_);
-        storage->write(startingAddress + 4, velMinus_);
-        storage->write(startingAddress + 5, velPlus_);
-        storage->write(startingAddress + 6, lengthPerc_);
-        storage->write(startingAddress + 7, chancePerc_);
+        RandomSave save;
+        save.noteMinus = noteMinus_;
+        save.notePlus = notePlus_;
+        save.octMinus = octMinus_;
+        save.octPlus = octPlus_;
+        save.velMinus = velMinus_;
+        save.velPlus = velPlus_;
+        save.lengthPerc = lengthPerc_;
+        save.chancePerc = chancePerc_;
+        save.midiChan = midiChan_;
+        save.delayMin = delayMin_;
+        save.delayMax = delayMax_;
 
-        return startingAddress + 8;
+        int saveSize = sizeof(RandomSave);
+
+		auto saveBytesPtr = (byte *)(&save);
+		for (int j = 0; j < saveSize; j++)
+		{
+			storage->write(startingAddress + j, *saveBytesPtr++);
+		}
+
+		return startingAddress + saveSize;
     }
 
     int MidiFXRandomizer::loadFromDisk(int startingAddress, Storage *storage)
     {
-        // Serial.println((String) "Loading mfx randomizer: " + startingAddress); // 5969
+        int saveSize = sizeof(RandomSave);
 
-        noteMinus_ = storage->read(startingAddress + 0);
-        notePlus_ = storage->read(startingAddress + 1);
-        octMinus_ = storage->read(startingAddress + 2);
-        octPlus_ = storage->read(startingAddress + 3);
-        velMinus_ = storage->read(startingAddress + 4);
-        velPlus_ = storage->read(startingAddress + 5);
-        lengthPerc_ = storage->read(startingAddress + 6);
-        chancePerc_ = storage->read(startingAddress + 7);
+		auto save = RandomSave{};
+		auto current = (byte *)&save;
+		for (int j = 0; j < saveSize; j++)
+		{
+			*current = storage->read(startingAddress + j);
+			current++;
+		}
 
-        return startingAddress + 8;
+        noteMinus_ = save.noteMinus;
+        notePlus_ = save.notePlus;
+        octMinus_ = save.octMinus;
+        octPlus_ = save.octPlus;
+        velMinus_ = save.velMinus;
+        velPlus_ = save.velPlus;
+        lengthPerc_ = save.lengthPerc;
+        chancePerc_ = save.chancePerc;
+        midiChan_ = save.midiChan;
+        delayMin_ = save.delayMin;
+        delayMax_ = save.delayMax;
+
+        return startingAddress + saveSize;
     }
 }

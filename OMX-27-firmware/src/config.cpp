@@ -69,6 +69,7 @@ const uint32_t secs2micros = 1000000;
 const char *mfxOffMsg = "MidiFX are Off";
 const char *mfxArpEditMsg = "Arp Edit";
 const char *exitMsg = "Exit";
+const char *paramOffMsg = "OFF";
 
 const char *modes[] = {"MI", "DRUM", "CH", "S1", "S2", "GR", "EL", "OM"};
 const char *macromodes[] = {"Off", "M8", "NRN", "DEL"};

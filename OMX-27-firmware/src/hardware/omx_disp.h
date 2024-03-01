@@ -8,6 +8,7 @@ class OmxDisp
 {
 public:
 	// Should make into function
+	
 	const char *legends[4] = {"", "", "", ""};
 	int legendVals[4] = {0, 0, 0, 0};
 	int dispPage = 0;
@@ -80,6 +81,13 @@ public:
 	void bumpDisplayTimer();
 
 	void clearLegends();
+	void setLegend(uint8_t index, const char* label, int value);
+	void setLegend(uint8_t index, const char* label, bool isOff, int value);
+	void setLegend(uint8_t index, const char* label, const char* text);
+	void setLegend(uint8_t index, const char* label, bool isOff, const char* text);
+	void setLegend(uint8_t index, const char* label, String text);
+	void setLegend(uint8_t index, const char* label, bool isOff, String text);
+
 	void setSubmode(int submode);
 
 	void UpdateMessageTextTimer();
@@ -111,6 +119,8 @@ private:
 	void renderMessage();
 
 	void dispChordBalance();
+
+	bool validateLegendIndex(uint8_t index);
 };
 
 extern OmxDisp omxDisp;

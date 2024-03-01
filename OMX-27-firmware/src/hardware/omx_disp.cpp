@@ -13,6 +13,8 @@ OmxDisp::OmxDisp()
 {
 }
 
+
+
 void OmxDisp::setup()
 {
 	initializeDisplay();
@@ -244,6 +246,77 @@ void OmxDisp::clearLegends()
 	useLegendString[1] = false;
 	useLegendString[2] = false;
 	useLegendString[3] = false;
+}
+
+bool OmxDisp::validateLegendIndex(uint8_t index)
+{
+	if(index >= 4)
+	{
+		Serial.println("ERROR: Param index out of range!");
+		return false;
+	}
+	return true;
+}
+
+
+
+void OmxDisp::setLegend(uint8_t index, const char *label, int value)
+{
+	if (validateLegendIndex(index))
+	{
+		legends[index] = label;
+		legendVals[index] = value;
+	}
+}
+void OmxDisp::setLegend(uint8_t index, const char *label, bool isOff, int value)
+{
+	if (isOff)
+	{
+		setLegend(index, label, paramOffMsg);
+	}
+	else
+	{
+		setLegend(index, label, value);
+	}
+}
+void OmxDisp::setLegend(uint8_t index, const char *label, const char *text)
+{
+	if (validateLegendIndex(index))
+	{
+		legends[index] = label;
+		legendText[index] = text;
+	}
+}
+void OmxDisp::setLegend(uint8_t index, const char* label, bool isOff, const char* text)
+{
+	if (isOff)
+	{
+		setLegend(index, label, paramOffMsg);
+	}
+	else
+	{
+		setLegend(index, label, text);
+	}
+}
+void OmxDisp::setLegend(uint8_t index, const char *label, String text)
+{
+	if (validateLegendIndex(index))
+	{
+		legends[index] = label;
+		useLegendString[index] = true;
+		legendString[index] = text;
+	}
+}
+void OmxDisp::setLegend(uint8_t index, const char *label, bool isOff, String text)
+{
+	if(isOff)
+	{
+		setLegend(index, label, paramOffMsg);
+	}
+	else
+	{
+		setLegend(index, label, text);
+	}
 }
 
 void OmxDisp::dispGenericMode(int selected)

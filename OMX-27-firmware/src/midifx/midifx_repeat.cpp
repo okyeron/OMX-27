@@ -446,10 +446,8 @@ namespace midifx
 
         if (pendingNoteQueue.capacity() > queueSize)
         {
-            activeNoteQueue.shrink_to_fit();
+            pendingNoteQueue.shrink_to_fit();
         }
-
-        
 
         // if(!noteAdded)
         // {
