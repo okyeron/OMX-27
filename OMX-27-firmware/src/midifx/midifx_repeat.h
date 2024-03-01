@@ -1,6 +1,7 @@
 #pragma once
 
 #include "midifx_interface.h"
+#include "midifx_notemaster.h"
 
 namespace midifx
 {
@@ -158,7 +159,19 @@ namespace midifx
         float rateStartInHz_;
         float rateEndInHz_;
 
-		std::vector<RepeatNote> playedNoteQueue; // Keeps track of which notes are being played
+        MidiFXNoteMaster noteMaster;
+
+        static void processNoteForwarder(void *context, MidiNoteGroup *note)
+        {
+            static_cast<MidiFXRepeat *>(context)->processNoteInput(note);
+        }
+
+        static void sendNoteOutForwarder(void *context, MidiNoteGroup *note)
+        {
+            static_cast<MidiFXRepeat *>(context)->sendNoteOut(*note);
+        }
+
+        std::vector<RepeatNote> playedNoteQueue; // Keeps track of which notes are being played
 		std::vector<RepeatNote> activeNoteQueue;	  // Holds notes
 		std::vector<RepeatNote> pendingNoteQueue;	  // notes pending for quantization
 
@@ -166,8 +179,8 @@ namespace midifx
 
 		std::vector<FixedLengthNote> fixedLengthNotes; // Tracking of fixed length notes
 
-		MidiNoteGroup trackingNoteGroups[8];
-		MidiNoteGroup trackingNoteGroupsPassthrough[8];
+		// MidiNoteGroup trackingNoteGroups[8];
+		// MidiNoteGroup trackingNoteGroupsPassthrough[8];
 
         void trackNoteInputPassthrough(MidiNoteGroup *note, bool ignoreNoteOns);
         void trackNoteInput(MidiNoteGroup *note);

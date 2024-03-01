@@ -55,6 +55,10 @@ namespace midifx
 
         quantizeSync_ = quantizedRateIndex_ >= -1; // -2 for off
 
+        noteMaster.setContext(this);
+        noteMaster.setProcessNoteFptr(&processNoteForwarder);
+        noteMaster.setSendNoteOutFptr(&sendNoteOutForwarder);
+
         recalcVariables();
         resync();
 
@@ -133,150 +137,152 @@ namespace midifx
 
         if (chancePerc_ != 100 && (chancePerc_ == 0 || random(100) > chancePerc_))
         {
-            // sendNoteOut(note);
-            if(note.unknownLength || note.noteOff)
-            {
-                trackNoteInputPassthrough(&note, false);
-            }
-            else
-            {
-                sendNoteOut(note);
-            }
+            noteMaster.trackNoteInputPassthrough(&note);
+            // // sendNoteOut(note);
+            // if(note.unknownLength || note.noteOff)
+            // {
+            //     trackNoteInputPassthrough(&note, false);
+            // }
+            // else
+            // {
+            //     sendNoteOut(note);
+            // }
             
             return;
         }
 
-        
 
-        if (note.unknownLength || note.noteOff)
-        {
-            // only notes of unknown lengths need to be tracked
-            // notes with fixed lengths will turn off automatically.
-            trackNoteInputPassthrough(&note, true);
-            trackNoteInput(&note);
-        }
-        else
-        {
-            processNoteInput(&note);
-        }
+        noteMaster.trackNoteInput(&note);
+
+        // if (note.unknownLength || note.noteOff)
+        // {
+        //     // only notes of unknown lengths need to be tracked
+        //     // notes with fixed lengths will turn off automatically.
+        //     trackNoteInputPassthrough(&note, true);
+        //     trackNoteInput(&note);
+        // }
+        // else
+        // {
+        //     processNoteInput(&note);
+        // }
     }
 
     // If chance is less than 100% and passing through, notes need to be tracked
     // and if the same note comes in without passthrough for a noteoff event, it needs to 
     // be passed through the effect to send noteoff to prevent stuck notes
-    void MidiFXRepeat::trackNoteInputPassthrough(MidiNoteGroup *note, bool ignoreNoteOns)
-    {
-        // Serial.println("trackNoteInputPassthrough");
-        // Note on, not ignored
-        if (!ignoreNoteOns && !note->noteOff)
-        {
-            // Serial.println("trackNoteInputPassthrough note on");
+    // void MidiFXRepeat::trackNoteInputPassthrough(MidiNoteGroup *note, bool ignoreNoteOns)
+    // {
+    //     // Serial.println("trackNoteInputPassthrough");
+    //     // Note on, not ignored
+    //     if (!ignoreNoteOns && !note->noteOff)
+    //     {
+    //         // Serial.println("trackNoteInputPassthrough note on");
 
-            // Search for an empty slot in trackingNoteGroupsPassthrough
-            // If no slots are available/more than 8 notes/ note gets killed. 
-            for (uint8_t i = 0; i < 8; i++)
-            {
-                // Found empty slot
-                if (trackingNoteGroupsPassthrough[i].prevNoteNumber == 255)
-                {
-                    trackingNoteGroupsPassthrough[i].channel = note->channel;
-                    trackingNoteGroupsPassthrough[i].prevNoteNumber = note->prevNoteNumber;
-                    trackingNoteGroupsPassthrough[i].noteNumber = note->noteNumber;
+    //         // Search for an empty slot in trackingNoteGroupsPassthrough
+    //         // If no slots are available/more than 8 notes/ note gets killed. 
+    //         for (uint8_t i = 0; i < 8; i++)
+    //         {
+    //             // Found empty slot
+    //             if (trackingNoteGroupsPassthrough[i].prevNoteNumber == 255)
+    //             {
+    //                 trackingNoteGroupsPassthrough[i].channel = note->channel;
+    //                 trackingNoteGroupsPassthrough[i].prevNoteNumber = note->prevNoteNumber;
+    //                 trackingNoteGroupsPassthrough[i].noteNumber = note->noteNumber;
 
-                    // Send it forward through chain
-                    sendNoteOut(*note);
-                    return;
-                }
-            }
-        }
+    //                 // Send it forward through chain
+    //                 sendNoteOut(*note);
+    //                 return;
+    //             }
+    //         }
+    //     }
 
-        // Note off
-        if (note->noteOff)
-        {
-            // Serial.println("trackNoteInputPassthrough note off");
+    //     // Note off
+    //     if (note->noteOff)
+    //     {
+    //         // Serial.println("trackNoteInputPassthrough note off");
 
-            // bool noteFound = false;
+    //         // bool noteFound = false;
 
-            // Search to see if this note is in trackingNoteGroupsPassthrough
-            // Meaning it was previously passed through
-            // If it is found, send it through chain
-            // PrevNoteNumber should be the origin note number before being modified by MidiFX
-            for (uint8_t i = 0; i < 8; i++)
-            {
-                if (trackingNoteGroupsPassthrough[i].prevNoteNumber != 255)
-                {
-                    if (trackingNoteGroupsPassthrough[i].channel == note->channel && trackingNoteGroupsPassthrough[i].prevNoteNumber == note->prevNoteNumber)
-                    {
-                        note->noteNumber = trackingNoteGroupsPassthrough[i].noteNumber;
-                        // processNoteInput(note);
-                        sendNoteOut(*note);
-                        trackingNoteGroupsPassthrough[i].prevNoteNumber = 255; // mark empty
-                        // noteFound = true;
-                    }
-                }
-            }
+    //         // Search to see if this note is in trackingNoteGroupsPassthrough
+    //         // Meaning it was previously passed through
+    //         // If it is found, send it through chain
+    //         // PrevNoteNumber should be the origin note number before being modified by MidiFX
+    //         for (uint8_t i = 0; i < 8; i++)
+    //         {
+    //             if (trackingNoteGroupsPassthrough[i].prevNoteNumber != 255)
+    //             {
+    //                 if (trackingNoteGroupsPassthrough[i].channel == note->channel && trackingNoteGroupsPassthrough[i].prevNoteNumber == note->prevNoteNumber)
+    //                 {
+    //                     note->noteNumber = trackingNoteGroupsPassthrough[i].noteNumber;
+    //                     // processNoteInput(note);
+    //                     sendNoteOut(*note);
+    //                     trackingNoteGroupsPassthrough[i].prevNoteNumber = 255; // mark empty
+    //                     // noteFound = true;
+    //                 }
+    //             }
+    //         }
 
-            // Should be false if note getting sent to arp
-            // Avoid double trackNoteInput call
-            if(!ignoreNoteOns)
-            {
-                trackNoteInput(note);
-            }
-        }
-    }
+    //         // Should be false if note getting sent to arp
+    //         // Avoid double trackNoteInput call
+    //         if(!ignoreNoteOns)
+    //         {
+    //             trackNoteInput(note);
+    //         }
+    //     }
+    // }
 
-    void MidiFXRepeat::trackNoteInput(MidiNoteGroup *note)
-    {
-        // Same implementation with more comments in submode_midifx
-        // Keeps track of previous note ons and and adjusts note number
-        // for note offs using the prevNoteNumber parameter.
-        // Why is this necessary?
-        // If the note is modified by midifx like randomize before the arp
-        // Then the arp can end up having notes stuck on
-        // This ensures that notes don't get stuck on.
-        if (note->noteOff)
-        {
-            bool noteFound = false;
+    // void MidiFXRepeat::trackNoteInput(MidiNoteGroup *note)
+    // {
+    //     // Same implementation with more comments in submode_midifx
+    //     // Keeps track of previous note ons and and adjusts note number
+    //     // for note offs using the prevNoteNumber parameter.
+    //     // Why is this necessary?
+    //     // If the note is modified by midifx like randomize before the arp
+    //     // Then the arp can end up having notes stuck on
+    //     // This ensures that notes don't get stuck on.
+    //     if (note->noteOff)
+    //     {
+    //         bool noteFound = false;
 
-            for (uint8_t i = 0; i < 8; i++)
-            {
-                if (trackingNoteGroups[i].prevNoteNumber != 255)
-                {
-                    if (trackingNoteGroups[i].channel == note->channel && trackingNoteGroups[i].prevNoteNumber == note->prevNoteNumber)
-                    {
-                        // Serial.println("trackNoteInput note off found in trackingNoteGroups");
-                        note->noteNumber = trackingNoteGroups[i].noteNumber;
-                        processNoteInput(note);
-                        trackingNoteGroups[i].prevNoteNumber = 255; // mark empty
-                        noteFound = true;
-                    }
-                }
-            }
+    //         for (uint8_t i = 0; i < 8; i++)
+    //         {
+    //             if (trackingNoteGroups[i].prevNoteNumber != 255)
+    //             {
+    //                 if (trackingNoteGroups[i].channel == note->channel && trackingNoteGroups[i].prevNoteNumber == note->prevNoteNumber)
+    //                 {
+    //                     // Serial.println("trackNoteInput note off found in trackingNoteGroups");
+    //                     note->noteNumber = trackingNoteGroups[i].noteNumber;
+    //                     processNoteInput(note);
+    //                     trackingNoteGroups[i].prevNoteNumber = 255; // mark empty
+    //                     noteFound = true;
+    //                 }
+    //             }
+    //         }
 
-            if (!noteFound)
-            {
-                // Serial.println("trackNoteInput note off not found in trackingNoteGroups");
+    //         if (!noteFound)
+    //         {
+    //             // Serial.println("trackNoteInput note off not found in trackingNoteGroups");
 
-                processNoteInput(note);
-            }
-        }
-        else if (!note->noteOff) // Note on
-        {
-            for (uint8_t i = 0; i < 8; i++)
-            {
-                // Find empty slot
-                if (trackingNoteGroups[i].prevNoteNumber == 255)
-                {
-                    trackingNoteGroups[i].channel = note->channel;
-                    trackingNoteGroups[i].prevNoteNumber = note->prevNoteNumber;
-                    trackingNoteGroups[i].noteNumber = note->noteNumber;
+    //             processNoteInput(note);
+    //         }
+    //     }
+    //     else if (!note->noteOff) // Note on
+    //     {
+    //         for (uint8_t i = 0; i < 8; i++)
+    //         {
+    //             // Find empty slot
+    //             if (trackingNoteGroups[i].prevNoteNumber == 255)
+    //             {
+    //                 trackingNoteGroups[i].channel = note->channel;
+    //                 trackingNoteGroups[i].prevNoteNumber = note->prevNoteNumber;
+    //                 trackingNoteGroups[i].noteNumber = note->noteNumber;
 
-                    processNoteInput(note);
-                    return;
-                }
-            }
-        }
-    }
+    //                 processNoteInput(note);
+    //                 return;
+    //             }
+    //         }
+    //     }
+    // }
 
     void MidiFXRepeat::processNoteInput(MidiNoteGroup *note)
     {
@@ -334,16 +340,17 @@ namespace midifx
             else
             {
                 // Remove from tracking notes
-                for (uint8_t i = 0; i < 8; i++)
-                {
-                    if (trackingNoteGroups[i].prevNoteNumber != 255)
-                    {
-                        if (trackingNoteGroups[i].channel == note->channel && trackingNoteGroups[i].prevNoteNumber == note->prevNoteNumber)
-                        {
-                            trackingNoteGroups[i].prevNoteNumber = 255; // mark empty
-                        }
-                    }
-                }
+                noteMaster.removeFromTracking(note);
+                // for (uint8_t i = 0; i < 8; i++)
+                // {
+                //     if (trackingNoteGroups[i].prevNoteNumber != 255)
+                //     {
+                //         if (trackingNoteGroups[i].channel == note->channel && trackingNoteGroups[i].prevNoteNumber == note->prevNoteNumber)
+                //         {
+                //             trackingNoteGroups[i].prevNoteNumber = 255; // mark empty
+                //         }
+                //     }
+                // }
                 // Too many notes, note gets killed. 
                 // sendNoteOut(*note);
             }
@@ -599,11 +606,13 @@ namespace midifx
 
         resetArpSeq();
 
-        for (uint8_t i = 0; i < 8; i++)
-        {
-            trackingNoteGroups[i].prevNoteNumber = 255;
-            trackingNoteGroupsPassthrough[i].prevNoteNumber = 255;
-        }
+        noteMaster.clear();
+
+        // for (uint8_t i = 0; i < 8; i++)
+        // {
+        //     trackingNoteGroups[i].prevNoteNumber = 255;
+        //     trackingNoteGroupsPassthrough[i].prevNoteNumber = 255;
+        // }
     }
 
     void MidiFXRepeat::repeatNoteOn(MidiNoteGroup *note)
