@@ -347,7 +347,7 @@ namespace midifx
                 lengthPerc_ = constrain(lengthPerc_ + amtFast, 0, 100);
                 break;
             case 3:
-                // midiChan_ = constrain(midiChan_ + amtSlow, 0, 16);
+                midiChan_ = constrain(midiChan_ + amtSlow, 0, 16);
                 break;
             }
         }
@@ -411,7 +411,7 @@ namespace midifx
             omxDisp.setLegend(0, "VEL-", velMinus_);
             omxDisp.setLegend(1, "VEL+", velPlus_);
             omxDisp.setLegend(2, "LEN%", lengthPerc_);
-            // omxDisp.setLegend(3, "CHAN", midiChan_ == 0, midiChan_);
+            omxDisp.setLegend(3, "CHAN", midiChan_ == 0, midiChan_);
         }
         break;
         case RZPAGE_3:
