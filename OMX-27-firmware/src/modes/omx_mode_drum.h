@@ -109,6 +109,8 @@ private:
 	ParamManager params;
 
 	bool macroActive_ = false;
+	bool mfxQuickEdit_ = false;
+	uint8_t quickEditMfxIndex_ = 0;
 
 	bool isDrumKeyHeld();
 	bool getEncoderSelect();

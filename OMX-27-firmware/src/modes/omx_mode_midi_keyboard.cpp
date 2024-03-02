@@ -101,6 +101,22 @@ void OmxModeMidiKeyboard::selectMidiFx(uint8_t mfxIndex, bool dispMsg)
 {
 	this->mfxIndex_ = mfxIndex;
 
+	if(mfxQuickEdit_)
+	{
+		// Change the MidiFX Group being edited
+		if(mfxIndex < NUM_MIDIFX_GROUPS && mfxIndex != quickEditMfxIndex_)
+		{
+			enableSubmode(&subModeMidiFx[mfxIndex]);
+			subModeMidiFx[mfxIndex].enablePassthrough();
+			quickEditMfxIndex_ = mfxIndex;
+			dispMsg = false;
+		}
+		else if(mfxIndex >= NUM_MIDIFX_GROUPS)
+		{
+			disableSubmode();
+		}
+	}
+
 	for (uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
 	{
 		subModeMidiFx[i].setSelected(i == mfxIndex);

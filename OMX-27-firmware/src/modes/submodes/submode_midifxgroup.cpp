@@ -248,7 +248,8 @@ void SubModeMidiFxGroup::selectPrevMFXSlot(bool silent)
 				selectedMidiFX_ = mfxIndex;
 				if (!silent)
 				{
-					omxDisp.displayMessage(String(selectedMidiFX_ + 1) + " " + mfx->getName());
+					tempString = String(selectedMidiFX_ + 1) + " " + mfx->getDispName();
+					omxDisp.displayMessage(tempString);
 				}
 				return;
 			}
@@ -270,7 +271,8 @@ void SubModeMidiFxGroup::selectNextMFXSlot(bool silent)
 				selectedMidiFX_ = mfxIndex;
 				if (!silent)
 				{
-					omxDisp.displayMessage(mfx->getName());
+					tempString = String(selectedMidiFX_ + 1) + " " + mfx->getDispName();
+					omxDisp.displayMessage(tempString);
 				}
 				return;
 			}

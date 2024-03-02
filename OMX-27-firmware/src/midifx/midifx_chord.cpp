@@ -287,6 +287,7 @@ namespace midifx
                         {
                             calculateRemap();
                         }
+                        rootNote_ = scaleConfig.scaleRoot;
                     }
                     else
                     {
@@ -309,6 +310,7 @@ namespace midifx
                             omxDisp.displayMessage(MusicScales::getScaleName(scaleConfig.scalePattern));
                             calculateRemap();
                         }
+			            scaleIndex_ = scaleConfig.scalePattern;
                     }
                     else
                     {
@@ -560,25 +562,9 @@ namespace midifx
             {
             case MFXCHRDPAGE_SCALES:
             {
-                omxDisp.legends[0] = "GLBL";
-                omxDisp.legendText[0] = useGlobalScale_ ? "ON" : "OFF";
-
-                omxDisp.legends[1] = "ROOT";
-                omxDisp.legendText[1] = MusicScales::getNoteName(rootNote_);
-
-                omxDisp.legends[2] = "SCALE";
-                if (scaleIndex_ < 0)
-                {
-                    omxDisp.legendText[2] = "Off";
-                }
-                else
-                {
-                    omxDisp.legendVals[2] = scaleIndex_;
-                }
-
-                // omxDisp.legends[3] = "CHC%";
-                // tempString = String(chancePerc_) + "%";
-                // omxDisp.legendText[3] = tempString.c_str();
+                omxDisp.setLegend(0, "GLBL", !useGlobalScale_, "ON");
+                omxDisp.setLegend(1, "ROOT", MusicScales::getNoteName(rootNote_));
+                omxDisp.setLegend(2, "SCALE", scaleIndex_ < 0, scaleIndex_);
             }
             break;
             case MFXCHRDPAGE_INT_NOTES:

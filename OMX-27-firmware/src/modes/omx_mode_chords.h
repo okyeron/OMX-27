@@ -112,6 +112,9 @@ private:
 	bool chordEditMode_ = false;
 	// bool splitKeyboardMode_ = false;
 
+	bool mfxQuickEdit_ = false;
+	uint8_t quickEditMfxIndex_ = 0;
+
 	bool wrapManStrum_ = true;
 
 	bool lastKeyWasKeyboard_ = false; // This gets set to true if the last key pressed was a keyboard key and not a chord key

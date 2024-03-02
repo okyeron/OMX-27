@@ -326,6 +326,22 @@ void OmxModeChords::selectMidiFx(uint8_t mfxIndex, bool dispMsg)
 {
 	this->mfxIndex_ = mfxIndex;
 
+	if(mfxQuickEdit_)
+	{
+		// Change the MidiFX Group being edited
+		if(mfxIndex < NUM_MIDIFX_GROUPS && mfxIndex != quickEditMfxIndex_)
+		{
+			enableSubmode(&subModeMidiFx[mfxIndex]);
+			subModeMidiFx[mfxIndex].enablePassthrough();
+			quickEditMfxIndex_ = mfxIndex;
+			dispMsg = false;
+		}
+		else if(mfxIndex >= NUM_MIDIFX_GROUPS)
+		{
+			disableSubmode();
+		}
+	}
+
 	for (uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
 	{
 		subModeMidiFx[i].setSelected(true);
@@ -354,6 +370,22 @@ void OmxModeChords::selectMidiFxChordKey(int8_t mfxIndex, bool dispMsg)
     }
 
     chords_[selectedChord_].midiFx = mfxIndex;
+
+	if(mfxQuickEdit_)
+	{
+		// Change the MidiFX Group being edited
+		if(mfxIndex < NUM_MIDIFX_GROUPS && mfxIndex != quickEditMfxIndex_)
+		{
+			enableSubmode(&subModeMidiFx[mfxIndex]);
+			subModeMidiFx[mfxIndex].enablePassthrough();
+			quickEditMfxIndex_ = mfxIndex;
+			dispMsg = false;
+		}
+		else if(mfxIndex >= NUM_MIDIFX_GROUPS)
+		{
+			disableSubmode();
+		}
+	}
 
 	for (uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
 	{
@@ -1080,7 +1112,7 @@ void OmxModeChords::onKeyUpdate(OMXKeypadEvent e)
 				int amt = thisKey == 11 ? -1 : 1;
 				midiSettings.octave = constrain(midiSettings.octave + amt, -5, 4);
 			}
-			else if (thisKey == 1 || thisKey == 2) // Change Param selection
+			else if (!mfxQuickEdit_ && (thisKey == 1 || thisKey == 2)) // Change Param selection
 			{
 				if (thisKey == 1)
 				{
@@ -1605,6 +1637,8 @@ void OmxModeChords::disableSubmode()
 		activeSubmode->setEnabled(false);
 	}
 
+	midiSettings.midiAUX = false;
+	mfxQuickEdit_ = false;
 	activeSubmode = nullptr;
 	omxDisp.setDirty();
 }
@@ -1681,7 +1715,15 @@ bool OmxModeChords::onKeyUpdateSelMidiFX(OMXKeypadEvent e)
 		{
 			if (auxDown_) // Aux mode
 			{
-				if (thisKey == 5)
+				if (mfxQuickEdit_ && thisKey == 1)
+				{
+					subModeMidiFx[quickEditMfxIndex_].selectPrevMFXSlot();
+				}
+				else if (mfxQuickEdit_ && thisKey == 2)
+				{
+					subModeMidiFx[quickEditMfxIndex_].selectNextMFXSlot();
+				}
+				else if (thisKey == 5)
 				{
 					keyConsumed = true;
 					// Turn off midiFx
@@ -1704,6 +1746,22 @@ bool OmxModeChords::onKeyUpdateSelMidiFX(OMXKeypadEvent e)
 					else
 					{
 						selectMidiFxChordKey(thisKey - 6, true);
+					}
+				}
+				else if (thisKey == 20) // MidiFX Passthrough
+				{
+					keyConsumed = true;
+					if (mfxdex < NUM_MIDIFX_GROUPS)
+					{
+						enableSubmode(&subModeMidiFx[mfxdex]);
+						subModeMidiFx[mfxdex].enablePassthrough();
+						mfxQuickEdit_ = true;
+						quickEditMfxIndex_ = mfxdex;
+						midiSettings.midiAUX = false;
+					}
+					else
+					{
+						omxDisp.displayMessage(mfxOffMsg);
 					}
 				}
 				else if (thisKey == 22) // Goto arp params
@@ -2139,6 +2197,7 @@ void OmxModeChords::updateLEDs()
 			strip.setPixelColor(6 + i, mfxColor);
 		}
 
+		strip.setPixelColor(20, mfxQuickEdit_ && blinkState ? LEDOFF : colorConfig.mfxQuickEdit);
 		strip.setPixelColor(22, colorConfig.gotoArpParams);
 		strip.setPixelColor(23, colorConfig.nextArpPattern);
 
