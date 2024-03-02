@@ -97,7 +97,7 @@ namespace midifx
             return;
         }
 
-        int8_t origNote = note.noteNumber;
+        // int8_t origNote = note.noteNumber;
 
         int8_t octaveMax = octMinus_ + octPlus_ + 1;
         int8_t octave = random(0, octaveMax) - octMinus_;
@@ -107,10 +107,10 @@ namespace midifx
         note.velocity = getRand(note.velocity, velMinus_, velPlus_);
         note.stepLength = note.stepLength * map(random(lengthPerc_), 0, 100, 1, 16);
 
-        if(midiChan_ != 0)
-        {
-            // note.channel = constrain(random(note.channel, note.channel + midiChan_), 1, 16);
-        }
+        // if(midiChan_ != 0)
+        // {
+        //     note.channel = constrain(random(note.channel, note.channel + midiChan_), 1, 16);
+        // }
 
         if(delayMin_ > 0 || delayMax_ > 0)
         {
@@ -118,9 +118,81 @@ namespace midifx
         }
         else
         {
-            processNoteOn(origNote, note);
+            processNoteOn(note);
+        }
+    }
+
+    void MidiFXRandomizer::processNoteOff(MidiNoteGroup note)
+    {
+        bool foundNote = false;
+        if (trackedNotes.size() > 0)
+        {
+            auto it = trackedNotes.begin();
+            while (it != trackedNotes.end())
+            {
+                if (it->prevNoteNumber == note.prevNoteNumber && it->origChannel == note.channel)
+                {
+                    foundNote = true;
+                    // sendNoteOut(note);
+
+                    note.channel = it->channel;
+                    // note.noteNumber = it->noteNumber;
+
+                    sendNoteOut(note);
+
+                    it = trackedNotes.erase(it);
+                }
+                else
+                {
+                    ++it;
+                }
+            }
+        }
+
+        if(!foundNote)
+        {
+    		sendNoteOut(note);
+        }
+    }
+
+    void MidiFXRandomizer::processNoteOn(MidiNoteGroup note)
+    {
+        // Tracking not needed if not randomizing midi chan
+        if(midiChan_ == 0)
+        {
+		    sendNoteOut(note);
+            return;
+        }
+
+        if (trackedNotes.size() > 0)
+        {
+            for(auto tNt : trackedNotes)
+            {
+                if (tNt.noteNumber == note.noteNumber && tNt.origChannel == note.channel)
+                {
+                    // same note is being tracked already, kill note
+                    return;
+                }
+            }
+        }
+
+        if (trackedNotes.size() < queueSize)
+        {
+            RandTrackedNote trackedNote;
+            trackedNote.setFromNoteGroup(&note);
+
+            // Keep track of original channel
+            trackedNote.origChannel = note.channel;
+
+            note.channel = constrain(random(note.channel, note.channel + midiChan_), 1, 16);
+
+            trackedNote.channel = note.channel;
+
+            trackedNotes.push_back(trackedNote);
+
             sendNoteOut(note);
         }
+        // Kill if queue is full
     }
 
     void MidiFXRandomizer::removeFromDelayQueue(MidiNoteGroup *note)
@@ -186,7 +258,7 @@ namespace midifx
         else
         {
             // queue is filled, send note out
-            sendNoteOut(*note);
+            processNoteOn(*note);
         }
     }
 
@@ -212,7 +284,7 @@ namespace midifx
             if (stepmicros >= it->noteonMicros)
             {
                 // Send out and remove
-                sendNoteOut(*it);
+                processNoteOn(*it);
                 it = delayedNoteQueue.erase(it);
             }
             else

@@ -33,7 +33,30 @@ namespace midifx
 
 		void onEncoderChangedEditParam(Encoder::Update enc) override;
 
+		void processNoteOff(MidiNoteGroup note) override;
+
+
 	private:
+		struct RandTrackedNote
+		{
+			uint8_t prevNoteNumber = 0;
+			uint8_t channel = 1;
+			uint8_t origChannel = 1;
+			uint8_t noteNumber = 0;
+
+			RandTrackedNote()
+			{
+			}
+
+			void setFromNoteGroup(MidiNoteGroup *noteGroup)
+			{
+				prevNoteNumber = noteGroup->prevNoteNumber;
+				channel = noteGroup->channel;
+				origChannel = noteGroup->channel;
+				noteNumber = noteGroup->noteNumber;
+			}
+		};
+
 		// std::vector<MidiNoteGroup> triggeredNotes;
 		struct RandomSave
 		{
@@ -65,11 +88,16 @@ namespace midifx
 		static const int queueSize = 16;
 		std::vector<MidiNoteGroup> delayedNoteQueue;	  // notes pending for quantization
 
+		std::vector<RandTrackedNote> trackedNotes;	  // notes that are tracked because midi chan changed
+
+
 		static uint8_t getDelayLength(uint8_t delayIndex);
 
 		static uint8_t getRand(uint8_t v, uint8_t minus, uint8_t plus);
 
 		void removeFromDelayQueue(MidiNoteGroup *note);
 		void processDelayedNote(MidiNoteGroup *note);
+
+		void processNoteOn(MidiNoteGroup note);
 	};
 }
