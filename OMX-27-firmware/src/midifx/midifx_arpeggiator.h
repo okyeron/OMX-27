@@ -270,6 +270,8 @@ namespace midifx
 		int patPos_;
 		bool goingUp_;
 
+		bool funcKeyModLength_; // Shortcut key to edit length of mod and transpose patterns without needing to use the encoder
+
 		int8_t heldKey16_ = -1; // Key that is held
 
 		int8_t modCopyBuffer_;

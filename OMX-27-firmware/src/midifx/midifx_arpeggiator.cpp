@@ -11,6 +11,7 @@ namespace midifx
 {
     enum ArpPage
     {
+        ARPPAGE_Chance,
         ARPPAGE_1,
         ARPPAGE_2,
         ARPPAGE_3, // TransposeSteps, TransposeDistance
@@ -129,6 +130,7 @@ namespace midifx
 
         changeArpMode(arpMode_);
 
+        params_.addPage(1);
         params_.addPage(4);
         params_.addPage(4);
         params_.addPage(4);
@@ -2078,6 +2080,16 @@ namespace midifx
         auto page = params_.getSelPage();
         auto param = params_.getSelParam();
 
+        if (e.down() && page >= ARPPAGE_MODPAT && heldKey16_ < 0 && thisKey == 3)
+        {
+            funcKeyModLength_ = true;
+        }
+
+        if (!e.down() && thisKey == 3)
+        {
+            funcKeyModLength_ = false;
+        }
+
         if (funcKeyMode == FUNCKEYMODE_NONE || heldKey16_ >= 0)
         {
             if (e.down())
@@ -2103,7 +2115,7 @@ namespace midifx
                     // Select step
                     if (thisKey >= 11)
                     {
-                        if (param == 16)
+                        if (param == 16 || funcKeyModLength_)
                         {
                             if (page == ARPPAGE_MODPAT)
                             {
@@ -2235,6 +2247,9 @@ namespace midifx
 
         if (heldKey16_ < 0)
         {
+            auto modLengthColor = (funcKeyModLength_ && blinkState) ? LEDOFF : FUNKONE;
+            strip.setPixelColor(3, modLengthColor);
+
             // Function Keys
             if (funcKeyMode == FUNCKEYMODE_F3)
             {
@@ -2385,9 +2400,20 @@ namespace midifx
             useLabelHeader = true;
         }
 
+        if (!useLabelHeader && funcKeyMode == FUNCKEYMODE_NONE && (page == ARPPAGE_MODPAT || page == ARPPAGE_TRANSPPAT))
+        {
+            if (funcKeyModLength_)
+            {
+                useLabelHeader = true;
+
+                tempStrings[0] = "Set Length";
+            }
+        }
+
         if (!useLabelHeader && funcKeyMode != FUNCKEYMODE_NONE && (page == ARPPAGE_MODPAT || page == ARPPAGE_TRANSPPAT))
         {
             useLabelHeader = true;
+
             if (funcKeyMode == FUNCKEYMODE_F1)
             {
                 tempStrings[0] = "Reset";
@@ -2481,70 +2507,39 @@ namespace midifx
             // omxDisp.dispValues16(transpPattern_, transpPatternLength_ + 1, 0, 127, false, params_.getSelParam(), params_.getNumPages(), params_.getSelPage(), encoderSelect_, true, labels, 3);
             return;
         }
+        else if(page == ARPPAGE_Chance)
+        {
+            omxDisp.dispParamBar(chancePerc_, chancePerc_, 0, 100, !getEncoderSelect(), false, "Arpeggiator", "Chance");
+            return;
+        }
 
         omxDisp.clearLegends();
 
         if (page == ARPPAGE_1) // Mode, Pattern, Reset mode, Chance
         {
-            omxDisp.legends[0] = "MODE";
-            omxDisp.legends[1] = "PAT";
-            omxDisp.legends[2] = "RSET";
-            omxDisp.legends[3] = "CHC%";
-            omxDisp.legendText[0] = kModeDisp_[arpMode_];
-            omxDisp.legendText[1] = kPatDisp_[arpPattern_];
-            omxDisp.legendText[2] = kResetDisp_[resetMode_];
-            omxDisp.useLegendString[3] = true;
-            omxDisp.legendString[3] = String(chancePerc_) + "%";
+            omxDisp.setLegend(0, "MODE", kModeDisp_[arpMode_]);
+            omxDisp.setLegend(1, "PAT", kPatDisp_[arpPattern_]);
+            omxDisp.setLegend(2, "RSET", kResetDisp_[resetMode_]);
+            omxDisp.setLegend(3, "CHC%", String(chancePerc_) + "%");
         }
         else if (page == ARPPAGE_2) // Rate, Octave Range, Gate, BPM
         {
-            omxDisp.legends[0] = "RATE";
-            omxDisp.useLegendString[0] = true;
-            omxDisp.legendString[0] = "1/" + String(kArpRates[rateIndex_]);
-
-            omxDisp.legends[1] = "RANG";
-            omxDisp.legendVals[1] = (octaveRange_ + 1);
-
-            omxDisp.legends[2] = "GATE";
-            omxDisp.legendVals[2] = gate;
-
-            omxDisp.legends[3] = "BPM";
-            omxDisp.legendVals[3] = (int)clockConfig.clockbpm;
+            omxDisp.setLegend(0, "RATE", "1/" + String(kArpRates[rateIndex_]));
+            omxDisp.setLegend(1, "RANG", octaveRange_ + 1);
+            omxDisp.setLegend(2, "GATE", gate);
+            omxDisp.setLegend(3, "BPM", (int)clockConfig.clockbpm);
         }
         else if (page == ARPPAGE_3) // Transpose Distance
         {
-            omxDisp.legends[0] = "ODIST";
-            omxDisp.useLegendString[0] = true;
-            omxDisp.legendString[0] = octDistance_ >= 0 ? ("+" + String(octDistance_)) : (String(octDistance_));
-
-            omxDisp.legends[1] = "QUANT";
-
-            if (quantizedRateIndex_ <= -2)
-            {
-                omxDisp.legendText[1] = "OFF";
-            }
-            else if (quantizedRateIndex_ == -1)
-            {
-                omxDisp.legendText[1] = "GBL";
-            }
-            else
-            {
-                omxDisp.useLegendString[1] = true;
-                omxDisp.legendString[1] = "1/" + String(kArpRates[quantizedRateIndex_]);
-            }
-
-
+            omxDisp.setLegend(0, "ODIST", octDistance_ >= 0 ? ("+" + String(octDistance_)) : (String(octDistance_)));
+            omxDisp.setLegend(1, "QUANT", quantizedRateIndex_ <= -2, quantizedRateIndex_ == -1 ? "GBL" : "1/" + String(kArpRates[quantizedRateIndex_]));
         }
         else if (page == ARPPAGE_4) // Velocity, midiChannel_, sendMidi, sendCV
         {
-            omxDisp.legends[0] = "VEL";
-            omxDisp.legends[1] = "CHAN";
-            omxDisp.legends[2] = "MIDI";
-            omxDisp.legends[3] = "CV";
-            omxDisp.legendVals[0] = velocity_;
-            omxDisp.legendVals[1] = midiChannel_ + 1;
-            omxDisp.legendVals[2] = sendMidi_;
-            omxDisp.legendVals[3] = sendCV_;
+            omxDisp.setLegend(0, "VEL", velocity_);
+            omxDisp.setLegend(1, "CHAN", midiChannel_ + 1);
+            omxDisp.setLegend(2, "MIDI", sendMidi_);
+            omxDisp.setLegend(3, "CV", sendCV_);
         }
 
         omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), getEncoderSelect());

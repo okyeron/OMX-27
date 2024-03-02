@@ -286,6 +286,8 @@ struct ColorConfig
 	uint32_t octDnColor = ORANGE;
 	uint32_t octUpColor = RBLUE;
 
+	uint32_t mfxQuickEdit = RED;
+
 	uint32_t mfxNone = LEDOFF; 
 	uint32_t mfxChance = MEDRED; 
 	uint32_t mfxTranspose = PURPLE;		
@@ -373,6 +375,7 @@ extern const int PPQ;
 
 extern const char *mfxOffMsg;
 extern const char *mfxArpEditMsg;
+extern const char *mfxPassthroughEditMsg;
 extern const char *exitMsg;
 extern const char *paramOffMsg;
 

@@ -46,6 +46,11 @@ public:
 	void nextArpPattern();
 	void nextArpOctRange();
 	void gotoArpParams();
+	void enablePassthrough();
+	void selectPrevMFXSlot(bool silent = false);
+	void selectNextMFXSlot(bool silent = false);
+
+
 	uint8_t getArpOctaveRange();
 
 	midifx::MidiFXArpeggiator *getArp(bool autoCreate);
@@ -59,7 +64,7 @@ protected:
 private:
 	bool selected_ = false;
 	bool midiFXParamView_ = false; // If true, parameters adjust the selected midiFX slot.
-	bool arpParamView_ = false;	   // If true, parameters adjust the selected midiFX slot.
+	bool passthroughQuickEdit = false;	   // If true, parameters adjust the selected midiFX slot.
 
 	uint8_t selectedMidiFX_ = 0; // Index of selected midiFX slot
 

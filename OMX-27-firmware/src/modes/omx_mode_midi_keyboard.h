@@ -74,6 +74,7 @@ private:
 	ParamManager params;
 
 	bool macroActive_ = false;
+	bool mfxQuickEdit_ = false;
 
 	// SubModes
 	SubmodeInterface *activeSubmode = nullptr;
@@ -117,6 +118,7 @@ private:
 	void selectMidiFx(uint8_t mfxIndex, bool dispMsg);
 
 	uint8_t mfxIndex_ = 0;
+	uint8_t quickEditMfxIndex_ = 0;
 
 	midimacro::MidiMacroNorns nornsMarco_;
 	midimacro::MidiMacroM8 m8Macro_;

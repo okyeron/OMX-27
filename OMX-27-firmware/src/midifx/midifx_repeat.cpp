@@ -1245,133 +1245,66 @@ namespace midifx
         omxDisp.setDirty();
     }
 
+    // used 186352 bytes
+    //      186320 bytes
+
     void MidiFXRepeat::onDisplayUpdate(uint8_t funcKeyMode)
     {
         omxDisp.clearLegends();
 
         int8_t page = params_.getSelPage();
 
-        switch (page)
-        {
-        case MFXREPEATPAGE_CHANCE:
+        if(page == MFXREPEATPAGE_CHANCE)
         {
             omxDisp.dispParamBar(chancePerc_, chancePerc_, 0, 100, !getEncoderSelect(), false, "Repeat", "Chance");
+            return;
         }
-        break;
+
+        switch (page)
+        {
         case MFXREPEATPAGE_MODERATE:
         {
-            omxDisp.legends[0] = "MODE";
-            omxDisp.legendText[0] = kRepeatModeDisp_[mode_];
-
-            omxDisp.legends[1] = "RATE";
-            if (rateIndex_ < 0)
-            {
-                omxDisp.legendText[1] = "HZ";
-            }
-            else
-            {
-                omxDisp.useLegendString[1] = true;
-                omxDisp.legendString[1] = "1/" + String(kArpRates[rateIndex_]);
-            }
-
-            omxDisp.legends[2] = "RTHZ";
-            if (rateInHz_ < 1.0f)
-            {
-                omxDisp.useLegendString[2] = true;
-                omxDisp.legendString[2] = String(rateInHz_, 2);
-            }
-            else
-            {
-                omxDisp.legendVals[2] = rateInHz_;
-            }
-
-            omxDisp.legends[3] = "Gate";
-            omxDisp.legendVals[3] = gate_;
-
-            omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), getEncoderSelect());
+            omxDisp.setLegend(0, "MODE", kRepeatModeDisp_[mode_]);
+            omxDisp.setLegend(1, "RATE", rateIndex_ < 0 ? ("HZ") : ("1/" + String(kArpRates[rateIndex_])));
+            omxDisp.setLegend(2, "RTHZ", rateInHz_ < 1.0f ? (String(rateInHz_, 2)) : (String(rateInHz_, 1)));
+            omxDisp.setLegend(3, "Gate", gate_);
         }
         break;
         case MFXREPEATPAGE_QUANT:
         {
-            omxDisp.legends[0] = "QUANT";
-
-            if (quantizedRateIndex_ <= -2)
-            {
-                omxDisp.legendText[0] = "OFF";
-            }
-            else if (quantizedRateIndex_ == -1)
-            {
-                omxDisp.legendText[0] = "GBL";
-            }
-            else
-            {
-                omxDisp.useLegendString[0] = true;
-                omxDisp.legendString[0] = "1/" + String(kArpRates[quantizedRateIndex_]);
-            }
-
-            omxDisp.legends[1] = "#RPT";
-            omxDisp.legendVals[1] = numOfRepeats_ + 1;
-
-            omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), getEncoderSelect());
+            omxDisp.setLegend(0, "QUANT", quantizedRateIndex_ <= -2, quantizedRateIndex_ == -1 ? ("GBL") : ("1/" + String(kArpRates[quantizedRateIndex_])));
+            omxDisp.setLegend(1, "#RPT", numOfRepeats_ + 1);
         }
         break;
         case MFXREPEATPAGE_FADEVEL:
         {
-            omxDisp.legends[0] = "FVEL";
-            omxDisp.legendText[0] = fadeVel_ ? "FADE" : "OFF";
-            omxDisp.legends[1] = "STAR";
-            omxDisp.legendVals[1] = velStart_;
-            omxDisp.legends[2] = "END";
-            omxDisp.legendVals[2] = velEnd_;
-
-            omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), getEncoderSelect());
+            omxDisp.setLegend(0, "FVEL", !fadeVel_, "FADE");
+            omxDisp.setLegend(1, "STRT", velStart_);
+            omxDisp.setLegend(2, "END", velEnd_);
         }
         break;
         case MFXREPEATPAGE_FADERATE:
         {
-            omxDisp.legends[0] = "FRAT";
-            omxDisp.legendText[0] = fadeRate_ ? "FADE" : "OFF";
-            omxDisp.legends[1] = "STAR";
-            omxDisp.legends[2] = "END";
+            omxDisp.setLegend(0, "FRAT", !fadeRate_, "FADE");
 
             if(useRateHz())
             {
                 float sHz = rateToHz(rateStartHz_);
                 float eHz = rateToHz(rateEndHz_);
 
-                if (sHz < 1.0f)
-                {
-                    omxDisp.useLegendString[1] = true;
-                    omxDisp.legendString[1] = String(sHz, 2);
-                }
-                else
-                {
-                    omxDisp.legendVals[1] = sHz;
-                }
-
-                if (eHz < 1.0f)
-                {
-                    omxDisp.useLegendString[2] = true;
-                    omxDisp.legendString[2] = String(eHz, 2);
-                }
-                else
-                {
-                    omxDisp.legendVals[2] = eHz;
-                }
+                omxDisp.setLegend(1, "STRT", sHz < 1.0f ? String(sHz, 2) : String(sHz, 1));
+                omxDisp.setLegend(2, "END", eHz < 1.0f ? String(eHz, 2) : String(eHz, 1));
             }
             else
             {
-                omxDisp.useLegendString[1] = true;
-                omxDisp.legendString[1] = "1/" + String(kArpRates[rateStart_]);
-
-                omxDisp.useLegendString[2] = true;
-                omxDisp.legendString[2] = "1/" + String(kArpRates[rateEnd_]);
+                omxDisp.setLegend(1, "STRT", "1/" + String(kArpRates[rateStart_]));
+                omxDisp.setLegend(2, "END", "1/" + String(kArpRates[rateEnd_]));
             }
-
-            omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), getEncoderSelect());
         }
         break;
         }
+
+        omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), getEncoderSelect());
     }
 
     int MidiFXRepeat::saveToDisk(int startingAddress, Storage *storage)

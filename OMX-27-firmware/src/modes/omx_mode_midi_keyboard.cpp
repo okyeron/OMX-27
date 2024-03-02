@@ -618,7 +618,7 @@ void OmxModeMidiKeyboard::onKeyUpdate(OMXKeypadEvent e)
 					int amt = thisKey == 11 ? -1 : 1;
 					midiSettings.octave = constrain(midiSettings.octave + amt, -5, 4);
 				}
-				else if (thisKey == 1 || thisKey == 2) // Change Param selection
+				else if (!mfxQuickEdit_ && (thisKey == 1 || thisKey == 2)) // Change Param selection
 				{
 					if (thisKey == 1)
 					{
@@ -776,7 +776,15 @@ bool OmxModeMidiKeyboard::onKeyUpdateSelMidiFX(OMXKeypadEvent e)
 		{
 			if (midiSettings.midiAUX) // Aux mode
 			{
-				if (thisKey == 5)
+				if (mfxQuickEdit_ && thisKey == 1)
+				{
+					subModeMidiFx[quickEditMfxIndex_].selectPrevMFXSlot();
+				}
+				else if (mfxQuickEdit_ && thisKey == 2)
+				{
+					subModeMidiFx[quickEditMfxIndex_].selectNextMFXSlot();
+				}
+				else if (thisKey == 5)
 				{
 					keyConsumed = true;
 					// Turn off midiFx
@@ -789,6 +797,22 @@ bool OmxModeMidiKeyboard::onKeyUpdateSelMidiFX(OMXKeypadEvent e)
 					selectMidiFx(thisKey - 6, true);
 					// Change active midiFx
 					// mfxIndex_ = thisKey - 6;
+				}
+				else if (thisKey == 20) // MidiFX Passthrough
+				{
+					keyConsumed = true;
+					if (mfxIndex_ < NUM_MIDIFX_GROUPS)
+					{
+						enableSubmode(&subModeMidiFx[mfxIndex_]);
+						subModeMidiFx[mfxIndex_].enablePassthrough();
+						mfxQuickEdit_ = true;
+						quickEditMfxIndex_ = mfxIndex_;
+						midiSettings.midiAUX = false;
+					}
+					else
+					{
+						omxDisp.displayMessage(mfxOffMsg);
+					}
 				}
 				else if (thisKey == 22) // Goto arp params
 				{
@@ -996,6 +1020,7 @@ void OmxModeMidiKeyboard::updateLEDs()
 			strip.setPixelColor(6 + i, mfxColor);
 		}
 
+		strip.setPixelColor(20, mfxQuickEdit_ && blinkState ? LEDOFF : colorConfig.mfxQuickEdit);
 		strip.setPixelColor(22, colorConfig.gotoArpParams);
 		strip.setPixelColor(23, colorConfig.nextArpPattern);
 
@@ -1315,7 +1340,7 @@ void OmxModeMidiKeyboard::disableSubmode()
 	}
 
 	midiSettings.midiAUX = false;
-
+	mfxQuickEdit_ = false;
 	activeSubmode = nullptr;
 	omxDisp.setDirty();
 }
