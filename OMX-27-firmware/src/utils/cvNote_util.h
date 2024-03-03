@@ -36,9 +36,9 @@ private:
         uint8_t cvNote : 6; // 0 - 54, note gets 24 added to it
     };
 
-    bool pulseGate;
+    bool pulseGate = false;
 
-    unsigned long lastNoteOnTime;
+    uint32_t turnGateOnTime;
 
     static const uint8_t trackedSize = 16;
 
@@ -46,7 +46,7 @@ private:
 
     static bool isNoteValid(uint8_t midiNoteNum);
 
-    static void setGate(bool high);
+    void setGate(bool high);
     void setPitch(uint8_t cvNoteNum);
 
     static uint8_t midi2CVNote(uint8_t noteNumber);
