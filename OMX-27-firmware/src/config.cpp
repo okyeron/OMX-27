@@ -72,6 +72,7 @@ const char *mfxArpEditMsg = "Arp Edit";
 const char *mfxPassthroughEditMsg = "MFX Quickedit";
 const char *exitMsg = "Exit";
 const char *paramOffMsg = "OFF";
+const char *paramOnMsg = "ON";
 
 const char *modes[] = {"MI", "DRUM", "CH", "S1", "S2", "GR", "EL", "OM"};
 const char *macromodes[] = {"Off", "M8", "NRN", "DEL"};

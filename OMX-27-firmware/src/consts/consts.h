@@ -44,9 +44,9 @@ const float stepsPerVolt = fullRangeDAC / fullRangeV;
 const float stepsPerOctave = stepsPerVolt;
 const float stepsPerSemitone = stepsPerOctave / 12;
 
-const int midiMiddleC = 60;
-const int midiLowestNote = midiMiddleC - 3 * 12; // 3 is how many octaves under middle c
-const int midiHightestNote = midiLowestNote + int(fullRangeV * 12) - 1;
+const uint8_t midiMiddleC = 60;
+const uint8_t cvLowestNote = midiMiddleC - 3 * 12; // 3 is how many octaves under middle c
+const uint8_t cvHightestNote = cvLowestNote + int(fullRangeV * 12) - 1;
 
 // FONTS
 #define FONT_LABELS u8g2_font_5x8_tf

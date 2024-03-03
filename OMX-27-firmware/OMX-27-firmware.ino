@@ -1,6 +1,6 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
 
-//	v1.13.1
+//	v1.13.3
 //	Last update: Feb 2024
 //
 //	Original concept and initial code by Steven Noreyko
@@ -28,6 +28,7 @@
 #include "src/midi/sysex.h"
 #include "src/hardware/omx_keypad.h"
 #include "src/utils/omx_util.h"
+#include "src/utils/cvNote_util.h"
 #include "src/hardware/omx_disp.h"
 #include "src/modes/omx_mode_midi_keyboard.h"
 #include "src/modes/omx_mode_drum.h"
@@ -271,7 +272,7 @@ void handleNoteOn(byte channel, byte note, byte velocity)
 	}
 	if (midiSettings.midiInToCV)
 	{
-		omxUtil.cvNoteOn(note);
+		cvNoteUtil.cvNoteOn(note);
 	}
 
 	omxScreensaver.resetCounter();
@@ -288,7 +289,7 @@ void handleNoteOff(byte channel, byte note, byte velocity)
 
 	if (midiSettings.midiInToCV)
 	{
-		omxUtil.cvNoteOff();
+		cvNoteUtil.cvNoteOff(note);
 	}
 
 	activeOmxMode->inMidiNoteOff(channel, note, velocity);
@@ -370,7 +371,9 @@ void saveHeader()
 
 	storage->write(EEPROM_HEADER_ADDRESS + 36, clockConfig.globalQuantizeStepIndex);
 
-	// 37 bytes
+	storage->write(EEPROM_HEADER_ADDRESS + 37, cvNoteUtil.triggerMode);
+
+	// 38 bytes
 }
 
 // returns true if the header contained initialized data
@@ -439,6 +442,8 @@ bool loadHeader(void)
 	midiSettings.defaultVelocity = storage->read(EEPROM_HEADER_ADDRESS + 35);
 
 	clockConfig.globalQuantizeStepIndex = constrain(storage->read(EEPROM_HEADER_ADDRESS + 36), 0, kNumArpRates - 1);
+
+	cvNoteUtil.triggerMode = constrain(storage->read(EEPROM_HEADER_ADDRESS + 37), 0, 1);
 
 	return true;
 }
@@ -688,6 +693,7 @@ void loop()
 	seqConfig.currentFrameMicros = micros();
 	// Micros timeStart = micros();
 	activeOmxMode->loopUpdate(passed);
+	cvNoteUtil.loopUpdate(passed);
 
 	if (passed > 0) // This should always be true
 	{

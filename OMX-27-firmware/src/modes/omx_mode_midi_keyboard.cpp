@@ -2,6 +2,7 @@
 #include "../config.h"
 #include "../consts/colors.h"
 #include "../utils/omx_util.h"
+#include "../utils/cvNote_util.h"
 #include "../hardware/omx_disp.h"
 #include "../hardware/omx_leds.h"
 #include "../midi/midi.h"
@@ -21,7 +22,8 @@ enum MIKeyModePage {
     MIPAGE_OUTCC,
     MIPAGE_POTSANDMACROS,
     MIPAGE_SCALES,
-    MIPAGE_CFG
+    MIPAGE_CFG,
+	MIPAGE_VERSION
 };
 
 OmxModeMidiKeyboard::OmxModeMidiKeyboard()
@@ -33,6 +35,7 @@ OmxModeMidiKeyboard::OmxModeMidiKeyboard()
 	params.addPage(4); // PotBank, Thru, Macro, Macro Channel
 	params.addPage(4); // Root, Scale, Lock Scale Notes, Group notes. 
 	params.addPage(4); // Pot CC CFG
+	params.addPage(4); // MIPAGE_VERSION
 
 	// subModeMidiFx.setNoteOutputFunc(&OmxModeMidiKeyboard::onNotePostFXForwarder, this);
 
@@ -437,6 +440,10 @@ void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
 		if (selParam == 3)
 		{
 			clockConfig.globalQuantizeStepIndex = constrain(clockConfig.globalQuantizeStepIndex + amt, 0, kNumArpRates - 1);
+		}
+		else if (selParam == 4)
+		{
+			cvNoteUtil.triggerMode = constrain(cvNoteUtil.triggerMode + amt, 0, 1);
 		}
 	}
 
@@ -1129,110 +1136,65 @@ void OmxModeMidiKeyboard::onDisplayUpdate()
 		{ // DISPLAY
 			if (!encoderConfig.enc_edit)
 			{
+				if (params.getSelPage() == MIPAGE_VERSION)
+				{
+					tempString = "v" + String(MAJOR_VERSION) + "." + String(MINOR_VERSION) + "." + String(POINT_VERSION);
+					omxDisp.dispGenericModeLabel(tempString.c_str(), params.getNumPages(), params.getSelPage());
+					return;
+				}
+
 				if (params.getSelPage() == MIPAGE_OUTMIDI)
 				{
 					omxDisp.clearLegends();
 
-					//			if (midiRoundRobin) {
-					//				displaychan = rrChannel;
-					//			}
-					omxDisp.legends[0] = "OCT";
-					omxDisp.legends[1] = "CH";
-					omxDisp.legends[2] = "VEL";
-					omxDisp.legends[3] = "";
-					omxDisp.legendVals[0] = (int)midiSettings.octave + 4;
-					omxDisp.legendVals[1] = sysSettings.midiChannel;
-					omxDisp.legendVals[2] = midiSettings.defaultVelocity;
-					omxDisp.legendVals[3] = -127;
-					omxDisp.legendText[3] = "";
+					omxDisp.setLegend(0, "OCT", (int)midiSettings.octave + 4);
+					omxDisp.setLegend(1,"CH", sysSettings.midiChannel);
+					omxDisp.setLegend(2,"VEL", midiSettings.defaultVelocity);
 				}
 				else if (params.getSelPage() == MIPAGE_MIDIINSPECT)
 				{
 					omxDisp.clearLegends();
 
-					//			if (midiRoundRobin) {
-					//				displaychan = rrChannel;
-					//			}
-					omxDisp.legends[0] = "P CC";
-					omxDisp.legends[1] = "P VAL";
-					omxDisp.legends[2] = "NOTE";
-					omxDisp.legends[3] = "VEL";
-					omxDisp.legendVals[0] = potSettings.potCC;
-					omxDisp.legendVals[1] = potSettings.potVal;
-					omxDisp.legendVals[2] = midiSettings.midiLastNote;
-					omxDisp.legendVals[3] = midiSettings.midiLastVel;
+					omxDisp.setLegend(0,"P CC", potSettings.potCC);
+					omxDisp.setLegend(1,"P VAL", potSettings.potVal);
+					omxDisp.setLegend(2,"NOTE", midiSettings.midiLastNote);
+					omxDisp.setLegend(3,"VEL", midiSettings.midiLastVel);
 				}
 				else if (params.getSelPage() == MIPAGE_OUTCC)
 				{
 					omxDisp.clearLegends();
 
-					omxDisp.legends[0] = "RR";
-					omxDisp.legends[1] = "RROF";
-					omxDisp.legends[2] = "PGM";
-					omxDisp.legends[3] = "BNK";
-					omxDisp.legendVals[0] = midiSettings.midiRRChannelCount;
-					omxDisp.legendVals[1] = midiSettings.midiRRChannelOffset;
-					omxDisp.legendVals[2] = midiSettings.currpgm + 1;
-					omxDisp.legendVals[3] = midiSettings.currbank;
+					omxDisp.setLegend(0,"RR", midiSettings.midiRRChannelCount);
+					omxDisp.setLegend(1,"RROF", midiSettings.midiRRChannelOffset);
+					omxDisp.setLegend(2,"PGM", midiSettings.currpgm + 1);
+					omxDisp.setLegend(3,"BNK", midiSettings.currbank);
 				}
 				else if (params.getSelPage() == MIPAGE_POTSANDMACROS) // SUBMODE_MIDI3
 				{
 					omxDisp.clearLegends();
 
-					omxDisp.legends[0] = "PBNK"; // Potentiometer Banks
-					omxDisp.legends[1] = "THRU"; // MIDI thru (usb to hardware)
-					omxDisp.legends[2] = "MCRO"; // Macro mode
-					omxDisp.legends[3] = "M-CH";
-					omxDisp.legendVals[0] = potSettings.potbank + 1;
-					omxDisp.legendVals[1] = -127;
-					if (midiSettings.midiSoftThru)
-					{
-						omxDisp.legendText[1] = "On";
-					}
-					else
-					{
-						omxDisp.legendText[1] = "Off";
-					}
-					omxDisp.legendVals[2] = -127;
-					omxDisp.legendText[2] = macromodes[midiMacroConfig.midiMacro];
-					omxDisp.legendVals[3] = midiMacroConfig.midiMacroChan;
+					omxDisp.setLegend(0,"PBNK", potSettings.potbank + 1);
+					omxDisp.setLegend(1,"THRU", midiSettings.midiSoftThru);
+					omxDisp.setLegend(2,"MCRO", macromodes[midiMacroConfig.midiMacro]);
+					omxDisp.setLegend(3,"M-CH", midiMacroConfig.midiMacroChan);
 				}
 				else if (params.getSelPage() == MIPAGE_SCALES) // SCALES
 				{
 					omxDisp.clearLegends();
-					omxDisp.legends[0] = "ROOT";
-					omxDisp.legends[1] = "SCALE";
-					omxDisp.legends[2] = "LOCK";
-					omxDisp.legends[3] = "GROUP";
-					omxDisp.legendVals[0] = -127;
-					if (scaleConfig.scalePattern < 0)
-					{
-						omxDisp.legendVals[1] = -127;
-						omxDisp.legendText[1] = "Off";
-					}
-					else
-					{
-						omxDisp.legendVals[1] = scaleConfig.scalePattern;
-					}
 
-					omxDisp.legendVals[2] = -127;
-					omxDisp.legendVals[3] = -127;
-
-					omxDisp.legendText[0] = musicScale->getNoteName(scaleConfig.scaleRoot);
-					omxDisp.legendText[2] = scaleConfig.lockScale ? "On" : "Off";
-					omxDisp.legendText[3] = scaleConfig.group16 ? "On" : "Off";
+					omxDisp.setLegend(0,"ROOT", musicScale->getNoteName(scaleConfig.scaleRoot));
+					omxDisp.setLegend(1,"SCALE", scaleConfig.scalePattern < 0, scaleConfig.scalePattern);
+					omxDisp.setLegend(2,"LOCK", scaleConfig.lockScale);
+					omxDisp.setLegend(3,"GROUP", scaleConfig.group16);
 				}
 				else if (params.getSelPage() == MIPAGE_CFG) // CONFIG
 				{
 					omxDisp.clearLegends();
-					omxDisp.legends[0] = "P CC";
-					omxDisp.legends[1] = "CLR";
-					omxDisp.legendText[0] = "CFG";
-					omxDisp.legendText[1] = "STOR";
 
-					omxDisp.legends[2] = "QUANT";
-					omxDisp.useLegendString[2] = true;
-                	omxDisp.legendString[2] = "1/" + String(kArpRates[clockConfig.globalQuantizeStepIndex]);
+					omxDisp.setLegend(0,"P CC", "CFG");
+					omxDisp.setLegend(1,"CLR", "STOR");
+					omxDisp.setLegend(2,"QUANT", "1/" + String(kArpRates[clockConfig.globalQuantizeStepIndex]));
+					omxDisp.setLegend(3,"CV M", cvNoteUtil.getTriggerModeDispName());
 				}
 
 				omxDisp.dispGenericMode2(params.getNumPages(), params.getSelPage(), params.getSelParam(), encoderSelect && !midiSettings.midiAUX);
@@ -1444,7 +1406,7 @@ void OmxModeMidiKeyboard::onNotePostFX(MidiNoteGroup note)
 		}
 		if (note.sendCV)
 		{
-			omxUtil.cvNoteOff();
+			cvNoteUtil.cvNoteOff(note.noteNumber);
 		}
 	}
 	else
@@ -1474,7 +1436,7 @@ void OmxModeMidiKeyboard::onNotePostFX(MidiNoteGroup note)
 			}
 			if (note.sendCV)
 			{
-				omxUtil.cvNoteOn(note.noteNumber);
+				cvNoteUtil.cvNoteOn(note.noteNumber);
 			}
 		}
 	}

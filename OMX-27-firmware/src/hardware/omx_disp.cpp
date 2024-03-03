@@ -318,6 +318,10 @@ void OmxDisp::setLegend(uint8_t index, const char *label, bool isOff, String tex
 		setLegend(index, label, text);
 	}
 }
+void OmxDisp::setLegend(uint8_t index, const char* label, bool value)
+{
+		setLegend(index, label, value ? paramOnMsg : paramOffMsg);
+}
 
 void OmxDisp::dispGenericMode(int selected)
 {
