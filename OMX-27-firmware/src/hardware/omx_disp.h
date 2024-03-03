@@ -87,6 +87,8 @@ public:
 	void setLegend(uint8_t index, const char* label, bool isOff, const char* text);
 	void setLegend(uint8_t index, const char* label, String text);
 	void setLegend(uint8_t index, const char* label, bool isOff, String text);
+	void setLegend(uint8_t index, const char* label, bool value);
+
 
 	void setSubmode(int submode);
 

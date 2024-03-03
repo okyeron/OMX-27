@@ -55,8 +55,8 @@ public:
 	bool areClocksRunning();
 
 	// #### Outbound CV note on/off
-	void cvNoteOn(int notenum);
-	void cvNoteOff();
+	// void cvNoteOn(uint8_t notenum);
+	// void cvNoteOff(uint8_t notenum);
 
 	// #### Outbound MIDI note on/off
 	void midiNoteOn(int notenum, int velocity, int channel);

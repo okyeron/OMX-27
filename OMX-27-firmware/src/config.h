@@ -15,10 +15,12 @@
 // #include <cstdarg>
 
 /* * firmware metadata  */
-// OMX_VERSION = 1.13.1
+// OMX_VERSION = 1.13.2
 const int MAJOR_VERSION = 1;
 const int MINOR_VERSION = 13;
-const int POINT_VERSION = 1;
+const int POINT_VERSION = 2;
+
+// 1.13.2 - Adds CV Trigger modes for legato and regtrig
 
 const int DEVICE_ID = 2;
 
@@ -71,6 +73,8 @@ extern const uint8_t EEPROM_VERSION;
 #define EEPROM_HEADER_ADDRESS 0
 #define EEPROM_HEADER_SIZE 36
 #define EEPROM_PATTERN_ADDRESS 64
+
+#define TRACKED_CV_SIZE 16 //
 
 // next address 1104 (was 1096 before clock)
 
@@ -138,6 +142,7 @@ extern PotSettings potSettings;
 extern int potMinVal;
 extern int potMaxVal;
 
+
 struct MidiConfig
 {
 	uint8_t defaultVelocity = 100;
@@ -163,7 +168,6 @@ struct MidiConfig
 	int currbank = 0;
 	bool midiInToCV = true;
 	bool midiSoftThru = false;
-	int pitchCV;
 	bool midiAUX = false;
 };
 
@@ -378,6 +382,7 @@ extern const char *mfxArpEditMsg;
 extern const char *mfxPassthroughEditMsg;
 extern const char *exitMsg;
 extern const char *paramOffMsg;
+extern const char *paramOnMsg;
 
 extern const char *modes[];
 extern const char *macromodes[];

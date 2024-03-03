@@ -8,6 +8,7 @@
 #include "../hardware/omx_disp.h"
 #include "../midi/noteoffs.h"
 #include "../modes/sequencer.h"
+#include "cvNote_util.h"
 
 void OmxUtil::setup()
 {
@@ -173,25 +174,28 @@ bool OmxUtil::areClocksRunning()
 	return sendClocks_;
 }
 
-void OmxUtil::cvNoteOn(int notenum)
-{
-	if (notenum >= midiLowestNote && notenum < midiHightestNote)
-	{
-		midiSettings.pitchCV = static_cast<int>(roundf((notenum - midiLowestNote) * stepsPerSemitone)); // map (adjnote, 36, 91, 0, 4080);
-		digitalWrite(CVGATE_PIN, HIGH);
-		//         analogWrite(CVPITCH_PIN, midiSettings.pitchCV);
-#if T4
-		dac.setVoltage(midiSettings.pitchCV, false);
-#else
-		analogWrite(CVPITCH_PIN, midiSettings.pitchCV);
-#endif
-	}
-}
-void OmxUtil::cvNoteOff()
-{
-	digitalWrite(CVGATE_PIN, LOW);
-	//	analogWrite(CVPITCH_PIN, 0);
-}
+// void OmxUtil::cvNoteOn(uint8_t notenum)
+// {
+// 	if (notenum >= cvLowestNote && notenum < cvHightestNote)
+// 	{
+// 		midiSettings.pitchCV = static_cast<int>(roundf((notenum - cvLowestNote) * stepsPerSemitone)); // map (adjnote, 36, 91, 0, 4080);
+// 		digitalWrite(CVGATE_PIN, HIGH);
+// 		//         analogWrite(CVPITCH_PIN, midiSettings.pitchCV);
+// #if T4
+// 		dac.setVoltage(midiSettings.pitchCV, false);
+// #else
+// 		analogWrite(CVPITCH_PIN, midiSettings.pitchCV);
+// #endif
+// 	}
+// }
+// void OmxUtil::cvNoteOff(uint8_t notenum)
+// {
+// 	if (notenum >= cvLowestNote && notenum < cvHightestNote)
+// 	{
+// 		digitalWrite(CVGATE_PIN, LOW);
+// 	//	analogWrite(CVPITCH_PIN, 0);
+// 	}
+// }
 
 void OmxUtil::midiNoteOn(int notenum, int velocity, int channel)
 {
@@ -240,7 +244,7 @@ void OmxUtil::midiNoteOn(MusicScales *scale, int notenum, int velocity, int chan
 		midiSettings.midiChannelState[notenum] = adjchan;
 		MM::sendNoteOn(adjnote, velocity, adjchan);
 		// CV
-		cvNoteOn(adjnote);
+		cvNoteUtil.cvNoteOn(adjnote);
 	}
 	else
 	{
@@ -272,7 +276,7 @@ void OmxUtil::midiNoteOff(int notenum, int channel)
 	{
 		MM::sendNoteOff(adjnote, 0, adjchan);
 		// CV off
-		cvNoteOff();
+		cvNoteUtil.cvNoteOff(adjnote);
 		midiSettings.midiKeyState[notenum] = -1;
 	}
 

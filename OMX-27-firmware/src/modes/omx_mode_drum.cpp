@@ -2,6 +2,7 @@
 #include "../config.h"
 #include "../consts/colors.h"
 #include "../utils/omx_util.h"
+#include "../utils/cvNote_util.h"
 #include "../hardware/omx_disp.h"
 #include "../hardware/omx_leds.h"
 #include "../midi/midi.h"
@@ -370,6 +371,10 @@ void OmxModeDrum::onEncoderChanged(Encoder::Update enc)
 		if (selParam == 3)
 		{
 			clockConfig.globalQuantizeStepIndex = constrain(clockConfig.globalQuantizeStepIndex + amt, 0, kNumArpRates - 1);
+		}
+		else if (selParam == 4)
+		{
+			cvNoteUtil.triggerMode = constrain(cvNoteUtil.triggerMode + amt, 0, 1);
 		}
 	}
 
@@ -1058,13 +1063,10 @@ void OmxModeDrum::onDisplayUpdate()
 				else if (params.getSelPage() == DRUMPAGE_CFG) // CONFIG
 				{
 					omxDisp.clearLegends();
-					omxDisp.legends[0] = "CC";
-					omxDisp.legendText[0] = "CFG";
-
-
-					omxDisp.legends[2] = "QUANT";
-					omxDisp.useLegendString[2] = true;
-                	omxDisp.legendString[2] = "1/" + String(kArpRates[clockConfig.globalQuantizeStepIndex]);
+					omxDisp.setLegend(0,"P CC", "CFG");
+					omxDisp.setLegend(1,"CLR", "STOR");
+					omxDisp.setLegend(2,"QUANT", "1/" + String(kArpRates[clockConfig.globalQuantizeStepIndex]));
+					omxDisp.setLegend(3,"CV M", cvNoteUtil.getTriggerModeDispName());
 				}
 
 				omxDisp.dispGenericMode2(params.getNumPages(), params.getSelPage(), params.getSelParam(), getEncoderSelect());
@@ -1326,7 +1328,7 @@ void OmxModeDrum::onNotePostFX(MidiNoteGroup note)
 		}
 		if (note.sendCV)
 		{
-			omxUtil.cvNoteOff();
+			cvNoteUtil.cvNoteOff(note.noteNumber);
 		}
 	}
 	else
@@ -1356,7 +1358,7 @@ void OmxModeDrum::onNotePostFX(MidiNoteGroup note)
 			}
 			if (note.sendCV)
 			{
-				omxUtil.cvNoteOn(note.noteNumber);
+				cvNoteUtil.cvNoteOn(note.noteNumber);
 			}
 		}
 	}

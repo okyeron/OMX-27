@@ -2,11 +2,13 @@
 #include "../config.h"
 #include "../consts/colors.h"
 #include "../utils/omx_util.h"
+#include "../utils/cvNote_util.h"
 #include "../hardware/omx_disp.h"
 #include "../hardware/omx_leds.h"
 // #include "../sequencer.h"
 #include "../midi/midi.h"
 #include "../midi/noteoffs.h"
+
 
 enum ChordsModePage
 {
@@ -2092,7 +2094,7 @@ void OmxModeChords::onNotePostFX(MidiNoteGroup note)
 		}
 		if (note.sendCV)
 		{
-			omxUtil.cvNoteOff();
+			cvNoteUtil.cvNoteOff(note.noteNumber);
 		}
 	}
 	else
@@ -2120,7 +2122,7 @@ void OmxModeChords::onNotePostFX(MidiNoteGroup note)
 			}
 			if (note.sendCV)
 			{
-				omxUtil.cvNoteOn(note.noteNumber);
+				cvNoteUtil.cvNoteOn(note.noteNumber);
 			}
 		}
 	}
