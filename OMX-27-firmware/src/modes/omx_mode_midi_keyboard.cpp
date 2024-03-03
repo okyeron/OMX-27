@@ -22,7 +22,8 @@ enum MIKeyModePage {
     MIPAGE_OUTCC,
     MIPAGE_POTSANDMACROS,
     MIPAGE_SCALES,
-    MIPAGE_CFG
+    MIPAGE_CFG,
+	MIPAGE_VERSION
 };
 
 OmxModeMidiKeyboard::OmxModeMidiKeyboard()
@@ -34,6 +35,7 @@ OmxModeMidiKeyboard::OmxModeMidiKeyboard()
 	params.addPage(4); // PotBank, Thru, Macro, Macro Channel
 	params.addPage(4); // Root, Scale, Lock Scale Notes, Group notes. 
 	params.addPage(4); // Pot CC CFG
+	params.addPage(4); // MIPAGE_VERSION
 
 	// subModeMidiFx.setNoteOutputFunc(&OmxModeMidiKeyboard::onNotePostFXForwarder, this);
 
@@ -1134,6 +1136,13 @@ void OmxModeMidiKeyboard::onDisplayUpdate()
 		{ // DISPLAY
 			if (!encoderConfig.enc_edit)
 			{
+				if (params.getSelPage() == MIPAGE_VERSION)
+				{
+					tempString = "v" + String(MAJOR_VERSION) + "." + String(MINOR_VERSION) + "." + String(POINT_VERSION);
+					omxDisp.dispGenericModeLabel(tempString.c_str(), params.getNumPages(), params.getSelPage());
+					return;
+				}
+
 				if (params.getSelPage() == MIPAGE_OUTMIDI)
 				{
 					omxDisp.clearLegends();
