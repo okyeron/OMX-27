@@ -37,6 +37,10 @@ void OmxDisp::drawStartupScreen()
 	u8g2_display.setForegroundColor(WHITE);
 	u8g2_display.setBackgroundColor(BLACK);
 	drawLoading();
+	// Display version
+    display.clearDisplay();
+    displayMessageTimed("v" + String(MAJOR_VERSION) + "." + String(MINOR_VERSION) + "." + String(POINT_VERSION), 1);
+    display.display();
 }
 
 void OmxDisp::displayMessage(String msg)
