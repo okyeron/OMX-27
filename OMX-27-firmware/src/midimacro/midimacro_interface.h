@@ -41,6 +41,8 @@ namespace midimacro
 		virtual void setDoNoteOn(void (*fptr)(void *, uint8_t), void *context);
 		virtual void setDoNoteOff(void (*fptr)(void *, uint8_t), void *context);
 
+		virtual void inMidiControlChange(byte channel, byte control, byte value) {}
+
 	protected:
 		bool enabled_;
 		bool encoderSelect_;

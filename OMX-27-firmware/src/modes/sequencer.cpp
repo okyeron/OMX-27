@@ -9,6 +9,7 @@
 #include "../hardware/omx_disp.h"
 #include "../hardware/omx_leds.h"
 #include "../utils/omx_util.h"
+#include "../utils/cvNote_util.h"
 
 // globals in main ino
 extern SequencerState sequencer;
@@ -555,7 +556,7 @@ void seqNoteOn(int notenum, int velocity, int patternNum)
 		// CV
 		if (sequencer.getCurrentPattern()->sendCV)
 		{
-			omxUtil.cvNoteOn(adjnote);
+			cvNoteUtil.cvNoteOn(adjnote);
 		}
 	}
 
@@ -574,7 +575,7 @@ void seqNoteOff(int notenum, int patternNum)
 		// CV off
 		if (sequencer.getCurrentPattern()->sendCV)
 		{
-			omxUtil.cvNoteOff();
+			cvNoteUtil.cvNoteOff(adjnote);
 		}
 	}
 

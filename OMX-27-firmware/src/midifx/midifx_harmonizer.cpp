@@ -41,11 +41,6 @@ namespace midifx
 		return "HARM";
 	}
 
-	uint32_t MidiFXHarmonizer::getColor()
-	{
-		return PURPLE;
-	}
-
 	MidiFXInterface *MidiFXHarmonizer::getClone()
 	{
 		auto clone = new MidiFXHarmonizer();

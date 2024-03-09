@@ -4,6 +4,7 @@
 #include "../consts/consts.h"
 #include "../config.h"
 #include "../midi/midi.h"
+#include "../utils/cvNote_util.h"
 
 PendingNoteHistory::PendingNoteHistory()
 {
@@ -88,7 +89,7 @@ void PendingNoteOffs::play(uint32_t now)
 			//	 		analogWrite(CVPITCH_PIN, 0);
 			if (queue[i].sendCV)
 			{
-				digitalWrite(CVGATE_PIN, LOW);
+				cvNoteUtil.cvNoteOff(queue[i].note);
 			}
 			queue[i].inUse = false;
 
@@ -134,7 +135,7 @@ bool PendingNoteOffs::sendOffIfPresent(int note, int channel, bool sendCV)
 				//	 		analogWrite(CVPITCH_PIN, 0);
 				if (queue[i].sendCV)
 				{
-					digitalWrite(CVGATE_PIN, LOW);
+					cvNoteUtil.cvNoteOff(queue[i].note);
 				}
 				noteOffSent = true;
 				onNoteOff(queue[i].note, queue[i].channel);
@@ -156,7 +157,7 @@ void PendingNoteOffs::sendOffNow(int note, int channel, bool sendCV)
 		MM::sendNoteOff(note, 0, channel);
 		if (sendCV)
 		{
-			digitalWrite(CVGATE_PIN, LOW);
+			cvNoteUtil.cvNoteOff(note);
 		}
 		onNoteOff(note, channel);
 	}
@@ -235,26 +236,19 @@ bool PendingNoteOns::remove(int note, int channel)
 
 void PendingNoteOns::play(uint32_t now)
 {
-	int pCV;
+	// int pCV;
 	for (int i = 0; i < queueSize; ++i)
 	{
 		if (queue[i].inUse && queue[i].time <= now)
 		{
+			midiSettings.midiLastNote = queue[i].note;
+			midiSettings.midiLastVel = queue[i].velocity;
+
 			MM::sendNoteOn(queue[i].note, queue[i].velocity, queue[i].channel);
 
 			if (queue[i].sendCV)
 			{
-				if (queue[i].note >= midiLowestNote && queue[i].note < midiHightestNote)
-				{
-					pCV = static_cast<int>(roundf((queue[i].note - midiLowestNote) * stepsPerSemitone));
-					// map (adjnote, 36, 91, 0, 4080);
-					digitalWrite(CVGATE_PIN, HIGH);
-#if T4
-					dac.setVoltage(pCV, false);
-#else
-					analogWrite(CVPITCH_PIN, pCV);
-#endif
-				}
+				cvNoteUtil.cvNoteOn(queue[i].note);
 			}
 			queue[i].inUse = false;
 
@@ -265,9 +259,9 @@ void PendingNoteOns::play(uint32_t now)
 
 			// 	if (queue[i].sendCV)
 			// 	{
-			// 		if (queue[i].note >= midiLowestNote && queue[i].note < midiHightestNote)
+			// 		if (queue[i].note >= cvLowestNote && queue[i].note < cvHightestNote)
 			// 		{
-			// 			pCV = static_cast<int>(roundf((queue[i].note - midiLowestNote) * stepsPerSemitone));
+			// 			pCV = static_cast<int>(roundf((queue[i].note - cvLowestNote) * stepsPerSemitone));
 			// 			digitalWrite(CVGATE_PIN, HIGH);
 			// 			analogWrite(CVPITCH_PIN, pCV);
 			// 		}

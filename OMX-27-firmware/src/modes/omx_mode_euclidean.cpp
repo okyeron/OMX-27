@@ -159,16 +159,6 @@ void OmxModeEuclidean::onModeDeactivated()
 	}
 }
 
-void OmxModeEuclidean::selectMidiFx(uint8_t mfxIndex)
-{
-	// this->mfxIndex = mfxIndex;
-
-	// for(uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
-	// {
-	//     subModeMidiFx[i].setSelected(i == mfxIndex);
-	// }
-}
-
 void OmxModeEuclidean::startSequencers()
 {
 	// pendingStart_ = true;

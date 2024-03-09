@@ -8,6 +8,7 @@ class OmxDisp
 {
 public:
 	// Should make into function
+	
 	const char *legends[4] = {"", "", "", ""};
 	int legendVals[4] = {0, 0, 0, 0};
 	int dispPage = 0;
@@ -40,10 +41,16 @@ public:
 	void dispGenericModeLabelDoubleLine(const char *label1, const char *label2, uint8_t numPages, int8_t selectedPage);
 	void dispGenericModeLabelSmallText(const char *label, uint8_t numPages, int8_t selectedPage);
 
+	// Displays a header and options below
+	// Good for something like a yes/no box
+	void dispOptionCombo(const char * header, const char *options[], uint8_t optionCount, uint8_t selected, bool encSelActive);
+
 	void dispChar16(const char *charArray[], uint8_t charCount, uint8_t selected, uint8_t numPages, int8_t selectedPage, bool encSelActive, bool showLabels, const char *labels[], uint8_t labelCount);
 
 	// Renders values as bars
 	void dispValues16(int8_t valueArray[], uint8_t valueCount, int8_t minValue, int8_t maxValue, bool centered, uint8_t selected, uint8_t numPages, int8_t selectedPage, bool encSelActive, bool showLabels, const char *labels[], uint8_t labelCount);
+
+	void dispParamBar(int8_t potValue, int8_t targetValue, int8_t minValue, int8_t maxValue, bool pickedUp, bool centered, const char* bankName, const char* paramName);
 
 	// Displays slots for midifx or something else in future
 	void dispSlots(const char *slotNames[], uint8_t slotCount, uint8_t selected, uint8_t animPos, bool encSelActive, bool showLabels, const char *labels[], uint8_t labelCount);
@@ -74,6 +81,15 @@ public:
 	void bumpDisplayTimer();
 
 	void clearLegends();
+	void setLegend(uint8_t index, const char* label, int value);
+	void setLegend(uint8_t index, const char* label, bool isOff, int value);
+	void setLegend(uint8_t index, const char* label, const char* text);
+	void setLegend(uint8_t index, const char* label, bool isOff, const char* text);
+	void setLegend(uint8_t index, const char* label, String text);
+	void setLegend(uint8_t index, const char* label, bool isOff, String text);
+	void setLegend(uint8_t index, const char* label, bool value);
+
+
 	void setSubmode(int submode);
 
 	void UpdateMessageTextTimer();
@@ -84,6 +100,9 @@ private:
 	int hline = 8;
 	int messageTextTimer = 0;
 	bool dirtyDisplay = false;
+
+	uint8_t animPos = 0;
+	int animTimer = 0;
 
 	String currentMsg;
 	uint8_t specialMsgType_ = 0;
@@ -102,6 +121,8 @@ private:
 	void renderMessage();
 
 	void dispChordBalance();
+
+	bool validateLegendIndex(uint8_t index);
 };
 
 extern OmxDisp omxDisp;

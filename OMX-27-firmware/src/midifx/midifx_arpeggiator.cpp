@@ -9,10 +9,9 @@
 
 namespace midifx
 {
-    Micros nextArpTriggerTime_ = 0;
-
     enum ArpPage
     {
+        ARPPAGE_Chance,
         ARPPAGE_1,
         ARPPAGE_2,
         ARPPAGE_3, // TransposeSteps, TransposeDistance
@@ -122,12 +121,16 @@ namespace midifx
         transpPatternLength_ = 15;
         syncPos_ = 0;
 
+        quantizedRateIndex_ = -1; // Use global
+        quantizeSync_ = quantizedRateIndex_ >= -1;
+
         heldKey16_ = -1;
 
         prevArpMode_ = 0;
 
         changeArpMode(arpMode_);
 
+        params_.addPage(1);
         params_.addPage(4);
         params_.addPage(4);
         params_.addPage(4);
@@ -152,9 +155,23 @@ namespace midifx
             // }
         }
 
-        for (uint8_t i = 0; i < 8; i++)
+        noteMaster.setContext(this);
+        noteMaster.setProcessNoteFptr(&processNoteForwarder);
+        noteMaster.setSendNoteOutFptr(&sendNoteOutForwarder);
+
+        // for (uint8_t i = 0; i < 8; i++)
+        // {
+        //     trackingNoteGroups[i].prevNoteNumber = 255;
+        //     trackingNoteGroupsPassthrough[i].prevNoteNumber = 255;
+        // }
+    }
+
+    MidiFXArpeggiator::~MidiFXArpeggiator()
+    {
+        if (arpRunning_)
         {
-            trackingNoteGroups[i].prevNoteNumber = 255;
+            // Remove from this
+            seqConfig.numOfActiveArps--;
         }
     }
 
@@ -173,11 +190,6 @@ namespace midifx
         return "ARP";
     }
 
-    uint32_t MidiFXArpeggiator::getColor()
-    {
-        return BLUE;
-    }
-
     MidiFXInterface *MidiFXArpeggiator::getClone()
     {
         MidiFXArpeggiator *clone = new MidiFXArpeggiator();
@@ -188,11 +200,14 @@ namespace midifx
         clone->midiChannel_ = midiChannel_;
         clone->swing_ = swing_;
         clone->rateIndex_ = rateIndex_;
+        clone->quantizedRateIndex_ = rateIndex_;
         clone->octaveRange_ = octaveRange_;
         clone->octDistance_ = octDistance_;
         clone->gate = gate;
         clone->modPatternLength_ = modPatternLength_;
         clone->transpPatternLength_ = transpPatternLength_;
+        clone->multiplierCalculated_ = false;
+        clone->quantizeSync_ = quantizedRateIndex_ >= -1;
 
         for (uint8_t i = 0; i < 16; i++)
         {
@@ -338,7 +353,7 @@ namespace midifx
         holdNoteQueue.clear();
         sortedNoteQueue.clear();
         tempNoteQueue.clear();
-        pendingNotes.clear();
+        fixedLengthNotes.clear();
         heldKey16_ = -1;
     }
 
@@ -388,76 +403,154 @@ namespace midifx
 
         if (chancePerc_ != 100 && (chancePerc_ == 0 || random(100) > chancePerc_))
         {
-            sendNoteOut(note);
+            noteMaster.trackNoteInputPassthrough(&note);
+            // // sendNoteOut(note);
+            // if(note.unknownLength || note.noteOff)
+            // {
+            //     trackNoteInputPassthrough(note, false);
+            // }
+            // else
+            // {
+            //     sendNoteOut(note);
+            // }
+            
             return;
         }
 
-        if (note.unknownLength || note.noteOff)
-        {
-            // only notes of unknown lengths need to be tracked
-            // notes with fixed lengths will turn off automatically.
-            trackNoteInput(note);
-        }
-        else
-        {
-            processNoteInput(note);
-        }
+        noteMaster.trackNoteInput(&note);
+
+        // if (note.unknownLength || note.noteOff)
+        // {
+        //     // only notes of unknown lengths need to be tracked
+        //     // notes with fixed lengths will turn off automatically.
+        //     trackNoteInputPassthrough(note, true);
+        //     trackNoteInput(note);
+        // }
+        // else
+        // {
+        //     processNoteInput(note);
+        // }
     }
 
-    void MidiFXArpeggiator::trackNoteInput(MidiNoteGroup note)
+    // If chance is less than 100% and passing through, notes need to be tracked
+    // and if the same note comes in without passthrough for a noteoff event, it needs to 
+    // be passed through to send noteoff to prevent stuck notes
+    // void MidiFXArpeggiator::trackNoteInputPassthrough(MidiNoteGroup note, bool ignoreNoteOns)
+    // {
+    //     // Note on, not ignored
+    //     if (!ignoreNoteOns && !note.noteOff)
+    //     {
+    //         // Search for an empty slot in trackingNoteGroupsPassthrough
+    //         // If no slots are available/more than 8 notes/ note gets killed. 
+    //         for (uint8_t i = 0; i < 8; i++)
+    //         {
+    //             // Found empty slot
+    //             if (trackingNoteGroupsPassthrough[i].prevNoteNumber == 255)
+    //             {
+    //                 trackingNoteGroupsPassthrough[i].channel = note.channel;
+    //                 trackingNoteGroupsPassthrough[i].prevNoteNumber = note.prevNoteNumber;
+    //                 trackingNoteGroupsPassthrough[i].noteNumber = note.noteNumber;
+
+    //                 // Send it forward through chain
+    //                 sendNoteOut(note);
+    //                 return;
+    //             }
+    //         }
+    //     }
+
+    //     // Note off
+    //     if (note.noteOff)
+    //     {
+    //         // bool noteFound = false;
+
+    //         // Search to see if this note is in trackingNoteGroupsPassthrough
+    //         // Meaning it was previously passed through
+    //         // If it is found, send it through chain
+    //         // PrevNoteNumber should be the origin note number before being modified by MidiFX
+    //         for (uint8_t i = 0; i < 8; i++)
+    //         {
+    //             if (trackingNoteGroupsPassthrough[i].prevNoteNumber != 255)
+    //             {
+    //                 if (trackingNoteGroupsPassthrough[i].channel == note.channel && trackingNoteGroupsPassthrough[i].prevNoteNumber == note.prevNoteNumber)
+    //                 {
+    //                     note.noteNumber = trackingNoteGroupsPassthrough[i].noteNumber;
+    //                     // processNoteInput(note);
+    //                     sendNoteOut(note);
+    //                     trackingNoteGroupsPassthrough[i].prevNoteNumber = 255; // mark empty
+    //                     // noteFound = true;
+    //                 }
+    //             }
+    //         }
+
+    //         // Should be false if note getting sent to arp
+    //         // Avoid double trackNoteInput call
+    //         if(!ignoreNoteOns)
+    //         {
+    //             trackNoteInput(note);
+    //         }
+
+    //         // Note not previously passed through and is noteoff, now send to arp to turn off arp notes
+    //         // if(!noteFound)
+    //         // {
+    //         //     trackNoteInput(note);
+    //         // }
+    //     }
+    // }
+
+    // void MidiFXArpeggiator::trackNoteInput(MidiNoteGroup note)
+    // {
+    //     // Same implementation with more comments in submode_midifx
+    //     // Keeps track of previous note ons and and adjusts note number
+    //     // for note offs using the prevNoteNumber parameter.
+    //     // Why is this necessary?
+    //     // If the note is modified by midifx like randomize before the arp
+    //     // Then the arp can end up having notes stuck on
+    //     // This ensures that notes don't get stuck on.
+    //     if (note.noteOff)
+    //     {
+    //         bool noteFound = false;
+
+    //         for (uint8_t i = 0; i < 8; i++)
+    //         {
+    //             if (trackingNoteGroups[i].prevNoteNumber != 255)
+    //             {
+    //                 if (trackingNoteGroups[i].channel == note.channel && trackingNoteGroups[i].prevNoteNumber == note.prevNoteNumber)
+    //                 {
+    //                     note.noteNumber = trackingNoteGroups[i].noteNumber;
+    //                     processNoteInput(note);
+    //                     trackingNoteGroups[i].prevNoteNumber = 255; // mark empty
+    //                     noteFound = true;
+    //                 }
+    //             }
+    //         }
+
+    //         if (!noteFound)
+    //         {
+    //             processNoteInput(note);
+    //         }
+    //     }
+    //     else if (!note.noteOff)
+    //     {
+    //         for (uint8_t i = 0; i < 8; i++)
+    //         {
+    //             if (trackingNoteGroups[i].prevNoteNumber == 255)
+    //             {
+    //                 trackingNoteGroups[i].channel = note.channel;
+    //                 trackingNoteGroups[i].prevNoteNumber = note.prevNoteNumber;
+    //                 trackingNoteGroups[i].noteNumber = note.noteNumber;
+
+    //                 processNoteInput(note);
+    //                 return;
+    //             }
+    //         }
+    //     }
+    // }
+
+    void MidiFXArpeggiator::processNoteInput(MidiNoteGroup *note)
     {
-        // Same implementation with more comments in submode_midifx
-        // Keeps track of previous note ons and and adjusts note number
-        // for note offs using the prevNoteNumber parameter.
-        // Why is this necessary?
-        // If the note is modified by midifx like randomize before the arp
-        // Then the arp can end up having notes stuck on
-        // This ensures that notes don't get stuck on.
-        if (note.noteOff)
+        if (note->unknownLength)
         {
-            bool noteFound = false;
-
-            for (uint8_t i = 0; i < 8; i++)
-            {
-                if (trackingNoteGroups[i].prevNoteNumber != 255)
-                {
-                    if (trackingNoteGroups[i].channel == note.channel && trackingNoteGroups[i].prevNoteNumber == note.prevNoteNumber)
-                    {
-                        note.noteNumber = trackingNoteGroups[i].noteNumber;
-                        processNoteInput(note);
-                        trackingNoteGroups[i].prevNoteNumber = 255; // mark empty
-                        noteFound = true;
-                    }
-                }
-            }
-
-            if (!noteFound)
-            {
-                processNoteInput(note);
-            }
-        }
-        else if (!note.noteOff)
-        {
-            for (uint8_t i = 0; i < 8; i++)
-            {
-                if (trackingNoteGroups[i].prevNoteNumber == 255)
-                {
-                    trackingNoteGroups[i].channel = note.channel;
-                    trackingNoteGroups[i].prevNoteNumber = note.prevNoteNumber;
-                    trackingNoteGroups[i].noteNumber = note.noteNumber;
-
-                    processNoteInput(note);
-                    return;
-                }
-            }
-        }
-    }
-
-    void MidiFXArpeggiator::processNoteInput(MidiNoteGroup note)
-    {
-        if (note.unknownLength)
-        {
-            if (note.noteOff)
+            if (note->noteOff)
             {
                 arpNoteOff(note);
             }
@@ -470,17 +563,17 @@ namespace midifx
         {
             bool canInsert = true;
 
-            if (pendingNotes.size() < queueSize)
+            if (fixedLengthNotes.size() < queueSize)
             {
-                for (uint8_t i = 0; i < pendingNotes.size(); i++)
+                for (uint8_t i = 0; i < fixedLengthNotes.size(); i++)
                 {
-                    PendingArpNote p = pendingNotes[i];
+                    PendingArpNote p = fixedLengthNotes[i];
 
                     // Note already exists
-                    if (p.noteCache.noteNumber == note.noteNumber && p.noteCache.channel == note.channel)
+                    if (p.noteCache.noteNumber == note->noteNumber && p.noteCache.channel == note->channel)
                     {
                         // Update note off time
-                        pendingNotes[i].offTime = seqConfig.currentFrameMicros + (note.stepLength * clockConfig.step_micros);
+                        fixedLengthNotes[i].offTime = seqConfig.currentFrameMicros + (note->stepLength * clockConfig.step_micros);
                         canInsert = false;
                         break;
                     }
@@ -494,28 +587,30 @@ namespace midifx
             if (canInsert)
             {
                 // Serial.println("Inserting pending note");
-                PendingArpNote pendingNote;
-                pendingNote.noteCache.setFromNoteGroup(note);
-                pendingNote.offTime = seqConfig.currentFrameMicros + (note.stepLength * clockConfig.step_micros);
-                pendingNotes.push_back(pendingNote);
+                PendingArpNote fixedLengthNote;
+                fixedLengthNote.noteCache.setFromNoteGroup(note);
+                fixedLengthNote.offTime = seqConfig.currentFrameMicros + (note->stepLength * clockConfig.step_micros);
+                fixedLengthNotes.push_back(fixedLengthNote);
                 arpNoteOn(note);
             }
             else
             {
                 // Remove from tracking notes
-                for (uint8_t i = 0; i < 8; i++)
-                {
-                    if (trackingNoteGroups[i].prevNoteNumber != 255)
-                    {
-                        if (trackingNoteGroups[i].channel == note.channel && trackingNoteGroups[i].prevNoteNumber == note.prevNoteNumber)
-                        {
-                            trackingNoteGroups[i].prevNoteNumber = 255; // mark empty
-                        }
-                    }
-                }
-                sendNoteOut(note);
+                noteMaster.removeFromTracking(note);
+                // for (uint8_t i = 0; i < 8; i++)
+                // {
+                //     if (trackingNoteGroups[i].prevNoteNumber != 255)
+                //     {
+                //         if (trackingNoteGroups[i].channel == note->channel && trackingNoteGroups[i].prevNoteNumber == note->prevNoteNumber)
+                //         {
+                //             trackingNoteGroups[i].prevNoteNumber = 255; // mark empty
+                //         }
+                //     }
+                // }
+                // Kill note
+                // sendNoteOut(note);
             }
-            // if(pendingNotes.si)
+            // if(fixedLengthNotes.si)
             // arpNoteOn(note);
         }
     }
@@ -530,20 +625,25 @@ namespace midifx
         sortOrderChanged_ = false;
         resetNextTrigger_ = false;
 
-        pendingStartTime_ = micros();
+        // pendingStartTime_ = micros();
 
         notePos_ = 0;
         prevNotePos_ = 0;
         nextNotePos_ = 0;
 
-        if (omxUtil.areClocksRunning() == false)
-        {
-            pendingStart_ = true;
-        }
-        else
+        if(quantizeSync_ == false)
         {
             doPendingStart();
         }
+
+        // if (omxUtil.areClocksRunning() == false)
+        // {
+        //     pendingStart_ = true;
+        // }
+        // else
+        // {
+        //     doPendingStart();
+        // }
 
         // if((pendingStartTime_ - seqConfig.lastClockMicros <= 1000) || sysSettings.omxMode == MODE_EUCLID)
         // {
@@ -558,46 +658,52 @@ namespace midifx
 
     void MidiFXArpeggiator::doPendingStart()
     {
-        if (omxUtil.areClocksRunning() == false)
-        {
-            omxUtil.restartClocks();
-            omxUtil.startClocks();
-            stepMicroDelta_ = (clockConfig.step_micros * 16) * multiplier_;
-            nextStepTimeP_ = seqConfig.lastClockMicros; // Should be current time, start now.
-            nextArpTriggerTime_ = nextStepTimeP_;
-        }
-        else
-        {
-            nextStepTimeP_ = nextArpTriggerTime_;
+        // Serial.println("doPendingStart()");
 
-            // stepMicroDelta_ = (clockConfig.step_micros * 16) * multiplier_;
+        // stepMicroDelta_ = (clockConfig.step_micros * 16) * multiplier_;
+        multiplierCalculated_ = false;
+        nextArpTriggerTime_ = seqConfig.lastClockMicros;
 
-            // nextStepTimeP_ = seqConfig.lastClockMicros + stepMicroDelta_;
+        // if (omxUtil.areClocksRunning() == false)
+        // {
+        //     omxUtil.restartClocks();
+        //     omxUtil.startClocks();
+        //     stepMicroDelta_ = (clockConfig.step_micros * 16) * multiplier_;
+        //     nextStepTimeP_ = seqConfig.lastClockMicros; // Should be current time, start now.
+        //     nextArpTriggerTime_ = nextStepTimeP_;
+        // }
+        // else
+        // {
+        //     nextStepTimeP_ = nextArpTriggerTime_;
 
-            // // Add microstep time until nextStep time is in the future
-            // while(nextStepTimeP_ < seqConfig.currentFrameMicros)
-            // {
-            //     nextStepTimeP_ += stepMicroDelta_;
-            // }
-            // // if next step will be in the past
-            // if (seqConfig.lastClockMicros + stepMicroDelta_ < seqConfig.currentFrameMicros)
-            // {
-            //     return; // return and do on next clock.
+        //     // stepMicroDelta_ = (clockConfig.step_micros * 16) * multiplier_;
 
-            //     // In the past, do it after next clock
-            //     // uint32_t nextClockTime = seqConfig.lastClockMicros + (clockConfig.ppqInterval * (PPQ / 24));
-            //     // nextStepTimeP_ = nextClockTime + stepMicroDelta_;
-            // }
-        }
+        //     // nextStepTimeP_ = seqConfig.lastClockMicros + stepMicroDelta_;
 
-        // tickCount_ = 0;
-        // patPos_ = 0;
-        // notePos_ = 0;
-        // octavePos_ = 0;
+        //     // // Add microstep time until nextStep time is in the future
+        //     // while(nextStepTimeP_ < seqConfig.currentFrameMicros)
+        //     // {
+        //     //     nextStepTimeP_ += stepMicroDelta_;
+        //     // }
+        //     // // if next step will be in the past
+        //     // if (seqConfig.lastClockMicros + stepMicroDelta_ < seqConfig.currentFrameMicros)
+        //     // {
+        //     //     return; // return and do on next clock.
 
-        // resetArpSeq();
+        //     //     // In the past, do it after next clock
+        //     //     // uint32_t nextClockTime = seqConfig.lastClockMicros + (clockConfig.ppqInterval * (PPQ / 24));
+        //     //     // nextStepTimeP_ = nextClockTime + stepMicroDelta_;
+        //     // }
+        // }
 
-        lastStepTimeP_ = nextStepTimeP_;
+        // // tickCount_ = 0;
+        // // patPos_ = 0;
+        // // notePos_ = 0;
+        // // octavePos_ = 0;
+
+        // // resetArpSeq();
+
+        // lastStepTimeP_ = nextStepTimeP_;
         // startMicros = micros();
 
         arpRunning_ = true;
@@ -605,16 +711,18 @@ namespace midifx
         pendingStop_ = false;
 
         seqConfig.numOfActiveArps++;
+
+        // Serial.println("numOfActiveArps: " + String(seqConfig.numOfActiveArps));
     }
 
     void MidiFXArpeggiator::stopArp()
     {
         pendingStart_ = false;
-        // pendingStop_ = false;
+        pendingStop_ = true;
         // arpRunning_ = false;
-        pendingStopCount_ = 0;
+        // pendingStopCount_ = 0;
 
-        doPendingStop();
+        // doPendingStop();
 
         // // Serial.println("stopArp");
         // arpRunning_ = false;
@@ -623,22 +731,25 @@ namespace midifx
 
     void MidiFXArpeggiator::doPendingStop()
     {
+        // Serial.println("doPendingStop");
         if (arpRunning_)
         {
             // Stop clocks if last arp
             seqConfig.numOfActiveArps--;
             if (seqConfig.numOfActiveArps <= 0)
             {
-                omxUtil.stopClocks();
+                // omxUtil.stopClocks();
             }
         }
 
         arpRunning_ = false;
         pendingStart_ = false;
         pendingStop_ = false;
+
+        // Serial.println("numOfActiveArps: " + String(seqConfig.numOfActiveArps));
     }
 
-    bool MidiFXArpeggiator::insertMidiNoteQueue(MidiNoteGroup note)
+    bool MidiFXArpeggiator::insertMidiNoteQueue(MidiNoteGroup *note)
     {
         // Serial.println("playedNoteQueue capacity: " + String(playedNoteQueue.capacity()));
         if (playedNoteQueue.capacity() > queueSize)
@@ -680,17 +791,18 @@ namespace midifx
         return noteAdded;
     }
 
-    bool MidiFXArpeggiator::removeMidiNoteQueue(MidiNoteGroup note)
+    bool MidiFXArpeggiator::removeMidiNoteQueue(MidiNoteGroup *note)
     {
         bool foundNoteToRemove = false;
         auto it = playedNoteQueue.begin();
         while (it != playedNoteQueue.end())
         {
             // remove matching note numbers
-            if (it->noteNumber == note.noteNumber)
+            if (it->noteNumber == note->noteNumber && it->channel == note->channel - 1)
             {
                 // `erase()` invalidates the iterator, use returned iterator
                 it = playedNoteQueue.erase(it);
+                foundNoteToRemove = true;
             }
             else
             {
@@ -920,7 +1032,7 @@ namespace midifx
     //     Serial.print("\n\n");
     // }
 
-    void MidiFXArpeggiator::arpNoteOn(MidiNoteGroup note)
+    void MidiFXArpeggiator::arpNoteOn(MidiNoteGroup *note)
     {
         // if(arpMode_ != ARPMODE_ONESHOT && !arpRunning_ )
         // {
@@ -942,9 +1054,10 @@ namespace midifx
 
         if (hasMidiNotes() == false)
         {
-            velocity_ = note.velocity;
-            sendMidi_ = note.sendMidi;
-            sendCV_ = note.sendCV;
+            velocity_ = note->velocity;
+            sendMidi_ = note->sendMidi;
+            sendCV_ = note->sendCV;
+            midiChannel_ = note->channel - 1; // note.channel is 1-16, sub 1 for 0-15
 
             // if(arpMode_ == ARPMODE_ON || arpMode_ == ARPMODE_ONCE)
             // {
@@ -1008,7 +1121,7 @@ namespace midifx
         }
     }
 
-    void MidiFXArpeggiator::arpNoteOff(MidiNoteGroup note)
+    void MidiFXArpeggiator::arpNoteOff(MidiNoteGroup *note)
     {
         removeMidiNoteQueue(note);
 
@@ -1102,17 +1215,42 @@ namespace midifx
 
         resetArpSeq();
 
-        for (uint8_t i = 0; i < 8; i++)
-        {
-            trackingNoteGroups[i].prevNoteNumber = 255;
-        }
+        noteMaster.clear();
+
+        // for (uint8_t i = 0; i < 8; i++)
+        // {
+        //     trackingNoteGroups[i].prevNoteNumber = 255;
+        // }
     }
 
     void MidiFXArpeggiator::onClockTick()
     {
-        if (pendingStart_ && omxUtil.areClocksRunning())
+        // if (pendingStart_ && omxUtil.areClocksRunning())
+        // {
+        //     doPendingStart();
+        // }
+
+
+        if(!pendingStart_) return;
+
+        uint8_t quantIndex = quantizedRateIndex_ < 0 ? clockConfig.globalQuantizeStepIndex : quantizedRateIndex_; // Use global or local quantize rate?
+
+        bool isQuantizedStep = seqConfig.currentClockTick % ((96 * 4) / kArpRates[quantIndex]) == 0;
+
+        // Move pending notes to active
+        if(isQuantizedStep)
         {
             doPendingStart();
+        }
+    }
+
+    void MidiFXArpeggiator::updateMultiplier()
+    {
+        if (!multiplierCalculated_)
+        {
+            uint8_t rate = kArpRates[rateIndex_]; // 8
+            multiplier_ = 1.0f / (float)rate; // 1 / 8 = 0.125 // Only need to recalculate this if rate changes yo
+            multiplierCalculated_ = true;
         }
     }
 
@@ -1132,17 +1270,17 @@ namespace midifx
         auto now = seqConfig.currentFrameMicros;
 
         // Send arp offs for notes that had fixed lengths
-        auto it = pendingNotes.begin();
-        while (it != pendingNotes.end())
+        auto it = fixedLengthNotes.begin();
+        while (it != fixedLengthNotes.end())
         {
             // remove matching note numbers
             if (it->offTime <= now)
             {
-
+                auto nt = it->noteCache.toMidiNoteGroup();
                 // Serial.println("Removing pending note");
-                arpNoteOff(it->noteCache.toMidiNoteGroup());
+                arpNoteOff(&nt);
                 // `erase()` invalidates the iterator, use returned iterator
-                it = pendingNotes.erase(it);
+                it = fixedLengthNotes.erase(it);
             }
             else
             {
@@ -1156,21 +1294,23 @@ namespace midifx
         //     patternDirty_ = false;
         // }
 
-        if (pendingStart_ && !omxUtil.areClocksRunning() && micros() - pendingStartTime_ >= 15000)
-        {
-            omxUtil.resetClocks();
-            doPendingStart();
-        }
+        // if (pendingStart_ && !omxUtil.areClocksRunning() && micros() - pendingStartTime_ >= 15000)
+        // {
+        //     omxUtil.resetClocks();
+        //     doPendingStart();
+        // }
+
+        // Serial.println("arpRunning_: " + String(arpRunning_));
 
         if (!arpRunning_)
         {
             return;
         }
 
-        if (sysSettings.omxMode == MODE_MIDI && !selected_)
-        {
-            return;
-        }
+        // if (sysSettings.omxMode == MODE_MIDI && !selected_)
+        // {
+        //     return;
+        // }
 
         //   seqPerc_ = (stepmicros - startMicros) / ((float)max(stepMicroDelta_, 1) * (steps_ + 1));
 
@@ -1183,31 +1323,34 @@ namespace midifx
 
         //   uint32_t nextBarMicros = stepMicroDelta_ * (steps_ + 1);
 
+        updateMultiplier();
+
         uint32_t stepmicros = seqConfig.currentFrameMicros;
 
-        if (stepmicros >= nextStepTimeP_)
+        if (stepmicros >= nextArpTriggerTime_)
         {
-            lastStepTimeP_ = nextStepTimeP_;
+            // lastStepTimeP_ = nextStepTimeP_;
 
-            uint8_t rate = kArpRates[rateIndex_];
-            multiplier_ = 1.0f / (float)rate;
+            // stepMicroDelta_ = (clockConfig.step_micros * 16) * multiplier_;
 
-            stepMicroDelta_ = (clockConfig.step_micros * 16) * multiplier_;
+            // nextStepTimeP_ = seqConfig.currentFrameMicros + stepMicroDelta_; // calc step based on rate
 
-            nextStepTimeP_ = seqConfig.currentFrameMicros + stepMicroDelta_; // calc step based on rate
+            nextArpTriggerTime_ = nextArpTriggerTime_ + (clockConfig.step_micros * 16 * multiplier_); 
 
-            nextArpTriggerTime_ = nextStepTimeP_;
+            // nextArpTriggerTime_ = nextStepTimeP_;
 
             arpNoteTrigger();
 
             // Keeps arp running for a bit on stop so if you play new notes they will be in sync
             if (pendingStop_)
             {
-                pendingStopCount_--;
-                if (pendingStopCount_ == 0)
-                {
-                    doPendingStop();
-                }
+                doPendingStop();
+
+                // pendingStopCount_--;
+                // if (pendingStopCount_ == 0)
+                // {
+                //     doPendingStop();
+                // }
             }
         }
     }
@@ -1487,7 +1630,7 @@ namespace midifx
 
         int16_t noteNumber = arpNote.noteNumber;
 
-        noteNumber = applyModPattern(noteNumber);
+        noteNumber = applyModPattern(noteNumber, arpNote.channel);
         stepLength_ = findStepLength(); // Can be changed by ties in mod pattern
 
         if (noteNumber != -127)
@@ -1496,7 +1639,7 @@ namespace midifx
 
             // Add octave
             noteNumber = noteNumber + (octavePos_ * octDistance_);
-            playNote(noteon_micros, noteNumber, velocity_);
+            playNote(noteon_micros, noteNumber, velocity_, arpNote.channel);
         }
 
         bool seqReset = false;
@@ -1555,7 +1698,7 @@ namespace midifx
         // patPos_++;
     }
 
-    int16_t MidiFXArpeggiator::applyModPattern(int16_t noteNumber)
+    int16_t MidiFXArpeggiator::applyModPattern(int16_t noteNumber, uint8_t channel)
     {
         uint8_t modMode = modPattern_[modPos_].mod;
 
@@ -1597,7 +1740,7 @@ namespace midifx
             newNote = lowestPitch_ - 12;
             newNote = applyTranspPattern(newNote);
             uint32_t noteon_micros = seqConfig.currentFrameMicros;
-            playNote(noteon_micros, newNote, velocity_);
+            playNote(noteon_micros, newNote, velocity_, channel);
             lastPlayedNoteNumber_ = newNote;
             newNote = -127;
         }
@@ -1607,7 +1750,7 @@ namespace midifx
             newNote = highestPitch_ + 12;
             newNote = applyTranspPattern(newNote);
             uint32_t noteon_micros = seqConfig.currentFrameMicros;
-            playNote(noteon_micros, newNote, velocity_);
+            playNote(noteon_micros, newNote, velocity_, channel);
             lastPlayedNoteNumber_ = newNote;
             newNote = -127;
         }
@@ -1622,12 +1765,12 @@ namespace midifx
                 newNote = lowestPitch_;
                 newNote = applyTranspPattern(newNote);
                 newNote = newNote + (octavePos_ * 12);
-                playNote(noteon_micros, newNote, velocity_);
+                playNote(noteon_micros, newNote, velocity_, channel);
 
                 newNote = highestPitch_;
                 newNote = applyTranspPattern(newNote);
                 newNote = newNote + (octavePos_ * 12);
-                playNote(noteon_micros, newNote, velocity_);
+                playNote(noteon_micros, newNote, velocity_, channel);
 
                 newNote = -127; // Don't play this note.
 
@@ -1652,7 +1795,7 @@ namespace midifx
                 newNote = applyTranspPattern(newNote);
                 newNote = newNote + (octavePos_ * 12);
 
-                playNote(noteon_micros, newNote, velocity_);
+                playNote(noteon_micros, newNote, velocity_, n.channel);
             }
 
             lastPlayedMod_ = modMode;
@@ -1737,7 +1880,7 @@ namespace midifx
         return newNote;
     }
 
-    void MidiFXArpeggiator::playNote(uint32_t noteOnMicros, int16_t noteNumber, uint8_t velocity)
+    void MidiFXArpeggiator::playNote(uint32_t noteOnMicros, int16_t noteNumber, uint8_t velocity, uint8_t channel)
     {
         // Serial.println("PlayNote: " + String(note.noteNumber));
         if (noteNumber < 0 || noteNumber > 127)
@@ -1745,7 +1888,7 @@ namespace midifx
 
         MidiNoteGroup noteOut;
 
-        noteOut.channel = midiChannel_ + 1;
+        noteOut.channel = channel + 1;
         noteOut.noteNumber = (uint8_t)noteNumber;
         noteOut.prevNoteNumber = (uint8_t)noteNumber;
         noteOut.velocity = velocity;
@@ -1825,6 +1968,7 @@ namespace midifx
             if (param == 0)
             {
                 rateIndex_ = constrain(rateIndex_ + amtSlow, 0, kNumArpRates - 1);
+                multiplierCalculated_ = false;
             }
             else if (param == 1)
             {
@@ -1854,10 +1998,11 @@ namespace midifx
 
                 // velocity_ = constrain(velocity_ + amtFast, 0, 127);
             }
-            // else if (param == 1)
-            // {
-            //     midiChannel_ = constrain(midiChannel_ + amtSlow, 0, 15);
-            // }
+            else if (param == 1)
+            {
+                quantizedRateIndex_ = constrain(quantizedRateIndex_ + amtSlow, -2, kNumArpRates - 1);
+                quantizeSync_ = quantizedRateIndex_ >= -1; // -2 for off
+            }
             // else if (param == 2)
             // {
             //     sendMidi_ = constrain(sendMidi_ + amtSlow, 0, 1);
@@ -1935,6 +2080,16 @@ namespace midifx
         auto page = params_.getSelPage();
         auto param = params_.getSelParam();
 
+        if (e.down() && page >= ARPPAGE_MODPAT && heldKey16_ < 0 && thisKey == 3)
+        {
+            funcKeyModLength_ = true;
+        }
+
+        if (!e.down() && thisKey == 3)
+        {
+            funcKeyModLength_ = false;
+        }
+
         if (funcKeyMode == FUNCKEYMODE_NONE || heldKey16_ >= 0)
         {
             if (e.down())
@@ -1960,7 +2115,7 @@ namespace midifx
                     // Select step
                     if (thisKey >= 11)
                     {
-                        if (param == 16)
+                        if (param == 16 || funcKeyModLength_)
                         {
                             if (page == ARPPAGE_MODPAT)
                             {
@@ -2092,6 +2247,9 @@ namespace midifx
 
         if (heldKey16_ < 0)
         {
+            auto modLengthColor = (funcKeyModLength_ && blinkState) ? LEDOFF : FUNKONE;
+            strip.setPixelColor(3, modLengthColor);
+
             // Function Keys
             if (funcKeyMode == FUNCKEYMODE_F3)
             {
@@ -2242,9 +2400,20 @@ namespace midifx
             useLabelHeader = true;
         }
 
+        if (!useLabelHeader && funcKeyMode == FUNCKEYMODE_NONE && (page == ARPPAGE_MODPAT || page == ARPPAGE_TRANSPPAT))
+        {
+            if (funcKeyModLength_)
+            {
+                useLabelHeader = true;
+
+                tempStrings[0] = "Set Length";
+            }
+        }
+
         if (!useLabelHeader && funcKeyMode != FUNCKEYMODE_NONE && (page == ARPPAGE_MODPAT || page == ARPPAGE_TRANSPPAT))
         {
             useLabelHeader = true;
+
             if (funcKeyMode == FUNCKEYMODE_F1)
             {
                 tempStrings[0] = "Reset";
@@ -2338,52 +2507,39 @@ namespace midifx
             // omxDisp.dispValues16(transpPattern_, transpPatternLength_ + 1, 0, 127, false, params_.getSelParam(), params_.getNumPages(), params_.getSelPage(), encoderSelect_, true, labels, 3);
             return;
         }
+        else if(page == ARPPAGE_Chance)
+        {
+            omxDisp.dispParamBar(chancePerc_, chancePerc_, 0, 100, !getEncoderSelect(), false, "Arpeggiator", "Chance");
+            return;
+        }
 
         omxDisp.clearLegends();
 
         if (page == ARPPAGE_1) // Mode, Pattern, Reset mode, Chance
         {
-            omxDisp.legends[0] = "MODE";
-            omxDisp.legends[1] = "PAT";
-            omxDisp.legends[2] = "RSET";
-            omxDisp.legends[3] = "CHC%";
-            omxDisp.legendText[0] = kModeDisp_[arpMode_];
-            omxDisp.legendText[1] = kPatDisp_[arpPattern_];
-            omxDisp.legendText[2] = kResetDisp_[resetMode_];
-            omxDisp.useLegendString[3] = true;
-            omxDisp.legendString[3] = String(chancePerc_) + "%";
+            omxDisp.setLegend(0, "MODE", kModeDisp_[arpMode_]);
+            omxDisp.setLegend(1, "PAT", kPatDisp_[arpPattern_]);
+            omxDisp.setLegend(2, "RSET", kResetDisp_[resetMode_]);
+            omxDisp.setLegend(3, "CHC%", String(chancePerc_) + "%");
         }
         else if (page == ARPPAGE_2) // Rate, Octave Range, Gate, BPM
         {
-            omxDisp.legends[0] = "RATE";
-            omxDisp.useLegendString[0] = true;
-            omxDisp.legendString[0] = "1/" + String(kArpRates[rateIndex_]);
-
-            omxDisp.legends[1] = "RANG";
-            omxDisp.legendVals[1] = (octaveRange_ + 1);
-
-            omxDisp.legends[2] = "GATE";
-            omxDisp.legendVals[2] = gate;
-
-            omxDisp.legends[3] = "BPM";
-            omxDisp.legendVals[3] = (int)clockConfig.clockbpm;
+            omxDisp.setLegend(0, "RATE", "1/" + String(kArpRates[rateIndex_]));
+            omxDisp.setLegend(1, "RANG", octaveRange_ + 1);
+            omxDisp.setLegend(2, "GATE", gate);
+            omxDisp.setLegend(3, "BPM", (int)clockConfig.clockbpm);
         }
         else if (page == ARPPAGE_3) // Transpose Distance
         {
-            omxDisp.legends[0] = "ODIST";
-            omxDisp.useLegendString[0] = true;
-            omxDisp.legendString[0] = octDistance_ >= 0 ? ("+" + String(octDistance_)) : (String(octDistance_));
+            omxDisp.setLegend(0, "ODIST", octDistance_ >= 0 ? ("+" + String(octDistance_)) : (String(octDistance_)));
+            omxDisp.setLegend(1, "QUANT", quantizedRateIndex_ <= -2, quantizedRateIndex_ == -1 ? "GBL" : "1/" + String(kArpRates[quantizedRateIndex_]));
         }
         else if (page == ARPPAGE_4) // Velocity, midiChannel_, sendMidi, sendCV
         {
-            omxDisp.legends[0] = "VEL";
-            omxDisp.legends[1] = "CHAN";
-            omxDisp.legends[2] = "MIDI";
-            omxDisp.legends[3] = "CV";
-            omxDisp.legendVals[0] = velocity_;
-            omxDisp.legendVals[1] = midiChannel_ + 1;
-            omxDisp.legendVals[2] = sendMidi_;
-            omxDisp.legendVals[3] = sendCV_;
+            omxDisp.setLegend(0, "VEL", velocity_);
+            omxDisp.setLegend(1, "CHAN", midiChannel_ + 1);
+            omxDisp.setLegend(2, "MIDI", sendMidi_);
+            omxDisp.setLegend(3, "CV", sendCV_);
         }
 
         omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), getEncoderSelect());
@@ -2399,6 +2555,7 @@ namespace midifx
         arpSave.midiChannel = midiChannel_;
         arpSave.swing = swing_;
         arpSave.rateIndex = rateIndex_;
+        arpSave.quantizedRateIndex_ = quantizedRateIndex_;
         arpSave.octaveRange = octaveRange_;
         arpSave.octDistance_ = octDistance_;
         arpSave.gate = gate;
@@ -2441,20 +2598,23 @@ namespace midifx
         midiChannel_ = arpSave.midiChannel;
         swing_ = arpSave.swing;
         rateIndex_ = arpSave.rateIndex;
+        quantizedRateIndex_ = arpSave.quantizedRateIndex_;
         octaveRange_ = arpSave.octaveRange;
         octDistance_ = arpSave.octDistance_;
         gate = arpSave.gate;
         modPatternLength_ = arpSave.modPatternLength;
         transpPatternLength_ = arpSave.transpPatternLength;
 
-        changeArpMode(arpMode_);
-        prevArpMode_ = arpMode_;
+        quantizeSync_ = quantizedRateIndex_ >= -1;
 
         for (uint8_t i = 0; i < 16; i++)
         {
             modPattern_[i] = arpSave.modPattern[i];
             transpPattern_[i] = arpSave.transpPattern[i];
         }
+
+        changeArpMode(arpMode_);
+        prevArpMode_ = arpMode_;
 
         return startingAddress + saveSize;
     }

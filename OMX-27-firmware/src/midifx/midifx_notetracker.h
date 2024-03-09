@@ -13,12 +13,6 @@ namespace midifx
 		MidiFXNoteTracker() {}
 		virtual ~MidiFXNoteTracker();
 
-<<<<<<< HEAD:OMX-27-firmware/src/midifx_notetracker.h
 	private:
 	};
-=======
-    private:
-
-    };
->>>>>>> 5fe2be8 (File organization and includePath updates):OMX-27-firmware/src/midifx/midifx_notetracker.h
 }

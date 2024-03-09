@@ -28,17 +28,13 @@ namespace midifx
 		return "TRAN";
 	}
 
-	uint32_t MidiFXTranspose::getColor()
-	{
-		return PURPLE;
-	}
-
 	MidiFXInterface *MidiFXTranspose::getClone()
 	{
 		auto clone = new MidiFXTranspose();
 
 		clone->chancePerc_ = chancePerc_;
 		clone->transpose_ = transpose_;
+		clone->octave_ = octave_;
 
 		return clone;
 	}
@@ -140,6 +136,7 @@ namespace midifx
 	int MidiFXTranspose::saveToDisk(int startingAddress, Storage *storage)
 	{
 		TransposeSave save;
+		save.chancePerc_ = chancePerc_;
 		save.transpose = transpose_;
 		save.octave = octave_;
 
@@ -168,6 +165,7 @@ namespace midifx
 
 		transpose_ = save.transpose;
 		octave_ = save.octave;
+		chancePerc_ = save.chancePerc_;
 
 		return startingAddress + saveSize;
 	}

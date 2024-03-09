@@ -6,10 +6,14 @@
 
 U8G2_FOR_ADAFRUIT_GFX u8g2_display;
 
+const char *loaderAnim[] = {"\u25f0", "\u25f1", "\u25f2", "\u25f3"};
+
 // Constructor
 OmxDisp::OmxDisp()
 {
 }
+
+
 
 void OmxDisp::setup()
 {
@@ -174,7 +178,6 @@ void OmxDisp::testdrawrect()
 
 void OmxDisp::drawLoading()
 {
-	const char *loader[] = {"\u25f0", "\u25f1", "\u25f2", "\u25f3"};
 	display.clearDisplay();
 	u8g2_display.setFontMode(0);
 	for (int16_t i = 0; i < 16; i += 1)
@@ -184,7 +187,7 @@ void OmxDisp::drawLoading()
 		u8g2_display.setFont(FONT_TENFAT);
 		u8g2_display.print("OMX-27");
 		u8g2_display.setFont(FONT_SYMB_BIG);
-		u8g2centerText(loader[i % 4], 80, 10, 32, 32); // "\u00BB\u00AB" // // dice: "\u2685"
+		u8g2centerText(loaderAnim[i % 4], 80, 10, 32, 32); // "\u00BB\u00AB" // // dice: "\u2685"
 		display.display();
 		delay(100);
 	}
@@ -243,6 +246,81 @@ void OmxDisp::clearLegends()
 	useLegendString[1] = false;
 	useLegendString[2] = false;
 	useLegendString[3] = false;
+}
+
+bool OmxDisp::validateLegendIndex(uint8_t index)
+{
+	if(index >= 4)
+	{
+		Serial.println("ERROR: Param index out of range!");
+		return false;
+	}
+	return true;
+}
+
+
+
+void OmxDisp::setLegend(uint8_t index, const char *label, int value)
+{
+	if (validateLegendIndex(index))
+	{
+		legends[index] = label;
+		legendVals[index] = value;
+	}
+}
+void OmxDisp::setLegend(uint8_t index, const char *label, bool isOff, int value)
+{
+	if (isOff)
+	{
+		setLegend(index, label, paramOffMsg);
+	}
+	else
+	{
+		setLegend(index, label, value);
+	}
+}
+void OmxDisp::setLegend(uint8_t index, const char *label, const char *text)
+{
+	if (validateLegendIndex(index))
+	{
+		legends[index] = label;
+		legendText[index] = text;
+	}
+}
+void OmxDisp::setLegend(uint8_t index, const char* label, bool isOff, const char* text)
+{
+	if (isOff)
+	{
+		setLegend(index, label, paramOffMsg);
+	}
+	else
+	{
+		setLegend(index, label, text);
+	}
+}
+void OmxDisp::setLegend(uint8_t index, const char *label, String text)
+{
+	if (validateLegendIndex(index))
+	{
+		legends[index] = label;
+		useLegendString[index] = true;
+		legendString[index] = text;
+	}
+}
+void OmxDisp::setLegend(uint8_t index, const char *label, bool isOff, String text)
+{
+	if(isOff)
+	{
+		setLegend(index, label, paramOffMsg);
+	}
+	else
+	{
+		setLegend(index, label, text);
+	}
+}
+void OmxDisp::setLegend(uint8_t index, const char* label, bool value)
+{
+		setLegend(index, label, value ? paramOnMsg : paramOffMsg);
 }
 
 void OmxDisp::dispGenericMode(int selected)
@@ -466,6 +544,47 @@ void OmxDisp::dispGenericModeLabelSmallText(const char *label, uint8_t numPages,
 	}
 }
 
+void OmxDisp::dispOptionCombo(const char * header, const char *optionsArray[], uint8_t optionCount, uint8_t selected, bool encSelActive)
+{
+	if (isMessageActive())
+	{
+		renderMessage();
+		return;
+	}
+
+	// Draw header text
+	u8g2_display.setFontMode(1);
+	u8g2_display.setFont(FONT_LABELS);
+	u8g2_display.setCursor(0, 0);
+
+	uint8_t labelWidth = 128; // 8
+	u8g2centerText(header, 2, hline - 2, labelWidth - 4, 10);
+
+	// Draw options
+	u8g2_display.setFontMode(1);
+	u8g2_display.setFont(FONT_LABELS);
+
+	uint8_t optionWidth = 128 / optionCount; // 8
+
+	uint8_t yPos = hline * 2 + 3; // 19
+
+	for (uint8_t i = 0; i < optionCount; i++)
+	{
+		if (i == selected)
+		{
+			display.fillRect(i * optionWidth, 14, optionWidth, 12, WHITE);
+			display.fillRect(i * optionWidth + 1, 14 + 1, optionWidth - 2, 12 - 2, BLACK);
+		}
+
+		u8g2centerText(optionsArray[i], i * optionWidth, yPos, optionWidth - 1, 16);
+	}
+
+	if(!encSelActive)
+	{
+		display.drawFastHLine(4, 28, 128 - 8, WHITE);
+	}
+}
+
 void OmxDisp::dispChar16(const char *charArray[], uint8_t charCount, uint8_t selected, uint8_t numPages, int8_t selectedPage, bool encSelActive, bool showLabels, const char *labels[], uint8_t labelCount)
 {
 	if (isMessageActive())
@@ -605,6 +724,71 @@ void OmxDisp::dispValues16(int8_t valueArray[], uint8_t valueCount, int8_t minVa
 	// {
 	//     dispPageIndicators2(numPages, selectedPage);
 	// }
+}
+
+void OmxDisp::dispParamBar(int8_t potValue, int8_t targetValue, int8_t minValue, int8_t maxValue, bool pickedUp, bool centered, const char* bankName, const char* paramName)
+{
+	if (isMessageActive())
+	{
+		renderMessage();
+		return;
+	}
+
+	display.fillRect(0, 0, 128, 32, BLACK);
+
+	// if (showLabels)
+	// {
+	// 	int8_t selIndex = constrain(selected - 16, -1, 127);
+	// 	dispLabelParams(selIndex, encSelActive, labels, labelCount, false);
+	// }
+
+	u8g2_display.setFontMode(1);
+	// u8g2_display.setFont(FONT_LABELS);
+	u8g2_display.setCursor(0, 0);
+
+	u8g2_display.setFont(FONT_LABELS);
+	u8g2leftText(bankName, 2, hline - 3, 128 - 4, 10);
+	u8g2_display.setFont(FONT_TENFAT);
+	u8g2leftText(paramName, 2, 18, 92 - 4, 12);
+
+	u8g2_display.setFont(FONT_BIG);
+	tempString = String(targetValue);
+	u8g2centerText(tempString.c_str(), 92, 18, 128 - 96 - 4, 22);
+
+	float potPerc = map(potValue, minValue, maxValue, 0, 1000) / 1000.0f;
+	float targetPerc = map(targetValue, minValue, maxValue, 0, 1000) / 1000.0f;
+
+	uint8_t boxStartX = 0; // 8
+	uint8_t boxWidth = 128; // 8
+	uint8_t potWidth = boxWidth * potPerc; // 8
+	uint8_t targetWidth = boxWidth * targetPerc; // 8
+	uint8_t boxStartY = 27;
+	uint8_t heightMax = 32;
+	uint8_t boxHeight = heightMax - boxStartY;
+	// uint8_t halfBoxHeight = boxHeight / 2;
+
+	// int8_t middleValue = ((maxValue - minValue) / 2) + minValue;
+
+	display.fillRect(boxStartX, boxStartY, boxWidth, boxHeight, WHITE);
+	display.fillRect(boxStartX + 1, boxStartY + 1, boxWidth - 2, boxHeight - 2, BLACK);
+	display.fillRect(boxStartX + 1, boxStartY + 1, targetWidth - 2, boxHeight - 2, WHITE);
+
+	// Chevron showing pot value
+	// xxxxxxx
+	// -xxxxx
+	// --xxx
+	// ---x
+	display.fillRect(boxStartX + potWidth - 4, boxStartY - 4, 7, 1, WHITE);
+	display.fillRect(boxStartX + potWidth - 3, boxStartY - 3, 5, 1, WHITE);
+	display.fillRect(boxStartX + potWidth - 2, boxStartY - 2, 3, 1, WHITE);
+	display.fillRect(boxStartX + potWidth - 1, boxStartY - 1, 1, 1, WHITE);
+
+	if(!pickedUp)
+	{
+		display.fillRect(boxStartX + potWidth - 3, boxStartY - 4, 5, 1, BLACK);
+		display.fillRect(boxStartX + potWidth - 2, boxStartY - 3, 3, 1, BLACK);
+		display.fillRect(boxStartX + potWidth - 1, boxStartY - 2, 1, 1, BLACK);
+	}
 }
 
 void OmxDisp::dispSlots(const char *slotNames[], uint8_t slotCount, uint8_t selected, uint8_t animPos, bool encSelActive, bool showLabels, const char *labels[], uint8_t labelCount)
@@ -1174,24 +1358,42 @@ void OmxDisp::dispPageIndicators(int page, bool selected)
 
 void OmxDisp::dispMode()
 {
-	// labels formatting
-	u8g2_display.setFontMode(1);
-	u8g2_display.setFont(FONT_BIG);
-	u8g2_display.setCursor(0, 0);
+	animPos = constrain(animPos, 0, 3);
 
-	u8g2_display.setForegroundColor(WHITE);
-	u8g2_display.setBackgroundColor(BLACK);
+	animTimer -= sysSettings.timeElasped;
 
-	const char *displaymode = "";
-	if (sysSettings.newmode != sysSettings.omxMode && encoderConfig.enc_edit)
+	if(animTimer <= 0)
 	{
-		displaymode = modes[sysSettings.newmode]; // display.print(modes[sysSettings.newmode]);
+		animPos = (animPos + 1) % 4;
+		animTimer = 100000;
+		setDirty();
 	}
-	else if (encoderConfig.enc_edit)
+
+	if (isDirty())
 	{
-		displaymode = modes[sysSettings.omxMode]; // display.print(modes[mode]);
+		u8g2_display.setFontMode(0);
+		u8g2_display.setFont(FONT_SYMB_BIG);
+		u8g2centerText(loaderAnim[animPos], 80, 10, 32, 32); // "\u00BB\u00AB" // // dice: "\u2685"
+
+		// labels formatting
+		u8g2_display.setFontMode(1);
+		u8g2_display.setFont(FONT_BIG);
+		u8g2_display.setCursor(0, 0);
+
+		u8g2_display.setForegroundColor(WHITE);
+		u8g2_display.setBackgroundColor(BLACK);
+
+		const char *displaymode = "";
+		if (sysSettings.newmode != sysSettings.omxMode && encoderConfig.enc_edit)
+		{
+			displaymode = modes[sysSettings.newmode]; // display.print(modes[sysSettings.newmode]);
+		}
+		else if (encoderConfig.enc_edit)
+		{
+			displaymode = modes[sysSettings.omxMode]; // display.print(modes[mode]);
+		}
+		u8g2centerText(displaymode, 2, 20, 75, 32);
 	}
-	u8g2centerText(displaymode, 86, 20, 44, 32);
 }
 
 void OmxDisp::setDirty()

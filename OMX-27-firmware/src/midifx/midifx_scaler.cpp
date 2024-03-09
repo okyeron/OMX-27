@@ -31,16 +31,12 @@ namespace midifx
 		return "SCAL";
 	}
 
-	uint32_t MidiFXScaler::getColor()
-	{
-		return YELLOW;
-	}
-
 	MidiFXInterface *MidiFXScaler::getClone()
 	{
 		auto clone = new MidiFXScaler();
 
 		clone->chancePerc_ = chancePerc_;
+		clone->useGlobalScale_ = useGlobalScale_;
 		clone->rootNote_ = rootNote_;
 		clone->scaleIndex_ = scaleIndex_;
 
@@ -344,7 +340,7 @@ namespace midifx
 		storage->write(startingAddress + 2, (uint8_t)rootNote_);
 		storage->write(startingAddress + 3, (uint8_t)scaleIndex_);
 
-		return startingAddress + 3;
+		return startingAddress + 4;
 	}
 
 	int MidiFXScaler::loadFromDisk(int startingAddress, Storage *storage)
@@ -358,6 +354,6 @@ namespace midifx
 
 		calculateRemap();
 
-		return startingAddress + 3;
+		return startingAddress + 4;
 	}
 }
