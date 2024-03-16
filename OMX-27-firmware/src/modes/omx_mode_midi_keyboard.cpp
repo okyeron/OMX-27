@@ -394,14 +394,39 @@ void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
 				omxDisp.displayMessage(musicScale->getScaleName(scaleConfig.scalePattern));
 				musicScale->calculateScale(scaleConfig.scaleRoot, scaleConfig.scalePattern);
 			}
+
+			if (scaleConfig.scalePattern == -1)
+			{ // record locked and grouped states, then set the current lockScale and group16 to off
+				if (prevPat != -1)
+				{
+					scaleConfig.lockedState = scaleConfig.lockScale;
+					scaleConfig.groupedState = scaleConfig.group16;
+				}
+				scaleConfig.lockScale = 0;
+				scaleConfig.group16 = 0;
+			}
+			else
+			{ // restore locked and grouped states if the scale was previously set to off
+				if (prevPat == -1)
+				{
+					scaleConfig.lockScale = scaleConfig.lockedState;
+					scaleConfig.group16 = scaleConfig.groupedState;
+				}
+			}
 		}
 		if (selParam == 3)
 		{
-			scaleConfig.lockScale = constrain(scaleConfig.lockScale + amt, 0, 1);
+			if (scaleConfig.scalePattern != -1)
+			{
+				scaleConfig.lockScale = constrain(scaleConfig.lockScale + amt, 0, 1);
+			}
 		}
 		if (selParam == 4)
 		{
-			scaleConfig.group16 = constrain(scaleConfig.group16 + amt, 0, 1);
+			if (scaleConfig.scalePattern != -1)
+			{
+				scaleConfig.group16 = constrain(scaleConfig.group16 + amt, 0, 1);
+			}
 		}
 	}
 
