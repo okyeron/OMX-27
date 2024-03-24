@@ -28,11 +28,6 @@ namespace midifx
 		return "MONO";
 	}
 
-	uint32_t MidiFXMonophonic::getColor()
-	{
-		return ROSE;
-	}
-
 	MidiFXInterface *MidiFXMonophonic::getClone()
 	{
 		auto clone = new MidiFXMonophonic();
@@ -103,7 +98,7 @@ namespace midifx
 		// }
 
 		// Update previous note history
-		prevNoteOn[midiChannel].setFromNoteGroup(note);
+		prevNoteOn[midiChannel].setFromNoteGroup(&note);
 
 		sendNoteOut(note);
 

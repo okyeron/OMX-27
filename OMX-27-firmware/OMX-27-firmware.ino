@@ -1,7 +1,7 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
 
-//	v1.12.17
-//	Last update: August 2023
+//	v1.13.3
+//	Last update: Feb 2024
 //
 //	Original concept and initial code by Steven Noreyko
 //  Additional code contributions:
@@ -28,8 +28,10 @@
 #include "src/midi/sysex.h"
 #include "src/hardware/omx_keypad.h"
 #include "src/utils/omx_util.h"
+#include "src/utils/cvNote_util.h"
 #include "src/hardware/omx_disp.h"
 #include "src/modes/omx_mode_midi_keyboard.h"
+#include "src/modes/omx_mode_drum.h"
 #include "src/modes/omx_mode_sequencer.h"
 #include "src/modes/omx_mode_grids.h"
 #include "src/modes/omx_mode_euclidean.h"
@@ -39,20 +41,24 @@
 #include "src/utils/music_scales.h"
 
 // Allows code to compile with smallest code LTO
-extern "C"{
-  int _getpid(){ return -1;}
-  int _kill(int pid, int sig){ return -1; }
-  int _write(){return -1;}
+extern "C"
+{
+	int _getpid() { return -1; }
+	int _kill(int pid, int sig) { return -1; }
+	int _write() { return -1; }
 }
 
 // #define RAM_MONITOR
 // #ifdef RAM_MONITOR
-// #include "RamMonitor.h"
+// #include "src/utils/RamMonitor.h"
 // #endif
 
 OmxModeMidiKeyboard omxModeMidi;
+OmxModeDrum omxModeDrum;
 OmxModeSequencer omxModeSeq;
+#ifdef OMXMODEGRIDS
 OmxModeGrids omxModeGrids;
+#endif
 OmxModeEuclidean omxModeEuclid;
 OmxModeChords omxModeChords;
 
@@ -142,17 +148,15 @@ void report_ram()
 };
 #endif
 
-
-
 // ####### SEQUENCER LEDS #######
 
 void changeOmxMode(OMXMode newOmxmode)
 {
-//	Serial.println((String)"NewMode: " + newOmxmode);
+	//	Serial.println((String)"NewMode: " + newOmxmode);
 	sysSettings.omxMode = newOmxmode;
 	sysSettings.newmode = newOmxmode;
 
-	if(activeOmxMode != nullptr)
+	if (activeOmxMode != nullptr)
 	{
 		activeOmxMode->onModeDeactivated();
 	}
@@ -162,6 +166,9 @@ void changeOmxMode(OMXMode newOmxmode)
 	case MODE_MIDI:
 		omxModeMidi.setMidiMode();
 		activeOmxMode = &omxModeMidi;
+		break;
+	case MODE_DRUM:
+		activeOmxMode = &omxModeDrum;
 		break;
 	case MODE_CHORDS:
 		activeOmxMode = &omxModeChords;
@@ -179,7 +186,9 @@ void changeOmxMode(OMXMode newOmxmode)
 		activeOmxMode = &omxModeMidi;
 		break;
 	case MODE_GRIDS:
+#ifdef OMXMODEGRIDS
 		activeOmxMode = &omxModeGrids;
+#endif
 		break;
 	case MODE_EUCLID:
 		activeOmxMode = &omxModeEuclid;
@@ -191,11 +200,12 @@ void changeOmxMode(OMXMode newOmxmode)
 	}
 
 	activeOmxMode->onModeActivated();
+
+	omxLeds.setDirty();
+	omxDisp.setDirty();
 }
 
 // ####### END LEDS
-
-
 
 // ####### POTENTIOMETERS #######
 void readPotentimeters()
@@ -221,7 +231,6 @@ void readPotentimeters()
 
 		// delta is way smaller on T4 - what to do??
 		int analogDelta = abs(newAnalog - prevAnalog);
-
 
 		// if (k == 1)
 		// {
@@ -259,8 +268,10 @@ void handleNoteOn(byte channel, byte note, byte velocity)
 	}
 	if (midiSettings.midiInToCV)
 	{
-		omxUtil.cvNoteOn(note);
+		cvNoteUtil.cvNoteOn(note);
 	}
+
+	omxScreensaver.resetCounter();
 
 	activeOmxMode->inMidiNoteOn(channel, note, velocity);
 }
@@ -274,7 +285,7 @@ void handleNoteOff(byte channel, byte note, byte velocity)
 
 	if (midiSettings.midiInToCV)
 	{
-		omxUtil.cvNoteOff();
+		cvNoteUtil.cvNoteOff(note);
 	}
 
 	activeOmxMode->inMidiNoteOff(channel, note, velocity);
@@ -294,7 +305,6 @@ void handleControlChange(byte channel, byte control, byte value)
 void OnNoteOn(byte channel, byte note, byte velocity)
 {
 	handleNoteOn(channel, note, velocity);
-
 }
 void OnNoteOff(byte channel, byte note, byte velocity)
 {
@@ -349,10 +359,16 @@ void saveHeader()
 	uint8_t lockScale = (uint8_t)scaleConfig.lockScale;
 	storage->write(EEPROM_HEADER_ADDRESS + 33, lockScale);
 
-	uint8_t scaleGrp16 = (uint8_t)scaleConfig.group16 ;
+	uint8_t scaleGrp16 = (uint8_t)scaleConfig.group16;
 	storage->write(EEPROM_HEADER_ADDRESS + 34, scaleGrp16);
 
-	// 35 bytes
+	storage->write(EEPROM_HEADER_ADDRESS + 35, midiSettings.defaultVelocity);
+
+	storage->write(EEPROM_HEADER_ADDRESS + 36, clockConfig.globalQuantizeStepIndex);
+
+	storage->write(EEPROM_HEADER_ADDRESS + 37, cvNoteUtil.triggerMode);
+
+	// 38 bytes
 }
 
 // returns true if the header contained initialized data
@@ -361,15 +377,15 @@ bool loadHeader(void)
 {
 	uint8_t version = storage->read(EEPROM_HEADER_ADDRESS + 0);
 
-		char buf[64];
-		snprintf( buf, sizeof(buf), "EEPROM Header Version is %d\n", version );
-		Serial.print( buf );
+	char buf[64];
+	snprintf(buf, sizeof(buf), "EEPROM Header Version is %d\n", version);
+	Serial.print(buf);
 
 	// Uninitalized EEPROM memory is filled with 0xFF
 	if (version == 0xFF)
 	{
 		// EEPROM was uninitialized
-				Serial.println( "version was 0xFF" );
+		Serial.println("version was 0xFF");
 		return false;
 	}
 
@@ -377,7 +393,7 @@ bool loadHeader(void)
 	{
 		// write an adapter if we ever need to increment the EEPROM version and also save the existing patterns
 		// for now, return false will essentially reset the state
-				Serial.println( "version not matched" );
+		Serial.println("version not matched");
 		return false;
 	}
 
@@ -389,7 +405,7 @@ bool loadHeader(void)
 	uint8_t unMidiChannel = storage->read(EEPROM_HEADER_ADDRESS + 3);
 	sysSettings.midiChannel = unMidiChannel + 1;
 
-	Serial.println( "Loading banks" );
+	Serial.println("Loading banks");
 	for (int b = 0; b < NUM_CC_BANKS; b++)
 	{
 		for (int i = 0; i < NUM_CC_POTS; i++)
@@ -418,6 +434,12 @@ bool loadHeader(void)
 
 	globalScale.calculateScale(scaleConfig.scaleRoot, scaleConfig.scalePattern);
 
+	midiSettings.defaultVelocity = storage->read(EEPROM_HEADER_ADDRESS + 35);
+
+	clockConfig.globalQuantizeStepIndex = constrain(storage->read(EEPROM_HEADER_ADDRESS + 36), 0, kNumArpRates - 1);
+
+	cvNoteUtil.triggerMode = constrain(storage->read(EEPROM_HEADER_ADDRESS + 37), 0, 1);
+
 	return true;
 }
 
@@ -442,14 +464,17 @@ void savePatterns(void)
 		nLocalAddress += patternSize;
 	}
 
-	if(isEeprom)
+	if (isEeprom)
 	{
 		return;
 	}
-	Serial.println((String)"nLocalAddress: " + nLocalAddress);
+	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 5784
+
+#ifdef OMXMODEGRIDS
+	Serial.println("Saving Grids");
 
 	// Grids patterns
-	patternSize = OmxModeGrids::serializedPatternSize(storage->isEeprom());
+	patternSize = OmxModeGrids::serializedPatternSize(isEeprom);
 	int numPatterns = OmxModeGrids::getNumPatterns();
 
 	// Serial.println((String)"OmxModeGrids patternSize: " + patternSize);
@@ -465,24 +490,37 @@ void savePatterns(void)
 
 		nLocalAddress += patternSize;
 	}
-	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 5968
+	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 6008
+#endif
 
 	Serial.println("Saving Euclidean");
 	nLocalAddress = omxModeEuclid.saveToDisk(nLocalAddress, storage);
-	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 6321
+	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 7433
 
 	Serial.println("Saving Chords");
 	nLocalAddress = omxModeChords.saveToDisk(nLocalAddress, storage);
-	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 6321
+	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 10505
+
+	Serial.println("Saving Drums");
+	nLocalAddress = omxModeDrum.saveToDisk(nLocalAddress, storage);
+	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 11545
 
 	Serial.println("Saving MidiFX");
-	for(uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
+	for (uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
 	{
 		nLocalAddress = subModeMidiFx[i].saveToDisk(nLocalAddress, storage);
 		// Serial.println((String)"Saved: " + i);
 		// Serial.println((String)"nLocalAddress: " + nLocalAddress);
 	}
-	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 6321
+	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 11585
+
+	// Starting 11545
+	// MidiFX with nothing 11585
+	// 1 MidiFX full ARPS 11913
+	//
+	// OMX Frooze/Ran out of memory after creating 4 x 8 - 3 = 29  ARPs
+	// Maybe build in a limit of 2 or one arps per MidiFX, or just recommend users not to
+	// create 29 ARPs.
 
 	// Seq patternSize: 715
 	// nLocalAddress: 5752
@@ -491,7 +529,6 @@ void savePatterns(void)
 	// numPatterns: 8
 	// nLocalAddress: 5936
 	// size of grids: 184
-
 }
 
 void loadPatterns(void)
@@ -501,8 +538,8 @@ void loadPatterns(void)
 	int patternSize = serializedPatternSize(isEeprom);
 	int nLocalAddress = EEPROM_PATTERN_ADDRESS;
 
-	Serial.print( "Seq patterns - nLocalAddress: " );
-	Serial.println( nLocalAddress );
+	Serial.print("Seq patterns - nLocalAddress: ");
+	Serial.println(nLocalAddress);
 
 	int seqPatternNum = isEeprom ? NUM_SEQ_PATTERNS_EEPROM : NUM_SEQ_PATTERNS;
 
@@ -520,18 +557,19 @@ void loadPatterns(void)
 		nLocalAddress += patternSize;
 	}
 
-	if(isEeprom)
+	if (isEeprom)
 	{
 		return;
 	}
 
-	Serial.print( "Grids patterns - nLocalAddress: " );
-	Serial.println( nLocalAddress );
+	Serial.print("Grids patterns - nLocalAddress: ");
+	Serial.println(nLocalAddress);
 	// 332 - eeprom size
 	// 332 * 8 = 2656
 
 	// Grids patterns
-	patternSize = OmxModeGrids::serializedPatternSize(storage->isEeprom());
+#ifdef OMXMODEGRIDS
+	patternSize = OmxModeGrids::serializedPatternSize(isEeprom);
 	int numPatterns = OmxModeGrids::getNumPatterns();
 
 	for (int i = 0; i < numPatterns; i++)
@@ -546,31 +584,36 @@ void loadPatterns(void)
 		omxModeGrids.setPattern(i, pattern);
 		nLocalAddress += patternSize;
 	}
+#endif
 
-	Serial.print( "Pattern size: " );
-	Serial.print( patternSize );
+	Serial.print("Pattern size: ");
+	Serial.print(patternSize);
 
-	Serial.print( " - nLocalAddress: " );
-	Serial.println( nLocalAddress );
+	Serial.print(" - nLocalAddress: ");
+	Serial.println(nLocalAddress);
 
 	Serial.print("Loading Euclidean - ");
 	nLocalAddress = omxModeEuclid.loadFromDisk(nLocalAddress, storage);
-	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 5988
+	Serial.println((String) "nLocalAddress: " + nLocalAddress); // 5988
 
 	Serial.print("Loading Chords - ");
 	nLocalAddress = omxModeChords.loadFromDisk(nLocalAddress, storage);
 	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 5988
 
+	Serial.print("Loading Drums - ");
+	nLocalAddress = omxModeDrum.loadFromDisk(nLocalAddress, storage);
+	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 5988
+
 	// Serial.println((String)"nLocalAddress: " + nLocalAddress); // 5968
 
 	Serial.print("Loading MidiFX - ");
-	for(uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
+	for (uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
 	{
 		nLocalAddress = subModeMidiFx[i].loadFromDisk(nLocalAddress, storage);
 		// Serial.println((String)"Loaded: " + i);
 		// Serial.println((String)"nLocalAddress: " + nLocalAddress);
 	}
-	Serial.println((String)"nLocalAddress: " + nLocalAddress); // 5988
+	Serial.println((String) "nLocalAddress: " + nLocalAddress); // 5988
 
 	// with 8 note chords, 10929
 
@@ -588,13 +631,12 @@ void loadPatterns(void)
 
 	// no arps = 10929, 5 arps = 11129, 25 arps = 12529
 	//
-
 }
 
 // currently saves everything ( mode + patterns )
 void saveToStorage(void)
 {
-	Serial.println( "Saving to Storage..." );
+	Serial.println("Saving to Storage...");
 	saveHeader();
 	savePatterns();
 }
@@ -605,12 +647,12 @@ bool loadFromStorage(void)
 	// This load can happen soon after Serial.begin - enable this 'wait for Serial' if you need to Serial.print during loading
 	// while( !Serial );
 
-	Serial.println( "Read the header" );
+	Serial.println("Read the header");
 	bool bContainedData = loadHeader();
 
 	if (bContainedData)
 	{
-		Serial.println( "Loading patterns" );
+		Serial.println("Loading patterns");
 		loadPatterns();
 		changeOmxMode(sysSettings.omxMode);
 
@@ -619,7 +661,7 @@ bool loadFromStorage(void)
 		return true;
 	}
 
-	Serial.println( "-- Failed to load --" );
+	Serial.println("-- Failed to load --");
 
 	omxDisp.isDirty();
 	omxLeds.isDirty();
@@ -644,8 +686,9 @@ void loop()
 	seqConfig.currentFrameMicros = micros();
 	// Micros timeStart = micros();
 	activeOmxMode->loopUpdate(passed);
+	cvNoteUtil.loopUpdate(passed);
 
-	if (passed > 0)
+	if (passed > 0) // This should always be true
 	{
 		if (sequencer.playing || omxUtil.areClocksRunning())
 		{
@@ -700,9 +743,10 @@ void loop()
 			// set mode
 			//			int modesize = NUM_OMX_MODES;
 			sysSettings.newmode = (OMXMode)constrain(sysSettings.newmode + amt, 0, NUM_OMX_MODES - 1);
-			omxDisp.dispMode();
-			omxDisp.bumpDisplayTimer();
+			// omxDisp.dispMode();
+			// omxDisp.bumpDisplayTimer();
 			omxDisp.setDirty();
+			omxLeds.setDirty();
 		}
 		else
 		{
@@ -728,7 +772,8 @@ void loop()
 			seqStop();
 			omxLeds.setAllLEDS(0, 0, 0);
 			encoderConfig.enc_edit = false;
-			omxDisp.dispMode();
+			// omxDisp.dispMode();
+			omxDisp.setDirty();
 		}
 		else if (encoderConfig.enc_edit)
 		{
@@ -752,9 +797,12 @@ void loop()
 		}
 		else
 		{
+			// Enter mode change
 			encoderConfig.enc_edit = true;
 			sysSettings.newmode = sysSettings.omxMode;
-			omxDisp.dispMode();
+			omxLeds.setAllLEDS(0, 0, 0);
+			omxDisp.setDirty();
+			// omxDisp.dispMode();
 		}
 
 		omxDisp.setDirty();
@@ -789,11 +837,14 @@ void loop()
 		if (e.down() && thisKey == 0 && encoderConfig.enc_edit)
 		{
 			// temp - save whenever the 0 key is pressed in encoder edit mode
+			omxDisp.displayMessage("Saving...");
+			omxDisp.isDirty();
+			omxDisp.showDisplay();
 			saveToStorage();
 			//	Serial.println("EEPROM saved");
 			omxDisp.displayMessage("Saved State");
 			encoderConfig.enc_edit = false;
-			omxLeds.setAllLEDS(0,0,0);
+			omxLeds.setAllLEDS(0, 0, 0);
 			activeOmxMode->onModeActivated();
 			omxDisp.isDirty();
 			omxLeds.isDirty();
@@ -825,7 +876,15 @@ void loop()
 	{
 		omxLeds.updateBlinkStates();
 		omxDisp.UpdateMessageTextTimer();
-		activeOmxMode->onDisplayUpdate();
+
+		if (encoderConfig.enc_edit)
+		{
+			omxDisp.dispMode();
+		}
+		else
+		{
+			activeOmxMode->onDisplayUpdate();
+		}
 	}
 	else
 	{ // if screenSaverMode
@@ -854,8 +913,6 @@ void loop()
 	// 	// report_ram();
 	// };
 
-
-
 #ifdef RAM_MONITOR
 	uint32_t time = millis();
 
@@ -878,11 +935,18 @@ void setup()
 	//	while( !Serial );
 #if T4
 	Serial.println("Teensy 4.0");
-// 	Serial.println("DAC Start!");
+	// 	Serial.println("DAC Start!");
 	dac.begin(DAC_ADDR);
 #else
 	Serial.println("Teensy 3.2");
 #endif
+	// Init Display
+	omxDisp.setup();
+
+	// Startup screen
+	omxDisp.drawStartupScreen();
+
+	// Storage
 	storage = Storage::initStorage();
 	sysEx = new SysEx(storage, &sysSettings);
 
@@ -902,6 +966,7 @@ void setup()
 
 	lastProcessTime = micros();
 	omxUtil.resetClocks();
+	omxUtil.subModeClearStorage.setStoragePtr(storage);
 
 	// HW MIDI
 	MM::begin();
@@ -921,21 +986,21 @@ void setup()
 	// ENCODER BUTTON pin
 	pinMode(buttonPin, INPUT_PULLUP);
 
-// initialize ANALOG INPUTS and ResponsiveAnalogRead
+	// initialize ANALOG INPUTS and ResponsiveAnalogRead
 	for (int i = 0; i < potCount; i++)
 	{
-// 		potSettings.analog[i] = new ResponsiveAnalogRead(0, true, .001);
-// 		potSettings.analog[i]->setAnalogResolution(1 << 13);
+		// 		potSettings.analog[i] = new ResponsiveAnalogRead(0, true, .001);
+		// 		potSettings.analog[i]->setAnalogResolution(1 << 13);
 		pinMode(analogPins[i], INPUT);
 		potSettings.analog[i] = new ResponsiveAnalogRead(analogPins[i], true, .001);
 
-		#if T4
-//			potSettings.analog[i]->setAnalogResolution(10);
-//			potSettings.analog[i]->setActivityThreshold(8);
-		#else
-			potSettings.analog[i]->setAnalogResolution(1 << 13);
-			potSettings.analog[i]->setActivityThreshold(32);
-		#endif
+#if T4
+		//			potSettings.analog[i]->setAnalogResolution(10);
+		//			potSettings.analog[i]->setActivityThreshold(8);
+#else
+		potSettings.analog[i]->setAnalogResolution(1 << 13);
+		potSettings.analog[i]->setActivityThreshold(32);
+#endif
 
 		currentValue[i] = 0;
 		lastMidiValue[i] = 0;
@@ -955,8 +1020,11 @@ void setup()
 
 	globalScale.calculateScale(scaleConfig.scaleRoot, scaleConfig.scalePattern);
 	omxModeMidi.SetScale(&globalScale);
+	omxModeDrum.SetScale(&globalScale);
 	omxModeSeq.SetScale(&globalScale);
+#ifdef OMXMODEGRIDS
 	omxModeGrids.SetScale(&globalScale);
+#endif
 	omxModeEuclid.SetScale(&globalScale);
 	omxModeChords.SetScale(&globalScale);
 
@@ -964,6 +1032,8 @@ void setup()
 	bool bLoaded = loadFromStorage();
 	if (!bLoaded)
 	{
+		Serial.println( "Init load fail. Reinitializing" );
+
 		// Failed to load due to initialized EEPROM or version mismatch
 		// defaults
 		// sysSettings.omxMode = DEFAULT_MODE;
@@ -983,14 +1053,6 @@ void setup()
 		saveToStorage();
 	}
 
-	// changeOmxMode(MODE_EUCLID);
-
-	// Init Display
-	omxDisp.setup();
-
-	// Startup screen
-	omxDisp.drawStartupScreen();
-
 	// Keypad
 	//	customKeypad.begin();
 	keypad.begin();
@@ -998,7 +1060,6 @@ void setup()
 	// LEDs
 	omxLeds.initSetup();
 
-	omxScreensaver.InitSetup();
 
 #ifdef RAM_MONITOR
 	reporttime = millis();

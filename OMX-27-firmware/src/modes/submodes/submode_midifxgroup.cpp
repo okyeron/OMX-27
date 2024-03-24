@@ -8,6 +8,9 @@
 #include "../../midifx/midifx_monophonic.h"
 #include "../../midifx/midifx_harmonizer.h"
 #include "../../midifx/midifx_transpose.h"
+#include "../../midifx/midifx_chord.h"
+#include "../../midifx/midifx_repeat.h"
+
 // #include "midifx_arpeggiator.h"
 
 using namespace midifx;
@@ -20,7 +23,7 @@ SubModeMidiFxGroup subModeMidiFx[NUM_MIDIFX_GROUPS];
 
 const int kSelMFXTypeColor = 0xE6FFCF;
 const int kMFXTypeColor = DKGREEN;
-const int kMFXTypeEmptyColor = 0x400000;
+// const int kMFXTypeEmptyColor = 0x400000;
 
 // None, Chance, Randomizer, Harmonizer = Heliotrope gray, Scaler = Spanish viridian, Monophonic = Maroon (Crayola),
 // const int kMFXTypeColors[16] = {kMFXTypeEmptyColor, CYAN, RED, 0xAA98A9, 0x007F5C, 0xC32148, kMFXTypeEmptyColor, kMFXTypeEmptyColor,
@@ -56,6 +59,15 @@ SubModeMidiFxGroup::SubModeMidiFxGroup()
 
 uint8_t SubModeMidiFxGroup::getArpIndex()
 {
+	if (selectedMidiFX_ < NUM_MIDIFX_SLOTS)
+	{
+		auto mfx = getMidiFX(selectedMidiFX_);
+		if(mfx != nullptr && mfx->getFXType() == MIDIFX_ARP)
+		{
+			return selectedMidiFX_;
+		}
+	}
+
 	for (uint8_t i = 0; i < NUM_MIDIFX_SLOTS; i++)
 	{
 		auto mfx = getMidiFX(i);
@@ -73,6 +85,15 @@ uint8_t SubModeMidiFxGroup::getArpIndex()
 
 midifx::MidiFXArpeggiator *SubModeMidiFxGroup::getArp(bool autoCreate)
 {
+	if (selectedMidiFX_ < NUM_MIDIFX_SLOTS)
+	{
+		auto mfx = getMidiFX(selectedMidiFX_);
+		if(mfx != nullptr && mfx->getFXType() == MIDIFX_ARP)
+		{
+			return static_cast<midifx::MidiFXArpeggiator *>(mfx);
+		}
+	}
+
 	bool canAddArp = false;
 	uint8_t addArpIndex = 0;
 
@@ -169,7 +190,7 @@ void SubModeMidiFxGroup::nextArpOctRange()
 void SubModeMidiFxGroup::gotoArpParams()
 {
 	midiFXParamView_ = true;
-	arpParamView_ = true;
+	passthroughQuickEdit = true;
 	heldMidiFX_ = -1;
 
 	getArp(true); // Create arp if empty
@@ -179,6 +200,83 @@ void SubModeMidiFxGroup::gotoArpParams()
 	if (arpIndex < NUM_MIDIFX_SLOTS)
 	{
 		selectedMidiFX_ = arpIndex;
+	}
+
+	omxDisp.displayMessage(mfxArpEditMsg);
+}
+
+void SubModeMidiFxGroup::enablePassthrough()
+{
+	midiFXParamView_ = true;
+	passthroughQuickEdit = true;
+	heldMidiFX_ = -1;
+
+	if (selectedMidiFX_ < NUM_MIDIFX_SLOTS)
+	{
+		auto mfx = getMidiFX(selectedMidiFX_);
+		if (mfx == nullptr)
+		{
+			selectNextMFXSlot();
+
+			if (getMidiFX(selectedMidiFX_) == nullptr)
+			{
+				omxDisp.displayMessage(mfxPassthroughEditMsg);
+			}
+			return;
+		}
+		else
+		{
+			omxDisp.displayMessage(mfx->getName());
+			return;
+		}
+	}
+
+	omxDisp.displayMessage(mfxPassthroughEditMsg);
+}
+
+void SubModeMidiFxGroup::selectPrevMFXSlot(bool silent)
+{
+	for (uint8_t i = 1; i < NUM_MIDIFX_SLOTS; i++)
+	{
+		uint8_t mfxIndex = (selectedMidiFX_ + NUM_MIDIFX_SLOTS - i) % NUM_MIDIFX_SLOTS;
+
+		if (mfxIndex != selectedMidiFX_)
+		{
+			auto mfx = getMidiFX(mfxIndex);
+			if (mfx != nullptr)
+			{
+				selectedMidiFX_ = mfxIndex;
+				if (!silent)
+				{
+					tempString = String(selectedMidiFX_ + 1) + " " + mfx->getDispName();
+					omxDisp.displayMessage(tempString);
+				}
+				return;
+			}
+		}
+	}
+}
+
+void SubModeMidiFxGroup::selectNextMFXSlot(bool silent)
+{
+	for (uint8_t i = 1; i < NUM_MIDIFX_SLOTS; i++)
+	{
+		uint8_t mfxIndex = (selectedMidiFX_ + i) % NUM_MIDIFX_SLOTS;
+
+		if (mfxIndex != selectedMidiFX_)
+		{
+			auto mfx = getMidiFX(mfxIndex);
+			if (mfx != nullptr)
+			{
+				selectedMidiFX_ = mfxIndex;
+				if (!silent)
+				{
+					tempString = String(selectedMidiFX_ + 1) + " " + mfx->getDispName();
+					omxDisp.displayMessage(tempString);
+				}
+				return;
+			}
+		}
 	}
 }
 
@@ -237,6 +335,7 @@ void SubModeMidiFxGroup::onEnabled()
 {
 	// params_.setSelPageAndParam(0, 0);
 	midiFXParamView_ = true;
+	passthroughQuickEdit = false;
 
 	// Goto first available midifx if selected one is empty.
 	auto mfx = getMidiFX(selectedMidiFX_);
@@ -295,6 +394,15 @@ void SubModeMidiFxGroup::updateFuncKeyMode()
 	uint8_t prevMode = funcKeyMode_;
 
 	funcKeyMode_ = FUNCKEYMODE_NONE;
+
+	if(passthroughQuickEdit)
+	{
+		if (funcKeyMode_ != prevMode)
+		{
+			omxDisp.setDirty();
+		}
+		return;
+	}
 
 	if (keyState[1] && !keyState[2])
 	{
@@ -383,7 +491,7 @@ bool SubModeMidiFxGroup::updateLEDs()
 	auto auxColor = midiFXParamView_ ? (blinkStateSlow ? ORANGE : LEDOFF) : RED;
 	strip.setPixelColor(0, auxColor);
 
-	if (arpParamView_)
+	if (passthroughQuickEdit)
 		return false;
 
 	// for(uint8_t i = 1; i < 26; i++)
@@ -434,7 +542,7 @@ bool SubModeMidiFxGroup::updateLEDs()
 	}
 
 	// Change midifx while holding down midifx slot
-	if (heldMidiFX_ >= 0 && midiFXParamView_ && !arpParamView_)
+	if (heldMidiFX_ >= 0 && midiFXParamView_ && !passthroughQuickEdit)
 	{
 		uint8_t selFXType = 0;
 
@@ -446,9 +554,14 @@ bool SubModeMidiFxGroup::updateLEDs()
 
 		for (uint8_t i = 0; i < 16; i++)
 		{
-			auto fxColor = (i == selFXType ? kSelMFXTypeColor : ((i == MIDIFX_NONE || i >= MIDIFX_COUNT) ? kMFXTypeEmptyColor : kMFXTypeColor));
-
-			strip.setPixelColor(11 + i, fxColor);
+			if (i == selFXType)
+			{
+				strip.setPixelColor(11 + i, blinkState ? colorConfig.getMidiFXColor(i) : LEDOFF);
+			}
+			else
+			{
+				strip.setPixelColor(11 + i, colorConfig.getMidiFXColor(i));
+			}
 		}
 	}
 
@@ -561,7 +674,7 @@ bool SubModeMidiFxGroup::onKeyUpdate(OMXKeypadEvent e)
 {
 	if (e.held())
 	{
-		// if(arpParamView_) return false; // Don't consume key update
+		// if(passthroughQuickEdit) return false; // Don't consume key update
 		return true;
 	}
 
@@ -596,14 +709,15 @@ bool SubModeMidiFxGroup::onKeyUpdate(OMXKeypadEvent e)
 			// if(!e.down() && e.clicks() == 2)
 			if (e.quickClicked())
 			{
-				arpParamView_ = false;
+				passthroughQuickEdit = false;
 				midiFXParamView_ = false;
 				setEnabled(false);
+				omxDisp.displayMessage(exitMsg);
 				return true;
 			}
 		}
 
-		if (arpParamView_)
+		if (passthroughQuickEdit)
 			return false; // Don't consume key update
 		return true;	  // Consume key
 	}
@@ -622,9 +736,9 @@ bool SubModeMidiFxGroup::onKeyUpdate(OMXKeypadEvent e)
 	{
 		// if (thisKey == 0)
 		// {
-		//     if(arpParamView_)
+		//     if(passthroughQuickEdit)
 		//     {
-		//         arpParamView_ = false;
+		//         passthroughQuickEdit = false;
 		//         midiFXParamView_ = false;
 		//         setEnabled(false);
 		//         return true;
@@ -645,7 +759,7 @@ bool SubModeMidiFxGroup::onKeyUpdate(OMXKeypadEvent e)
 		//     }
 		// }
 
-		if (arpParamView_)
+		if (passthroughQuickEdit)
 		{
 			return false;
 		}
@@ -683,7 +797,7 @@ bool SubModeMidiFxGroup::onKeyUpdate(OMXKeypadEvent e)
 			}
 
 			// Change FX type
-			if (heldMidiFX_ >= 0 && midiFXParamView_ && !arpParamView_)
+			if (heldMidiFX_ >= 0 && midiFXParamView_ && !passthroughQuickEdit)
 			{
 				if (thisKey >= 11 && thisKey < 11 + 16)
 				{
@@ -710,7 +824,7 @@ bool SubModeMidiFxGroup::onKeyUpdate(OMXKeypadEvent e)
 		heldMidiFX_ = -1;
 	}
 
-	if (arpParamView_)
+	if (passthroughQuickEdit)
 	{
 		return false;
 	}
@@ -747,7 +861,7 @@ void SubModeMidiFxGroup::selectMidiFX(uint8_t fxIndex)
 			newMFX->setEnabled(true);
 		}
 
-		arpParamView_ = false;
+		passthroughQuickEdit = false;
 	}
 
 	// displayMidiFXName(fxIndex);
@@ -890,6 +1004,13 @@ void SubModeMidiFxGroup::changeMidiFXType(uint8_t slotIndex, uint8_t typeIndex, 
 		setMidiFX(slotIndex, new MidiFXRandomizer());
 	}
 	break;
+	case MIDIFX_SELECTOR:
+	{
+		auto selector = new MidiFXSelector();
+		selector->setNoteInputFunc(slotIndex, &SubModeMidiFxGroup::midiFxSelNoteInputForwarder, this);
+		setMidiFX(slotIndex, selector);
+	}
+	break;
 	case MIDIFX_HARMONIZER:
 	{
 		setMidiFX(slotIndex, new MidiFXHarmonizer());
@@ -903,6 +1024,16 @@ void SubModeMidiFxGroup::changeMidiFXType(uint8_t slotIndex, uint8_t typeIndex, 
 	case MIDIFX_MONOPHONIC:
 	{
 		setMidiFX(slotIndex, new MidiFXMonophonic());
+	}
+	break;
+	case MIDIFX_CHORD:
+	{
+		setMidiFX(slotIndex, new MidiFXChord());
+	}
+	break;
+	case MIDIFX_REPEAT:
+	{
+		setMidiFX(slotIndex, new MidiFXRepeat());
 	}
 	break;
 	case MIDIFX_ARP:
@@ -930,6 +1061,197 @@ void SubModeMidiFxGroup::changeMidiFXType(uint8_t slotIndex, uint8_t typeIndex, 
 	reconnectInputsOutputs();
 }
 
+void SubModeMidiFxGroup::midiFxSelNoteInput(midifx::MidiFXSelector *mfxSelector, uint8_t midiFXIndex, MidiNoteGroup note)
+{
+	// Reconnect the outputs if the length changed. 
+	// Otherwise unexpected things might happen. 
+	if(mfxSelector->didLengthChange())
+	{
+		reconnectInputsOutputs();
+	}
+
+	// Serial.println("midiFxSelNoteInput");
+
+	// Note offs should go through every FX in chain
+	// if (note.noteOff)
+	// {
+	// 	// Serial.println("Note off, reconnecting");
+
+	// 	reconnectInputsOutputs();
+	// 	mfxSelector->handleNoteOff(note);
+	// 	return;
+	// }
+
+	uint8_t finalIndex = mfxSelector->getFinalMidiFXIndex(midiFXIndex);
+	// Serial.println(String("finalIndex = ") + String(finalIndex));
+
+	midifx::MidiFXInterface *finalMFX = nullptr;
+	bool finalOutputToGroup = true;
+
+	// Search for the next MFX for final mfx
+	for(uint8_t i = finalIndex; i < NUM_MIDIFX_SLOTS; i++)
+	{
+		finalMFX = getMidiFX(i);
+		if(finalMFX != nullptr)
+		{
+			// Serial.println(String("Final output: ") + String(i));
+
+			finalOutputToGroup = false;
+			break;
+		}
+	}
+
+	uint8_t length =  mfxSelector->getLength();
+
+	// 0 length edge case
+	if(length == 0)
+	{
+		if(finalOutputToGroup)
+		{
+			noteOutputFunc(note);
+		}
+		else
+		{
+			finalMFX->noteInput(note);
+		}
+		return;
+	}
+
+	// For a note off, send it to all the midifx in the length
+	// however, map those outputs to the final midifx or the group output
+	if (note.noteOff)
+	{
+
+		// len = 2, mfxIndex = 1, check 2, 3, final = 4
+
+		// midifx::MidiFXInterface *firstMidiFX;
+
+		bool validMfxFound = false;
+
+		for(uint8_t i = midiFXIndex + 1; i < midiFXIndex + length + 1; i++)
+		{
+			auto mfx = getMidiFX(i);
+
+			if(mfx != nullptr)
+			{
+				validMfxFound = true;
+
+				if (finalOutputToGroup)
+				{
+					mfx->setNoteOutput(&SubModeMidiFxGroup::noteFuncForwarder, this);
+					mfx->noteInput(note);
+				}
+				else
+				{
+					mfx->setNoteOutput(&MidiFXInterface::onNoteInputForwarder, finalMFX);
+					mfx->noteInput(note);
+				}
+			}
+		}
+
+		if(!validMfxFound)
+		{
+			if (finalOutputToGroup)
+			{
+				noteOutputFunc(note);
+				return;
+			}
+			else
+			{
+				finalMFX->noteInput(note);
+				return;
+			}
+		}
+		return;
+	}
+
+	// if (finalOutputToGroup)
+	// {
+	// 	Serial.println("Final output is group");
+	// }
+
+	// Skip due to chance, note should go to next mfx + selector length, or master output
+	if(mfxSelector->chanceShouldSkip())
+	{
+		// Serial.println("Should Skip");
+
+		if(finalOutputToGroup)
+		{
+			noteOutputFunc(note);
+			return;
+		}
+		else
+		{
+			finalMFX->noteInput(note);
+			return;
+		}
+	}
+
+	uint8_t selIndex = mfxSelector->getSelectedMidiFXIndex(midiFXIndex);
+	// Serial.println(String("selIndex = ") + String(selIndex));
+
+	// goto final or group
+	if(selIndex == 0)
+	{
+		if(finalOutputToGroup)
+		{
+			noteOutputFunc(note);
+			return;
+		}
+		else
+		{
+			finalMFX->noteInput(note);
+			return;
+		}
+	}
+
+	// Selected index out of range
+	if(selIndex >= NUM_MIDIFX_SLOTS)
+	{
+		// Serial.println("Sel index oor");
+		noteOutputFunc(note);
+		return;
+	}
+
+	auto selMidiFX = getMidiFX(selIndex);
+
+	// Selected MFX is empty, jump to final or group output
+	if(selMidiFX == nullptr)
+	{
+		// Serial.println("Sel mfx empty");
+		if(finalOutputToGroup)
+		{
+			noteOutputFunc(note);
+			return;
+		}
+		else
+		{
+			finalMFX->noteInput(note);
+			return;
+		}
+	}
+
+	// Selected MFX is valid, remap this FX to go to final or group output
+	// Then send the note to it
+	if(selMidiFX != nullptr)
+	{
+		// Serial.println("Valid sel MFX");
+
+		if(finalOutputToGroup)
+		{
+			// Serial.println("Note to group");
+			selMidiFX->setNoteOutput(&SubModeMidiFxGroup::noteFuncForwarder, this);
+		}
+		else
+		{
+			// Serial.println("Note to final");
+			selMidiFX->setNoteOutput(&MidiFXInterface::onNoteInputForwarder, finalMFX);
+		}
+
+		selMidiFX->noteInput(note);
+	}
+}
+
 // Where the magic happens
 void SubModeMidiFxGroup::reconnectInputsOutputs()
 {
@@ -950,6 +1272,8 @@ void SubModeMidiFxGroup::reconnectInputsOutputs()
 			continue;
 		}
 
+		fx->setSlotIndex(i);
+
 		// Last valid MidiFX, connect it's output to the main midifxgroup output
 		if (!validMidiFXFound)
 		{
@@ -962,12 +1286,21 @@ void SubModeMidiFxGroup::reconnectInputsOutputs()
 		// connect the output of this midiFX to the input of the next one
 		else
 		{
-			// if(lastValidMidiFX == nullptr)
+			// if(lastValidMidiFX->getFXType() == MIDIFX_SELECTOR)
 			// {
-			//     Serial.println("lastValidMidiFX is null");
-			// }
 
-			// Serial.println("connecting midifx to previous midifx");
+			// }
+			// else
+			// {
+			// // if(lastValidMidiFX == nullptr)
+			// // {
+			// //     Serial.println("lastValidMidiFX is null");
+			// // }
+
+			// // Serial.println("connecting midifx to previous midifx");
+
+			// 	fx->setNoteOutput(&MidiFXInterface::onNoteInputForwarder, lastValidMidiFX);
+			// }
 
 			fx->setNoteOutput(&MidiFXInterface::onNoteInputForwarder, lastValidMidiFX);
 			lastValidMidiFX = fx;
@@ -1181,30 +1514,30 @@ void SubModeMidiFxGroup::onDisplayUpdateMidiFX()
 		return;
 	}
 
-	if (funcKeyMode_ == FUNCKEYMODE_F1)
+	MidiFXInterface *selFX = getMidiFX(selectedMidiFX_);
+
+	bool mfxKeysActive = midiFXParamView_ && selFX != nullptr && selFX->usesKeys();
+
+	if (!mfxKeysActive && funcKeyMode_ == FUNCKEYMODE_F1)
 	{
 		omxDisp.dispGenericModeLabel("Copy", params_.getNumPages(), params_.getSelPage());
 	}
-	else if (funcKeyMode_ == FUNCKEYMODE_F2)
+	else if (!mfxKeysActive && funcKeyMode_ == FUNCKEYMODE_F2)
 	{
 		omxDisp.dispGenericModeLabel("Paste", params_.getNumPages(), params_.getSelPage());
 	}
-	else if (funcKeyMode_ == FUNCKEYMODE_F3)
+	else if (!mfxKeysActive && funcKeyMode_ == FUNCKEYMODE_F3)
 	{
 		omxDisp.dispGenericModeLabel("Cut", params_.getNumPages(), params_.getSelPage());
 	}
 	else
 	{
-		MidiFXInterface *selFX = getMidiFX(selectedMidiFX_);
-
 		if (selFX == nullptr)
 		{
 			omxDisp.displayMessage("No FX");
 		}
 		else
 		{
-			// Serial.println("Selected MidiFX not null");
-
 			selFX->onDisplayUpdate(funcKeyMode_);
 		}
 	}
@@ -1271,6 +1604,8 @@ int SubModeMidiFxGroup::loadFromDisk(int startingAddress, Storage *storage)
 	{
 		int mfxType = storage->read(startingAddress);
 		startingAddress++;
+
+		if(mfxType >= 0 && mfxType)
 
 		// Serial.println((String)"MFX: " + mfxType);
 

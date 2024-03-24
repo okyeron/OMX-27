@@ -8,6 +8,11 @@ namespace midifx
 		// Serial.println("Deleted vector");
 	}
 
+	void MidiFXInterface::setSlotIndex(uint8_t slotIndex)
+	{
+		this->mfxSlotIndex_ = slotIndex;
+	}
+
 	void MidiFXInterface::setSelected(bool selected)
 	{
 		bool prevSel = selected_;

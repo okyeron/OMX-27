@@ -20,19 +20,19 @@ namespace midifx
 		{
 		}
 
-		MidiNoteGroupCache(MidiNoteGroup noteGroup)
+		MidiNoteGroupCache(MidiNoteGroup *noteGroup)
 		{
 			setFromNoteGroup(noteGroup);
 		}
 
-		void setFromNoteGroup(MidiNoteGroup noteGroup)
+		void setFromNoteGroup(MidiNoteGroup *noteGroup)
 		{
-			prevNoteNumber = noteGroup.prevNoteNumber;
-			channel = noteGroup.channel;
-			noteNumber = noteGroup.noteNumber;
-			sendMidi = noteGroup.sendMidi;
-			sendCV = noteGroup.sendCV;
-			unknownLength = noteGroup.unknownLength;
+			prevNoteNumber = noteGroup->prevNoteNumber;
+			channel = noteGroup->channel;
+			noteNumber = noteGroup->noteNumber;
+			sendMidi = noteGroup->sendMidi;
+			sendCV = noteGroup->sendCV;
+			unknownLength = noteGroup->unknownLength;
 		}
 
 		MidiNoteGroup toMidiNoteGroup()
@@ -60,13 +60,18 @@ namespace midifx
 
 		virtual int getFXType() = 0;
 
+		virtual void setSlotIndex(uint8_t slotIndex);
+
 		// Display name
 		virtual const char *getName() = 0;
 
 		// Short Display Name
 		virtual const char *getDispName() = 0;
 
-		virtual uint32_t getColor() { return colorConfig.midiFXGRPColor; }
+		virtual uint32_t getColor()
+		{
+			return colorConfig.getMidiFXColor(getFXType());
+		}
 
 		virtual MidiFXInterface *getClone() { return nullptr; }
 
@@ -121,6 +126,8 @@ namespace midifx
 		bool enabled_ = false;
 		bool selected_ = false;
 		bool auxDown_ = false;
+
+        uint8_t mfxSlotIndex_;
 
 		bool encoderSelect_ = true;
 		ParamManager params_;

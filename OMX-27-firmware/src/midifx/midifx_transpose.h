@@ -14,7 +14,6 @@ namespace midifx
 		int getFXType() override;
 		const char *getName() override;
 		const char *getDispName() override;
-		uint32_t getColor() override;
 
 		MidiFXInterface *getClone() override;
 
@@ -38,6 +37,7 @@ namespace midifx
 		{
 			int8_t transpose : 6;
 			int8_t octave : 4;
+			uint8_t chancePerc_ = 100;
 		};
 
 		int8_t transpose_ : 6;

@@ -79,10 +79,14 @@ const int8_t scalePatterns[][7] = {
 	{0, 2, 3, 5, 6, 8, 9},
 
 	// pentatonic scales
+	// major blues
+	{0, 2, 3, 4, 7, 9, -1},
+	// minor blues
+	{0, 3, 5, 6, 7, 10, -1},
 	// major pentatonic
 	{0, 2, 4, 7, 9, -1, -1},
 	// minor pentatonic
-	{0, 3, 5, 7, 9, -1, -1},
+	{0, 3, 5, 7, 10, -1, -1},
 	// in sen (japanese)
 	{0, 1, 5, 7, 10, -1, -1},
 	// iwato
@@ -128,6 +132,8 @@ const char *scaleNames[] = {
 	"ionian #2#5",
 	"loc bb3bb7",
 
+	"blues maj",
+	"blues min",
 	"penta maj",
 	"penta min",
 	"in sen",
@@ -177,6 +183,10 @@ void MusicScales::calculateScaleIfModified(uint8_t scaleRoot, uint8_t scalePatte
 
 void MusicScales::calculateScale(uint8_t scaleRoot, uint8_t scalePattern)
 {
+	if (scaleRoot != rootNote && scalePattern != scaleIndex)
+	{
+		scaleRemapCalculated_ = false;
+	}
 
 	rootNote = scaleRoot;
 	scaleIndex = scalePattern;
@@ -298,6 +308,95 @@ bool MusicScales::isNoteInScale(int8_t noteNum)
 	return inScale;
 }
 
+// This takes a incoming note and forces it into the current scale
+int8_t MusicScales::remapNoteToScale(uint8_t noteNumber)
+{
+	if (!scaleCalculated)
+	{
+		calculateScale(rootNote, scaleIndex);
+	}
+
+	if (noteNumber > 127)
+	{
+		return -1;
+	}
+
+	if (!scaleRemapCalculated_)
+	{
+		calculateRemap();
+	}
+
+	int8_t noteIndex = noteNumber % 12;
+	int8_t octave = noteNumber / 12;
+
+	int8_t remapedNoteIndex = scaleRemapper[noteIndex];
+
+	if (remapedNoteIndex > noteIndex)
+	{
+		octave--;
+	}
+
+	int newNoteNumber = octave * 12 + remapedNoteIndex;
+
+	// note out of range, kill
+	if (newNoteNumber < 0 || newNoteNumber > 127)
+	{
+		return -1;
+	}
+
+	return newNoteNumber;
+}
+
+void MusicScales::calculateRemap()
+{
+	if (scaleIndex < 0)
+	{
+		for (uint8_t i = 0; i < 12; i++)
+		{
+			scaleRemapper[i] = i; // Chromatic scale
+		}
+
+		scaleRemapCalculated_ = true;
+		return;
+	}
+
+	auto scalePattern = getScalePattern(scaleIndex);
+
+	uint8_t sIndex = 0;
+	uint8_t lastNoteIndex = 0;
+
+	// looks through 12 notes, and sets each note to last note in scale
+	// so notes out of scale get rounded down to the previous note in the scale.
+	for (uint8_t i = 0; i < 12; i++)
+	{
+		if (sIndex < 7 && scalePattern[sIndex] == i)
+		{
+			lastNoteIndex = i;
+			sIndex++;
+		}
+		scaleRemapper[i] = (lastNoteIndex + rootNote) % 12;
+	}
+
+	if (rootNote > 0)
+	{
+		// rotate the scale to root
+		int8_t temp[12];
+
+		uint8_t val = 12 - rootNote;
+
+		for (uint8_t i = 0; i < 12; i++)
+		{
+			temp[i] = scaleRemapper[(i + val) % 12];
+		}
+		for (int i = 0; i < 12; i++)
+		{
+			scaleRemapper[i] = temp[i];
+		}
+	}
+
+	scaleRemapCalculated_ = true;
+}
+
 int MusicScales::getGroup16Note(uint8_t keyNum, int8_t octave)
 {
 	//     1,2,   3,4,5,   6,7,   8,9,10,
@@ -364,6 +463,76 @@ int8_t MusicScales::getNoteByDegree(uint8_t degree, int8_t octave)
 	return (int8_t)adjnote;
 }
 
+uint8_t MusicScales::getDegreeFromNote(uint8_t noteNumber, int8_t rootNote, int8_t scalePatIndex)
+{
+	uint8_t noteFlat = (noteNumber + 12 - rootNote) % 12;
+
+	// Chromatic
+	if(scalePatIndex < 0)
+	{
+		return noteFlat;
+	}
+
+	// Root = 62 - D
+	// Pat = Maj : D E F# G A B C#
+	// note 64 = E
+	// noteFlat should = 2
+	// degree should = 2
+	// note 65 = F
+	// noteFlag should = 3
+	// degree should = 2, round down
+
+	// Maj scale pattern {0, 2, 4, 5, 7, 9, 11},
+
+	// Scale pattern should be sorted 
+	auto scalePat = getScalePattern(scalePatIndex);
+	
+	for(uint8_t i = 0; i < 7; i++)
+	{
+		int8_t off0 = scalePat[i];
+		int8_t off1 = -1;
+
+		if(i < 6)
+		{
+			off1 = scalePat[i + 1];
+		}
+
+		// boom, perfectly in scale
+		if(noteFlat == off0)
+		{
+			return i;
+		}
+		// reached the end of the scale
+		if(off1 < 0)
+		{
+			return i;
+		}
+		// next scale offset matches this note
+		if(noteFlat == off1)
+		{
+			return i + 1;
+		}
+		// ot oh, note is not in the scale
+		if(noteFlat > off0 && noteFlat < off1)
+		{
+			// Compare distance to offsets
+			// If same distance, round down
+			// If shorter distance to off1, choose off1
+			if(off1 - noteFlat < noteFlat - off0)
+			{
+				return i + 1;
+			}
+			else
+			{
+				return i;
+			}
+		}
+	}
+
+	// Note sure how we'd get here
+	return noteFlat;
+}
+
 int MusicScales::getScaleColor(uint8_t noteIndex)
 {
 	if (!scaleCalculated)
@@ -426,7 +595,7 @@ int MusicScales::getScaleLength()
 	return scaleLength;
 }
 
-const int8_t *MusicScales::getScalePattern(uint8_t noteIndex)
+const int8_t *MusicScales::getScalePattern(uint8_t patIndex)
 {
-	return scalePatterns[noteIndex];
+	return scalePatterns[patIndex];
 }

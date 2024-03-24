@@ -10,8 +10,9 @@ namespace midifx
 
 	MidiFXChance::MidiFXChance()
 	{
-		params_.addPage(4);
+		params_.addPage(1);
 		encoderSelect_ = true;
+		chancePerc_ = random(100);
 	}
 
 	int MidiFXChance::getFXType()
@@ -27,11 +28,6 @@ namespace midifx
 	const char *MidiFXChance::getDispName()
 	{
 		return "CHC";
-	}
-
-	uint32_t MidiFXChance::getColor()
-	{
-		return RED;
 	}
 
 	MidiFXInterface *MidiFXChance::getClone()
@@ -60,7 +56,7 @@ namespace midifx
 		// Serial.println("MidiFXChance::noteInput");
 		// note.noteNumber += 7;
 
-		uint8_t r = random(255);
+		uint8_t r = random(100);
 
 		if (r <= chancePerc_)
 		{
@@ -89,7 +85,7 @@ namespace midifx
 		{
 			if (param == 0)
 			{
-				chancePerc_ = constrain(chancePerc_ + amt, 0, 255);
+				chancePerc_ = constrain(chancePerc_ + amt, 0, 100);
 			}
 		}
 		omxDisp.setDirty();
@@ -105,24 +101,14 @@ namespace midifx
 		{
 		case CHPAGE_1:
 		{
-			omxDisp.legends[0] = "CHC%";
-			omxDisp.legends[1] = "";
-			omxDisp.legends[2] = "";
-			omxDisp.legends[3] = "";
-			omxDisp.legendVals[0] = -127;
-			omxDisp.legendVals[1] = -127;
-			omxDisp.legendVals[2] = -127;
-			omxDisp.legendVals[3] = -127;
-			omxDisp.useLegendString[0] = true;
-			uint8_t perc = ((chancePerc_ / 255.0f) * 100);
-			omxDisp.legendString[0] = String(perc) + "%";
+			omxDisp.dispParamBar(chancePerc_, chancePerc_, 0, 100, !getEncoderSelect(), false, "Trigger", "Chance");
 		}
 		break;
 		default:
 			break;
 		}
 
-		omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), getEncoderSelect());
+		// omxDisp.dispGenericMode2(params_.getNumPages(), params_.getSelPage(), params_.getSelParam(), getEncoderSelect());
 	}
 
 	int MidiFXChance::saveToDisk(int startingAddress, Storage *storage)
@@ -137,7 +123,7 @@ namespace midifx
 	{
 		// Serial.println((String)"Loading mfx chance: " + startingAddress); // 5969
 
-		chancePerc_ = storage->read(startingAddress);
+		chancePerc_ = constrain(storage->read(startingAddress), 0, 100);
 		// Serial.println((String)"chancePerc_: " + chancePerc_);
 
 		return startingAddress + 1;

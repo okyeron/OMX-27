@@ -2,7 +2,15 @@
 #include "consts/consts.h"
 
 const OMXMode DEFAULT_MODE = MODE_MIDI;
-const uint8_t EEPROM_VERSION = 29;
+const uint8_t EEPROM_VERSION = 36;
+
+// v30 - adds storage to header for velocity
+// v31 - adds storage for drums
+// v32 - adds mfx chord saves
+// v33 - adds mfx selector saves
+// v34 - adds mfx repeat saves
+// v35 - adds quantize rate to arps, added global quant rate to header
+// v36 - adds stuff to randomizer
 
 // DEFINE CC NUMBERS FOR POTS // CCS mapped to Organelle Defaults
 const int CC1 = 21;
@@ -54,13 +62,21 @@ int potMaxVal = 8190; // T4 = 1019 // T3.2 = 8190;
 
 const int gridh = 32;
 const int gridw = 128;
-const int PPQ = 96;
+const int PPQ = 96; // Pulses Per Quarter note
+
+const uint32_t secs2micros = 1000000;
+
 
 const char *mfxOffMsg = "MidiFX are Off";
+const char *mfxArpEditMsg = "Arp Edit";
+const char *mfxPassthroughEditMsg = "MFX Quickedit";
+const char *exitMsg = "Exit";
+const char *paramOffMsg = "OFF";
+const char *paramOnMsg = "ON";
 
-const char *modes[] = {"MI", "CH", "S1", "S2", "GR", "EL", "OM"};
-const char *macromodes[] = {"Off", "M8", "NRN"};
-const int nummacromodes = 2;
+const char *modes[] = {"MI", "DRUM", "CH", "S1", "S2", "GR", "EL", "OM"};
+const char *macromodes[] = {"Off", "M8", "NRN", "DEL"};
+const int nummacromodes = 3;
 
 float multValues[] = {.25, .5, 1, 2, 4, 8, 16};
 const char *mdivs[] = {"1/64", "1/32", "1/16", "1/8", "1/4", "1/2", "W"};

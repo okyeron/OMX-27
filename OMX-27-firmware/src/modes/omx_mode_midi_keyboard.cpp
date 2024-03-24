@@ -2,6 +2,7 @@
 #include "../config.h"
 #include "../consts/colors.h"
 #include "../utils/omx_util.h"
+#include "../utils/cvNote_util.h"
 #include "../hardware/omx_disp.h"
 #include "../hardware/omx_leds.h"
 #include "../midi/midi.h"
@@ -15,14 +16,26 @@
 // const int kSelMidiFXColor = LTCYAN;
 // const int kMidiFXColor = BLUE;
 
+enum MIKeyModePage {
+    MIPAGE_OUTMIDI,
+    MIPAGE_MIDIINSPECT,
+    MIPAGE_OUTCC,
+    MIPAGE_POTSANDMACROS,
+    MIPAGE_SCALES,
+    MIPAGE_CFG,
+	MIPAGE_VERSION
+};
+
 OmxModeMidiKeyboard::OmxModeMidiKeyboard()
 {
 	// Add 4 pages
-	params.addPage(4);
-	params.addPage(4);
-	params.addPage(4);
-	params.addPage(4);
-	params.addPage(4);
+	params.addPage(4); // Oct, CH, Vel
+	params.addPage(4); // Sent Pot CC, Last Note, Last Vel, Not editable, just FYI
+	params.addPage(4); // RR - Midi Round Robin, RROF - Round Robin Offset, PGm, BNK
+	params.addPage(4); // PotBank, Thru, Macro, Macro Channel
+	params.addPage(4); // Root, Scale, Lock Scale Notes, Group notes. 
+	params.addPage(4); // Pot CC CFG
+	params.addPage(4); // MIPAGE_VERSION
 
 	// subModeMidiFx.setNoteOutputFunc(&OmxModeMidiKeyboard::onNotePostFXForwarder, this);
 
@@ -30,6 +43,8 @@ OmxModeMidiKeyboard::OmxModeMidiKeyboard()
 	m8Macro_.setDoNoteOff(&OmxModeMidiKeyboard::doNoteOffForwarder, this);
 	nornsMarco_.setDoNoteOn(&OmxModeMidiKeyboard::doNoteOnForwarder, this);
 	nornsMarco_.setDoNoteOff(&OmxModeMidiKeyboard::doNoteOffForwarder, this);
+	delugeMacro_.setDoNoteOn(&OmxModeMidiKeyboard::doNoteOnForwarder, this);
+	delugeMacro_.setDoNoteOff(&OmxModeMidiKeyboard::doNoteOffForwarder, this);
 }
 
 void OmxModeMidiKeyboard::InitSetup()
@@ -88,6 +103,22 @@ void OmxModeMidiKeyboard::stopSequencers()
 void OmxModeMidiKeyboard::selectMidiFx(uint8_t mfxIndex, bool dispMsg)
 {
 	this->mfxIndex_ = mfxIndex;
+
+	if(mfxQuickEdit_)
+	{
+		// Change the MidiFX Group being edited
+		if(mfxIndex < NUM_MIDIFX_GROUPS && mfxIndex != quickEditMfxIndex_)
+		{
+			enableSubmode(&subModeMidiFx[mfxIndex]);
+			subModeMidiFx[mfxIndex].enablePassthrough();
+			quickEditMfxIndex_ = mfxIndex;
+			dispMsg = false;
+		}
+		else if(mfxIndex >= NUM_MIDIFX_GROUPS)
+		{
+			disableSubmode();
+		}
+	}
 
 	for (uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
 	{
@@ -167,7 +198,7 @@ void OmxModeMidiKeyboard::onPotChanged(int potIndex, int prevValue, int newValue
 
 void OmxModeMidiKeyboard::onClockTick()
 {
-	for (uint8_t i = 0; i < 5; i++)
+	for (uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
 	{
 		// Lets them do things in background
 		subModeMidiFx[i].onClockTick();
@@ -186,7 +217,7 @@ void OmxModeMidiKeyboard::loopUpdate(Micros elapsedTime)
 	// 	}
 	// }
 
-	for (uint8_t i = 0; i < 5; i++)
+	for (uint8_t i = 0; i < NUM_MIDIFX_GROUPS; i++)
 	{
 		// Lets them do things in background
 		subModeMidiFx[i].loopUpdate();
@@ -285,11 +316,10 @@ void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
 
 	auto amt = enc.accel(5); // where 5 is the acceleration factor if you want it, 0 if you don't)
 
-	int8_t selPage = params.getSelPage() + 1; // Add one for readability
-	int8_t selParam = params.getSelParam() + 1;
+	int8_t selPage = params.getSelPage(); 
+	int8_t selParam = params.getSelParam() + 1; // Add one for readability
 
-	// PAGE ONE
-	if (selPage == 1)
+	if (selPage == MIPAGE_OUTMIDI)
 	{
 		if (selParam == 1)
 		{
@@ -299,14 +329,17 @@ void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
 		else if (selParam == 2)
 		{
 			int newchan = constrain(sysSettings.midiChannel + amt, 1, 16);
-			if (newchan != sysSettings.midiChannel)
+			if (newchan != sysSettings.midiChannel) // Is this if necessary?
 			{
 				sysSettings.midiChannel = newchan;
 			}
 		}
+		else if (selParam == 3)
+		{
+			midiSettings.defaultVelocity = constrain((int)midiSettings.defaultVelocity + amt, 0, 127); // cast to int to prevent rollover
+		}
 	}
-	// PAGE TWO
-	else if (selPage == 2)
+	else if (selPage == MIPAGE_OUTCC)
 	{
 		if (selParam == 1)
 		{
@@ -353,8 +386,7 @@ void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
 			MM::sendProgramChange(midiSettings.currpgm, sysSettings.midiChannel);
 		}
 	}
-	// PAGE THREE
-	else if (selPage == 3)
+	else if (selPage == MIPAGE_POTSANDMACROS)
 	{
 		if (selParam == 1)
 		{
@@ -373,8 +405,7 @@ void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
 			midiMacroConfig.midiMacroChan = constrain(midiMacroConfig.midiMacroChan + amt, 1, 16);
 		}
 	}
-	// PAGE FOUR - SCALES
-	else if (selPage == 4)
+	else if (selPage == MIPAGE_SCALES)
 	{
 		if (selParam == 1)
 		{
@@ -404,6 +435,17 @@ void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
 			scaleConfig.group16 = constrain(scaleConfig.group16 + amt, 0, 1);
 		}
 	}
+	else if(selPage == MIPAGE_CFG)
+	{
+		if (selParam == 3)
+		{
+			clockConfig.globalQuantizeStepIndex = constrain(clockConfig.globalQuantizeStepIndex + amt, 0, kNumArpRates - 1);
+		}
+		else if (selParam == 4)
+		{
+			cvNoteUtil.triggerMode = constrain(cvNoteUtil.triggerMode + amt, 0, 1);
+		}
+	}
 
 	omxDisp.setDirty();
 }
@@ -428,11 +470,21 @@ void OmxModeMidiKeyboard::onEncoderButtonDown()
 		return;
 	}
 
-	if (params.getSelPage() == 4 && params.getSelParam() == 0)
+	if(params.getSelPage() == MIPAGE_CFG)
 	{
-		enableSubmode(&subModePotConfig_);
-		omxDisp.isDirty();
-		return;
+		int8_t selParam = params.getSelParam();
+		if(selParam == 0)
+		{
+			enableSubmode(&subModePotConfig_);
+			omxDisp.isDirty();
+			return;
+		}
+		else if(selParam == 1)
+		{
+			enableSubmode(&omxUtil.subModeClearStorage);
+			omxDisp.isDirty();
+			return;
+		}
 	}
 
 	encoderSelect = !encoderSelect;
@@ -589,7 +641,7 @@ void OmxModeMidiKeyboard::onKeyUpdate(OMXKeypadEvent e)
 					int amt = thisKey == 11 ? -1 : 1;
 					midiSettings.octave = constrain(midiSettings.octave + amt, -5, 4);
 				}
-				else if (thisKey == 1 || thisKey == 2) // Change Param selection
+				else if (!mfxQuickEdit_ && (thisKey == 1 || thisKey == 2)) // Change Param selection
 				{
 					if (thisKey == 1)
 					{
@@ -747,7 +799,15 @@ bool OmxModeMidiKeyboard::onKeyUpdateSelMidiFX(OMXKeypadEvent e)
 		{
 			if (midiSettings.midiAUX) // Aux mode
 			{
-				if (thisKey == 5)
+				if (mfxQuickEdit_ && thisKey == 1)
+				{
+					subModeMidiFx[quickEditMfxIndex_].selectPrevMFXSlot();
+				}
+				else if (mfxQuickEdit_ && thisKey == 2)
+				{
+					subModeMidiFx[quickEditMfxIndex_].selectNextMFXSlot();
+				}
+				else if (thisKey == 5)
 				{
 					keyConsumed = true;
 					// Turn off midiFx
@@ -760,6 +820,22 @@ bool OmxModeMidiKeyboard::onKeyUpdateSelMidiFX(OMXKeypadEvent e)
 					selectMidiFx(thisKey - 6, true);
 					// Change active midiFx
 					// mfxIndex_ = thisKey - 6;
+				}
+				else if (thisKey == 20) // MidiFX Passthrough
+				{
+					keyConsumed = true;
+					if (mfxIndex_ < NUM_MIDIFX_GROUPS)
+					{
+						enableSubmode(&subModeMidiFx[mfxIndex_]);
+						subModeMidiFx[mfxIndex_].enablePassthrough();
+						mfxQuickEdit_ = true;
+						quickEditMfxIndex_ = mfxIndex_;
+						midiSettings.midiAUX = false;
+					}
+					else
+					{
+						omxDisp.displayMessage(mfxOffMsg);
+					}
 				}
 				else if (thisKey == 22) // Goto arp params
 				{
@@ -898,6 +974,8 @@ midimacro::MidiMacroInterface *OmxModeMidiKeyboard::getActiveMacro()
 		return &m8Macro_;
 	case 2:
 		return &nornsMarco_;
+	case 3:
+		return &delugeMacro_;
 	}
 	return nullptr;
 }
@@ -953,28 +1031,7 @@ void OmxModeMidiKeyboard::updateLEDs()
 		strip.setPixelColor(1, color1);
 		strip.setPixelColor(2, color2);
 
-		auto octDnColor = ORANGE;
-		auto octUpColor = RBLUE;
-
-		if (midiSettings.octave == 0)
-		{
-			strip.setPixelColor(11, octDnColor);
-			strip.setPixelColor(12, octUpColor);
-		}
-		else if (midiSettings.octave > 0)
-		{
-			bool blinkOctave = omxLeds.getBlinkPattern(midiSettings.octave);
-
-			strip.setPixelColor(11, octDnColor);
-			strip.setPixelColor(12, blinkOctave ? octUpColor : LEDOFF);
-		}
-		else
-		{
-			bool blinkOctave = omxLeds.getBlinkPattern(-midiSettings.octave);
-
-			strip.setPixelColor(11, blinkOctave ? octDnColor : LEDOFF);
-			strip.setPixelColor(12, octUpColor);
-		}
+		omxLeds.drawOctaveKeys(11, 12, midiSettings.octave);
 
 		// MidiFX off
 		strip.setPixelColor(5, (mfxIndex_ >= NUM_MIDIFX_GROUPS ? colorConfig.selMidiFXGRPOffColor : colorConfig.midiFXGRPOffColor));
@@ -986,6 +1043,7 @@ void OmxModeMidiKeyboard::updateLEDs()
 			strip.setPixelColor(6 + i, mfxColor);
 		}
 
+		strip.setPixelColor(20, mfxQuickEdit_ && blinkState ? LEDOFF : colorConfig.mfxQuickEdit);
 		strip.setPixelColor(22, colorConfig.gotoArpParams);
 		strip.setPixelColor(23, colorConfig.nextArpPattern);
 
@@ -1078,97 +1136,65 @@ void OmxModeMidiKeyboard::onDisplayUpdate()
 		{ // DISPLAY
 			if (!encoderConfig.enc_edit)
 			{
-				if (params.getSelPage() == 0) // SUBMODE_MIDI
+				if (params.getSelPage() == MIPAGE_VERSION)
 				{
-					omxDisp.clearLegends();
-
-					//			if (midiRoundRobin) {
-					//				displaychan = rrChannel;
-					//			}
-					omxDisp.legends[0] = "OCT";
-					omxDisp.legends[1] = "CH";
-					omxDisp.legends[2] = "CC";
-					omxDisp.legends[3] = "NOTE";
-					omxDisp.legendVals[0] = (int)midiSettings.octave + 4;
-					omxDisp.legendVals[1] = sysSettings.midiChannel;
-					omxDisp.legendVals[2] = potSettings.potVal;
-					omxDisp.legendVals[3] = midiSettings.midiLastNote;
+					tempString = "v" + String(MAJOR_VERSION) + "." + String(MINOR_VERSION) + "." + String(POINT_VERSION);
+					omxDisp.dispGenericModeLabel(tempString.c_str(), params.getNumPages(), params.getSelPage());
+					return;
 				}
-				else if (params.getSelPage() == 1) // SUBMODE_MIDI2
+
+				if (params.getSelPage() == MIPAGE_OUTMIDI)
 				{
 					omxDisp.clearLegends();
 
-					omxDisp.legends[0] = "RR";
-					omxDisp.legends[1] = "RROF";
-					omxDisp.legends[2] = "PGM";
-					omxDisp.legends[3] = "BNK";
-					omxDisp.legendVals[0] = midiSettings.midiRRChannelCount;
-					omxDisp.legendVals[1] = midiSettings.midiRRChannelOffset;
-					omxDisp.legendVals[2] = midiSettings.currpgm + 1;
-					omxDisp.legendVals[3] = midiSettings.currbank;
+					omxDisp.setLegend(0, "OCT", (int)midiSettings.octave + 4);
+					omxDisp.setLegend(1,"CH", sysSettings.midiChannel);
+					omxDisp.setLegend(2,"VEL", midiSettings.defaultVelocity);
 				}
-				else if (params.getSelPage() == 2) // SUBMODE_MIDI3
+				else if (params.getSelPage() == MIPAGE_MIDIINSPECT)
 				{
 					omxDisp.clearLegends();
 
-					omxDisp.legends[0] = "PBNK"; // Potentiometer Banks
-					omxDisp.legends[1] = "THRU"; // MIDI thru (usb to hardware)
-					omxDisp.legends[2] = "MCRO"; // Macro mode
-					omxDisp.legends[3] = "M-CH";
-					omxDisp.legendVals[0] = potSettings.potbank + 1;
-					omxDisp.legendVals[1] = -127;
-					if (midiSettings.midiSoftThru)
-					{
-						omxDisp.legendText[1] = "On";
-					}
-					else
-					{
-						omxDisp.legendText[1] = "Off";
-					}
-					omxDisp.legendVals[2] = -127;
-					omxDisp.legendText[2] = macromodes[midiMacroConfig.midiMacro];
-					omxDisp.legendVals[3] = midiMacroConfig.midiMacroChan;
+					omxDisp.setLegend(0,"P CC", potSettings.potCC);
+					omxDisp.setLegend(1,"P VAL", potSettings.potVal);
+					omxDisp.setLegend(2,"NOTE", midiSettings.midiLastNote);
+					omxDisp.setLegend(3,"VEL", midiSettings.midiLastVel);
 				}
-				else if (params.getSelPage() == 3) // SCALES
+				else if (params.getSelPage() == MIPAGE_OUTCC)
 				{
 					omxDisp.clearLegends();
-					omxDisp.legends[0] = "ROOT";
-					omxDisp.legends[1] = "SCALE";
-					omxDisp.legends[2] = "LOCK";
-					omxDisp.legends[3] = "GROUP";
-					omxDisp.legendVals[0] = -127;
-					if (scaleConfig.scalePattern < 0)
-					{
-						omxDisp.legendVals[1] = -127;
-						omxDisp.legendText[1] = "Off";
-					}
-					else
-					{
-						omxDisp.legendVals[1] = scaleConfig.scalePattern;
-					}
 
-					omxDisp.legendVals[2] = -127;
-					omxDisp.legendVals[3] = -127;
-
-					omxDisp.legendText[0] = musicScale->getNoteName(scaleConfig.scaleRoot);
-					omxDisp.legendText[2] = scaleConfig.lockScale ? "On" : "Off";
-					omxDisp.legendText[3] = scaleConfig.group16 ? "On" : "Off";
+					omxDisp.setLegend(0,"RR", midiSettings.midiRRChannelCount);
+					omxDisp.setLegend(1,"RROF", midiSettings.midiRRChannelOffset);
+					omxDisp.setLegend(2,"PGM", midiSettings.currpgm + 1);
+					omxDisp.setLegend(3,"BNK", midiSettings.currbank);
 				}
-				else if (params.getSelPage() == 4) // CONFIG
+				else if (params.getSelPage() == MIPAGE_POTSANDMACROS) // SUBMODE_MIDI3
 				{
 					omxDisp.clearLegends();
-					omxDisp.legends[0] = "CC";
-					omxDisp.legends[1] = "";
-					omxDisp.legends[2] = "";
-					omxDisp.legends[3] = "";
-					omxDisp.legendVals[0] = -127;
-					omxDisp.legendVals[1] = -127;
-					omxDisp.legendVals[2] = -127;
-					omxDisp.legendVals[3] = -127;
-					omxDisp.legendText[0] = "CFG";
-					omxDisp.legendText[1] = "";
-					omxDisp.legendText[2] = "";
-					omxDisp.legendText[3] = "";
+
+					omxDisp.setLegend(0,"PBNK", potSettings.potbank + 1);
+					omxDisp.setLegend(1,"THRU", midiSettings.midiSoftThru);
+					omxDisp.setLegend(2,"MCRO", macromodes[midiMacroConfig.midiMacro]);
+					omxDisp.setLegend(3,"M-CH", midiMacroConfig.midiMacroChan);
+				}
+				else if (params.getSelPage() == MIPAGE_SCALES) // SCALES
+				{
+					omxDisp.clearLegends();
+
+					omxDisp.setLegend(0,"ROOT", musicScale->getNoteName(scaleConfig.scaleRoot));
+					omxDisp.setLegend(1,"SCALE", scaleConfig.scalePattern < 0, scaleConfig.scalePattern);
+					omxDisp.setLegend(2,"LOCK", scaleConfig.lockScale);
+					omxDisp.setLegend(3,"GROUP", scaleConfig.group16);
+				}
+				else if (params.getSelPage() == MIPAGE_CFG) // CONFIG
+				{
+					omxDisp.clearLegends();
+
+					omxDisp.setLegend(0,"P CC", "CFG");
+					omxDisp.setLegend(1,"CLR", "STOR");
+					omxDisp.setLegend(2,"QUANT", "1/" + String(kArpRates[clockConfig.globalQuantizeStepIndex]));
+					omxDisp.setLegend(3,"CV M", cvNoteUtil.getTriggerModeDispName());
 				}
 
 				omxDisp.dispGenericMode2(params.getNumPages(), params.getSelPage(), params.getSelParam(), encoderSelect && !midiSettings.midiAUX);
@@ -1184,6 +1210,7 @@ void OmxModeMidiKeyboard::inMidiNoteOn(byte channel, byte note, byte velocity)
 		return;
 
 	midiSettings.midiLastNote = note;
+	midiSettings.midiLastVel = velocity;
 	int whatoct = (note / 12);
 	int thisKey;
 	uint32_t keyColor = MIDINOTEON;
@@ -1254,6 +1281,16 @@ void OmxModeMidiKeyboard::inMidiNoteOff(byte channel, byte note, byte velocity)
 	omxDisp.setDirty();
 }
 
+void OmxModeMidiKeyboard::inMidiControlChange(byte channel, byte control, byte value)
+{
+	auto activeMacro = getActiveMacro();
+
+	if (activeMacro != nullptr)
+	{
+		activeMacro->inMidiControlChange(channel, control, value);
+	}
+}
+
 void OmxModeMidiKeyboard::SetScale(MusicScales *scale)
 {
 	this->musicScale = scale;
@@ -1281,7 +1318,7 @@ void OmxModeMidiKeyboard::disableSubmode()
 	}
 
 	midiSettings.midiAUX = false;
-
+	mfxQuickEdit_ = false;
 	activeSubmode = nullptr;
 	omxDisp.setDirty();
 }
@@ -1369,7 +1406,7 @@ void OmxModeMidiKeyboard::onNotePostFX(MidiNoteGroup note)
 		}
 		if (note.sendCV)
 		{
-			omxUtil.cvNoteOff();
+			cvNoteUtil.cvNoteOff(note.noteNumber);
 		}
 	}
 	else
@@ -1393,11 +1430,13 @@ void OmxModeMidiKeyboard::onNotePostFX(MidiNoteGroup note)
 
 			if (note.sendMidi)
 			{
+				midiSettings.midiLastNote = note.noteNumber;
+				midiSettings.midiLastVel = note.velocity;
 				MM::sendNoteOn(note.noteNumber, note.velocity, note.channel);
 			}
 			if (note.sendCV)
 			{
-				omxUtil.cvNoteOn(note.noteNumber);
+				cvNoteUtil.cvNoteOn(note.noteNumber);
 			}
 		}
 	}

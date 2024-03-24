@@ -4,6 +4,7 @@
 #include "../../midifx/midifx_interface.h"
 #include "../../hardware/storage.h"
 #include "../../midifx/midifx_arpeggiator.h"
+#include "../../midifx/midifx_selector.h"
 
 #define NUM_MIDIFX_GROUPS 5
 #define NUM_MIDIFX_SLOTS 8
@@ -45,6 +46,11 @@ public:
 	void nextArpPattern();
 	void nextArpOctRange();
 	void gotoArpParams();
+	void enablePassthrough();
+	void selectPrevMFXSlot(bool silent = false);
+	void selectNextMFXSlot(bool silent = false);
+
+
 	uint8_t getArpOctaveRange();
 
 	midifx::MidiFXArpeggiator *getArp(bool autoCreate);
@@ -58,7 +64,7 @@ protected:
 private:
 	bool selected_ = false;
 	bool midiFXParamView_ = false; // If true, parameters adjust the selected midiFX slot.
-	bool arpParamView_ = false;	   // If true, parameters adjust the selected midiFX slot.
+	bool passthroughQuickEdit = false;	   // If true, parameters adjust the selected midiFX slot.
 
 	uint8_t selectedMidiFX_ = 0; // Index of selected midiFX slot
 
@@ -90,6 +96,7 @@ private:
 	MidiNoteGroup onNoteGroups[32];
 
 	midifx::MidiFXInterface *getMidiFX(uint8_t index);
+
 	void setMidiFX(uint8_t index, midifx::MidiFXInterface *midifx);
 	uint8_t getArpIndex();
 	void setupPageLegends();
@@ -136,6 +143,12 @@ private:
 	//     static_cast<SubModeMidiFxGroup *>(context)->noteOutputFunc(note);
 	// }
 
+	static void midiFxSelNoteInputForwarder(void *context, midifx::MidiFXSelector *mfxSelector, uint8_t midiFXIndex, MidiNoteGroup note)
+	{
+		static_cast<SubModeMidiFxGroup *>(context)->midiFxSelNoteInput(mfxSelector, midiFXIndex, note);
+	}
+
+	void midiFxSelNoteInput(midifx::MidiFXSelector *mfxSelector, uint8_t midiFXIndex, MidiNoteGroup note);
 	void reconnectInputsOutputs();
 };
 

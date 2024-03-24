@@ -15,10 +15,14 @@
 // #include <cstdarg>
 
 /* * firmware metadata  */
-// OMX_VERSION = 1.12.17
+// OMX_VERSION = 1.13.3
 const int MAJOR_VERSION = 1;
-const int MINOR_VERSION = 12;
-const int POINT_VERSION = 17;
+const int MINOR_VERSION = 13;
+const int POINT_VERSION = 3;
+
+// 1.13.2 - Adds CV Trigger modes for legato and regtrig
+// 1.13.3 - Bugfix for CV Trigger modes
+
 
 const int DEVICE_ID = 2;
 
@@ -28,6 +32,7 @@ extern Adafruit_MCP4725 dac;
 enum OMXMode
 {
 	MODE_MIDI = 0,
+	MODE_DRUM,
 	MODE_CHORDS,
 	MODE_S1,
 	MODE_S2,
@@ -44,9 +49,12 @@ enum MIDIFXTYPE
 	MIDIFX_CHANCE,
 	MIDIFX_TRANSPOSE,
 	MIDIFX_RANDOMIZER,
+	MIDIFX_SELECTOR,
+	MIDIFX_CHORD,
 	MIDIFX_HARMONIZER,
 	MIDIFX_SCALER,
 	MIDIFX_MONOPHONIC,
+	MIDIFX_REPEAT,
 	MIDIFX_ARP,
 	MIDIFX_COUNT
 };
@@ -65,8 +73,10 @@ enum FUNCKEYMODE
 extern const uint8_t EEPROM_VERSION;
 
 #define EEPROM_HEADER_ADDRESS 0
-#define EEPROM_HEADER_SIZE 34
+#define EEPROM_HEADER_SIZE 36
 #define EEPROM_PATTERN_ADDRESS 64
+
+#define TRACKED_CV_SIZE 16 //
 
 // next address 1104 (was 1096 before clock)
 
@@ -98,6 +108,7 @@ extern const int analogPins[];
 extern int pots[NUM_CC_BANKS][NUM_CC_POTS]; // the MIDI CC (continuous controller) for each analog input
 
 using Micros = unsigned long; // for tracking time per pattern
+
 
 struct SysSettings
 {
@@ -133,9 +144,10 @@ extern PotSettings potSettings;
 extern int potMinVal;
 extern int potMaxVal;
 
+
 struct MidiConfig
 {
-	int defaultVelocity = 100;
+	uint8_t defaultVelocity = 100;
 	int octave = 0; // default C4 is 0 - range is -4 to +5
 	// int newoctave = octave;
 	int transpose = 0;
@@ -153,11 +165,11 @@ struct MidiConfig
 	int midiRRChannelOffset = 0;
 	int midiRRChannelCount = 1;
 	uint8_t midiLastNote = 0;
+	uint8_t midiLastVel = 0;
 	int currpgm = 0;
 	int currbank = 0;
 	bool midiInToCV = true;
 	bool midiSoftThru = false;
-	int pitchCV;
 	bool midiAUX = false;
 };
 
@@ -189,17 +201,20 @@ struct EncoderConfig
 
 extern EncoderConfig encoderConfig;
 
+extern const uint32_t secs2micros;
+
 struct ClockConfig
 {
 	float clockbpm = 120;
+	uint8_t globalQuantizeStepIndex = 9; // Determines what unit to quantize to. Index of kArpRates
 	float newtempo = clockbpm;
 	unsigned long tempoStartTime;
 	unsigned long tempoEndTime;
-	float step_delay;
+	float step_delay; // 16th note step length in milliseconds
 	unsigned long minDelta = 5000;
 
-	volatile unsigned long step_micros; // 124992 for 120 bpm : 35712 for 300 bpm
-	volatile unsigned long ppqInterval; // 5208 for 120 bpm : 1488 for 300 bpm
+	volatile unsigned long step_micros; // 16th note step in microseconds (quarter of quarter note), 124992 for 120 bpm : 35712 for 300 bpm
+	volatile unsigned long ppqInterval; // time in microseconds between clock ticks,  5208 or 5.2ms for 120 bpm : 1488 for 300 bpm, 5.2 * 96 = 500ms
 };
 
 extern ClockConfig clockConfig;
@@ -217,6 +232,10 @@ struct SequencerConfig
 
 	uint32_t currentFrameMicros;
 	uint32_t lastClockMicros;
+
+	uint8_t midiOutClockTick; // Shouldn't be modified
+
+	uint16_t currentClockTick; // Counter that wraps from 0-96 on the clock tick. currentClockTick % 96 will align with global 1/4 note, currentClockTick % 96/2=48 global 8th note and 96/4=24 global 16th note
 
 	int numOfActiveArps = 0;
 
@@ -272,6 +291,51 @@ struct ColorConfig
 
 	uint32_t octDnColor = ORANGE;
 	uint32_t octUpColor = RBLUE;
+
+	uint32_t mfxQuickEdit = RED;
+
+	uint32_t mfxNone = LEDOFF; 
+	uint32_t mfxChance = MEDRED; 
+	uint32_t mfxTranspose = PURPLE;		
+	uint32_t mfxRandomizer = RED;
+	uint32_t mfxSelector = ORANGE;
+	uint32_t mfxChord = CYAN;
+	uint32_t mfxHarmonizer = ROSE;
+	uint32_t mfxScaler = YELLOW;
+	uint32_t mfxMonophonic = INDIGO;
+	uint32_t mfxRepeat = RED;
+	uint32_t mfxArp = BLUE;
+
+	uint32_t getMidiFXColor(uint8_t mfxType)
+	{
+		switch (mfxType)
+		{
+		case MIDIFX_NONE:
+			return mfxNone;
+		case MIDIFX_CHANCE:
+			return mfxChance;
+		case MIDIFX_TRANSPOSE:
+			return mfxTranspose;
+		case MIDIFX_RANDOMIZER:
+			return mfxRandomizer;
+		case MIDIFX_SELECTOR:
+			return mfxSelector;
+		case MIDIFX_CHORD:
+			return mfxChord;
+		case MIDIFX_HARMONIZER:
+			return mfxHarmonizer;
+		case MIDIFX_SCALER:
+			return mfxScaler;
+		case MIDIFX_MONOPHONIC:
+			return mfxMonophonic;
+		case MIDIFX_REPEAT:
+			return mfxRepeat;
+		case MIDIFX_ARP:
+			return mfxArp;
+		};
+
+		return LEDOFF;
+	}
 };
 
 extern ColorConfig colorConfig;
@@ -316,6 +380,11 @@ extern const int gridw;
 extern const int PPQ;
 
 extern const char *mfxOffMsg;
+extern const char *mfxArpEditMsg;
+extern const char *mfxPassthroughEditMsg;
+extern const char *exitMsg;
+extern const char *paramOffMsg;
+extern const char *paramOnMsg;
 
 extern const char *modes[];
 extern const char *macromodes[];

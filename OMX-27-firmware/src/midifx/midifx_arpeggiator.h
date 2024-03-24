@@ -1,6 +1,7 @@
 #pragma once
 
 #include "midifx_interface.h"
+#include "midifx_notemaster.h"
 
 namespace midifx
 {
@@ -67,12 +68,11 @@ namespace midifx
 	{
 	public:
 		MidiFXArpeggiator();
-		~MidiFXArpeggiator() {}
+		~MidiFXArpeggiator();
 
 		int getFXType() override;
 		const char *getName() override;
 		const char *getDispName() override;
-		uint32_t getColor() override;
 
 		MidiFXInterface *getClone() override;
 
@@ -120,6 +120,7 @@ namespace midifx
 		{
 			// bool inUse = false;
 			uint8_t noteNumber;
+			uint8_t channel;
 			// uint8_t velocity : 7;
 			// bool sendMidi = false;
 			// bool sendCV = false;
@@ -129,18 +130,20 @@ namespace midifx
 				noteNumber = 255;
 			}
 
-			ArpNote(int noteNumber)
+			ArpNote(int noteNumber, uint8_t channel)
 			{
 				if (noteNumber < 0 || noteNumber > 127)
 				{
 					noteNumber = 255;
 				}
 				this->noteNumber = noteNumber;
+				this->channel = channel;
 			}
 
-			ArpNote(MidiNoteGroup noteGroup)
+			ArpNote(MidiNoteGroup *noteGroup)
 			{
-				noteNumber = noteGroup.noteNumber;
+				noteNumber = noteGroup->noteNumber;
+				channel = noteGroup->channel - 1;
 				// velocity = noteGroup.velocity;
 				// sendMidi = noteGroup.sendMidi;
 				// sendCV = noteGroup.sendCV;
@@ -173,9 +176,10 @@ namespace midifx
 			uint8_t midiChannel : 4; // 0-15, Add 1 when using
 			uint8_t swing : 7;		 // max 100
 			uint8_t rateIndex : 4;	 // max 15
+        	int8_t quantizedRateIndex_ : 5; // max 15 or -1 for hz
 			uint8_t octaveRange : 4; // max 7, 0 = 1 octave
 			int8_t octDistance_ : 6; // -24 to 24
-			uint8_t gate : 7;		 // 0 - 200
+			uint8_t gate;		 // 0 - 200
 
 			uint8_t modPatternLength : 4; // Max 15
 			ArpMod modPattern[16];
@@ -206,6 +210,8 @@ namespace midifx
 
 		uint8_t rateIndex_ : 4; // max 15
 
+        int8_t quantizedRateIndex_ : 5; // max 15 or -1 for hz
+
 		uint8_t octaveRange_ : 4; // max 7, 0 = 1 octave
 		int8_t octDistance_ : 6;  // -24 to 24
 
@@ -219,12 +225,18 @@ namespace midifx
 
 		uint8_t randPrevNote_;
 
+        bool quantizeSync_ = true;
+
 		bool pendingStart_ = false;
 		bool pendingStop_ = false;
-		Micros pendingStartTime_;
-		uint8_t pendingStopCount_ = 0;
+    	Micros nextArpTriggerTime_;
+
+		// Micros pendingStartTime_;
+		// uint8_t pendingStopCount_ = 0;
 
 		bool arpRunning_ = false;
+
+		bool multiplierCalculated_ = false;
 
 		static const int queueSize = 8;
 
@@ -235,7 +247,7 @@ namespace midifx
 
 		std::vector<ArpNote> prevSortedNoteQueue;
 
-		std::vector<PendingArpNote> pendingNotes; // Notes that are used in arp
+		std::vector<PendingArpNote> fixedLengthNotes; // Notes that are used in arp
 
 		uint8_t modPatternLength_ : 4; // Max 15
 		ArpMod modPattern_[16];
@@ -258,6 +270,8 @@ namespace midifx
 		int patPos_;
 		bool goingUp_;
 
+		bool funcKeyModLength_; // Shortcut key to edit length of mod and transpose patterns without needing to use the encoder
+
 		int8_t heldKey16_ = -1; // Key that is held
 
 		int8_t modCopyBuffer_;
@@ -266,9 +280,9 @@ namespace midifx
 		int16_t lastPlayedNoteNumber_;
 		int8_t lastPlayedMod_;
 
-		Micros nextStepTimeP_ = 32;
-		Micros lastStepTimeP_ = 32;
-		uint32_t stepMicroDelta_ = 0;
+		// Micros nextStepTimeP_ = 32;
+		// Micros lastStepTimeP_ = 32;
+		// uint32_t stepMicroDelta_ = 0;
 
 		float multiplier_ = 1;
 
@@ -290,10 +304,23 @@ namespace midifx
 		bool resetNextTrigger_;
 		bool sortOrderChanged_;
 
-		MidiNoteGroup trackingNoteGroups[8];
+		MidiFXNoteMaster noteMaster;
 
-		bool insertMidiNoteQueue(MidiNoteGroup note);
-		bool removeMidiNoteQueue(MidiNoteGroup note);
+		static void processNoteForwarder(void *context, MidiNoteGroup *note)
+        {
+            static_cast<MidiFXArpeggiator *>(context)->processNoteInput(note);
+        }
+
+        static void sendNoteOutForwarder(void *context, MidiNoteGroup *note)
+        {
+            static_cast<MidiFXArpeggiator *>(context)->sendNoteOut(*note);
+        }
+
+		// MidiNoteGroup trackingNoteGroups[8];
+		// MidiNoteGroup trackingNoteGroupsPassthrough[8];
+
+		bool insertMidiNoteQueue(MidiNoteGroup *note);
+		bool removeMidiNoteQueue(MidiNoteGroup *note);
 
 		void findIndexOfNextNotePos();
 
@@ -302,11 +329,12 @@ namespace midifx
 
 		bool hasMidiNotes();
 
-		void trackNoteInput(MidiNoteGroup note);
-		void processNoteInput(MidiNoteGroup note);
+		// void trackNoteInput(MidiNoteGroup note);
+		// void trackNoteInputPassthrough(MidiNoteGroup note, bool ignoreNoteOns);
+		void processNoteInput(MidiNoteGroup *note);
 
-		void arpNoteOn(MidiNoteGroup note);
-		void arpNoteOff(MidiNoteGroup note);
+		void arpNoteOn(MidiNoteGroup *note);
+		void arpNoteOff(MidiNoteGroup *note);
 
 		void startArp();
 		void doPendingStart();
@@ -314,12 +342,14 @@ namespace midifx
 		void doPendingStop();
 		void resetArpSeq();
 
+		void updateMultiplier();
+
 		void arpNoteTrigger();
-		int16_t applyModPattern(int16_t note);
+		int16_t applyModPattern(int16_t note, uint8_t channel);
 		uint8_t findStepLength();
 		int16_t applyTranspPattern(int16_t note);
 
-		void playNote(uint32_t noteOnMicros, int16_t noteNumber, uint8_t velocity);
+		void playNote(uint32_t noteOnMicros, int16_t noteNumber, uint8_t velocity, uint8_t channel);
 
 		void showMessage();
 

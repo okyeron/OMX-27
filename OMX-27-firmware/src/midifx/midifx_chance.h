@@ -14,7 +14,6 @@ namespace midifx
 		int getFXType() override;
 		const char *getName() override;
 		const char *getDispName() override;
-		uint32_t getColor() override;
 
 		MidiFXInterface *getClone() override;
 
@@ -35,6 +34,6 @@ namespace midifx
 		void onEncoderChangedEditParam(Encoder::Update enc) override;
 
 	private:
-		uint8_t chancePerc_ = 255;
+		uint8_t chancePerc_ = 100;
 	};
 }
