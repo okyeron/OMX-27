@@ -4,7 +4,7 @@
 
 Mechanical key switch midi keyboard and sequencer. Based on Teensy 3.2 and Cherry MX RGB key switches.
 
-Full kits and partial kits are [available for sale here](https://denki-oto.weebly.com/#/).
+Full kits and partial kits are [available for sale here](https://www.denki-oto.com/).
 
 Dimensions:  313mm x 65mm  
 
