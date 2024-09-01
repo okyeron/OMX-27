@@ -381,8 +381,9 @@ void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
 		{
 			midiSettings.currbank = constrain(midiSettings.currbank + amt, 0, 127);
 			// Bank Select is 2 mesages
-			MM::sendControlChange(0, 0, sysSettings.midiChannel);
-			MM::sendControlChange(32, midiSettings.currbank, sysSettings.midiChannel);
+			// need to figure out bit shift to get values over 127
+			MM::sendControlChange(0, midiSettings.currbank, sysSettings.midiChannel);
+			MM::sendControlChange(32, 0, sysSettings.midiChannel);
 			MM::sendProgramChange(midiSettings.currpgm, sysSettings.midiChannel);
 		}
 	}

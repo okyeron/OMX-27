@@ -5,6 +5,7 @@
 #include "../hardware/omx_leds.h"
 // #include "../modes/sequencer.h"
 #include "../midi/noteoffs.h"
+#include "../consts/consts.h"
 
 using namespace grids;
 
@@ -90,6 +91,22 @@ void OmxModeGrids::onPotChanged(int potIndex, int prevValue, int newValue, int a
 	// if (analogDelta < 3)
 	//         return;
 
+#if T4
+// prevents values from being modified until pot is modified
+	if (potPostLoadThresh[potIndex])
+	{
+		int delta = newValue - prevValue;
+
+		if (delta >= 1)
+		{
+			potPostLoadThresh[potIndex] = false;
+		}
+		else
+		{
+			return;
+		}
+	}
+#else
 	// prevents values from being modified until pot is modified
 	if (potPostLoadThresh[potIndex])
 	{
@@ -102,6 +119,7 @@ void OmxModeGrids::onPotChanged(int potIndex, int prevValue, int newValue, int a
 			potPostLoadThresh[potIndex] = false;
 		}
 	}
+#endif
 
 	if (potIndex < 4)
 	{
@@ -525,8 +543,8 @@ void OmxModeGrids::loadActivePattern(uint8_t pattIndex)
 void OmxModeGrids::startPlayback()
 {
 	gridsAUX = true;
-	grids_.start();
 	omxUtil.resetClocks();
+	grids_.start();
 	omxUtil.startClocks();
 	// sequencer.playing = true;
 	isPlaying_ = true;

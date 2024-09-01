@@ -18,7 +18,7 @@
 // OMX_VERSION = 1.13.4
 const int MAJOR_VERSION = 1;
 const int MINOR_VERSION = 13;
-const int POINT_VERSION = 4;
+const int POINT_VERSION = 6;
 
 // 1.13.2 - Adds CV Trigger modes for legato and regtrig
 // 1.13.3 - Bugfix for CV Trigger modes
@@ -73,7 +73,7 @@ enum FUNCKEYMODE
 extern const uint8_t EEPROM_VERSION;
 
 #define EEPROM_HEADER_ADDRESS 0
-#define EEPROM_HEADER_SIZE 36
+#define EEPROM_HEADER_SIZE 40
 #define EEPROM_PATTERN_ADDRESS 64
 
 #define TRACKED_CV_SIZE 16 //
@@ -171,6 +171,7 @@ struct MidiConfig
 	bool midiInToCV = true;
 	bool midiSoftThru = false;
 	bool midiAUX = false;
+	bool isBankSelect = false;
 };
 
 extern MidiConfig midiSettings;
