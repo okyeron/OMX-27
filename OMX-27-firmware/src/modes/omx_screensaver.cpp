@@ -81,7 +81,7 @@ void OmxScreensaver::updateLEDs()
 		{
 			strip.setPixelColor(z, 0);
 		}
-		if (colorConfig.screensaverColor != 0)
+		if (colorConfig.screensaverColor < 32639)
 		{
 			if (!ssreverse)
 			{
