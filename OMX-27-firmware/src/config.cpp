@@ -55,9 +55,9 @@ int pots[NUM_CC_BANKS][NUM_CC_POTS] = {
 
 int potMinVal = 0;
 #if T4
-int potMaxVal = 1019; // T4 = 1019 // T3.2 = 8190;
+int potMaxVal = 1019; // T4 = 1019 // T3.2 = 8191;
 #else
-int potMaxVal = 8190; // T4 = 1019 // T3.2 = 8190;
+int potMaxVal = 8191; // T4 = 1019 // T3.2 = 8191;
 #endif
 
 const int gridh = 32;

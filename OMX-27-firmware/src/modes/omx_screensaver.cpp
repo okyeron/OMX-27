@@ -7,14 +7,16 @@
 
 void OmxScreensaver::setScreenSaverColor()
 {
-	colorConfig.screensaverColor = map(potSettings.analog[4]->getValue(), potMinVal, potMaxVal, 0, 32764);
+	colorConfig.screensaverColor = map(potSettings.analog[4]->getValue(), potMinVal, potMaxVal, 0, ssMaxColorDepth);
 }
 
 void OmxScreensaver::onPotChanged(int potIndex, int prevValue, int newValue, int analogDelta)
 {
-	//     colorConfig.screensaverColor = potSettings.analog[4]->getValue() * 4; // value is 0-32764 for strip.ColorHSV
-	setScreenSaverColor();
-
+	// set screensaver color with pot 4
+	if (potSettings.analog[4]->hasChanged())
+	{
+		setScreenSaverColor();
+	}
 	// reset screensaver
 	if (potSettings.analog[0]->hasChanged() || potSettings.analog[1]->hasChanged() || potSettings.analog[2]->hasChanged() || potSettings.analog[3]->hasChanged())
 	{
@@ -81,7 +83,7 @@ void OmxScreensaver::updateLEDs()
 		{
 			strip.setPixelColor(z, 0);
 		}
-		if (colorConfig.screensaverColor < 32639)
+		if (colorConfig.screensaverColor < ssMaxColorDepth)
 		{
 			if (!ssreverse)
 			{
