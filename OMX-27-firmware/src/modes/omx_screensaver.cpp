@@ -28,8 +28,12 @@ void OmxScreensaver::updateScreenSaverState()
 {
 	if (screenSaverCounter > screensaverInterval)
 	{
-		screenSaverActive = true;
-	}
+        if (!screenSaverActive)
+        {
+            screenSaverActive = true;
+            setScreenSaverColor();
+        }
+    }
 	else if (screenSaverCounter < 10)
 	{
 		ssstep = 0;
@@ -47,7 +51,6 @@ void OmxScreensaver::updateScreenSaverState()
 
 bool OmxScreensaver::shouldShowScreenSaver()
 {
-	setScreenSaverColor();
 	return screenSaverActive;
 }
 
@@ -64,10 +67,12 @@ void OmxScreensaver::onDisplayUpdate()
 	updateLEDs();
 	omxDisp.clearDisplay();
 }
+
 void OmxScreensaver::resetCounter()
 {
 	screenSaverCounter = 0;
 }
+
 void OmxScreensaver::updateLEDs()
 {
 	unsigned long playstepmillis = millis();
