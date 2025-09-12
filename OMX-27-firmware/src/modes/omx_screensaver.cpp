@@ -7,14 +7,16 @@
 
 void OmxScreensaver::setScreenSaverColor()
 {
-	colorConfig.screensaverColor = map(potSettings.analog[4]->getValue(), potMinVal, potMaxVal, 0, 32764);
+	colorConfig.screensaverColor = map(potSettings.analog[4]->getValue(), potMinVal, potMaxVal, 0, ssMaxColorDepth);
 }
 
 void OmxScreensaver::onPotChanged(int potIndex, int prevValue, int newValue, int analogDelta)
 {
-	//     colorConfig.screensaverColor = potSettings.analog[4]->getValue() * 4; // value is 0-32764 for strip.ColorHSV
-	setScreenSaverColor();
-
+	// set screensaver color with pot 4
+	if (potSettings.analog[4]->hasChanged())
+	{
+		setScreenSaverColor();
+	}
 	// reset screensaver
 	if (potSettings.analog[0]->hasChanged() || potSettings.analog[1]->hasChanged() || potSettings.analog[2]->hasChanged() || potSettings.analog[3]->hasChanged())
 	{
@@ -26,8 +28,12 @@ void OmxScreensaver::updateScreenSaverState()
 {
 	if (screenSaverCounter > screensaverInterval)
 	{
-		screenSaverActive = true;
-	}
+        if (!screenSaverActive)
+        {
+            screenSaverActive = true;
+            setScreenSaverColor();
+        }
+    }
 	else if (screenSaverCounter < 10)
 	{
 		ssstep = 0;
@@ -45,7 +51,6 @@ void OmxScreensaver::updateScreenSaverState()
 
 bool OmxScreensaver::shouldShowScreenSaver()
 {
-	setScreenSaverColor();
 	return screenSaverActive;
 }
 
@@ -62,10 +67,12 @@ void OmxScreensaver::onDisplayUpdate()
 	updateLEDs();
 	omxDisp.clearDisplay();
 }
+
 void OmxScreensaver::resetCounter()
 {
 	screenSaverCounter = 0;
 }
+
 void OmxScreensaver::updateLEDs()
 {
 	unsigned long playstepmillis = millis();
@@ -81,7 +88,7 @@ void OmxScreensaver::updateLEDs()
 		{
 			strip.setPixelColor(z, 0);
 		}
-		if (colorConfig.screensaverColor != 0)
+		if (colorConfig.screensaverColor < ssMaxColorDepth)
 		{
 			if (!ssreverse)
 			{

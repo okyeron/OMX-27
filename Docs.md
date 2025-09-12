@@ -801,6 +801,10 @@ Use these shortcuts to save and load banks of chords. There are 8 available bank
 
 ## S1 - Sequencer 1 <a name="s1mode"></a>
 
+Step sequencer - One pattern active at a time.
+
+Layout: 
+
 ### "Black keys" (sharp/flat keyboard keys)
 
 The first 2 black keys are Function Keys (FUNC)
@@ -817,8 +821,6 @@ Hold a key (long press) to access parameters for that pattern. This is "Pattern 
 Sequencer Step Keys - These are your sequencer step on/off keys.
 
 Hold a key (long press) to access parameters for that step. This is "Note Select / Step Parameters". F1 + Step Key is also a quick shortcut.
-
-Step sequencer - One pattern active at a time.
 
 Keys/Commands:   
  - AUX is Start/Stop  
