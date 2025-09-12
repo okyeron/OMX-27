@@ -53,6 +53,8 @@ public:
 	void inMidiNoteOff(byte channel, byte note, byte velocity) override;
 	void inMidiControlChange(byte channel, byte control, byte value) override;
 
+	void sendMidiClock(bool send);
+
 	void SetScale(MusicScales *scale);
 
 private:

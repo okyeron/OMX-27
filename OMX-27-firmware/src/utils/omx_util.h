@@ -20,7 +20,9 @@ enum GlobalParams
 	GPARAM_SCALE_LOCK,
 	GPARAM_SCALE_GRP16,
 	GPARAM_MACRO_MODE,
-	GPARAM_MACRO_CHAN
+	GPARAM_MACRO_CHAN,
+	GPARAM_CLOCK_SOURCE,
+	GPARAM_CLOCK_SEND
 };
 
 class OmxUtil
@@ -92,7 +94,7 @@ private:
 	// signed to avoid rollover
 	signed long long timeToNextClock = 0;
 
-	bool sendClocks_ = false;
+	bool sendClocks_ = true;
 	OmxModeInterface *activeOmxMode_;
 };
 

@@ -1,7 +1,7 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
 
-//	v1.13.5
-//	Last update: Feb 2024
+//	v1.13.8
+//	Last update: Sept 2025
 //
 //	Original concept and initial code by Steven Noreyko
 //  Additional code contributions:
@@ -297,6 +297,16 @@ void handleControlChange(byte channel, byte control, byte value)
 	{
 		MM::sendControlChangeHW(control, value, channel);
 	}
+	// change potbank on bank select
+	if (control == 0){
+		midiSettings.isBankSelect = true;
+		potSettings.potbank = constrain(value, 0, NUM_CC_BANKS - 1);
+		omxDisp.setDirty();
+	// }else if (midiSettings.isBankSelect && control == 32){
+	// 	midiSettings.isBankSelect = true;
+	}else{
+		midiSettings.isBankSelect = false;
+	}
 
 	activeOmxMode->inMidiControlChange(channel, control, value);
 }
@@ -368,7 +378,7 @@ void saveHeader()
 
 	storage->write(EEPROM_HEADER_ADDRESS + 37, cvNoteUtil.triggerMode);
 
-	// 38 bytes
+	storage->write(EEPROM_HEADER_ADDRESS + 38, potSettings.potbank);
 }
 
 // returns true if the header contained initialized data
@@ -439,6 +449,8 @@ bool loadHeader(void)
 	clockConfig.globalQuantizeStepIndex = constrain(storage->read(EEPROM_HEADER_ADDRESS + 36), 0, kNumArpRates - 1);
 
 	cvNoteUtil.triggerMode = constrain(storage->read(EEPROM_HEADER_ADDRESS + 37), 0, 1);
+
+	potSettings.potbank = constrain(storage->read(EEPROM_HEADER_ADDRESS + 38), 0, NUM_CC_BANKS-1);
 
 	return true;
 }
