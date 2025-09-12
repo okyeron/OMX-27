@@ -543,8 +543,8 @@ void OmxModeGrids::loadActivePattern(uint8_t pattIndex)
 void OmxModeGrids::startPlayback()
 {
 	gridsAUX = true;
-	grids_.start();
 	omxUtil.resetClocks();
+	grids_.start();
 	omxUtil.startClocks();
 	// sequencer.playing = true;
 	isPlaying_ = true;

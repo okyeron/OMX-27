@@ -79,7 +79,10 @@ void OmxUtil::advanceClock(OmxModeInterface *activeOmxMode, Micros advance)
 		{
 			// Should always send clock
 			// This way external gear can update themselves
-			MM::sendClock();
+			if (clockConfig.send_always)
+			{
+				MM::sendClock();
+			}
 		}
 
 		if (activeOmxMode_ != nullptr)
@@ -154,18 +157,21 @@ void OmxUtil::restartClocks()
 void OmxUtil::startClocks()
 {
 	sendClocks_ = true;
+	clockConfig.send_always = true;
 	MM::startClock();
 }
 
 void OmxUtil::resumeClocks()
 {
 	sendClocks_ = true;
+	clockConfig.send_always = true;
 	MM::continueClock();
 }
 
 void OmxUtil::stopClocks()
 {
 	sendClocks_ = false;
+	clockConfig.send_always = false;
 	MM::stopClock();
 }
 

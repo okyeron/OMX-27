@@ -15,14 +15,16 @@
 // #include <cstdarg>
 
 /* * firmware metadata  */
-// OMX_VERSION = 1.13.5
+// OMX_VERSION = 1.13.8
 const int MAJOR_VERSION = 1;
 const int MINOR_VERSION = 13;
-const int POINT_VERSION = 5;
+const int POINT_VERSION = 8;
 
 // 1.13.2 - Adds CV Trigger modes for legato and regtrig
 // 1.13.3 - Bugfix for CV Trigger modes
-
+// 1.13.5 - Bugfix for grids T4 pots
+// 1.13.6 - start/stop midi fixes in grids,  sysex tweaks for pot banks 
+// 1.13.8 - option to send midi all the time or not
 
 const int DEVICE_ID = 2;
 
@@ -73,7 +75,7 @@ enum FUNCKEYMODE
 extern const uint8_t EEPROM_VERSION;
 
 #define EEPROM_HEADER_ADDRESS 0
-#define EEPROM_HEADER_SIZE 36
+#define EEPROM_HEADER_SIZE 40
 #define EEPROM_PATTERN_ADDRESS 64
 
 #define TRACKED_CV_SIZE 16 //
@@ -171,6 +173,7 @@ struct MidiConfig
 	bool midiInToCV = true;
 	bool midiSoftThru = false;
 	bool midiAUX = false;
+	bool isBankSelect = false;
 };
 
 extern MidiConfig midiSettings;
@@ -215,6 +218,7 @@ struct ClockConfig
 
 	volatile unsigned long step_micros; // 16th note step in microseconds (quarter of quarter note), 124992 for 120 bpm : 35712 for 300 bpm
 	volatile unsigned long ppqInterval; // time in microseconds between clock ticks,  5208 or 5.2ms for 120 bpm : 1488 for 300 bpm, 5.2 * 96 = 500ms
+	bool send_always = true;
 };
 
 extern ClockConfig clockConfig;

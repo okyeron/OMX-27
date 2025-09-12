@@ -451,7 +451,7 @@ namespace grids
 	{
 		tickCount_ = 0;
 		running_ = true;
-		MM::startClock();
+// 		MM::startClock();
 
 		nextStepTimeP_ = micros();
 		lastStepTimeP_ = micros();
@@ -460,7 +460,7 @@ namespace grids
 	void GridsWrapper::stop()
 	{
 		running_ = false;
-		MM::stopClock();
+// 		MM::stopClock();
 	}
 
 	void GridsWrapper::proceed()

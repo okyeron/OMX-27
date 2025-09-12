@@ -8,7 +8,7 @@
 #include "../midi/midi.h"
 #include "../utils/music_scales.h"
 #include "../midi/noteoffs.h"
-// #include "sequencer.h"
+#include "sequencer.h"
 
 // const int kSelMidiFXOffColor = SALMON;
 // const int kMidiFXOffColor = RED;
@@ -23,6 +23,8 @@ enum MIKeyModePage {
     MIPAGE_POTSANDMACROS,
     MIPAGE_SCALES,
     MIPAGE_CFG,
+	MIPAGE_CLOCK_SOURCE,
+	MIPAGE_CLOCK_SEND,
 	MIPAGE_VERSION
 };
 
@@ -381,8 +383,9 @@ void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
 		{
 			midiSettings.currbank = constrain(midiSettings.currbank + amt, 0, 127);
 			// Bank Select is 2 mesages
-			MM::sendControlChange(0, 0, sysSettings.midiChannel);
-			MM::sendControlChange(32, midiSettings.currbank, sysSettings.midiChannel);
+			// need to figure out bit shift to get values over 127
+			MM::sendControlChange(0, midiSettings.currbank, sysSettings.midiChannel);
+			MM::sendControlChange(32, 0, sysSettings.midiChannel);
 			MM::sendProgramChange(midiSettings.currpgm, sysSettings.midiChannel);
 		}
 	}
@@ -391,6 +394,8 @@ void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
 		if (selParam == 1)
 		{
 			potSettings.potbank = constrain(potSettings.potbank + amt, 0, NUM_CC_BANKS - 1);
+			// send a CC to the editor here
+			MM::sendControlChange(90, potSettings.potbank, sysSettings.midiChannel);
 		}
 		if (selParam == 2)
 		{
@@ -471,6 +476,18 @@ void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
 			cvNoteUtil.triggerMode = constrain(cvNoteUtil.triggerMode + amt, 0, 1);
 		}
 	}
+		else if (selPage == MIPAGE_CLOCK_SOURCE)
+	{
+		if (selParam == 1)
+		{
+			sequencer.clockSource = constrain(sequencer.clockSource + amt, 0, 1);
+		}
+		if (selParam == 2)
+		{
+			clockConfig.send_always = constrain(clockConfig.send_always + amt, 0, 1);
+		}
+	}
+
 
 	omxDisp.setDirty();
 }
@@ -1221,7 +1238,13 @@ void OmxModeMidiKeyboard::onDisplayUpdate()
 					omxDisp.setLegend(2,"QUANT", "1/" + String(kArpRates[clockConfig.globalQuantizeStepIndex]));
 					omxDisp.setLegend(3,"CV M", cvNoteUtil.getTriggerModeDispName());
 				}
+				else if (params.getSelPage() == MIPAGE_CLOCK_SOURCE) 
+				{
+					omxDisp.clearLegends();
 
+					omxDisp.setLegend(0,"CLKS", sequencer.clockSource ? "Ext" : "Int");
+					omxDisp.setLegend(1,"SEND", clockConfig.send_always ? "ON" : "OFF"); // Always send clock or not
+				}
 				omxDisp.dispGenericMode2(params.getNumPages(), params.getSelPage(), params.getSelParam(), encoderSelect && !midiSettings.midiAUX);
 			}
 		}
@@ -1321,6 +1344,11 @@ void OmxModeMidiKeyboard::SetScale(MusicScales *scale)
 	this->musicScale = scale;
 	m8Macro_.setScale(scale);
 	nornsMarco_.setScale(scale);
+}
+
+void OmxModeMidiKeyboard::sendMidiClock(bool send)
+{
+	clockConfig.send_always = !clockConfig.send_always;
 }
 
 void OmxModeMidiKeyboard::enableSubmode(SubmodeInterface *subMode)

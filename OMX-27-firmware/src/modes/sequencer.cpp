@@ -775,8 +775,8 @@ void seqReset()
 				sequencer.lastSeqPos[k] = sequencer.seqPos[k];
 			}
 		}
-		omxUtil.stopClocks();
-		omxUtil.startClocks();
+// 		omxUtil.stopClocks();
+// 		omxUtil.startClocks();
 		// MM::stopClock();
 		// MM::startClock();
 		sequencer.seqResetFlag = false;
@@ -797,8 +797,10 @@ void seqStart()
 	{
 		omxUtil.resumeClocks();
 		// MM::continueClock();
-		//	} else if (seqPos[sequencer.playingPattern]==0) {
-		//		MM::startClock();
+// 	} else if (sequencer.seqPos[sequencer.playingPattern]==0) {
+	} else  {
+		omxUtil.startClocks();
+// 		MM::startClock();
 	}
 }
 
@@ -814,6 +816,7 @@ void seqStop()
 void seqContinue()
 {
 	sequencer.playing = true;
+	omxUtil.resumeClocks();
 }
 
 int getPatternPage(int position)

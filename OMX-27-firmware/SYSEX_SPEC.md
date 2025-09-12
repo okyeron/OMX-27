@@ -32,7 +32,13 @@ Request for OMX-27 to transmit current state via sysex. No other payload.
 	//  32 - Scale Pattern, -1 for chromatic
 	//  33 - Lock Scale - Bool
 	//  34 - Scale Group 16 - Bool
-	//  35 - 63 - Not yet used
+	//  35 - midiSettings.defaultVelocity
+	//  36 - clockConfig.globalQuantizeStepIndex
+	//  37 - cvNoteUtil.triggerMode
+	// 	38 - actvie pot bank
+	
+	//  XX - 63 - Not yet used
+
 ```
 Example: 
 `F0 7D 00 00 0D 09 00 00 00 15 16 17 18 07 1D 1E 1F 20 21 22 23 24 25 26 27 28 29 2A 2B 5B 5D 67 68 69 00 00 00 F7`
