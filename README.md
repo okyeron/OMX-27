@@ -62,15 +62,16 @@ pio run
 
 # upload to hardware (press reset and boot and release reset before boot)
 pio run -t upload
-
-
 ```
 
 (optional) Install PlatformIO IDE VSCode extension. [Instructions](https://platformio.org/platformio-ide)
 
 Install EditorConfig extension for your text editor. [Instructions](https://editorconfig.org/)
  
-Note: when making changes using the PlatformIO toolchain, please ensure the sketch still builds on Teensyduino before opening a PR.
+To open the project in VSCode :
+- open a new window
+- select the PlatformIO icon from the Primary Side Bar (left toolbar)
+- use the "Pick a folder" button to select the OMX-27 folder you created above
 
 
 ## FAQ
