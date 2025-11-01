@@ -1,3 +1,5 @@
+
+#include "../../globals.h"
 #include "submode_potconfig.h"
 #include "../../hardware/omx_disp.h"
 #include "../../hardware/omx_leds.h"

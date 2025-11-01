@@ -1,8 +1,10 @@
+#include "../globals.h"
 #include "midifx_arpeggiator.h"
 #include "../hardware/omx_disp.h"
 #include "../utils/omx_util.h"
 #include "../hardware/omx_leds.h"
 #include "../consts/colors.h"
+
 // #include "../sequencer.h"
 #include <algorithm>
 // #include <bits/stdc++.h>

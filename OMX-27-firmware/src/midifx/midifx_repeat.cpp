@@ -1,4 +1,5 @@
 #include "midifx_repeat.h"
+#include "../globals.h"
 #include "../hardware/omx_disp.h"
 #include "../utils/omx_util.h"
 

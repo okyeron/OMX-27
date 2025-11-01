@@ -1,6 +1,7 @@
 #pragma once
 
 #include "./omx_mode_interface.h"
+#include <elapsedMillis.h>
 
 class OmxScreensaver : public OmxModeInterface
 {
@@ -30,9 +31,12 @@ public:
 private:
 	void setScreenSaverColor();
 	elapsedMillis screenSaverCounter = 0;
-	unsigned long screensaverInterval = 1000 * 60 * 3; // 3 minutes default
-	uint32_t ssMaxColorDepth = 65528; // used by setScreenSaverColor(). Allows for full rainbow of colors, plus a little extra for 'black'
+	unsigned long screensaverInterval = 1000 * 60 * 3; // 3 minutes default? // 10000;  15000; //
+	uint32_t ssMaxColorDepth = 65528; // used by setScreenSaverColor(). 
+	// Allows for full rainbow of colors, plus a little extra for 'black'
 
+	// Uncomment for 10 second screensaver for testing
+	// unsigned long screensaverInterval = 1000 * 10;
 	int ssstep = 0;
 	int ssloop = 0;
 	volatile unsigned long nextStepTimeSS = 0;

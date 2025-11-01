@@ -336,7 +336,7 @@ namespace euclidean
 		{
 			sOut += (pattern_[i] ? "X" : "-");
 		}
-		Serial.println(sOut.c_str());
+// 		Serial.println(sOut.c_str());
 	}
 	EuclidSave EuclideanSequencer::getSave()
 	{

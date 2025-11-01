@@ -1,4 +1,5 @@
 #include "midimacro_deluge.h"
+#include "../globals.h"
 #include "../utils/omx_util.h"
 #include "../hardware/omx_disp.h"
 #include "../hardware/omx_leds.h"
@@ -126,10 +127,10 @@ namespace midimacro
 		paramBanks[15].SetCCs("Pot 1", 105, "Pot 2", 106, "Pot 3", 107, "Pot 4", 108, "Pot 5", 109);
 
 
-		params_.addPage(5); // 
-		// params_.addPage(1); // 
-		// params_.addPage(1); // 
-		// params_.addPage(1); // 
+		params_.addPage(5); //
+		// params_.addPage(1); //
+		// params_.addPage(1); //
+		// params_.addPage(1); //
 
 		for(uint8_t i = 0; i < 127; i++)
 		{
@@ -184,7 +185,7 @@ namespace midimacro
 	{
 		if (bankIndex >= kNumBanks)
 		{
-			Serial.println((String)"ERROR:MidiMacroDeluge: Cannot set active bank to " + bankIndex);
+// 			Serial.println((String)"ERROR:MidiMacroDeluge: Cannot set active bank to " + bankIndex);
 			return;
 		}
 
@@ -197,7 +198,7 @@ namespace midimacro
 
 			if(params_.getSelPage() == 0)
 			{
-				params_.setSelParam(activeParam);	
+				params_.setSelParam(activeParam);
 			}
 
 			updatePotPickups();
@@ -208,7 +209,7 @@ namespace midimacro
 
 	// Updates the pot pickups to the values saved in the active bank
 	// Thus if we switch banks, the value will need to be picked up
-	// by the pot before it sends out to avoid jumping values. 
+	// by the pot before it sends out to avoid jumping values.
 	void MidiMacroDeluge::updatePotPickups()
 	{
 		auto activeBank = getActiveBank();
@@ -296,7 +297,7 @@ namespace midimacro
 
 			// if(activeBank != nullptr)
 			// {
-				
+
 			// }
 
 			// Serial.println((String)"IN CC: " + control + " VAL: " + value); // 5968
@@ -339,7 +340,7 @@ namespace midimacro
 					// omxDisp.displayMessageTimed(String(activeBank->paramNames[potIndex]) + " " + String(delugeMapVal), 5);
 					MM::sendControlChange(cc, potPickups[potIndex].value, midiMacroConfig.midiMacroChan);
 				}
-				else 
+				else
 				{
 					// uint8_t delugeMapNewVal = (uint8_t)map(newValue, 0, 127, 0, 50);
 					// uint8_t delugeMapVal = (uint8_t)map(potPickups[potIndex].value, 0, 127, 0, 50);
@@ -409,7 +410,7 @@ namespace midimacro
 						}
 					}
 					// Change Octave
-					else if (thisKey == 11 || thisKey == 12) 
+					else if (thisKey == 11 || thisKey == 12)
 					{
 						int amt = thisKey == 11 ? -1 : 1;
 						midiSettings.octave = constrain(midiSettings.octave + amt, -5, 4);
@@ -587,7 +588,7 @@ namespace midimacro
 	void MidiMacroDeluge::onEncoderChangedSelectParam(Encoder::Update enc)
 	{
 		params_.changeParam(enc.dir());
-		
+
 		if(params_.getSelPage() == 0)
 		{
 			activeParam = params_.getSelParam();
@@ -666,7 +667,7 @@ namespace midimacro
 		// 			// omxDisp.displayMessageTimed(String(activeBank->paramNames[potIndex]) + " " + String(delugeMapVal), 5);
 		// 			MM::sendControlChange(cc, potPickups[potIndex].value, midiMacroConfig.midiMacroChan);
 		// 		}
-		// 		else 
+		// 		else
 		// 		{
 		// 			uint8_t delugeMapNewVal = (uint8_t)map(newValue, 0, 127, 0, 50);
 		// 			uint8_t delugeMapVal = (uint8_t)map(potPickups[potIndex].value, 0, 127, 0, 50);
@@ -677,7 +678,7 @@ namespace midimacro
 
 		uint8_t delugeMapPotVal = (uint8_t)map(potPickups[activeParam].potValue, 0, 127, 0, 50);
 		uint8_t delugeMapVal = (uint8_t)map(potPickups[activeParam].value, 0, 127, 0, 50);
-		
+
 		omxDisp.dispParamBar(delugeMapPotVal, delugeMapVal, 0, 50, potPickups[activeParam].pickedUp, false, activeBank->bankName, activeBank->paramNames[activeParam]);
 
 			// omxDisp.dispGenericModeLabel(activeBank->bankName, params_.getNumPages(), params_.getSelPage());

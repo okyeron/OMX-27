@@ -1,5 +1,6 @@
 #include "omx_mode_drum.h"
 #include "../config.h"
+#include "../globals.h"
 #include "../consts/colors.h"
 #include "../utils/omx_util.h"
 #include "../utils/cvNote_util.h"

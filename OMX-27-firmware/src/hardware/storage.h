@@ -8,6 +8,12 @@ enum StorageType
 	FRAM_MEMORY = 1
 };
 
+// EEPROM available
+// Teensy 3.2	2048 bytes
+// Teensy 4.0	1080 bytes
+// FRAM = 32 KBytes
+
+
 // abstract storage class
 class Storage
 {

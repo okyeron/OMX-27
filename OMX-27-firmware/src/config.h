@@ -11,20 +11,20 @@
 #include <Wire.h>
 #include <Adafruit_MCP4725.h>
 #include "consts/colors.h"
+#include <Mux.h>
 
 // #include <cstdarg>
 
 /* * firmware metadata  */
-// OMX_VERSION = 1.13.8
+// OMX_VERSION = 1.14.0
 const int MAJOR_VERSION = 1;
-const int MINOR_VERSION = 13;
-const int POINT_VERSION = 8;
+const int MINOR_VERSION = 14;
+const int POINT_VERSION = 0;
 
 // 1.13.2 - Adds CV Trigger modes for legato and regtrig
 // 1.13.3 - Bugfix for CV Trigger modes
-// 1.13.5 - Bugfix for grids T4 pots
-// 1.13.6 - start/stop midi fixes in grids,  sysex tweaks for pot banks 
 // 1.13.8 - option to send midi all the time or not
+// 1.14.0 - finish RP2040 port
 
 const int DEVICE_ID = 2;
 
@@ -102,7 +102,7 @@ extern const int LED_BRIGHTNESS;
 extern const int LED_PIN;
 extern const int LED_COUNT;
 
-// POTS/ANALOG INPUTS - teensy pins for analog inputs
+// POTS/ANALOG INPUTS - pins for analog inputs
 extern const int analogPins[];
 
 #define NUM_CC_BANKS 5
@@ -123,7 +123,7 @@ struct SysSettings
 	unsigned long timeElasped;
 };
 
-extern SysSettings sysSettings;
+
 
 extern const int potCount;
 
@@ -141,7 +141,6 @@ struct PotSettings
 	int potNum = 0;
 };
 // Put in global struct to share across classes
-extern PotSettings potSettings;
 
 extern int potMinVal;
 extern int potMaxVal;
@@ -193,7 +192,6 @@ struct MidiMacroConfig
 	int midiMacroChan = 10;
 };
 
-extern MidiMacroConfig midiMacroConfig;
 
 // extern bool m8mutesolo[];
 
@@ -298,9 +296,9 @@ struct ColorConfig
 
 	uint32_t mfxQuickEdit = RED;
 
-	uint32_t mfxNone = LEDOFF; 
-	uint32_t mfxChance = MEDRED; 
-	uint32_t mfxTranspose = PURPLE;		
+	uint32_t mfxNone = LEDOFF;
+	uint32_t mfxChance = MEDRED;
+	uint32_t mfxTranspose = PURPLE;
 	uint32_t mfxRandomizer = RED;
 	uint32_t mfxSelector = ORANGE;
 	uint32_t mfxChord = CYAN;

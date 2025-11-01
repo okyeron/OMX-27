@@ -1,12 +1,13 @@
 #pragma once
 
+// #include "../config.h"
 #include "../hardware/storage.h"
-#include "../config.h"
+#include "midi.h"
 
 class SysEx
 {
-	Storage *storage;
 	SysSettings *settings;
+	Storage *storage;
 
 public:
 	SysEx(Storage *storage, SysSettings *settings) : storage(storage),

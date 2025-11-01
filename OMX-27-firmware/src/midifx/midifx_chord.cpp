@@ -441,9 +441,9 @@ namespace midifx
                 {
                     if (i > 0)
                     {
-                        tempString.append(" ");
+                        tempString += " ";
                     }
-                    tempString.append(MusicScales::getFullNoteName(note));
+                    tempString += (MusicScales::getFullNoteName(note));
                 }
             }
 

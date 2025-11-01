@@ -451,7 +451,7 @@ namespace grids
 	{
 		tickCount_ = 0;
 		running_ = true;
-// 		MM::startClock();
+		// MM::startClock();
 
 		nextStepTimeP_ = micros();
 		lastStepTimeP_ = micros();
@@ -460,13 +460,13 @@ namespace grids
 	void GridsWrapper::stop()
 	{
 		running_ = false;
-// 		MM::stopClock();
+		// MM::stopClock();
 	}
 
 	void GridsWrapper::proceed()
 	{
 		running_ = true;
-		MM::continueClock();
+		MM::continueTransport();
 	}
 
 	void GridsWrapper::setNoteOutputFunc(void (*fptr)(void *, uint8_t, MidiNoteGroup), void *context)

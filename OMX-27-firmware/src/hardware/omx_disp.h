@@ -1,5 +1,6 @@
 #pragma once
 #include "../config.h"
+#include <elapsedMillis.h>
 
 // MESSAGE DISPLAY
 const int MESSAGE_TIMEOUT_US = 500000;
@@ -8,7 +9,7 @@ class OmxDisp
 {
 public:
 	// Should make into function
-	
+
 	const char *legends[4] = {"", "", "", ""};
 	int legendVals[4] = {0, 0, 0, 0};
 	int dispPage = 0;

@@ -1,4 +1,5 @@
 #include "midimacro_m8.h"
+#include "../globals.h"
 #include "../utils/omx_util.h"
 #include "../hardware/omx_disp.h"
 #include "../hardware/omx_leds.h"

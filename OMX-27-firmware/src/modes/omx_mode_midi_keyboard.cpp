@@ -1,5 +1,6 @@
 #include "omx_mode_midi_keyboard.h"
 #include "../config.h"
+#include "../globals.h"
 #include "../consts/colors.h"
 #include "../utils/omx_util.h"
 #include "../utils/cvNote_util.h"
@@ -23,8 +24,7 @@ enum MIKeyModePage {
     MIPAGE_POTSANDMACROS,
     MIPAGE_SCALES,
     MIPAGE_CFG,
-	MIPAGE_CLOCK_SOURCE,
-	MIPAGE_CLOCK_SEND,
+    MIPAGE_CLOCK_SOURCE,
 	MIPAGE_VERSION
 };
 
@@ -37,6 +37,7 @@ OmxModeMidiKeyboard::OmxModeMidiKeyboard()
 	params.addPage(4); // PotBank, Thru, Macro, Macro Channel
 	params.addPage(4); // Root, Scale, Lock Scale Notes, Group notes. 
 	params.addPage(4); // Pot CC CFG
+	params.addPage(4); // MIPAGE_CLOCK_SOURCE
 	params.addPage(4); // MIPAGE_VERSION
 
 	// subModeMidiFx.setNoteOutputFunc(&OmxModeMidiKeyboard::onNotePostFXForwarder, this);
@@ -476,7 +477,7 @@ void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
 			cvNoteUtil.triggerMode = constrain(cvNoteUtil.triggerMode + amt, 0, 1);
 		}
 	}
-		else if (selPage == MIPAGE_CLOCK_SOURCE)
+	else if (selPage == MIPAGE_CLOCK_SOURCE)
 	{
 		if (selParam == 1)
 		{
@@ -487,7 +488,6 @@ void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
 			clockConfig.send_always = constrain(clockConfig.send_always + amt, 0, 1);
 		}
 	}
-
 
 	omxDisp.setDirty();
 }
@@ -1238,13 +1238,13 @@ void OmxModeMidiKeyboard::onDisplayUpdate()
 					omxDisp.setLegend(2,"QUANT", "1/" + String(kArpRates[clockConfig.globalQuantizeStepIndex]));
 					omxDisp.setLegend(3,"CV M", cvNoteUtil.getTriggerModeDispName());
 				}
-				else if (params.getSelPage() == MIPAGE_CLOCK_SOURCE) 
-				{
+				else if (params.getSelPage() == MIPAGE_CLOCK_SOURCE) {
 					omxDisp.clearLegends();
 
 					omxDisp.setLegend(0,"CLKS", sequencer.clockSource ? "Ext" : "Int");
 					omxDisp.setLegend(1,"SEND", clockConfig.send_always ? "ON" : "OFF"); // Always send clock or not
 				}
+
 				omxDisp.dispGenericMode2(params.getNumPages(), params.getSelPage(), params.getSelParam(), encoderSelect && !midiSettings.midiAUX);
 			}
 		}
@@ -1345,7 +1345,6 @@ void OmxModeMidiKeyboard::SetScale(MusicScales *scale)
 	m8Macro_.setScale(scale);
 	nornsMarco_.setScale(scale);
 }
-
 void OmxModeMidiKeyboard::sendMidiClock(bool send)
 {
 	clockConfig.send_always = !clockConfig.send_always;
