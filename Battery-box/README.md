@@ -8,6 +8,8 @@ The battery plug on the PCB is a JST SH connector (2 pin, 1.0 mm pitch) or you c
 
 3D printable battery box models are available below:
 
+The parts are designed to use heat-set inserts for mounting - I used M2.5 4mmx4mm inserts - and then you can just use the same screws inserted from the bottom instead.
+
 ![<# alt text #>](box_inside.png "box_inside")
 
 [Rectangular box](omx-27_battery_box_1a.stl)
