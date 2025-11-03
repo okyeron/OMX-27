@@ -1,8 +1,10 @@
 #pragma once
+
 #include "../modes/omx_mode_interface.h"
 #include "../utils/music_scales.h"
 // #include "../consts/colors.h"
 #include "../config.h"
+#include "../globals.h"
 // #include "../modes/omx_mode_midi_keyboard.h"
 #include "../utils/param_manager.h"
 #include "../hardware/storage.h"

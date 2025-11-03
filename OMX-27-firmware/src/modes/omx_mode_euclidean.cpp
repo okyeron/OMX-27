@@ -347,14 +347,23 @@ void OmxModeEuclidean::onPotChanged(int potIndex, int prevValue, int newValue, i
 	EuclideanSequencer *activeEuclid = &euclids[selectedEuclid_];
 
 	// Serial.println(String("PotChanged ") + String(potIndex));
+	// Serial.println(String("newValue ") + String(newValue));
+	// Serial.println(String("analogDelta ") + String(analogDelta));
 
 	// --- EDIT MODE ---
 	if (paramMode_ == PARAMMODE_EDIT)
 	{
 		// Serial.println("Edit Mode");
 
+#if (BOARDTYPE == TEENSY4 || BOARDTYPE == OMX2040)
+		// Assuming delta also small for T4
+		// Small delta on OMX2040
+		if (analogDelta < 1)
+			return;
+#else
 		if (analogDelta < 3)
 			return;
+#endif
 
 		if (potIndex == 0)
 		{

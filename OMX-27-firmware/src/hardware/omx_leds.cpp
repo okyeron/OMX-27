@@ -1,6 +1,7 @@
 #include "omx_leds.h"
 #include "../consts/consts.h"
 #include "../consts/colors.h"
+#include "../globals.h"
 
 Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 

@@ -1,5 +1,6 @@
 #include "omx_mode_sequencer.h"
 #include "../config.h"
+#include "../globals.h"
 #include "../consts/colors.h"
 #include "../utils/omx_util.h"
 #include "../hardware/omx_disp.h"

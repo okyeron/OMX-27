@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <EEPROM.h>
 #include <Adafruit_FRAM_I2C.h>
+#include <Wire.h>
 
 #include "storage.h"
 
@@ -10,10 +11,17 @@ Storage *Storage::initStorage()
 {
 	Adafruit_FRAM_I2C fram = Adafruit_FRAM_I2C();
 	// check if FRAM chip can be initialised
+#if BOARDTYPE == OMX2040
+	if (fram.begin(0x50, &Wire1))
+	{
+		return new FRAMStorage(fram);
+	}
+#else
 	if (fram.begin())
 	{
 		return new FRAMStorage(fram);
 	}
+#endif
 	// fall back to EEPROM
 	return new EEPROMStorage();
 }

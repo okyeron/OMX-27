@@ -32,4 +32,4 @@ jobs:
         pip install --upgrade platformio
 
     - name: Compile firmware
-      run: pio run -e teensy31
+      run: pio run -e pico

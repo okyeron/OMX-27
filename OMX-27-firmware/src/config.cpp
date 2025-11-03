@@ -2,7 +2,7 @@
 #include "consts/consts.h"
 
 const OMXMode DEFAULT_MODE = MODE_MIDI;
-const uint8_t EEPROM_VERSION = 36;
+const uint8_t EEPROM_VERSION = 38;
 
 // v30 - adds storage to header for velocity
 // v31 - adds storage for drums
@@ -23,25 +23,32 @@ const int CC_AUX = 25; // Mother mode - AUX key
 const int CC_OM1 = 26; // Mother mode - enc switch
 const int CC_OM2 = 28; // Mother mode - enc turn
 
-const int LED_BRIGHTNESS = 50;
+const int LED_BRIGHTNESS = 90;
 
 // DONT CHANGE ANYTHING BELOW HERE
-
-const int LED_PIN = 14;
 const int LED_COUNT = 27;
 
-#if DEV
-const int analogPins[] = {23, 22, 21, 20, 16}; // DEV/beta boards
-const byte DAC_ADDR = 0x62;
-#elif MIDIONLY
-const int analogPins[] = {23, 22, 21, 20, 16}; // on MIDI only boards - {23,A10,21,20,16} on Bodged MIDI boards
-const byte DAC_ADDR = 0x60;
-#elif T4
-const int analogPins[] = {23, 22, 21, 20, 16}; // on 2.0
-const byte DAC_ADDR = 0x60;
+#if BOARDTYPE == OMX2040
+	const int LED_PIN = 19;
 #else
-const int analogPins[] = {34, 22, 21, 20, 16}; // on 1.0
-const byte DAC_ADDR = 0x60;
+	const int LED_PIN = 14;
+#endif
+
+#if DEV
+	const int analogPins[] = {23, 22, 21, 20, 16}; // DEV/beta boards
+	const byte DAC_ADDR = 0x62;
+#elif MIDIONLY
+	const int analogPins[] = {23, 22, 21, 20, 16}; // on MIDI only boards - {23,A10,21,20,16} on Bodged MIDI boards
+	const byte DAC_ADDR = 0x60;
+#elif BOARDTYPE == TEENSY4
+	const int analogPins[] = {23, 22, 21, 20, 16}; // on 2.0
+	const byte DAC_ADDR = 0x60;
+#elif BOARDTYPE == OMX2040
+	const int analogPins[] = {2, 3 ,0, 1, 4};	// mux pin numbers
+	const byte DAC_ADDR = 0x60;
+#else
+	const int analogPins[] = {34, 22, 21, 20, 16}; // on 1.0
+	const byte DAC_ADDR = 0x60;
 #endif
 
 const int potCount = NUM_CC_POTS;
@@ -54,10 +61,12 @@ int pots[NUM_CC_BANKS][NUM_CC_POTS] = {
 	{91, 93, 103, 104, 7}}; // the MIDI CC (continuous controller) for each analog input
 
 int potMinVal = 0;
-#if T4
-int potMaxVal = 1019; // T4 = 1019 // T3.2 = 8191;
+#if BOARDTYPE == TEENSY4
+	int potMaxVal = 1019; // T4 = 1019 // T3.2 = 8190;
+#elif BOARDTYPE == OMX2040
+	int potMaxVal = 1018;
 #else
-int potMaxVal = 8191; // T4 = 1019 // T3.2 = 8191;
+	int potMaxVal = 8191; // T4 = 1019 // T3.2 = 8191;
 #endif
 
 const int gridh = 32;
@@ -99,8 +108,13 @@ char keys[ROWS][COLS] = {
 	{11, 12, 13, 14, 15, 24},
 	{16, 17, 18, 19, 20, 25},
 	{22, 23, 21}};
-byte rowPins[ROWS] = {6, 4, 3, 5, 2};		// row pins for key switches
-byte colPins[COLS] = {7, 8, 10, 9, 15, 17}; // column pins for key switches
+#if BOARDTYPE == OMX2040
+	byte rowPins[ROWS] = {28, 14, 13, 12, 6};		// row pins for key switches
+	byte colPins[COLS] = {10, 9, 4, 5, 8, 11}; // column pins for key switches
+#else
+	byte rowPins[ROWS] = {6, 4, 3, 5, 2};		// row pins for key switches
+	byte colPins[COLS] = {7, 8, 10, 9, 15, 17}; // column pins for key switches
+#endif
 
 // KEYBOARD MIDI NOTE LAYOUT
 const int notes[] = {0,
@@ -114,10 +128,7 @@ const int steps[] = {0,
 const int midiKeyMap[] = {12, 1, 13, 2, 14, 15, 3, 16, 4, 17, 5, 18, 19, 6, 20, 7, 21, 22, 8, 23, 9, 24, 10, 25, 26};
 
 Adafruit_MCP4725 dac;
-SysSettings sysSettings;
-PotSettings potSettings;
 MidiConfig midiSettings;
-MidiMacroConfig midiMacroConfig;
 EncoderConfig encoderConfig;
 ClockConfig clockConfig;
 SequencerConfig seqConfig;

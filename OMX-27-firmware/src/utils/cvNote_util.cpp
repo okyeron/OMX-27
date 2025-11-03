@@ -186,15 +186,17 @@ void CVNoteUtil::setGate(bool high)
     // Serial.println("SetGate: " + String(high));
 
     // Serial.println("notes Size: " + String(cvNotes_.size()));
-    
+
     digitalWrite(CVGATE_PIN, high);
 }
 
 void CVNoteUtil::setPitch(uint8_t cvNoteNum)
 {
     cvPitch = static_cast<int>(roundf(cvNoteNum * stepsPerSemitone)); // map (adjnote, 36, 91, 0, 4080);
-#if T4
+#if BOARDTYPE == TEENSY4
     dac.setVoltage(cvPitch, false);
+#elif BOARDTYPE == OMX2040
+	dac.setVoltage(cvPitch, false);
 #else
     analogWrite(CVPITCH_PIN, cvPitch);
 #endif

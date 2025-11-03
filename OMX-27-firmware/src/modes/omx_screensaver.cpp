@@ -1,4 +1,5 @@
 #include "omx_screensaver.h"
+#include "../globals.h"
 #include "../consts/consts.h"
 #include "../config.h"
 #include "../utils/omx_util.h"
@@ -7,12 +8,13 @@
 
 void OmxScreensaver::setScreenSaverColor()
 {
-	colorConfig.screensaverColor = map(potSettings.analog[4]->getValue(), potMinVal, potMaxVal, 0, ssMaxColorDepth);
+	int tempcolor = potSettings.analog[4]->getValue();
+	colorConfig.screensaverColor = map(tempcolor, potMinVal, potMaxVal, 0, ssMaxColorDepth);
+	// Serial.println(colorConfig.screensaverColor);
 }
 
 void OmxScreensaver::onPotChanged(int potIndex, int prevValue, int newValue, int analogDelta)
 {
-	// set screensaver color with pot 4
 	if (potSettings.analog[4]->hasChanged())
 	{
 		setScreenSaverColor();
@@ -28,7 +30,7 @@ void OmxScreensaver::updateScreenSaverState()
 {
 	if (screenSaverCounter > screensaverInterval)
 	{
-        if (!screenSaverActive)
+		if (!screenSaverActive)
         {
             screenSaverActive = true;
             setScreenSaverColor();
@@ -51,6 +53,7 @@ void OmxScreensaver::updateScreenSaverState()
 
 bool OmxScreensaver::shouldShowScreenSaver()
 {
+	// setScreenSaverColor();
 	return screenSaverActive;
 }
 
@@ -67,12 +70,10 @@ void OmxScreensaver::onDisplayUpdate()
 	updateLEDs();
 	omxDisp.clearDisplay();
 }
-
 void OmxScreensaver::resetCounter()
 {
 	screenSaverCounter = 0;
 }
-
 void OmxScreensaver::updateLEDs()
 {
 	unsigned long playstepmillis = millis();
@@ -83,13 +84,18 @@ void OmxScreensaver::updateLEDs()
 
 		int j = 26 - ssloop;
 		int i = ssstep + 11;
+		int saturation = 255;
+		int brightness = 255;
 
 		for (int z = 1; z < 11; z++)
 		{
-			strip.setPixelColor(z, 0);
+			strip.setPixelColor(z, 0, 0, 0 );
 		}
 		if (colorConfig.screensaverColor < ssMaxColorDepth)
 		{
+			if (colorConfig.screensaverColor > 65200){
+				brightness = 0;
+			}
 			if (!ssreverse)
 			{
 				// turn off all leds
@@ -97,14 +103,14 @@ void OmxScreensaver::updateLEDs()
 				{
 					if (i < j)
 					{
-						strip.setPixelColor(x + 11, 0);
+						strip.setPixelColor(x + 11, 0, 0, 0 );
 					}
 					if (x + 11 > j)
 					{
-						strip.setPixelColor(x + 11, strip.gamma32(strip.ColorHSV(colorConfig.screensaverColor)));
+						strip.setPixelColor(x + 11, strip.gamma32(strip.ColorHSV(colorConfig.screensaverColor, saturation, brightness)));
 					}
 				}
-				strip.setPixelColor(i + 1, strip.gamma32(strip.ColorHSV(colorConfig.screensaverColor)));
+				strip.setPixelColor(i + 1, strip.gamma32(strip.ColorHSV(colorConfig.screensaverColor, saturation, brightness)));
 			}
 			else
 			{
@@ -112,21 +118,21 @@ void OmxScreensaver::updateLEDs()
 				{
 					if (i >= j)
 					{
-						strip.setPixelColor(y + 11, 0);
+						strip.setPixelColor(y + 11, 0, 0, 0 );
 					}
 					if (y + 11 < j)
 					{
-						strip.setPixelColor(y + 11, strip.gamma32(strip.ColorHSV(colorConfig.screensaverColor)));
+						strip.setPixelColor(y + 11, strip.gamma32(strip.ColorHSV(colorConfig.screensaverColor, saturation, brightness)));
 					}
 				}
-				strip.setPixelColor(i + 1, strip.gamma32(strip.ColorHSV(colorConfig.screensaverColor)));
+				strip.setPixelColor(i + 1, strip.gamma32(strip.ColorHSV(colorConfig.screensaverColor, saturation, brightness)));
 			}
 		}
 		else
 		{
 			for (int w = 0; w < 27; w++)
 			{
-				strip.setPixelColor(w, 0);
+				strip.setPixelColor(w, 0, 0, 0 );
 			}
 		}
 		ssstep++;

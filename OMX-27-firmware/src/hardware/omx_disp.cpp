@@ -3,6 +3,7 @@
 #include "omx_disp.h"
 #include "../consts/consts.h"
 #include "../ClearUI/ClearUI.h"
+#include "../globals.h"
 
 U8G2_FOR_ADAFRUIT_GFX u8g2_display;
 
@@ -256,7 +257,7 @@ bool OmxDisp::validateLegendIndex(uint8_t index)
 {
 	if(index >= 4)
 	{
-		Serial.println("ERROR: Param index out of range!");
+// 		Serial.println("ERROR: Param index out of range!");
 		return false;
 	}
 	return true;

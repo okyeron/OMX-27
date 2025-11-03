@@ -1,6 +1,7 @@
 #include <Adafruit_NeoPixel.h>
 
 #include "sequencer.h"
+#include "../globals.h"
 #include "../config.h"
 #include "../consts/consts.h"
 #include "../consts/colors.h"
@@ -733,7 +734,9 @@ void allNotesOff()
 
 void allNotesOffPanic()
 {
-#if T4
+#if BOARDTYPE == TEENSY4
+	dac.setVoltage(0, false);
+#elif BOARDTYPE == OMX2040
 	dac.setVoltage(0, false);
 #else
 	analogWrite(CVPITCH_PIN, 0);
@@ -775,8 +778,8 @@ void seqReset()
 				sequencer.lastSeqPos[k] = sequencer.seqPos[k];
 			}
 		}
-// 		omxUtil.stopClocks();
-// 		omxUtil.startClocks();
+		// omxUtil.stopClocks();
+		// omxUtil.startClocks();
 		// MM::stopClock();
 		// MM::startClock();
 		sequencer.seqResetFlag = false;
@@ -797,7 +800,9 @@ void seqStart()
 	{
 		omxUtil.resumeClocks();
 		// MM::continueClock();
-// 	} else if (sequencer.seqPos[sequencer.playingPattern]==0) {
+		//	} else if (seqPos[sequencer.playingPattern]==0) {
+		//		MM::startClock();
+	// 	} else if (sequencer.seqPos[sequencer.playingPattern]==0) {
 	} else  {
 		omxUtil.startClocks();
 // 		MM::startClock();

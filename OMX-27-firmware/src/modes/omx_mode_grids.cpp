@@ -1,5 +1,6 @@
 #include "omx_mode_grids.h"
 #include "../config.h"
+#include "../globals.h"
 #include "../utils/omx_util.h"
 #include "../hardware/omx_disp.h"
 #include "../hardware/omx_leds.h"
@@ -75,7 +76,7 @@ void OmxModeGrids::onClockTick()
 
 void OmxModeGrids::onPotChanged(int potIndex, int prevValue, int newValue, int analogDelta)
 {
-#if T4
+#if (BOARDTYPE == TEENSY4 || BOARDTYPE == OMX2040)
 	int deltaTheshold = 1;
 #else
 	int deltaTheshold = 6;
@@ -91,7 +92,7 @@ void OmxModeGrids::onPotChanged(int potIndex, int prevValue, int newValue, int a
 	// if (analogDelta < 3)
 	//         return;
 
-#if T4
+#if (BOARDTYPE == TEENSY4 || BOARDTYPE == OMX2040)
 // prevents values from being modified until pot is modified
 	if (potPostLoadThresh[potIndex])
 	{
@@ -416,7 +417,7 @@ void OmxModeGrids::onEncoderChanged(Encoder::Update enc)
 				if (noteLength != newNoteLength)
 				{
 					grids_.setNoteLength(lockedInst_, newNoteLength);
-					omxDisp.displayMessage(kNoteLengths[newNoteLength]);
+					omxDisp.displayMessage((String) kNoteLengths[newNoteLength]);
 					omxDisp.setDirty();
 				}
 			}
@@ -543,8 +544,8 @@ void OmxModeGrids::loadActivePattern(uint8_t pattIndex)
 void OmxModeGrids::startPlayback()
 {
 	gridsAUX = true;
-	omxUtil.resetClocks();
 	grids_.start();
+	omxUtil.resetClocks();
 	omxUtil.startClocks();
 	// sequencer.playing = true;
 	isPlaying_ = true;

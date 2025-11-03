@@ -1,5 +1,4 @@
 #include "noteoffs.h"
-
 #include <Arduino.h>
 #include "../consts/consts.h"
 #include "../config.h"

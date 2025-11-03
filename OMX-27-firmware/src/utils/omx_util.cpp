@@ -1,7 +1,8 @@
 #include <U8g2_for_Adafruit_GFX.h>
 
-#include "omx_util.h"
+#include "../globals.h"
 #include "../consts/consts.h"
+#include "omx_util.h"
 #include "../midi/midi.h"
 #include "../consts/colors.h"
 #include "../hardware/omx_leds.h"
@@ -34,7 +35,7 @@ float OmxUtil::lerp(float a, float b, float t)
 
 void OmxUtil::advanceClock(OmxModeInterface *activeOmxMode, Micros advance)
 {
-	// advance is delta in Micros from previous loop update to this loop update. 
+	// advance is delta in Micros from previous loop update to this loop update.
 
 	// XXXXXXXXXXXXXXXXXXXXXXXX
 	// Txxxxxxxxxxxxxxxxxxxxxxx - Quarter Note - 24 ticks
@@ -55,7 +56,7 @@ void OmxUtil::advanceClock(OmxModeInterface *activeOmxMode, Micros advance)
 	// in a while loop like this is
 	// Maybe so if there is a long advance multiple clocks
 	// will get fired to catch up?
-	// Keeping like this for now as it works. 
+	// Keeping like this for now as it works.
 	while (adv >= timeToNextClock)
 	{
 		adv -= timeToNextClock;
@@ -79,10 +80,12 @@ void OmxUtil::advanceClock(OmxModeInterface *activeOmxMode, Micros advance)
 		{
 			// Should always send clock
 			// This way external gear can update themselves
+			// MM::sendClock();
 			if (clockConfig.send_always)
 			{
 				MM::sendClock();
 			}
+
 		}
 
 		if (activeOmxMode_ != nullptr)
@@ -139,7 +142,7 @@ void OmxUtil::resetClocks()
 {
 	// BPM tempo to step_delay calculation
 	// 60000000 = 60 secs
-	clockConfig.ppqInterval = 60000000 / (PPQ * clockConfig.clockbpm); // ppq interval is in microseconds, 96 * 120 = 11520, 60000000 / 11520 = 52083 microsecond, * 0.001 = 5.208 milliseconds, 
+	clockConfig.ppqInterval = 60000000 / (PPQ * clockConfig.clockbpm); // ppq interval is in microseconds, 96 * 120 = 11520, 60000000 / 11520 = 5208.3 microsecond, * 0.001 = 5.208 milliseconds,
 	clockConfig.step_micros = clockConfig.ppqInterval * (PPQ / 4);	   // 16th note step in microseconds (quarter of quarter note)
 
 	// 16th note step length in milliseconds
@@ -158,21 +161,21 @@ void OmxUtil::startClocks()
 {
 	sendClocks_ = true;
 	clockConfig.send_always = true;
-	MM::startClock();
+	MM::startTransport();
 }
 
 void OmxUtil::resumeClocks()
 {
 	sendClocks_ = true;
 	clockConfig.send_always = true;
-	MM::continueClock();
+	MM::continueTransport();
 }
 
 void OmxUtil::stopClocks()
 {
 	sendClocks_ = false;
 	clockConfig.send_always = false;
-	MM::stopClock();
+	MM::stopTransport();
 }
 
 bool OmxUtil::areClocksRunning()
@@ -187,7 +190,7 @@ bool OmxUtil::areClocksRunning()
 // 		midiSettings.pitchCV = static_cast<int>(roundf((notenum - cvLowestNote) * stepsPerSemitone)); // map (adjnote, 36, 91, 0, 4080);
 // 		digitalWrite(CVGATE_PIN, HIGH);
 // 		//         analogWrite(CVPITCH_PIN, midiSettings.pitchCV);
-// #if T4
+// #if BOARDTYPE == TEENSY4
 // 		dac.setVoltage(midiSettings.pitchCV, false);
 // #else
 // 		analogWrite(CVPITCH_PIN, midiSettings.pitchCV);
@@ -555,8 +558,8 @@ void OmxUtil::onEncoderChangedEditParam(Encoder::Update *enc, MusicScales *music
 	case GPARAM_POTS_LASTVAL:
 	case GPARAM_POTS_LASTCC:
 	{
-		Serial.println("Param not editable: ");
-		Serial.println(paramType);
+// 		Serial.println("Param not editable: ");
+// 		Serial.println(paramType);
 	}
 	break;
 	}
@@ -597,13 +600,13 @@ void OmxUtil::setupPageLegend(MusicScales *musicScale, uint8_t index, uint8_t pa
 	break;
 	case GPARAM_MIDI_LASTNOTE:
 	{
-		omxDisp.legends[index] = "NOTE"; 
+		omxDisp.legends[index] = "NOTE";
 		omxDisp.legendVals[index] = midiSettings.midiLastNote;
 	}
 	break;
 	case GPARAM_MIDI_LASTVEL:
 	{
-		omxDisp.legends[index] = "VEL"; 
+		omxDisp.legends[index] = "VEL";
 		omxDisp.legendVals[index] = midiSettings.midiLastVel;
 	}
 	break;
@@ -664,6 +667,18 @@ void OmxUtil::setupPageLegend(MusicScales *musicScale, uint8_t index, uint8_t pa
 	{
 		omxDisp.legends[index] = "MCRO"; // Macro mode
 		omxDisp.legendText[index] = macromodes[midiMacroConfig.midiMacro];
+	}
+	break;
+	case GPARAM_CLOCK_SOURCE:
+	{
+		omxDisp.legends[index] = "CLKS";
+		omxDisp.legendText[index] = sequencer.clockSource ? "Int" : "Ext";
+	}
+	break;
+	case GPARAM_CLOCK_SEND:
+	{
+		omxDisp.legends[index] = "SEND";
+		omxDisp.legendText[index] = clockConfig.send_always ? "ON" : "OFF";
 	}
 	break;
 	case GPARAM_MACRO_CHAN:

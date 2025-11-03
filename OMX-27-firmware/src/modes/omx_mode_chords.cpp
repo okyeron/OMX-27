@@ -1,5 +1,6 @@
 #include "omx_mode_chords.h"
 #include "../config.h"
+#include "../globals.h"
 #include "../consts/colors.h"
 #include "../utils/omx_util.h"
 #include "../utils/cvNote_util.h"
@@ -2825,9 +2826,9 @@ void OmxModeChords::onDisplayUpdate()
 							{
 								if (i > 0)
 								{
-									notesString.append(" ");
+									notesString += " ";
 								}
-								notesString.append(musicScale_->getFullNoteName(note));
+								notesString += (musicScale_->getFullNoteName(note));
 
 								// if(i < 4)
 								// {

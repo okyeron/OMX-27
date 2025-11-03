@@ -1,13 +1,17 @@
+
+#include "../globals.h"
 #include "../midi/sysex.h"
-#include "../midi/midi.h"
-#include "../config.h"
+
+// #include "../midi/midi.h"
+// #include "../config.h"
 
 const uint8_t INFO = 0x1F;
 const uint8_t CONFIG_EDIT = 0x0E;
 const uint8_t CONFIG_DEVICE_EDIT = 0x0D;
 
-void SysEx::processIncomingSysex(const uint8_t *sysexData, unsigned size)
+void SysEx::processIncomingSysex(const byte *sysexData, unsigned size)
 {
+	Serial.println("Sysex received");
 	if (size < 3)
 	{
 		// 		Serial.println("That's an empty sysex");
@@ -118,15 +122,22 @@ void SysEx::sendCurrentState()
 	sysexData[6] = MINOR_VERSION; // minor version
 	sysexData[7] = POINT_VERSION; // point version
 
-	// 	32 bytes of data:
-	// 	EEPROM VERSION
-	// 	MODE
-	// 	PlayingPattern
-	//	MidiChannel
-	//	Pots (x25 - 5 banks of 5 pots)
-	// 	00
-	// 	00
-	// 	00
+	// 	X bytes of data:
+	//  0 - EEPROM VERSION
+	//  1 - Current MODE
+	//  2 - Sequencer PlayingPattern
+	//  3 - MIDI mode MidiChannel 
+	//  4 - 28 - Pots (x25 - 5 banks of 5 pots)
+	//  29 - MIDI Macro Channel
+	//  30 - MIDI Macro Type
+	//  31 - Scale Root
+	//  32 - Scale Pattern, -1 for chromatic
+	//  33 - Lock Scale - Bool
+	//  34 - Scale Group 16 - Bool
+	//  35 - midiSettings.defaultVelocity
+	//  36 - clockConfig.globalQuantizeStepIndex
+	//  37 - cvNoteUtil.triggerMode
+	// 	38 - actvie pot bank
 
 	uint8_t buffer[EEPROM_HEADER_SIZE];
 	this->storage->readArray(0, buffer, EEPROM_HEADER_SIZE);
