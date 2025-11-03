@@ -1,8 +1,8 @@
 # Optional battery
 
-A lipo battery can be added. 
+A lipo battery can be added to OMX-27 v3. 
 
-[This battery from tinycircuits is recommended](https://tinycircuits.com/products/lithium-ion-polymer-battery-3-7v-290mah). Also available from [Mouser](https://www.mouser.com/ProductDetail/TinyCircuits/ASR00007) or [Digikey](https://www.digikey.com/en/products/detail/tinycircuits/ASR00007/7404517)
+[This battery from tinycircuits is recommended](https://tinycircuits.com/products/lithium-ion-polymer-battery-3-7v-290mah). Also available from [Mouser](https://www.mouser.com/ProductDetail/TinyCircuits/ASR00007) or [Digikey](https://www.digikey.com/en/products/detail/tinycircuits/ASR00007/7404517). [Octopart link](https://octopart.com/asr00007-tiny+circuits-84715901)
 
 The battery plug on the PCB is a JST SH connector (2 pin, 1.0 mm pitch) or you can solder the battery wires directly to the PCB. Please note the PCB markings for polarity.
 
