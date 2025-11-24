@@ -19,11 +19,11 @@ public:
 
 	void onEncoderChanged(Encoder::Update enc) override;
 
-	void onEncoderButtonDown() override{};
-	void onEncoderButtonDownLong() override{};
+	void onEncoderButtonDown() override {};
+	void onEncoderButtonDownLong() override {};
 
 	void onKeyUpdate(OMXKeypadEvent e) override;
-	void onKeyHeldUpdate(OMXKeypadEvent e){};
+	void onKeyHeldUpdate(OMXKeypadEvent e) {};
 
 	void onDisplayUpdate() override;
 
@@ -31,7 +31,11 @@ private:
 	void setScreenSaverColor();
 	elapsedMillis screenSaverCounter = 0;
 	unsigned long screensaverInterval = 1000 * 60 * 3; // 3 minutes default
-	uint32_t ssMaxColorDepth = 65528; // used by setScreenSaverColor(). Allows for full rainbow of colors, plus a little extra for 'black'
+	// unsigned long screensaverInterval = 1000 * 10; // 10 sec for debug
+
+	// Pot 5 (analog[4]) controls color via HSV hue value (0-65535 for full rainbow)
+	uint32_t ssMaxColorDepth = 65535; // Full HSV color range (16-bit)
+	uint32_t ssMinThreshold = 1000;	  // Below this value = LEDs off
 
 	int ssstep = 0;
 	int ssloop = 0;
