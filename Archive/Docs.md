@@ -1084,9 +1084,7 @@ Pretty much the same as MI, but with the following tweaks for Organelle Mother o
 ---
 
 ## Screensaver <a name="screensaver"></a>
-After a default timeout (3 minutes), the display will be blanked and in MI Mode a "screensaver" animation will show on the LEDs. The rightmost pot (#5) can be turned to adjust the color. Touching any keys or any of the other pots will exit the screensaver.  
-
-In S1/S2 the screen will blank, but there is no LED animation.
+After a default timeout (3 minutes), the display will be blanked and a "screensaver" animation will show on the white keyboard LEDs. The rightmost pot (#5) can be turned to adjust the color. Turning it all the way down will turn off the LEDs. Touching any keys or any of the other pots will exit the screensaver.
 
 ---
 
