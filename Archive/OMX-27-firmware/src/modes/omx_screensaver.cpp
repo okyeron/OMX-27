@@ -28,12 +28,12 @@ void OmxScreensaver::updateScreenSaverState()
 {
 	if (screenSaverCounter > screensaverInterval)
 	{
-        if (!screenSaverActive)
-        {
-            screenSaverActive = true;
-            setScreenSaverColor();
-        }
-    }
+		if (!screenSaverActive)
+		{
+			screenSaverActive = true;
+			setScreenSaverColor();
+		}
+	}
 	else if (screenSaverCounter < 10)
 	{
 		ssstep = 0;
@@ -84,11 +84,21 @@ void OmxScreensaver::updateLEDs()
 		int j = 26 - ssloop;
 		int i = ssstep + 11;
 
+		// Always turn off "black" keypad LEDs (1-10)
 		for (int z = 1; z < 11; z++)
 		{
 			strip.setPixelColor(z, 0);
 		}
-		if (colorConfig.screensaverColor < ssMaxColorDepth)
+
+		// Check for LED off mode (pot at minimum)
+		if (colorConfig.screensaverColor < ssMinThreshold)
+		{
+			for (int w = 11; w < 27; w++)
+			{
+				strip.setPixelColor(w, 0, 0, 0);
+			}
+		}
+		else
 		{
 			if (!ssreverse)
 			{
@@ -122,13 +132,7 @@ void OmxScreensaver::updateLEDs()
 				strip.setPixelColor(i + 1, strip.gamma32(strip.ColorHSV(colorConfig.screensaverColor)));
 			}
 		}
-		else
-		{
-			for (int w = 0; w < 27; w++)
-			{
-				strip.setPixelColor(w, 0);
-			}
-		}
+
 		ssstep++;
 		if (ssstep == 16)
 		{
