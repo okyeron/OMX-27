@@ -12,6 +12,12 @@ Information and code for earlier heardware versions is included in the [Archive]
 
 Dimensions:  313mm x 65mm  
 
+## Docs
+
+[New Documentation](https://okyeron.github.io/OMX-27/docs/)
+
+[Old Documentation](<Docs.md>)
+
 ## Firmware 
 
 Kits are shipped with the current firmware already flashed.
@@ -24,9 +30,6 @@ See [below](<#Firmware-Development>) to compile the firmware yourself.
 
 [Build Guide](<build/Build-Kit.md>)
 
-## Docs
-
-[Documentation](<Docs.md>)
 
 ## Web Configurator
 
