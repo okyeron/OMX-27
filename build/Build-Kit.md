@@ -25,7 +25,7 @@ See [Adafruit's guide to excellent soldering](https://learn.adafruit.com/adafrui
 
 # Build Video
 
-[Build/assembly](https://youtu.be/jUWWuaacoz4) 
+[Build/assembly](https://www.youtube.com/watch?v=Nn4loqqdX9o) 
 
 ---
 
