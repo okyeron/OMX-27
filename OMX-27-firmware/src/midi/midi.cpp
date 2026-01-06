@@ -34,7 +34,7 @@ namespace
 }
 
 namespace MM
-{	
+{
 	void begin()
 	{
 		#if BOARDTYPE == OMX2040
@@ -53,7 +53,7 @@ namespace MM
 			usbMIDI.setHandleContinue(handleContinue);
 			usbMIDI.setHandleControlChange(handleControlChange);
 			usbMIDI.setHandleSystemExclusive(OnSysEx);
-			
+
 			HWMIDI.setHandleNoteOn(handleNoteOn);
 			HWMIDI.setHandleNoteOff(handleNoteOff);
 			HWMIDI.setHandleClock(handleClock);
@@ -69,15 +69,19 @@ namespace MM
 	// #### Inbound MIDI callbacks
 
 	// void onControlChange(byte channel, byte number, byte value){
-	// 	// if bank select MSB (0)- set flag 
-	// 	// if flag, then look for next CC - LSB (32), 
+	// 	// if bank select MSB (0)- set flag
+	// 	// if flag, then look for next CC - LSB (32),
 	// 	// then do bank change and reset flag
 	// 	// or if not 32, reset flag
 	// }
 
 	void handleNoteOn(byte channel, byte note, byte velocity)
 	{
-		digitalWrite(BLUELED, HIGH);
+
+		#if BOARDTYPE == OMX2040
+			digitalWrite(BLUELED, HIGH);
+		#endif
+
 		if (midiSettings.midiSoftThru)
 		{
 			sendNoteOnHW(note, velocity, channel);
@@ -92,7 +96,10 @@ namespace MM
 
 	void handleNoteOff(byte channel, byte note, byte velocity)
 	{
-		digitalWrite(BLUELED, LOW);
+		#if BOARDTYPE == OMX2040
+			digitalWrite(BLUELED, LOW);
+		#endif
+
 		if (midiSettings.midiSoftThru)
 		{
 			sendNoteOffHW(note, velocity, channel);
@@ -103,7 +110,7 @@ namespace MM
 		}
 		activeOmxMode->inMidiNoteOff(channel, note, velocity);
 	}
-	
+
 	void handleControlChange(byte channel, byte control, byte value)
 	{
 		// digitalWrite(REDLED, HIGH);
@@ -129,7 +136,7 @@ namespace MM
 	// void externalMidiClockTick(absolute_time_t timestamp) {
 	// 	uint32_t delta = absolute_time_diff_us(last_ext_tick_at_, timestamp);
 	// 	if ( delta > 0) {
-	// 		clockConfig.ppqInterval = delta / 4 ; 
+	// 		clockConfig.ppqInterval = delta / 4 ;
 	// 		clockConfig.clockbpm = (60000000 / clockConfig.ppqInterval) / PPQ;
 
 	// 		last_ext_tick_at_ = timestamp;
@@ -146,7 +153,7 @@ namespace MM
 		// bool clockSource;	// Internal clock (0), external clock (1)
 
 		if (sequencer.clockSource == 1){ // external clock
-		
+
 		// 	absolute_time_t Now = time_us_32();
 		// 	externalMidiClockTick(Now);
 		// 	// omxDisp.setDirty();
@@ -174,7 +181,10 @@ namespace MM
 	}
 
 	void handleStart() {
-		digitalWrite(REDLED, HIGH);
+
+		#if BOARDTYPE == OMX2040
+			digitalWrite(REDLED, HIGH);
+		#endif
 		clockstats.start();
 		startTransport();
 		if (midiSettings.midiSoftThru){
@@ -182,7 +192,10 @@ namespace MM
 	}
 
 	void handleStop() {
-		digitalWrite(REDLED, LOW);
+
+		#if BOARDTYPE == OMX2040
+			digitalWrite(REDLED, LOW);
+		#endif
 		clockstats.stop();
 		stopTransport();
 		if (midiSettings.midiSoftThru){
@@ -190,7 +203,10 @@ namespace MM
 	}
 
 	void handleContinue() {
-		digitalWrite(REDLED, HIGH);
+
+		#if BOARDTYPE == OMX2040
+			digitalWrite(REDLED, HIGH);
+		#endif
 		continueTransport();
 		if (midiSettings.midiSoftThru){
 		}
@@ -200,7 +216,7 @@ namespace MM
 	{
 		sysEx->processIncomingSysex(sysexData, length);
 	}
-	void OnSysExHW(byte* sysexData, unsigned length) 
+	void OnSysExHW(byte* sysexData, unsigned length)
 	{
 		sendSysEx(length, sysexData, false);
 	}
@@ -237,7 +253,7 @@ namespace MM
 	{
 		HWMIDI.sendControlChange(control, value, channel);
 	}
-	
+
 	void sendProgramChange(byte program, byte channel)
 	{
 		// Bank switch?
