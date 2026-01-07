@@ -4,11 +4,15 @@
 
 OMX-27 is a compact DIY hardware MIDI controller and sequencer with RGB LED backlit mechanical key switches.
 
-Version 3 of the hardware is based on the RP2040 microprocessor
+Version 3 of the hardware is based on the RP2040 microprocessor (Raspberry Pi Pico).
+
+The firmware also supports earlier hardware versions:
+- **OMX-27 v2**: Teensy 4.0
+- **OMX-27 v1**: Teensy 3.2/3.1
+
+All three platforms share a unified codebase with platform-specific optimizations.
 
 Kits and specs are [available here](https://www.denki-oto.com/).
-
-Information and code for earlier heardware versions is included in the [Archive](Archive/ReadMe.md) directory.
 
 Dimensions:  313mm x 65mm  
 
@@ -22,7 +26,9 @@ Dimensions:  313mm x 65mm
 
 Kits are shipped with the current firmware already flashed.
 
-The OMX-27 firmware is Open Source and current uses PlatformIO (Arduino)
+The OMX-27 firmware is Open Source and uses PlatformIO (Arduino framework)
+
+The firmware supports multiple hardware platforms (RP2040/Pico, Teensy 4.0, Teensy 3.2/3.1).
 
 See [below](<#Firmware-Development>) to compile the firmware yourself.  
 
@@ -55,16 +61,29 @@ Install PlatformIO CLI tools. [Detailed Instructions](https://platformio.org/ins
 brew install platformio
 
 # check out the project
-git checkout https://github.com/okyeron/OMX-27.git
+git clone https://github.com/okyeron/OMX-27.git
 
 # go to the project directory
-cd OMX-27-RP2040
+cd OMX-27
 
-# compile the project (this may take a while the first time)
+# compile for default platform (RP2040/Pico)
 pio run
 
-# upload to hardware (press reset and boot and release reset before boot)
-pio run -t upload
+# compile for specific platform
+pio run -e pico      # RP2040/Pico (v3)
+pio run -e teensy40  # Teensy 4.0 (v2)
+pio run -e teensy31  # Teensy 3.2/3.1 (v1)
+
+# compile for all platforms
+pio run -e pico -e teensy40 -e teensy31
+
+# upload to hardware
+## For RP2040/Pico: Press RESET and BOOT buttons, release RESET before releasing BOOT
+pio run -e pico -t upload
+
+## For Teensy: Press the button on the Teensy board
+pio run -e teensy40 -t upload
+pio run -e teensy31 -t upload
 ```
 
 (optional) Install PlatformIO IDE VSCode extension. [Instructions](https://platformio.org/platformio-ide)
@@ -76,6 +95,20 @@ To open the project in VSCode :
 - select the PlatformIO icon from the Primary Side Bar (left toolbar)
 - use the "Pick a folder" button to select the OMX-27 folder you created above
 
+## Clear Storage Utility
+
+The `clear_storage` directory contains a utility sketch to reset the device's FRAM or EEPROM storage to factory defaults. This is useful when:
+- Upgrading between firmware versions with incompatible storage formats
+- Troubleshooting configuration issues
+- Starting fresh with default settings
+
+Pre-compiled hex files are available for Teensy platforms:
+- `clear_storage.T32.hex` - For Teensy 3.2/3.1
+- `clear_storage.T4.hex` - For Teensy 4.0
+
+To use: Flash the appropriate hex file using TyUpdater (same process as main firmware). The device will automatically detect whether you have FRAM or EEPROM and clear it accordingly. Progress is shown on the OLED display.
+
+After clearing storage, re-flash the main OMX-27 firmware.
 
 ## FAQ
 
