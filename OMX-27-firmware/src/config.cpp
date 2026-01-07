@@ -23,7 +23,11 @@ const int CC_AUX = 25; // Mother mode - AUX key
 const int CC_OM1 = 26; // Mother mode - enc switch
 const int CC_OM2 = 28; // Mother mode - enc turn
 
-const int LED_BRIGHTNESS = 90;
+#if BOARDTYPE == OMX2040
+	const int LED_BRIGHTNESS = 90;
+#else
+	const int LED_BRIGHTNESS = 50; // Teensy boards
+#endif
 
 // DONT CHANGE ANYTHING BELOW HERE
 const int LED_COUNT = 27;
