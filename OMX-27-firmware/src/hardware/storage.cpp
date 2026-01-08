@@ -4,6 +4,7 @@
 #include <Wire.h>
 
 #include "storage.h"
+#include "../consts/consts.h"
 
 // Storage
 

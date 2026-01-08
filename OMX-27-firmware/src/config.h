@@ -11,7 +11,11 @@
 #include <Wire.h>
 #include <Adafruit_MCP4725.h>
 #include "consts/colors.h"
-#include <Mux.h>
+#include "consts/consts.h"
+
+#if BOARDTYPE == OMX2040
+	#include <Mux.h>
+#endif
 
 // #include <cstdarg>
 

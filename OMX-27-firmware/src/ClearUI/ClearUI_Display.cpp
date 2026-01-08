@@ -4,6 +4,8 @@
 #include <Adafruit_GFX.h>
 #include <Wire.h>
 
+#include "../consts/consts.h"
+
 #include <Fonts/FreeMono9pt7b.h>
 #include <Fonts/FreeSansBold9pt7b.h>
 #include <Fonts/FreeSerifBold9pt7b.h>

@@ -6,8 +6,8 @@
 
 class SysEx
 {
-	SysSettings *settings;
 	Storage *storage;
+	SysSettings *settings;
 
 public:
 	SysEx(Storage *storage, SysSettings *settings) : storage(storage),
