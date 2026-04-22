@@ -87,8 +87,8 @@ const char *exitMsg = "Exit";
 const char *paramOffMsg = "OFF";
 const char *paramOnMsg = "ON";
 
-const char *modes[] = {"MI", "DRUM", "CH", "S1", "S2", "GR", "EL", "OM"};
-const char *macromodes[] = {"Off", "M8", "NRN", "DEL"};
+const char *modes[] = {"KEYS", "DRUMS", "CHORD", "SEQ 1", "SEQ 2", "GRIDS", "EUCLID", "ORGAN"};
+const char *macromodes[] = {"OFF", "M8", "NRN", "DEL"};
 const int nummacromodes = 3;
 
 float multValues[] = {.25, .5, 1, 2, 4, 8, 16};

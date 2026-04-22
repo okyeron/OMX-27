@@ -1376,28 +1376,44 @@ void OmxDisp::dispMode()
 
 	if (isDirty())
 	{
-		u8g2_display.setFontMode(0);
-		u8g2_display.setFont(FONT_SYMB_BIG);
-		u8g2centerText(loaderAnim[animPos], 80, 10, 32, 32); // "\u00BB\u00AB" // // dice: "\u2685"
-
-		// labels formatting
-		u8g2_display.setFontMode(1);
-		u8g2_display.setFont(FONT_BIG);
-		u8g2_display.setCursor(0, 0);
-
-		u8g2_display.setForegroundColor(WHITE);
-		u8g2_display.setBackgroundColor(BLACK);
-
 		const char *displaymode = "";
 		if (sysSettings.newmode != sysSettings.omxMode && encoderConfig.enc_edit)
 		{
-			displaymode = modes[sysSettings.newmode]; // display.print(modes[sysSettings.newmode]);
+			displaymode = modes[sysSettings.newmode];
 		}
 		else if (encoderConfig.enc_edit)
 		{
-			displaymode = modes[sysSettings.omxMode]; // display.print(modes[mode]);
+			displaymode = modes[sysSettings.omxMode];
 		}
-		u8g2centerText(displaymode, 2, 20, 75, 32);
+
+		const int16_t marginL = 2;
+		const uint16_t labelW = 128 - marginL;
+
+		u8g2_display.setFontMode(1);
+		u8g2_display.setForegroundColor(WHITE);
+		u8g2_display.setBackgroundColor(BLACK);
+		u8g2_display.setFont(FONT_BIG);
+		u8g2_display.setCursor(0, 0);
+		// Same vertical math as u8g2centerText (baseline = boxY + (h - ascent) / 2). Do not use boxMid from
+		// boxY=20,h=32 as "screen center" — that targets y≈36, below the 32px-tall panel and clips text.
+		const int16_t labelBoxY = 20;
+		u8g2centerText(displaymode, marginL, labelBoxY, labelW, 32);
+
+		// Top-right overlay: U8g2 cursor Y is the baseline, so u8g2centerText(..., y=0, h=15) put the
+		// baseline near the top edge and clipped most of the glyph upward. Place baseline explicitly.
+		u8g2_display.setFontMode(0);
+		u8g2_display.setFont(FONT_SYMB);
+		u8g2_display.setForegroundColor(WHITE);
+		u8g2_display.setBackgroundColor(BLACK);
+		const char *animFrame = loaderAnim[animPos];
+		const uint16_t symW = u8g2_display.getUTF8Width(animFrame);
+		const uint16_t symAsc = u8g2_display.getFontAscent();
+		const int16_t padTop = 1;
+		const int16_t padRight = 2;
+		const int16_t symBaseline = padTop + symAsc;
+		const int16_t symX = 128 - padRight - (int16_t)symW;
+		u8g2_display.setCursor(symX, symBaseline);
+		u8g2_display.print(animFrame);
 	}
 }
 

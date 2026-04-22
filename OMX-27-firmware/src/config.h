@@ -29,6 +29,7 @@ const int POINT_VERSION = 0;
 // 1.13.3 - Bugfix for CV Trigger modes
 // 1.13.8 - option to send midi all the time or not
 // 1.14.0 - finish RP2040 port
+// 1.15.0 - AUX pot-bank on keys 13/14; mode-select labels
 
 const int DEVICE_ID = 2;
 
