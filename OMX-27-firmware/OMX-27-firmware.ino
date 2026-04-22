@@ -1,6 +1,6 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
 
-//	v1.14.1
+//	v1.15.0
 //	Last update: April 2026
 //
 //	Original concept and initial code by Steven Noreyko
@@ -279,12 +279,10 @@ void readPotentimeters()
 
 		if (potSettings.analog[k]->hasChanged())
 		{
-			// do stuff
 			if (sysSettings.screenSaverMode)
 			{
 				omxScreensaver.onPotChanged(k, prevValue, potSettings.analogValues[k], analogDelta);
 			}
-			// don't send pots in screensaver
 			else
 			{
 				activeOmxMode->onPotChanged(k, prevValue, potSettings.analogValues[k], analogDelta);
@@ -292,6 +290,7 @@ void readPotentimeters()
 		}
 
 	}
+
 }
 // ####### END POTENTIOMETERS #######
 
@@ -346,7 +345,9 @@ void saveHeader()
 
 	storage->write(EEPROM_HEADER_ADDRESS + 38, potSettings.potbank);
 
-	// 38 bytes
+	storage->write(EEPROM_HEADER_ADDRESS + 39, sysSettings.screensaverMinutes);
+
+	// 40 bytes (see EEPROM_HEADER_SIZE)
 }
 
 // returns true if the header contained initialized data
@@ -419,6 +420,18 @@ bool loadHeader(void)
 	cvNoteUtil.triggerMode = constrain(storage->read(EEPROM_HEADER_ADDRESS + 37), 0, 1);
 
 	potSettings.potbank = constrain(storage->read(EEPROM_HEADER_ADDRESS + 38), 0, NUM_CC_BANKS-1);
+
+	{
+		uint8_t ssmin = storage->read(EEPROM_HEADER_ADDRESS + 39);
+		if (ssmin == 0xFF || ssmin < 1 || ssmin > 60)
+		{
+			sysSettings.screensaverMinutes = 3;
+		}
+		else
+		{
+			sysSettings.screensaverMinutes = ssmin;
+		}
+	}
 
 	// digitalWrite(BLUELED, HIGH);
 	return true;
@@ -687,7 +700,70 @@ void loop()
 	//
 	//	Serial.println(screenSaverCounter);
 	omxScreensaver.updateScreenSaverState();
-	sysSettings.screenSaverMode = omxScreensaver.shouldShowScreenSaver();
+	{
+		static bool wasScreenSaverMode = false;
+		sysSettings.screenSaverMode = omxScreensaver.shouldShowScreenSaver();
+		if (wasScreenSaverMode && !sysSettings.screenSaverMode)
+		{
+			omxScreensaver.clearGameStateOnSaverExit();
+		}
+		wasScreenSaverMode = sysSettings.screenSaverMode;
+	}
+
+	// ############### KEY HANDLING ###############
+	// Before pots: keypad + midiSettings.keyState match ADC reads the same frame.
+	while (keypad.available())
+	{
+		auto e = keypad.next();
+		int thisKey = e.key();
+		bool keyConsumed = false;
+
+		if (e.down())
+		{
+			// AUX alone does not wake the idle saver; keys during the easter-egg game must not
+			// reset the counter (that exits screensaver and kills the game).
+			const bool auxAloneNoWake =
+				sysSettings.screenSaverMode && thisKey == 0 && !omxScreensaver.isGameActive();
+			const bool gameKeysNoWake = sysSettings.screenSaverMode && omxScreensaver.isGameActive();
+			if (!auxAloneNoWake && !gameKeysNoWake)
+			{
+				omxScreensaver.resetCounter();
+			}
+			midiSettings.keyState[thisKey] = true;
+		}
+
+		if (e.down() && thisKey == 0 && encoderConfig.enc_edit)
+		{
+			// temp - save whenever the 0 key is pressed in encoder edit mode
+			omxDisp.displayMessage("Saving...");
+			omxDisp.isDirty();
+			omxDisp.showDisplay();
+			saveToStorage();
+			//	Serial.println("EEPROM saved");
+			omxDisp.displayMessage("Saved State");
+			encoderConfig.enc_edit = false;
+			omxLeds.setAllLEDS(0, 0, 0);
+			activeOmxMode->onModeActivated();
+			omxDisp.isDirty();
+			omxLeds.isDirty();
+			keyConsumed = true;
+		}
+
+		if (!keyConsumed)
+		{
+			activeOmxMode->onKeyUpdate(e);
+		}
+
+		if (!e.down())
+		{
+			midiSettings.keyState[thisKey] = false;
+		}
+
+		if (e.held() && !keyConsumed)
+		{
+			activeOmxMode->onKeyHeldUpdate(e);
+		}
+	}
 
 	// ############### POTS ###############
 	//
@@ -716,7 +792,10 @@ void loop()
 	if (u.active())
 	{
 		auto amt = u.accel(1);		   // where 5 is the acceleration factor if you want it, 0 if you don't)
-		omxScreensaver.resetCounter(); // screenSaverCounter = 0;
+		if (!sysSettings.screenSaverMode)
+		{
+			omxScreensaver.resetCounter();
+		}
 									   //    	Serial.println(u.dir() < 0 ? "ccw " : "cw ");
 									   //    	Serial.println(amt);
 
@@ -731,9 +810,13 @@ void loop()
 			omxDisp.setDirty();
 			omxLeds.setDirty();
 		}
-		else
+		else if (!sysSettings.screenSaverMode)
 		{
 			activeOmxMode->onEncoderChanged(u);
+		}
+		else
+		{
+			omxScreensaver.onEncoderChanged(u);
 		}
 	}
 	// END ENCODER
@@ -744,8 +827,14 @@ void loop()
 	switch (s)
 	{
 	// SHORT PRESS
-	case Button::Down:				   // Serial.println("Button down");
-		omxScreensaver.resetCounter(); // screenSaverCounter = 0;
+	case Button::Down: // Serial.println("Button down");
+		if (sysSettings.screenSaverMode && !encoderConfig.enc_edit)
+		{
+			omxScreensaver.toggleGame();
+			omxDisp.setDirty();
+			break;
+		}
+		omxScreensaver.resetCounter();
 
 		// what page are we on?
 		if (sysSettings.newmode != sysSettings.omxMode && encoderConfig.enc_edit)
@@ -800,61 +889,6 @@ void loop()
 		break;
 	}
 	// END ENCODER BUTTON
-
-	// ############### KEY HANDLING ###############
-	//
-	while (keypad.available())
-	{
-// 		Serial.println("keypad");
-		auto e = keypad.next();
-		int thisKey = e.key();
-		bool keyConsumed = false;
-		// int keyPos = thisKey - 11;
-		// int seqKey = keyPos + (sequencer.patternPage[sequencer.playingPattern] * NUM_STEPKEYS);
-
-		if (e.down())
-		{
-			omxScreensaver.resetCounter(); // screenSaverCounter = 0;
-			midiSettings.keyState[thisKey] = true;
-		}
-
-		if (e.down() && thisKey == 0 && encoderConfig.enc_edit)
-		{
-			// temp - save whenever the 0 key is pressed in encoder edit mode
-			omxDisp.displayMessage("Saving...");
-			omxDisp.isDirty();
-			omxDisp.showDisplay();
-			saveToStorage();
-			//	Serial.println("EEPROM saved");
-			omxDisp.displayMessage("Saved State");
-			encoderConfig.enc_edit = false;
-			omxLeds.setAllLEDS(0, 0, 0);
-			activeOmxMode->onModeActivated();
-			omxDisp.isDirty();
-			omxLeds.isDirty();
-			keyConsumed = true;
-		}
-
-		if (!keyConsumed)
-		{
-			activeOmxMode->onKeyUpdate(e);
-		}
-
-		// END MODE SWITCH
-
-		if (!e.down())
-		{
-			midiSettings.keyState[thisKey] = false;
-		}
-
-		// ### LONG KEY SWITCH PRESS
-		if (e.held() && !keyConsumed)
-		{
-			// DO LONG PRESS THINGS
-			activeOmxMode->onKeyHeldUpdate(e); // Only the sequencer uses this, could probably be handled in onKeyUpdate() but keyStates are modified before this stuff happens.
-		}									   // END IF HELD
-
-	} // END KEYS WHILE
 
 	if (!sysSettings.screenSaverMode)
 	{
@@ -1088,6 +1122,7 @@ void setup()
 
 		// Failed to load due to initialized EEPROM or version mismatch
 		// defaults
+		sysSettings.screensaverMinutes = 3;
 		sequencer.playingPattern = 0;
 		sysSettings.playingPattern = 0;
 		sysSettings.midiChannel = 1;
@@ -1104,6 +1139,7 @@ void setup()
 		saveToStorage();
 	}
 
+	omxScreensaver.setIntervalMinutes(sysSettings.screensaverMinutes);
 
 #ifdef RAM_MONITOR
 	reporttime = millis();

@@ -2,7 +2,9 @@
 #include "consts/consts.h"
 
 const OMXMode DEFAULT_MODE = MODE_MIDI;
-const uint8_t EEPROM_VERSION = 38;
+const uint8_t EEPROM_VERSION = 39;
+
+// v39 - screensaver idle delay (minutes) at EEPROM header byte 39
 
 // v30 - adds storage to header for velocity
 // v31 - adds storage for drums

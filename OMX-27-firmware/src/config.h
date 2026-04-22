@@ -125,6 +125,8 @@ struct SysSettings
 	bool refresh = false;
 	bool screenSaverMode = false;
 	unsigned long timeElasped;
+	// Screensaver idle delay (minutes), persisted in EEPROM
+	uint8_t screensaverMinutes = 3;
 };
 
 

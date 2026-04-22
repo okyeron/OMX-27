@@ -137,7 +137,8 @@ void SysEx::sendCurrentState()
 	//  35 - midiSettings.defaultVelocity
 	//  36 - clockConfig.globalQuantizeStepIndex
 	//  37 - cvNoteUtil.triggerMode
-	// 	38 - actvie pot bank
+	// 	38 - active pot bank
+	// 	39 - screensaver idle delay (minutes)
 
 	uint8_t buffer[EEPROM_HEADER_SIZE];
 	this->storage->readArray(0, buffer, EEPROM_HEADER_SIZE);

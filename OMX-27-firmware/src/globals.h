@@ -3,6 +3,9 @@
 #include "midi/sysex.h"
 #include "midi/MIDIClockStats.h"
 
+class OmxScreensaver;
+extern OmxScreensaver omxScreensaver;
+
 extern SysSettings sysSettings;
 extern PotSettings potSettings;
 extern MidiMacroConfig midiMacroConfig;

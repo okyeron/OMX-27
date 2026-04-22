@@ -1,4 +1,5 @@
 #include <U8g2_for_Adafruit_GFX.h>
+#include <cstdio>
 
 #include "omx_disp.h"
 #include "../consts/consts.h"
@@ -202,10 +203,21 @@ void OmxDisp::drawLoading()
 
 void OmxDisp::dispGridBoxes()
 {
+	dispGridBoxesCols(4);
+}
+
+void OmxDisp::dispGridBoxesCols(uint8_t numCols)
+{
+	if (numCols < 2)
+	{
+		numCols = 2;
+	}
 	display.fillRect(0, 0, gridw, 10, WHITE);
-	display.drawFastVLine(gridw / 4, 0, gridh, INVERSE);
-	display.drawFastVLine(gridw / 2, 0, gridh, INVERSE);
-	display.drawFastVLine(gridw * 0.75, 0, gridh, INVERSE);
+	for (uint8_t i = 1; i < numCols; i++)
+	{
+		int x = (int)((gridw * i) / numCols);
+		display.drawFastVLine(x, 0, gridh, INVERSE);
+	}
 }
 void OmxDisp::invertColor(bool flip)
 {
@@ -220,44 +232,34 @@ void OmxDisp::invertColor(bool flip)
 		u8g2_display.setBackgroundColor(BLACK);
 	}
 }
-void OmxDisp::dispValBox(int v, int16_t n, bool inv)
-{ // n is box 0-3
+void OmxDisp::dispValBox(int v, int16_t n, bool inv, int16_t colW)
+{ // n is column index
 	invertColor(inv);
-	u8g2centerNumber(v, n * 32, hline * 2 + 3, 32, 22);
+	u8g2centerNumber(v, n * colW, hline * 2 + 3, colW, 22);
 }
 
-void OmxDisp::dispSymbBox(const char *v, int16_t n, bool inv)
-{ // n is box 0-3
+void OmxDisp::dispSymbBox(const char *v, int16_t n, bool inv, int16_t colW)
+{ // n is column index
 	invertColor(inv);
-	u8g2centerText(v, n * 32, hline * 2 + 3, 32, 22);
+	u8g2centerText(v, n * colW, hline * 2 + 3, colW, 22);
 }
 
 void OmxDisp::clearLegends()
 {
-	legends[0] = "";
-	legends[1] = "";
-	legends[2] = "";
-	legends[3] = "";
-	legendVals[0] = -127;
-	legendVals[1] = -127;
-	legendVals[2] = -127;
-	legendVals[3] = -127;
+	for (uint8_t i = 0; i < kLegendSlots; i++)
+	{
+		legends[i] = "";
+		legendVals[i] = -127;
+		legendText[i] = "";
+		useLegendString[i] = false;
+	}
 	dispPage = 0;
-	legendText[0] = "";
-	legendText[1] = "";
-	legendText[2] = "";
-	legendText[3] = "";
-	useLegendString[0] = false;
-	useLegendString[1] = false;
-	useLegendString[2] = false;
-	useLegendString[3] = false;
 }
 
 bool OmxDisp::validateLegendIndex(uint8_t index)
 {
-	if(index >= 4)
+	if (index >= kLegendSlots)
 	{
-// 		Serial.println("ERROR: Param index out of range!");
 		return false;
 	}
 	return true;
@@ -418,8 +420,14 @@ void OmxDisp::dispGenericMode(int selected)
 	}
 }
 
-void OmxDisp::dispGenericMode2(uint8_t numPages, int8_t selectedPage, int8_t selectedParam, bool encSelActive)
+void OmxDisp::dispGenericMode2(uint8_t numPages, int8_t selectedPage, int8_t selectedParam, bool encSelActive, uint8_t numColumns)
 {
+	if (numColumns < 1 || numColumns > kLegendSlots)
+	{
+		numColumns = 4;
+	}
+	const int16_t colW = (int16_t)(gridw / numColumns);
+
 	if (isMessageActive())
 	{
 		renderMessage();
@@ -429,15 +437,15 @@ void OmxDisp::dispGenericMode2(uint8_t numPages, int8_t selectedPage, int8_t sel
 	u8g2_display.setFontMode(1);
 	u8g2_display.setFont(FONT_LABELS);
 	u8g2_display.setCursor(0, 0);
-	dispGridBoxes();
+	dispGridBoxesCols(numColumns);
 
 	// labels
 	u8g2_display.setForegroundColor(BLACK);
 	u8g2_display.setBackgroundColor(WHITE);
 
-	for (int j = 0; j < 4; j++)
+	for (int j = 0; j < numColumns; j++)
 	{
-		u8g2centerText(legends[j], (j * 32) + 1, hline - 2, 32, 10);
+		u8g2centerText(legends[j], (j * colW) + 1, hline - 2, colW, 10);
 	}
 
 	// value text formatting
@@ -446,39 +454,38 @@ void OmxDisp::dispGenericMode2(uint8_t numPages, int8_t selectedPage, int8_t sel
 	u8g2_display.setForegroundColor(WHITE);
 	u8g2_display.setBackgroundColor(BLACK);
 
-	if (selectedParam >= 0 && selectedParam < 4)
+	if (selectedParam >= 0 && selectedParam < numColumns)
 	{
+		const int16_t innerW = colW - 3;
 		if (encSelActive)
 		{
 			const int8_t bWidth = 1;
-			display.fillRect(selectedParam * 32 + 2, 9, 29, 21, WHITE);
-			display.fillRect(selectedParam * 32 + 2 + bWidth, 9 + bWidth, 29 - (bWidth * 2), 21 - (bWidth * 2), BLACK);
+			display.fillRect(selectedParam * colW + 2, 9, innerW, 21, WHITE);
+			display.fillRect(selectedParam * colW + 2 + bWidth, 9 + bWidth, innerW - (bWidth * 2), 21 - (bWidth * 2), BLACK);
 		}
 		else
 		{
-			display.fillRect(selectedParam * 32 + 2, 9, 29, 21, WHITE);
+			display.fillRect(selectedParam * colW + 2, 9, innerW, 21, WHITE);
 		}
-
-		// display.fillRect(selectedParam * 32 + 2, 9, 29, 21, WHITE);
 	}
 
 	// ValueBoxes
 	bool highlight = false;
-	for (int j = 0; j < 4; j++)
+	for (int j = 0; j < numColumns; j++)
 	{
 		highlight = (j == selectedParam && !encSelActive);
 
 		if (useLegendString[j])
 		{
-			dispSymbBox(legendString[j].c_str(), j, highlight);
+			dispSymbBox(legendString[j].c_str(), j, highlight, colW);
 		}
 		else if (legendVals[j] == -127)
 		{
-			dispSymbBox(legendText[j], j, highlight);
+			dispSymbBox(legendText[j], j, highlight, colW);
 		}
 		else
 		{
-			dispValBox(legendVals[j], j, highlight);
+			dispValBox(legendVals[j], j, highlight, colW);
 		}
 	}
 
@@ -1435,6 +1442,19 @@ void OmxDisp::showDisplay()
 void OmxDisp::bumpDisplayTimer()
 {
 	dirtyDisplayTimer = displayRefreshRate + 1;
+}
+
+void OmxDisp::drawGameScore(int score)
+{
+	display.fillRect(0, 0, 128, 32, BLACK);
+	u8g2_display.setFontMode(1);
+	u8g2_display.setFont(FONT_TENFAT);
+	u8g2_display.setForegroundColor(WHITE);
+	u8g2_display.setBackgroundColor(BLACK);
+	char buf[16];
+	snprintf(buf, sizeof(buf), "Score: %d", score);
+	u8g2centerText(buf, 0, 0, 128, 32);
+	setDirty();
 }
 
 void OmxDisp::drawEuclidPattern(bool singleView, bool *pattern, uint8_t steps, uint8_t yPos, bool selected, bool isPlaying, uint8_t seqPos)

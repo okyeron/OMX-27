@@ -10,12 +10,14 @@ class OmxDisp
 public:
 	// Should make into function
 
-	const char *legends[4] = {"", "", "", ""};
-	int legendVals[4] = {0, 0, 0, 0};
+	static const uint8_t kLegendSlots = 5;
+
+	const char *legends[5] = {"", "", "", "", ""};
+	int legendVals[5] = {0, 0, 0, 0, 0};
 	int dispPage = 0;
-	const char *legendText[4] = {"", "", "", ""};
-	bool useLegendString[4] = {false, false, false, false};
-	String legendString[4] = {"12345", "12345", "12345", "12345"};
+	const char *legendText[5] = {"", "", "", "", ""};
+	bool useLegendString[5] = {false, false, false, false, false};
+	String legendString[5] = {"12345", "12345", "12345", "12345", "12345"};
 
 	OmxDisp();
 	void setup();
@@ -31,11 +33,11 @@ public:
 
 	void dispGridBoxes();
 	void invertColor(bool flip);
-	void dispValBox(int v, int16_t n, bool inv);
-	void dispSymbBox(const char *v, int16_t n, bool inv);
+	void dispValBox(int v, int16_t n, bool inv, int16_t colW = 32);
+	void dispSymbBox(const char *v, int16_t n, bool inv, int16_t colW = 32);
 	void dispGenericMode(int selected);
 
-	void dispGenericMode2(uint8_t numPages, int8_t selectedPage, int8_t selectedParam, bool encSelActive);
+	void dispGenericMode2(uint8_t numPages, int8_t selectedPage, int8_t selectedParam, bool encSelActive, uint8_t numColumns = 4);
 
 	// Displays a label and page numbers
 	void dispGenericModeLabel(const char *label, uint8_t numPages, int8_t selectedPage);
@@ -81,6 +83,8 @@ public:
 
 	void bumpDisplayTimer();
 
+	void drawGameScore(int score);
+
 	void clearLegends();
 	void setLegend(uint8_t index, const char* label, int value);
 	void setLegend(uint8_t index, const char* label, bool isOff, int value);
@@ -96,6 +100,8 @@ public:
 	void UpdateMessageTextTimer();
 
 	void drawEuclidPattern(bool singleView, bool *pattern, uint8_t steps, uint8_t yPos, bool selected, bool isPlaying, uint8_t seqPos);
+
+	void dispGridBoxesCols(uint8_t numCols);
 
 private:
 	int hline = 8;
