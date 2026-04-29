@@ -1,5 +1,6 @@
 
 #include "../../globals.h"
+#include "../../config.h"
 #include "submode_potconfig.h"
 #include "../../hardware/omx_disp.h"
 #include "../../hardware/omx_leds.h"
@@ -16,7 +17,7 @@ SubModePotConfig::SubModePotConfig()
 {
 	params_.addPage(4);
 	params_.addPage(4);
-	params_.addPage(1); // Exit submode
+	params_.addPage(4); // Stop / Play / Rec CC + Exit
 }
 
 void SubModePotConfig::onEnabled()
@@ -125,6 +126,14 @@ void SubModePotConfig::onEncoderChangedEditParam(Encoder::Update enc)
 			potSettings.potbank = constrain(potSettings.potbank + amt, 0, NUM_CC_BANKS - 1);
 		}
 	}
+	else if (selPage == POTPAGE_EXIT)
+	{
+		if (selParam >= 1 && selParam <= 3)
+		{
+			int ti = selParam - 1;
+			midiSettings.transportCC[ti] = (uint8_t)constrain((int)midiSettings.transportCC[ti] + amt, 0, 127);
+		}
+	}
 
 	omxDisp.setDirty();
 	omxLeds.setDirty();
@@ -132,7 +141,7 @@ void SubModePotConfig::onEncoderChangedEditParam(Encoder::Update enc)
 
 void SubModePotConfig::onEncoderButtonDown()
 {
-	if (params_.getSelPage() == POTPAGE_EXIT && params_.getSelParam() == 0)
+	if (params_.getSelPage() == POTPAGE_EXIT && params_.getSelParam() == 3)
 	{
 		setEnabled(false);
 	}
@@ -227,18 +236,18 @@ void SubModePotConfig::setupPageLegends()
 	break;
 	case POTPAGE_EXIT:
 	{
-		omxDisp.legends[0] = "Exit";
-		omxDisp.legends[1] = "";
-		omxDisp.legends[2] = "";
-		omxDisp.legends[3] = "";
-		omxDisp.legendVals[0] = -127;
-		omxDisp.legendVals[1] = -127;
-		omxDisp.legendVals[2] = -127;
+		omxDisp.legends[0] = "Stop";
+		omxDisp.legends[1] = "Play";
+		omxDisp.legends[2] = "Rec";
+		omxDisp.legends[3] = "Exit";
+		omxDisp.legendVals[0] = midiSettings.transportCC[0];
+		omxDisp.legendVals[1] = midiSettings.transportCC[1];
+		omxDisp.legendVals[2] = midiSettings.transportCC[2];
 		omxDisp.legendVals[3] = -127;
-		omxDisp.legendText[0] = "Exit";
+		omxDisp.legendText[0] = "";
 		omxDisp.legendText[1] = "";
 		omxDisp.legendText[2] = "";
-		omxDisp.legendText[3] = "";
+		omxDisp.legendText[3] = "Exit";
 	}
 	break;
 	default:

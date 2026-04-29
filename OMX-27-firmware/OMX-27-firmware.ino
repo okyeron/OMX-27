@@ -1,6 +1,6 @@
 // OMX-27 MIDI KEYBOARD / SEQUENCER
 
-//	v1.14.1
+//	v1.15.0
 //	Last update: April 2026
 //
 //	Original concept and initial code by Steven Noreyko
@@ -346,7 +346,11 @@ void saveHeader()
 
 	storage->write(EEPROM_HEADER_ADDRESS + 38, potSettings.potbank);
 
-	// 38 bytes
+	storage->write(EEPROM_HEADER_ADDRESS + 39, midiSettings.transportCC[0]);
+	storage->write(EEPROM_HEADER_ADDRESS + 40, midiSettings.transportCC[1]);
+	storage->write(EEPROM_HEADER_ADDRESS + 41, midiSettings.transportCC[2]);
+
+	// 42 bytes
 }
 
 // returns true if the header contained initialized data
@@ -419,6 +423,10 @@ bool loadHeader(void)
 	cvNoteUtil.triggerMode = constrain(storage->read(EEPROM_HEADER_ADDRESS + 37), 0, 1);
 
 	potSettings.potbank = constrain(storage->read(EEPROM_HEADER_ADDRESS + 38), 0, NUM_CC_BANKS-1);
+
+	midiSettings.transportCC[0] = constrain(storage->read(EEPROM_HEADER_ADDRESS + 39), 0, 127);
+	midiSettings.transportCC[1] = constrain(storage->read(EEPROM_HEADER_ADDRESS + 40), 0, 127);
+	midiSettings.transportCC[2] = constrain(storage->read(EEPROM_HEADER_ADDRESS + 41), 0, 127);
 
 	// digitalWrite(BLUELED, HIGH);
 	return true;
@@ -1096,6 +1104,10 @@ void setup()
 		pots[0][2] = CC3;
 		pots[0][3] = CC4;
 		pots[0][4] = CC5;
+
+		midiSettings.transportCC[0] = 102;
+		midiSettings.transportCC[1] = 103;
+		midiSettings.transportCC[2] = 104;
 
 		omxModeSeq.initPatterns();
 

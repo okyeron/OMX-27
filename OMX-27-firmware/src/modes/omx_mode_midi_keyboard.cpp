@@ -29,6 +29,49 @@ enum MIKeyModePage {
 	MIPAGE_VERSION
 };
 
+namespace
+{
+uint8_t nextCountInValue(uint8_t current)
+{
+	switch (current)
+	{
+	case 0:
+		return 1;
+	case 1:
+		return 2;
+	case 2:
+		return 4;
+	default:
+		return 0;
+	}
+}
+
+uint8_t normalizeCountInValue(uint8_t value)
+{
+	switch (value)
+	{
+	case 0:
+	case 1:
+	case 2:
+	case 4:
+		return value;
+	default:
+		if (value >= 4)
+			return 4;
+		if (value >= 2)
+			return 2;
+		if (value >= 1)
+			return 1;
+		return 0;
+	}
+}
+
+uint32_t getMetronomeColor(uint8_t brightness = 255)
+{
+	return strip.ColorHSV(midiSettings.metronomeColorHue, 255, brightness);
+}
+}
+
 OmxModeMidiKeyboard::OmxModeMidiKeyboard()
 {
 	// Add 4 pages
@@ -211,6 +254,7 @@ void OmxModeMidiKeyboard::onClockTick()
 
 void OmxModeMidiKeyboard::loopUpdate(Micros elapsedTime)
 {
+	(void)elapsedTime;
 
 	// if (elapsedTime > 0)
 	// {
@@ -229,6 +273,12 @@ void OmxModeMidiKeyboard::loopUpdate(Micros elapsedTime)
 
 	// Can be modified by scale MidiFX
 	musicScale->calculateScaleIfModified(scaleConfig.scaleRoot, scaleConfig.scalePattern);
+
+	if (metronomePulseLevel_ > 0 && (int32_t)(millis() - metronomePulseOffAtMs_) >= 0)
+	{
+		metronomePulseLevel_ = 0;
+		omxLeds.setDirty();
+	}
 
 	// if (isSubmodeEnabled())
 	// {
@@ -279,6 +329,23 @@ void OmxModeMidiKeyboard::onEncoderChanged(Encoder::Update enc)
 		// onEncoderChangedSelectParam(enc);
 		params.changeParam(enc.dir());
 		omxDisp.setDirty();
+		return;
+	}
+
+	// While AUX is held, key 3 + encoder edits metronome hue.
+	if (midiSettings.midiAUX && midiSettings.keyState[3])
+	{
+		int amt = enc.accel(8);
+		if (amt != 0)
+		{
+			metronomeColorAdjustedWhileHeld_ = true;
+			int32_t hue = (int32_t)midiSettings.metronomeColorHue + (amt * 256);
+			while (hue < 0)
+				hue += 65536;
+			midiSettings.metronomeColorHue = (uint16_t)(hue % 65536);
+			omxLeds.setDirty();
+			omxDisp.setDirty();
+		}
 		return;
 	}
 
@@ -700,6 +767,40 @@ void OmxModeMidiKeyboard::onKeyUpdate(OMXKeypadEvent e)
 					potBankAuxTriggerFlash((uint8_t)b);
 					MM::sendControlChange(90, potSettings.potbank, sysSettings.midiChannel);
 				}
+				else if (thisKey >= 16 && thisKey <= 18) // Transport: 16=Stop (momentary), 17/18=Play/Rec (toggle)
+				{
+					int transportIndex = thisKey - 16;
+					uint8_t cc = (uint8_t)constrain(midiSettings.transportCC[transportIndex], 0, 127);
+					uint8_t val;
+					if (transportIndex == 0)
+					{
+						val = 127;
+						midiSettings.transportToggle[1] = false;
+					}
+					else
+					{
+						bool newState = !midiSettings.transportToggle[transportIndex];
+						midiSettings.transportToggle[transportIndex] = newState;
+						val = newState ? 127 : 0;
+					}
+					MM::sendControlChange(cc, val, sysSettings.midiChannel);
+				}
+				else if (thisKey == 15) // Metronome toggle
+				{
+					metronomeEnabled_ = !metronomeEnabled_;
+					MM::sendControlChange(midiSettings.metronomeToggleCC, metronomeEnabled_ ? 127 : 0, sysSettings.midiChannel);
+				}
+				else if (thisKey == 3) // Host sends metronome pulse CC to OMX (toggle)
+				{
+					// Toggle is handled on key release so hold+encoder can edit color without toggling.
+					metronomePulseTogglePending_ = true;
+					metronomeColorAdjustedWhileHeld_ = false;
+				}
+				else if (thisKey == 4) // Count-in cycle: 0, 1, 2, 4
+				{
+					countInBars_ = nextCountInValue(countInBars_);
+					MM::sendControlChange(midiSettings.countInCC, countInBars_, sysSettings.midiChannel);
+				}
 				else if (!mfxQuickEdit_ && (thisKey == 1 || thisKey == 2)) // Change Param selection
 				{
 					if (thisKey == 1)
@@ -786,7 +887,28 @@ void OmxModeMidiKeyboard::onKeyUpdate(OMXKeypadEvent e)
 		}
 		else if (!e.down() && thisKey != 0)
 		{
-			doNoteOff(thisKey);
+			if (midiSettings.midiAUX && thisKey == 16)
+			{
+				uint8_t cc = (uint8_t)constrain(midiSettings.transportCC[0], 0, 127);
+				MM::sendControlChange(cc, 0, sysSettings.midiChannel);
+			}
+			if (midiSettings.midiAUX && thisKey == 3)
+			{
+				if (metronomePulseTogglePending_ && !metronomeColorAdjustedWhileHeld_)
+				{
+					metronomePulseFromHostEnabled_ = !metronomePulseFromHostEnabled_;
+					MM::sendControlChange(
+						midiSettings.metronomePulseHostCC,
+						metronomePulseFromHostEnabled_ ? 127 : 0,
+						sysSettings.midiChannel);
+				}
+				metronomePulseTogglePending_ = false;
+				metronomeColorAdjustedWhileHeld_ = false;
+			}
+			if (!(midiSettings.midiAUX && (thisKey >= 16 && thisKey <= 18 || thisKey == 3)))
+			{
+				doNoteOff(thisKey);
+			}
 			// omxUtil.midiNoteOff(thisKey, sysSettings.midiChannel);
 		}
 	}
@@ -826,6 +948,8 @@ void OmxModeMidiKeyboard::onKeyUpdate(OMXKeypadEvent e)
 			midiSettings.midiAUX = false;
 		}
 		potBankAuxClearFlash();
+		metronomePulseTogglePending_ = false;
+		metronomeColorAdjustedWhileHeld_ = false;
 		// turn off leds
 		strip.setPixelColor(0, LEDOFF);
 		strip.setPixelColor(1, LEDOFF);
@@ -834,6 +958,12 @@ void OmxModeMidiKeyboard::onKeyUpdate(OMXKeypadEvent e)
 		strip.setPixelColor(12, LEDOFF);
 		strip.setPixelColor(13, LEDOFF);
 		strip.setPixelColor(14, LEDOFF);
+		strip.setPixelColor(16, LEDOFF);
+		strip.setPixelColor(17, LEDOFF);
+		strip.setPixelColor(18, LEDOFF);
+		strip.setPixelColor(3, LEDOFF);
+		strip.setPixelColor(4, LEDOFF);
+		strip.setPixelColor(15, LEDOFF);
 	}
 
 	omxLeds.setDirty();
@@ -1153,6 +1283,19 @@ void OmxModeMidiKeyboard::updateLEDs()
 				strip.setPixelColor(14, c14);
 			}
 		}
+		strip.setPixelColor(16, midiSettings.keyState[16] ? WHITE : TRANSPORT_DIM_WHITE);
+		strip.setPixelColor(17, midiSettings.transportToggle[1] ? GREEN : TRANSPORT_DIM_GREEN);
+		strip.setPixelColor(18, midiSettings.transportToggle[2] ? RED : TRANSPORT_DIM_RED);
+		strip.setPixelColor(15, metronomeEnabled_ ? YELLOW : LEDOFF);
+		if (midiSettings.keyState[3])
+		{
+			strip.setPixelColor(3, getMetronomeColor());
+		}
+		else
+		{
+			strip.setPixelColor(3, metronomePulseFromHostEnabled_ ? getMetronomeColor() : LEDOFF);
+		}
+		strip.setPixelColor(4, (countInBars_ > 0 && omxLeds.getBlinkPattern(countInBars_)) ? YELLOW : LEDOFF);
 
 		// strip.setPixelColor(10, color3); // MidiFX key
 
@@ -1169,6 +1312,12 @@ void OmxModeMidiKeyboard::updateLEDs()
 
 		auto auxColor = (blinkStateSlow ? RED : LEDOFF);
 		strip.setPixelColor(0, auxColor);
+	}
+
+	if (metronomePulseLevel_ > 0)
+	{
+		uint8_t brightness = (uint16_t)metronomePulseLevel_ * 255 / 127;
+		strip.setPixelColor(0, getMetronomeColor(brightness));
 	}
 }
 
@@ -1369,6 +1518,57 @@ void OmxModeMidiKeyboard::inMidiNoteOff(byte channel, byte note, byte velocity)
 
 void OmxModeMidiKeyboard::inMidiControlChange(byte channel, byte control, byte value)
 {
+	(void)channel;
+
+	if (control == midiSettings.transportCC[0])
+	{
+		// Stop is treated as a momentary event; clear play state on non-zero values.
+		if (value > 0)
+		{
+			midiSettings.transportToggle[1] = false;
+			omxLeds.setDirty();
+		}
+	}
+	else if (control == midiSettings.transportCC[1])
+	{
+		midiSettings.transportToggle[1] = value >= 64;
+		omxLeds.setDirty();
+	}
+	else if (control == midiSettings.transportCC[2])
+	{
+		midiSettings.transportToggle[2] = value >= 64;
+		omxLeds.setDirty();
+	}
+	else if (control == midiSettings.metronomeToggleCC)
+	{
+		bool newState = value >= 64;
+		if (newState != metronomeEnabled_)
+		{
+			metronomeEnabled_ = newState;
+			omxLeds.setDirty();
+		}
+	}
+	else if (control == midiSettings.countInCC)
+	{
+		countInBars_ = normalizeCountInValue(value);
+		omxLeds.setDirty();
+	}
+	else if (control == midiSettings.metronomePulseHostCC)
+	{
+		bool newState = value >= 64;
+		if (newState != metronomePulseFromHostEnabled_)
+		{
+			metronomePulseFromHostEnabled_ = newState;
+			omxLeds.setDirty();
+		}
+	}
+	else if (control == midiSettings.metronomePulseCC)
+	{
+		metronomePulseLevel_ = value;
+		metronomePulseOffAtMs_ = millis() + 90;
+		omxLeds.setDirty();
+	}
+
 	auto activeMacro = getActiveMacro();
 
 	if (activeMacro != nullptr)

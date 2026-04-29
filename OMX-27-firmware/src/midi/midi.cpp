@@ -130,6 +130,7 @@ namespace MM
 		}
 
 		// sendControlChange(control, value, channel);
+		activeOmxMode->inMidiControlChange(channel, control, value);
 	}
 
 	// absolute_time_t last_ext_tick_at_ = 0;

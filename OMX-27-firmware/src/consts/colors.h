@@ -68,6 +68,11 @@ const auto LOWWHITE = 0x202020;
 const auto VLOWWHITE = 0x101010;
 const auto LEDOFF = 0x000000;
 
+// AUX transport keys (Stop/Play/Rec) when off — dim so full brightness reads clearly when on
+const auto TRANSPORT_DIM_WHITE = 0x060606;
+const auto TRANSPORT_DIM_RED = 0x0C0000;
+const auto TRANSPORT_DIM_GREEN = 0x000C00;
+
 // sequencer pattern colors
 const uint32_t seqColors[] = {ORANGE, YELLOW, GREEN, MAGENTA, CYAN, BLUE, LIME, LTPURPLE};
 const uint32_t muteColors[] = {DKORANGE, DKYELLOW, DKGREEN, DKMAGENTA, DKCYAN, DKBLUE, DKLIME, DKPURPLE};

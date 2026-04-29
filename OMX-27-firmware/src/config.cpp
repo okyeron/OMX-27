@@ -2,7 +2,7 @@
 #include "consts/consts.h"
 
 const OMXMode DEFAULT_MODE = MODE_MIDI;
-const uint8_t EEPROM_VERSION = 38;
+const uint8_t EEPROM_VERSION = 39;
 
 // v30 - adds storage to header for velocity
 // v31 - adds storage for drums
@@ -11,6 +11,7 @@ const uint8_t EEPROM_VERSION = 38;
 // v34 - adds mfx repeat saves
 // v35 - adds quantize rate to arps, added global quant rate to header
 // v36 - adds stuff to randomizer
+// v39 - transport CC assignments (AUX keys 16–18): three bytes after header
 
 // DEFINE CC NUMBERS FOR POTS // CCS mapped to Organelle Defaults
 const int CC1 = 21;
@@ -57,12 +58,13 @@ const int LED_COUNT = 27;
 
 const int potCount = NUM_CC_POTS;
 
+// Banks 2–5 avoid CC 102–119 (default transport / general MIDI undefined range)
 int pots[NUM_CC_BANKS][NUM_CC_POTS] = {
 	{CC1, CC2, CC3, CC4, CC5},
-	{29, 30, 31, 32, 33},
-	{34, 35, 36, 37, 38},
-	{39, 40, 41, 42, 43},
-	{91, 93, 103, 104, 7}}; // the MIDI CC (continuous controller) for each analog input
+	{25, 26, 27, 28, CC5},
+	{46, 47, 48, 49, CC5},
+	{50, 51, 52, 53, CC5},
+	{54, 55, 56, 57, CC5}}; // the MIDI CC (continuous controller) for each analog input
 
 int potMinVal = 0;
 #if BOARDTYPE == TEENSY4

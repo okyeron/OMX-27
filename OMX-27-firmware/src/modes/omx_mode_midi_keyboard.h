@@ -121,6 +121,13 @@ private:
 
 	uint8_t mfxIndex_ = 0;
 	uint8_t quickEditMfxIndex_ = 0;
+	bool metronomeEnabled_ = false;
+	bool metronomePulseFromHostEnabled_ = true; // Bitwig sends CC107 pulses when true
+	bool metronomePulseTogglePending_ = false;
+	bool metronomeColorAdjustedWhileHeld_ = false;
+	uint8_t countInBars_ = 0; // 0,1,2,4
+	uint8_t metronomePulseLevel_ = 0;
+	uint32_t metronomePulseOffAtMs_ = 0;
 
 	midimacro::MidiMacroNorns nornsMarco_;
 	midimacro::MidiMacroM8 m8Macro_;
