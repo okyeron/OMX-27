@@ -392,6 +392,51 @@ bool loadHeader(void)
 		}
 	}
 
+	// Migrate legacy default pot CC mappings to safer defaults.
+	// This is non-destructive: only rows that exactly match known legacy defaults are updated.
+	{
+		static const uint8_t kLegacyPotDefaults[NUM_CC_BANKS][NUM_CC_POTS] = {
+			{21, 22, 23, 24, 7},
+			{29, 30, 31, 32, 33},
+			{34, 35, 36, 37, 38},
+			{39, 40, 41, 42, 43},
+			{91, 93, 103, 104, 7},
+		};
+		static const uint8_t kSafePotDefaults[NUM_CC_BANKS][NUM_CC_POTS] = {
+			{110, 111, 112, 113, 7},
+			{114, 115, 116, 117, 7},
+			{118, 119, 120, 121, 7},
+			{122, 123, 124, 125, 7},
+			{126, 127, 100, 101, 7},
+		};
+
+		bool migratedAny = false;
+		for (int b = 0; b < NUM_CC_BANKS; b++)
+		{
+			bool matchesLegacy = true;
+			for (int i = 0; i < NUM_CC_POTS; i++)
+			{
+				if (pots[b][i] != kLegacyPotDefaults[b][i])
+				{
+					matchesLegacy = false;
+					break;
+				}
+			}
+
+			if (!matchesLegacy)
+				continue;
+
+			for (int i = 0; i < NUM_CC_POTS; i++)
+			{
+				pots[b][i] = kSafePotDefaults[b][i];
+				storage->write(EEPROM_HEADER_ADDRESS + 4 + i + (5 * b), pots[b][i]);
+			}
+			migratedAny = true;
+		}
+
+		(void)migratedAny;
+	}
+
 	uint8_t midiMacroChannel = storage->read(EEPROM_HEADER_ADDRESS + 29);
 	midiMacroConfig.midiMacroChan = midiMacroChannel + 1;
 

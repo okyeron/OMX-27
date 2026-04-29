@@ -12,11 +12,12 @@ const uint8_t EEPROM_VERSION = 38;
 // v35 - adds quantize rate to arps, added global quant rate to header
 // v36 - adds stuff to randomizer
 
-// DEFINE CC NUMBERS FOR POTS // CCS mapped to Organelle Defaults
-const int CC1 = 21;
-const int CC2 = 22;
-const int CC3 = 23;
-const int CC4 = 24;
+// DEFINE CC NUMBERS FOR POTS
+// CC1-CC4 now align with the safe default Bank 1 mapping.
+const int CC1 = 110;
+const int CC2 = 111;
+const int CC3 = 112;
+const int CC4 = 113;
 const int CC5 = 7; // change to 25 for EYESY Knob 5
 
 const int CC_AUX = 25; // Mother mode - AUX key
@@ -58,11 +59,11 @@ const int LED_COUNT = 27;
 const int potCount = NUM_CC_POTS;
 
 int pots[NUM_CC_BANKS][NUM_CC_POTS] = {
-	{CC1, CC2, CC3, CC4, CC5},
-	{29, 30, 31, 32, 33},
-	{34, 35, 36, 37, 38},
-	{39, 40, 41, 42, 43},
-	{91, 93, 103, 104, 7}}; // the MIDI CC (continuous controller) for each analog input
+	{110, 111, 112, 113, 7},
+	{114, 115, 116, 117, 7},
+	{118, 119, 120, 121, 7},
+	{122, 123, 124, 125, 7},
+	{126, 127, 100, 101, 7}}; // the MIDI CC (continuous controller) for each analog input
 
 int potMinVal = 0;
 #if BOARDTYPE == TEENSY4
